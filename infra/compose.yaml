@@ -60,6 +60,8 @@ services:
       S3_BUCKET: ${S3_BUCKET}
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN}
       ENV: ${ENV}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       UV_PROJECT_ENVIRONMENT: /opt/venv
     volumes:
       - ../apps/api:/app

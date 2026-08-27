@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncIterator, Iterator
+from contextlib import asynccontextmanager
 from typing import cast
 
 import pytest
@@ -63,8 +64,8 @@ async def db(engine: AsyncEngine) -> AsyncIterator[AsyncSession]:
         await trans.rollback()
 
 
-@pytest.fixture
-async def client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncClient]:
+@asynccontextmanager
+async def _make_client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncClient]:
     app = create_app(settings)
     async with LifespanManager(app):
         # Route every request's session onto the test's connection/transaction.
@@ -74,6 +75,25 @@ async def client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncCli
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="https://test") as c:
             yield c
+
+
+@pytest.fixture
+async def client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncClient]:
+    async with _make_client(settings, db) as c:
+        yield c
+
+
+@pytest.fixture
+async def client_google(db: AsyncSession) -> AsyncIterator[AsyncClient]:
+    google_settings = Settings(
+        database_url=TEST_DATABASE_URL,
+        env="test",
+        public_origin="https://test",
+        google_client_id="cid",
+        google_client_secret="csecret",
+    )
+    async with _make_client(google_settings, db) as c:
+        yield c
 
 
 async def register(
