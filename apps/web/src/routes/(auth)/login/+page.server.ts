@@ -1,21 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { apiFetch, relaySetCookie } from '$lib/server/api';
+import { problemMessage, safeNext } from '$lib/server/auth-forms';
 import type { Actions, PageServerLoad } from './$types';
-
-/** Only accept same-origin relative paths as a redirect target (open-redirect guard). */
-function safeNext(value: string | null): string {
-	if (value && value.startsWith('/') && !value.startsWith('//')) return value;
-	return '/home';
-}
-
-async function problemMessage(res: Response, fallback: string): Promise<string> {
-	try {
-		const problem = await res.json();
-		return problem.title ?? problem.detail ?? fallback;
-	} catch {
-		return fallback;
-	}
-}
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) redirect(303, '/home');
@@ -38,15 +24,23 @@ export const actions: Actions = {
 		const password = String(form.get('password') ?? '');
 		const next = safeNext(String(form.get('next') ?? ''));
 
-		const res = await apiFetch(event, '/auth/login', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ email, password })
-		});
+		let res: Response;
+		try {
+			res = await apiFetch(event, '/auth/login', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ email, password })
+			});
+		} catch {
+			return fail(503, {
+				error: 'The service is temporarily unavailable. Please try again.',
+				email
+			});
+		}
 
 		if (!res.ok) {
-			const error = await problemMessage(res, 'Unable to sign in.');
-			return fail(res.status, { error, email });
+			const problem = await res.json().catch(() => undefined);
+			return fail(res.status, { error: problemMessage(problem, res.status), email });
 		}
 
 		relaySetCookie(event, res);

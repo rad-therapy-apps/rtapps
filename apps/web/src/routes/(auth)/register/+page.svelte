@@ -42,6 +42,7 @@
 			type="password"
 			required
 			minlength="10"
+			maxlength="256"
 			autocomplete="new-password"
 		/>
 	</div>
