@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/compose.yaml --env-file .env
 
-.PHONY: dev down logs seed test test-api test-web lint lint-api lint-web e2e client migrate
+.PHONY: dev down logs test test-api test-web lint lint-api lint-web e2e client migrate
 
 dev: .env
 	$(COMPOSE) up --build
