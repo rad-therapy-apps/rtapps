@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncIterator, Iterator
+from typing import cast
 
 import pytest
 from alembic.config import Config
@@ -71,5 +72,19 @@ async def client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncCli
             bind=db.bind, expire_on_commit=False, join_transaction_mode="create_savepoint"
         )
         transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
+        async with AsyncClient(transport=transport, base_url="https://test") as c:
             yield c
+
+
+async def register(
+    client: AsyncClient,
+    email: str = "a@example.edu",
+    password: str = "password-123",
+    name: str = "Ada",
+) -> dict[str, object]:
+    r = await client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": password, "display_name": name},
+    )
+    assert r.status_code == 201, r.text
+    return cast(dict[str, object], r.json())

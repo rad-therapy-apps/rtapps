@@ -4,7 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import health
+from app.auth.router import router as auth_router
 from app.config import Settings, load_settings
+from app.csrf import OriginCheckMiddleware
 from app.db import get_engine, make_session_factory
 from app.errors import install_error_handlers
 
@@ -36,7 +38,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     install_error_handlers(app)
+    app.add_middleware(OriginCheckMiddleware, settings=settings)
     app.include_router(health.router, prefix=API_PREFIX)
+    app.include_router(auth_router, prefix=API_PREFIX)
     return app
 
 
