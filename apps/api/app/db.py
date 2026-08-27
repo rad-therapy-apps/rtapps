@@ -30,7 +30,7 @@ def _factory_from_request(request: Request) -> async_sessionmaker[AsyncSession]:
 
 
 async def get_session(
-    factory: async_sessionmaker[AsyncSession] = Depends(_factory_from_request),  # noqa: B008
+    factory: async_sessionmaker[AsyncSession] = Depends(_factory_from_request),
 ) -> AsyncIterator[AsyncSession]:
     async with factory() as session:
         yield session
