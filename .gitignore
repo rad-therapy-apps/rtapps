@@ -26,3 +26,8 @@ minio-data/
 .agentmaster/
 # sdd scratch
 .superpowers/
+# playwright / coverage
+apps/web/test-results/
+apps/web/playwright-report/
+coverage/
+.coverage
