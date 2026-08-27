@@ -6,7 +6,7 @@ COPY apps/web/package.json apps/web/
 COPY pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --filter web...
 COPY apps/web apps/web
-RUN pnpm --filter web build && pnpm --filter web --prod deploy /out
+RUN pnpm --filter web build && pnpm --filter web --prod deploy /out --legacy
 
 FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production PORT=3000
