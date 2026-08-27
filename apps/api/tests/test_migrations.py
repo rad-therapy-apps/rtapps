@@ -1,15 +1,19 @@
 import asyncio
-import os
 
+import pytest
 from alembic.config import Config
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import command
+from tests.conftest import TEST_DATABASE_URL
 
 
-def test_migrations_upgrade_head_and_create_alembic_version() -> None:
-    url = os.environ["TEST_DATABASE_URL"]
+def test_migrations_upgrade_head_and_create_alembic_version(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    url = TEST_DATABASE_URL
+    monkeypatch.setenv("DATABASE_URL", url)
     cfg = Config("alembic.ini")
     cfg.set_main_option("sqlalchemy.url", url)
     command.downgrade(cfg, "base")
