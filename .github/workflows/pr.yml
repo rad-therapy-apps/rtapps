@@ -48,6 +48,7 @@ jobs:
           node-version: 24
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web exec playwright install --with-deps chromium
       - run: pnpm --filter web lint
       - run: pnpm --filter web check
       - run: pnpm --filter web test
