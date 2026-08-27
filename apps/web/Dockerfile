@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS build
+FROM node:25-bookworm-slim AS build
 RUN corepack enable
 WORKDIR /repo
 COPY package.json pnpm-workspace.yaml .npmrc ./
@@ -8,7 +8,7 @@ RUN pnpm install --frozen-lockfile --filter web...
 COPY apps/web apps/web
 RUN pnpm --filter web build && pnpm --filter web --prod deploy /out --legacy
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:25-bookworm-slim AS runtime
 ENV NODE_ENV=production PORT=3000
 RUN useradd --create-home --uid 10001 app
 WORKDIR /app
