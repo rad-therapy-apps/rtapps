@@ -67,13 +67,21 @@ jobs:
         with:
           context: apps/api
           push: false
+          load: true
+          tags: rtapps-api:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Smoke-test api image
+        run: docker run --rm rtapps-api:ci python -c "import app.main"
       - name: Build web image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: apps/web/Dockerfile
           push: false
+          load: true
+          tags: rtapps-web:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Smoke-test web image
+        run: docker run --rm --entrypoint node rtapps-web:ci -e "require('fs').accessSync('build/index.js')"
