@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs, urlparse
+
 import respx
 from httpx import AsyncClient, Response
 
@@ -60,3 +62,29 @@ async def test_providers_google_enabled(client_google: AsyncClient) -> None:
     r = await client_google.get("/api/v1/auth/providers")
     assert r.status_code == 200
     assert r.json() == {"google": True}
+
+
+@respx.mock
+async def test_callback_token_without_access_token_is_502(client_google: AsyncClient) -> None:
+    respx.post("https://oauth2.googleapis.com/token").mock(
+        return_value=Response(200, json={"id_token": "x"})
+    )
+    start = await client_google.get("/api/v1/auth/google/start")
+    state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
+    cb = await client_google.get(f"/api/v1/auth/google/callback?code=abc&state={state}")
+    assert cb.status_code == 502
+    assert "rt_session" not in client_google.cookies
+
+
+@respx.mock
+async def test_callback_userinfo_missing_email_is_502(client_google: AsyncClient) -> None:
+    respx.post("https://oauth2.googleapis.com/token").mock(
+        return_value=Response(200, json={"access_token": "at"})
+    )
+    respx.get("https://openidconnect.googleapis.com/v1/userinfo").mock(
+        return_value=Response(200, json={"sub": "g-1", "email_verified": True})
+    )
+    start = await client_google.get("/api/v1/auth/google/start")
+    state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
+    cb = await client_google.get(f"/api/v1/auth/google/callback?code=abc&state={state}")
+    assert cb.status_code == 502

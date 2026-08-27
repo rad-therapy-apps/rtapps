@@ -61,10 +61,14 @@ async def fetch_google_user(settings: Settings, code: str) -> dict[str, object]:
         if tok.status_code != 200:
             raise Problem(502, "Google token exchange failed")
         access_token = tok.json().get("access_token")
+        if not access_token:
+            raise Problem(502, "Google token exchange returned no access token")
         info = await http.get(USERINFO_URL, headers={"Authorization": f"Bearer {access_token}"})
         if info.status_code != 200:
             raise Problem(502, "Google userinfo failed")
         data: dict[str, object] = info.json()
+    if not data.get("sub") or not data.get("email"):
+        raise Problem(502, "Google userinfo response is missing sub or email")
     if not data.get("email_verified"):
         raise Problem(403, "Google account email is not verified")
     return data
