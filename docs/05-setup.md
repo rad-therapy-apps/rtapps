@@ -37,5 +37,8 @@ See `docs/03-architecture.md` §9. Short version: `apps/api` (FastAPI), `apps/we
 
 ## Troubleshooting
 - **`web` container loops on `pnpm install`** — run `pnpm install` once on the host so `pnpm-lock.yaml` matches, then `make dev` again.
-- **`api` unhealthy** — `make logs`; usually the DB isn't ready yet on first boot; it retries for 30 s.
+- **`api` unhealthy** — `make logs`; usually the DB isn't ready yet on first boot; the healthcheck allows ~2.5 minutes (30 s start period + 12 retries × 10 s) before marking it unhealthy.
 - **Port in use** — 8080 (proxy), 5173 (web), 8000 is internal, 5432 (db), 9000/9001 (MinIO), 8025 (Mailpit).
+
+## Branch protection
+The org is on the GitHub Free plan, which does not support branch protection on private repos; CI on PRs is advisory until the plan changes or the repo becomes public — do not merge red.
