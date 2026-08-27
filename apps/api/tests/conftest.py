@@ -5,7 +5,7 @@ import pytest
 from asgi_lifespan import LifespanManager
 from httpx import ASGITransport, AsyncClient
 
-from app.config import Settings, get_settings
+from app.config import Settings
 from app.main import create_app
 
 TEST_DATABASE_URL = os.environ.get(
@@ -20,8 +20,7 @@ def settings() -> Settings:
 
 @pytest.fixture
 async def client(settings: Settings) -> AsyncIterator[AsyncClient]:
-    app = create_app()
-    app.dependency_overrides[get_settings] = lambda: settings
+    app = create_app(settings)
     async with LifespanManager(app):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as c:
