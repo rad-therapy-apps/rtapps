@@ -1,0 +1,24 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+# python
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+# node
+node_modules/
+.svelte-kit/
+build/
+dist/
+# editors / os
+.DS_Store
+.vscode/
+.idea/
+# local data
+pgdata/
+minio-data/
