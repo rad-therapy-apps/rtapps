@@ -14,4 +14,4 @@ Decisions are recorded in [MADR](https://adr.github.io/madr/) format. One file p
 
 1. Copy the section layout of an existing ADR: Status · Context · Decision · Options considered · Consequences · Follow-ups.
 2. Number it `NNNN-short-kebab-title.md`; start as `Proposed`, flip to `Accepted` in the merging PR.
-3. Add a row above. ADR-0001 also serves as the internship stack decision record (due 2026-10-30).
+3. Add a row above. ADR-0001 also serves as the internship stack decision record (milestone M2).

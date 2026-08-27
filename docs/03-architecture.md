@@ -1,3 +1,4 @@
+
 # RTApps — Architecture Design
 
 | | |
@@ -401,5 +402,5 @@ CI (`pr.yml`) runs all of the above on every pull request and is a required chec
 ## 12. Review and next steps
 
 - **Mentor review of this document** is the gate before Phase 1 code. Questions for that review are in `01-problem-definition-and-scope.md` §8; the design questions specifically: (a) are the seven content types and their rules (80 % pass, badge tiers, attempts allowed) right? (b) is "educator = enrolled in cohort with role educator" the right ownership model? (c) which learning-outcome codes should analytics use (ARRT content specifications, programme SLOs, both)?
-- Phase 1 implementation plan follows approval: scaffold, auth, one migrated lesson with knowledge checks, tests, CI — by 2026-09-25.
+- Phase 1 implementation plan follows approval: scaffold, auth, one migrated lesson with knowledge checks, tests, CI — milestone M1.
 - Decisions recorded in `docs/adr/`: 0001 stack, 0002 sessions/proxy, 0003 content storage, 0004 result schema, 0005 deployment.

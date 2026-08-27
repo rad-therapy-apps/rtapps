@@ -55,7 +55,7 @@ Formatting is never discussed in review — the formatters decide.
 
 ## 7. Versioning and releases
 
-- Semantic version tags on `main`: `v0.1.0` = first version with tests and CI (2026-09-25), `v0.2.0` = vertical slice deployed (2026-10-30).
+- Semantic version tags on `main`: `v0.1.0` = first version with tests and CI (milestone M1), `v0.2.0` = vertical slice deployed (milestone M2).
 - Images are tagged with the commit SHA and the version tag; `latest` is convenience only and never used by `compose.prod.yaml`.
 - `CHANGELOG.md` is generated from Conventional Commits at tag time.
 

@@ -28,7 +28,7 @@
 | Column | Values |
 |---|---|
 | Priority | MoSCoW: **M** must, **S** should, **C** could, **W** won't (this release) |
-| Phase | 0 docs · 1 scaffold + auth + lesson (→ 2026-09-25) · 2 educator view + vertical slice (→ 2026-10-30) · 3 content types + authoring + migration (→ 2026-12-19) · 4 SDK + games / simulators / EMR (2027) |
+| Phase | 0 docs · 1 scaffold + auth + lesson (→ M1) · 2 educator view + vertical slice (→ M2) · 3 content types + authoring + migration (→ M3) · 4 SDK + games / simulators / EMR (2027) |
 | Trace | Legacy content type (`docs/01` §4), source doc section, or stakeholder need (`docs/01` §2) |
 | Status | `proposed` · `agreed` (mentor reviewed) · `implemented` (PR merged) · `verified` (acceptance test green) |
 
@@ -260,7 +260,7 @@ Automated where marked (Playwright e2e against Compose in CI; pytest against Pos
 | AT-16 | Clean-clone dev environment and CI gate | A machine with Docker, pnpm, uv only | `make dev` then `make seed`; a PR with a failing test is opened | All healthchecks green; seed users can log in; the PR is blocked by required checks | FR-M-06; NFR-19, 21 | Manual (recorded) + GitHub branch protection |
 | AT-17 | Deploy and restore | A push to `main`; last night's backup object | `deploy.yml` runs; the restore procedure is followed on a throwaway DB | `/health` returns 200 from the test URL; AT-11 passes against it; restored DB contains yesterday's attempts | NFR-03, 04, 08, 24, 25 | Workflow log + restore log |
 
-Mapping to the learning objectives: AT-01, 02, 05, 06, 08, 14, 16 must be green for 2026-09-25; AT-03, 04, 11, 15, 17 for 2026-10-30; AT-07, 09, 10, 12, 13 for 2026-11-28 / 2026-12-19.
+Mapping to the learning objectives: AT-01, 02, 05, 06, 08, 14, 16 must be green for M1; AT-03, 04, 11, 15, 17 for M2; AT-07, 09, 10, 12, 13 for M3 / 2026-12-19.
 
 ## 6. Open items awaiting interview answers
 

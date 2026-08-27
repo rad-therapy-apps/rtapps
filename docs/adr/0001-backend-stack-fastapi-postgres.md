@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-08-27
 - **Deciders:** Chris Guzman (lead developer). Mentor (non-technical content author) consulted on scope, not on technology.
-- **Note:** This ADR is also the internship *stack decision record* due 2026-10-30. Phase 2 will append measured evidence (CI time, p95 of `POST /attempts/{id}/submit`, LOC per feature) under *Follow-ups*.
+- **Note:** This ADR is also the internship *stack decision record* for milestone M2. Phase 2 will append measured evidence (CI time, p95 of `POST /attempts/{id}/submit`, LOC per feature) under *Follow-ups*.
 
 ## Context
 
@@ -21,7 +21,7 @@ Forces and constraints:
 
 | Force | Effect on the decision |
 |---|---|
-| Solo developer with hard dates (2026-09-25 first tested version + CI; 2026-10-30 deployed vertical slice) | Productivity and a short learning curve dominate |
+| Solo developer with ordered milestones (M1 first tested version + CI; M2 deployed vertical slice) | Productivity and a short learning curve dominate |
 | Owner's existing toolchain is Python 3.12 + `uv`; already fluent in FastAPI/Pydantic | Anything else costs ramp-up time the schedule does not have |
 | Scientific/medical-imaging work in later phases (`pydicom`, `nibabel`, `numpy`, `scipy`) | These libraries are Python-only in any serious form |
 | Budget ≈ free: Oracle Cloud ARM free tier + Cloudflare | Must run in one container on arm64; no per-seat auth pricing |
@@ -140,7 +140,7 @@ Python 3.12 · FastAPI ≥ 0.115 · Pydantic 2.x · SQLAlchemy 2.0.x (asyncio ex
 
 ## Follow-ups / what would make us revisit
 
-- **Phase 2 (by 2026-10-30):** append measured evidence: CI wall time for `pr.yml`, p95 latency of attempt submit on the test VM, lines of code for the auth module vs. the Django equivalent estimate, count of `MissingGreenlet` incidents.
+- **Phase 2 (milestone M2):** append measured evidence: CI wall time for `pr.yml`, p95 latency of attempt submit on the test VM, lines of code for the auth module vs. the Django equivalent estimate, count of `MissingGreenlet` incidents.
 - **Revisit toward Django** if hand-written auth/permissions grow past ~1,500 lines or a permission-matrix test fails in review more than twice; the ORM/model layer is the only part that would need porting.
 - **Revisit toward Node** only if the imaging and PDF features are dropped from the roadmap *and* a maintainer arrives who is TS-only. If imaging stays, Python stays.
 - **Revisit Supabase** never for the core; it may still host RT-Games presenter data until games adopt the SDK (ADR-0004).

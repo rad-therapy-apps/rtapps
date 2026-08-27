@@ -46,7 +46,7 @@ RTApps will therefore be rebuilt from the ground up as a web application with a 
 | G6 | The system is operable by one person: Docker Compose on one VM, GitHub Actions for CI/CD, nightly backups, a health endpoint, structured logs. |
 | G7 | The attempt/result contract is stable enough that games, simulators and other future clients can post to it through an SDK without changing the server. |
 | G8 | Student data is minimal (name, email, cohort), educator reads are audited, and a user can be deactivated or erased. |
-| G9 | The internship learning-objective deliverables (2026-09-25, 2026-10-30, 2026-11-28) are met by the phase exit criteria, not by separate work. |
+| G9 | The internship learning-objective deliverables (Milestones M1, M2, M3 — see §7) are met by the phase exit criteria, not by separate work. |
 
 ### 3.2 Non-goals
 
@@ -64,7 +64,7 @@ RTApps will therefore be rebuilt from the ground up as a web application with a 
 
 ## 4. Scope of Release 1
 
-Release 1 = the end of Phase 3 (target 2026-12-19): everything a student and an educator need for the 13 migrated subjects, plus the authoring UI. Phase numbers refer to `docs/03-architecture.md` § roadmap.
+Release 1 = the end of Phase 3 (Milestone M3): everything a student and an educator need for the 13 migrated subjects, plus the authoring UI. Phase numbers refer to `docs/03-architecture.md` § roadmap.
 
 | Capability | Release 1 | Later | Notes |
 |---|---|---|---|
@@ -102,7 +102,7 @@ Release 1 = the end of Phase 3 (target 2026-12-19): everything a student and an 
 | Constraint | Consequence |
 |---|---|
 | Solo developer (Chris), part-time alongside other internship duties | Scope per phase is small; the authoring UI is form-based, not a page builder; no background worker in Release 1; every feature must be testable by automation, not by manual QA |
-| Learning-objective deadlines: 2026-09-25 (requirements, reviewed design, first version with tests + CI), 2026-10-30 (stack ADR with ≥ 3 options, working vertical slice deployed to a test environment, setup/conventions docs), 2026-11-28 (≥ 3 modules complete, ≥ 3 mentor + ≥ 2 student feedback conversations, findings doc → backlog) | Phase exit criteria are the objectives; slipping a phase slips a deliverable |
+| Learning-objective milestones (order matters, dates are indicative): M1 (requirements, reviewed design, first version with tests + CI), M2 (stack ADR with ≥ 3 options, working vertical slice deployed to a test environment, setup/conventions docs), 2026-11-28 (≥ 3 modules complete, ≥ 3 mentor + ≥ 2 student feedback conversations, findings doc → backlog) | Phase exit criteria are the objectives; slipping a phase slips a deliverable |
 | Stack decided (not re-argued here): SvelteKit + TypeScript, FastAPI + Python 3.12 + SQLAlchemy 2 + Alembic, PostgreSQL 16, content in DB with authoring UI, self-hosted auth, Docker Compose, GitHub Actions → GHCR, new private monorepo `rad-therapy-apps/rtapps` | ADR-001…005 record the reasoning; this document treats them as givens |
 | Private repositories; legacy repos read-only | Migration tool reads legacy repos by path; nothing is written back |
 | Licensing: legacy workbook content is CC BY-NC 4.0; Sketchfab models are four CC-BY-4.0 and one CC-BY-NC-SA-4.0 (`urinary_tract`), each requiring a specific credit line; the 86 MB human-body model has no licence or provenance | Migrated content keeps its CC BY-NC 4.0 notice; no commercial use; the model credit lines must be reproduced where the models are shown; the human-body model is not migrated until provenance is established |
@@ -145,7 +145,9 @@ Release 1 = the end of Phase 3 (target 2026-12-19): everything a student and an 
 
 Mapped to the three learning-objective dates. Each is verifiable by a person other than the developer.
 
-### 7.1 By 2026-09-25 (Phase 1 exit, tag `v0.1.0`)
+Milestones are ordered, not dated: the internship learning objectives list calendar dates, but those are placeholders. What matters is that M1 (first tested version with CI) precedes M2 (vertical slice on a test environment), which precedes M3 (all 13 subjects migrated, authoring UI usable by the mentor). Dates are set when each phase is planned.
+
+### 7.1 Milestone M1 — first tested version (Phase 1 exit, tag `v0.1.0`)
 
 | # | Criterion | Verified by |
 |---|---|---|
@@ -157,7 +159,7 @@ Mapped to the three learning-objective dates. Each is verifiable by a person oth
 | S6 | `pr.yml` is required on `main` and runs ruff, mypy, pytest, eslint, svelte-check, vitest, contract check, Playwright smoke, image builds | Branch protection settings; a failing PR is blocked |
 | S7 | Coverage ≥ 70 % on `api/app/grading` and `api/app/auth` | CI coverage report |
 
-### 7.2 By 2026-10-30 (Phase 2 exit)
+### 7.2 Milestone M2 — vertical slice deployed (Phase 2 exit)
 
 | # | Criterion | Verified by |
 |---|---|---|
@@ -169,11 +171,11 @@ Mapped to the three learning-objective dates. Each is verifiable by a person oth
 | S13 | A nightly backup exists in object storage and a restore into a fresh database has been performed once and recorded | `docs/05-setup.md` restore log |
 | S14 | `docs/04-conventions.md` and `docs/05-setup.md` merged | Repo |
 
-### 7.3 By 2026-11-28 (Phase 3 mid-point) and 2026-12-19 (Phase 3 exit)
+### 7.3 Milestone M3 — content complete (Phase 3 mid-point and exit)
 
 | # | Criterion | Verified by |
 |---|---|---|
-| S15 | Ethics, Radiation Biology and Radiation Physics migrated and walked through end-to-end by Chris by 2026-11-28; all 13 subjects by 2026-12-19 | Migration report with `converted / needs-review / unsupported` counts per subject |
+| S15 | Ethics, Radiation Biology and Radiation Physics migrated and walked through end-to-end by Chris at the Phase 3 mid-point; all 13 subjects by 2026-12-19 | Migration report with `converted / needs-review / unsupported` counts per subject |
 | S16 | ≥ 3 mentor and ≥ 2 student feedback conversations held; findings doc mapped to backlog issues | `docs/findings-2026-11.md` and linked issues |
 | S17 | Quiz (badge at pass), flashcards, matching, sequencing and at least the MU and TMR/PDD calculators record attempts | pytest per grader; Playwright per type |
 | S18 | The mentor creates a new lesson with a knowledge check, uploads an image, publishes it, and a student sees it — with no developer help | Observed session, recorded in findings doc |
@@ -183,7 +185,7 @@ Mapped to the three learning-objective dates. Each is verifiable by a person oth
 
 ## 8. Mentor and student interview guide
 
-To be run during Phase 0/1 (before 2026-09-25) and again as the ≥ 3 mentor + ≥ 2 student conversations due 2026-11-28. Record answers in §8.3 and turn each into a backlog issue or a requirement change.
+To be run during Phase 0/1 (before M1) and again as the ≥ 3 mentor + ≥ 2 student conversations at M3. Record answers in §8.3 and turn each into a backlog issue or a requirement change.
 
 ### 8.1 Questions for the mentor (Kevin Kindle)
 
@@ -260,7 +262,7 @@ _(to be filled after interview on YYYY-MM-DD)_
 | cGy / Gy | Centigray / gray, the SI units of absorbed dose. |
 | KESN | Knowledge / Evaluation / Skill / Novelty sub-scores in the legacy station bridge; carried only in `attempt.client_meta` if at all. |
 | SDK | `@rtapps/sdk` — the client library games and simulators use to post attempts (Phase 4). |
-| Vertical slice | The 2026-10-30 deliverable: one activity records a result and one educator view reads it, on a deployed test environment. |
+| Vertical slice | The M2 deliverable: one activity records a result and one educator view reads it, on a deployed test environment. |
 
 ## 10. Change log
 
