@@ -9,4 +9,6 @@ Radiation-therapy education platform — the ground-up rebuild of the RTApps e-w
 - `tools/migrate-legacy` — imports content from the legacy `rtt_e_workbook` repository
 - `infra/` — Docker Compose, proxy config, backups
 
+Getting started: `docs/05-setup.md`.
+
 Educational software — not for clinical use. Licence: to be decided (see `docs/01-problem-definition-and-scope.md`).

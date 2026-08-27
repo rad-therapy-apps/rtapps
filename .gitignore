@@ -24,3 +24,12 @@ pgdata/
 minio-data/
 # tooling telemetry
 .agentmaster/
+# sdd scratch
+.superpowers/
+# playwright / coverage
+apps/web/test-results/
+apps/web/playwright-report/
+coverage/
+.coverage
+# pnpm store created by the web container
+.pnpm-store/
