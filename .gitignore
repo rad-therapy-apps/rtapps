@@ -24,3 +24,5 @@ pgdata/
 minio-data/
 # tooling telemetry
 .agentmaster/
+# sdd scratch
+.superpowers/
