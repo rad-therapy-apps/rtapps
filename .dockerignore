@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+**/node_modules
+**/.svelte-kit
+**/build
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.pnpm-store
+.superpowers
+.agentmaster
+docs
