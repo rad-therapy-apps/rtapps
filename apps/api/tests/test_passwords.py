@@ -14,3 +14,8 @@ def test_strength_minimum_length() -> None:
     with pytest.raises(ValueError):
         validate_password_strength("short1")
     validate_password_strength("long enough 1")
+
+
+def test_malformed_stored_hash_is_not_a_crash() -> None:
+    assert verify_password("anything", "not-a-valid-argon2-hash") is False
+    assert verify_password("anything", "") is False

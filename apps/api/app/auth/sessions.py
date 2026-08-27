@@ -46,7 +46,7 @@ async def resolve_session(db: AsyncSession, token: str, now: datetime, days: int
         return None
     if sess.expires_at - now < timedelta(days=days) / 2:
         sess.expires_at = now + timedelta(days=days)
-        await db.flush()
+        await db.commit()  # persist the sliding extension even on read-only requests
     return user
 
 
