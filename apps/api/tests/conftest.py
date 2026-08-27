@@ -24,7 +24,7 @@ TEST_DATABASE_URL = os.environ.get(
 
 @pytest.fixture(scope="session")
 def settings() -> Settings:
-    return Settings(database_url=TEST_DATABASE_URL, env="test", public_origin="http://test")
+    return Settings(database_url=TEST_DATABASE_URL, env="test", public_origin="https://test")
 
 
 @pytest.fixture(scope="session")

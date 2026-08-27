@@ -16,8 +16,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", status_code=status.HTTP_201_CREATED, response_model=UserOut)
 async def register(
-    body: RegisterIn, request: Request, response: Response,
-    db: AsyncSession = Depends(get_session), settings: Settings = Depends(get_settings),
+    body: RegisterIn,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_session),
+    settings: Settings = Depends(get_settings),
 ) -> User:
     user = User(
         email=body.email,
@@ -41,8 +44,11 @@ async def register(
 
 @router.post("/login", response_model=UserOut)
 async def login(
-    body: LoginIn, request: Request, response: Response,
-    db: AsyncSession = Depends(get_session), settings: Settings = Depends(get_settings),
+    body: LoginIn,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_session),
+    settings: Settings = Depends(get_settings),
 ) -> User:
     user = await user_by_email(db, body.email)
     if (
@@ -62,8 +68,10 @@ async def login(
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
-    request: Request, response: Response,
-    db: AsyncSession = Depends(get_session), settings: Settings = Depends(get_settings),
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_session),
+    settings: Settings = Depends(get_settings),
 ) -> None:
     token = request.cookies.get(COOKIE)
     if token:

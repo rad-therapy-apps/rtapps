@@ -16,8 +16,13 @@ COOKIE = "rt_session"
 
 def set_session_cookie(response: Response, token: str, settings: Settings) -> None:
     response.set_cookie(
-        COOKIE, token, max_age=settings.session_days * 86400, path="/",
-        httponly=True, secure=settings.cookie_secure, samesite="lax",
+        COOKIE,
+        token,
+        max_age=settings.session_days * 86400,
+        path="/",
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
     )
 
 
