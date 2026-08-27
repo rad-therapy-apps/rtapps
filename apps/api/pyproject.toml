@@ -14,13 +14,13 @@ dependencies = [
   "uuid-utils>=0.17.0",
   "argon2-cffi>=25.1.0",
   "itsdangerous>=2.2.0",
+  "httpx>=0.28",
 ]
 
 [dependency-groups]
 dev = [
   "pytest>=9",
   "pytest-asyncio>=1.4",
-  "httpx>=0.28",
   "ruff>=0.16",
   "mypy>=2.3",
   "asgi-lifespan>=2.1",

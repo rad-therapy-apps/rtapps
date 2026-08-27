@@ -608,6 +608,7 @@ dependencies = [
     { name = "argon2-cffi" },
     { name = "asyncpg" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "itsdangerous" },
     { name = "pydantic", extra = ["email"] },
     { name = "pydantic-settings" },
@@ -619,7 +620,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "asgi-lifespan" },
-    { name = "httpx" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -633,6 +633,7 @@ requires-dist = [
     { name = "argon2-cffi", specifier = ">=25.1.0" },
     { name = "asyncpg", specifier = ">=0.31" },
     { name = "fastapi", specifier = ">=0.141" },
+    { name = "httpx", specifier = ">=0.28" },
     { name = "itsdangerous", specifier = ">=2.2.0" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.13" },
     { name = "pydantic-settings", specifier = ">=2.15" },
@@ -644,7 +645,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "asgi-lifespan", specifier = ">=2.1" },
-    { name = "httpx", specifier = ">=0.28" },
     { name = "mypy", specifier = ">=2.3" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-asyncio", specifier = ">=1.4" },
