@@ -31,3 +31,5 @@ apps/web/test-results/
 apps/web/playwright-report/
 coverage/
 .coverage
+# pnpm store created by the web container
+.pnpm-store/
