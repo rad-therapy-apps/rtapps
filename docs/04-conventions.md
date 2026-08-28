@@ -74,6 +74,7 @@ make test       # api + web unit tests
 make e2e        # playwright against the compose stack
 make lint       # ruff, mypy, eslint, svelte-check
 make client     # regenerate packages/api-client from the running API
+make prod-config # validate infra/compose.prod.yaml (+ tunnel overlay) against the env template
 make migrate m="add data_table"   # alembic revision --autogenerate
 ```
 (All targets exist as of v0.1.0; `make test-tools` / `make lint-tools` cover `tools/migrate-legacy`. The coverage threshold applies to full-suite runs only — `pytest tests/test_x.py` never fails on coverage.)

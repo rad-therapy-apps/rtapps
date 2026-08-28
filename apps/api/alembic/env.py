@@ -28,7 +28,10 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 import app.attempts.models
+import app.attempts.rollup
+import app.audit.models
 import app.auth.models
+import app.cohorts.models
 import app.content.models  # noqa: F401
 from alembic import context
 from app.db import Base

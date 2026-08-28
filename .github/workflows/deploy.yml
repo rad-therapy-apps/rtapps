@@ -1,0 +1,71 @@
+# What this file does: deploys the images for a given git sha (or tag) to a target GitHub
+#   Environment (`test` or `prod`) over SSH — copy the compose files, pull, migrate, restart,
+#   health-check, and (if the environment has no VM configured yet) report a no-op instead of
+#   failing.
+# Used here and why: `workflow_call` lets main.yml invoke this as `deploy-test` after images build
+#   and the migration dry-run passes; `workflow_dispatch` lets a human deploy any sha to `test` or
+#   promote it to `prod` by hand. `environment: ${{ inputs.environment }}` resolves that
+#   Environment's secrets/variables at run time. `prod` is never triggered automatically anywhere
+#   in this repo — the only way to reach it is a human running workflow_dispatch with
+#   `environment: prod`, because GitHub Free does not support a required-reviewer rule on
+#   Environments; that manual trigger, not a reviewer gate, is the safeguard for `prod`.
+#   `concurrency` with `cancel-in-progress: false` queues deploys to the same environment instead
+#   of cancelling one mid-migration, which would be worse than waiting.
+# How it fits the project: docs/adr/0005-single-vm-docker-compose-deployment.md ("Deploy"
+#   bullet) — SSH, compose pull, migrate before up -d, health curl, roll back on failure. The
+#   "no DEPLOY_HOST" gate below is what keeps main.yml green before the `test` VM exists.
+# Works with: infra/deploy/deploy.sh (runs on the VM; does the actual pull/migrate/restart/
+#   rollback), infra/compose.prod.yaml + infra/compose.tunnel.yaml + infra/Caddyfile.prod +
+#   infra/backup (copied to the VM before each deploy), the Environment secrets DEPLOY_HOST,
+#   DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and variable PUBLIC_URL (docs/06-operations.md,
+#   Task 12). Used by: main.yml's `deploy-test` job and manual workflow_dispatch runs.
+name: deploy
+on:
+  workflow_call:
+    inputs:
+      environment: { type: string, required: true }
+      image_tag: { type: string, required: true }
+  workflow_dispatch:
+    inputs:
+      environment: { type: choice, options: [test, prod], default: test }
+      image_tag: { type: string, description: "Git SHA (or tag) of the images to deploy", required: true }
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Skip when the environment has no host configured
+        # secrets.* can't be used in a job-level `if`, so every later step gates on this output —
+        # this is what lets `test` stay green before its VM exists.
+        id: gate
+        run: echo "configured=${{ secrets.DEPLOY_HOST != '' }}" >> "$GITHUB_OUTPUT"
+      - if: steps.gate.outputs.configured == 'true'
+        name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - if: steps.gate.outputs.configured == 'true'
+        name: Copy compose files
+        run: |
+          scp -r infra/compose.prod.yaml infra/compose.tunnel.yaml infra/Caddyfile.prod infra/backup infra/deploy \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/rtapps/"
+      - if: steps.gate.outputs.configured == 'true'
+        name: Deploy
+        # GHCR_TOKEN travels only in the remote command's environment, never echoed or logged.
+        run: |
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "GHCR_TOKEN='${{ secrets.GITHUB_TOKEN }}' GHCR_USER='${{ github.actor }}' \
+             bash /opt/rtapps/deploy/deploy.sh '${{ inputs.image_tag }}'"
+      - if: steps.gate.outputs.configured == 'true'
+        name: Smoke test
+        run: curl --fail --silent --show-error --max-time 20 "${{ vars.PUBLIC_URL }}/api/v1/health"
+      - if: steps.gate.outputs.configured != 'true'
+        run: echo "::notice::Environment ${{ inputs.environment }} has no DEPLOY_HOST secret — nothing deployed."

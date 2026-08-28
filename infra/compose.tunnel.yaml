@@ -1,0 +1,27 @@
+# What this file does: Compose overlay that swaps Caddy's public TLS listener for a
+# Cloudflare Tunnel — used as `-f infra/compose.prod.yaml -f infra/compose.tunnel.yaml`.
+# Used here and why: when the VM has no inbound ports open (ADR-0005's default posture
+# behind Oracle's security list), `cloudflared` makes an outbound-only connection to
+# Cloudflare's edge, which terminates TLS and forwards plain HTTP to `proxy` over the
+# private tunnel — so `proxy` needs no host port bindings at all. `!override` (Compose
+# v2.24+ — this host's `docker compose version` reports v5.4.0) replaces
+# compose.prod.yaml's `proxy.ports` (["80:80", "443:443"]) outright instead of merging
+# with it.
+# How it fits the project: ADR-0005 ("Ingress" bullet) — the tunnel variant is the
+# default when the VM has no open inbound ports; see docs/06-operations.md for the
+# minimum Compose version and which variant a given deploy uses.
+# Works with: infra/compose.prod.yaml (the base this overlays), infra/Caddyfile.prod
+# (SITE_ADDRESS=:80 in this mode, per infra/prod.env.example), infra/prod.env.example
+# (CLOUDFLARE_TUNNEL_TOKEN).
+# Used by: the deploy workflow (Task 11/12) when the tunnel variant is selected.
+services:
+  # Removes the host port bindings entirely — Cloudflare reaches `proxy` only through
+  # the tunnel, never a bound host port.
+  proxy:
+    ports: !override []
+  # Outbound-only connection to Cloudflare's edge; no inbound ports on the VM at all.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on: [proxy]
+    restart: unless-stopped

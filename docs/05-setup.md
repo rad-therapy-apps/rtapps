@@ -36,7 +36,7 @@ cd apps/api && uv run pytest
 If 5433 is taken on your machine, use another host port and set `TEST_DATABASE_URL` to match — CI uses 5433.
 
 ## Seed data
-`make seed` (stack running) creates three accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and imports + publishes the lessons in `apps/api/seed/lessons/`. Safe to re-run; it refuses when `ENV=prod`.
+`make seed` (stack running) creates accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and `student01@example.com` … `student10@example.com` (ten students enrolled in the demo cohort); imports + publishes the lessons in `apps/api/seed/lessons/`; and creates a demo cohort (join code `DEMO42`) owned by `educator@example.com` with the ten `studentNN@example.com` accounts enrolled, plus attempts and rollups. Safe to re-run; it refuses when `ENV=prod`.
 
 ## Migrating legacy lessons
 `tools/migrate-legacy` converts a legacy paged lesson (`div.lesson-page` + `lessonCorrectAnswers`) into an import document:
@@ -61,6 +61,9 @@ See `docs/03-architecture.md` §9. Short version: `apps/api` (FastAPI), `apps/we
 - **`web` container loops on `pnpm install`** — run `pnpm install` once on the host so `pnpm-lock.yaml` matches, then `make dev` again.
 - **`api` unhealthy** — `make logs`; usually the DB isn't ready yet on first boot; the healthcheck allows ~2.5 minutes (30 s start period + 12 retries × 10 s) before marking it unhealthy.
 - **Port in use** — 8080 (proxy), 5173 (web), 8000 is internal, 5432 (db), 9000/9001 (MinIO), 8025 (Mailpit).
+
+## Deploying
+Test/production VM, deploy workflows, backups and restore: see `docs/06-operations.md`.
 
 ## Branch protection
 The org is on the GitHub Free plan, which does not support branch protection on private repos; CI on PRs is advisory until the plan changes or the repo becomes public — do not merge red.

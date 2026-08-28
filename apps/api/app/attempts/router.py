@@ -15,10 +15,10 @@ through the one `attempt`/`attempt_item` schema, graded server-side against the 
 `content_version` snapshot pinned at `start_attempt` time, never against the live/edited
 lesson.
 
-Depends on: `app.attempts.models`, `app.attempts.schemas`, `app.auth.deps.require_user`,
-`app.auth.models.User`, `app.content.models` (Activity, ContentVersion, Lesson),
-`app.content.snapshot.knowledge_checks`, `app.db.get_session`, `app.errors.Problem`,
-`app.grading.single_choice.grade_single_choice`.
+Depends on: `app.attempts.models`, `app.attempts.rollup`, `app.attempts.schemas`,
+`app.auth.deps.require_user`, `app.auth.models.User`, `app.content.models`
+(Activity, ContentVersion, Lesson), `app.content.snapshot.knowledge_checks`,
+`app.db.get_session`, `app.errors.Problem`, `app.grading.single_choice.grade_single_choice`.
 Used by: `app/main.py` mounts this router; `tests/test_attempts.py`.
 """
 
@@ -31,6 +31,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.models import Attempt, AttemptItem
+from app.attempts.rollup import upsert_activity_result
 from app.attempts.schemas import AttemptOut, ItemGradeOut, ItemIn, ResultOut
 from app.auth.deps import require_user
 from app.auth.models import User
@@ -161,6 +162,8 @@ async def submit_attempt(
     attempt.submitted_at = now
     attempt.idempotency_key = idempotency_key
     attempt.duration_s = int((now - attempt.started_at).total_seconds())
+    await db.flush()  # make the submitted status visible to the rollup query
+    await upsert_activity_result(db, attempt)  # FR-X-02: rollup lands in the same transaction
     await db.commit()
     await db.refresh(attempt)
     return attempt

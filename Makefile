@@ -14,7 +14,7 @@
 # compose file location and loads runtime config from the local, gitignored .env.
 COMPOSE := docker compose -f infra/compose.yaml --env-file .env
 
-.PHONY: dev down logs test test-api test-web test-tools lint lint-api lint-web lint-tools e2e client migrate seed
+.PHONY: dev down logs test test-api test-web test-tools lint lint-api lint-web lint-tools e2e client migrate seed prod-config
 
 # Bring up the full dev stack (db, storage, api, web, proxy, mailpit), rebuilding images
 # first. Depends on .env existing (see the .env target below).
@@ -92,3 +92,11 @@ migrate:
 # cohort, subject with a published lesson/quiz, fake students with attempts).
 seed:
 	$(COMPOSE) exec api uv run python -m app.seed
+
+# Validates infra/compose.prod.yaml and the Cloudflare Tunnel overlay against the
+# committed placeholder env file — catches a broken compose file (bad interpolation,
+# invalid `!override`, etc.) without needing real secrets or a VM. Same commands the CI
+# `images` job runs (Task 11).
+prod-config:
+	docker compose -f infra/compose.prod.yaml --env-file infra/prod.env.example config -q
+	docker compose -f infra/compose.prod.yaml -f infra/compose.tunnel.yaml --env-file infra/prod.env.example config -q

@@ -224,7 +224,7 @@ erDiagram
 
 ### 6.2 Tables
 
-Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; soft-delete only where stated; JSONB columns are validated against a JSON Schema at the API boundary. Status/kind columns are text with CHECK constraints (only `user.role` is a native enum). **Implemented in v0.1.0:** `subject`, `lesson`, `lesson_page`, `content_block` (`rich_text`, `knowledge_check`), `question` (`single_choice`), `activity` (`lesson`), `content_version`, `attempt`, `attempt_item`; the rest arrive with their phases.
+Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; soft-delete only where stated; JSONB columns are validated against a JSON Schema at the API boundary. Status/kind columns are text with CHECK constraints (only `user.role` is a native enum). **Implemented in v0.1.0:** `subject`, `lesson`, `lesson_page`, `content_block` (`rich_text`, `knowledge_check`), `question` (`single_choice`), `activity` (`lesson`), `content_version`, `attempt`, `attempt_item`. **Implemented in v0.2.0:** `cohort` (+ `threshold_percent`), `enrollment`, `activity_result` (+ `latest_percent`), `audit_log` (+ `request_id`). `program` is deferred until a second institution exists (a nullable FK added later is a plain migration); the rest arrive with their phases.
 
 **Identity and cohorts**
 
@@ -284,12 +284,12 @@ Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAP
 | Group | Endpoints | Who |
 |---|---|---|
 | auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/providers`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}` | anyone / signed-in |
-| cohorts | `POST cohorts`, `GET cohorts`, `GET cohorts/{id}`, `POST cohorts/{id}/rotate-code`, `POST cohorts/join {code}`, `GET cohorts/{id}/members` | educator (own), student (join) |
+| cohorts | `POST cohorts` ✅, `GET cohorts` ✅, `GET cohorts/{id}` ✅, `PATCH cohorts/{id}` ✅, `POST cohorts/{id}/rotate-code` ✅, `POST cohorts/join {code}` ✅, `GET cohorts/{id}/members` ✅, `DELETE cohorts/{id}/members/{uid}` ✅ | educator (own), student (join) |
 | content (published) | `GET subjects` ✅, `GET subjects/{slug}` ✅, `GET lessons/{slug}` ✅, `GET activities/{id}` — returns the published snapshot with correct answers stripped | signed-in |
 | attempts | `POST activities/{id}/attempts` ✅, `POST attempts/{id}/items` ✅, `POST attempts/{id}/submit` ✅ (requires `Idempotency-Key`), `GET me/results` ✅, `GET me/attempts/{id}` | owner of the attempt |
-| analytics | `GET cohorts/{id}/overview`, `GET cohorts/{id}/students/{uid}`, `GET cohorts/{id}/activities/{aid}`, `GET cohorts/{id}/outcomes`, `GET cohorts/{id}/export.csv` — each read audited | educator (own cohort), admin |
+| analytics | `GET cohorts/{id}/overview` ✅, `GET cohorts/{id}/students/{uid}` ✅, `GET cohorts/{id}/activities/{aid}`, `GET cohorts/{id}/outcomes`, `GET cohorts/{id}/export.csv` — each read audited | educator (own cohort), admin |
 | authoring | `POST/PATCH lessons`, `PUT lessons/{id}/pages` (whole tree), `POST/PATCH questions`, `POST/PATCH activities`, `POST/PATCH data-tables`, `POST lessons|activities/{id}/publish`, `GET …/versions`, `POST …/versions/{n}/restore`, `POST media/presign`, `POST media/{id}/confirm` | educator, admin |
-| admin | `GET users`, `PATCH users/{id}/role`, `POST users/{id}/deactivate`, `POST users/{id}/erase`, `GET audit-log` | admin |
+| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST users/{id}/erase`, `GET admin/audit-log` ✅ | admin |
 | system | `GET health`, `GET openapi.json` | public |
 
 Conventions:
@@ -362,6 +362,8 @@ rtapps/
 `make dev` → `docker compose up --build` brings up `db`, `storage` (MinIO with a bucket-init job), `api` (Uvicorn with reload, source bind-mounted, runs `alembic upgrade head` on start), `web` (Vite dev server with HMR), `proxy` (Caddy on `http://localhost:8080`, same routing rules as production) and `mailpit` (catches auth e-mails). `make seed` loads an admin, an educator, one cohort, one subject with a published lesson and quiz, and ten fake students with attempts. `.env` is copied from `.env.example`; only `SESSION_SECRET` and Google OAuth keys differ per machine.
 
 ### 10.2 Test and production
+
+Runbook: `docs/06-operations.md` (provision, `.env`, ingress, GitHub Environment secrets, deploy, verify, backup/restore, rollback). Implemented in v0.2.0: `infra/compose.prod.yaml` (+ `compose.tunnel.yaml`), `Caddyfile.prod`, the `backup` container, `main.yml` and `deploy.yml`.
 
 Same `compose.prod.yaml`, different `.env` and different VM. Images are pulled from GHCR by commit SHA; no bind mounts; `web` runs the `adapter-node` build; Postgres data is on a block volume; the `backup` container runs `pg_dump` nightly to object storage with 30-day retention (media buckets have versioning enabled). Migrations run as a **one-shot step in the deploy workflow**, not on container start, so a bad migration never loops a restarting container.
 

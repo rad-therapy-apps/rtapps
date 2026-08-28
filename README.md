@@ -3,12 +3,14 @@
 Radiation-therapy education platform — the ground-up rebuild of the RTApps e-workbook, games and educator analytics.
 
 - `docs/` — problem definition, requirements, architecture, conventions, ADRs (start with `docs/01-problem-definition-and-scope.md`)
-- `apps/web` — SvelteKit front end (Phase 1)
-- `apps/api` — FastAPI back end (Phase 1)
+- `apps/web` — SvelteKit front end
+- `apps/api` — FastAPI back end
 - `packages/` — shared schemas, generated API client, result-reporting SDK
 - `tools/migrate-legacy` — imports content from the legacy `rtt_e_workbook` repository
-- `infra/` — Docker Compose, proxy config, backups
+- `infra/` — Docker Compose (dev + prod), Caddy/Cloudflare Tunnel config, backup container, deploy script
 
-Getting started: `docs/05-setup.md`.
+Status: **v0.2.0** (milestone M2) — lessons with knowledge checks, cohorts with join codes, audited educator views, admin, and a one-workflow deploy to a test VM (`docs/06-operations.md`). Next: plan 3 (content types + authoring + migration).
+
+Getting started: `docs/05-setup.md`; deploying: `docs/06-operations.md`.
 
 Educational software — not for clinical use. Licence: to be decided (see `docs/01-problem-definition-and-scope.md`).

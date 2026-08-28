@@ -1,0 +1,60 @@
+# What this file does: Caddy config for the production/test proxy — the single public
+# origin in front of the packaged `api` and `web` containers.
+# Used here and why: same routing as infra/Caddyfile (dev) — `/api/*` to the FastAPI
+# service, everything else to the packaged SvelteKit server — plus
+# Strict-Transport-Security (NFR-08) since this proxy now either terminates real TLS or
+# sits behind Cloudflare Tunnel (which does). The site address comes from SITE_ADDRESS:
+# a real hostname (e.g. rt.example.edu) makes Caddy request and renew its own certificate
+# automatically on 80/443; `:80` (tunnel mode, infra/compose.tunnel.yaml) just serves
+# plain HTTP, since Cloudflare terminates TLS upstream and only reaches this proxy over
+# the private tunnel.
+# How it fits the project: docs/03-architecture.md §3 (proxy variants) and ADR-0005
+# (Caddy automatic TLS or Cloudflare Tunnel, same routing rules either way).
+# Works with: infra/compose.prod.yaml (mounts this file into the `proxy` service),
+# infra/compose.tunnel.yaml (drops proxy's host ports and adds `cloudflared`; SITE_ADDRESS
+# is set to `:80` in that mode).
+# Used by: `docker compose -f infra/compose.prod.yaml [-f infra/compose.tunnel.yaml] up`.
+
+# Global options block: `admin off` disables Caddy's local admin API (nothing reconfigures
+# Caddy at runtime here). Automatic HTTPS is left at Caddy's default rather than forced
+# off, so a real hostname in SITE_ADDRESS still gets a certificate automatically; `:80`
+# is not a hostname, so Caddy just serves plain HTTP for it — no extra config needed to
+# support both modes from the same file.
+{
+	admin off
+}
+
+# The single site block: address comes from SITE_ADDRESS (a hostname for automatic public
+# TLS, or :80 behind the Cloudflare Tunnel).
+{$SITE_ADDRESS} {
+	# Compress responses with zstd (preferred) or gzip, whichever the client accepts.
+	encode zstd gzip
+	# Security headers applied to every response from this origin.
+	header {
+		# Stop browsers from MIME-sniffing responses into a different content type.
+		X-Content-Type-Options nosniff
+		# Send the full referrer only to same-origin destinations; downgrade to
+		# origin-only cross-origin, and never on an HTTPS→HTTP downgrade.
+		Referrer-Policy strict-origin-when-cross-origin
+		# Blocks this origin from being framed at all (clickjacking defense).
+		# NOTE(review, issue #16): same Phase-4 caveat as infra/Caddyfile — Phase 4's
+		# legacy simulators/EMR/DICOM viewers are meant to be re-hosted as
+		# iframe-embedded "external" activities, which DENY would break. Revisit then;
+		# not needed for Release 1.
+		X-Frame-Options DENY
+		# Force HTTPS for a year, including subdomains, on every future visit (NFR-08).
+		# Harmless when actually served over plain HTTP (tunnel mode): browsers only
+		# honor this header on responses received over HTTPS in the first place.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	}
+	# API traffic: proxied as-is to the api container. `handle` (not `handle_path`)
+	# preserves the `/api` prefix, matching that the API's routes are mounted at
+	# `/api/v1/...`, not stripped of `/api`.
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+	# Everything else (SSR pages, static assets) goes to the packaged SvelteKit server.
+	handle {
+		reverse_proxy web:3000
+	}
+}

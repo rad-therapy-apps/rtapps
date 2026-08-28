@@ -32,9 +32,9 @@
 <header>
 	<a href={resolve('/')} class="brand">RTApps</a>
 	<nav>
-		<!-- Signed in: subjects link, display name, and a sign-out form. -->
+		<!-- Signed in: display name and a sign-out form (the Subjects link lives in the
+			     role-gated nav below, added by (app)/+layout.svelte, to avoid duplicating it). -->
 		{#if data.user}
-			<a href={resolve('/subjects')}>Subjects</a>
 			<span>{data.user.display_name}</span>
 			<form method="POST" action="/logout" use:enhance>
 				<button type="submit">Sign out</button>
