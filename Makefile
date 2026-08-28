@@ -18,7 +18,7 @@ logs:
 test: test-api test-web test-tools
 
 test-api:
-	cd apps/api && uv run pytest
+	cd apps/api && uv run pytest --cov-fail-under=70
 
 test-web:
 	pnpm --filter web test

@@ -52,4 +52,4 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "--cov=app/grading --cov=app/auth --cov-report=term-missing --cov-fail-under=70"
+addopts = "--cov=app/grading --cov=app/auth --cov-report=term-missing"
