@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import health
+from app.attempts.router import router as attempts_router
 from app.auth.router import router as auth_router
 from app.config import Settings, load_settings
 from app.content.router import router as content_router
@@ -43,6 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health.router, prefix=API_PREFIX)
     app.include_router(auth_router, prefix=API_PREFIX)
     app.include_router(content_router, prefix=API_PREFIX)
+    app.include_router(attempts_router, prefix=API_PREFIX)
     return app
 
 
