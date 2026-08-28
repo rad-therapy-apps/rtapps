@@ -97,7 +97,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - run: cp infra/.env.example .env
-      - run: docker compose -f infra/compose.yaml --env-file .env up -d --build --wait --wait-timeout 600
+      - run: docker compose -f infra/compose.yaml --env-file .env up -d --build
+      # --wait only on long-running services: the one-shot storage-init container exits 0,
+      # which `up --wait` over all services reports as a failure.
+      - run: docker compose -f infra/compose.yaml --env-file .env up --wait --wait-timeout 600 proxy web api
       - run: docker compose -f infra/compose.yaml --env-file .env exec -T api uv run python -m app.seed
       - run: pnpm --filter web e2e
       - if: failure()
