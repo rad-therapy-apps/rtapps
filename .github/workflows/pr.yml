@@ -58,6 +58,20 @@ jobs:
       - run: uv run mypy src
       - run: uv run pytest -q
 
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with: { enable-cache: true }
+      - uses: actions/setup-node@v7
+        with: { node-version: 24 }
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: cd apps/api && uv sync --locked
+      - run: make client
+      - run: git diff --exit-code -- packages/api-client
+
   web:
     runs-on: ubuntu-latest
     steps:

@@ -41,7 +41,9 @@ e2e:
 	pnpm --filter web e2e
 
 client:
-	pnpm --filter web client
+	cd apps/api && uv run python -m app.openapi_export > ../../packages/api-client/openapi.json
+	pnpm --filter @rtapps/api-client generate
+	pnpm --filter web exec prettier --write ../../packages/api-client/src/schema.d.ts
 
 migrate:
 	cd apps/api && uv run alembic revision --autogenerate -m "$(m)"
