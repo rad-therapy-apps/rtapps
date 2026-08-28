@@ -11,17 +11,12 @@
 	type AttemptOut = components['schemas']['AttemptOut'];
 	type ItemGradeOut = components['schemas']['ItemGradeOut'];
 
-	// See the matching comment in KnowledgeCheck.svelte: the generated schema's path keys
-	// already include the API's "/api/v1" mount prefix that `createApi()`'s `baseUrl` also
-	// supplies, so the unprefixed path actually sent over the wire isn't a key of `paths`.
-	type SubmitPost = (
-		path: '/attempts/{attempt_id}/submit',
-		init: { params: { path: { attempt_id: string } }; headers: { 'Idempotency-Key': string } }
-	) => Promise<{ data?: AttemptOut; error?: { title?: string } }>;
-	const submitPost = api.POST as unknown as SubmitPost;
+	const submitPost = api.POST;
 
 	let { lesson, attempt }: { lesson: LessonOut; attempt: AttemptOut } = $props();
 
+	// `snapshot` is typed as a plain object by the OpenAPI schema (it's opaque JSON to the API),
+	// so it needs an explicit cast to the lesson content shape the frontend actually renders.
 	const snapshot = lesson.snapshot as unknown as LessonSnapshot;
 	const pages = snapshot.lesson.pages;
 	const idempotencyKey = crypto.randomUUID();
@@ -43,12 +38,16 @@
 		submitting = true;
 		submitError = undefined;
 		try {
-			const res = await submitPost('/attempts/{attempt_id}/submit', {
+			const res = await submitPost('/api/v1/attempts/{attempt_id}/submit', {
 				params: { path: { attempt_id: attempt.id } },
 				headers: { 'Idempotency-Key': idempotencyKey }
 			});
 			if (res.error) {
-				submitError = res.error.title ?? 'Request failed';
+				// See the matching comment in KnowledgeCheck.svelte: apps/api's global exception
+				// handlers return an RFC7807 problem+json body with `title` for every error
+				// response, which the generated schema (documenting only the default FastAPI
+				// 422 body) doesn't reflect.
+				submitError = (res.error as { title?: string }).title ?? 'Request failed';
 				return;
 			}
 			submitResult = res.data;

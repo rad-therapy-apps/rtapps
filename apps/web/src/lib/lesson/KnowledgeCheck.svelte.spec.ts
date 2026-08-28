@@ -50,7 +50,7 @@ describe('KnowledgeCheck', () => {
 		await page.getByRole('radio', { name: 'Option B' }).click();
 		await page.getByRole('button', { name: 'Check answer' }).click();
 
-		expect(post).toHaveBeenCalledWith('/attempts/{attempt_id}/items', {
+		expect(post).toHaveBeenCalledWith('/api/v1/attempts/{attempt_id}/items', {
 			params: { path: { attempt_id: 'attempt-1' } },
 			body: { item_key: 'lq_page2_1', response: { choice: 1 } }
 		});
