@@ -1,17 +1,52 @@
+# What this file does: Caddy config for the dev-stack proxy — the single public origin
+# in front of the api and web containers.
+# Used here and why: routes `/api/*` to the FastAPI service and everything else to the
+# SvelteKit dev server, so both are reachable at one origin (http://localhost:8080) even
+# though they're different containers/ports. Same-origin matters because the session
+# cookie (ADR-0002) and the API's CSRF check (verifying the `Origin` header) both assume
+# requests to `/api/*` come from the same origin the page was served from — a separate
+# origin per service would need CORS and a cross-site cookie policy instead.
+# How it fits the project: docs/03-architecture.md §3 (containers table — proxy's job is
+# routing/headers/compression, never application logic) and §10.1 (this file is reused
+# unmodified for the compose dev stack; production uses the same routing rules, per
+# ADR-0005).
+# Works with: infra/compose.yaml (mounts this file into the `proxy` service; `api` and
+# `web` are the container/service names resolved via compose's DNS).
+# Used by: `make dev` (via infra/compose.yaml).
+
+# Global options block: disables Caddy's automatic HTTPS/ACME since this proxy serves
+# plain HTTP on a fixed port in dev (and behind Cloudflare/cloudflared in prod, per
+# docs/03-architecture.md §3's proxy variants) — no cert to manage here.
 {
 	auto_https off
 }
 
+# The single site block: everything on port 8080 is handled here.
 :8080 {
+	# Compress responses with zstd (preferred) or gzip, whichever the client accepts.
 	encode zstd gzip
+	# Security headers applied to every response from this origin.
 	header {
+		# Stop browsers from MIME-sniffing responses into a different content type.
 		X-Content-Type-Options nosniff
+		# Send the full referrer only to same-origin destinations; downgrade to
+		# origin-only cross-origin, and never on an HTTPS→HTTP downgrade.
 		Referrer-Policy strict-origin-when-cross-origin
+		# Blocks this origin from being framed at all (clickjacking defense).
+		# NOTE(review, issue #16): this is a Phase-4 caveat — Phase 4's legacy
+		# simulators/EMR/DICOM viewers are meant to be re-hosted as iframe-embedded
+		# "external" activities, which DENY would break. Switch to SAMEORIGIN or set
+		# this per-route when that phase starts; not needed for Release 1, where
+		# nothing embeds this app in a frame.
 		X-Frame-Options DENY
 	}
+	# API traffic: proxied as-is to the api container. `handle` (not `handle_path`)
+	# preserves the `/api` prefix in the forwarded request, matching that the API's
+	# routes are actually mounted at `/api/v1/...`, not stripped of `/api`.
 	handle /api/* {
 		reverse_proxy api:8000
 	}
+	# Everything else (SSR pages, static assets, HMR) goes to the SvelteKit dev server.
 	handle {
 		reverse_proxy web:5173
 	}

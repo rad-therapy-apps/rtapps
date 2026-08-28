@@ -1,0 +1,945 @@
+{
+  "subject": {
+    "slug": "radiation-physics",
+    "title": "Radiation Physics",
+    "order": 0
+  },
+  "lesson": {
+    "slug": "em-spectrum",
+    "title": "The Electromagnetic Spectrum & X-Ray Production",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Where X-Rays Sit in the Electromagnetic Spectrum",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The electromagnetic spectrum runs from low-energy radio waves up to high-energy gamma rays: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "radio waves \u2192 microwaves \u2192 infrared \u2192 visible light \u2192 ultraviolet \u2192 x-rays \u2192 gamma rays",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". X-rays and gamma rays sit at the high-energy end, and they're the two forms of electromagnetic radiation used in radiation therapy."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Ionizing vs. Non-Ionizing Radiation",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Everything below X-rays on the spectrum \u2014 radio waves, microwaves, infrared, visible light, and ultraviolet \u2014 does "
+                    },
+                    {
+                      "type": "text",
+                      "text": "not",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " ionize atoms, even though some of it (microwaves, UV) can still transfer energy and cause real biological effects like heating tissue or skin damage."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Ionization",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is the removal of an electron from an atom by a photon carrying enough energy to knock it out of orbit. The atom and the ejected electron together are called an "
+                        },
+                        {
+                          "type": "text",
+                          "text": "ion pair",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ". This is exactly what makes X-rays and gamma rays biologically hazardous if misused \u2014 ionized tissue atoms can damage molecules and DNA."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ultraviolet light can cause skin damage and is linked to skin cancer. Does it ionize atoms?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Yes",
+              "No"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "UV light causes biological damage through a different mechanism (stimulating melanin production, causing cellular damage) without actually ionizing atoms \u2014 it sits just below X-rays on the spectrum."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wavelength, Frequency, and the Wave Equation",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Wavelength (\u03bb)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the distance between two like points on a wave. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Frequency (\u03bd)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is how many waves pass a point each second, measured in Hertz. As frequency goes up, wavelength goes down \u2014 they're inversely related."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "All electromagnetic waves travel at the speed of light, c = 3.0 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "8",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " m/s, related to frequency and wavelength by: "
+                        },
+                        {
+                          "type": "text",
+                          "text": "c = \u03bd \u00d7 \u03bb",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", so "
+                        },
+                        {
+                          "type": "text",
+                          "text": "\u03bd = c / \u03bb",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " and "
+                        },
+                        {
+                          "type": "text",
+                          "text": "\u03bb = c / \u03bd",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Worked example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Find the wavelength of a wave with frequency 4.5 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "14",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Hz."
+                        },
+                        {
+                          "type": "hardBreak"
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u03bb = c / \u03bd = (3.0 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "8",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " m/s) / (4.5 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "14",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Hz) = "
+                        },
+                        {
+                          "type": "text",
+                          "text": "6.67 \u00d7 10",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "-7",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " m",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Discovery of X-Rays",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Wilhelm Roentgen discovered X-rays on November 8, 1895, and published his findings shortly after. Radiologic Technology Week is celebrated the first full week of November every year in his honor."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Producing X-Rays \u2014 The X-Ray Tube",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Producing X-rays requires a source of accelerated electrons, an appropriate target material, a high voltage, and a vacuum inside a sealed tube. X-rays are generated when high-speed electrons collide with a metal target \u2014 the anode."
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Component"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Function"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Cathode",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Negative side; filament + focusing cup. Thermionic emission \"boils off\" electrons from the heated filament and focuses the stream toward the anode."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Anode",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Positive side; a rotating tungsten target disk that receives electrons, dissipates heat, and is the source of X-ray photons."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Glass envelope",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Maintains the vacuum around cathode and anode so electrons flow uninterrupted."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Protective housing",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Lead-lined housing controlling radiation leakage and electric shock; insulating oil also aids cooling."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Target Interactions \u2014 Where the Energy Goes",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When electrons strike the target, the energy splits three ways: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "heat (~99%)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bremsstrahlung (~0.8%, but 75\u201380% of the actual X-ray tube output)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "characteristic radiation (~0.2%)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Bremsstrahlung (\"braking radiation\"):",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " X-rays produced when electrons decelerate near atomic nuclei \u2014 this is the majority of usable tube output."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Characteristic X-rays:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " ionization at the target removes an inner-shell electron; an outer-shell electron fills the vacancy and releases its excess energy as a characteristic X-ray, with energy equal to the difference between the two shells' binding energies."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page6_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which target interaction accounts for the large majority of usable X-ray tube output?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Characteristic radiation",
+              "Bremsstrahlung"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bremsstrahlung accounts for roughly 75-80% of the actual tube output, even though the overwhelming majority of total energy at the target becomes heat."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Properties of X-Rays",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "X-rays are highly penetrating, invisible, electrically and magnetically neutral, heterogeneous (polyenergetic \u2014 produced at a range of energies), travel in straight lines at the speed of light while diverging from their source, ionize gases, cause fluorescence in certain materials, cannot be focused by a lens, and exhibit both wave and particle behavior."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Quantum Theory in Brief",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quantum theory, alongside relativity, forms the basis of modern physics. Planck (1900) proposed energy exists in discrete units (quanta); Einstein (1905) extended this to radiation itself; de Broglie (1924) proposed "
+                    },
+                    {
+                      "type": "text",
+                      "text": "wave-particle duality",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 that on the atomic scale, energy and matter can each behave as either particles or waves. Because ionizing radiation acts more like particles when interacting with matter, its energy-carrying units are called "
+                    },
+                    {
+                      "type": "text",
+                      "text": "quanta",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "text",
+                      "text": "photons",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 which still carry wave properties like frequency and wavelength."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Beam Quality and Quantity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two console settings control the X-ray beam:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Quality",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (beam energy) \u2014 controlled by kVp (or MeV for electron energy). Affects the beam's penetrating ability."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Quantity",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (number of photons) \u2014 controlled by mAs. Directly proportional to the number of electrons liberated by thermionic emission."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "These two settings interact: increasing kVp affects both quality and quantity simultaneously, while mAs primarily affects quantity alone \u2014 a distinction that matters when troubleshooting image quality or dose."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered where X-rays sit on the EM spectrum, ionizing vs. non-ionizing radiation, the wave equation, the history of X-ray discovery, X-ray tube components, target interactions (bremsstrahlung and characteristic radiation), X-ray properties, quantum theory, and beam quality vs. quantity."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next: once X-rays are produced, what happens when they actually reach and interact with tissue \u2014 that's the Photon Interactions lesson."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

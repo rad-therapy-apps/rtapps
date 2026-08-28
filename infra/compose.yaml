@@ -1,6 +1,21 @@
+# What this file does: defines the local development stack for `make dev` (docker compose):
+#   Postgres, MinIO (S3-compatible object storage) + a one-shot bucket initialiser, the FastAPI
+#   `api` (source bind-mounted, auto-reload), the SvelteKit `web` dev server (Vite, HMR), Caddy
+#   as the single origin on :8080, and Mailpit to catch outgoing e-mail.
+# Used here and why: one compose file so the whole system starts with one command and the dev
+#   topology matches production's (proxy → web/api → db/storage, ADR-0005). Healthchecks plus
+#   `depends_on: condition: service_healthy` give a deterministic start order; the same file
+#   is used unchanged by the CI `e2e` job (.github/workflows/pr.yml) with `--wait`.
+# How it fits the project: docs/03-architecture.md §3 (containers) and §10.1 (development);
+#   docs/05-setup.md for the day-to-day commands. Values come from ./.env (copied from
+#   infra/.env.example by `make dev`); the Makefile passes `--env-file .env`.
+# Works with: infra/Caddyfile (proxy routing), apps/api/Dockerfile + entrypoint.dev.sh (api),
+#   packages/schemas (mounted read-only for the prose validator), apps/web (bind-mounted repo).
+#   Used by: Makefile (dev/down/logs/seed), .github/workflows/pr.yml (e2e job).
 name: rtapps
 
 services:
+  # Postgres 16 — the only database; data persists in the `pgdata` volume across restarts.
   db:
     image: postgres:16
     environment:
@@ -10,13 +25,15 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5432:5432" # exposed so host tools (psql, the API test suite) can reach it
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
 
+  # MinIO stands in for S3/R2 locally (ADR-0005); the API only ever speaks the S3 API to it.
+  # :9000 = S3 API, :9001 = web console.
   storage:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
@@ -34,6 +51,9 @@ services:
       timeout: 3s
       retries: 10
 
+  # One-shot job: creates the bucket once MinIO is healthy, then exits 0. Nothing depends on
+  # it, which is why the CI e2e job waits only on proxy/web/api (an exited one-shot would
+  # otherwise make `compose up --wait` report a failure).
   storage-init:
     image: minio/mc:latest
     depends_on:
@@ -45,13 +65,20 @@ services:
       mc mb --ignore-existing local/${S3_BUCKET}
       "
 
+  # FastAPI in dev mode: the `base` image stage (deps only) with the source bind-mounted so
+  # uvicorn --reload picks up edits; entrypoint.dev.sh runs `alembic upgrade head` first.
+  # Build context is the repo root so the Dockerfile can also copy packages/schemas.
   api:
     build:
-      context: ../apps/api
+      context: ..
+      dockerfile: apps/api/Dockerfile
       target: base
     command: ["sh", "/app/entrypoint.dev.sh"]
     working_dir: /app
     environment:
+      # The bind mount below hides the image's copy of the schema, so point the validator
+      # at the read-only package mount instead (see app/content/prose.py candidates).
+      PROSE_SCHEMA_PATH: /packages/schemas/prose-doc.schema.json
       DATABASE_URL: ${DATABASE_URL}
       SESSION_SECRET: ${SESSION_SECRET}
       S3_ENDPOINT: ${S3_ENDPOINT}
@@ -62,13 +89,16 @@ services:
       ENV: ${ENV}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      UV_PROJECT_ENVIRONMENT: /opt/venv
+      UV_PROJECT_ENVIRONMENT: /opt/venv # keep the venv in a volume, not in the bind mount
     volumes:
-      - ../apps/api:/app
+      - ../apps/api:/app # live source for reload
+      - ../packages/schemas:/packages/schemas:ro # prose-doc.schema.json for the validator
       - api-venv:/opt/venv
     depends_on:
       db:
         condition: service_healthy
+    # Healthy = the API answers its own /health (which also checks the DB); the 30 s start
+    # period covers the migration run on first boot.
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health').status==200 else 1)\""]
       interval: 10s
@@ -76,13 +106,16 @@ services:
       retries: 12
       start_period: 30s
 
+  # SvelteKit dev server (Vite + HMR). Runs from the bind-mounted repo; node_modules live in
+  # named volumes so the Linux container never fights the host's macOS/Windows installs.
+  # First start runs `pnpm install` (slow) — hence the 120 s healthcheck start period.
   web:
     image: node:24-bookworm-slim
     working_dir: /repo
     command: ["sh", "-c", "corepack enable && pnpm install --frozen-lockfile && pnpm --filter web dev"]
     environment:
-      API_INTERNAL_URL: ${API_INTERNAL_URL}
-      ORIGIN: ${ORIGIN}
+      API_INTERNAL_URL: ${API_INTERNAL_URL} # server-side calls go straight to api:8000
+      ORIGIN: ${ORIGIN} # sent as the Origin header on server-side POSTs (API CSRF check)
     volumes:
       - ..:/repo
       - web-node-modules:/repo/node_modules
@@ -92,7 +125,23 @@ services:
         condition: service_healthy
     ports:
       - "5173:5173"
+    # The node image has no curl; use node's fetch to probe SvelteKit's /health route.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:5173/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
 
+  # Caddy: the single origin the browser talks to (http://localhost:8080). /api/* → api,
+  # everything else → web. Same-origin is what lets the session cookie flow to both without
+  # CORS (ADR-0002). Routing rules live in ./Caddyfile.
   proxy:
     image: caddy:2
     volumes:
@@ -103,12 +152,14 @@ services:
       - web
       - api
 
+  # Catches every outgoing e-mail in dev (password reset in plan 2): SMTP on :1025, UI on :8025.
   mailpit:
     image: axllent/mailpit:latest
     ports:
       - "8025:8025"
       - "1025:1025"
 
+# Named volumes: database files, object storage, the API venv, and the two node_modules trees.
 volumes:
   pgdata:
   minio-data:

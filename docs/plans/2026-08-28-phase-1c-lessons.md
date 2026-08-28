@@ -18,7 +18,7 @@
 - `content_version` is keyed by `activity_id` (+ `version` starting at 1, unique together). `lesson.current_version_id` and `activity.current_version_id` both point at it. (`docs/03-architecture.md` §6.2 is updated in Task 12.)
 - Attempts: `POST /activities/{id}/attempts` pins `activity.current_version_id`; items are graded on write; `POST /attempts/{id}/submit` requires header `Idempotency-Key` (400 if missing); same key → same 200 body; different key on a submitted attempt → 409. `passed = percent >= config.pass_percent` (default **80**). `max_score` = number of knowledge checks in the snapshot; unanswered checks score 0.
 - Coverage gate: `pytest --cov=app/grading --cov=app/auth --cov-fail-under=70` in CI (conventions §4).
-- Seed accounts (dev/test only; `app.seed` refuses when `env == "prod"`): `admin@rtapps.local` (admin), `educator@rtapps.local` (educator), `student@rtapps.local` (student), all with password `rtapps-dev-password`.
+- Seed accounts (dev/test only; `app.seed` refuses when `env == "prod"`): `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), all with password `rtapps-dev-password`.
 - Legacy repos are read-only; `tools/migrate-legacy` reads them by path and its tests use copies of two legacy pages checked into the tool's fixtures.
 - Test database on `TEST_DATABASE_URL` (CI 5433; developer machine 5434).
 
@@ -283,7 +283,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-SCHEMA_PATH = Path(__file__).resolve().parents[3] / "packages/schemas/prose-doc.schema.json"
+SCHEMA_PATH = Path(__file__).resolve().parents[4] / "packages/schemas/prose-doc.schema.json"  # repo root
 
 
 class ProseValidationError(ValueError):
@@ -340,8 +340,10 @@ async def test_lesson_tree_round_trip(db: AsyncSession) -> None:
     )
     ContentBlock(page=page, order=1, type="rich_text", body={"type": "doc", "content": [{"type": "paragraph"}]})
     ContentBlock(page=page, order=2, type="knowledge_check", body={"key": "lq_page1_1"}, question=q)
+    db.add_all([subject, lesson])
+    await db.flush()  # ids are assigned at flush time
     activity = Activity(kind="lesson", ref_id=lesson.id, title=lesson.title, subject=subject, lesson=lesson)
-    db.add_all([subject, lesson, activity])
+    db.add(activity)
     await db.flush()
 
     loaded = await db.get(Lesson, lesson.id)
@@ -502,7 +504,7 @@ class ContentVersion(Base):
 ### Task 3: Snapshot, publish, importer
 
 **Files:**
-- Create: `apps/api/app/content/snapshot.py`, `apps/api/app/content/service.py`, `apps/api/app/content/importer.py`, `apps/api/app/content/__main__.py` (thin: `from app.content.importer import main; main()`), `apps/api/tests/test_content_publish.py`, `apps/api/tests/test_importer.py`, `apps/api/tests/fixtures/lesson_min.json`
+- Create: `apps/api/app/content/snapshot.py`, `apps/api/app/content/service.py`, `apps/api/app/content/importer.py` (with an `if __name__ == "__main__": main()` guard so `python -m app.content.importer` works), `apps/api/tests/test_content_publish.py`, `apps/api/tests/test_importer.py`, `apps/api/tests/fixtures/lesson_min.json`
 
 **Interfaces:**
 - Produces: `build_snapshot(db, lesson) -> dict`, `strip_answers(snapshot) -> dict` (pure, deep-copied), `knowledge_checks(snapshot) -> dict[str, dict]` (key → unstripped block), `publish_lesson(db, lesson, author: User | None, change_note: str | None = None) -> ContentVersion`, `import_lesson(db, doc: LessonImport, *, publish: bool = True, author: User | None = None) -> Lesson`, Pydantic `LessonImport`.
@@ -930,6 +932,8 @@ def main() -> None:
 The `refresh(lesson, ["pages"])` after mutation is required because pages/blocks are `selectin`-loaded; if the reimport test fails on stale collections, `await db.refresh(lesson)` before `lesson.pages.clear()` as well.
 
 - [ ] **Step 3: Run, lint, commit** — both new test files green; ruff/mypy clean (the `field_validator` lambdas may need small named functions for mypy — use them). Commit: `feat(api): lesson snapshots, publish, and JSON importer`.
+
+> **Implementation note (as built):** `import_lesson` builds the tree through the relationships (`lesson.pages.append(lp)`, `lp.blocks.append(ContentBlock(..., question=q))`, one flush at the end; a new lesson is not flushed before its pages are appended) so the in-memory collections stay accurate and `build_snapshot` needs no `refresh` calls. Use decorated `@field_validator`/`@classmethod` methods rather than the lambda shorthand shown above.
 
 ---
 
@@ -1473,7 +1477,7 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
 
 async def test_seed_users_can_log_in(client: AsyncClient, db: AsyncSession, settings: Settings) -> None:
     await seed(db, settings)
-    r = await client.post("/api/v1/auth/login", json={"email": "educator@rtapps.local", "password": "rtapps-dev-password"})
+    r = await client.post("/api/v1/auth/login", json={"email": "educator@example.com", "password": "rtapps-dev-password"})
     assert r.status_code == 200 and r.json()["role"] == "educator"
 
 
@@ -1483,7 +1487,7 @@ async def test_seed_refuses_prod(db: AsyncSession) -> None:
         await seed(db, prod)
 ```
 
-- [ ] **Step 2: Implement** `app/seed.py` (`SeedSummary` dataclass with `users_created`, `lessons_imported`; `SEED_PASSWORD = "rtapps-dev-password"`; `SEED_USERS = [("admin@rtapps.local", "Admin", UserRole.admin), ("educator@rtapps.local", "Educator", UserRole.educator), ("student@rtapps.local", "Student", UserRole.student)]`; `LESSON_DIR = Path(__file__).resolve().parents[1] / "seed/lessons"`; `main()` mirrors the importer's `_run`). Makefile:
+- [ ] **Step 2: Implement** `app/seed.py` (`SeedSummary` dataclass with `users_created`, `lessons_imported`; `SEED_PASSWORD = "rtapps-dev-password"`; `SEED_USERS = [("admin@example.com", "Admin", UserRole.admin), ("educator@example.com", "Educator", UserRole.educator), ("student@example.com", "Student", UserRole.student)]`; `LESSON_DIR = Path(__file__).resolve().parents[1] / "seed/lessons"`; `main()` mirrors the importer's `_run`). Makefile:
 ```make
 seed:
 	$(COMPOSE) exec api uv run python -m app.seed
@@ -1687,7 +1691,7 @@ describe('ProseDoc', () => {
 
 - [ ] **Step 2: Implement** the routes and components (minimal in-component styles; labels and `aria-*` as in Task 8 of plan 1b). Typing: `import type { components } from '@rtapps/api-client'; type LessonOut = components['schemas']['LessonOut'];`.
 
-- [ ] **Step 3: Manual verification via `make dev` + `make seed`** (record in the report): sign in as `student@rtapps.local` → Subjects shows "Radiation Biology" and "Radiation Physics" → RBE and OER → 7 pages → page 2 knowledge check: choose the second option → "Correct" + explanation → Finish on page 7 → "Score: 1 / 2 (50%) — Not passed" → Home lists the result. Reload the lesson: a new attempt starts (expected in 1c; resuming in-progress attempts is Phase 3).
+- [ ] **Step 3: Manual verification via `make dev` + `make seed`** (record in the report): sign in as `student@example.com` → Subjects shows "Radiation Biology" and "Radiation Physics" → RBE and OER → 7 pages → page 2 knowledge check: choose the second option → "Correct" + explanation → Finish on page 7 → "Score: 1 / 2 (50%) — Not passed" → Home lists the result. Reload the lesson: a new attempt starts (expected in 1c; resuming in-progress attempts is Phase 3).
 
 - [ ] **Step 4:** `pnpm --filter web lint && check && test`; commit: `feat(web): subject and lesson pages with graded knowledge checks and results`.
 

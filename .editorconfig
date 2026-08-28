@@ -1,5 +1,18 @@
+# What this file does: tells editors/IDEs which whitespace/newline conventions to apply
+# per file type, so contributors don't need to configure this by hand.
+# Used here and why: the repo mixes a Python half (PEP 8: 4-space indent, enforced by
+# ruff/mypy in the Makefile's lint-api target) with a web half (Svelte/TS convention:
+# 2-space indent) and a Makefile (GNU Make requires literal tab indentation for recipe
+# lines — spaces there are a syntax error). Line endings are unified to LF everywhere
+# (see .gitattributes, which normalizes this in git itself, not just in editors).
+# How it fits the project: docs/04-conventions.md §3 (code standards).
+# Works with: .gitattributes (LF at the git layer); Depends on: editor/IDE EditorConfig
+# support (most editors read this automatically, no plugin needed in modern versions).
+
 root = true
 
+# Default for every file: LF line endings, UTF-8, trim trailing whitespace, ensure a
+# final newline, 2-space indent (the web/TS/Svelte convention).
 [*]
 charset = utf-8
 end_of_line = lf
@@ -8,8 +21,10 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
+# Python files follow PEP 8's 4-space indent instead of the 2-space default above.
 [*.py]
 indent_size = 4
 
+# GNU Make requires recipe lines to start with a literal tab; spaces are a parse error.
 [Makefile]
 indent_style = tab

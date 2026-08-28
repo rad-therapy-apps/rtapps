@@ -76,4 +76,4 @@ make lint       # ruff, mypy, eslint, svelte-check
 make client     # regenerate packages/api-client from the running API
 make migrate m="add data_table"   # alembic revision --autogenerate
 ```
-(Targets are created in Phase 1; this list is the contract for them.)
+(All targets exist as of v0.1.0; `make test-tools` / `make lint-tools` cover `tools/migrate-legacy`. The coverage threshold applies to full-suite runs only — `pytest tests/test_x.py` never fails on coverage.)

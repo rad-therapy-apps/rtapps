@@ -1,0 +1,10 @@
+{
+  "name": "@rtapps/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./prose-doc.schema.json": "./prose-doc.schema.json",
+    "./fixtures/prose-doc.json": "./fixtures/prose-doc.json"
+  }
+}

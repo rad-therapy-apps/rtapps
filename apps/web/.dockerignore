@@ -1,3 +1,12 @@
+# What this file does: excludes local, regenerable, and build-output directories from the Docker
+# build context for `apps/web/Dockerfile`.
+# Used here and why: `node_modules`/`.svelte-kit`/`build` are regenerated inside the image by
+# `pnpm install`/`pnpm build`, so shipping the host's copies would be wasted context transfer and
+# could leak a host-specific (non-Linux) `node_modules`; `test-results`/`playwright-report` are
+# Playwright's local e2e output, irrelevant to the image.
+# How it fits the project: keeps `docker build`'s context small and reproducible for the `web`
+# service image (ADR-0005 deployment).
+# Used by: `docker build -f apps/web/Dockerfile`, `docker compose build web`.
 node_modules
 .svelte-kit
 build

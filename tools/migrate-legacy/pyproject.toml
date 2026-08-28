@@ -1,0 +1,59 @@
+# What this file does: packages the legacy-lesson migration tool (src/migrate_legacy)
+# as a standalone `uv`-managed project, separate from apps/api's own pyproject.toml, and
+# configures its test/lint/type-check tooling.
+#
+# Used here and why: `jsonschema` (dev dep) so tests/test_convert.py can validate
+# converted output against the real `packages/schemas/prose-doc.schema.json`;
+# `beautifulsoup4` (runtime dep) for HTML parsing in `migrate_legacy.convert`/`html2prose`.
+#
+# How it fits the project: this is the "Migration tool" entry from
+# `docs/03-architecture.md` §9/§11 — a one-off CLI (`migrate-legacy`), not part of the
+# running app, so it's versioned and tested independently of apps/api.
+#
+# Depends on: nothing in-repo besides packages/schemas (read at test time, not a
+# dependency of this package).
+# Used by: `make test-tools` / `make lint-tools`; the `tools` job in
+# `.github/workflows/pr.yml` runs the same `uv run` commands directly.
+[project]
+name = "migrate-legacy"
+version = "0.1.0"
+description = "Converts legacy paged-lesson HTML to lesson-import JSON"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.13",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "jsonschema>=4.23",
+    "ruff>=0.16",
+    "mypy>=2.3",
+    "types-beautifulsoup4>=4.12.0.20250516",
+]
+
+[project.scripts]
+migrate-legacy = "migrate_legacy.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/migrate_legacy"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# test_convert.py is copied verbatim from the task brief; don't reflow its lines.
+extend-exclude = ["tests/test_convert.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

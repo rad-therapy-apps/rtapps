@@ -1,8 +1,20 @@
+/**
+ * What this file does: unit tests for `apiFetch`'s two call shapes and for `relaySetCookie`'s
+ * Set-Cookie parsing.
+ * Used here and why: vitest `server` project (plain Node, no DOM) — this module only touches
+ * `fetch`/`Headers`/`RequestEvent`, never the browser.
+ * How it fits the project: guards the SSR half of ADR-0002 (same-origin cookie sessions) — a
+ * regression here means the session cookie stops being forwarded or relayed correctly.
+ * Depends on: `./api` (apiFetch, relaySetCookie), `@sveltejs/kit` types, vitest.
+ * Used by: `pnpm --filter web test` (vitest `server` project, `pr.yml` job `web`).
+ */
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
 import { apiFetch, relaySetCookie } from './api';
 
 describe('apiFetch', () => {
+	// Scenario: the bare-fetch overload with an explicit cookie string.
+	// Invariant: the internal API base is prefixed and the cookie header is set verbatim.
 	it('prefixes the internal API base and forwards the cookie header', async () => {
 		const fetchMock = vi.fn(async () => new Response('{}', { status: 200 }));
 		await apiFetch(fetchMock as unknown as typeof fetch, '/health', { cookie: 'rt_session=abc' });
@@ -12,6 +24,8 @@ describe('apiFetch', () => {
 		expect(new Headers(init.headers).get('cookie')).toBe('rt_session=abc');
 	});
 
+	// Scenario: the RequestEvent overload with a mutating (non-GET) request.
+	// Invariant: the cookie is forwarded from the incoming request and Origin is set for the API's CSRF check.
 	it('given a RequestEvent, forwards the cookie header and sets Origin on non-GET', async () => {
 		const fetchMock = vi.fn(async () => new Response('{}', { status: 200 }));
 		const event = {
@@ -31,6 +45,8 @@ describe('apiFetch', () => {
 });
 
 describe('relaySetCookie', () => {
+	// Scenario: a live session cookie with the full attribute set.
+	// Invariant: attributes are parsed correctly and `cookies.set` is called, not `delete`.
 	it('copies a Set-Cookie header onto event.cookies with parsed attributes', () => {
 		const set = vi.fn();
 		const del = vi.fn();
@@ -55,6 +71,8 @@ describe('relaySetCookie', () => {
 		expect(del).not.toHaveBeenCalled();
 	});
 
+	// Scenario: a logout/clear response (Max-Age=0).
+	// Invariant: the cookie is deleted, not set with an empty value.
 	it('deletes the cookie when Max-Age=0', () => {
 		const set = vi.fn();
 		const del = vi.fn();

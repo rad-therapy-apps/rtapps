@@ -16,17 +16,22 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test": "vitest run",
-		"e2e": "playwright test",
-		"client": "openapi-typescript http://localhost:8080/api/v1/openapi.json -o ../../packages/api-client/src/schema.d.ts"
+		"e2e": "playwright test"
+	},
+	"dependencies": {
+		"@rtapps/api-client": "workspace:*"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.60.0",
+		"@rtapps/schemas": "workspace:*",
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@types/node": "^24",
 		"@vitest/browser-playwright": "^4.1.8",
+		"ajv": "^8.20.0",
+		"ajv-formats": "^3.0.1",
 		"eslint": "^10.4.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.19.0",

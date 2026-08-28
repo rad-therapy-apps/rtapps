@@ -1,17 +1,43 @@
+# What this file does: configures GitHub Dependabot to open PRs for outdated
+# dependencies across the repo's package ecosystems, on a weekly schedule.
+# Used here and why: one entry per ecosystem/directory that actually has a lockfile in
+# this repo — Python deps for the API, the pnpm workspace's JS deps (rooted at `/` since
+# pnpm-workspace.yaml covers apps/* and packages/* from there), the GitHub Actions
+# workflow versions themselves, and the two Dockerfiles' base images. No entry for
+# tools/migrate-legacy (not part of the deployed system) or infra/compose.yaml (pinned
+# image tags are managed manually, not via a lockfile).
+# How it fits the project: docs/04-conventions.md §7 (versioning/releases) — keeps
+# dependencies from silently drifting between releases.
+# Depends on: this repo's lockfiles (apps/api/uv.lock, pnpm-lock.yaml) and Dockerfiles.
+# Used by: GitHub's Dependabot service; PRs it opens go through the same pr.yml checks
+# as any other PR.
+# NOTE(review): tools/migrate-legacy also has its own pyproject.toml/uv.lock but has no
+# dependabot entry — likely omitted because it's a one-off migration script, not part of
+# the deployed system, but that's not stated anywhere; worth confirming intentional.
 version: 2
 updates:
+  # Python dependencies for the API service (apps/api/pyproject.toml + uv.lock).
   - package-ecosystem: uv
     directory: /apps/api
     schedule: { interval: weekly }
+  # Python dependencies for the legacy migration tool (its own pyproject.toml + uv.lock).
+  - package-ecosystem: uv
+    directory: /tools/migrate-legacy
+    schedule: { interval: weekly }
+  # JS/TS dependencies for the whole pnpm workspace (single root lockfile covers
+  # apps/web and packages/*, per pnpm-workspace.yaml).
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
+  # Pinned action versions (e.g. actions/checkout@vN) used in .github/workflows/*.
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+  # Base image in apps/api's Dockerfile.
   - package-ecosystem: docker
     directory: /apps/api
     schedule: { interval: weekly }
+  # Base image in apps/web's Dockerfile.
   - package-ecosystem: docker
     directory: /apps/web
     schedule: { interval: weekly }

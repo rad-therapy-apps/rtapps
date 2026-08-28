@@ -1,0 +1,105 @@
+"""Student-facing read API for published curriculum content.
+
+What this file does: three GET routes — list subjects with a published-lesson count, one
+subject's published lessons, and one lesson's current published snapshot with answer keys
+removed. There is no write path here; authoring goes through `app.content.importer` (and,
+eventually, an authoring UI) instead.
+
+Used here and why: a FastAPI `APIRouter` with `require_user` applied to the whole router
+(every route needs a logged-in session, even though nothing here is role-gated) so no
+individual route can forget the auth dependency.
+
+How it fits the project: this is the "serve" end of the content pipeline (ADR-0003) —
+every route only ever reads rows with `status == "published"` or a lesson's
+`current_version_id`; the underlying working-copy edits and unpublished drafts are never
+reachable from here.
+
+Works with:
+  Depends on: `app.auth.deps.require_user` (session dependency), `app.content.models`
+    (ContentVersion, Lesson, Subject), `app.content.schemas` (response models),
+    `app.content.snapshot.strip_answers`, `app.db.get_session`, `app.errors.Problem`.
+  Used by: `app.main` mounts this router under the API prefix.
+"""
+
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth.deps import require_user
+from app.content.models import ContentVersion, Lesson, Subject
+from app.content.schemas import LessonOut, LessonRefOut, SubjectDetailOut, SubjectOut
+from app.content.snapshot import strip_answers
+from app.db import get_session
+from app.errors import Problem
+
+router = APIRouter(tags=["content"], dependencies=[Depends(require_user)])
+
+
+@router.get("/subjects", response_model=list[SubjectOut])
+async def list_subjects(db: AsyncSession = Depends(get_session)) -> list[SubjectOut]:
+    """List subjects that have at least one published lesson, with that lesson count."""
+    rows = (
+        await db.execute(
+            select(Subject, func.count(Lesson.id))
+            .join(Lesson)
+            .where(Lesson.status == "published")
+            .group_by(Subject.id)
+            .order_by(Subject.order, Subject.slug)
+        )
+    ).all()
+    return [
+        SubjectOut(slug=subject.slug, title=subject.title, order=subject.order, lesson_count=count)
+        for subject, count in rows
+    ]
+
+
+@router.get("/subjects/{slug}", response_model=SubjectDetailOut)
+async def get_subject(slug: str, db: AsyncSession = Depends(get_session)) -> SubjectDetailOut:
+    """One subject with its published lessons; 404s if the subject or all its lessons are
+
+    unpublished, so an unpublished subject is indistinguishable from a missing one.
+    """
+    subject = await db.scalar(select(Subject).where(Subject.slug == slug))
+    if subject is None:
+        raise Problem(404, "Subject not found")
+    lessons = (
+        await db.scalars(
+            select(Lesson)
+            .where(Lesson.subject_id == subject.id, Lesson.status == "published")
+            .order_by(Lesson.order, Lesson.slug)
+        )
+    ).all()
+    if not lessons:
+        raise Problem(404, "Subject not found")
+    return SubjectDetailOut(
+        slug=subject.slug,
+        title=subject.title,
+        summary=subject.summary,
+        lessons=[
+            LessonRefOut(slug=lesson.slug, title=lesson.title, order=lesson.order)
+            for lesson in lessons
+        ],
+    )
+
+
+@router.get("/lessons/{slug}", response_model=LessonOut)
+async def get_lesson(slug: str, db: AsyncSession = Depends(get_session)) -> LessonOut:
+    """Serve a lesson's current published snapshot with answer keys stripped.
+
+    Requires both `status == "published"` and a `current_version_id` to be set — the two
+    are kept in sync by `publish_lesson`, but checking both is cheap insurance against a
+    lesson that's mid-migration or otherwise inconsistent.
+    """
+    lesson = await db.scalar(select(Lesson).where(Lesson.slug == slug))
+    if lesson is None or lesson.status != "published" or lesson.current_version_id is None:
+        raise Problem(404, "Lesson not found")
+    version = await db.get(ContentVersion, lesson.current_version_id)
+    if version is None:
+        raise Problem(404, "Lesson not found")
+    return LessonOut(
+        activity_id=version.activity_id,
+        content_version_id=version.id,
+        # strip_answers: this is the one place unstripped snapshot data could otherwise
+        # leak to a student — never skip it on this route.
+        snapshot=strip_answers(version.snapshot),
+    )
