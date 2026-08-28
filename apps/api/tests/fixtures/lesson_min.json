@@ -1,0 +1,15 @@
+{
+  "subject": {"slug": "radiation-biology", "title": "Radiation Biology", "order": 1},
+  "lesson": {"slug": "rbe-and-oer", "title": "RBE and OER", "order": 1, "pages": [
+    {"title": "Not All Radiation Damages Equally", "blocks": [
+      {"type": "rich_text", "body": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "LET matters."}]}]}}
+    ]},
+    {"title": "RBE", "blocks": [
+      {"type": "rich_text", "body": {"type": "doc", "content": [{"type": "callout", "attrs": {"kind": "key-principle"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "RBE rises with LET."}]}]}]}},
+      {"type": "knowledge_check", "key": "lq_page2_1",
+       "stem": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Beyond the optimal LET, RBE…"}]}]},
+       "options": ["keeps increasing", "decreases"], "answer": 1,
+       "explanation": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Overkill."}]}]}}
+    ]}
+  ]}
+}
