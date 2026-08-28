@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit.models import AuditLog
 from app.auth.models import User, UserRole
-from app.cohorts.models import generate_join_code
+from app.cohorts.models import Cohort
 from tests.conftest import register
 
 
@@ -150,20 +150,22 @@ async def test_admin_can_read_any_cohort(client: AsyncClient, db: AsyncSession) 
 
 
 async def test_join_code_race_is_a_problem_response(client: AsyncClient, db: AsyncSession) -> None:
-    """If the unique index fires at commit (two requests picked the same code), the API answers
-    409 problem+json rather than a bare 500."""
+    """If the unique index fires at flush/commit (two requests picked the same code between
+    the pre-check and the write), the API answers 409 problem+json rather than a bare 500."""
     await make_educator(client, db, "edu@example.edu")
     cohort = await create_cohort(client)
-    original = generate_join_code
-    # Force the next allocation to reuse the existing code so the pre-check passes on a stale
-    # read and the unique index rejects the commit.
     import app.cohorts.router as router_module
 
-    router_module.generate_join_code = lambda: cohort["join_code"]  # type: ignore[assignment]
+    original = router_module._assign_fresh_code
+
+    async def stale_pre_check(db: AsyncSession, c: Cohort) -> None:
+        c.join_code = cohort["join_code"]  # as if the pre-check ran before the other insert
+
+    router_module._assign_fresh_code = stale_pre_check  # type: ignore[assignment]
     try:
         r = await client.post("/api/v1/cohorts", json={"name": "Clash"})
     finally:
-        router_module.generate_join_code = original
+        router_module._assign_fresh_code = original
     assert r.status_code == 409
     assert r.headers["content-type"].startswith("application/problem+json")
     assert "join code" in r.json()["title"].lower()

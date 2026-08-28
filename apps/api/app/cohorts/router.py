@@ -62,10 +62,13 @@ async def cohort_out(db: AsyncSession, cohort: Cohort, role: str) -> CohortOut:
     )
 
 
-async def _commit_with_code(db: AsyncSession) -> None:
-    """Commit; if two requests raced to the same join code, answer 409 (problem+json) not 500."""
+async def _commit_with_code(db: AsyncSession, *, flush_only: bool = False) -> None:
+    """Flush or commit; a join-code race (unique index) becomes a 409 problem, not a 500."""
     try:
-        await db.commit()
+        if flush_only:
+            await db.flush()
+        else:
+            await db.commit()
     except IntegrityError as exc:
         await db.rollback()
         raise Problem(409, "Join code collided with another cohort; please retry") from exc
@@ -101,7 +104,7 @@ async def create_cohort(
     )
     await _assign_fresh_code(db, cohort)
     db.add(cohort)
-    await db.flush()  # assign the id before the enrollment references it
+    await _commit_with_code(db, flush_only=True)  # assign the id; unique index guards the code
     # Creator becomes the cohort's educator by enrollment, not a separate ownership column.
     db.add(Enrollment(user_id=user.id, cohort_id=cohort.id, role="educator"))
     await record_audit(
