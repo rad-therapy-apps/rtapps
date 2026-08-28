@@ -6,7 +6,7 @@
 
 	let { doc, images = {} }: { doc: ProseDoc; images?: Record<string, string> } = $props();
 
-	setContext('prose-images', images);
+	setContext('prose-images', () => images);
 </script>
 
 <div class="prose">

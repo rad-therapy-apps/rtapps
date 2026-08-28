@@ -27,23 +27,23 @@
 	color: #555;
 }
 
-.callout {
+.prose .callout {
 	border-left: 4px solid #888;
 	padding: 0.5em 1em;
 	background: #f5f5f5;
 }
 
-.callout-key-principle {
+.prose .callout-key-principle {
 	border-left-color: #2563eb;
 	background: #eff6ff;
 }
 
-.callout-clinical-note {
+.prose .callout-clinical-note {
 	border-left-color: #059669;
 	background: #ecfdf5;
 }
 
-.callout-warning {
+.prose .callout-warning {
 	border-left-color: #d97706;
 	background: #fffbeb;
 }
@@ -77,6 +77,6 @@
 	font-style: italic;
 }
 
-code.math {
+.prose code.math {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }

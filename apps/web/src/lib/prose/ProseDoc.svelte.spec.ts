@@ -37,6 +37,33 @@ describe('ProseDoc', () => {
 		await expect(render(ProseDoc, { doc: bad })).rejects.toThrow(/Unknown prose node: iframe/);
 	});
 
+	it('keeps marks and images reactive across a rerender', async () => {
+		const docA: Doc = {
+			type: 'doc',
+			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'LET' }] }]
+		};
+		const docB: Doc = {
+			type: 'doc',
+			content: [
+				{ type: 'paragraph', content: [{ type: 'text', text: 'LET', marks: [{ type: 'bold' }] }] },
+				{ type: 'image', attrs: { mediaAssetId: 'fig1', alt: 'figure' } }
+			]
+		};
+
+		const screen = await render(ProseDoc, { doc: docA });
+		await expect.element(page.getByText('LET')).toBeInTheDocument();
+		expect(screen.container.querySelector('strong')).toBeNull();
+
+		await screen.rerender({ doc: docB, images: { fig1: '/fig1.png' } });
+
+		const strong = page.getByText('LET');
+		await expect.element(strong).toBeInTheDocument();
+		expect((await strong.element()).tagName).toBe('STRONG');
+		const img = screen.container.querySelector('img');
+		expect(img).not.toBeNull();
+		expect(img?.getAttribute('src')).toBe('/fig1.png');
+	});
+
 	it('never injects HTML from text', async () => {
 		const doc: Doc = {
 			type: 'doc',

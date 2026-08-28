@@ -19,7 +19,7 @@
 		'link'
 	]);
 
-	const marks: ProseMark[] = node.type === 'text' ? (node.marks ?? []) : [];
+	const marks: ProseMark[] = $derived(node.type === 'text' ? (node.marks ?? []) : []);
 	if (marks.length > 0 && !KNOWN_MARK_TYPES.has(marks[0].type)) {
 		throw new Error(`Unknown prose mark: ${marks[0].type}`);
 	}

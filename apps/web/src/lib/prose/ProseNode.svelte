@@ -20,7 +20,7 @@
 		throw new Error(`Unknown prose node: ${node.type}`);
 	}
 
-	const images = getContext<Record<string, string>>('prose-images') ?? {};
+	const getImages = getContext<() => Record<string, string>>('prose-images');
 </script>
 
 {#if node.type === 'paragraph'}
@@ -90,7 +90,7 @@
 		</tbody>
 	</table>
 {:else if node.type === 'image'}
-	{@const src = images[node.attrs.mediaAssetId]}
+	{@const src = getImages?.()[node.attrs.mediaAssetId]}
 	<figure>
 		{#if src}
 			<img {src} alt={node.attrs.alt} />
