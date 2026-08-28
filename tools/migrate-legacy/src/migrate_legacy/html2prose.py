@@ -66,9 +66,18 @@ def inline_nodes(
     element: Tag, notes: list[str], marks: list[dict[str, Any]] | None = None
 ) -> list[dict[str, Any]]:
     """Map the children of an inline-context element into prose inline nodes."""
+    return _inline_nodes_from(element.children, notes, marks)
+
+
+def _inline_nodes_from(
+    children: Iterable[Any], notes: list[str], marks: list[dict[str, Any]] | None = None
+) -> list[dict[str, Any]]:
+    """Map a run of sibling nodes (not necessarily all of one element's
+    children) into prose inline nodes. Shared by `inline_nodes` and by
+    `blocks_from_container`'s loose-content wrapping."""
     marks = marks or []
     out: list[dict[str, Any]] = []
-    for child in element.children:
+    for child in children:
         if isinstance(child, NavigableString):
             text = collapse_whitespace(str(child))
             if text == "":
@@ -142,13 +151,44 @@ def _table_block(element: Tag, notes: list[str]) -> dict[str, Any]:
 
 
 def blocks_from_container(element: Tag, notes: list[str], page_num: int) -> list[dict[str, Any]]:
-    """Map the direct block-level children of a container (callout, blockquote)
-    recursively; if it has none (bare text/inline markup only), wrap the whole
-    thing in one paragraph."""
+    """Map the direct children of a container (callout, blockquote, li, td, …)
+    into blocks: block-level children (`<p>`, lists, …) map recursively via
+    `element_to_block`. Loose runs of non-block content (bare text, or inline
+    tags like `<span>`/`<strong>` directly under the container) between/around
+    the block children are wrapped into synthesized paragraph blocks, in
+    document order, rather than dropped. If the container has no block
+    children at all, the whole thing is wrapped in one paragraph."""
     block_children = [c for c in element.children if isinstance(c, Tag) and c.name in _BLOCK_TAGS]
     if not block_children:
         return [_paragraph(element, notes)]
-    blocks = [b for c in block_children if (b := element_to_block(c, notes, page_num)) is not None]
+
+    blocks: list[dict[str, Any]] = []
+    run: list[Any] = []
+    wrapped_loose_content = False
+
+    def flush_run() -> None:
+        nonlocal wrapped_loose_content
+        if not run:
+            return
+        content = strip_edges(_inline_nodes_from(run, notes))
+        if content:
+            blocks.append({"type": "paragraph", "content": content})
+            wrapped_loose_content = True
+        run.clear()
+
+    for child in element.children:
+        if isinstance(child, Tag) and child.name in _BLOCK_TAGS:
+            flush_run()
+            block = element_to_block(child, notes, page_num)
+            if block is not None:
+                blocks.append(block)
+        else:
+            run.append(child)
+    flush_run()
+
+    if wrapped_loose_content:
+        notes.append(f"mixed inline content wrapped in paragraph in {element.name}")
+
     return blocks or [_paragraph(element, notes)]
 
 

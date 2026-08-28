@@ -94,6 +94,44 @@ def test_key_principle_bare_text_becomes_one_paragraph() -> None:
     }
 
 
+def test_key_principle_mixed_block_and_loose_text_wraps_trailing_run() -> None:
+    div = _fragment('<div class="key-principle"><p>Real point.</p>Some loose trailing text.</div>')
+    notes: list[str] = []
+    block = element_to_block(div, notes)
+    assert block == {
+        "type": "callout",
+        "attrs": {"kind": "key-principle"},
+        "content": [
+            {"type": "paragraph", "content": [{"type": "text", "text": "Real point."}]},
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": "Some loose trailing text."}],
+            },
+        ],
+    }
+    assert "mixed inline content wrapped in paragraph in div" in notes
+
+
+def test_blockquote_mixed_leading_inline_and_block_preserves_order() -> None:
+    bq = _fragment("<blockquote>Lead <strong>text</strong><p>Then a para.</p></blockquote>")
+    notes: list[str] = []
+    block = element_to_block(bq, notes)
+    assert block == {
+        "type": "blockquote",
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [
+                    {"type": "text", "text": "Lead "},
+                    {"type": "text", "text": "text", "marks": [{"type": "bold"}]},
+                ],
+            },
+            {"type": "paragraph", "content": [{"type": "text", "text": "Then a para."}]},
+        ],
+    }
+    assert "mixed inline content wrapped in paragraph in blockquote" in notes
+
+
 def test_unordered_list_becomes_bullet_list() -> None:
     ul = _fragment("<ul><li>One</li><li>Two</li></ul>")
     notes: list[str] = []

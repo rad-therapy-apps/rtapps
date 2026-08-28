@@ -22,6 +22,7 @@ _QUICK_CHECK_RE = re.compile(r"^quick\s+check[!.,;:]*$", re.IGNORECASE)
 _EXPLANATION_PREFIX_RE = re.compile(r"^[A-Z]\.\s*")
 _CORRECT_ANSWERS_RE = re.compile(r"const\s+lessonCorrectAnswers\s*=\s*(\{.*?\});", re.DOTALL)
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
+_KEY_INVALID_RE = re.compile(r"[^a-z0-9_]")
 
 
 @dataclass
@@ -64,9 +65,21 @@ def _explanation_doc(element: Tag, notes: list[str]) -> dict[str, Any]:
     return {"type": "doc", "content": [{"type": "paragraph", "content": nodes}]}
 
 
+def _normalise_key(raw_key: str, notes: list[str]) -> str:
+    """Force a radio `name` into the `^[a-z0-9_]+$` shape the API importer
+    requires, noting the change so it's traceable back to the legacy markup."""
+    normalised = _KEY_INVALID_RE.sub("_", raw_key.lower())
+    if normalised != raw_key:
+        notes.append(f"normalised key {raw_key} → {normalised}")
+    return normalised
+
+
 def _build_knowledge_check(
     block_div: Tag, page_num: int, correct_answers: dict[str, str], notes: list[str]
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
+    """Build a `knowledge_check` block, or `None` if the block has no radio
+    input to key it on (the caller then falls back to a plain rich_text block
+    so the question text isn't silently dropped)."""
     stem_el = _find_tag(block_div, "p", class_="question-text")
     stem = (
         _one_paragraph_doc(stem_el, notes)
@@ -74,19 +87,28 @@ def _build_knowledge_check(
         else {"type": "doc", "content": [{"type": "paragraph", "content": []}]}
     )
 
-    key = None
+    raw_key = None
     options: list[str] = []
     values: list[str | None] = []
     for label in block_div.find_all("label"):
         radio = label.find("input", type="radio")
-        if key is None and radio is not None:
-            key = radio.get("name")
+        if raw_key is None and radio is not None and radio.get("name") is not None:
+            raw_key = str(radio["name"])
         values.append(radio.get("value") if radio is not None else None)
         options.append(collapse_whitespace(label.get_text()).strip())
 
+    if raw_key is None:
+        notes.append(
+            "unsupported element interactive-question-block without radio inputs "
+            f"on page {page_num}"
+        )
+        return None
+
+    key = _normalise_key(raw_key, notes)
+
     answer = 0
-    if key is not None and key in correct_answers and correct_answers[key] in values:
-        answer = values.index(correct_answers[key])
+    if raw_key in correct_answers and correct_answers[raw_key] in values:
+        answer = values.index(correct_answers[raw_key])
     else:
         notes.append(f"no correct answer for {key}")
 
@@ -133,7 +155,21 @@ def _page_blocks(
             continue
         if child.name == "div" and "interactive-question-block" in (child.get("class") or []):
             flush()
-            blocks.append(_build_knowledge_check(child, page_num, correct_answers, notes))
+            check = _build_knowledge_check(child, page_num, correct_answers, notes)
+            if check is not None:
+                blocks.append(check)
+            else:
+                text = collapse_whitespace(child.get_text()).strip()
+                body = {
+                    "type": "doc",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"type": "text", "text": text}] if text else [],
+                        }
+                    ],
+                }
+                blocks.append({"type": "rich_text", "body": body})
             continue
         accumulator.append(child)
 
