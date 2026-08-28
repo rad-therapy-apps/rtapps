@@ -123,7 +123,7 @@ sequenceDiagram
   A->>D: SELECT user WHERE email
   A->>A: argon2id verify
   A->>D: INSERT session (token_hash, user_id, expires, ua_hash)
-  A-->>W: 200 {user} + Set-Cookie: rt_session=…; HttpOnly; Secure; SameSite=Lax
+  A-->>W: 200 {user} + Set-Cookie rt_session=… (HttpOnly, Secure, SameSite=Lax)
   W-->>B: 303 → /home (cookie relayed via event.cookies)
 ```
 
@@ -159,7 +159,7 @@ sequenceDiagram
   A->>D: INSERT attempt_item (correct, score)
   A-->>B: {correct, score, explanation}
   B->>A: POST /api/v1/attempts/{id}/submit  (Idempotency-Key)
-  A->>D: UPDATE attempt (score, percent, passed, submitted_at); UPSERT activity_result
+  A->>D: UPDATE attempt (score, percent, passed, submitted_at) + UPSERT activity_result
   A-->>B: scored attempt
 ```
 

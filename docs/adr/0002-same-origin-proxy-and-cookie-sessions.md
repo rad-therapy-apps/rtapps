@@ -32,7 +32,7 @@ sequenceDiagram
   P->>A: forward
   A->>A: check Origin allow-list, argon2id verify
   A->>D: INSERT session(user_id, token_hash, expires_at, ua_hash)
-  A-->>B: 200 {user} + Set-Cookie: rt_session=…; HttpOnly; Secure; SameSite=Lax
+  A-->>B: 200 {user} + Set-Cookie rt_session=… (HttpOnly, Secure, SameSite=Lax)
   B->>P: GET /student (navigation, cookie attached)
 ```
 
@@ -52,7 +52,7 @@ sequenceDiagram
   A-->>W: 200 {user, role}  (or 401 → redirect /login)
   W->>A: GET /api/v1/lessons/rbe (Cookie forwarded)
   A-->>W: 200 snapshot (answers stripped)
-  W-->>B: rendered HTML; later client fetches hit /api/* on the same origin
+  W-->>B: rendered HTML — later client fetches hit /api/* on the same origin
 ```
 
 ## Options considered
