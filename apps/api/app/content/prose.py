@@ -1,4 +1,5 @@
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,11 @@ from jsonschema import Draft202012Validator, FormatChecker
 def _candidates() -> list[Path]:
     resolved = Path(__file__).resolve()
     candidates = []
+    override = os.environ.get("PROSE_SCHEMA_PATH")
+    if (
+        override
+    ):  # dev compose: the api bind mount hides the image copy, so point at the mounted package
+        candidates.append(Path(override))
     if len(resolved.parents) > 4:
         candidates.append(resolved.parents[4] / "packages/schemas/prose-doc.schema.json")
     candidates.append(resolved.parents[1] / "schemas/prose-doc.schema.json")
