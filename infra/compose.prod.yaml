@@ -1,0 +1,138 @@
+# What this file does: defines the production (and test-VM) stack for `docker compose`
+#   (ADR-0005): Postgres, the packaged `api` (uvicorn, no reload, no bind-mounted source),
+#   the packaged `web` (SvelteKit adapter-node), Caddy as the single public origin, and
+#   `backup` (nightly encrypted pg_dump to object storage). No `storage` service — prod
+#   points at an external S3-compatible bucket (R2/OCI) via S3_* variables instead of MinIO.
+# Used here and why: same topology as infra/compose.yaml (proxy → web/api → db) so dev and
+#   prod never diverge in shape; images are pulled from GHCR via IMAGE_REPO/IMAGE_TAG, never
+#   built on the host; migrations run as a separate deploy step
+#   (`docker compose run --rm api alembic upgrade head`) before `up -d`, never on container
+#   start, so a failed migration can't half-start the stack; `db` and `proxy` are pinned by
+#   digest (issue #14) since, unlike the app images, their tags aren't chosen by this repo's
+#   own CI.
+# How it fits the project: docs/03-architecture.md §3 (containers) and ADR-0005 (single VM,
+#   Docker Compose, GHCR images, Caddy or Cloudflare Tunnel). The `test` VM runs this exact
+#   file unmodified; only `--env-file` differs.
+# Works with: infra/Caddyfile.prod (proxy routing/TLS), infra/compose.tunnel.yaml (overlay
+#   swapping Caddy TLS for a Cloudflare Tunnel), infra/prod.env.example (the variable
+#   template copied to /opt/rtapps/.env per the runbook), infra/backup (the `backup` image).
+#   Depends on: apps/api/Dockerfile, apps/web/Dockerfile (the images this file runs).
+#   Used by: the deploy workflow (Task 11/12), Makefile's `prod-config` target.
+name: rtapps
+
+services:
+  # Postgres 16, pinned by digest — the only database; data persists on the volume
+  # (or the mounted block volume, via PGDATA_PATH) across restarts and deploys.
+  db:
+    image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${PGDATA_PATH:-pgdata}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    logging: &logging
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  # FastAPI, packaged image only — no source mount, no reload, no migration on start;
+  # migrations are a separate deploy step per ADR-0005.
+  api:
+    image: ${IMAGE_REPO:-ghcr.io/rad-therapy-apps/rtapps}-api:${IMAGE_TAG:-latest}
+    environment:
+      ENV: prod
+      DATABASE_URL: ${DATABASE_URL}
+      SESSION_SECRET: ${SESSION_SECRET}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    # Healthy = the API answers its own /health (which also checks the DB).
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    restart: unless-stopped
+    logging: *logging
+
+  # SvelteKit adapter-node, packaged image only; talks to `api` over the compose network.
+  web:
+    image: ${IMAGE_REPO:-ghcr.io/rad-therapy-apps/rtapps}-web:${IMAGE_TAG:-latest}
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      ORIGIN: ${PUBLIC_ORIGIN}
+      PORT: "3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    restart: unless-stopped
+    logging: *logging
+
+  # Caddy, pinned by digest — the single public origin. TLS or plain-HTTP-behind-tunnel
+  # routing lives in Caddyfile.prod; SITE_ADDRESS picks which. Ports are removed entirely
+  # by infra/compose.tunnel.yaml when running behind Cloudflare Tunnel.
+  proxy:
+    image: caddy:2@sha256:df7f1c2fb114453b951de51a98efc010db1655a92c2e86be6706714e2417a78d
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+      - api
+    restart: unless-stopped
+    logging: *logging
+
+  # Nightly encrypted Postgres backup to object storage (infra/backup); built locally
+  # since there's no separate backup repo to pull from ahead of the first CI run.
+  backup:
+    build: ./backup
+    image: ${IMAGE_REPO:-ghcr.io/rad-therapy-apps/rtapps}-backup:${IMAGE_TAG:-latest}
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      BACKUP_BUCKET: ${BACKUP_BUCKET}
+      BACKUP_AGE_RECIPIENT: ${BACKUP_AGE_RECIPIENT}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_HOUR_UTC: ${BACKUP_HOUR_UTC:-03}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *logging
+
+# Named volumes: database files and Caddy's certificate/config state.
+volumes:
+  pgdata:
+  caddy-data:
+  caddy-config:
