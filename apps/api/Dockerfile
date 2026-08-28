@@ -13,6 +13,7 @@ COPY apps/api/app ./app
 COPY packages/schemas/prose-doc.schema.json /app/app/schemas/prose-doc.schema.json
 COPY apps/api/alembic.ini ./
 COPY apps/api/alembic ./alembic
+COPY apps/api/seed ./seed
 ENV PATH="/app/.venv/bin:$PATH"
 USER app
 EXPOSE 8000

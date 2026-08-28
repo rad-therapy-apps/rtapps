@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/compose.yaml --env-file .env
 
-.PHONY: dev down logs test test-api test-web test-tools lint lint-api lint-web lint-tools e2e client migrate
+.PHONY: dev down logs test test-api test-web test-tools lint lint-api lint-web lint-tools e2e client migrate seed
 
 dev: .env
 	$(COMPOSE) up --build
@@ -45,3 +45,6 @@ client:
 
 migrate:
 	cd apps/api && uv run alembic revision --autogenerate -m "$(m)"
+
+seed:
+	$(COMPOSE) exec api uv run python -m app.seed
