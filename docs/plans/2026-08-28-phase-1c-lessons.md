@@ -283,7 +283,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-SCHEMA_PATH = Path(__file__).resolve().parents[3] / "packages/schemas/prose-doc.schema.json"
+SCHEMA_PATH = Path(__file__).resolve().parents[4] / "packages/schemas/prose-doc.schema.json"  # repo root
 
 
 class ProseValidationError(ValueError):
@@ -340,8 +340,10 @@ async def test_lesson_tree_round_trip(db: AsyncSession) -> None:
     )
     ContentBlock(page=page, order=1, type="rich_text", body={"type": "doc", "content": [{"type": "paragraph"}]})
     ContentBlock(page=page, order=2, type="knowledge_check", body={"key": "lq_page1_1"}, question=q)
+    db.add_all([subject, lesson])
+    await db.flush()  # ids are assigned at flush time
     activity = Activity(kind="lesson", ref_id=lesson.id, title=lesson.title, subject=subject, lesson=lesson)
-    db.add_all([subject, lesson, activity])
+    db.add(activity)
     await db.flush()
 
     loaded = await db.get(Lesson, lesson.id)
