@@ -10,7 +10,6 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
-    event,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -166,17 +165,3 @@ class ContentVersion(Base):
     )
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     change_note: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-
-def _eager_id(target: Any, args: tuple[Any, ...], kwargs: dict[str, Any]) -> None:
-    """Populate `id` at construction time (not flush time).
-
-    `default=new_id` on the `id` column is a flush-time default, so callers that
-    reference `instance.id` before the row is flushed (e.g. to set an FK on a sibling
-    object) would otherwise see `None`. Generating it eagerly on `__init__` avoids that.
-    """
-    kwargs.setdefault("id", new_id())
-
-
-for _model in (Subject, Lesson, LessonPage, Question, ContentBlock, Activity, ContentVersion):
-    event.listen(_model, "init", _eager_id)

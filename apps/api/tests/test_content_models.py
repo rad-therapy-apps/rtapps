@@ -22,10 +22,12 @@ async def test_lesson_tree_round_trip(db: AsyncSession) -> None:
         body={"type": "doc", "content": [{"type": "paragraph"}]},
     )
     ContentBlock(page=page, order=2, type="knowledge_check", body={"key": "lq_page1_1"}, question=q)
+    db.add_all([subject, lesson])
+    await db.flush()  # ids are assigned at flush time
     activity = Activity(
         kind="lesson", ref_id=lesson.id, title=lesson.title, subject=subject, lesson=lesson
     )
-    db.add_all([subject, lesson, activity])
+    db.add(activity)
     await db.flush()
 
     loaded = await db.get(Lesson, lesson.id)
