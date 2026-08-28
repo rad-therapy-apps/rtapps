@@ -1,3 +1,17 @@
+/**
+ * What this file does: component-level tests for `KnowledgeCheck.svelte` — button
+ * enable/disable, a successful grade, and a failed grade.
+ * Used here and why: vitest `client` browser project (real Chromium via
+ * `@vitest/browser-playwright`) so `page.getByRole`/`bind:group` radio behaviour is exercised
+ * for real, not simulated; the `post` prop is replaced with a `vi.fn` fake so no real network
+ * call happens and the exact request body can be asserted.
+ * How it fits the project: covers the client half of ADR-0004's item-grading call
+ * (`POST /api/v1/attempts/{attempt_id}/items`) and the RFC 9457 `error.title` fallback path
+ * documented in the component itself.
+ * Depends on: `./KnowledgeCheck.svelte`, `./types` (`KnowledgeCheckBlock`), `@rtapps/api-client`
+ * (`ItemGradeOut`), vitest-browser-svelte.
+ * Used by: `pnpm --filter web test` (vitest `client` project, `pr.yml` job `web`).
+ */
 import { page } from 'vitest/browser';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
@@ -9,6 +23,7 @@ import type { components } from '@rtapps/api-client';
 type ItemGradeOut = components['schemas']['ItemGradeOut'];
 type Post = NonNullable<ComponentProps<typeof KnowledgeCheck>['post']>;
 
+// Shared fixture question used by all three tests below.
 const block: KnowledgeCheckBlock = {
 	type: 'knowledge_check',
 	key: 'lq_page2_1',
@@ -23,6 +38,8 @@ const block: KnowledgeCheckBlock = {
 };
 
 describe('KnowledgeCheck', () => {
+	// Scenario: no option selected yet.
+	// Invariant: "Check answer" is disabled until a radio is picked, then enabled.
 	it('disables the button until a radio is chosen', async () => {
 		// `Post` is a generic overloaded signature (openapi-fetch's `ClientMethod`); `vi.fn<Post>`
 		// can't infer a matching concrete implementation, so the fake is built untyped and cast
@@ -40,6 +57,9 @@ describe('KnowledgeCheck', () => {
 		await expect.element(button).not.toBeDisabled();
 	});
 
+	// Scenario: the server grades the choice as correct and returns an explanation.
+	// Invariant: the exact request body is sent, and "Correct" plus the explanation render, with
+	// the button relabelled "Check again".
 	it('grades the chosen option and shows the result', async () => {
 		const result: ItemGradeOut = {
 			item_key: 'lq_page2_1',
@@ -68,6 +88,8 @@ describe('KnowledgeCheck', () => {
 		await expect.element(page.getByRole('button', { name: 'Check again' })).toBeInTheDocument();
 	});
 
+	// Scenario: the API returns an RFC 9457 problem body with a `title` (e.g. attempt already submitted).
+	// Invariant: that `title` is shown as the error message.
 	it('shows an error message when the request fails', async () => {
 		const post: Post = vi.fn(async () => ({
 			data: undefined,
