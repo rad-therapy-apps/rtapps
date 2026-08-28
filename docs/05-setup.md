@@ -36,7 +36,7 @@ cd apps/api && uv run pytest
 If 5433 is taken on your machine, use another host port and set `TEST_DATABASE_URL` to match — CI uses 5433.
 
 ## Seed data
-`make seed` (stack running) creates three accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and imports + publishes the lessons in `apps/api/seed/lessons/`. Safe to re-run; it refuses when `ENV=prod`.
+`make seed` (stack running) creates accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and `student01@example.com` … `student10@example.com` (ten students enrolled in the demo cohort); imports + publishes the lessons in `apps/api/seed/lessons/`; and creates a demo cohort (join code `DEMO42`) owned by `educator@example.com` with the ten `studentNN@example.com` accounts enrolled, plus attempts and rollups. Safe to re-run; it refuses when `ENV=prod`.
 
 ## Migrating legacy lessons
 `tools/migrate-legacy` converts a legacy paged lesson (`div.lesson-page` + `lessonCorrectAnswers`) into an import document:
