@@ -1,0 +1,46 @@
+{
+  "valid": {
+    "paragraph_with_marks": {"type": "doc", "content": [{"type": "paragraph", "content": [
+      {"type": "text", "text": "RBE "}, {"type": "text", "text": "rises", "marks": [{"type": "bold"}]},
+      {"type": "text", "text": " with LET", "marks": [{"type": "italic"}, {"type": "underline"}]},
+      {"type": "text", "text": " D", "marks": [{"type": "code"}]},
+      {"type": "text", "text": "0", "marks": [{"type": "subscript"}]},
+      {"type": "text", "text": "8", "marks": [{"type": "superscript"}]},
+      {"type": "hardBreak"},
+      {"type": "text", "text": "source", "marks": [{"type": "link", "attrs": {"href": "https://example.org/rbe"}}]}
+    ]}]},
+    "heading_levels": {"type": "doc", "content": [
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "H2"}]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "H3"}]},
+      {"type": "heading", "attrs": {"level": 4}, "content": [{"type": "text", "text": "H4"}]}
+    ]},
+    "lists_and_quote": {"type": "doc", "content": [
+      {"type": "bulletList", "content": [{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "one"}]}]}]},
+      {"type": "orderedList", "content": [{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "first"}]}]}]},
+      {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "quoted"}]}]}
+    ]},
+    "table": {"type": "doc", "content": [{"type": "table", "content": [
+      {"type": "tableRow", "content": [{"type": "tableCell", "attrs": {"header": true}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Part"}]}]}]},
+      {"type": "tableRow", "content": [{"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Cathode"}]}]}]}
+    ]}]},
+    "callout_image_math": {"type": "doc", "content": [
+      {"type": "callout", "attrs": {"kind": "key-principle"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "OER = 3.0"}]}]},
+      {"type": "image", "attrs": {"mediaAssetId": "0190f4a6-1c2b-7d3e-8f4a-5b6c7d8e9f01", "alt": "Survival curve"}},
+      {"type": "paragraph", "content": [{"type": "math", "attrs": {"src": "c = \\nu \\lambda"}}]}
+    ]},
+    "empty_paragraph": {"type": "doc", "content": [{"type": "paragraph"}]}
+  },
+  "invalid": {
+    "unknown_node": {"type": "doc", "content": [{"type": "iframe", "attrs": {"src": "https://x"}}]},
+    "unknown_mark": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "x", "marks": [{"type": "style"}]}]}]},
+    "http_link": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "x", "marks": [{"type": "link", "attrs": {"href": "http://insecure"}}]}]}]},
+    "javascript_link": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "x", "marks": [{"type": "link", "attrs": {"href": "javascript:alert(1)"}}]}]}]},
+    "heading_level_1": {"type": "doc", "content": [{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "x"}]}]},
+    "extra_property": {"type": "doc", "content": [{"type": "paragraph", "onclick": "x()", "content": [{"type": "text", "text": "x"}]}]},
+    "image_url_instead_of_asset": {"type": "doc", "content": [{"type": "image", "attrs": {"src": "https://x/y.png", "alt": ""}}]},
+    "empty_doc": {"type": "doc", "content": []},
+    "text_at_block_level": {"type": "doc", "content": [{"type": "text", "text": "loose"}]},
+    "callout_bad_kind": {"type": "doc", "content": [{"type": "callout", "attrs": {"kind": "danger"}, "content": [{"type": "paragraph"}]}]},
+    "not_a_doc": {"type": "paragraph", "content": [{"type": "text", "text": "x"}]}
+  }
+}

@@ -47,7 +47,8 @@ services:
 
   api:
     build:
-      context: ../apps/api
+      context: ..
+      dockerfile: apps/api/Dockerfile
       target: base
     command: ["sh", "/app/entrypoint.dev.sh"]
     working_dir: /app

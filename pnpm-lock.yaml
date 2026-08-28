@@ -74,6 +74,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(svelte@5.56.10(@typescript-eslint/types@8.68.0))(vitest@4.1.11)
 
+  packages/schemas: {}
+
 packages:
 
   '@blazediff/core@1.9.1':
