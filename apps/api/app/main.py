@@ -14,9 +14,9 @@ How it fits the project: this is the `api` container from `docs/03-architecture.
 the top of the request flow (proxy routes `/*` to `web` for pages, `/api/*` to this app for
 data). Interactive docs (`/api/v1/docs`, `/api/v1/openapi.json`) are disabled in prod.
 
-Depends on: `app.health`, `app.analytics.router`, `app.attempts.router`, `app.auth.router`,
-`app.cohorts.router`, `app.config`, `app.content.router`, `app.csrf.OriginCheckMiddleware`,
-`app.db`, `app.errors`.
+Depends on: `app.admin.router`, `app.health`, `app.analytics.router`, `app.attempts.router`,
+`app.auth.router`, `app.cohorts.router`, `app.config`, `app.content.router`,
+`app.csrf.OriginCheckMiddleware`, `app.db`, `app.errors`.
 Used by: `app.openapi_export` (`create_app`); `tests/conftest.py` (`client` fixture);
 served directly by Uvicorn (`app.main:app`) in dev/prod.
 """
@@ -27,6 +27,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import health
+from app.admin.router import router as admin_router
 from app.analytics.router import router as analytics_router
 from app.attempts.router import router as attempts_router
 from app.auth.router import router as auth_router
@@ -77,6 +78,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(attempts_router, prefix=API_PREFIX)
     app.include_router(cohorts_router, prefix=API_PREFIX)
     app.include_router(analytics_router, prefix=API_PREFIX)
+    app.include_router(admin_router, prefix=API_PREFIX)
     return app
 
 
