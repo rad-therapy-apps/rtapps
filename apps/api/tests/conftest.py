@@ -1,6 +1,8 @@
+import json
 import os
 from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import cast
 
 import pytest
@@ -16,6 +18,8 @@ from sqlalchemy.ext.asyncio import (
 
 from alembic import command
 from app.config import Settings
+from app.content.importer import LessonImport, import_lesson
+from app.content.models import Lesson
 from app.main import create_app
 
 TEST_DATABASE_URL = os.environ.get(
@@ -108,3 +112,8 @@ async def register(
     )
     assert r.status_code == 201, r.text
     return cast(dict[str, object], r.json())
+
+
+async def seed_lesson(db: AsyncSession, *, publish: bool = True) -> Lesson:
+    doc = json.loads((Path(__file__).parent / "fixtures/lesson_min.json").read_text())
+    return await import_lesson(db, LessonImport.model_validate(doc), publish=publish)
