@@ -20,7 +20,9 @@ router = APIRouter(tags=["attempts"])
 
 
 async def _owned_attempt(db: AsyncSession, attempt_id: uuid.UUID, user: User) -> Attempt:
-    attempt = await db.get(Attempt, attempt_id)
+    # Row lock: serialises concurrent grade/submit calls on the same attempt so the
+    # idempotency check and the item upsert cannot race (released at commit).
+    attempt = await db.get(Attempt, attempt_id, with_for_update=True)
     if attempt is None or attempt.user_id != user.id:
         raise Problem(404, "Attempt not found")
     return attempt
@@ -99,6 +101,8 @@ async def submit_attempt(
         if attempt.idempotency_key == idempotency_key:
             return attempt
         raise Problem(409, "Attempt already submitted")
+    if attempt.status != "in_progress":
+        raise Problem(409, f"Attempt is {attempt.status}")
     version = await db.get(ContentVersion, attempt.content_version_id)
     assert version is not None
     checks = knowledge_checks(version.snapshot)

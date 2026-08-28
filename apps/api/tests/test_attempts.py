@@ -5,6 +5,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.attempts.models import Attempt
 from app.content.models import Activity
 from tests.conftest import register, seed_lesson
 
@@ -125,3 +126,24 @@ async def test_unpublished_activity_cannot_start(client: AsyncClient, db: AsyncS
     activity = await db.scalar(select(Activity).where(Activity.lesson_id == lesson.id))
     assert activity is not None
     assert (await client.post(f"/api/v1/activities/{activity.id}/attempts")).status_code == 404
+
+
+async def test_abandoned_attempt_cannot_be_submitted_or_graded(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    await seed_lesson(db)
+    await register(client)
+    attempt = await _start(client)
+    row = await db.get(Attempt, uuid.UUID(attempt["id"]))
+    assert row is not None
+    row.status = "abandoned"
+    await db.flush()
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k"}
+    )
+    assert r.status_code == 409
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/items",
+        json={"item_key": "lq_page2_1", "response": {"choice": 1}},
+    )
+    assert r.status_code == 409
