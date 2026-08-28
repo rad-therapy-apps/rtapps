@@ -15,6 +15,7 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	],
+	ssr: { noExternal: ['@rtapps/api-client'] },
 	test: {
 		expect: { requireAssertions: true },
 		projects: [

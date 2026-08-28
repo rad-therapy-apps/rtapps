@@ -16,6 +16,7 @@
 	<a href={resolve('/')} class="brand">RTApps</a>
 	<nav>
 		{#if data.user}
+			<a href={resolve('/subjects')}>Subjects</a>
 			<span>{data.user.display_name}</span>
 			<form method="POST" action="/logout" use:enhance>
 				<button type="submit">Sign out</button>

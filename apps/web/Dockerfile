@@ -3,9 +3,13 @@ RUN corepack enable
 WORKDIR /repo
 COPY package.json pnpm-workspace.yaml .npmrc ./
 COPY apps/web/package.json apps/web/
+COPY packages/api-client/package.json packages/api-client/
+COPY packages/schemas/package.json packages/schemas/
 COPY pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --filter web...
 COPY apps/web apps/web
+COPY packages/api-client packages/api-client
+COPY packages/schemas packages/schemas
 RUN pnpm --filter web build && pnpm --filter web --prod deploy /out --legacy
 
 FROM node:24-bookworm-slim AS runtime
