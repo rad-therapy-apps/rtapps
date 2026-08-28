@@ -10,6 +10,25 @@ elements into one `doc`.
 Every function takes a `notes` list it appends human-readable notes to
 (lossy mappings, unsupported elements) — callers inspect it to decide the
 overall conversion `Report` status.
+
+What this file does: the pure HTML-fragment -> ProseMirror-JSON mapper used by
+`convert.py`; every node/mark it can produce is one the closed schema in
+`packages/schemas/prose-doc.schema.json` accepts, so output never needs a second
+validation pass to catch an unknown type.
+
+Used here and why: kept free of file I/O and of `convert.py`'s page/knowledge-check
+concerns so the mapping rules (marks, callouts, lists, tables, the https-only link
+rule, the highlight->bold lossiness) can be unit-tested in isolation
+(`tests/test_html2prose.py`) against small HTML fragments.
+
+How it fits the project: implements the legacy side of ADR-0003 (content as
+ProseMirror JSON) referenced in `docs/03-architecture.md` §5 — the same node/mark set
+the (future) TipTap editor and the `ProseNode.svelte` renderer use.
+
+Works with: `convert.py` (block-level callers), `packages/schemas/prose-doc.schema.json`
+(the schema every produced node must satisfy).
+Depends on: beautifulsoup4 (`NavigableString`, `Tag`).
+Used by: `convert.py`'s `_page_blocks`/`_one_paragraph_doc`/`_explanation_doc`.
 """
 
 from __future__ import annotations
@@ -95,12 +114,19 @@ def _inline_nodes_from(
             elif name in _MARK_TAGS:
                 out.extend(inline_nodes(child, notes, [*marks, {"type": _MARK_TAGS[name]}]))
             elif name == "span" and "highlight" in (child.get("class") or []):
+                # span.highlight -> bold: the schema has no "highlight" mark, so this
+                # is a lossy but readable substitute; flagged so a reviewer can see
+                # where visual emphasis changed meaning.
                 notes.append("highlight→bold")
                 out.extend(inline_nodes(child, notes, [*marks, {"type": "bold"}]))
             elif name == "a" and str(child.get("href", "")).startswith("https://"):
+                # https-only link rule: the schema's `link` mark only allows https
+                # hrefs (ADR-0003 / §5), matching the strict CSP's same policy.
                 link_mark = {"type": "link", "attrs": {"href": child["href"]}}
                 out.extend(inline_nodes(child, notes, [*marks, link_mark]))
             elif name == "a":
+                # Non-https link: dropped to plain text rather than imported as an
+                # invalid mark that would fail schema validation.
                 notes.append("dropped non-https link")
                 out.extend(inline_nodes(child, notes, marks))
             else:
@@ -110,10 +136,12 @@ def _inline_nodes_from(
 
 
 def _paragraph(element: Tag, notes: list[str]) -> dict[str, Any]:
+    """Map a `<p>` (or any inline-context element) to a `paragraph` block."""
     return {"type": "paragraph", "content": strip_edges(inline_nodes(element, notes))}
 
 
 def _heading(element: Tag, level: int, notes: list[str]) -> dict[str, Any]:
+    """Map an `<h2>`/`<h3>`/`<h4>` to a `heading` block at the given level."""
     return {
         "type": "heading",
         "attrs": {"level": level},
@@ -122,6 +150,8 @@ def _heading(element: Tag, level: int, notes: list[str]) -> dict[str, Any]:
 
 
 def _list_block(element: Tag, kind: str, notes: list[str]) -> dict[str, Any]:
+    """Map a `<ul>`/`<ol>`'s direct `<li>` children to `bulletList`/`orderedList`
+    (`kind`), each wrapped as a `listItem` containing one `paragraph`."""
     items = [
         {
             "type": "listItem",
@@ -133,6 +163,7 @@ def _list_block(element: Tag, kind: str, notes: list[str]) -> dict[str, Any]:
 
 
 def _table_block(element: Tag, notes: list[str]) -> dict[str, Any]:
+    """Map a `<table>` to a `table` block; `<th>` cells get `attrs.header: true`."""
     rows = []
     for tr in element.find_all("tr"):
         cells = []
