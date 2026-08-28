@@ -1,6 +1,7 @@
 /** Only accept same-origin relative paths as a redirect target (open-redirect guard). */
 export function safeNext(value: string | null | undefined): string {
-	if (value && value.startsWith('/') && !value.startsWith('//')) return value;
+	// Reject `//host` and `/\host`: browsers normalise the backslash and treat both as protocol-relative.
+	if (value && value.startsWith('/') && !/^\/[/\\]/.test(value)) return value;
 	return '/home';
 }
 
