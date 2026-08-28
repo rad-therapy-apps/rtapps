@@ -3,10 +3,10 @@
 # Used here and why: one entry per ecosystem/directory that actually has a lockfile in
 # this repo — Python deps for the API, the pnpm workspace's JS deps (rooted at `/` since
 # pnpm-workspace.yaml covers apps/* and packages/* from there), the GitHub Actions
-# workflow versions themselves, and the three Dockerfiles' base images (apps/api,
-# apps/web, infra/backup). No entry for tools/migrate-legacy (not part of the deployed
-# system) or infra/compose*.yaml (pinned image tags are managed manually, not via a
-# lockfile).
+# workflow versions themselves, the three Dockerfiles' base images (apps/api, apps/web,
+# infra/backup), and the digest-pinned images in infra/compose.prod.yaml (db, proxy) via
+# the docker-compose ecosystem. No entry for tools/migrate-legacy (not part of the
+# deployed system).
 # How it fits the project: docs/04-conventions.md §7 (versioning/releases) — keeps
 # dependencies from silently drifting between releases.
 # Depends on: this repo's lockfiles (apps/api/uv.lock, pnpm-lock.yaml) and Dockerfiles.
@@ -45,4 +45,8 @@ updates:
   # Base images in infra/backup's Dockerfile (minio/mc build stage, alpine runtime).
   - package-ecosystem: docker
     directory: /infra/backup
+    schedule: { interval: weekly }
+  # Digest-pinned images in infra/compose.prod.yaml (postgres, caddy) — issue #14.
+  - package-ecosystem: docker-compose
+    directory: /infra
     schedule: { interval: weekly }
