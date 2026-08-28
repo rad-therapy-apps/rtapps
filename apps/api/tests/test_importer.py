@@ -68,3 +68,14 @@ async def test_reimport_without_publish_still_replaces_questions(db: AsyncSessio
     assert second.id == first.id and second.status == "draft"
     assert (await db.scalar(select(func.count()).select_from(Question))) == 1  # no orphans
     assert second.pages[1].blocks[1].body == {"key": "lq_page2_renamed"}
+
+
+@pytest.mark.parametrize(
+    "path", sorted((Path(__file__).parents[1] / "seed/lessons").glob("*.json"))
+)
+async def test_seed_lessons_import_and_publish(db: AsyncSession, path: Path) -> None:
+    lesson = await import_lesson(
+        db,
+        LessonImport.model_validate(json.loads(path.read_text())),  # noqa: ASYNC240
+    )
+    assert lesson.status == "published" and len(lesson.pages) >= 7
