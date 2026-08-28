@@ -504,7 +504,7 @@ class ContentVersion(Base):
 ### Task 3: Snapshot, publish, importer
 
 **Files:**
-- Create: `apps/api/app/content/snapshot.py`, `apps/api/app/content/service.py`, `apps/api/app/content/importer.py`, `apps/api/app/content/__main__.py` (thin: `from app.content.importer import main; main()`), `apps/api/tests/test_content_publish.py`, `apps/api/tests/test_importer.py`, `apps/api/tests/fixtures/lesson_min.json`
+- Create: `apps/api/app/content/snapshot.py`, `apps/api/app/content/service.py`, `apps/api/app/content/importer.py` (with an `if __name__ == "__main__": main()` guard so `python -m app.content.importer` works), `apps/api/tests/test_content_publish.py`, `apps/api/tests/test_importer.py`, `apps/api/tests/fixtures/lesson_min.json`
 
 **Interfaces:**
 - Produces: `build_snapshot(db, lesson) -> dict`, `strip_answers(snapshot) -> dict` (pure, deep-copied), `knowledge_checks(snapshot) -> dict[str, dict]` (key → unstripped block), `publish_lesson(db, lesson, author: User | None, change_note: str | None = None) -> ContentVersion`, `import_lesson(db, doc: LessonImport, *, publish: bool = True, author: User | None = None) -> Lesson`, Pydantic `LessonImport`.
