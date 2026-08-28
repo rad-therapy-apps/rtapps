@@ -125,6 +125,15 @@ async def test_student_outside_cohort_is_404(client: AsyncClient, db: AsyncSessi
     await login(client, "e@example.edu")
     r = await client.get(f"/api/v1/cohorts/{ctx['cohort']['id']}/students/{d['user_id']}")
     assert r.status_code == 404
+    # The cohort's own educator is enrolled, but not as a student: same 404.
+    me = (await client.get("/api/v1/auth/me")).json()
+    r = await client.get(f"/api/v1/cohorts/{ctx['cohort']['id']}/students/{me['id']}")
+    assert r.status_code == 404 and r.json()["title"] == "Student not in cohort"
+    # Neither 404 wrote an audit row (the read never happened).
+    reads = (
+        await db.scalars(select(AuditLog).where(AuditLog.action == "read_student_detail"))
+    ).all()
+    assert reads == []
 
 
 async def test_other_educator_403_and_not_audited(client: AsyncClient, db: AsyncSession) -> None:
