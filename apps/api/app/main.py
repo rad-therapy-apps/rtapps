@@ -1,3 +1,25 @@
+"""Application factory and ASGI entry point for the FastAPI API.
+
+What this file does: builds the FastAPI app (`create_app`), wires up the database engine on
+startup/shutdown (`lifespan`), installs the error handlers and the CSRF `Origin`-check
+middleware, and mounts every route group under `/api/v1`; `app` is the module-level
+instance Uvicorn serves.
+
+Used here and why: FastAPI's `lifespan` context manager creates the async engine once per
+process and disposes it cleanly on shutdown, rather than per request; `create_app` takes an
+optional `Settings` so tests can build an app against a test database without touching the
+process-wide cached settings.
+
+How it fits the project: this is the `api` container from `docs/03-architecture.md` §3 —
+the top of the request flow (proxy routes `/*` to `web` for pages, `/api/*` to this app for
+data). Interactive docs (`/api/v1/docs`, `/api/v1/openapi.json`) are disabled in prod.
+
+Depends on: `app.health`, `app.attempts.router`, `app.auth.router`, `app.config`,
+`app.content.router`, `app.csrf.OriginCheckMiddleware`, `app.db`, `app.errors`.
+Used by: `app.openapi_export` (`create_app`); `tests/conftest.py` (`client` fixture);
+served directly by Uvicorn (`app.main:app`) in dev/prod.
+"""
+
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -12,11 +34,14 @@ from app.csrf import OriginCheckMiddleware
 from app.db import get_engine, make_session_factory
 from app.errors import install_error_handlers
 
-API_PREFIX = "/api/v1"
+API_PREFIX = "/api/v1"  # every route group below is mounted under this prefix (URL versioning)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Runs once at process startup/shutdown: create the async engine and session factory
+    # here (not at import time) so each app instance (including per-test apps) gets its own
+    # engine, and dispose the engine on shutdown to close pooled connections cleanly.
     settings: Settings = app.state.settings
     engine = get_engine(settings)
     app.state.engine = engine
@@ -28,8 +53,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
+    # settings defaults to the process-wide cached Settings, but callers (tests,
+    # app/openapi_export.py) can pass their own to point at a different database/env.
     settings = settings or load_settings()
-    docs_enabled = settings.env != "prod"
+    docs_enabled = settings.env != "prod"  # hide interactive docs/schema in production
     app = FastAPI(
         title="RTApps API",
         version="0.2.0",
@@ -38,7 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         docs_url=f"{API_PREFIX}/docs" if docs_enabled else None,
         redoc_url=None,
     )
-    app.state.settings = settings
+    app.state.settings = settings  # read back by app.config.get_settings and lifespan above
     install_error_handlers(app)
     app.add_middleware(OriginCheckMiddleware, settings=settings)
     app.include_router(health.router, prefix=API_PREFIX)
@@ -48,4 +75,4 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-app = create_app()
+app = create_app()  # module-level instance Uvicorn serves (e.g. `uvicorn app.main:app`)

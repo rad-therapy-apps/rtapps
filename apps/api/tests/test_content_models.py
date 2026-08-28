@@ -1,3 +1,19 @@
+"""What this file tests: the SQLAlchemy ORM mapping in `app/content/models.py` — that the
+Subject/Lesson/LessonPage/ContentBlock/Question/Activity tree persists and reloads through
+its relationships with the right ordering, defaults, and cross-links intact.
+
+Used here and why: a real `db` session/transaction (no HTTP layer) — this is a model-layer
+test, checking the ORM mapping itself rather than any route built on top of it.
+
+How it fits the project: protects ADR-0003 (content stored in Postgres as ProseMirror-ish
+JSON trees) — the working-copy tree must round-trip losslessly before it can ever be
+snapshotted for publishing (see `test_content_publish.py`).
+
+Works with: pytest-asyncio, sqlalchemy asyncio.
+Depends on: `db` fixture from `conftest.py`; `app.content.models`.
+Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
+"""
+
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +22,9 @@ from app.content.models import Activity, ContentBlock, Lesson, LessonPage, Quest
 
 
 async def test_lesson_tree_round_trip(db: AsyncSession) -> None:
+    """Build a subject/lesson/page/blocks/question/activity tree via relationships, then
+    reload the lesson by id and check page order, block types, the question back-link, and
+    that new lessons/activities default to draft status with no current version."""
     subject = Subject(slug="radiation-biology", title="Radiation Biology", order=1)
     lesson = Lesson(subject=subject, slug="rbe-and-oer", title="RBE and OER", order=1)
     page = LessonPage(lesson=lesson, order=1, title="Page 1")
