@@ -10,7 +10,19 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
-import { apiFetch, relaySetCookie } from './api';
+import { apiFetch, apiJson, relaySetCookie } from './api';
+
+// Builds a minimal mock RequestEvent: a stubbed fetch, an empty request, and mutable locals
+// (so a test can set `event.locals.requestId` before calling apiFetch/apiJson).
+function makeEvent(overrides: {
+	fetch: (url: string, init: RequestInit) => Promise<Response>;
+}): RequestEvent {
+	return {
+		fetch: overrides.fetch,
+		request: new Request('http://x'),
+		locals: {} as App.Locals
+	} as unknown as RequestEvent;
+}
 
 describe('apiFetch', () => {
 	// Scenario: the bare-fetch overload with an explicit cookie string.
@@ -30,7 +42,8 @@ describe('apiFetch', () => {
 		const fetchMock = vi.fn(async () => new Response('{}', { status: 200 }));
 		const event = {
 			fetch: fetchMock,
-			request: new Request('http://x', { headers: { cookie: 'rt_session=t' } })
+			request: new Request('http://x', { headers: { cookie: 'rt_session=t' } }),
+			locals: { requestId: 'rid-0' }
 		} as unknown as RequestEvent;
 
 		await apiFetch(event, '/auth/logout', { method: 'POST' });
@@ -41,6 +54,26 @@ describe('apiFetch', () => {
 		const headers = new Headers(init.headers);
 		expect(headers.get('cookie')).toBe('rt_session=t');
 		expect(headers.get('origin')).toBe('http://localhost:8080');
+	});
+
+	// Scenario: a request via apiJson, with a per-request correlation id set on locals.
+	// Invariant: x-request-id, content-type and origin are all set, and the body is JSON-encoded.
+	it('forwards the request id on every call and JSON-encodes apiJson bodies', async () => {
+		const calls: { url: string; init: RequestInit }[] = [];
+		const event = makeEvent({
+			fetch: async (url: string, init: RequestInit) => {
+				calls.push({ url, init });
+				return new Response('{}');
+			}
+		});
+		event.locals.requestId = 'rid-1';
+		await apiJson(event, '/cohorts', { name: 'X' });
+		const h = new Headers(calls[0].init.headers);
+		expect(h.get('x-request-id')).toBe('rid-1');
+		expect(h.get('content-type')).toBe('application/json');
+		expect(h.get('origin')).toBe('http://localhost:8080');
+		expect(calls[0].init.method).toBe('POST');
+		expect(calls[0].init.body).toBe('{"name":"X"}');
 	});
 });
 

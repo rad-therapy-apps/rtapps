@@ -59,10 +59,27 @@ export async function apiFetch(
 	const h = new Headers(headers);
 	const cookie = event.request.headers.get('cookie');
 	if (cookie) h.set('cookie', cookie);
+	// Correlation id set once per request in hooks.server.ts: forwarded so API logs/audit rows
+	// can be tied back to the request that triggered them.
+	h.set('x-request-id', event.locals.requestId);
 	if (!h.has('accept')) h.set('accept', 'application/json');
 	// The API's CSRF check (ADR-0002) allow-lists Origin on non-GET requests only; GET is never mutating by convention.
 	if ((rest.method ?? 'GET').toUpperCase() !== 'GET') h.set('origin', ORIGIN);
 	return event.fetch(`${API_BASE}${path}`, { ...rest, headers: h });
+}
+
+/** JSON request helper for form actions: sets content-type, encodes the body, forwards cookie/origin/request id. */
+export function apiJson(
+	event: RequestEvent,
+	path: string,
+	body?: unknown,
+	method: 'POST' | 'PATCH' | 'DELETE' = 'POST'
+): Promise<Response> {
+	return apiFetch(event, path, {
+		method,
+		headers: { 'content-type': 'application/json' },
+		body: body === undefined ? undefined : JSON.stringify(body)
+	});
 }
 
 type SameSite = 'lax' | 'strict' | 'none';
