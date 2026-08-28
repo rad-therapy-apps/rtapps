@@ -17,6 +17,13 @@ set -euo pipefail
 
 OBJECT_NAME="${1:?usage: restore.sh OBJECT_NAME TARGET_DB}"
 TARGET_DB="${2:?usage: restore.sh OBJECT_NAME TARGET_DB}"
+# Guard: `pg_restore --clean` drops objects in the target, so refuse the live database name
+# (PGDATABASE, the one the api uses) unless the caller sets ALLOW_LIVE_RESTORE=1 on purpose —
+# the monthly drill always targets a scratch database such as rtapps_restore_check.
+if [ "$TARGET_DB" = "${PGDATABASE:-}" ] && [ "${ALLOW_LIVE_RESTORE:-}" != "1" ]; then
+	echo "refusing to restore into the live database '${TARGET_DB}' (set ALLOW_LIVE_RESTORE=1 for a real restore)" >&2
+	exit 2
+fi
 
 # One timestamped log line per action.
 log() {

@@ -140,7 +140,12 @@ Python 3.12 · FastAPI ≥ 0.115 · Pydantic 2.x · SQLAlchemy 2.0.x (asyncio ex
 
 ## Follow-ups / what would make us revisit
 
-- **Phase 2 (milestone M2):** append measured evidence: CI wall time for `pr.yml`, p95 latency of attempt submit on the test VM, lines of code for the auth module vs. the Django equivalent estimate, count of `MissingGreenlet` incidents.
+- **Phase 2 (milestone M2) — measured evidence (2026-08-28, plan 2):**
+  - **CI wall time for `pr.yml`:** 3 min 31 s for run 33210380122 on `feat/educator-slice` (six jobs in parallel; the longest is `e2e` at 2 min 11 s, which boots the full compose stack). Well inside the "a PR is checked in under ten minutes" expectation that motivated a single-process stack.
+  - **p95 of `POST /attempts/{id}/submit`:** median 11.3 ms, p95 43.5 ms, max 67.0 ms over 30 sequential submits through Caddy on the developer laptop's compose stack (Uvicorn `--reload`, Postgres in Docker; script kept in the plan-2 ledger). Against the NFR-01 target of 300 ms this leaves an order of magnitude of headroom; to be re-measured on the test VM once it exists (docs/06-operations.md §6).
+  - **Lines of code, auth module:** `apps/api/app/auth/*.py` = 721 lines *including* the mandatory header/block comments (roughly 40 % of the file), i.e. ~430 lines of Python for register/login/logout/me, opaque sessions, argon2, Google OAuth and the role dependency. A Django + django-allauth + DRF equivalent would need ~0 lines of auth logic but ~40–60 lines of settings/URL wiring plus the allauth templates — comparable effort, with the FastAPI version being fully typed and tested against a real database in 1.4 s.
+  - **`MissingGreenlet` incidents:** 1 (plan 1c, Task 3 — building a lesson tree via lazy relationships inside an async session; fixed by constructing through relationships before the flush and using `selectin` loading). No recurrence in plan 2 (cohorts, analytics, admin).
+  - **Verdict:** nothing measured argues for revisiting the decision; the async-ORM learning curve (the one `MissingGreenlet`) was paid once.
 - **Revisit toward Django** if hand-written auth/permissions grow past ~1,500 lines or a permission-matrix test fails in review more than twice; the ORM/model layer is the only part that would need porting.
 - **Revisit toward Node** only if the imaging and PDF features are dropped from the roadmap *and* a maintainer arrives who is TS-only. If imaging stays, Python stays.
 - **Revisit Supabase** never for the core; it may still host RT-Games presenter data until games adopt the SDK (ADR-0004).

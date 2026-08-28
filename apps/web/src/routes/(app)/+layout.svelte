@@ -32,6 +32,7 @@
 	{/if}
 	{#if data.user.role === 'admin'}
 		<a href={resolve('/(app)/admin/users')}>Admin</a>
+		<a href={resolve('/(app)/admin/audit')}>Audit log</a>
 	{/if}
 </nav>
 

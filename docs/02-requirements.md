@@ -45,7 +45,7 @@ Every functional requirement is a testable "shall" statement. Numbers that are n
 | FR-S-03 | The system shall let a user sign in with Google; a Google identity with a verified email matching an existing account shall link to that account, otherwise a new `student` account is created. | M | 2 | Owner decision: auth | implemented |
 | FR-S-04 | The system shall let a user log out, revoking the current session server-side; a revoked session cookie shall be rejected on the next request. | M | 1 | 03-architecture § sessions | implemented |
 | FR-S-05 | The system shall let a user request a password reset by email; the reset link shall be single-use and expire within 60 min (*target*). | S | 2 | Stakeholder: student | proposed |
-| FR-S-06 | The system shall let a student join a cohort by entering its current join code; a rotated or unknown code shall be rejected with a clear message; joining twice shall be idempotent. | M | 2 | Owner decision: cohorts; BRIDGES §5 identity gap | proposed |
+| FR-S-06 | The system shall let a student join a cohort by entering its current join code; a rotated or unknown code shall be rejected with a clear message; joining twice shall be idempotent. | M | 2 | Owner decision: cohorts; BRIDGES §5 identity gap | implemented |
 | FR-S-07 | The system shall list the 13 subjects and, per subject, its published lessons and activities in author-defined order, showing the student's completion / mastery state next to each. | M | 1 | ARCHITECTURE §3.1 (13 subjects) | implemented |
 | FR-S-08 | The system shall render a published lesson as ordered pages shown one at a time with previous / next controls, a page indicator, and deep-linkable page URLs; rich text shall be rendered from the closed ProseMirror schema without `{@html}`. | M | 1 | Legacy: paged lesson (`lesson-page-N`, 96 pages) | implemented |
 | FR-S-09 | The system shall remember the student's furthest page per lesson and offer to resume there on return. | S | 1 | Stakeholder: student | proposed |
@@ -68,16 +68,16 @@ Every functional requirement is a testable "shall" statement. Numbers that are n
 
 | ID | Requirement | Pri | Phase | Trace | Status |
 |---|---|---|---|---|---|
-| FR-E-01 | The system shall let an educator create a cohort with a name and optional start / end dates; the creator becomes its owner. | M | 2 | Owner decision: cohorts | proposed |
-| FR-E-02 | The system shall generate a join code per cohort and let the owner rotate it; the previous code shall stop working immediately. | M | 2 | Owner decision: cohorts | proposed |
-| FR-E-03 | The system shall show the cohort roster (display name, email, joined date, last activity) and let the owner remove a member. | M | 2 | Stakeholder: educator | proposed |
-| FR-E-04 | The system shall show a cohort overview: per activity, the count of students attempted / passed and mean best percent; per student, activities attempted / passed; highlighting activities and students below a configurable threshold (*target* 70 %). | M | 2 | Stakeholder: educator ("who is struggling") | proposed |
-| FR-E-05 | The system shall show per-student detail within a cohort: every activity result with best / latest percent, attempts, time spent, and per-attempt item responses. | M | 2 | Stakeholder: educator; SYSTEM-OVERVIEW §1 educators | proposed |
+| FR-E-01 | The system shall let an educator create a cohort with a name and optional start / end dates; the creator becomes its owner. | M | 2 | Owner decision: cohorts | implemented |
+| FR-E-02 | The system shall generate a join code per cohort and let the owner rotate it; the previous code shall stop working immediately. | M | 2 | Owner decision: cohorts | implemented |
+| FR-E-03 | The system shall show the cohort roster (display name, email, joined date, last activity) and let the owner remove a member. | M | 2 | Stakeholder: educator | implemented |
+| FR-E-04 | The system shall show a cohort overview: per activity, the count of students attempted / passed and mean best percent; per student, activities attempted / passed; highlighting activities and students below a configurable threshold (*target* 70 %). | M | 2 | Stakeholder: educator ("who is struggling") | implemented |
+| FR-E-05 | The system shall show per-student detail within a cohort: every activity result with best / latest percent, attempts, time spent, and per-attempt item responses. | M | 2 | Stakeholder: educator; SYSTEM-OVERVIEW §1 educators | implemented |
 | FR-E-06 | The system shall show per-activity statistics for a cohort: attempts, pass rate, score distribution, per-item difficulty (percent correct) and the most common wrong answers. | M | 3 | Stakeholder: educator ("which activities work") | proposed |
 | FR-E-07 | The system shall show per-outcome mastery for a cohort and per student: for each outcome code, percent of tagged items answered correctly and number of students below threshold. | M | 3 | BRIDGES §5 outcome vocabularies; 01 Q3 | proposed |
 | FR-E-08 | The system shall export any cohort view as CSV (UTF-8, header row, one row per student-activity or student-outcome) containing no fields beyond those visible on screen. | S | 3 | Stakeholder: educator (grading); NG1 | proposed |
-| FR-E-09 | The system shall restrict every educator read to cohorts the educator owns, enforced in the database query, not only in the UI. | M | 2 | 03-architecture § authorization | proposed |
-| FR-E-10 | The system shall write an `audit_log` row (actor, action, target student / cohort, timestamp, request id) for every educator read of student data and every export. | M | 2 | Assumption A2; risk: student data | proposed |
+| FR-E-09 | The system shall restrict every educator read to cohorts the educator owns, enforced in the database query, not only in the UI. | M | 2 | 03-architecture § authorization | implemented |
+| FR-E-10 | The system shall write an `audit_log` row (actor, action, target student / cohort, timestamp, request id) for every educator read of student data and every export. | M | 2 | Assumption A2; risk: student data | implemented |
 | FR-E-11 | The system shall show educators the same student-facing rendering of any published activity (preview as student) without creating attempts. | S | 3 | Stakeholder: educator | proposed |
 
 ### 2.3 Content author (FR-A)
@@ -103,10 +103,10 @@ Every functional requirement is a testable "shall" statement. Numbers that are n
 
 | ID | Requirement | Pri | Phase | Trace | Status |
 |---|---|---|---|---|---|
-| FR-M-01 | The system shall let an admin list and search users and change a user's role among `student`, `educator`, `admin`; the change shall be audited and take effect on the user's next request. | M | 2 | Owner decision: roles | proposed |
-| FR-M-02 | The system shall let an admin deactivate a user: all sessions revoked, login refused, data retained; and reactivate. | M | 2 | Risk: student data (deactivate / erase) | proposed |
+| FR-M-01 | The system shall let an admin list and search users and change a user's role among `student`, `educator`, `admin`; the change shall be audited and take effect on the user's next request. | M | 2 | Owner decision: roles | implemented |
+| FR-M-02 | The system shall let an admin deactivate a user: all sessions revoked, login refused, data retained; and reactivate. | M | 2 | Risk: student data (deactivate / erase) | implemented |
 | FR-M-03 | The system shall let an admin erase a user: PII replaced with a tombstone (`erased-<id>`), identities and sessions deleted, attempts retained pseudonymously for cohort statistics; the action is audited and irreversible. | M | 2 | Risk: student data; NFR privacy | proposed |
-| FR-M-04 | The system shall let an admin view and filter the audit log by actor, action, target and date range. | M | 2 | FR-E-10 | proposed |
+| FR-M-04 | The system shall let an admin view and filter the audit log by actor, action, target and date range. | M | 2 | FR-E-10 | implemented |
 | FR-M-05 | The system shall let an admin manage the `outcome` list and subject metadata. | S | 3 | FR-A-14 | proposed |
 | FR-M-06 | The system shall seed a fresh instance with an admin, an educator, one cohort, one subject with a published lesson + quiz and 10 fake students with attempts via `make seed`. | M | 1 | 03-architecture § compose (dev) | proposed |
 
@@ -115,7 +115,7 @@ Every functional requirement is a testable "shall" statement. Numbers that are n
 | ID | Requirement | Pri | Phase | Trace | Status |
 |---|---|---|---|---|---|
 | FR-X-01 | The system shall record every scored interaction as an `attempt` (user, activity, `content_version_id`, started / submitted timestamps, status, score / max / percent, passed, duration, source, `client_meta`) with one `attempt_item` per answered item (`item_key`, response JSON, correct, score, time_ms). | M | 1 | SYSTEM-OVERVIEW §6 (integration spine); BRIDGES §5 superset | proposed |
-| FR-X-02 | The system shall maintain an `activity_result` rollup per (user, activity) — best percent, latest attempt, attempt count, first passed at, mastery — updated transactionally on submit. | M | 2 | 03-architecture § data model | proposed |
+| FR-X-02 | The system shall maintain an `activity_result` rollup per (user, activity) — best percent, latest attempt, attempt count, first passed at, mastery — updated transactionally on submit. | M | 2 | 03-architecture § data model | implemented |
 | FR-X-03 | `POST /attempts/{id}/submit` shall honour an `Idempotency-Key` header: a repeated submit with the same key shall return the original result and create no second attempt. | M | 1 | ADR-004; SDK offline queue | proposed |
 | FR-X-04 | The system shall strip answer keys and explanations from activity snapshots served to students before submit, and shall grade only server-side. | M | 1 | Legacy: answers inline in page JS | proposed |
 | FR-X-05 | The system shall serve content to students only from published `content_version` snapshots, never from working-copy rows. | M | 1 | 03-architecture § content versioning | proposed |
