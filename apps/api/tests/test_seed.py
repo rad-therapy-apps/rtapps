@@ -27,7 +27,7 @@ async def test_seed_users_can_log_in(
     await seed(db, settings)
     r = await client.post(
         "/api/v1/auth/login",
-        json={"email": "educator@rtapps.dev", "password": "rtapps-dev-password"},
+        json={"email": "educator@example.com", "password": "rtapps-dev-password"},
     )
     assert r.status_code == 200 and r.json()["role"] == "educator"
 

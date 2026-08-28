@@ -14,9 +14,9 @@ from app.db import get_engine, make_session_factory
 
 SEED_PASSWORD = "rtapps-dev-password"
 SEED_USERS: list[tuple[str, str, UserRole]] = [
-    ("admin@rtapps.dev", "Admin", UserRole.admin),
-    ("educator@rtapps.dev", "Educator", UserRole.educator),
-    ("student@rtapps.dev", "Student", UserRole.student),
+    ("admin@example.com", "Admin", UserRole.admin),
+    ("educator@example.com", "Educator", UserRole.educator),
+    ("student@example.com", "Student", UserRole.student),
 ]
 LESSON_DIR = Path(__file__).resolve().parents[1] / "seed/lessons"
 
