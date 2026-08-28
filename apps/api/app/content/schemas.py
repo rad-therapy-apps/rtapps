@@ -1,6 +1,5 @@
-"""Pydantic response models for `app.content.router` — the OpenAPI-visible shapes the
-
-student-facing content API returns. No request bodies here; every route in that router
+"""What this file does: Pydantic response models for `app.content.router` — the
+OpenAPI-visible shapes the student-facing content API returns. No request bodies here; every route in that router
 is a GET.
 
 Used here and why: plain Pydantic `BaseModel`s (not ORM `from_attributes` models like

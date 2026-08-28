@@ -1,3 +1,19 @@
+# Project/tooling config for the api service.
+#
+# What this file does: declares the package metadata and runtime/dev dependencies (managed
+# by `uv`), then configures ruff (lint/format), mypy (type checking) and pytest.
+#
+# Used here and why: `uv` for dependency management per the toolchain convention; `ruff`
+# for both linting and formatting in one tool; `mypy --strict` so the app's type hints are
+# actually enforced; `pytest-asyncio` auto mode since almost every test/route is async.
+#
+# How it fits the project: this is what `uv sync`, `uv run ruff ...`, `uv run mypy app`,
+# and `uv run pytest` all read; the Dockerfile's `deps` stage runs `uv sync --frozen --no-dev`
+# against this file (plus `uv.lock`) to build the runtime image's virtualenv.
+#
+# Depends on: nothing.
+# Used by: `Dockerfile` (`uv sync`), CI (`.github/workflows/pr.yml`), local dev commands.
+
 [project]
 name = "rtapps-api"
 version = "0.1.0"
@@ -18,6 +34,8 @@ dependencies = [
   "jsonschema>=4.23",
 ]
 
+# Dev-only dependencies (test/lint/type-check tooling); excluded from the runtime image by
+# the Dockerfile's `--no-dev` sync flag.
 [dependency-groups]
 dev = [
   "pytest>=9",
@@ -31,6 +49,8 @@ dev = [
   "pytest-cov>=6",
 ]
 
+# package = false: this is an application, not a library to be built/published — uv manages
+# its virtualenv without trying to build an installable package from it.
 [tool.uv]
 package = false
 
@@ -38,9 +58,13 @@ package = false
 line-length = 100
 target-version = "py312"
 
+# Rule sets: pyflakes/pycodestyle errors, import sorting, pyupgrade, bugbear, async
+# pitfalls, and simplification suggestions, plus ruff's own extra rules.
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC", "SIM", "RUF"]
 
+# Tells bugbear these FastAPI call results are safe as default argument values (they're
+# sentinel markers, not the usual mutable-default footgun it otherwise flags).
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header", "fastapi.Cookie", "fastapi.Body"]
 
@@ -49,7 +73,11 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 
+# asyncio_mode = "auto": async test functions run without needing an explicit
+# @pytest.mark.asyncio on each one.
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+# Coverage limited to the modules with the most business logic (grading, auth); not a
+# repo-wide coverage gate.
 addopts = "--cov=app/grading --cov=app/auth --cov-report=term-missing"

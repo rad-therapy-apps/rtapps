@@ -1,3 +1,25 @@
+"""The `/auth/*` routes: email+password register/login/logout, `/me`, and Google OAuth.
+
+What this file does: `register`/`login` create a session and set the cookie; `logout`
+revokes the session and clears the cookie; `me` returns the caller's own profile;
+`providers` tells the frontend whether Google sign-in is configured; `google/start` and
+`google/callback` are the two legs of the Google OAuth redirect flow.
+
+Used here and why: a FastAPI `APIRouter` mounted under `/auth` by `app.main`; each route
+composes the building blocks from `app.auth.deps` (cookie set/clear, `require_user`),
+`app.auth.sessions` (token issue/revoke), `app.auth.passwords` (hash/verify) and
+`app.auth.google` (the OAuth exchange) rather than duplicating any of that logic.
+
+How it fits the project: this is the route layer of ADR-0002 — the only place sessions are
+created or destroyed; every route that only needs "who is this" instead depends on
+`app.auth.deps.require_user`, not on anything here.
+
+Depends on: `app.auth.deps`, `app.auth.google`, `app.auth.models`, `app.auth.passwords`,
+`app.auth.schemas`, `app.auth.sessions`, `app.config`, `app.db.get_session`, `app.errors`.
+Used by: `app/main.py` mounts this router; `tests/test_auth_routes.py`,
+`tests/test_google.py`.
+"""
+
 import secrets
 
 from fastapi import APIRouter, Depends, Request, Response, status
@@ -43,6 +65,8 @@ async def register(
     try:
         await db.flush()
     except IntegrityError as exc:
+        # Unique violation on email (a race with a concurrent register for the same
+        # address); roll back so the failed insert doesn't poison the session, then 409.
         await db.rollback()
         raise Problem(409, "An account with that email already exists") from exc
     token, _ = await create_session(
@@ -62,6 +86,9 @@ async def login(
     settings: Settings = Depends(get_settings),
 ) -> User:
     user = await user_by_email(db, body.email)
+    # One combined check and one generic error message for "no such user", "no password set
+    # (OAuth-only account)", "wrong password", and "deactivated" — never reveal which case
+    # it was, so a login attempt can't be used to enumerate accounts.
     if (
         user is None
         or user.password_hash is None
@@ -84,6 +111,8 @@ async def logout(
     db: AsyncSession = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ) -> None:
+    # No require_user here on purpose: logging out with no/invalid cookie should still
+    # succeed (clear whatever the browser has) rather than 401.
     token = request.cookies.get(COOKIE)
     if token:
         await revoke_session(db, token)
@@ -103,6 +132,8 @@ async def providers(settings: Settings = Depends(get_settings)) -> dict[str, boo
 
 @router.get("/google/start")
 async def google_start(settings: Settings = Depends(get_settings)) -> Response:
+    # Redirects to Google's consent screen; the CSRF-style `state` value is stashed in a
+    # short-lived cookie scoped to the callback path only, and checked in google_callback.
     url, state = build_start(settings, nonce=secrets.token_urlsafe(16))
     resp = RedirectResponse(url, status_code=302)
     resp.set_cookie(
@@ -130,6 +161,10 @@ async def google_callback(
         raise Problem(400, "Missing code")
     info = await fetch_google_user(settings, code)
     sub, email, name = str(info["sub"]), str(info["email"]), str(info.get("name") or info["email"])
+    # Link-or-create: an existing Identity means "seen this Google account before" (use its
+    # linked user); otherwise fall back to matching by email, and only create a brand-new
+    # user if neither exists — so a Google login on an existing password account links
+    # rather than duplicating the account.
     identity = await db.scalar(
         select(Identity).where(Identity.provider == "google", Identity.subject == sub)
     )
@@ -151,5 +186,5 @@ async def google_callback(
     await db.commit()
     resp = RedirectResponse(f"{settings.public_origin}/home", status_code=302)
     set_session_cookie(resp, token, settings)
-    resp.delete_cookie(STATE_COOKIE, path="/api/v1/auth/google")
+    resp.delete_cookie(STATE_COOKIE, path="/api/v1/auth/google")  # one-time use only
     return resp

@@ -1,3 +1,27 @@
+"""Routes for the attempt lifecycle: start, per-item grade, submit, and a student's own results.
+
+What this file does: `start_attempt` opens a new attempt against a published activity's
+current snapshot; `grade_item` grades one knowledge-check response and upserts its
+`AttemptItem`; `submit_attempt` finalises the attempt's score (idempotently, keyed by the
+`Idempotency-Key` header); `my_results` lists the caller's own submitted attempts.
+
+Used here and why: a FastAPI `APIRouter` (mounted without a prefix — paths are
+`/activities/{id}/attempts`, `/attempts/{id}/...`, `/me/results`); `_owned_attempt` is a
+shared helper every mutating route calls first, so "not mine" and "not found" both 404
+identically (never leaking that an attempt id exists for someone else).
+
+How it fits the project: this is the route layer of ADR-0004 — every write here goes
+through the one `attempt`/`attempt_item` schema, graded server-side against the exact
+`content_version` snapshot pinned at `start_attempt` time, never against the live/edited
+lesson.
+
+Depends on: `app.attempts.models`, `app.attempts.schemas`, `app.auth.deps.require_user`,
+`app.auth.models.User`, `app.content.models` (Activity, ContentVersion, Lesson),
+`app.content.snapshot.knowledge_checks`, `app.db.get_session`, `app.errors.Problem`,
+`app.grading.single_choice.grade_single_choice`.
+Used by: `app/main.py` mounts this router; `tests/test_attempts.py`.
+"""
+
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -23,6 +47,8 @@ async def _owned_attempt(db: AsyncSession, attempt_id: uuid.UUID, user: User) ->
     # Row lock: serialises concurrent grade/submit calls on the same attempt so the
     # idempotency check and the item upsert cannot race (released at commit).
     attempt = await db.get(Attempt, attempt_id, with_for_update=True)
+    # Ownership check: a real attempt belonging to someone else 404s the same as a missing
+    # one, so this endpoint never confirms another user's attempt id exists.
     if attempt is None or attempt.user_id != user.id:
         raise Problem(404, "Attempt not found")
     return attempt
@@ -39,8 +65,12 @@ async def start_attempt(
     db: AsyncSession = Depends(get_session),
 ) -> Attempt:
     activity = await db.get(Activity, activity_id)
+    # Unpublished (or never-published) activities aren't attemptable; 404 either way rather
+    # than distinguishing "doesn't exist" from "not published yet".
     if activity is None or activity.current_version_id is None or activity.status != "published":
         raise Problem(404, "Activity not found")
+    # Pin content_version_id now: this is the ADR-0004 guarantee that later edits/republishes
+    # of the lesson can never change what this attempt is graded against.
     attempt = Attempt(
         user_id=user.id,
         activity_id=activity.id,
@@ -62,12 +92,18 @@ async def grade_item(
     attempt = await _owned_attempt(db, attempt_id, user)
     if attempt.status != "in_progress":
         raise Problem(409, "Attempt already submitted")
+    # Read the pinned snapshot (not the live/edited lesson) so grading matches what the
+    # student actually saw, even if the author has since republished.
     version = await db.get(ContentVersion, attempt.content_version_id)
     assert version is not None
     block = knowledge_checks(version.snapshot).get(body.item_key)
     if block is None:
         raise Problem(404, "Unknown item key")
+    # Grading always runs server-side, against the snapshot's stored answer key — the
+    # client only ever sends its chosen response, never the answer.
     result = grade_single_choice(block["body"], body.response)
+    # Upsert on (attempt_id, item_key): re-answering the same question updates the existing
+    # row instead of inserting a duplicate (see the unique constraint on AttemptItem).
     item = next((i for i in attempt.items if i.item_key == body.item_key), None)
     if item is None:
         item = AttemptItem(attempt_id=attempt.id, item_key=body.item_key, response=body.response)
@@ -97,6 +133,9 @@ async def submit_attempt(
     if not idempotency_key:
         raise Problem(400, "Idempotency-Key header is required")
     attempt = await _owned_attempt(db, attempt_id, user)
+    # Idempotent replay: a retried submit with the same key returns the original result
+    # instead of re-grading (protects against double-submit on flaky student wifi); a
+    # different key on an already-submitted attempt is a genuine conflict, not a retry.
     if attempt.status == "submitted":
         if attempt.idempotency_key == idempotency_key:
             return attempt
@@ -105,6 +144,8 @@ async def submit_attempt(
         raise Problem(409, f"Attempt is {attempt.status}")
     version = await db.get(ContentVersion, attempt.content_version_id)
     assert version is not None
+    # Sum only the pinned snapshot's own knowledge checks; an item answered under a
+    # different (older) snapshot key wouldn't match here and is simply excluded.
     checks = knowledge_checks(version.snapshot)
     scored = {i.item_key: i.score or 0.0 for i in attempt.items}
     score = sum(scored.get(key, 0.0) for key in checks)
@@ -130,6 +171,8 @@ async def my_results(
     user: User = Depends(require_user),
     db: AsyncSession = Depends(get_session),
 ) -> list[dict[str, Any]]:
+    # Joined read (not attempt.activity_id alone) so the response can include the
+    # activity's title and lesson slug without a second round trip per row.
     rows = await db.execute(
         select(Attempt, Activity.title, Lesson.slug)
         .join(Activity, Activity.id == Attempt.activity_id)
