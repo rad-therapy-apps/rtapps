@@ -104,8 +104,11 @@ async def deactivate_user(
     db: AsyncSession = Depends(get_session),
 ) -> User:
     target = await _target(db, user_id, actor)
-    if target.deactivated_at is None:
-        target.deactivated_at = datetime.now(UTC)
+    # Already deactivated: nothing changes, so no sessions to revoke and no audit row (a
+    # second "deactivate_user" entry would misrepresent the log).
+    if target.deactivated_at is not None:
+        return target
+    target.deactivated_at = datetime.now(UTC)
     # `resolve_session` already refuses a deactivated user's sessions, so this revoke is
     # belt-and-braces, not the only thing enforcing it.
     revoked = await revoke_all_for_user(db, target.id)

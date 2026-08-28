@@ -89,11 +89,17 @@ async def test_deactivate_revokes_sessions(client: AsyncClient, db: AsyncSession
     gone = (await client.get("/api/v1/admin/users", params={"q": "gone@"})).json()["items"][0]
     r = await client.post(f"/api/v1/admin/users/{gone['id']}/deactivate")
     assert r.status_code == 200 and r.json()["deactivated_at"]
+    first_deactivated_at = r.json()["deactivated_at"]
     assert (await client.post(f"/api/v1/admin/users/{admin_id}/deactivate")).status_code == 400
     r = await client.post(
         "/api/v1/auth/login", json={"email": "gone@example.edu", "password": "password-123"}
     )
     assert r.status_code == 401
+    log = (await client.get("/api/v1/admin/audit-log", params={"action": "deactivate_user"})).json()
+    assert len(log) == 1
+    # Deactivating again is a no-op: same timestamp, still exactly one audit row.
+    again = await client.post(f"/api/v1/admin/users/{gone['id']}/deactivate")
+    assert again.status_code == 200 and again.json()["deactivated_at"] == first_deactivated_at
     log = (await client.get("/api/v1/admin/audit-log", params={"action": "deactivate_user"})).json()
     assert len(log) == 1
 
