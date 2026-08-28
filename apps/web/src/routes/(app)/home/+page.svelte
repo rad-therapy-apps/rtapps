@@ -1,23 +1,26 @@
 <!--
-	What this file does: Signed-in landing page at `(app)/home`. Greets the user and lists their
-	past results in a table.
+	What this file does: Signed-in landing page at `(app)/home`. Greets the user, lists their past
+	results in a table, and (students only) shows their cohorts plus a join-by-code form.
 
-	Used here and why: `resolve()` for the subjects link (`svelte/no-navigation-without-resolve`);
-	Svelte 5 runes (`$props()`); `data.user` is typed non-nullable because the `(app)` layout
-	guard guarantees it by the time this page renders.
+	Used here and why: `use:enhance` on the join form for progressive enhancement; `resolve()` for
+	the subjects link (`svelte/no-navigation-without-resolve`); Svelte 5 runes (`$props()`);
+	`data.user` is typed non-nullable because the `(app)` layout guard guarantees it by the time
+	this page renders.
 
-	How it fits the project: `data.results`/`data.error` come from this route's `load`
-	(`GET /me/results`); this is the page `apps/web/e2e/lesson.e2e.ts` returns to after finishing
+	How it fits the project: `data.results`/`data.error` and `data.cohorts` come from this route's
+	`load` (`GET /me/results`, `GET /cohorts`); the join form posts to the `join` action
+	(`POST /cohorts/join`); this is the page `apps/web/e2e/lesson.e2e.ts` returns to after finishing
 	a lesson, to assert the new result row and score appear.
 
-	Works with: `$app/paths`. Used by: linked from `+layout.svelte` implicitly (post sign-in
-	redirect target) and from the login/register `next` default.
+	Works with: `$app/forms`, `$app/paths`. Used by: linked from `+layout.svelte` implicitly (post
+	sign-in redirect target) and from the login/register `next` default.
 -->
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
 
 <svelte:head>
@@ -28,6 +31,42 @@
 <p>Role: {data.user.role}</p>
 
 <p><a href={resolve('/subjects')}>Browse subjects</a></p>
+
+<!-- Cohorts and the join-by-code form only apply to students. -->
+{#if data.user.role === 'student'}
+	<h2>Your cohorts</h2>
+	{#if data.cohorts.length === 0}
+		<p>You are not in a cohort yet.</p>
+	{:else}
+		<ul>
+			{#each data.cohorts as c (c.id)}
+				<li>{c.name}</li>
+			{/each}
+		</ul>
+	{/if}
+
+	<form method="POST" action="?/join" use:enhance>
+		<label for="code">Join code</label>
+		<input
+			id="code"
+			name="code"
+			required
+			minlength="6"
+			maxlength="12"
+			autocapitalize="characters"
+			value={form?.code ?? ''}
+		/>
+		<button>Join cohort</button>
+	</form>
+
+	<!-- Server-rendered result from the last join attempt: success (polite live region) or error. -->
+	{#if form?.joined}
+		<p aria-live="polite">Joined {form.joined}</p>
+	{/if}
+	{#if form?.error}
+		<p role="alert">{form.error}</p>
+	{/if}
+{/if}
 
 <h2>Your results</h2>
 <!-- Three mutually exclusive states: load error, no results yet, or the results table. -->
