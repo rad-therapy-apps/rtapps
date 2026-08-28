@@ -123,11 +123,11 @@ sequenceDiagram
   A->>D: SELECT user WHERE email
   A->>A: argon2id verify
   A->>D: INSERT session (token_hash, user_id, expires, ua_hash)
-  A-->>W: 204 + Set-Cookie: rt_session=…; HttpOnly; Secure; SameSite=Lax
-  W-->>B: 303 → /subjects (cookie passed through)
+  A-->>W: 200 {user} + Set-Cookie: rt_session=…; HttpOnly; Secure; SameSite=Lax
+  W-->>B: 303 → /home (cookie relayed via event.cookies)
 ```
 
-Google sign-in follows the standard Authlib redirect flow inside the API (`/auth/google/start` → Google → `/auth/google/callback`); the account is linked by verified email through the `identity` table, and the same session cookie is issued.
+Google sign-in follows the standard OIDC authorization-code flow, implemented in the API with `httpx` and a signed state cookie (no Authlib) (`/auth/google/start` → Google → `/auth/google/callback`); the account is linked by verified email through the `identity` table, and the same session cookie is issued.
 
 ### 4.3 Reading a lesson (server-side render)
 
@@ -283,7 +283,7 @@ Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAP
 
 | Group | Endpoints | Who |
 |---|---|---|
-| auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}` | anyone / signed-in |
+| auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/providers`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}` | anyone / signed-in |
 | cohorts | `POST cohorts`, `GET cohorts`, `GET cohorts/{id}`, `POST cohorts/{id}/rotate-code`, `POST cohorts/join {code}`, `GET cohorts/{id}/members` | educator (own), student (join) |
 | content (published) | `GET subjects`, `GET subjects/{slug}`, `GET lessons/{slug}`, `GET activities/{id}` — returns the published snapshot with correct answers stripped | signed-in |
 | attempts | `POST activities/{id}/attempts`, `POST attempts/{id}/items`, `POST attempts/{id}/submit` (accepts `Idempotency-Key`), `GET me/results`, `GET me/attempts/{id}` | owner of the attempt |

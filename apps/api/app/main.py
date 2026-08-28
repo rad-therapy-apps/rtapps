@@ -4,18 +4,19 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import health
-from app.config import get_settings
+from app.auth.router import router as auth_router
+from app.config import Settings, load_settings
+from app.csrf import OriginCheckMiddleware
 from app.db import get_engine, make_session_factory
+from app.errors import install_error_handlers
 
 API_PREFIX = "/api/v1"
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    settings_provider = app.dependency_overrides.get(get_settings, get_settings)
-    settings = settings_provider()
+    settings: Settings = app.state.settings
     engine = get_engine(settings)
-    app.state.settings = settings
     app.state.engine = engine
     app.state.session_factory = make_session_factory(engine)
     try:
@@ -24,15 +25,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await engine.dispose()
 
 
-def create_app() -> FastAPI:
+def create_app(settings: Settings | None = None) -> FastAPI:
+    settings = settings or load_settings()
+    docs_enabled = settings.env != "prod"
     app = FastAPI(
         title="RTApps API",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
-        openapi_url=f"{API_PREFIX}/openapi.json",
-        docs_url=f"{API_PREFIX}/docs",
+        openapi_url=f"{API_PREFIX}/openapi.json" if docs_enabled else None,
+        docs_url=f"{API_PREFIX}/docs" if docs_enabled else None,
+        redoc_url=None,
     )
+    app.state.settings = settings
+    install_error_handlers(app)
+    app.add_middleware(OriginCheckMiddleware, settings=settings)
     app.include_router(health.router, prefix=API_PREFIX)
+    app.include_router(auth_router, prefix=API_PREFIX)
     return app
 
 

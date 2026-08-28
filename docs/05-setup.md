@@ -32,6 +32,14 @@ cd apps/api && uv run pytest
 ```
 If 5433 is taken on your machine, use another host port and set `TEST_DATABASE_URL` to match — CI uses 5433.
 
+## Google sign-in (optional)
+Email + password works out of the box. To enable "Continue with Google":
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials) create an **OAuth client ID** of type *Web application*.
+2. Add the authorised redirect URI `http://localhost:8080/api/v1/auth/google/callback` (use the real origin in production).
+3. Put the client id and secret in `.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, then restart the API: `docker compose -f infra/compose.yaml restart api`.
+
+The login page shows the Google button only when `GET /api/v1/auth/providers` reports `{"google": true}`, i.e. when both variables are set. Accounts are linked by verified e-mail: signing in with Google using the address of an existing password account signs into that account.
+
 ## Layout
 See `docs/03-architecture.md` §9. Short version: `apps/api` (FastAPI), `apps/web` (SvelteKit), `infra/` (compose, Caddy), `docs/`.
 
