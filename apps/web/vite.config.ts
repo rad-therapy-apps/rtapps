@@ -16,6 +16,9 @@ export default defineConfig({
 		})
 	],
 	ssr: { noExternal: ['@rtapps/api-client'] },
+	// Playwright writes reports/traces into this directory while the dev server (bind-mounted in
+	// compose) is running; without this Vite sees new .html files and forces page reloads mid-test.
+	server: { watch: { ignored: ['**/playwright-report/**', '**/test-results/**'] } },
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
