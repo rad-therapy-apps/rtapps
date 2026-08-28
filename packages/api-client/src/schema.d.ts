@@ -198,7 +198,14 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Get Lesson */
+    /**
+     * Get Lesson
+     * @description Serve a lesson's current published snapshot with answer keys stripped.
+     *
+     *     Requires both `status == "published"` and a `current_version_id` to be set — the two
+     *     are kept in sync by `publish_lesson`, but checking both is cheap insurance against a
+     *     lesson that's mid-migration or otherwise inconsistent.
+     */
     get: operations["get_lesson_api_v1_lessons__slug__get"];
     put?: never;
     post?: never;
@@ -232,7 +239,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** List Subjects */
+    /**
+     * List Subjects
+     * @description List subjects that have at least one published lesson, with that lesson count.
+     */
     get: operations["list_subjects_api_v1_subjects_get"];
     put?: never;
     post?: never;
@@ -249,7 +259,12 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Get Subject */
+    /**
+     * Get Subject
+     * @description One subject with its published lessons; 404s if the subject or all its lessons are
+     *
+     *     unpublished, so an unpublished subject is indistinguishable from a missing one.
+     */
     get: operations["get_subject_api_v1_subjects__slug__get"];
     put?: never;
     post?: never;
@@ -327,7 +342,12 @@ export interface components {
         [key: string]: unknown;
       };
     };
-    /** LessonOut */
+    /**
+     * LessonOut
+     * @description Response for `GET /lessons/{slug}`: the pinned version id (what an attempt should
+     *
+     *     reference) plus the answer-stripped snapshot itself.
+     */
     LessonOut: {
       /**
        * Activity Id
@@ -344,7 +364,12 @@ export interface components {
         [key: string]: unknown;
       };
     };
-    /** LessonRefOut */
+    /**
+     * LessonRefOut
+     * @description A lesson reference nested inside `SubjectDetailOut` (no snapshot, just enough to
+     *
+     *     list and link to it).
+     */
     LessonRefOut: {
       /** Order */
       order: number;
@@ -402,7 +427,10 @@ export interface components {
       /** Submitted At */
       submitted_at: string | null;
     };
-    /** SubjectDetailOut */
+    /**
+     * SubjectDetailOut
+     * @description Response for `GET /subjects/{slug}`: one subject with its published lessons.
+     */
     SubjectDetailOut: {
       /** Lessons */
       lessons: components["schemas"]["LessonRefOut"][];
@@ -413,7 +441,10 @@ export interface components {
       /** Title */
       title: string;
     };
-    /** SubjectOut */
+    /**
+     * SubjectOut
+     * @description One row of `GET /subjects`: a subject plus its published-lesson count.
+     */
     SubjectOut: {
       /** Lesson Count */
       lesson_count: number;
