@@ -15,10 +15,8 @@ async def build_snapshot(db: AsyncSession, lesson: Lesson) -> dict[str, Any]:
     if activity is None:
         raise ValueError(f"lesson {lesson.slug} has no activity")
     subject = await db.get(Subject, lesson.subject_id)
-    await db.refresh(lesson, ["pages"])
     pages = []
     for page in lesson.pages:
-        await db.refresh(page, ["blocks"])
         blocks: list[dict[str, Any]] = []
         for block in page.blocks:
             if block.type == "rich_text":

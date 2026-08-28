@@ -57,3 +57,14 @@ def test_duplicate_keys_rejected() -> None:
 async def test_lesson_count_after_import(db: AsyncSession) -> None:
     await import_lesson(db, LessonImport.model_validate(FIXTURE))
     assert (await db.scalar(select(func.count()).select_from(Lesson))) == 1
+
+
+async def test_reimport_without_publish_still_replaces_questions(db: AsyncSession) -> None:
+    first = await import_lesson(db, LessonImport.model_validate(FIXTURE), publish=False)
+    assert (await db.scalar(select(func.count()).select_from(Question))) == 1
+    doc = json.loads(json.dumps(FIXTURE))
+    doc["lesson"]["pages"][1]["blocks"][1]["key"] = "lq_page2_renamed"
+    second = await import_lesson(db, LessonImport.model_validate(doc), publish=False)
+    assert second.id == first.id and second.status == "draft"
+    assert (await db.scalar(select(func.count()).select_from(Question))) == 1  # no orphans
+    assert second.pages[1].blocks[1].body == {"key": "lq_page2_renamed"}

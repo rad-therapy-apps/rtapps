@@ -116,8 +116,9 @@ async def import_lesson(
             title=doc.lesson.title,
             order=doc.lesson.order,
         )
-        db.add(lesson)
-        await db.flush()
+        db.add(
+            lesson
+        )  # not flushed yet: a pending lesson's `pages` initialises without a lazy load
     else:
         lesson.subject_id, lesson.title, lesson.order = (
             subject.id,
@@ -134,13 +135,14 @@ async def import_lesson(
                 await db.delete(q)
         await db.flush()
 
+    # Build the tree through the relationships so the in-memory collections stay accurate
+    # (cascades persist pages, blocks and questions on the next flush).
     for order, page in enumerate(doc.lesson.pages, start=1):
-        lp = LessonPage(lesson_id=lesson.id, order=order, title=page.title)
-        db.add(lp)
-        await db.flush()
+        lp = LessonPage(order=order, title=page.title)
+        lesson.pages.append(lp)
         for border, block in enumerate(page.blocks, start=1):
             if isinstance(block, RichTextImport):
-                db.add(ContentBlock(page_id=lp.id, order=border, type="rich_text", body=block.body))
+                lp.blocks.append(ContentBlock(order=border, type="rich_text", body=block.body))
             else:
                 q = Question(
                     type="single_choice",
@@ -148,15 +150,12 @@ async def import_lesson(
                     body={"options": block.options, "answer": block.answer},
                     explanation=block.explanation,
                 )
-                db.add(q)
-                await db.flush()
-                db.add(
+                lp.blocks.append(
                     ContentBlock(
-                        page_id=lp.id,
                         order=border,
                         type="knowledge_check",
                         body={"key": block.key},
-                        question_id=q.id,
+                        question=q,
                     )
                 )
     await db.flush()
@@ -174,7 +173,6 @@ async def import_lesson(
     else:
         activity.title, activity.subject_id = lesson.title, subject.id
     await db.flush()
-    await db.refresh(lesson, ["pages"])
 
     if publish:
         await publish_lesson(db, lesson, author=author, change_note="import")
