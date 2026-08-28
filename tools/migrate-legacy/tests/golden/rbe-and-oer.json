@@ -1,0 +1,576 @@
+{
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 0
+  },
+  "lesson": {
+    "slug": "rbe-and-oer",
+    "title": "RBE and OER",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Not All Radiation Damages Equally",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two beams delivering the identical physical dose can produce very different biological damage, depending on how densely that energy is deposited along the radiation's track. This density is described by "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Linear Energy Transfer (LET)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 and it's the key variable behind both RBE and OER."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Relative Biologic Effectiveness (RBE)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "RBE",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " compares the effectiveness of a test radiation against a reference radiation (typically 250 kVp X-rays) for producing the same biological effect."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "RBE rises with increasing LET, up to an optimal LET of approximately "
+                        },
+                        {
+                          "type": "text",
+                          "text": "100 keV/\u00b5m",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 the density of ionization at which the average separation between ionization events coincides with the diameter of the DNA double helix (about 2 nm), maximizing the probability of a double-strand break from a single particle track. "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Above",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " that optimal LET, RBE actually decreases again \u2014 radiation becomes so densely ionizing that energy is \"wasted\" beyond what's needed to kill the cell (overkill)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What happens to RBE as LET increases beyond the optimal ~100 keV/\u00b5m point?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "RBE keeps increasing without limit",
+              "RBE actually decreases past that point"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Past the optimal LET, additional ionization density is wasted (overkill) rather than adding more biological damage, so RBE decreases."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Oxygen Effect",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The most potent radiosensitizer known is ordinary molecular "
+                    },
+                    {
+                      "type": "text",
+                      "text": "oxygen",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Its presence is thought to help \"fix\" (make permanent) free-radical damage that would otherwise be reversible \u2014 this is called the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "oxygen fixation hypothesis",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Oxygen must be present "
+                    },
+                    {
+                      "type": "text",
+                      "text": "during",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " irradiation for this sensitizing effect to occur."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The sensitizing effect of oxygen is most significant with "
+                        },
+                        {
+                          "type": "text",
+                          "text": "low-LET",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " radiation, where indirect effects (via free radical formation) dominate over direct effects. As LET increases, the oxygen effect diminishes."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Oxygen Enhancement Ratio (OER)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The magnitude of the oxygen effect is quantified as the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Oxygen Enhancement Ratio (OER)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "OER = (Radiation dose under hypoxic/anoxic conditions) / (Radiation dose under oxic conditions to produce the same biologic effect)",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Worked example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " If D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "0",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " = 300 cGy under hypoxic conditions but only 100 cGy under oxic conditions (same biological endpoint), OER = 300/100 = "
+                        },
+                        {
+                          "type": "text",
+                          "text": "3.0",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For mammalian cells exposed to X-rays and gamma rays, OER is typically "
+                    },
+                    {
+                      "type": "text",
+                      "text": "2.5 to 3.0",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 meaning hypoxic cells are roughly 2.5\u20133 times more resistant to a given dose of low-LET radiation than well-oxygenated cells."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Why Tumor Hypoxia Matters Clinically",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tumors often contain hypoxic regions (areas with reduced oxygen tension) due to poor or chaotic vascularization. Since hypoxic cells are more radioresistant, this is a genuine barrier to tumor control with conventional low-LET radiation."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "As radiation LET increases, the OER decreases toward 1.0 \u2014 meaning high-LET radiation (like neutrons or protons at high LET) is much less affected by whether tissue is oxygenated. This is part of the clinical rationale for exploring high-LET particle therapy against hypoxic tumors."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why might a hypoxic tumor respond better to high-LET radiation than to conventional X-rays?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "High-LET radiation's effectiveness is much less dependent on oxygen (OER closer to 1.0)",
+              "High-LET radiation delivers a lower total physical dose"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since OER drops toward 1.0 as LET increases, high-LET radiation's cell-killing effectiveness is much less dependent on whether the tissue is well-oxygenated \u2014 a real clinical advantage against hypoxic tumor regions."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radiosensitizers and Radioprotectors",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Beyond oxygen, two categories of chemical agents modify radiation response:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Radiosensitizers",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 enhance the cellular response to radiation. Halogenated pyrimidines (like 5-bromo-deoxyuridine) are DNA base analogs taken up by cycling cells during S phase, making DNA more radiation-susceptible. Nitroimidazoles (like misonidazole) are oxygen-mimicking hypoxic cell sensitizers \u2014 diffusing farther than oxygen from blood vessels to reach radioresistant hypoxic tumor cells."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Radioprotectors",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 decrease the cellular response to radiation, protecting normal tissue. Sulfhydryl compounds (like amifostine) act as free-radical scavengers, competing with oxygen for free radicals before they can cause lasting damage."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The effectiveness of a radioprotector is expressed as the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Dose Reduction Factor (DRF)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the ratio of radiation dose needed with the protector present versus without it, for the same biologic effect. Clinically achievable DRFs are typically 2.0 to 2.7."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered RBE and its relationship to LET (including the \"overkill\" effect past optimal LET), the oxygen fixation hypothesis, the OER equation and typical values, why tumor hypoxia is a clinical challenge, and radiosensitizers vs. radioprotectors."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Both RBE and OER connect directly back to the survival curve shape changes covered in the Cell Survival Curves lesson \u2014 LET is the variable driving both."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

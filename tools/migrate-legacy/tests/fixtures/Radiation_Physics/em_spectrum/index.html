@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Electromagnetic Spectrum and X-Ray Production</title>
+<style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; margin: 20px;
+            background-color: #f4f4f4; color: #333; display: flex; flex-direction: column; align-items: center; }
+        .container { background-color: #fff; padding: 25px 35px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%; max-width: 900px; margin-bottom: 30px; }
+        h1, h2, h3, h4 { color: #0056b3; }
+        h1 { text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px; font-size: 2em; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px; color: #003d7a; font-size: 1.6em; }
+        h3 { color: #004085; margin-top: 25px; margin-bottom: 15px; font-size: 1.3em; }
+        h4 { color: #17a2b8; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; font-weight: 600; }
+        p, li { margin-bottom: 12px; font-size: 1.05em; }
+        ul, ol { margin-bottom: 15px; padding-left: 25px; }
+        strong { font-weight: 600; }
+        .highlight { background-color: #e6f7ff; padding: 2px 5px; border-radius: 3px; font-weight: 600; }
+        code { background-color: #e9ecef; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #c7254e; }
+        table.data-table { width: 90%; margin: 15px auto; border-collapse: collapse; }
+        table.data-table th, table.data-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        table.data-table th { background-color: #e9f5ff; color: #0056b3; font-weight: 600; }
+        table.data-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .flip-lesson-container { border: 1px solid #b3d7ff; padding: 20px; border-radius: 8px; background-color: #f0f8ff; margin-bottom: 30px; }
+        .lesson-page { display: none; padding: 15px; border: 1px solid #ddeeff; background-color: #fff; border-radius: 5px; min-height: 400px; }
+        .lesson-page.active { display: block; }
+        .lesson-navigation { text-align: center; margin-top: 20px; }
+        .lesson-navigation button, .lesson-page .check-page-answers {
+            background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px;
+            cursor: pointer; font-size: 1em; margin: 5px 10px; transition: background-color 0.2s; }
+        .lesson-navigation button:hover, .lesson-page .check-page-answers:hover { background-color: #0056b3; }
+        .lesson-navigation button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .page-indicator { font-style: italic; color: #555; margin: 10px 0; }
+        .key-principle { background-color: #e7f3ff; padding: 10px; margin-bottom:10px; border-left: 3px solid #007bff; border-radius: 3px; }
+        .interactive-question-block { background: #f9f9f9; padding: 15px; margin: 20px 0; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .interactive-question-block .question-text { font-weight: bold; margin-bottom: 8px; font-size: 1em; color: #555; }
+        .interactive-question-block label { display: block; margin-left: 0; padding: 8px 12px; border-radius: 5px; cursor: pointer; border: 1px solid transparent; margin-bottom: 5px; }
+        .interactive-question-block input[type="radio"] { margin-right: 10px; vertical-align: middle; }
+        .interactive-question-block label:hover { background-color: #f0f8ff; }
+        .feedback-correct { background-color: #e8f8f0 !important; border-left: 4px solid #2ecc71 !important; }
+        .feedback-incorrect { background-color: #fdedec !important; border-left: 4px solid #e74c3c !important; }
+        .feedback-correct label.correct-option, .feedback-incorrect label.correct-option { font-weight: bold; color: #1E8449; }
+        .feedback-incorrect label.selected-incorrect { color: #A93226; }
+        .explanation { font-size: 0.9em; color: #444; margin-top: 5px; padding-left: 20px; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; font-size: 0.9em; color: #555; }
+
+        .nav-links-header { background-color: #fff; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 50; }
+</style>
+</head>
+<body>
+    <header class="nav-links-header">
+        <div style="max-width:900px;margin:0 auto;padding:12px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
+            <strong style="color:#0056b3;">The Electromagnetic Spectrum &amp; X-Ray Production</strong>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <a href="../index.html" style="font-size:0.8rem;background:#0056b3;color:#fff;font-weight:500;padding:8px 12px;border-radius:6px;text-decoration:none;">&larr; Back to Physics Lessons</a>
+                <a href="../../index.html" style="font-size:0.8rem;background:#64748b;color:#fff;font-weight:500;padding:8px 12px;border-radius:6px;text-decoration:none;">&larr; Back to Main Workbook</a>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>The Electromagnetic Spectrum &amp; X-Ray Production</h1>
+        <div class="flip-lesson-container">
+            <h2>Interactive Lesson</h2>
+            <div id="lesson-page-1" class="lesson-page active">
+                <h3>Page 1: Where X-Rays Sit in the Electromagnetic Spectrum</h3>
+                <p>The electromagnetic spectrum runs from low-energy radio waves up to high-energy gamma rays: <span class="highlight">radio waves &rarr; microwaves &rarr; infrared &rarr; visible light &rarr; ultraviolet &rarr; x-rays &rarr; gamma rays</span>. X-rays and gamma rays sit at the high-energy end, and they're the two forms of electromagnetic radiation used in radiation therapy.</p>
+            </div>
+            <div id="lesson-page-2" class="lesson-page">
+                <h3>Page 2: Ionizing vs. Non-Ionizing Radiation</h3>
+                <p>Everything below X-rays on the spectrum &mdash; radio waves, microwaves, infrared, visible light, and ultraviolet &mdash; does <strong>not</strong> ionize atoms, even though some of it (microwaves, UV) can still transfer energy and cause real biological effects like heating tissue or skin damage.</p>
+                <div class="key-principle">
+                    <p><strong>Ionization</strong> is the removal of an electron from an atom by a photon carrying enough energy to knock it out of orbit. The atom and the ejected electron together are called an <strong>ion pair</strong>. This is exactly what makes X-rays and gamma rays biologically hazardous if misused &mdash; ionized tissue atoms can damage molecules and DNA.</p>
+                </div>
+                <h4>Quick Check!</h4>
+                <div class="interactive-question-block">
+                    <p class="question-text">Ultraviolet light can cause skin damage and is linked to skin cancer. Does it ionize atoms?</p>
+                    <label><input type="radio" name="lq_page2_1" value="A"> Yes</label>
+                    <label><input type="radio" name="lq_page2_1" value="B"> No</label>
+                    <div class="explanation" style="display:none;">B. UV light causes biological damage through a different mechanism (stimulating melanin production, causing cellular damage) without actually ionizing atoms &mdash; it sits just below X-rays on the spectrum.</div>
+                </div>
+                <button class="check-page-answers" onclick="checkPageAnswers(2)">Check Answer</button>
+            </div>
+            <div id="lesson-page-3" class="lesson-page">
+                <h3>Page 3: Wavelength, Frequency, and the Wave Equation</h3>
+                <p><strong>Wavelength (&lambda;)</strong> is the distance between two like points on a wave. <strong>Frequency (&nu;)</strong> is how many waves pass a point each second, measured in Hertz. As frequency goes up, wavelength goes down &mdash; they're inversely related.</p>
+                <div class="key-principle">
+                    <p>All electromagnetic waves travel at the speed of light, c = 3.0 &times; 10<sup>8</sup> m/s, related to frequency and wavelength by: <strong>c = &nu; &times; &lambda;</strong>, so <strong>&nu; = c / &lambda;</strong> and <strong>&lambda; = c / &nu;</strong>.</p>
+                    <p><strong>Worked example:</strong> Find the wavelength of a wave with frequency 4.5 &times; 10<sup>14</sup> Hz.<br>
+                    &lambda; = c / &nu; = (3.0 &times; 10<sup>8</sup> m/s) / (4.5 &times; 10<sup>14</sup> Hz) = <strong>6.67 &times; 10<sup>-7</sup> m</strong></p>
+                </div>
+            </div>
+            <div id="lesson-page-4" class="lesson-page">
+                <h3>Page 4: The Discovery of X-Rays</h3>
+                <p>Wilhelm Roentgen discovered X-rays on November 8, 1895, and published his findings shortly after. Radiologic Technology Week is celebrated the first full week of November every year in his honor.</p>
+            </div>
+            <div id="lesson-page-5" class="lesson-page">
+                <h3>Page 5: Producing X-Rays &mdash; The X-Ray Tube</h3>
+                <p>Producing X-rays requires a source of accelerated electrons, an appropriate target material, a high voltage, and a vacuum inside a sealed tube. X-rays are generated when high-speed electrons collide with a metal target &mdash; the anode.</p>
+                <table class="data-table">
+                    <thead><tr><th>Component</th><th>Function</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Cathode</strong></td><td>Negative side; filament + focusing cup. Thermionic emission "boils off" electrons from the heated filament and focuses the stream toward the anode.</td></tr>
+                        <tr><td><strong>Anode</strong></td><td>Positive side; a rotating tungsten target disk that receives electrons, dissipates heat, and is the source of X-ray photons.</td></tr>
+                        <tr><td><strong>Glass envelope</strong></td><td>Maintains the vacuum around cathode and anode so electrons flow uninterrupted.</td></tr>
+                        <tr><td><strong>Protective housing</strong></td><td>Lead-lined housing controlling radiation leakage and electric shock; insulating oil also aids cooling.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="lesson-page-6" class="lesson-page">
+                <h3>Page 6: Target Interactions &mdash; Where the Energy Goes</h3>
+                <p>When electrons strike the target, the energy splits three ways: <strong>heat (~99%)</strong>, <strong>bremsstrahlung (~0.8%, but 75&ndash;80% of the actual X-ray tube output)</strong>, and <strong>characteristic radiation (~0.2%)</strong>.</p>
+                <div class="key-principle">
+                    <p><strong>Bremsstrahlung ("braking radiation"):</strong> X-rays produced when electrons decelerate near atomic nuclei &mdash; this is the majority of usable tube output.</p>
+                    <p><strong>Characteristic X-rays:</strong> ionization at the target removes an inner-shell electron; an outer-shell electron fills the vacancy and releases its excess energy as a characteristic X-ray, with energy equal to the difference between the two shells' binding energies.</p>
+                </div>
+                <h4>Quick Check!</h4>
+                <div class="interactive-question-block">
+                    <p class="question-text">Which target interaction accounts for the large majority of usable X-ray tube output?</p>
+                    <label><input type="radio" name="lq_page6_1" value="A"> Characteristic radiation</label>
+                    <label><input type="radio" name="lq_page6_1" value="B"> Bremsstrahlung</label>
+                    <div class="explanation" style="display:none;">B. Bremsstrahlung accounts for roughly 75-80% of the actual tube output, even though the overwhelming majority of total energy at the target becomes heat.</div>
+                </div>
+                <button class="check-page-answers" onclick="checkPageAnswers(6)">Check Answer</button>
+            </div>
+            <div id="lesson-page-7" class="lesson-page">
+                <h3>Page 7: Properties of X-Rays</h3>
+                <p>X-rays are highly penetrating, invisible, electrically and magnetically neutral, heterogeneous (polyenergetic &mdash; produced at a range of energies), travel in straight lines at the speed of light while diverging from their source, ionize gases, cause fluorescence in certain materials, cannot be focused by a lens, and exhibit both wave and particle behavior.</p>
+            </div>
+            <div id="lesson-page-8" class="lesson-page">
+                <h3>Page 8: Quantum Theory in Brief</h3>
+                <p>Quantum theory, alongside relativity, forms the basis of modern physics. Planck (1900) proposed energy exists in discrete units (quanta); Einstein (1905) extended this to radiation itself; de Broglie (1924) proposed <span class="highlight">wave-particle duality</span> &mdash; that on the atomic scale, energy and matter can each behave as either particles or waves. Because ionizing radiation acts more like particles when interacting with matter, its energy-carrying units are called <strong>quanta</strong> or <strong>photons</strong> &mdash; which still carry wave properties like frequency and wavelength.</p>
+            </div>
+            <div id="lesson-page-9" class="lesson-page">
+                <h3>Page 9: Beam Quality and Quantity</h3>
+                <p>Two console settings control the X-ray beam:</p>
+                <ul>
+                    <li><strong>Quality</strong> (beam energy) &mdash; controlled by kVp (or MeV for electron energy). Affects the beam's penetrating ability.</li>
+                    <li><strong>Quantity</strong> (number of photons) &mdash; controlled by mAs. Directly proportional to the number of electrons liberated by thermionic emission.</li>
+                </ul>
+                <p>These two settings interact: increasing kVp affects both quality and quantity simultaneously, while mAs primarily affects quantity alone &mdash; a distinction that matters when troubleshooting image quality or dose.</p>
+            </div>
+            <div id="lesson-page-10" class="lesson-page">
+                <h3>Page 10: Wrap-Up</h3>
+                <p>You've covered where X-rays sit on the EM spectrum, ionizing vs. non-ionizing radiation, the wave equation, the history of X-ray discovery, X-ray tube components, target interactions (bremsstrahlung and characteristic radiation), X-ray properties, quantum theory, and beam quality vs. quantity.</p>
+                <p>Next: once X-rays are produced, what happens when they actually reach and interact with tissue &mdash; that's the Photon Interactions lesson.</p>
+            </div>
+
+            <div class="lesson-navigation">
+                <button id="prevLessonPage" onclick="changeLessonPage(-1)" disabled>Previous Page</button>
+                <span class="page-indicator" id="lessonPageIndicator">Page 1 of 10</span>
+                <button id="nextLessonPage" onclick="changeLessonPage(1)">Next Page</button>
+                <button id="startActivityButton" onclick="window.location.href='../index.html'" style="display:none; background-color: #28a745;">Back to Menu</button>
+            </div>
+        </div>
+        <div class="footer">Radiation Therapy E-Workbook &mdash; Radiation Physics</div>
+    </div>
+    <script>
+        let currentLessonPage = 1;
+        const totalLessonPages = 10;
+        const lessonPages = document.querySelectorAll('.lesson-page');
+        const prevLessonButton = document.getElementById('prevLessonPage');
+        const nextLessonButton = document.getElementById('nextLessonPage');
+        const lessonPageIndicator = document.getElementById('lessonPageIndicator');
+        const startActivityButton = document.getElementById('startActivityButton');
+        const lessonCorrectAnswers = {"lq_page2_1": "B", "lq_page6_1": "B"};
+        function displayLessonPage() {
+            lessonPages.forEach((page, index) => page.classList.toggle('active', index === currentLessonPage - 1));
+            prevLessonButton.disabled = currentLessonPage === 1;
+            nextLessonButton.style.display = currentLessonPage === totalLessonPages ? 'none' : 'inline-block';
+            startActivityButton.style.display = currentLessonPage === totalLessonPages ? 'inline-block' : 'none';
+            lessonPageIndicator.textContent = `Page ${currentLessonPage} of ${totalLessonPages}`;
+        }
+        function changeLessonPage(direction) {
+            currentLessonPage += direction;
+            if (currentLessonPage < 1) currentLessonPage = 1;
+            if (currentLessonPage > totalLessonPages) currentLessonPage = totalLessonPages;
+            displayLessonPage();
+        }
+        function checkPageAnswers(pageNumber) {
+            const questionsOnPage = document.querySelectorAll(`#lesson-page-${pageNumber} .interactive-question-block`);
+            questionsOnPage.forEach(block => {
+                const radio = block.querySelector('input[type="radio"]');
+                if (!radio) return;
+                const questionName = radio.name;
+                if (!lessonCorrectAnswers.hasOwnProperty(questionName)) return;
+                const correctAnswerValue = lessonCorrectAnswers[questionName];
+                const selectedRadio = block.querySelector(`input[name="${questionName}"]:checked`);
+                const explanationDiv = block.querySelector('.explanation');
+                block.classList.remove('feedback-correct', 'feedback-incorrect');
+                block.querySelectorAll('label').forEach(label => label.classList.remove('correct-option', 'selected-incorrect'));
+                if (explanationDiv) explanationDiv.style.display = 'none';
+                if (selectedRadio) {
+                    const userAnswer = selectedRadio.value;
+                    const userSelectedLabel = selectedRadio.parentElement;
+                    if (userAnswer === correctAnswerValue) {
+                        block.classList.add('feedback-correct');
+                        if (userSelectedLabel) userSelectedLabel.classList.add('correct-option');
+                    } else {
+                        block.classList.add('feedback-incorrect');
+                        if (userSelectedLabel) userSelectedLabel.classList.add('selected-incorrect');
+                        const correctRadio = block.querySelector(`input[name="${questionName}"][value="${correctAnswerValue}"]`);
+                        if (correctRadio && correctRadio.parentElement) correctRadio.parentElement.classList.add('correct-option');
+                    }
+                } else {
+                    block.classList.add('feedback-incorrect');
+                    const correctRadio = block.querySelector(`input[name="${questionName}"][value="${correctAnswerValue}"]`);
+                    if (correctRadio && correctRadio.parentElement) correctRadio.parentElement.classList.add('correct-option');
+                }
+                if (explanationDiv) explanationDiv.style.display = 'block';
+            });
+        }
+        displayLessonPage();
+    </script>
+</body>
+</html>

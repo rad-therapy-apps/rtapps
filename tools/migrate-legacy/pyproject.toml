@@ -1,0 +1,43 @@
+[project]
+name = "migrate-legacy"
+version = "0.1.0"
+description = "Converts legacy paged-lesson HTML to lesson-import JSON"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.13",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "jsonschema>=4.23",
+    "ruff>=0.16",
+    "mypy>=2.3",
+    "types-beautifulsoup4>=4.12.0.20250516",
+]
+
+[project.scripts]
+migrate-legacy = "migrate_legacy.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/migrate_legacy"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# test_convert.py is copied verbatim from the task brief; don't reflow its lines.
+extend-exclude = ["tests/test_convert.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

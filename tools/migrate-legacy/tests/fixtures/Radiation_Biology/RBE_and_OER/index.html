@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBE and OER</title>
+<style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; margin: 20px;
+            background-color: #f4f4f4; color: #333; display: flex; flex-direction: column; align-items: center; }
+        .container { background-color: #fff; padding: 25px 35px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%; max-width: 900px; margin-bottom: 30px; }
+        h1, h2, h3, h4 { color: #0056b3; }
+        h1 { text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px; font-size: 2em; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px; color: #003d7a; font-size: 1.6em; }
+        h3 { color: #004085; margin-top: 25px; margin-bottom: 15px; font-size: 1.3em; }
+        h4 { color: #17a2b8; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; font-weight: 600; }
+        p, li { margin-bottom: 12px; font-size: 1.05em; }
+        ul, ol { margin-bottom: 15px; padding-left: 25px; }
+        strong { font-weight: 600; }
+        .highlight { background-color: #e6f7ff; padding: 2px 5px; border-radius: 3px; font-weight: 600; }
+        code { background-color: #e9ecef; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #c7254e; }
+        table.data-table { width: 90%; margin: 15px auto; border-collapse: collapse; }
+        table.data-table th, table.data-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        table.data-table th { background-color: #e9f5ff; color: #0056b3; font-weight: 600; }
+        table.data-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .flip-lesson-container { border: 1px solid #b3d7ff; padding: 20px; border-radius: 8px; background-color: #f0f8ff; margin-bottom: 30px; }
+        .lesson-page { display: none; padding: 15px; border: 1px solid #ddeeff; background-color: #fff; border-radius: 5px; min-height: 400px; }
+        .lesson-page.active { display: block; }
+        .lesson-navigation { text-align: center; margin-top: 20px; }
+        .lesson-navigation button, .lesson-page .check-page-answers {
+            background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px;
+            cursor: pointer; font-size: 1em; margin: 5px 10px; transition: background-color 0.2s; }
+        .lesson-navigation button:hover, .lesson-page .check-page-answers:hover { background-color: #0056b3; }
+        .lesson-navigation button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .page-indicator { font-style: italic; color: #555; margin: 10px 0; }
+        .key-principle { background-color: #e7f3ff; padding: 10px; margin-bottom:10px; border-left: 3px solid #007bff; border-radius: 3px; }
+        .interactive-question-block { background: #f9f9f9; padding: 15px; margin: 20px 0; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .interactive-question-block .question-text { font-weight: bold; margin-bottom: 8px; font-size: 1em; color: #555; }
+        .interactive-question-block label { display: block; margin-left: 0; padding: 8px 12px; border-radius: 5px; cursor: pointer; border: 1px solid transparent; margin-bottom: 5px; }
+        .interactive-question-block input[type="radio"] { margin-right: 10px; vertical-align: middle; }
+        .interactive-question-block label:hover { background-color: #f0f8ff; }
+        .feedback-correct { background-color: #e8f8f0 !important; border-left: 4px solid #2ecc71 !important; }
+        .feedback-incorrect { background-color: #fdedec !important; border-left: 4px solid #e74c3c !important; }
+        .feedback-correct label.correct-option, .feedback-incorrect label.correct-option { font-weight: bold; color: #1E8449; }
+        .feedback-incorrect label.selected-incorrect { color: #A93226; }
+        .explanation { font-size: 0.9em; color: #444; margin-top: 5px; padding-left: 20px; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; font-size: 0.9em; color: #555; }
+
+        .nav-links-header { background-color: #fff; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 50; }
+</style>
+</head>
+<body>
+    <header class="nav-links-header">
+        <div style="max-width:900px;margin:0 auto;padding:12px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
+            <strong style="color:#0056b3;">RBE and OER</strong>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <a href="../index.html" style="font-size:0.8rem;background:#0056b3;color:#fff;font-weight:500;padding:8px 12px;border-radius:6px;text-decoration:none;">&larr; Back to Radiation Biology Menu</a>
+                <a href="../../index.html" style="font-size:0.8rem;background:#64748b;color:#fff;font-weight:500;padding:8px 12px;border-radius:6px;text-decoration:none;">&larr; Main Workbook</a>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>RBE and OER</h1>
+        <div class="flip-lesson-container">
+            <h2>Interactive Lesson</h2>
+            <div id="lesson-page-1" class="lesson-page active">
+                <h3>Page 1: Not All Radiation Damages Equally</h3>
+                <p>Two beams delivering the identical physical dose can produce very different biological damage, depending on how densely that energy is deposited along the radiation's track. This density is described by <span class="highlight">Linear Energy Transfer (LET)</span> &mdash; and it's the key variable behind both RBE and OER.</p>
+            </div>
+            <div id="lesson-page-2" class="lesson-page">
+                <h3>Page 2: Relative Biologic Effectiveness (RBE)</h3>
+                <p><strong>RBE</strong> compares the effectiveness of a test radiation against a reference radiation (typically 250 kVp X-rays) for producing the same biological effect.</p>
+                <div class="key-principle">
+                    <p>RBE rises with increasing LET, up to an optimal LET of approximately <strong>100 keV/&micro;m</strong> &mdash; the density of ionization at which the average separation between ionization events coincides with the diameter of the DNA double helix (about 2 nm), maximizing the probability of a double-strand break from a single particle track. <strong>Above</strong> that optimal LET, RBE actually decreases again &mdash; radiation becomes so densely ionizing that energy is "wasted" beyond what's needed to kill the cell (overkill).</p>
+                </div>
+                <h4>Quick Check!</h4>
+                <div class="interactive-question-block">
+                    <p class="question-text">What happens to RBE as LET increases beyond the optimal ~100 keV/&micro;m point?</p>
+                    <label><input type="radio" name="lq_page2_1" value="A"> RBE keeps increasing without limit</label>
+                    <label><input type="radio" name="lq_page2_1" value="B"> RBE actually decreases past that point</label>
+                    <div class="explanation" style="display:none;">B. Past the optimal LET, additional ionization density is wasted (overkill) rather than adding more biological damage, so RBE decreases.</div>
+                </div>
+                <button class="check-page-answers" onclick="checkPageAnswers(2)">Check Answer</button>
+            </div>
+            <div id="lesson-page-3" class="lesson-page">
+                <h3>Page 3: The Oxygen Effect</h3>
+                <p>The most potent radiosensitizer known is ordinary molecular <strong>oxygen</strong>. Its presence is thought to help "fix" (make permanent) free-radical damage that would otherwise be reversible &mdash; this is called the <span class="highlight">oxygen fixation hypothesis</span>. Oxygen must be present <em>during</em> irradiation for this sensitizing effect to occur.</p>
+                <div class="key-principle">
+                    <p>The sensitizing effect of oxygen is most significant with <strong>low-LET</strong> radiation, where indirect effects (via free radical formation) dominate over direct effects. As LET increases, the oxygen effect diminishes.</p>
+                </div>
+            </div>
+            <div id="lesson-page-4" class="lesson-page">
+                <h3>Page 4: The Oxygen Enhancement Ratio (OER)</h3>
+                <p>The magnitude of the oxygen effect is quantified as the <span class="highlight">Oxygen Enhancement Ratio (OER)</span>:</p>
+                <div class="key-principle">
+                    <p><strong>OER = (Radiation dose under hypoxic/anoxic conditions) / (Radiation dose under oxic conditions to produce the same biologic effect)</strong></p>
+                    <p><strong>Worked example:</strong> If D<sub>0</sub> = 300 cGy under hypoxic conditions but only 100 cGy under oxic conditions (same biological endpoint), OER = 300/100 = <strong>3.0</strong>.</p>
+                </div>
+                <p>For mammalian cells exposed to X-rays and gamma rays, OER is typically <strong>2.5 to 3.0</strong> &mdash; meaning hypoxic cells are roughly 2.5&ndash;3 times more resistant to a given dose of low-LET radiation than well-oxygenated cells.</p>
+            </div>
+            <div id="lesson-page-5" class="lesson-page">
+                <h3>Page 5: Why Tumor Hypoxia Matters Clinically</h3>
+                <p>Tumors often contain hypoxic regions (areas with reduced oxygen tension) due to poor or chaotic vascularization. Since hypoxic cells are more radioresistant, this is a genuine barrier to tumor control with conventional low-LET radiation.</p>
+                <div class="key-principle">
+                    <p>As radiation LET increases, the OER decreases toward 1.0 &mdash; meaning high-LET radiation (like neutrons or protons at high LET) is much less affected by whether tissue is oxygenated. This is part of the clinical rationale for exploring high-LET particle therapy against hypoxic tumors.</p>
+                </div>
+                <h4>Quick Check!</h4>
+                <div class="interactive-question-block">
+                    <p class="question-text">Why might a hypoxic tumor respond better to high-LET radiation than to conventional X-rays?</p>
+                    <label><input type="radio" name="lq_page5_1" value="A"> High-LET radiation's effectiveness is much less dependent on oxygen (OER closer to 1.0)</label>
+                    <label><input type="radio" name="lq_page5_1" value="B"> High-LET radiation delivers a lower total physical dose</label>
+                    <div class="explanation" style="display:none;">A. Since OER drops toward 1.0 as LET increases, high-LET radiation's cell-killing effectiveness is much less dependent on whether the tissue is well-oxygenated — a real clinical advantage against hypoxic tumor regions.</div>
+                </div>
+                <button class="check-page-answers" onclick="checkPageAnswers(5)">Check Answer</button>
+            </div>
+            <div id="lesson-page-6" class="lesson-page">
+                <h3>Page 6: Radiosensitizers and Radioprotectors</h3>
+                <p>Beyond oxygen, two categories of chemical agents modify radiation response:</p>
+                <ul>
+                    <li><strong>Radiosensitizers</strong> &mdash; enhance the cellular response to radiation. Halogenated pyrimidines (like 5-bromo-deoxyuridine) are DNA base analogs taken up by cycling cells during S phase, making DNA more radiation-susceptible. Nitroimidazoles (like misonidazole) are oxygen-mimicking hypoxic cell sensitizers &mdash; diffusing farther than oxygen from blood vessels to reach radioresistant hypoxic tumor cells.</li>
+                    <li><strong>Radioprotectors</strong> &mdash; decrease the cellular response to radiation, protecting normal tissue. Sulfhydryl compounds (like amifostine) act as free-radical scavengers, competing with oxygen for free radicals before they can cause lasting damage.</li>
+                </ul>
+                <p>The effectiveness of a radioprotector is expressed as the <strong>Dose Reduction Factor (DRF)</strong> &mdash; the ratio of radiation dose needed with the protector present versus without it, for the same biologic effect. Clinically achievable DRFs are typically 2.0 to 2.7.</p>
+            </div>
+            <div id="lesson-page-7" class="lesson-page">
+                <h3>Page 7: Wrap-Up</h3>
+                <p>You've covered RBE and its relationship to LET (including the "overkill" effect past optimal LET), the oxygen fixation hypothesis, the OER equation and typical values, why tumor hypoxia is a clinical challenge, and radiosensitizers vs. radioprotectors.</p>
+                <p>Both RBE and OER connect directly back to the survival curve shape changes covered in the Cell Survival Curves lesson &mdash; LET is the variable driving both.</p>
+            </div>
+
+            <div class="lesson-navigation">
+                <button id="prevLessonPage" onclick="changeLessonPage(-1)" disabled>Previous Page</button>
+                <span class="page-indicator" id="lessonPageIndicator">Page 1 of 7</span>
+                <button id="nextLessonPage" onclick="changeLessonPage(1)">Next Page</button>
+                <button id="startActivityButton" onclick="window.location.href='../index.html'" style="display:none; background-color: #28a745;">Back to Menu</button>
+            </div>
+        </div>
+        <div class="footer">Radiation Therapy E-Workbook &mdash; Radiation Biology</div>
+    </div>
+    <script>
+        let currentLessonPage = 1;
+        const totalLessonPages = 7;
+        const lessonPages = document.querySelectorAll('.lesson-page');
+        const prevLessonButton = document.getElementById('prevLessonPage');
+        const nextLessonButton = document.getElementById('nextLessonPage');
+        const lessonPageIndicator = document.getElementById('lessonPageIndicator');
+        const startActivityButton = document.getElementById('startActivityButton');
+        const lessonCorrectAnswers = {"lq_page2_1": "B", "lq_page5_1": "A"};
+        function displayLessonPage() {
+            lessonPages.forEach((page, index) => page.classList.toggle('active', index === currentLessonPage - 1));
+            prevLessonButton.disabled = currentLessonPage === 1;
+            nextLessonButton.style.display = currentLessonPage === totalLessonPages ? 'none' : 'inline-block';
+            startActivityButton.style.display = currentLessonPage === totalLessonPages ? 'inline-block' : 'none';
+            lessonPageIndicator.textContent = `Page ${currentLessonPage} of ${totalLessonPages}`;
+        }
+        function changeLessonPage(direction) {
+            currentLessonPage += direction;
+            if (currentLessonPage < 1) currentLessonPage = 1;
+            if (currentLessonPage > totalLessonPages) currentLessonPage = totalLessonPages;
+            displayLessonPage();
+        }
+        function checkPageAnswers(pageNumber) {
+            const questionsOnPage = document.querySelectorAll(`#lesson-page-${pageNumber} .interactive-question-block`);
+            questionsOnPage.forEach(block => {
+                const radio = block.querySelector('input[type="radio"]');
+                if (!radio) return;
+                const questionName = radio.name;
+                if (!lessonCorrectAnswers.hasOwnProperty(questionName)) return;
+                const correctAnswerValue = lessonCorrectAnswers[questionName];
+                const selectedRadio = block.querySelector(`input[name="${questionName}"]:checked`);
+                const explanationDiv = block.querySelector('.explanation');
+                block.classList.remove('feedback-correct', 'feedback-incorrect');
+                block.querySelectorAll('label').forEach(label => label.classList.remove('correct-option', 'selected-incorrect'));
+                if (explanationDiv) explanationDiv.style.display = 'none';
+                if (selectedRadio) {
+                    const userAnswer = selectedRadio.value;
+                    const userSelectedLabel = selectedRadio.parentElement;
+                    if (userAnswer === correctAnswerValue) {
+                        block.classList.add('feedback-correct');
+                        if (userSelectedLabel) userSelectedLabel.classList.add('correct-option');
+                    } else {
+                        block.classList.add('feedback-incorrect');
+                        if (userSelectedLabel) userSelectedLabel.classList.add('selected-incorrect');
+                        const correctRadio = block.querySelector(`input[name="${questionName}"][value="${correctAnswerValue}"]`);
+                        if (correctRadio && correctRadio.parentElement) correctRadio.parentElement.classList.add('correct-option');
+                    }
+                } else {
+                    block.classList.add('feedback-incorrect');
+                    const correctRadio = block.querySelector(`input[name="${questionName}"][value="${correctAnswerValue}"]`);
+                    if (correctRadio && correctRadio.parentElement) correctRadio.parentElement.classList.add('correct-option');
+                }
+                if (explanationDiv) explanationDiv.style.display = 'block';
+            });
+        }
+        displayLessonPage();
+    </script>
+</body>
+</html>
