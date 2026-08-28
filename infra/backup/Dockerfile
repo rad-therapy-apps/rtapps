@@ -13,7 +13,7 @@
 # mc has no Alpine package; pull its binary from the official image instead of installing it.
 FROM minio/mc:RELEASE.2025-08-13T08-35-41Z AS mc
 
-FROM alpine:3.21
+FROM alpine:3.24
 # postgresql16-client: pg_dump/pg_restore/pg_isready; age: backup encryption; bash: scripts
 # use bash-isms; coreutils: GNU `date -u` flags the scripts rely on.
 RUN apk add --no-cache postgresql16-client age bash coreutils
