@@ -9,6 +9,8 @@
 **/.pytest_cache
 **/.mypy_cache
 **/.ruff_cache
+**/*.pyc
+apps/api/tests
 .pnpm-store
 .superpowers
 .agentmaster

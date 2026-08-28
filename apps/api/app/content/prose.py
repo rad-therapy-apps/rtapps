@@ -24,15 +24,17 @@ def _schema_path() -> Path:
     raise FileNotFoundError(f"prose-doc.schema.json not found at {names}")
 
 
+PROSE_SCHEMA: dict[str, Any] = json.loads(_schema_path().read_text())
+
+
 class ProseValidationError(ValueError):
     pass
 
 
 @lru_cache(maxsize=1)
 def _validator() -> Draft202012Validator:
-    schema = json.loads(_schema_path().read_text())
-    Draft202012Validator.check_schema(schema)
-    return Draft202012Validator(schema, format_checker=FormatChecker())
+    Draft202012Validator.check_schema(PROSE_SCHEMA)
+    return Draft202012Validator(PROSE_SCHEMA, format_checker=FormatChecker())
 
 
 def validate_prose(doc: Any) -> None:
