@@ -20,6 +20,10 @@ updates:
   - package-ecosystem: uv
     directory: /apps/api
     schedule: { interval: weekly }
+  # Python dependencies for the legacy migration tool (its own pyproject.toml + uv.lock).
+  - package-ecosystem: uv
+    directory: /tools/migrate-legacy
+    schedule: { interval: weekly }
   # JS/TS dependencies for the whole pnpm workspace (single root lockfile covers
   # apps/web and packages/*, per pnpm-workspace.yaml).
   - package-ecosystem: npm
