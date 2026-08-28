@@ -199,3 +199,7 @@ def main() -> None:
         print("usage: python -m app.content.importer FILE.json [FILE.json …]", file=sys.stderr)
         sys.exit(2)
     asyncio.run(_run([Path(p) for p in sys.argv[1:]]))
+
+
+if __name__ == "__main__":
+    main()
