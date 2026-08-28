@@ -21,7 +21,10 @@ Open http://localhost:8080 — the status page shows web and API health.
 | `make test` | API tests (needs `TEST_DATABASE_URL`, see below) + web unit tests |
 | `make lint` | ruff, mypy, prettier, eslint, svelte-check |
 | `make migrate m="add user table"` | new Alembic revision from model changes |
-| `make e2e` | Playwright against the running stack |
+| `make seed` | dev accounts + the migrated lessons (idempotent; refuses in prod) |
+| `make e2e` | Playwright against the running, seeded stack (`pnpm --filter web exec playwright install chromium` once) |
+| `make client` | regenerate `packages/api-client` from the API's OpenAPI (the `contract` CI job fails if it is stale) |
+| `make test-tools` / `make lint-tools` | the legacy migration tool (`tools/migrate-legacy`) |
 
 ### API tests outside compose
 The API tests need a PostgreSQL. Either use the compose `db` (`TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5432/rtapps_test` after `createdb rtapps_test`), or a throwaway container:
@@ -31,6 +34,17 @@ export TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5433/rtapp
 cd apps/api && uv run pytest
 ```
 If 5433 is taken on your machine, use another host port and set `TEST_DATABASE_URL` to match — CI uses 5433.
+
+## Seed data
+`make seed` (stack running) creates three accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and imports + publishes the lessons in `apps/api/seed/lessons/`. Safe to re-run; it refuses when `ENV=prod`.
+
+## Migrating legacy lessons
+`tools/migrate-legacy` converts a legacy paged lesson (`div.lesson-page` + `lessonCorrectAnswers`) into an import document:
+```bash
+cd tools/migrate-legacy
+uv run migrate-legacy convert /path/to/rtt_e_workbook/Radiation_Biology/RBE_and_OER --out ../../apps/api/seed/lessons --report /tmp/report.json
+```
+Each page is reported as `converted`, `needs-review` (something was mapped lossily or a knowledge check had no answer key) or `unsupported` (not the paged-lesson pattern). Import with `cd apps/api && uv run python -m app.content.importer ../../apps/api/seed/lessons/<slug>.json` or simply `make seed`.
 
 ## Google sign-in (optional)
 Email + password works out of the box. To enable "Continue with Google":

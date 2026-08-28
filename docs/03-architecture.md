@@ -183,7 +183,7 @@ Lesson text is authored in **TipTap** (a ProseMirror editor) and stored as **Pro
 |---|---|
 | Marks | `bold`, `italic`, `underline`, `link` (https only), `code`, `subscript`, `superscript` |
 
-One schema file drives four things: the TipTap extension list in the editor, the API validator (unknown node or mark → 422), the legacy-migration mapper, and the renderer. The renderer, `apps/web/src/lib/prose/ProseNode.svelte`, is a recursive component that switches on node type and emits real Svelte elements. It **never** uses `{@html}`, so there is no HTML-injection surface no matter what an author pastes.
+One schema file drives four things: the TipTap extension list in the editor, the API validator (unknown node or mark → 422), the legacy-migration mapper, and the renderer. The validator (`app/content/prose.py`, `jsonschema`), the mapper (`tools/migrate-legacy`) and the renderer exist as of v0.1.0; the editor is Phase 3. Until then `math` nodes render as their KaTeX source in a `<code class="math">`. The renderer, `apps/web/src/lib/prose/ProseNode.svelte`, is a recursive component that switches on node type and emits real Svelte elements. It **never** uses `{@html}`, so there is no HTML-injection surface no matter what an author pastes.
 
 ---
 
@@ -224,7 +224,7 @@ erDiagram
 
 ### 6.2 Tables
 
-Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; soft-delete only where stated; JSONB columns are validated against a JSON Schema at the API boundary.
+Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; soft-delete only where stated; JSONB columns are validated against a JSON Schema at the API boundary. Status/kind columns are text with CHECK constraints (only `user.role` is a native enum). **Implemented in v0.1.0:** `subject`, `lesson`, `lesson_page`, `content_block` (`rich_text`, `knowledge_check`), `question` (`single_choice`), `activity` (`lesson`), `content_version`, `attempt`, `attempt_item`; the rest arrive with their phases.
 
 **Identity and cohorts**
 
@@ -260,7 +260,7 @@ Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; sof
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `content_version` | `entity_type` ∈ lesson/activity, `entity_id`, `version`, `snapshot` JSONB, `author_id`, `published_at`, `change_note` | Immutable. Students read `snapshot`; authors edit the working copy. |
+| `content_version` | `activity_id`, `version` (unique together, from 1), `snapshot` JSONB, `author_id`, `published_at`, `change_note` | Immutable. Students read `snapshot`; authors edit the working copy. A lesson is versioned through its `activity` row (`kind=lesson`). |
 
 **Results (the integration spine — ADR-0004)**
 
@@ -279,14 +279,14 @@ Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; sof
 
 ## 7. API
 
-Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAPI's OpenAPI and that document is the contract for the front end.
+Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAPI's OpenAPI and that document is the contract for the front end. ✅ marks endpoints implemented as of v0.1.0; `packages/api-client` is generated from `openapi.json` and the `contract` CI job fails when it is stale.
 
 | Group | Endpoints | Who |
 |---|---|---|
 | auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/providers`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}` | anyone / signed-in |
 | cohorts | `POST cohorts`, `GET cohorts`, `GET cohorts/{id}`, `POST cohorts/{id}/rotate-code`, `POST cohorts/join {code}`, `GET cohorts/{id}/members` | educator (own), student (join) |
-| content (published) | `GET subjects`, `GET subjects/{slug}`, `GET lessons/{slug}`, `GET activities/{id}` — returns the published snapshot with correct answers stripped | signed-in |
-| attempts | `POST activities/{id}/attempts`, `POST attempts/{id}/items`, `POST attempts/{id}/submit` (accepts `Idempotency-Key`), `GET me/results`, `GET me/attempts/{id}` | owner of the attempt |
+| content (published) | `GET subjects` ✅, `GET subjects/{slug}` ✅, `GET lessons/{slug}` ✅, `GET activities/{id}` — returns the published snapshot with correct answers stripped | signed-in |
+| attempts | `POST activities/{id}/attempts` ✅, `POST attempts/{id}/items` ✅, `POST attempts/{id}/submit` ✅ (requires `Idempotency-Key`), `GET me/results` ✅, `GET me/attempts/{id}` | owner of the attempt |
 | analytics | `GET cohorts/{id}/overview`, `GET cohorts/{id}/students/{uid}`, `GET cohorts/{id}/activities/{aid}`, `GET cohorts/{id}/outcomes`, `GET cohorts/{id}/export.csv` — each read audited | educator (own cohort), admin |
 | authoring | `POST/PATCH lessons`, `PUT lessons/{id}/pages` (whole tree), `POST/PATCH questions`, `POST/PATCH activities`, `POST/PATCH data-tables`, `POST lessons|activities/{id}/publish`, `GET …/versions`, `POST …/versions/{n}/restore`, `POST media/presign`, `POST media/{id}/confirm` | educator, admin |
 | admin | `GET users`, `PATCH users/{id}/role`, `POST users/{id}/deactivate`, `POST users/{id}/erase`, `GET audit-log` | admin |
@@ -395,7 +395,7 @@ Single VM is expected to serve a program of a few hundred students comfortably. 
 | Migration tool | pytest golden files | Three legacy pages → expected JSON |
 | Contract | CI job | `openapi.json` → regenerated client must match the committed one |
 
-CI (`pr.yml`) runs all of the above on every pull request and is a required check on `main`. Coverage gate: 70 % on `app/grading` and `app/auth` from the first version, rising as the codebase grows.
+CI (`pr.yml`) runs all of the above on every pull request (jobs `api`, `web`, `tools`, `contract`, `images`, `e2e`) and is a required check on `main`. Coverage gate: 70 % on `app/grading` and `app/auth`, enforced on full-suite runs (CI and `make test-api`), rising as the codebase grows.
 
 ---
 
