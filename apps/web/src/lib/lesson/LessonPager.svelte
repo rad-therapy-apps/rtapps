@@ -3,21 +3,25 @@
 	import KnowledgeCheck from './KnowledgeCheck.svelte';
 	import { api } from './api';
 	import { formatScore } from './score';
+	import { lessonSnapshot } from './snapshot';
 	import { resolve } from '$app/paths';
 	import type { components } from '@rtapps/api-client';
-	import type { LessonSnapshot } from './types';
 
 	type LessonOut = components['schemas']['LessonOut'];
 	type AttemptOut = components['schemas']['AttemptOut'];
 	type ItemGradeOut = components['schemas']['ItemGradeOut'];
 
-	const submitPost = api.POST;
+	let {
+		lesson,
+		attempt,
+		post = api.POST
+	}: {
+		lesson: LessonOut;
+		attempt: AttemptOut;
+		post?: typeof api.POST;
+	} = $props();
 
-	let { lesson, attempt }: { lesson: LessonOut; attempt: AttemptOut } = $props();
-
-	// `snapshot` is typed as a plain object by the OpenAPI schema (it's opaque JSON to the API),
-	// so it needs an explicit cast to the lesson content shape the frontend actually renders.
-	const snapshot = lesson.snapshot as unknown as LessonSnapshot;
+	const snapshot = lessonSnapshot(lesson);
 	const pages = snapshot.lesson.pages;
 	const idempotencyKey = crypto.randomUUID();
 
@@ -38,7 +42,7 @@
 		submitting = true;
 		submitError = undefined;
 		try {
-			const res = await submitPost('/api/v1/attempts/{attempt_id}/submit', {
+			const res = await post('/api/v1/attempts/{attempt_id}/submit', {
 				params: { path: { attempt_id: attempt.id } },
 				headers: { 'Idempotency-Key': idempotencyKey }
 			});
@@ -62,18 +66,21 @@
 <p>Page {pageIndex + 1} of {pages.length}</p>
 <h2>{currentPage.title}</h2>
 
-{#each currentPage.blocks as block, i (i)}
-	{#if block.type === 'rich_text'}
-		<ProseDoc doc={block.body} />
-	{:else}
-		<KnowledgeCheck
-			{block}
-			attemptId={attempt.id}
-			onGraded={recordGrade}
-			initial={gradedResults[block.key]}
-		/>
-	{/if}
-{/each}
+{#key pageIndex}
+	{#each currentPage.blocks as block, i (block.type === 'knowledge_check' ? block.key : `rt-${i}`)}
+		{#if block.type === 'rich_text'}
+			<ProseDoc doc={block.body} />
+		{:else}
+			<KnowledgeCheck
+				{block}
+				attemptId={attempt.id}
+				{post}
+				onGraded={recordGrade}
+				initial={gradedResults[block.key]}
+			/>
+		{/if}
+	{/each}
+{/key}
 
 <div class="pager-controls">
 	<button type="button" disabled={pageIndex === 0} onclick={() => pageIndex--}>Previous</button>

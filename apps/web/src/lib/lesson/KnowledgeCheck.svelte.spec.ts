@@ -1,11 +1,13 @@
 import { page } from 'vitest/browser';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { type ComponentProps } from 'svelte';
 import KnowledgeCheck from './KnowledgeCheck.svelte';
 import type { KnowledgeCheckBlock } from './types';
 import type { components } from '@rtapps/api-client';
 
 type ItemGradeOut = components['schemas']['ItemGradeOut'];
+type Post = NonNullable<ComponentProps<typeof KnowledgeCheck>['post']>;
 
 const block: KnowledgeCheckBlock = {
 	type: 'knowledge_check',
@@ -22,8 +24,14 @@ const block: KnowledgeCheckBlock = {
 
 describe('KnowledgeCheck', () => {
 	it('disables the button until a radio is chosen', async () => {
-		const post = vi.fn(async () => ({ data: undefined, error: undefined }));
-		await render(KnowledgeCheck, { block, attemptId: 'attempt-1', post: post as never });
+		// `Post` is a generic overloaded signature (openapi-fetch's `ClientMethod`); `vi.fn<Post>`
+		// can't infer a matching concrete implementation, so the fake is built untyped and cast
+		// once to the real prop type instead of widening the prop itself.
+		const post: Post = vi.fn(async () => ({
+			data: undefined,
+			error: undefined
+		})) as unknown as Post;
+		await render(KnowledgeCheck, { block, attemptId: 'attempt-1', post });
 
 		const button = page.getByRole('button', { name: 'Check answer' });
 		await expect.element(button).toBeDisabled();
@@ -43,9 +51,9 @@ describe('KnowledgeCheck', () => {
 				content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Because overkill.' }] }]
 			}
 		};
-		const post = vi.fn(async () => ({ data: result, error: undefined }));
+		const post: Post = vi.fn(async () => ({ data: result, error: undefined })) as unknown as Post;
 
-		await render(KnowledgeCheck, { block, attemptId: 'attempt-1', post: post as never });
+		await render(KnowledgeCheck, { block, attemptId: 'attempt-1', post });
 
 		await page.getByRole('radio', { name: 'Option B' }).click();
 		await page.getByRole('button', { name: 'Check answer' }).click();
@@ -61,11 +69,11 @@ describe('KnowledgeCheck', () => {
 	});
 
 	it('shows an error message when the request fails', async () => {
-		const post = vi.fn(async () => ({
+		const post: Post = vi.fn(async () => ({
 			data: undefined,
 			error: { title: 'Attempt already submitted' }
-		}));
-		await render(KnowledgeCheck, { block, attemptId: 'attempt-1', post: post as never });
+		})) as unknown as Post;
+		await render(KnowledgeCheck, { block, attemptId: 'attempt-1', post });
 
 		await page.getByRole('radio', { name: 'Option A' }).click();
 		await page.getByRole('button', { name: 'Check answer' }).click();

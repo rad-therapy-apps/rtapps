@@ -1,11 +1,11 @@
 <script lang="ts">
 	import LessonPager from '$lib/lesson/LessonPager.svelte';
-	import type { LessonSnapshot } from '$lib/lesson/types';
+	import { lessonSnapshot } from '$lib/lesson/snapshot';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	const snapshot = data.lesson.snapshot as unknown as LessonSnapshot;
+	const snapshot = lessonSnapshot(data.lesson);
 </script>
 
 <svelte:head>

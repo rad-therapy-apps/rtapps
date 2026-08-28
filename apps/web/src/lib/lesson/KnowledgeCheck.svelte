@@ -70,6 +70,7 @@
 	{#if result}
 		<p aria-live="polite">{result.correct ? 'Correct' : 'Not quite'}</p>
 		{#if result.explanation}
+			<!-- OpenAPI types the explanation as a plain object; it is a validated prose doc (packages/schemas) -->
 			<ProseDoc doc={result.explanation as unknown as ProseDocType} />
 		{/if}
 	{/if}
