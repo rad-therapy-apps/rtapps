@@ -6,6 +6,9 @@ test('register, complete a lesson, answer a question, and see the score', async 
 	const displayName = 'E2E Student';
 
 	await page.goto('/register');
+	// Wait for hydration (module requests to finish) before typing: values entered into the
+	// server-rendered form before Svelte hydrates are reset by the `value={…}` bindings.
+	await page.waitForLoadState('networkidle');
 	await page.getByLabel('Email').fill(email);
 	await page.getByLabel('Display name').fill(displayName);
 	await page.getByLabel('Password').fill(password);
