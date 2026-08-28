@@ -933,6 +933,8 @@ The `refresh(lesson, ["pages"])` after mutation is required because pages/blocks
 
 - [ ] **Step 3: Run, lint, commit** — both new test files green; ruff/mypy clean (the `field_validator` lambdas may need small named functions for mypy — use them). Commit: `feat(api): lesson snapshots, publish, and JSON importer`.
 
+> **Implementation note (as built):** `import_lesson` builds the tree through the relationships (`lesson.pages.append(lp)`, `lp.blocks.append(ContentBlock(..., question=q))`, one flush at the end; a new lesson is not flushed before its pages are appended) so the in-memory collections stay accurate and `build_snapshot` needs no `refresh` calls. Use decorated `@field_validator`/`@classmethod` methods rather than the lambda shorthand shown above.
+
 ---
 
 ### Task 4: Content read API (published, answers stripped)
