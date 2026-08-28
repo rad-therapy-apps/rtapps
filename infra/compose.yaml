@@ -110,7 +110,7 @@ services:
   # named volumes so the Linux container never fights the host's macOS/Windows installs.
   # First start runs `pnpm install` (slow) — hence the 120 s healthcheck start period.
   web:
-    image: node:24-bookworm-slim
+    image: node:26-bookworm-slim
     working_dir: /repo
     command: ["sh", "-c", "corepack enable && pnpm install --frozen-lockfile && pnpm --filter web dev"]
     environment:
