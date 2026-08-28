@@ -162,7 +162,13 @@ docker compose --env-file .env -f compose.prod.yaml exec db dropdb -U rtapps rta
 ```
 
 Record the date and the attempt count in the ops log (a note in this repo's wiki or the ledger).
-A real restore is the same command with the live database name, after `compose stop api web`.
+A real restore is the same command with the live database name **and** `-e ALLOW_LIVE_RESTORE=1` (the script refuses the live database otherwise), after `compose stop api web`:
+
+```bash
+docker compose --env-file .env -f compose.prod.yaml run --rm -e ALLOW_LIVE_RESTORE=1 \
+  -v /path/to/rtapps-backup.key:/run/secrets/age-key:ro --entrypoint restore.sh backup \
+  rtapps-<timestamp>.dump.age rtapps
+```
 
 ## 8. Rollback
 

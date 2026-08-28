@@ -289,7 +289,7 @@ Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAP
 | attempts | `POST activities/{id}/attempts` ✅, `POST attempts/{id}/items` ✅, `POST attempts/{id}/submit` ✅ (requires `Idempotency-Key`), `GET me/results` ✅, `GET me/attempts/{id}` | owner of the attempt |
 | analytics | `GET cohorts/{id}/overview` ✅, `GET cohorts/{id}/students/{uid}` ✅, `GET cohorts/{id}/activities/{aid}`, `GET cohorts/{id}/outcomes`, `GET cohorts/{id}/export.csv` — each read audited | educator (own cohort), admin |
 | authoring | `POST/PATCH lessons`, `PUT lessons/{id}/pages` (whole tree), `POST/PATCH questions`, `POST/PATCH activities`, `POST/PATCH data-tables`, `POST lessons|activities/{id}/publish`, `GET …/versions`, `POST …/versions/{n}/restore`, `POST media/presign`, `POST media/{id}/confirm` | educator, admin |
-| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST users/{id}/erase`, `GET admin/audit-log` | admin |
+| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST users/{id}/erase`, `GET admin/audit-log` ✅ | admin |
 | system | `GET health`, `GET openapi.json` | public |
 
 Conventions:
