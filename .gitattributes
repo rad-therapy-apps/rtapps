@@ -1,4 +1,18 @@
+# What this file does: tells git how to handle line endings and diffs per file type,
+# enforced at commit/checkout time (unlike .editorconfig, which only advises editors).
+# Used here and why: the repo mixes contributors/OSes and a Python half + web half, so
+# text files are normalized to LF on checkout regardless of the checking-out platform's
+# native line ending, preventing CRLF/LF churn in diffs. Binary asset types used by the
+# legacy content being migrated (images, 3-D models, case zips, DICOM files) are marked
+# binary so git never tries to diff or line-ending-normalize them.
+# How it fits the project: docs/04-conventions.md §3; works with .editorconfig (which
+# sets end_of_line = lf for editors) to keep line endings consistent end to end.
+# Depends on: nothing. Used by: `git` itself on every checkout/commit/diff.
+
+# Auto-detect text files and normalize their line endings to LF in the repo.
 * text=auto eol=lf
+# Binary asset types (lesson media, 3-D models, exported bundles, imaging data) — never
+# diff or normalize these as text.
 *.png binary
 *.jpg binary
 *.glb binary

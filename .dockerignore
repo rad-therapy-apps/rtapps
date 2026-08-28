@@ -1,17 +1,39 @@
+# What this file does: excludes paths from the Docker build context sent to the daemon
+# when any image in this repo is built (`docker compose build`, CI's `docker build`).
+# Used here and why: the repo root is the build context for every service's Dockerfile
+# (apps/api, apps/web); without this file, VCS metadata, secrets, caches, and dev-only
+# tooling would all be uploaded to the daemon and could leak into image layers or just
+# slow builds down. Kept as one root-level file since there's a single build context.
+# How it fits the project: docs/03-architecture.md §9 (repo layout) — apps/api and
+# apps/web each have a Dockerfile but no per-app .dockerignore, so this file is what
+# keeps their build contexts lean.
+# Depends on: nothing. Used by: `docker build`/`docker compose build` for every service.
+
+# VCS metadata — never needed inside an image
 .git
+
+# Secrets — must never be baked into an image layer
 .env
 .env.*
+
+# Installed/build artifacts — regenerated inside the image, not copied in
 **/node_modules
 **/.svelte-kit
 **/build
 **/.venv
+
+# Python bytecode and tool caches — machine-specific, safe to regenerate
 **/__pycache__
 **/.pytest_cache
 **/.mypy_cache
 **/.ruff_cache
 **/*.pyc
+
+# Test suite and package-manager store — not needed at runtime
 apps/api/tests
 .pnpm-store
+
+# Repo tooling/docs not needed inside any image
 .superpowers
 .agentmaster
 docs

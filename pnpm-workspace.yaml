@@ -1,3 +1,18 @@
+# What this file does: declares which directories pnpm treats as workspace packages
+# (each with its own package.json), sharing one root lockfile and node_modules.
+# Used here and why: two globs cover every JS/TS package in the repo — `apps/*` (web
+# app) and `packages/*` (schemas, api-client) — so `pnpm --filter <name>` (used
+# throughout the Makefile) can address any of them, and `pnpm install` at the root
+# resolves and dedupes all of their dependencies together.
+# How it fits the project: docs/03-architecture.md §9 (repo layout: apps/, packages/).
+# Works with: Makefile (pnpm --filter targets), .github/dependabot.yml (npm ecosystem
+# rooted at `/`, since this file — not per-package config — is what defines the
+# workspace), .dockerignore (excludes **/node_modules from image build contexts).
+# Depends on: each matched directory having its own package.json with a `name` field
+# (e.g. `web`, `@rtapps/api-client`) that `--filter` matches against.
 packages:
+  # apps/web — the SvelteKit frontend (filtered as `web`).
   - apps/*
+  # packages/schemas, packages/api-client — shared/generated packages (filtered as
+  # `@rtapps/api-client`, etc.).
   - packages/*

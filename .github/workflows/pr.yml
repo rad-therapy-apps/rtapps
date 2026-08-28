@@ -1,23 +1,44 @@
+# What this file does: the pull-request / main CI pipeline — six independent jobs that must all be
+#   green before a PR is merged (docs/04-conventions.md §1): api (lint, types, tests + coverage),
+#   tools (the migration tool), contract (generated API client is up to date), web (lint, types,
+#   unit + component tests), e2e (Playwright against the real compose stack), images (both Docker
+#   images build and boot).
+# Used here and why: GitHub Actions because the repo lives in the rad-therapy-apps org; jobs run in
+#   parallel for speed and each pins its toolchain (uv --locked, pnpm --frozen-lockfile) so CI runs
+#   exactly the committed dependency set. `permissions: contents: read` is least privilege; the
+#   `concurrency` group cancels superseded runs of the same branch.
+# How it fits the project: docs/03-architecture.md §11 (testing strategy) and §10.2 (CI/CD).
+#   Deploy pipelines (main.yml / deploy.yml) arrive with plan 2 (ADR-0005).
+# Works with: apps/api (pyproject addopts, tests), tools/migrate-legacy, Makefile (`make client`),
+#   packages/api-client (contract diff), apps/web (scripts), infra/compose.yaml (e2e),
+#   apps/api/Dockerfile + apps/web/Dockerfile (images). Used by: every PR and every push to main.
 name: pr
 
+# Run on every PR and on main after a merge (so main always carries a fresh green run).
 on:
   pull_request:
   push:
     branches: [main]
 
+# The workflow only reads the repo; nothing here pushes, comments or publishes.
 permissions:
   contents: read
 
+# A new push to the same branch cancels the run still in progress for the old commit.
 concurrency:
   group: pr-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # FastAPI: ruff (lint + format), mypy --strict, pytest against a throwaway Postgres service on
+  # host port 5433 (developer machines use 5434 via TEST_DATABASE_URL). The coverage threshold is
+  # passed here explicitly so partial local runs never fail on coverage.
   api:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/api
+    # Real database for the tests (no mocks — docs/04-conventions.md §4).
     services:
       postgres:
         image: postgres:16
@@ -36,12 +57,13 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      - run: uv sync --locked
+      - run: uv sync --locked # fails if uv.lock is out of date with pyproject.toml
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy app
-      - run: uv run pytest -q --cov-fail-under=70
+      - run: uv run pytest -q --cov-fail-under=70 # gate on app/grading + app/auth coverage
 
+  # Legacy migration tool: same uv toolchain, no database needed (pure HTML → JSON tests).
   tools:
     runs-on: ubuntu-latest
     defaults:
@@ -58,6 +80,8 @@ jobs:
       - run: uv run mypy src
       - run: uv run pytest -q
 
+  # Drift guard: regenerate packages/api-client from the API's OpenAPI document and fail if the
+  # committed client differs — an API change must ship with its regenerated client (`make client`).
   contract:
     runs-on: ubuntu-latest
     steps:
@@ -69,9 +93,11 @@ jobs:
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: cd apps/api && uv sync --locked
-      - run: make client
-      - run: git diff --exit-code -- packages/api-client
+      - run: make client # export openapi.json → openapi-typescript → prettier
+      - run: git diff --exit-code -- packages/api-client # any diff = stale client
 
+  # SvelteKit: prettier + eslint, svelte-check (types), vitest (Node project + Chromium browser
+  # project, hence the Playwright chromium install).
   web:
     runs-on: ubuntu-latest
     steps:
@@ -86,9 +112,11 @@ jobs:
       - run: pnpm --filter web check
       - run: pnpm --filter web test
 
+  # Full-stack flow: boot the dev compose stack (same file as `make dev`), seed it, run the
+  # Playwright test through Caddy on :8080, always upload the report and tear down volumes.
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 25 # the web container installs node_modules on first start (~2–3 min)
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -96,21 +124,26 @@ jobs:
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
-      - run: cp infra/.env.example .env
+      - run: cp infra/.env.example .env # dev-only values; no secrets involved
       - run: docker compose -f infra/compose.yaml --env-file .env up -d --build
       # --wait only on long-running services: the one-shot storage-init container exits 0,
       # which `up --wait` over all services reports as a failure.
       - run: docker compose -f infra/compose.yaml --env-file .env up --wait --wait-timeout 600 proxy web api
-      - run: docker compose -f infra/compose.yaml --env-file .env exec -T api uv run python -m app.seed
+      - run: docker compose -f infra/compose.yaml --env-file .env exec -T api uv run python -m app.seed # lessons + dev accounts
       - run: pnpm --filter web e2e
+      # On failure, container logs are the fastest way to see what the API/web answered.
       - if: failure()
         run: docker compose -f infra/compose.yaml --env-file .env logs --no-color | tail -n 300
+      # The HTML report (with traces on failure) is downloadable from the run page for 7 days.
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: playwright-report, path: apps/web/playwright-report, retention-days: 7 }
       - if: always()
-        run: docker compose -f infra/compose.yaml --env-file .env down -v
+        run: docker compose -f infra/compose.yaml --env-file .env down -v # drop volumes too
 
+  # Production images: build both Dockerfiles from the repo root (so packages/* are in context),
+  # load them locally and smoke-test that they boot — this is what caught a dev-only dependency
+  # being imported at runtime. Runs after api/web so a red unit suite fails fast.
   images:
     runs-on: ubuntu-latest
     needs: [api, web]
@@ -125,7 +158,7 @@ jobs:
           push: false
           load: true
           tags: rtapps-api:ci
-          cache-from: type=gha
+          cache-from: type=gha # reuse layers across runs via the Actions cache
           cache-to: type=gha,mode=max
       - name: Smoke-test api image
         run: docker run --rm rtapps-api:ci python -c "import app.main"
