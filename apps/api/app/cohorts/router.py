@@ -18,6 +18,7 @@ from typing import Any, cast
 
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy import CursorResult, delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.models import Attempt
@@ -59,6 +60,15 @@ async def cohort_out(db: AsyncSession, cohort: Cohort, role: str) -> CohortOut:
         role=role,
         student_count=await _student_count(db, cohort.id),
     )
+
+
+async def _commit_with_code(db: AsyncSession) -> None:
+    """Commit; if two requests raced to the same join code, answer 409 (problem+json) not 500."""
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise Problem(409, "Join code collided with another cohort; please retry") from exc
 
 
 async def _assign_fresh_code(db: AsyncSession, cohort: Cohort) -> None:
@@ -103,7 +113,7 @@ async def create_cohort(
         cohort_id=cohort.id,
         request=request,
     )
-    await db.commit()
+    await _commit_with_code(db)  # unique index is the final guard against a race
     return await cohort_out(db, cohort, "educator")
 
 
@@ -176,7 +186,7 @@ async def rotate_code(
         cohort_id=cohort.id,
         request=request,
     )
-    await db.commit()
+    await _commit_with_code(db)  # unique index is the final guard against a race
     return await cohort_out(db, cohort, "educator")
 
 
