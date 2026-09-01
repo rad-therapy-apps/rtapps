@@ -1,6 +1,6 @@
 <!--
 	What this file does: Subjects index page at `(app)/subjects`. Lists every published subject
-	with its lesson count, linking into each subject's detail page.
+	with its lesson and activity counts, linking into each subject's detail page.
 
 	Used here and why: `resolve()` with a route-params object (`{ slug }`) to build the dynamic
 	`[slug]` href, per the `svelte/no-navigation-without-resolve` rule; Svelte 5 runes
@@ -28,7 +28,7 @@
 	{#each data.subjects as subject (subject.slug)}
 		<li>
 			<a href={resolve('/(app)/subjects/[slug]', { slug: subject.slug })}>{subject.title}</a>
-			({subject.lesson_count} lessons)
+			({subject.lesson_count} lessons, {subject.activity_count} activities)
 		</li>
 	{/each}
 </ul>
