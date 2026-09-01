@@ -38,21 +38,30 @@
 	<title>{snapshot.activity.title} — RTApps</title>
 </svelte:head>
 
-{#if snapshot.activity.kind === 'quiz'}
-	<!-- svelte-check doesn't carry the `snapshot.activity.kind` narrowing above across the
-		 component-prop boundary, so the discriminated union is cast explicitly here; the check
-		 above is what actually guarantees the shape at runtime. -->
-	<QuizPlayer activityId={data.activity.activity_id} snapshot={snapshot as QuizSnapshot} />
-{:else if snapshot.activity.kind === 'flashcards'}
-	<FlashcardPlayer
-		activityId={data.activity.activity_id}
-		snapshot={snapshot as FlashcardsSnapshot}
-	/>
-{:else if snapshot.activity.kind === 'matching'}
-	<MatchingPlayer activityId={data.activity.activity_id} snapshot={snapshot as MatchingSnapshot} />
-{:else if snapshot.activity.kind === 'sequencing'}
-	<SequencingPlayer
-		activityId={data.activity.activity_id}
-		snapshot={snapshot as SequencingSnapshot}
-	/>
-{/if}
+<!-- Keying on the activity id forces the player to be destroyed and recreated when client-side
+	 navigation moves from one activity to another, so a previous activity's in-progress state
+	 (index, answers, busy) never bleeds into the next one; mirrors `{#key pageIndex}` in
+	 `LessonPager.svelte`. -->
+{#key data.activity.activity_id}
+	{#if snapshot.activity.kind === 'quiz'}
+		<!-- svelte-check doesn't carry the `snapshot.activity.kind` narrowing above across the
+			 component-prop boundary, so the discriminated union is cast explicitly here; the check
+			 above is what actually guarantees the shape at runtime. -->
+		<QuizPlayer activityId={data.activity.activity_id} snapshot={snapshot as QuizSnapshot} />
+	{:else if snapshot.activity.kind === 'flashcards'}
+		<FlashcardPlayer
+			activityId={data.activity.activity_id}
+			snapshot={snapshot as FlashcardsSnapshot}
+		/>
+	{:else if snapshot.activity.kind === 'matching'}
+		<MatchingPlayer
+			activityId={data.activity.activity_id}
+			snapshot={snapshot as MatchingSnapshot}
+		/>
+	{:else if snapshot.activity.kind === 'sequencing'}
+		<SequencingPlayer
+			activityId={data.activity.activity_id}
+			snapshot={snapshot as SequencingSnapshot}
+		/>
+	{/if}
+{/key}

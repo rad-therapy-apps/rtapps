@@ -47,17 +47,23 @@
 	let result = $state<{ percent: number | null; passed: boolean | null } | null>(null);
 	// True while grading/submitting is in flight, to disable reordering and double-submits.
 	let busy = $state(false);
+	// User-facing message when a start/grade/submit request fails; cleared at the start of each attempt.
+	let error = $state<string | undefined>(undefined);
 
 	// Seed the initial order and start (or resume) the attempt once; a resumed attempt's saved
 	// items mark their rows.
 	$effect(() => {
 		order = snapshot.sequencing.items.map((item) => item.key);
-		startAttempt(post, activityId).then((attempt) => {
-			attemptId = attempt.id;
-			for (const item of attempt.items) {
-				answers[item.item_key] = { correct: item.correct };
-			}
-		});
+		startAttempt(post, activityId)
+			.then((attempt) => {
+				attemptId = attempt.id;
+				for (const item of attempt.items) {
+					answers[item.item_key] = { correct: item.correct };
+				}
+			})
+			.catch(() => {
+				error = 'Request failed. Try again.';
+			});
 	});
 
 	// Swaps the item at `index` with the one above it.
@@ -80,13 +86,19 @@
 	async function checkOrder() {
 		if (!attemptId || busy) return;
 		busy = true;
-		for (const [index, key] of order.entries()) {
-			const grade = await gradeItem(post, attemptId, key, index);
-			answers[key] = { correct: grade.correct };
+		error = undefined;
+		try {
+			for (const [index, key] of order.entries()) {
+				const grade = await gradeItem(post, attemptId, key, index);
+				answers[key] = { correct: grade.correct };
+			}
+			const submitted = await submitAttempt(post, attemptId);
+			result = { percent: submitted.percent, passed: submitted.passed };
+		} catch {
+			error = 'Request failed. Try again.';
+		} finally {
+			busy = false;
 		}
-		const submitted = await submitAttempt(post, attemptId);
-		result = { percent: submitted.percent, passed: submitted.passed };
-		busy = false;
 	}
 </script>
 
@@ -126,6 +138,11 @@
 			</li>
 		{/each}
 	</ol>
+	<!-- Start/grade/submit request failed: surfaced as polite live-region text so screen readers
+		 announce it without stealing focus; cleared at the start of every attempt. -->
+	{#if error}
+		<p aria-live="polite" data-testid="player-error">{error}</p>
+	{/if}
 	<button type="button" disabled={!attemptId || busy} onclick={checkOrder}>Check order</button>
 {/if}
 

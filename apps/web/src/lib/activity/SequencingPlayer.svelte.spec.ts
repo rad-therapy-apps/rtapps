@@ -1,7 +1,7 @@
 /**
  * What this file does: component-level tests for `SequencingPlayer.svelte` — move-up reordering
- * of the rendered list, and the final score once every item is graded at its current position and
- * the attempt is submitted.
+ * of the rendered list, the final score once every item is graded at its current position and the
+ * attempt is submitted, and the per-row ✓/✗ feedback marks rendered after "Check order".
  * Used here and why: vitest `client` browser project (real Chromium via
  * `@vitest/browser-playwright`) so the click-to-reorder flow is exercised for real; the `post`
  * prop is replaced with a `vi.fn` fake that dispatches on the request path (start/grade/submit),
@@ -144,5 +144,44 @@ describe('SequencingPlayer', () => {
 
 		await expect.element(page.getByTestId('sequencing-result')).toBeInTheDocument();
 		await expect.element(page.getByText('Score: 100%')).toBeInTheDocument();
+	});
+
+	// Scenario: "Check order" grades every row (mixed correct/incorrect per the stub below); the
+	// submit call is left unstubbed (rejects) so the list stays rendered instead of switching to
+	// the score summary, letting the per-row marks be asserted deterministically.
+	// Invariant: every row's per-item feedback mark renders '✓'/'✗' once grading resolves.
+	it('marks every row with feedback after Check order', async () => {
+		const post: Post = vi.fn(
+			async (
+				path: string,
+				init?: { body?: { item_key: string; response: { choice: number } } }
+			) => {
+				if (path === '/api/v1/activities/{activity_id}/attempts') {
+					return { data: { ...baseAttempt, items: [] }, error: undefined };
+				}
+				if (path === '/api/v1/attempts/{attempt_id}/items') {
+					return {
+						data: {
+							item_key: init!.body!.item_key,
+							correct: init!.body!.item_key !== 's2',
+							score: init!.body!.item_key !== 's2' ? 1 : 0,
+							max_score: 1,
+							explanation: null
+						},
+						error: undefined
+					};
+				}
+				throw new Error(`unexpected path ${path}`);
+			}
+		) as unknown as Post;
+
+		await render(SequencingPlayer, { activityId: 'activity-2', snapshot, post });
+		await waitForAttemptStart(post);
+
+		await page.getByRole('button', { name: 'Check order' }).click();
+
+		await expect.element(page.getByTestId('seq-feedback-s1')).toHaveTextContent('✓');
+		await expect.element(page.getByTestId('seq-feedback-s2')).toHaveTextContent('✗');
+		await expect.element(page.getByTestId('seq-feedback-s3')).toHaveTextContent('✓');
 	});
 });

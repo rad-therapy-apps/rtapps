@@ -46,15 +46,21 @@
 	let result = $state<{ percent: number | null; passed: boolean | null } | null>(null);
 	// True while a grade/submit request is in flight, to disable pairing against double-submits.
 	let busy = $state(false);
+	// User-facing message when a start/grade/submit request fails; cleared at the start of each attempt.
+	let error = $state<string | undefined>(undefined);
 
 	// Start (or resume) the attempt once; a resumed attempt's saved items re-mark their terms.
 	$effect(() => {
-		startAttempt(post, activityId).then((attempt) => {
-			attemptId = attempt.id;
-			for (const item of attempt.items) {
-				answers[item.item_key] = { choice: item.response.choice, correct: item.correct };
-			}
-		});
+		startAttempt(post, activityId)
+			.then((attempt) => {
+				attemptId = attempt.id;
+				for (const item of attempt.items) {
+					answers[item.item_key] = { choice: item.response.choice, correct: item.correct };
+				}
+			})
+			.catch(() => {
+				error = 'Request failed. Try again.';
+			});
 	});
 
 	// Selects a term to pair next; re-selecting an already-answered term is allowed (upsert below).
@@ -68,23 +74,36 @@
 		if (!attemptId || !selectedTermKey || busy) return;
 		const termKey = selectedTermKey;
 		busy = true;
-		const grade = await gradeItem(post, attemptId, termKey, definitionIndex);
-		answers[termKey] = { choice: definitionIndex, correct: grade.correct };
-		selectedTermKey = null;
-		busy = false;
+		error = undefined;
+		try {
+			const grade = await gradeItem(post, attemptId, termKey, definitionIndex);
+			answers[termKey] = { choice: definitionIndex, correct: grade.correct };
+			selectedTermKey = null;
+		} catch {
+			error = 'Request failed. Try again.';
+		} finally {
+			busy = false;
+		}
 	}
 
 	// Submits the attempt for final scoring.
 	async function finish() {
 		if (!attemptId || busy) return;
 		busy = true;
-		const submitted = await submitAttempt(post, attemptId);
-		result = { percent: submitted.percent, passed: submitted.passed };
-		busy = false;
+		error = undefined;
+		try {
+			const submitted = await submitAttempt(post, attemptId);
+			result = { percent: submitted.percent, passed: submitted.passed };
+		} catch {
+			error = 'Request failed. Try again.';
+		} finally {
+			busy = false;
+		}
 	}
 
-	// Every term paired at least once, gating the "Check results" button.
-	const allPaired = $derived(Object.keys(answers).length >= terms.length);
+	// Every current term has an answer, gating the "Check results" button; a count comparison would
+	// let a resumed attempt's stale key (from a since-edited term list) satisfy the gate early.
+	const allPaired = $derived(terms.every((t) => t.key in answers));
 </script>
 
 {#if result}
@@ -125,6 +144,11 @@
 			{/each}
 		</ul>
 	</div>
+	<!-- Start/grade/submit request failed: surfaced as polite live-region text so screen readers
+		 announce it without stealing focus; cleared at the start of every attempt. -->
+	{#if error}
+		<p aria-live="polite" data-testid="player-error">{error}</p>
+	{/if}
 	<button type="button" disabled={!allPaired || busy} onclick={finish}>Check results</button>
 {/if}
 

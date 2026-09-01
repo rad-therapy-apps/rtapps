@@ -48,36 +48,54 @@
 	let result = $state<{ percent: number | null; passed: boolean | null } | null>(null);
 	// True while a grade/submit request is in flight, to disable controls against double-submits.
 	let busy = $state(false);
+	// User-facing message when a start/grade/submit request fails; cleared at the start of each attempt.
+	let error = $state<string | undefined>(undefined);
 
 	// Start (or resume) the attempt once; jump to the first unanswered question.
 	$effect(() => {
-		startAttempt(post, activityId).then((attempt) => {
-			attemptId = attempt.id;
-			for (const item of attempt.items) {
-				answers[item.item_key] = { choice: item.response.choice, correct: item.correct };
-			}
-			// Resume at the first unanswered question (or the last one when all are answered).
-			const firstUnanswered = questions.findIndex((q) => !answers[q.key]);
-			index = firstUnanswered === -1 ? questions.length - 1 : firstUnanswered;
-		});
+		startAttempt(post, activityId)
+			.then((attempt) => {
+				attemptId = attempt.id;
+				for (const item of attempt.items) {
+					answers[item.item_key] = { choice: item.response.choice, correct: item.correct };
+				}
+				// Resume at the first unanswered question (or the last one when all are answered).
+				const firstUnanswered = questions.findIndex((q) => !answers[q.key]);
+				index = firstUnanswered === -1 ? questions.length - 1 : firstUnanswered;
+			})
+			.catch(() => {
+				error = 'Request failed. Try again.';
+			});
 	});
 
 	// Grades the chosen option for one question and stores the result.
 	async function choose(key: string, choice: number) {
 		if (!attemptId || answers[key] || busy) return;
 		busy = true;
-		const grade = await gradeItem(post, attemptId, key, choice);
-		answers[key] = { choice, correct: grade.correct, explanation: grade.explanation };
-		busy = false;
+		error = undefined;
+		try {
+			const grade = await gradeItem(post, attemptId, key, choice);
+			answers[key] = { choice, correct: grade.correct, explanation: grade.explanation };
+		} catch {
+			error = 'Request failed. Try again.';
+		} finally {
+			busy = false;
+		}
 	}
 
 	// Submits the attempt for final scoring.
 	async function finish() {
 		if (!attemptId || busy) return;
 		busy = true;
-		const submitted = await submitAttempt(post, attemptId);
-		result = { percent: submitted.percent, passed: submitted.passed };
-		busy = false;
+		error = undefined;
+		try {
+			const submitted = await submitAttempt(post, attemptId);
+			result = { percent: submitted.percent, passed: submitted.passed };
+		} catch {
+			error = 'Request failed. Try again.';
+		} finally {
+			busy = false;
+		}
 	}
 
 	// Count of questions answered so far, gating the "Finish quiz" button.
@@ -110,6 +128,11 @@
 				{option}
 			</label>
 		{/each}
+		<!-- Start/grade/submit request failed: surfaced as polite live-region text so screen readers
+			 announce it without stealing focus; cleared at the start of every attempt. -->
+		{#if error}
+			<p aria-live="polite" data-testid="player-error">{error}</p>
+		{/if}
 		<!-- Graded (or resumed) result for this question: verdict, explanation if any, and Next/Finish. -->
 		{#if answers[q.key]}
 			{@const a = answers[q.key]}
@@ -120,7 +143,7 @@
 			{#if index < questions.length - 1}
 				<button type="button" onclick={() => (index += 1)}>Next question</button>
 			{:else}
-				<button type="button" onclick={finish} disabled={answered < questions.length}
+				<button type="button" onclick={finish} disabled={answered < questions.length || busy}
 					>Finish quiz</button
 				>
 			{/if}

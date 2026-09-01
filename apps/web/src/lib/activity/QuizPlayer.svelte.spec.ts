@@ -1,7 +1,8 @@
 /**
  * What this file does: component-level tests for `QuizPlayer.svelte` — first-question rendering,
- * grading a choice with feedback and its explanation, the passed badge on submit, and resuming an
- * in-progress attempt at its first unanswered question.
+ * grading a choice with feedback and its explanation, the passed badge on submit, resuming an
+ * in-progress attempt at its first unanswered question, and the error/retry path when a grade
+ * request rejects.
  * Used here and why: vitest `client` browser project (real Chromium via
  * `@vitest/browser-playwright`) so radio/button behaviour is exercised for real; the `post` prop
  * is replaced with a `vi.fn` fake that dispatches on the request path (start/grade/submit), so no
@@ -216,5 +217,55 @@ describe('QuizPlayer', () => {
 		await render(QuizPlayer, { activityId: 'activity-1', snapshot, post });
 
 		await expect.element(page.getByText('Question 2 of 2')).toBeInTheDocument();
+	});
+
+	// Scenario: the grade request rejects (e.g. a dropped network connection).
+	// Invariant: the error message renders and `busy` is released, so choosing again (the retry)
+	// posts a second grade request and succeeds.
+	it('shows an error when grading fails, and releases busy so a retry succeeds', async () => {
+		let gradeCalls = 0;
+		const post: Post = vi.fn(
+			async (
+				path: string,
+				init?: { body?: { item_key: string; response: { choice: number } } }
+			) => {
+				if (path === '/api/v1/activities/{activity_id}/attempts') {
+					return { data: { ...baseAttempt, items: [] }, error: undefined };
+				}
+				if (path === '/api/v1/attempts/{attempt_id}/items') {
+					gradeCalls += 1;
+					if (gradeCalls === 1) {
+						throw new Error('network down');
+					}
+					return {
+						data: {
+							item_key: init!.body!.item_key,
+							correct: true,
+							score: 1,
+							max_score: 1,
+							explanation: null
+						},
+						error: undefined
+					};
+				}
+				throw new Error(`unexpected path ${path}`);
+			}
+		) as unknown as Post;
+
+		await render(QuizPlayer, { activityId: 'activity-1', snapshot, post });
+		await waitForAttemptStart(post);
+
+		await page.getByRole('radio', { name: 'Option A' }).click();
+
+		await expect.element(page.getByTestId('player-error')).toBeInTheDocument();
+		expect(gradeCalls).toBe(1);
+
+		// Retry: the failed grade left the answer unrecorded and busy released, so choosing again
+		// (a different option, since the browser's native radio state stays checked on the first
+		// one even though the failed grade was never recorded) re-posts.
+		await page.getByRole('radio', { name: 'Option B' }).click();
+
+		expect(gradeCalls).toBe(2);
+		await expect.element(page.getByTestId('feedback')).toHaveTextContent('Correct!');
 	});
 });

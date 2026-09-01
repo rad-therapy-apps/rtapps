@@ -41,6 +41,8 @@
 	let done = $state(false);
 	// True while the finish request is in flight, to disable the button against double-submits.
 	let busy = $state(false);
+	// User-facing message when the completion attempt fails; cleared at the start of each attempt.
+	let error = $state<string | undefined>(undefined);
 
 	// Whether the current card is the deck's last, gating Next vs. the Finish button.
 	const isLastCard = $derived(index === cards.length - 1);
@@ -68,10 +70,16 @@
 	async function finish() {
 		if (busy) return;
 		busy = true;
-		const attempt = await startAttempt(post, activityId);
-		await submitAttempt(post, attempt.id);
-		done = true;
-		busy = false;
+		error = undefined;
+		try {
+			const attempt = await startAttempt(post, activityId);
+			await submitAttempt(post, attempt.id);
+			done = true;
+		} catch {
+			error = 'Request failed. Try again.';
+		} finally {
+			busy = false;
+		}
 	}
 </script>
 
@@ -91,6 +99,11 @@
 				<button type="button" onclick={next}>Next</button>
 			{/if}
 		</div>
+		<!-- Completion attempt failed: surfaced as polite live-region text so screen readers announce
+			 it without stealing focus; cleared at the start of every attempt. -->
+		{#if error}
+			<p aria-live="polite" data-testid="player-error">{error}</p>
+		{/if}
 	</section>
 {/if}
 
