@@ -70,7 +70,12 @@ TEST_DATABASE_URL = os.environ.get(
 @pytest.fixture(scope="session")
 def settings() -> Settings:
     # https://test (not http) so Secure cookies set by the app survive the round trip.
-    return Settings(database_url=TEST_DATABASE_URL, env="test", public_origin="https://test")
+    return Settings(
+        database_url=TEST_DATABASE_URL,
+        env="test",
+        public_origin="https://test",
+        rate_limit_enabled=False,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -149,6 +154,7 @@ async def client_google(db: AsyncSession) -> AsyncIterator[AsyncClient]:
         public_origin="https://test",
         google_client_id="cid",
         google_client_secret="csecret",
+        rate_limit_enabled=False,
     )
     async with _make_client(google_settings, db) as c:
         yield c

@@ -43,11 +43,21 @@ from app.auth.sessions import create_session, revoke_session, user_by_email
 from app.config import Settings, get_settings
 from app.db import get_session
 from app.errors import Problem
+from app.ratelimit import rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# Module-level singletons: per-IP rate limiters (ruff B008 pattern).
+_login_limit = rate_limit("login")
+_register_limit = rate_limit("register")
 
-@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=UserOut)
+
+@router.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UserOut,
+    dependencies=[Depends(_register_limit)],
+)
 async def register(
     body: RegisterIn,
     request: Request,
@@ -77,7 +87,7 @@ async def register(
     return user
 
 
-@router.post("/login", response_model=UserOut)
+@router.post("/login", response_model=UserOut, dependencies=[Depends(_login_limit)])
 async def login(
     body: LoginIn,
     request: Request,

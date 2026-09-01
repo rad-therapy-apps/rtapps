@@ -30,12 +30,14 @@ from app.cohorts.models import Cohort, Enrollment, generate_join_code
 from app.cohorts.schemas import CohortIn, CohortOut, CohortPatch, JoinIn, MemberOut
 from app.db import get_session
 from app.errors import Problem
+from app.ratelimit import rate_limit
 
 router = APIRouter(prefix="/cohorts", tags=["cohorts"])
 JOIN_CODE_RETRIES = 5  # collision-retry budget before giving up on a fresh join code
-# Module-level singleton so the route default isn't a nested function call (ruff B008);
-# same dependency-factory pattern as require_cohort_educator, just for the global role.
+# Module-level singletons (ruff B008 pattern): dependency factories for global role check
+# and per-IP rate limiting.
 _require_educator_or_admin = require_role(UserRole.educator, UserRole.admin)
+_join_limit = rate_limit("join")
 
 
 async def _student_count(db: AsyncSession, cohort_id: uuid.UUID) -> int:
@@ -193,7 +195,7 @@ async def rotate_code(
     return await cohort_out(db, cohort, "educator")
 
 
-@router.post("/join", response_model=CohortOut)
+@router.post("/join", response_model=CohortOut, dependencies=[Depends(_join_limit)])
 async def join_cohort(
     body: JoinIn,
     user: User = Depends(require_user),

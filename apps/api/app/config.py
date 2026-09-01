@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     s3_bucket: str = "rtapps-media"
     google_client_id: str = ""
     google_client_secret: str = ""
+    rate_limit_enabled: bool = True
 
     @property
     def cookie_secure(self) -> bool:
