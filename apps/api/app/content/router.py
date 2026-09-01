@@ -21,13 +21,24 @@ Works with:
   Used by: `app.main` mounts this router under the API prefix.
 """
 
+import uuid
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.deps import require_user
-from app.content.models import ContentVersion, Lesson, Subject
-from app.content.schemas import LessonOut, LessonRefOut, SubjectDetailOut, SubjectOut
+from app.auth.models import User, UserRole
+from app.content.activity_snapshots import strip_activity_answers
+from app.content.models import Activity, ContentVersion, Lesson, Subject
+from app.content.schemas import (
+    ActivityOut,
+    ActivityRefOut,
+    LessonOut,
+    LessonRefOut,
+    SubjectDetailOut,
+    SubjectOut,
+)
 from app.content.snapshot import strip_answers
 from app.db import get_session
 from app.errors import Problem
@@ -37,27 +48,38 @@ router = APIRouter(tags=["content"], dependencies=[Depends(require_user)])
 
 @router.get("/subjects", response_model=list[SubjectOut])
 async def list_subjects(db: AsyncSession = Depends(get_session)) -> list[SubjectOut]:
-    """List subjects that have at least one published lesson, with that lesson count."""
+    """List subjects that have at least one published activity, with lesson and activity
+    counts.
+    """
     rows = (
         await db.execute(
-            select(Subject, func.count(Lesson.id))
-            .join(Lesson)
-            .where(Lesson.status == "published")
+            select(
+                Subject,
+                func.count(Activity.id).filter(Activity.kind == "lesson"),
+                func.count(Activity.id),
+            )
+            .join(Activity)
+            .where(Activity.status == "published", Activity.access == "practice")
             .group_by(Subject.id)
             .order_by(Subject.order, Subject.slug)
         )
     ).all()
     return [
-        SubjectOut(slug=subject.slug, title=subject.title, order=subject.order, lesson_count=count)
-        for subject, count in rows
+        SubjectOut(
+            slug=subject.slug,
+            title=subject.title,
+            order=subject.order,
+            lesson_count=lesson_count,
+            activity_count=activity_count,
+        )
+        for subject, lesson_count, activity_count in rows
     ]
 
 
 @router.get("/subjects/{slug}", response_model=SubjectDetailOut)
 async def get_subject(slug: str, db: AsyncSession = Depends(get_session)) -> SubjectDetailOut:
-    """One subject with its published lessons; 404s if the subject or all its lessons are
-
-    unpublished, so an unpublished subject is indistinguishable from a missing one.
+    """One subject with its published lessons and practice non-lesson activities; 404s only
+    when the subject has neither published lessons nor published practice activities.
     """
     subject = await db.scalar(select(Subject).where(Subject.slug == slug))
     if subject is None:
@@ -69,7 +91,19 @@ async def get_subject(slug: str, db: AsyncSession = Depends(get_session)) -> Sub
             .order_by(Lesson.order, Lesson.slug)
         )
     ).all()
-    if not lessons:
+    activities = (
+        await db.scalars(
+            select(Activity)
+            .where(
+                Activity.subject_id == subject.id,
+                Activity.status == "published",
+                Activity.access == "practice",
+                Activity.kind != "lesson",
+            )
+            .order_by(Activity.title)
+        )
+    ).all()
+    if not lessons and not activities:
         raise Problem(404, "Subject not found")
     return SubjectDetailOut(
         slug=subject.slug,
@@ -79,6 +113,36 @@ async def get_subject(slug: str, db: AsyncSession = Depends(get_session)) -> Sub
             LessonRefOut(slug=lesson.slug, title=lesson.title, order=lesson.order)
             for lesson in lessons
         ],
+        activities=[
+            ActivityRefOut(id=activity.id, kind=activity.kind, title=activity.title)
+            for activity in activities
+        ],
+    )
+
+
+@router.get("/activities/{activity_id}", response_model=ActivityOut)
+async def get_activity(
+    activity_id: uuid.UUID,
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> ActivityOut:
+    """One activity's current published snapshot, answers stripped.
+
+    ADR-0006: students never see assessment activities — same 404 as a missing id.
+    """
+    activity = await db.get(Activity, activity_id)
+    if activity is None or activity.status != "published" or activity.current_version_id is None:
+        raise Problem(404, "Activity not found")
+    if activity.access != "practice" and user.role == UserRole.student:
+        raise Problem(404, "Activity not found")
+    version = await db.get(ContentVersion, activity.current_version_id)
+    if version is None:
+        raise Problem(404, "Activity not found")
+    return ActivityOut(
+        activity_id=activity.id,
+        content_version_id=version.id,
+        kind=activity.kind,
+        snapshot=strip_activity_answers(version.snapshot),
     )
 
 

@@ -1,6 +1,63 @@
 {
   "components": {
     "schemas": {
+      "ActivityOut": {
+        "description": "Response for `GET /activities/{id}`: one activity's current published snapshot with\nanswers stripped.",
+        "properties": {
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "content_version_id": {
+            "format": "uuid",
+            "title": "Content Version Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "snapshot": {
+            "additionalProperties": true,
+            "title": "Snapshot",
+            "type": "object"
+          }
+        },
+        "required": [
+          "activity_id",
+          "content_version_id",
+          "kind",
+          "snapshot"
+        ],
+        "title": "ActivityOut",
+        "type": "object"
+      },
+      "ActivityRefOut": {
+        "description": "An activity reference nested inside `SubjectDetailOut` \u2014 practice non-lesson activities\nonly, ordered by title.",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title"
+        ],
+        "title": "ActivityRefOut",
+        "type": "object"
+      },
       "ActivityRowOut": {
         "properties": {
           "activity_id": {
@@ -1187,8 +1244,16 @@
         "type": "object"
       },
       "SubjectDetailOut": {
-        "description": "Response for `GET /subjects/{slug}`: one subject with its published lessons.",
+        "description": "Response for `GET /subjects/{slug}`: one subject with its published lessons and practice\nnon-lesson activities.",
         "properties": {
+          "activities": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ActivityRefOut"
+            },
+            "title": "Activities",
+            "type": "array"
+          },
           "lessons": {
             "items": {
               "$ref": "#/components/schemas/LessonRefOut"
@@ -1226,8 +1291,12 @@
         "type": "object"
       },
       "SubjectOut": {
-        "description": "One row of `GET /subjects`: a subject plus its published-lesson count.",
+        "description": "One row of `GET /subjects`: a subject plus its published-lesson count and activity count.",
         "properties": {
+          "activity_count": {
+            "title": "Activity Count",
+            "type": "integer"
+          },
           "lesson_count": {
             "title": "Lesson Count",
             "type": "integer"
@@ -1249,7 +1318,8 @@
           "slug",
           "title",
           "order",
-          "lesson_count"
+          "lesson_count",
+          "activity_count"
         ],
         "title": "SubjectOut",
         "type": "object"
@@ -1367,6 +1437,50 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/activities/{activity_id}": {
+      "get": {
+        "description": "One activity's current published snapshot, answers stripped.\n\nADR-0006: students never see assessment activities \u2014 same 404 as a missing id.",
+        "operationId": "get_activity_api_v1_activities__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Activity",
+        "tags": [
+          "content"
+        ]
+      }
+    },
     "/api/v1/activities/{activity_id}/attempts": {
       "post": {
         "operationId": "start_attempt_api_v1_activities__activity_id__attempts_post",
@@ -2581,7 +2695,7 @@
     },
     "/api/v1/subjects": {
       "get": {
-        "description": "List subjects that have at least one published lesson, with that lesson count.",
+        "description": "List subjects that have at least one published activity, with lesson and activity\ncounts.",
         "operationId": "list_subjects_api_v1_subjects_get",
         "responses": {
           "200": {
@@ -2607,7 +2721,7 @@
     },
     "/api/v1/subjects/{slug}": {
       "get": {
-        "description": "One subject with its published lessons; 404s if the subject or all its lessons are\n\nunpublished, so an unpublished subject is indistinguishable from a missing one.",
+        "description": "One subject with its published lessons and practice non-lesson activities; 404s only\nwhen the subject has neither published lessons nor published practice activities.",
         "operationId": "get_subject_api_v1_subjects__slug__get",
         "parameters": [
           {

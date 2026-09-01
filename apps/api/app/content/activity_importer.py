@@ -399,9 +399,7 @@ async def import_any(
 
         doc = LessonImport.model_validate(data)
         result = await import_lesson(db, doc, author=author)
-        lesson_activity = await db.scalar(
-            select(Activity).where(Activity.lesson_id == result.id)
-        )
+        lesson_activity = await db.scalar(select(Activity).where(Activity.lesson_id == result.id))
         assert lesson_activity is not None
         return lesson_activity
     # All other activity types are in _IMPORTERS.

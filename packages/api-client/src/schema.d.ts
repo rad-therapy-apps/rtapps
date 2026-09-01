@@ -4,6 +4,28 @@
  */
 
 export interface paths {
+  "/api/v1/activities/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Activity
+     * @description One activity's current published snapshot, answers stripped.
+     *
+     *     ADR-0006: students never see assessment activities — same 404 as a missing id.
+     */
+    get: operations["get_activity_api_v1_activities__activity_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/activities/{activity_id}/attempts": {
     parameters: {
       query?: never;
@@ -447,7 +469,8 @@ export interface paths {
     };
     /**
      * List Subjects
-     * @description List subjects that have at least one published lesson, with that lesson count.
+     * @description List subjects that have at least one published activity, with lesson and activity
+     *     counts.
      */
     get: operations["list_subjects_api_v1_subjects_get"];
     put?: never;
@@ -467,9 +490,8 @@ export interface paths {
     };
     /**
      * Get Subject
-     * @description One subject with its published lessons; 404s if the subject or all its lessons are
-     *
-     *     unpublished, so an unpublished subject is indistinguishable from a missing one.
+     * @description One subject with its published lessons and practice non-lesson activities; 404s only
+     *     when the subject has neither published lessons nor published practice activities.
      */
     get: operations["get_subject_api_v1_subjects__slug__get"];
     put?: never;
@@ -484,6 +506,45 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /**
+     * ActivityOut
+     * @description Response for `GET /activities/{id}`: one activity's current published snapshot with
+     *     answers stripped.
+     */
+    ActivityOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /**
+       * Content Version Id
+       * Format: uuid
+       */
+      content_version_id: string;
+      /** Kind */
+      kind: string;
+      /** Snapshot */
+      snapshot: {
+        [key: string]: unknown;
+      };
+    };
+    /**
+     * ActivityRefOut
+     * @description An activity reference nested inside `SubjectDetailOut` — practice non-lesson activities
+     *     only, ordered by title.
+     */
+    ActivityRefOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Kind */
+      kind: string;
+      /** Title */
+      title: string;
+    };
     /** ActivityRowOut */
     ActivityRowOut: {
       /**
@@ -894,9 +955,15 @@ export interface components {
     };
     /**
      * SubjectDetailOut
-     * @description Response for `GET /subjects/{slug}`: one subject with its published lessons.
+     * @description Response for `GET /subjects/{slug}`: one subject with its published lessons and practice
+     *     non-lesson activities.
      */
     SubjectDetailOut: {
+      /**
+       * Activities
+       * @default []
+       */
+      activities: components["schemas"]["ActivityRefOut"][];
       /** Lessons */
       lessons: components["schemas"]["LessonRefOut"][];
       /** Slug */
@@ -908,9 +975,11 @@ export interface components {
     };
     /**
      * SubjectOut
-     * @description One row of `GET /subjects`: a subject plus its published-lesson count.
+     * @description One row of `GET /subjects`: a subject plus its published-lesson count and activity count.
      */
     SubjectOut: {
+      /** Activity Count */
+      activity_count: number;
       /** Lesson Count */
       lesson_count: number;
       /** Order */
@@ -967,6 +1036,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  get_activity_api_v1_activities__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActivityOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   start_attempt_api_v1_activities__activity_id__attempts_post: {
     parameters: {
       query?: never;
