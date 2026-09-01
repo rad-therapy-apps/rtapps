@@ -1,24 +1,30 @@
 <!--
 	What this file does: Activity page at `(app)/subjects/[slug]/activities/[id]`. Dispatches to
-	the player matching the activity's kind; matching/sequencing show a placeholder paragraph
-	until Task 15 wires their players.
+	the player matching the activity's kind.
 	Used here and why: Svelte 5 runes (`$props()`); `activitySnapshot()` casts the opaque
 	`snapshot` JSON to its typed shape, and branching on `snapshot.activity.kind` (rather than
 	`data.activity.kind`) lets TypeScript narrow `ActivitySnapshot` to the exact variant each
 	player expects.
 	How it fits the project: `data.activity` comes from this route's `load`
-	(`GET /activities/{id}`, answers stripped per ADR-0006). Adding matching/sequencing later
-	(Task 15) is just another `{:else if}` branch before the fallback. `docs/03-architecture.md`
-	§4.4, plan 3a Task 14/15.
+	(`GET /activities/{id}`, answers stripped per ADR-0006). `docs/03-architecture.md` §4.4, plan
+	3a Task 14/15.
 	Works with: `$lib/activity/QuizPlayer.svelte`, `$lib/activity/FlashcardPlayer.svelte`,
+	`$lib/activity/MatchingPlayer.svelte`, `$lib/activity/SequencingPlayer.svelte`,
 	`$lib/activity/types` (`activitySnapshot`). Used by: reached from
 	`(app)/subjects/[slug]/+page.svelte`.
 -->
 <script lang="ts">
 	import QuizPlayer from '$lib/activity/QuizPlayer.svelte';
 	import FlashcardPlayer from '$lib/activity/FlashcardPlayer.svelte';
+	import MatchingPlayer from '$lib/activity/MatchingPlayer.svelte';
+	import SequencingPlayer from '$lib/activity/SequencingPlayer.svelte';
 	import { activitySnapshot } from '$lib/activity/types';
-	import type { QuizSnapshot, FlashcardsSnapshot } from '$lib/activity/types';
+	import type {
+		QuizSnapshot,
+		FlashcardsSnapshot,
+		MatchingSnapshot,
+		SequencingSnapshot
+	} from '$lib/activity/types';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -42,6 +48,11 @@
 		activityId={data.activity.activity_id}
 		snapshot={snapshot as FlashcardsSnapshot}
 	/>
-{:else}
-	<p>This activity type arrives in a later phase.</p>
+{:else if snapshot.activity.kind === 'matching'}
+	<MatchingPlayer activityId={data.activity.activity_id} snapshot={snapshot as MatchingSnapshot} />
+{:else if snapshot.activity.kind === 'sequencing'}
+	<SequencingPlayer
+		activityId={data.activity.activity_id}
+		snapshot={snapshot as SequencingSnapshot}
+	/>
 {/if}
