@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-27
-- **Deciders:** Chris Guzman (lead developer). Mentor (non-technical content author) consulted on scope, not on technology.
+- **Deciders:** Chris Guzman (lead developer). Mentor (content author) consulted on scope.
 - **Note:** This ADR is also the internship *stack decision record* for milestone M2. Phase 2 will append measured evidence (CI time, p95 of `POST /attempts/{id}/submit`, LOC per feature) under *Follow-ups*.
 
 ## Context
