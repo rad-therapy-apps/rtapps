@@ -1,0 +1,43 @@
+{
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 0
+  },
+  "quiz": {
+    "slug": "demo-quiz",
+    "title": "Demo quiz",
+    "pass_percent": 80,
+    "shuffle": true,
+    "questions": [
+      {
+        "stem": "Demo question 1?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "answer": 0,
+        "explanation": "Option A is correct for demo question 1.",
+        "outcomes": ["RB-1"]
+      },
+      {
+        "stem": "Demo question 2?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "answer": 1,
+        "explanation": "Option B is correct for demo question 2.",
+        "outcomes": ["RB-1"]
+      },
+      {
+        "stem": "Demo question 3?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "answer": 2,
+        "explanation": "Option C is correct for demo question 3.",
+        "outcomes": ["RB-2"]
+      },
+      {
+        "stem": "Demo question 4?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "answer": 0,
+        "explanation": "Option A is correct for demo question 4.",
+        "outcomes": ["RB-2"]
+      }
+    ]
+  }
+}
