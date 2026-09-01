@@ -15,7 +15,8 @@ import uuid
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.models import UserRole
+from app.auth.models import User, UserRole
+from app.auth.passwords import hash_password
 from tests.conftest import register
 from tests.test_cohorts import login, promote
 
@@ -61,9 +62,10 @@ async def test_role_change_is_audited_and_effective(client: AsyncClient, db: Asy
     ][0]
     r = await client.patch(f"/api/v1/admin/users/{mentor['id']}/role", json={"role": "educator"})
     assert r.status_code == 200 and r.json()["role"] == "educator"
+    # The admin cannot demote themselves because they're the last active admin (409, not 400).
     assert (
         await client.patch(f"/api/v1/admin/users/{admin_id}/role", json={"role": "student"})
-    ).status_code == 400
+    ).status_code == 409
     assert (
         await client.patch(f"/api/v1/admin/users/{uuid.uuid4()}/role", json={"role": "student"})
     ).status_code == 404
@@ -90,7 +92,8 @@ async def test_deactivate_revokes_sessions(client: AsyncClient, db: AsyncSession
     r = await client.post(f"/api/v1/admin/users/{gone['id']}/deactivate")
     assert r.status_code == 200 and r.json()["deactivated_at"]
     first_deactivated_at = r.json()["deactivated_at"]
-    assert (await client.post(f"/api/v1/admin/users/{admin_id}/deactivate")).status_code == 400
+    # The admin cannot deactivate themselves because they're the last active admin (409, not 400).
+    assert (await client.post(f"/api/v1/admin/users/{admin_id}/deactivate")).status_code == 409
     r = await client.post(
         "/api/v1/auth/login", json={"email": "gone@example.edu", "password": "password-123"}
     )
@@ -122,3 +125,122 @@ async def test_audit_log_filters(client: AsyncClient, db: AsyncSession) -> None:
     assert (await client.get("/api/v1/admin/audit-log", params={"limit": 1})).json()[0]["detail"][
         "to"
     ] == "student"
+
+
+async def test_last_admin_guard_on_change_role(client: AsyncClient, db: AsyncSession) -> None:
+    # Single admin cannot be demoted.
+    await make_admin(client, db)
+    admin = (await client.get("/api/v1/admin/users", params={"q": "root@"})).json()["items"][0]
+    r = await client.patch(f"/api/v1/admin/users/{admin['id']}/role", json={"role": "student"})
+    assert r.status_code == 409 and "Cannot demote the last admin" in r.json()["title"]
+    # Add a second admin; now demotion works.
+    await register(client, email="a2@example.edu", name="Admin 2")
+    await promote(db, "a2@example.edu", UserRole.admin)
+    r = await client.patch(f"/api/v1/admin/users/{admin['id']}/role", json={"role": "student"})
+    assert r.status_code == 200 and r.json()["role"] == "student"
+
+
+async def test_last_admin_guard_on_deactivate(client: AsyncClient, db: AsyncSession) -> None:
+    # Single admin cannot be deactivated.
+    await make_admin(client, db)
+    admin = (await client.get("/api/v1/admin/users", params={"q": "root@"})).json()["items"][0]
+    r = await client.post(f"/api/v1/admin/users/{admin['id']}/deactivate")
+    assert r.status_code == 409 and "Cannot deactivate the last admin" in r.json()["title"]
+    # Add a second admin; now deactivation works.
+    await register(client, email="a2@example.edu", name="Admin 2")
+    await promote(db, "a2@example.edu", UserRole.admin)
+    r = await client.post(f"/api/v1/admin/users/{admin['id']}/deactivate")
+    assert r.status_code == 200 and r.json()["deactivated_at"]
+
+
+async def test_last_admin_guard_on_erase(client: AsyncClient, db: AsyncSession) -> None:
+    # Single admin cannot be erased.
+    await make_admin(client, db)
+    admin = (await client.get("/api/v1/admin/users", params={"q": "root@"})).json()["items"][0]
+    r = await client.post(f"/api/v1/admin/users/{admin['id']}/erase")
+    assert r.status_code == 409 and "Cannot erase the last admin" in r.json()["title"]
+    # Add a second admin; now erasure works.
+    await register(client, email="a2@example.edu", name="Admin 2")
+    await promote(db, "a2@example.edu", UserRole.admin)
+    r = await client.post(f"/api/v1/admin/users/{admin['id']}/erase")
+    assert r.status_code == 200
+    assert r.json()["email"].startswith("erased-")
+    assert r.json()["display_name"] == "Erased user"
+
+
+async def test_erase_user_tombstones_pii_deletes_identities_sessions(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    # Register a non-admin user, then make an admin (switches client to admin session).
+    gone_email = "gone@example.edu"
+    await register(client, email=gone_email, name="Gone User")
+    await make_admin(client, db)
+    # Get the gone user's ID.
+    gone = (await client.get("/api/v1/admin/users", params={"q": gone_email})).json()["items"][0]
+    gone_id = gone["id"]
+    # Erase the user.
+    r = await client.post(f"/api/v1/admin/users/{gone_id}/erase")
+    assert r.status_code == 200
+    erased_user = r.json()
+    assert erased_user["email"].startswith("erased-")
+    assert erased_user["display_name"] == "Erased user"
+    # Old session no longer works (login with erased email fails because email is changed).
+    login_r = await client.post(
+        "/api/v1/auth/login", json={"email": gone_email, "password": "password-123"}
+    )
+    assert login_r.status_code == 401  # Email is erased, so no match
+    # Audit log has exactly one erase_user entry with sessions_deleted and
+    # identities_deleted counts.
+    log = (await client.get("/api/v1/admin/audit-log", params={"action": "erase_user"})).json()
+    assert len(log) == 1
+    assert log[0]["target_id"] == gone_id
+    assert "sessions_deleted" in log[0]["detail"] and "identities_deleted" in log[0]["detail"]
+
+
+async def test_erase_user_idempotent(client: AsyncClient, db: AsyncSession) -> None:
+    # Register a non-admin user, then make an admin (switches client to admin session).
+    gone_email = "gone@example.edu"
+    await register(client, email=gone_email, name="Gone User")
+    await make_admin(client, db)
+    # Get the gone user's ID.
+    gone = (await client.get("/api/v1/admin/users", params={"q": gone_email})).json()["items"][0]
+    gone_id = gone["id"]
+    # Erase the user.
+    r1 = await client.post(f"/api/v1/admin/users/{gone_id}/erase")
+    assert r1.status_code == 200
+    first_email = r1.json()["email"]
+    # Erase again: should be idempotent, no second audit row.
+    r2 = await client.post(f"/api/v1/admin/users/{gone_id}/erase")
+    assert r2.status_code == 200
+    assert r2.json()["email"] == first_email
+    log = (await client.get("/api/v1/admin/audit-log", params={"action": "erase_user"})).json()
+    assert len(log) == 1  # Only one audit entry
+
+
+async def test_list_users_ilike_escaping(client: AsyncClient, db: AsyncSession) -> None:
+    # Create users with literal % and _ in display names.
+    await make_admin(client, db)
+    # Create users directly in the database to ensure exact names.
+    pct_user = User(
+        email="pct@example.edu",
+        display_name="100% done",
+        password_hash=hash_password("password-123"),
+    )
+    x_user = User(
+        email="x@example.edu",
+        display_name="100x done",
+        password_hash=hash_password("password-123"),
+    )
+    db.add(pct_user)
+    db.add(x_user)
+    await db.commit()
+    # Search for "100%" should match only the first user (not all starting with "100").
+    r = await client.get("/api/v1/admin/users", params={"q": "100%"})
+    assert r.status_code == 200
+    items = r.json()["items"]
+    found = [u for u in items if u["display_name"] == "100% done"]
+    assert len(found) == 1
+    assert found[0]["email"] == "pct@example.edu"
+    # The "100x done" user should not appear in the result.
+    x_found = [u for u in items if u["display_name"] == "100x done"]
+    assert len(x_found) == 0
