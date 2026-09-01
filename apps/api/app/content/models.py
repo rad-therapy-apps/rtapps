@@ -56,7 +56,8 @@ from app.ids import new_id
 LESSON_STATUSES = ("draft", "published", "archived")
 BLOCK_TYPES = ("rich_text", "knowledge_check")
 QUESTION_TYPES = ("single_choice",)
-ACTIVITY_KINDS = ("lesson",)
+ACTIVITY_KINDS = ("lesson", "quiz", "flashcards", "matching", "sequencing")
+ACTIVITY_ACCESS = ("practice", "assessment")
 
 
 def _in(column: str, values: tuple[str, ...], name: str) -> CheckConstraint:
@@ -193,6 +194,7 @@ class Activity(TimestampMixin, Base):
     __table_args__ = (
         _in("kind", ACTIVITY_KINDS, "ck_activity_kind"),
         _in("status", LESSON_STATUSES, "ck_activity_status"),
+        _in("access", ACTIVITY_ACCESS, "ck_activity_access"),
     )
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=new_id)
     kind: Mapped[str] = mapped_column(String(30), nullable=False)
@@ -208,6 +210,9 @@ class Activity(TimestampMixin, Base):
     )
     config: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
+    # ADR-0006: 'practice' activities are student-visible; 'assessment' pools are reserved
+    # for educator-assigned quizzing (games phase) and are 404 to students everywhere.
+    access: Mapped[str] = mapped_column(String(20), nullable=False, default="practice")
     current_version_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey(
             "content_version.id",

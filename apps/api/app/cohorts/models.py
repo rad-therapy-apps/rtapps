@@ -14,7 +14,8 @@ authorise; `app.analytics` joins through `Enrollment` to scope every read to one
 Works with:
   Depends on: `app.auth.models.TimestampMixin`, `app.db.Base`, `app.ids.new_id`.
   Used by: `app.cohorts.router`, `app.cohorts.deps`, `app.analytics.queries`,
-    `app.seed`, `alembic/env.py`, `tests/test_cohort_models.py`.
+    `app.seed`, `alembic/env.py`, `tests/test_cohort_models.py`, `Program`
+    (in Tasks 1-10 for tying cohorts to academic programs).
 """
 
 import secrets
@@ -68,6 +69,9 @@ class Cohort(TimestampMixin, Base):
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("user.id", ondelete="SET NULL"), nullable=True
     )
+    program_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("program.id", ondelete="SET NULL"), nullable=True
+    )
 
     enrollments: Mapped[list["Enrollment"]] = relationship(
         back_populates="cohort", cascade="all, delete-orphan"
@@ -97,3 +101,10 @@ class Enrollment(Base):
 
     cohort: Mapped[Cohort] = relationship(back_populates="enrollments")
     user: Mapped[User] = relationship()
+
+
+# Single institution today; the nullable FK is the multi-program growth point (docs/03 §5).
+class Program(TimestampMixin, Base):
+    __tablename__ = "program"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
