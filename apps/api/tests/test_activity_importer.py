@@ -162,6 +162,44 @@ def test_quiz_rejects_answer_out_of_range() -> None:
         QuizImport.model_validate(bad)
 
 
+def test_quiz_rejects_malformed_outcome_code() -> None:
+    # Malformed outcome codes (e.g., with spaces, special characters) must be rejected
+    bad = {
+        "subject": SUBJECT,
+        "quiz": {
+            "slug": "b",
+            "title": "B",
+            "questions": [
+                {
+                    "stem": "Q?",
+                    "options": ["A", "B"],
+                    "answer": 0,
+                    "outcomes": ["bad code!"],
+                }
+            ],
+        },
+    }
+    with pytest.raises(ValidationError):
+        QuizImport.model_validate(bad)
+    # Valid outcome codes like "RB-1" should be accepted
+    good = {
+        "subject": SUBJECT,
+        "quiz": {
+            "slug": "b",
+            "title": "B",
+            "questions": [
+                {
+                    "stem": "Q?",
+                    "options": ["A", "B"],
+                    "answer": 0,
+                    "outcomes": ["RB-1"],
+                }
+            ],
+        },
+    }
+    QuizImport.model_validate(good)  # Should not raise
+
+
 async def test_import_any_rejects_unknown_document(db: AsyncSession) -> None:
     with pytest.raises(ValueError):
         await import_any(db, {"subject": SUBJECT, "mystery": {}})

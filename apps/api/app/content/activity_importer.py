@@ -26,9 +26,9 @@ Works with:
 """
 
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, StringConstraints, model_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -65,7 +65,10 @@ class QuizQuestionData(BaseModel):
     options: list[str] = Field(min_length=2, max_length=10)
     answer: int
     explanation: str | None = None
-    outcomes: list[str] = Field(default_factory=list)
+    # Outcome codes must match ^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$ per SLO consistency requirement
+    outcomes: list[
+        Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$")]
+    ] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _answer_in_range(self) -> "QuizQuestionData":
