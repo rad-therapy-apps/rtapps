@@ -116,6 +116,68 @@
         "title": "ActivityRowOut",
         "type": "object"
       },
+      "ActivityStatsOut": {
+        "properties": {
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "distribution": {
+            "items": {
+              "$ref": "#/components/schemas/BucketOut"
+            },
+            "title": "Distribution",
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemStatOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "students_attempted": {
+            "title": "Students Attempted",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "title",
+          "kind",
+          "attempts",
+          "students_attempted",
+          "pass_rate",
+          "distribution",
+          "items"
+        ],
+        "title": "ActivityStatsOut",
+        "type": "object"
+      },
       "AdminUserOut": {
         "properties": {
           "created_at": {
@@ -528,6 +590,24 @@
         "title": "AuditOut",
         "type": "object"
       },
+      "BucketOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "count"
+        ],
+        "title": "BucketOut",
+        "type": "object"
+      },
       "CohortIn": {
         "properties": {
           "ends_on": {
@@ -804,6 +884,54 @@
         "title": "ItemIn",
         "type": "object"
       },
+      "ItemStatOut": {
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "percent_correct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent Correct"
+          },
+          "top_wrong": {
+            "items": {
+              "$ref": "#/components/schemas/WrongOut"
+            },
+            "title": "Top Wrong",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "answered",
+          "correct",
+          "percent_correct",
+          "top_wrong"
+        ],
+        "title": "ItemStatOut",
+        "type": "object"
+      },
       "JoinIn": {
         "properties": {
           "code": {
@@ -936,6 +1064,111 @@
           "last_activity_at"
         ],
         "title": "MemberOut",
+        "type": "object"
+      },
+      "OutcomeMasteryOut": {
+        "properties": {
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/OutcomeRowOut"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "outcomes"
+        ],
+        "title": "OutcomeMasteryOut",
+        "type": "object"
+      },
+      "OutcomeRowOut": {
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "percent_correct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent Correct"
+          },
+          "questions": {
+            "title": "Questions",
+            "type": "integer"
+          },
+          "students": {
+            "items": {
+              "$ref": "#/components/schemas/OutcomeStudentOut"
+            },
+            "title": "Students",
+            "type": "array"
+          },
+          "students_below_threshold": {
+            "title": "Students Below Threshold",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "questions",
+          "answered",
+          "percent_correct",
+          "students_below_threshold",
+          "students"
+        ],
+        "title": "OutcomeRowOut",
+        "type": "object"
+      },
+      "OutcomeStudentOut": {
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "percent_correct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent Correct"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "display_name",
+          "answered",
+          "percent_correct"
+        ],
+        "title": "OutcomeStudentOut",
         "type": "object"
       },
       "RegisterIn": {
@@ -1490,6 +1723,24 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "WrongOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "option": {
+            "title": "Option",
+            "type": "string"
+          }
+        },
+        "required": [
+          "option",
+          "count"
+        ],
+        "title": "WrongOut",
         "type": "object"
       }
     }
@@ -2431,6 +2682,59 @@
         ]
       }
     },
+    "/api/v1/cohorts/{cohort_id}/activities/{activity_id}": {
+      "get": {
+        "operationId": "activity_stats_out_api_v1_cohorts__cohort_id__activities__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "cohort_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cohort Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityStatsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Activity Stats Out",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
     "/api/v1/cohorts/{cohort_id}/members": {
       "get": {
         "operationId": "list_members_api_v1_cohorts__cohort_id__members_get",
@@ -2521,6 +2825,49 @@
         "summary": "Remove Member",
         "tags": [
           "cohorts"
+        ]
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}/outcomes": {
+      "get": {
+        "operationId": "outcome_mastery_api_v1_cohorts__cohort_id__outcomes_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohort_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cohort Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutcomeMasteryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Outcome Mastery",
+        "tags": [
+          "analytics"
         ]
       }
     },

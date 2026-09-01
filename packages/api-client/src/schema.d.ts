@@ -317,6 +317,23 @@ export interface paths {
     patch: operations["patch_cohort_api_v1_cohorts__cohort_id__patch"];
     trace?: never;
   };
+  "/api/v1/cohorts/{cohort_id}/activities/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Activity Stats Out */
+    get: operations["activity_stats_out_api_v1_cohorts__cohort_id__activities__activity_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts/{cohort_id}/members": {
     parameters: {
       query?: never;
@@ -346,6 +363,23 @@ export interface paths {
     post?: never;
     /** Remove Member */
     delete: operations["remove_member_api_v1_cohorts__cohort_id__members__user_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cohorts/{cohort_id}/outcomes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Outcome Mastery */
+    get: operations["outcome_mastery_api_v1_cohorts__cohort_id__outcomes_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -565,6 +599,28 @@ export interface components {
       /** Title */
       title: string;
     };
+    /** ActivityStatsOut */
+    ActivityStatsOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Attempts */
+      attempts: number;
+      /** Distribution */
+      distribution: components["schemas"]["BucketOut"][];
+      /** Items */
+      items: components["schemas"]["ItemStatOut"][];
+      /** Kind */
+      kind: string;
+      /** Pass Rate */
+      pass_rate: number | null;
+      /** Students Attempted */
+      students_attempted: number;
+      /** Title */
+      title: string;
+    };
     /** AdminUserOut */
     AdminUserOut: {
       /**
@@ -705,6 +761,13 @@ export interface components {
       /** Target Type */
       target_type: string;
     };
+    /** BucketOut */
+    BucketOut: {
+      /** Count */
+      count: number;
+      /** Label */
+      label: string;
+    };
     /** CohortIn */
     CohortIn: {
       /** Ends On */
@@ -789,6 +852,21 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    /** ItemStatOut */
+    ItemStatOut: {
+      /** Answered */
+      answered: number;
+      /** Correct */
+      correct: number;
+      /** Key */
+      key: string;
+      /** Label */
+      label: string;
+      /** Percent Correct */
+      percent_correct: number | null;
+      /** Top Wrong */
+      top_wrong: components["schemas"]["WrongOut"][];
+    };
     /** JoinIn */
     JoinIn: {
       /** Code */
@@ -855,6 +933,42 @@ export interface components {
       last_activity_at: string | null;
       /** Role */
       role: string;
+      /**
+       * User Id
+       * Format: uuid
+       */
+      user_id: string;
+    };
+    /** OutcomeMasteryOut */
+    OutcomeMasteryOut: {
+      /** Outcomes */
+      outcomes: components["schemas"]["OutcomeRowOut"][];
+    };
+    /** OutcomeRowOut */
+    OutcomeRowOut: {
+      /** Answered */
+      answered: number;
+      /** Code */
+      code: string;
+      /** Percent Correct */
+      percent_correct: number | null;
+      /** Questions */
+      questions: number;
+      /** Students */
+      students: components["schemas"]["OutcomeStudentOut"][];
+      /** Students Below Threshold */
+      students_below_threshold: number;
+      /** Title */
+      title: string;
+    };
+    /** OutcomeStudentOut */
+    OutcomeStudentOut: {
+      /** Answered */
+      answered: number;
+      /** Display Name */
+      display_name: string;
+      /** Percent Correct */
+      percent_correct: number | null;
       /**
        * User Id
        * Format: uuid
@@ -1046,6 +1160,13 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+    };
+    /** WrongOut */
+    WrongOut: {
+      /** Count */
+      count: number;
+      /** Option */
+      option: string;
     };
   };
   responses: never;
@@ -1651,6 +1772,38 @@ export interface operations {
       };
     };
   };
+  activity_stats_out_api_v1_cohorts__cohort_id__activities__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActivityStatsOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_members_api_v1_cohorts__cohort_id__members_get: {
     parameters: {
       query?: never;
@@ -1700,6 +1853,37 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  outcome_mastery_api_v1_cohorts__cohort_id__outcomes_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OutcomeMasteryOut"];
+        };
       };
       /** @description Validation Error */
       422: {

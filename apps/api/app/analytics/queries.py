@@ -3,18 +3,26 @@
 What this file does: `activity_rows(db, cohort)` and `student_rows(db, cohort)` build the
 overview tables from `activity_result` joined through `enrollment` (so only this cohort's
 students count); `student_results(db, cohort, user)` and `student_attempts(db, user)` build
-the per-student detail.
+the per-student detail; `activity_stats(db, cohort, activity)` builds one activity's stats
+(FR-E-06) and `outcome_rows(db, cohort)` builds the outcome mastery table (FR-E-07).
 Used here and why: SQL aggregates (`count`, `avg`) over the rollup rather than in Python so
 a 50-student x 100-activity cohort is one query per table (NFR-01); `_mean` rounds to one
-decimal in Python so the JSON is stable across Postgres versions.
-How it fits the project: FR-E-04/05; every function takes the already-authorised `Cohort`.
+decimal in Python so the JSON is stable across Postgres versions. `activity_stats` and
+`outcome_rows` instead pull the (cohort-scoped, activity- or nothing-scoped) `Attempt` rows
+in one query each — `Attempt.items` is `lazy="selectin"` so that's still one extra query,
+not N+1 — and aggregate in Python, the same split `activity_rows` already uses between "one
+query" and "the snapshot-dependent part" (labels, option text) that only Python can do.
+How it fits the project: FR-E-04/05/06/07; every function takes the already-authorised
+`Cohort`.
 Depends on: `app.attempts.models`, `app.attempts.rollup.ActivityResult`, `app.auth.models`,
-`app.cohorts.models.Enrollment`, `app.content.models`, `app.analytics.schemas`.
+`app.cohorts.models.Enrollment`, `app.content.activity_models` (Outcome, QuestionOutcome),
+`app.content.activity_snapshots` (gradeable_items, item_labels), `app.content.models`,
+`app.analytics.schemas`.
 Used by: `app.analytics.router`.
 """
 
 import uuid
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime
 from typing import Any
 
@@ -23,16 +31,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.analytics.schemas import (
     ActivityRowOut,
+    ActivityStatsOut,
     AttemptDetailOut,
     AttemptItemOut,
+    BucketOut,
+    ItemStatOut,
+    OutcomeRowOut,
+    OutcomeStudentOut,
     StudentResultOut,
     StudentRowOut,
+    WrongOut,
 )
 from app.attempts.models import Attempt
 from app.attempts.rollup import ActivityResult
 from app.auth.models import User
 from app.cohorts.models import Cohort, Enrollment
-from app.content.models import Activity, Lesson, Subject
+from app.content.activity_models import Outcome, QuestionOutcome
+from app.content.activity_snapshots import gradeable_items, item_labels
+from app.content.models import Activity, ContentVersion, Lesson, Subject
+
+# Score distribution buckets for activity_stats, in display order; bounds are inclusive.
+_DISTRIBUTION_BUCKETS = [
+    (0, 49, "0-49"),
+    (50, 69, "50-69"),
+    (70, 79, "70-79"),
+    (80, 89, "80-89"),
+    (90, 100, "90-100"),
+]
 
 
 def _mean(values: list[float]) -> float | None:
@@ -210,3 +235,157 @@ async def student_attempts(db: AsyncSession, user_id: uuid.UUID) -> list[Attempt
         )
         for a, title in rows.all()
     ]
+
+
+async def activity_stats(db: AsyncSession, cohort: Cohort, activity: Activity) -> ActivityStatsOut:
+    """One activity's stats (FR-E-06): attempts/pass rate/distribution over this cohort's
+    submitted attempts, plus per-item correctness resolved against the current snapshot."""
+    # Every submitted attempt on this activity by this cohort's students, items included
+    # (selectin) in the same query.
+    attempts = (
+        await db.scalars(
+            select(Attempt).where(
+                Attempt.activity_id == activity.id,
+                Attempt.status == "submitted",
+                Attempt.user_id.in_(_cohort_students(cohort.id)),
+            )
+        )
+    ).all()
+    # Flashcards leave percent/passed null; excluded from both the pass rate and buckets.
+    passed = [a.passed for a in attempts if a.passed is not None]
+    pass_rate = round(100 * sum(passed) / len(passed), 1) if passed else None
+    percents = [a.percent for a in attempts if a.percent is not None]
+    distribution = [
+        BucketOut(label=label, count=sum(1 for p in percents if lo <= p <= hi))
+        for lo, hi, label in _DISTRIBUTION_BUCKETS
+    ]
+    # Current snapshot for labels/options; a key an attempt has that the current snapshot
+    # doesn't (an older republished version) keeps the raw key as its label, no options.
+    version = await db.get(ContentVersion, activity.current_version_id)
+    assert version is not None
+    labels = item_labels(version.snapshot)
+    defs = gradeable_items(version.snapshot)
+    # Group every graded response by item key: answered/correct counts, and incorrect
+    # `response["choice"]` tallies for top_wrong (both need the whole attempt list, so this
+    # is the Python half of the split described in the module docstring).
+    answered: dict[str, int] = defaultdict(int)
+    correct: dict[str, int] = defaultdict(int)
+    wrong_choices: dict[str, Counter[int]] = defaultdict(Counter)
+    for a in attempts:
+        for item in a.items:
+            answered[item.item_key] += 1
+            if item.correct:
+                correct[item.item_key] += 1
+            elif isinstance(item.response, dict) and isinstance(item.response.get("choice"), int):
+                wrong_choices[item.item_key][item.response["choice"]] += 1
+    items = []
+    for key in sorted(answered):
+        options = defs.get(key, {}).get("body", {}).get("options", [])
+        n, c = answered[key], correct[key]
+        top_wrong = [
+            WrongOut(option=options[choice], count=count)
+            for choice, count in wrong_choices[key].most_common()
+            if 0 <= choice < len(options)
+        ][:2]
+        items.append(
+            ItemStatOut(
+                key=key,
+                label=labels.get(key, key),
+                answered=n,
+                correct=c,
+                percent_correct=round(100 * c / n, 1) if n else None,
+                top_wrong=top_wrong,
+            )
+        )
+    return ActivityStatsOut(
+        activity_id=activity.id,
+        title=activity.title,
+        kind=activity.kind,
+        attempts=len(attempts),
+        students_attempted=len({a.user_id for a in attempts}),
+        pass_rate=pass_rate,
+        distribution=distribution,
+        items=items,
+    )
+
+
+async def outcome_rows(db: AsyncSession, cohort: Cohort) -> list[OutcomeRowOut]:
+    """Per-outcome mastery table (FR-E-07): aggregate and per-student correctness over
+    quiz items tagged with that outcome, for this cohort's students.
+
+    Quiz attempt item keys are `str(question_id)`, so a question's outcome tags apply to
+    any attempt item whose key matches — non-quiz items simply never match (the documented
+    limitation: only quiz questions carry outcome tags today).
+    """
+    outcomes = (await db.scalars(select(Outcome).order_by(Outcome.code))).all()
+    tags = (await db.execute(select(QuestionOutcome.outcome_id, QuestionOutcome.question_id))).all()
+    questions_by_outcome: dict[uuid.UUID, set[uuid.UUID]] = defaultdict(set)
+    outcomes_by_item_key: dict[str, list[uuid.UUID]] = defaultdict(list)
+    for outcome_id, question_id in tags:
+        questions_by_outcome[outcome_id].add(question_id)
+        outcomes_by_item_key[str(question_id)].append(outcome_id)
+    # Cohort students, ordered like the overview's student table (for the per-outcome rows'
+    # always-present per-student breakdown).
+    members = (
+        (
+            await db.execute(
+                select(User)
+                .join(Enrollment, Enrollment.user_id == User.id)
+                .where(Enrollment.cohort_id == cohort.id, Enrollment.role == "student")
+                .order_by(User.display_name)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    # Every submitted attempt for this cohort's students, across every activity, items
+    # included (selectin) in the same query.
+    attempts = (
+        await db.scalars(
+            select(Attempt).where(
+                Attempt.user_id.in_(_cohort_students(cohort.id)), Attempt.status == "submitted"
+            )
+        )
+    ).all()
+    # (answered, correct) per (outcome_id, user_id), built from every matching item.
+    per_student: dict[tuple[uuid.UUID, uuid.UUID], list[int]] = defaultdict(lambda: [0, 0])
+    for a in attempts:
+        for item in a.items:
+            for outcome_id in outcomes_by_item_key.get(item.item_key, []):
+                stat = per_student[(outcome_id, a.user_id)]
+                stat[0] += 1
+                if item.correct:
+                    stat[1] += 1
+    rows = []
+    for outcome in outcomes:
+        students = []
+        total_answered = total_correct = below_threshold = 0
+        for u in members:
+            answered, correct = per_student.get((outcome.id, u.id), [0, 0])
+            total_answered += answered
+            total_correct += correct
+            percent = round(100 * correct / answered, 1) if answered else None
+            if answered > 0 and percent is not None and percent < cohort.threshold_percent:
+                below_threshold += 1
+            students.append(
+                OutcomeStudentOut(
+                    user_id=u.id,
+                    display_name=u.display_name,
+                    answered=answered,
+                    percent_correct=percent,
+                )
+            )
+        rows.append(
+            OutcomeRowOut(
+                code=outcome.code,
+                title=outcome.title,
+                questions=len(questions_by_outcome.get(outcome.id, set())),
+                answered=total_answered,
+                percent_correct=(
+                    round(100 * total_correct / total_answered, 1) if total_answered else None
+                ),
+                students_below_threshold=below_threshold,
+                students=students,
+            )
+        )
+    return rows
