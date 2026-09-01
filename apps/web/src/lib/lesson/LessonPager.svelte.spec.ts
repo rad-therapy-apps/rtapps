@@ -125,7 +125,9 @@ const attempt: AttemptOut = {
 	score: null,
 	max_score: null,
 	percent: null,
-	passed: null
+	passed: null,
+	// Task 5 made `items` a required field on AttemptOut (attempt resume); a fresh attempt has none.
+	items: []
 };
 
 // Builds a fake grading result matching the fake `post` below: choice 1 ("B"/"D") is always correct.

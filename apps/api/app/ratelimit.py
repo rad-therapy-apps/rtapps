@@ -41,9 +41,7 @@ def reset() -> None:
     _buckets.clear()
 
 
-def rate_limit(
-    name: str, *, limit: int = 10, window_s: float = 60.0
-) -> Callable[..., object]:
+def rate_limit(name: str, *, limit: int = 10, window_s: float = 60.0) -> Callable[..., object]:
     """
     FastAPI dependency factory for per-IP token-bucket rate limiting.
 
