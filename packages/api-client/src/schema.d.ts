@@ -649,6 +649,11 @@ export interface components {
        * Format: uuid
        */
       id: string;
+      /**
+       * Items
+       * @default []
+       */
+      items: components["schemas"]["SavedItemOut"][];
       /** Max Score */
       max_score: number | null;
       /** Passed */
@@ -898,6 +903,21 @@ export interface components {
     /** RoleIn */
     RoleIn: {
       role: components["schemas"]["UserRole"];
+    };
+    /** SavedItemOut */
+    SavedItemOut: {
+      /** Correct */
+      correct: boolean | null;
+      /** Item Key */
+      item_key: string;
+      /** Max Score */
+      max_score: number | null;
+      /** Response */
+      response: {
+        [key: string]: unknown;
+      };
+      /** Score */
+      score: number | null;
     };
     /** StudentDetailOut */
     StudentDetailOut: {

@@ -328,6 +328,14 @@
             "title": "Id",
             "type": "string"
           },
+          "items": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SavedItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
           "max_score": {
             "anyOf": [
               {
@@ -1066,6 +1074,61 @@
           "role"
         ],
         "title": "RoleIn",
+        "type": "object"
+      },
+      "SavedItemOut": {
+        "properties": {
+          "correct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct"
+          },
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          },
+          "max_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Score"
+          },
+          "response": {
+            "additionalProperties": true,
+            "title": "Response",
+            "type": "object"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          }
+        },
+        "required": [
+          "item_key",
+          "response",
+          "correct",
+          "score",
+          "max_score"
+        ],
+        "title": "SavedItemOut",
         "type": "object"
       },
       "StudentDetailOut": {

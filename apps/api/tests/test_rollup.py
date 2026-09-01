@@ -17,7 +17,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.rollup import ActivityResult
+from app.content.activity_importer import import_any
 from tests.conftest import register, seed_lesson
+from tests.test_activity_importer import SUBJECT
 
 
 async def _run_attempt(client: AsyncClient, activity_id: str, choice: int | None) -> str:
@@ -78,3 +80,23 @@ async def test_replay_does_not_double_count(client: AsyncClient, db: AsyncSessio
         assert r.status_code == 200
     row = await db.scalar(select(ActivityResult))
     assert row is not None and row.attempts == 1
+
+
+async def test_flashcards_completion_rollup(client: AsyncClient, db: AsyncSession) -> None:
+    """Flashcards: completion-only submission leaves best_percent None, mastery attempted."""
+    deck = await import_any(
+        db,
+        {
+            "subject": SUBJECT,
+            "flashcards": {"slug": "f1", "title": "F", "cards": [{"term": "T", "definition": "D"}]},
+        },
+    )
+    await register(client)
+    attempt = (await client.post(f"/api/v1/activities/{deck.id}/attempts")).json()
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
+    )
+    assert r.status_code == 200
+    row = await db.scalar(select(ActivityResult))
+    assert row is not None and row.attempts == 1
+    assert row.best_percent is None and row.mastery == "attempted"

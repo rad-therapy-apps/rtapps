@@ -16,8 +16,8 @@ through the one `attempt`/`attempt_item` schema, graded server-side against the 
 lesson.
 
 Depends on: `app.attempts.models`, `app.attempts.rollup`, `app.attempts.schemas`,
-`app.auth.deps.require_user`, `app.auth.models.User`, `app.content.models`
-(Activity, ContentVersion, Lesson), `app.content.snapshot.knowledge_checks`,
+`app.auth.deps.require_user`, `app.auth.models` (User, UserRole), `app.content.models`
+(Activity, ContentVersion, Lesson), `app.content.activity_snapshots.gradeable_items`,
 `app.db.get_session`, `app.errors.Problem`, `app.grading.single_choice.grade_single_choice`.
 Used by: `app/main.py` mounts this router; `tests/test_attempts.py`.
 """
@@ -34,9 +34,9 @@ from app.attempts.models import Attempt, AttemptItem
 from app.attempts.rollup import upsert_activity_result
 from app.attempts.schemas import AttemptOut, ItemGradeOut, ItemIn, ResultOut
 from app.auth.deps import require_user
-from app.auth.models import User
+from app.auth.models import User, UserRole
+from app.content.activity_snapshots import gradeable_items
 from app.content.models import Activity, ContentVersion, Lesson
-from app.content.snapshot import knowledge_checks
 from app.db import get_session
 from app.errors import Problem
 from app.grading.single_choice import grade_single_choice
@@ -70,6 +70,23 @@ async def start_attempt(
     # than distinguishing "doesn't exist" from "not published yet".
     if activity is None or activity.current_version_id is None or activity.status != "published":
         raise Problem(404, "Activity not found")
+    # ADR-0006: students cannot start attempts on assessment activities (same 404).
+    if activity.access != "practice" and user.role == UserRole.student:
+        raise Problem(404, "Activity not found")
+    # Resume: one in-progress attempt per (user, activity) — return it with its saved
+    # items instead of stacking a duplicate (FR: attempt resume).
+    existing = await db.scalar(
+        select(Attempt)
+        .where(
+            Attempt.user_id == user.id,
+            Attempt.activity_id == activity.id,
+            Attempt.status == "in_progress",
+        )
+        .order_by(Attempt.started_at.desc())
+        .limit(1)
+    )
+    if existing is not None:
+        return existing
     # Pin content_version_id now: this is the ADR-0004 guarantee that later edits/republishes
     # of the lesson can never change what this attempt is graded against.
     attempt = Attempt(
@@ -97,7 +114,7 @@ async def grade_item(
     # student actually saw, even if the author has since republished.
     version = await db.get(ContentVersion, attempt.content_version_id)
     assert version is not None
-    block = knowledge_checks(version.snapshot).get(body.item_key)
+    block = gradeable_items(version.snapshot).get(body.item_key)
     if block is None:
         raise Problem(404, "Unknown item key")
     # Grading always runs server-side, against the snapshot's stored answer key — the
@@ -145,19 +162,25 @@ async def submit_attempt(
         raise Problem(409, f"Attempt is {attempt.status}")
     version = await db.get(ContentVersion, attempt.content_version_id)
     assert version is not None
-    # Sum only the pinned snapshot's own knowledge checks; an item answered under a
-    # different (older) snapshot key wouldn't match here and is simply excluded.
-    checks = knowledge_checks(version.snapshot)
-    scored = {i.item_key: i.score or 0.0 for i in attempt.items}
-    score = sum(scored.get(key, 0.0) for key in checks)
-    max_score = float(len(checks))
-    percent = round(100.0 * score / max_score, 2) if max_score else 100.0
-    pass_percent = float(version.snapshot["activity"]["config"].get("pass_percent", 80))
+    kind = version.snapshot["activity"]["kind"]
+    if kind == "flashcards":
+        # Completion-only: no score fields at all (max_score 0 must not fake percent=100).
+        attempt.score = attempt.max_score = attempt.percent = None
+        attempt.passed = None
+    else:
+        # Sum only the pinned snapshot's own gradeable items; an item answered under a
+        # different (older) snapshot key wouldn't match here and is simply excluded.
+        items = gradeable_items(version.snapshot)
+        scored = {i.item_key: i.score or 0.0 for i in attempt.items}
+        score = sum(scored.get(key, 0.0) for key in items)
+        max_score = float(len(items))
+        percent = round(100.0 * score / max_score, 2) if max_score else 100.0
+        pass_percent = float(version.snapshot["activity"]["config"].get("pass_percent", 80))
+        attempt.score = score
+        attempt.max_score = max_score
+        attempt.percent = percent
+        attempt.passed = percent >= pass_percent
     now = datetime.now(UTC)
-    attempt.score = score
-    attempt.max_score = max_score
-    attempt.percent = percent
-    attempt.passed = percent >= pass_percent
     attempt.status = "submitted"
     attempt.submitted_at = now
     attempt.idempotency_key = idempotency_key

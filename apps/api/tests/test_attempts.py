@@ -25,8 +25,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.models import Attempt
+from app.content.activity_importer import import_any
 from app.content.models import Activity
 from tests.conftest import register, seed_lesson
+from tests.test_activity_importer import QUIZ_DOC, SUBJECT
 
 
 async def _start(client: AsyncClient) -> dict[str, Any]:
@@ -177,3 +179,112 @@ async def test_abandoned_attempt_cannot_be_submitted_or_graded(
         json={"item_key": "lq_page2_1", "response": {"choice": 1}},
     )
     assert r.status_code == 409
+
+
+async def test_start_attempt_resumes_in_progress(client: AsyncClient, db: AsyncSession) -> None:
+    """Resume: return existing in-progress attempt instead of creating a duplicate."""
+    activity = await import_any(db, QUIZ_DOC)
+    await register(client)
+    r1 = await client.post(f"/api/v1/activities/{activity.id}/attempts")
+    assert r1.status_code == 201 and r1.json()["items"] == []
+    snap = (await client.get(f"/api/v1/activities/{activity.id}")).json()["snapshot"]
+    key = snap["quiz"]["questions"][0]["key"]
+    await client.post(
+        f"/api/v1/attempts/{r1.json()['id']}/items",
+        json={"item_key": key, "response": {"choice": 0}},
+    )
+    r2 = await client.post(f"/api/v1/activities/{activity.id}/attempts")
+    assert r2.json()["id"] == r1.json()["id"]  # resumed, not duplicated
+    assert r2.json()["items"][0]["item_key"] == key  # saved item comes back
+    assert r2.json()["items"][0]["response"] == {"choice": 0}
+
+
+async def test_quiz_submit_grades_and_passes(client: AsyncClient, db: AsyncSession) -> None:
+    """Quiz submit: score and pass on all correct answers."""
+    activity = await import_any(db, QUIZ_DOC)  # answers: q1 -> 0, q2 -> 1
+    await register(client)
+    snap = (await client.get(f"/api/v1/activities/{activity.id}")).json()["snapshot"]
+    attempt = (await client.post(f"/api/v1/activities/{activity.id}/attempts")).json()
+    for q, choice in zip(snap["quiz"]["questions"], (0, 1), strict=True):
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/items",
+            json={"item_key": q["key"], "response": {"choice": choice}},
+        )
+        assert r.json()["correct"] is True
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
+    )
+    assert r.json()["percent"] == 100.0 and r.json()["passed"] is True
+
+
+async def test_matching_and_sequencing_grade_via_items(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    """Matching: grade via per-item responses, compute percent on submit."""
+    m = await import_any(
+        db,
+        {
+            "subject": SUBJECT,
+            "matching": {
+                "slug": "m1",
+                "title": "M",
+                "pairs": [
+                    {"term": "T1", "definition": "Alpha"},
+                    {"term": "T2", "definition": "Beta"},
+                ],
+            },
+        },
+    )
+    await register(client)
+    snap = (await client.get(f"/api/v1/activities/{m.id}")).json()["snapshot"]
+    defs = snap["matching"]["definitions"]  # sorted: ["Alpha", "Beta"]
+    attempt = (await client.post(f"/api/v1/activities/{m.id}/attempts")).json()
+    # T1 -> Alpha correct; T2 -> Alpha wrong.
+    k1, k2 = (t["key"] for t in snap["matching"]["terms"])
+    assert (
+        await client.post(
+            f"/api/v1/attempts/{attempt['id']}/items",
+            json={"item_key": k1, "response": {"choice": defs.index("Alpha")}},
+        )
+    ).json()["correct"]
+    assert not (
+        await client.post(
+            f"/api/v1/attempts/{attempt['id']}/items",
+            json={"item_key": k2, "response": {"choice": defs.index("Alpha")}},
+        )
+    ).json()["correct"]
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k2"}
+    )
+    assert r.json()["percent"] == 50.0 and r.json()["passed"] is False
+
+
+async def test_flashcards_submit_is_completion_only(client: AsyncClient, db: AsyncSession) -> None:
+    """Flashcards: submit with no score/percent/passed fields."""
+    deck = await import_any(
+        db,
+        {
+            "subject": SUBJECT,
+            "flashcards": {"slug": "f1", "title": "F", "cards": [{"term": "T", "definition": "D"}]},
+        },
+    )
+    await register(client)
+    attempt = (await client.post(f"/api/v1/activities/{deck.id}/attempts")).json()
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k3"}
+    )
+    body = r.json()
+    assert body["status"] == "submitted"
+    assert body["score"] is None and body["percent"] is None and body["passed"] is None
+
+
+async def test_student_cannot_start_assessment_attempt(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    """Students: cannot start attempts on assessment activities (404)."""
+    activity = await import_any(db, QUIZ_DOC)
+    activity.access = "assessment"
+    await db.flush()
+    await register(client)
+    r = await client.post(f"/api/v1/activities/{activity.id}/attempts")
+    assert r.status_code == 404
