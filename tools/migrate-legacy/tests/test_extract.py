@@ -1,4 +1,20 @@
-"""Test the JS array literal extractor (extract.js_arrays)."""
+"""What this file tests: `migrate_legacy.extract.js_arrays`, the JS array literal extractor
+that parses quiz, flashcard, matching, and sequencing data from legacy HTML pages. Tests
+cover both synthetic HTML examples and real legacy fixture files.
+
+Used here and why: the extractor is the first stage of the activity-data migration pipeline.
+Unit tests verify correct parsing of well-formed arrays, graceful handling of unparseable
+JS, and preservation of edge cases (apostrophes in strings, bracket literals in content).
+End-to-end tests against fixtures (quiz_page.html, flashcards_page.html) validate that
+the extractor retrieves the correct data structure and cardinality from real legacy content.
+
+How it fits the project: implements the extraction stage of the activity-data migration path
+(Task 6/7 of plan 3a). The js_arrays function is the entry point for the whole pipeline;
+these tests verify it extracts data in the shape that classify_arrays and the converters expect.
+
+Works with: `migrate_legacy.activities` (classify_arrays, converters consume the extracted arrays).
+Used by: `make test-tools` / `uv run pytest` (from `tools/migrate-legacy`).
+"""
 
 from pathlib import Path
 

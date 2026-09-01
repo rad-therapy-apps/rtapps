@@ -1,4 +1,21 @@
-"""Test activity classification and conversion (activities module)."""
+"""What this file tests: `migrate_legacy.activities` classification and conversion functions
+(convert_quiz, convert_flashcards, convert_matching, convert_sequencing) that transform
+legacy JS array formats into import-doc structures; includes unit tests for each converter
+and end-to-end tests against fixture HTML pages.
+
+Used here and why: each converter is tested in isolation with synthetic data and against
+real legacy fixture files (quiz_page.html, flashcards_page.html). Golden-dict assertions
+verify the entire converted document structure, not just fields; every question/card is
+asserted, catching any missed or partially-converted data. This ensures the converters
+handle edge cases (missing explanations, duplicate definitions, unordered rows) correctly.
+
+How it fits the project: implements the activity-data migration path (Task 6/7 of plan 3a).
+The classify_arrays function is tested as a router; each converter is tested in isolation
+and as part of the end-to-end extraction→classification→conversion pipeline.
+
+Works with: `migrate_legacy.extract.js_arrays` (input); `migrate_legacy.activities` converters.
+Used by: `make test-tools` / `uv run pytest` (from `tools/migrate-legacy`).
+"""
 
 from pathlib import Path
 
@@ -60,7 +77,7 @@ def test_convert_flashcards_passthrough() -> None:
 
 
 def test_convert_quiz_from_fixture() -> None:
-    """End-to-end: extract and convert golden quiz fixture."""
+    """End-to-end: extract and convert golden quiz fixture; assert entire document."""
     fixture_path = Path(__file__).parent / "fixtures" / "quiz_page.html"
     html = fixture_path.read_text(encoding="utf-8")
     notes: list[str] = []
@@ -71,25 +88,51 @@ def test_convert_quiz_from_fixture() -> None:
         title="Radiation Effects: Quiz",
         notes=notes,
     )
-    quiz = doc["quiz"]
-    assert quiz["slug"] == "radiation-effects-quiz"
-    assert quiz["title"] == "Radiation Effects: Quiz"
-    assert quiz["pass_percent"] == 80
-    assert quiz["shuffle"] is True
-    assert len(quiz["questions"]) == 3
-    # Q1: answer is "Atrophy" (index 0)
-    q0 = quiz["questions"][0]
-    assert q0["stem"].startswith("After a high radiation dose")
-    assert q0["options"] == ["Atrophy", "Desquamation", "Erythema", "Radiodermatitis"]
-    assert q0["answer"] == 0
-    # Q2: answer is "LD 50/60" (index 2)
-    assert quiz["questions"][1]["answer"] == 2
-    # Q3: answer is "Small intestine" (index 3)
-    assert quiz["questions"][2]["answer"] == 3
+    expected = {
+        "quiz": {
+            "slug": "radiation-effects-quiz",
+            "title": "Radiation Effects: Quiz",
+            "pass_percent": 80,
+            "shuffle": True,
+            "questions": [
+                {
+                    "stem": (
+                        "After a high radiation dose, the shrinkage of organs and "
+                        "tissues is referred to as:"
+                    ),
+                    "options": ["Atrophy", "Desquamation", "Erythema", "Radiodermatitis"],
+                    "answer": 0,
+                    "explanation": None,
+                    "outcomes": [],
+                },
+                {
+                    "stem": (
+                        "Which of the following measures of lethality is perhaps "
+                        "the most accurate for human survival?"
+                    ),
+                    "options": ["LD 10/30", "LD 50/30", "LD 50/60", "LD 100/60"],
+                    "answer": 2,
+                    "explanation": None,
+                    "outcomes": [],
+                },
+                {
+                    "stem": (
+                        "In humans with the gastrointestinal form of ARS, the part "
+                        "of the body most severely affected is the:"
+                    ),
+                    "options": ["Brain", "Heart", "Large intestine", "Small intestine"],
+                    "answer": 3,
+                    "explanation": None,
+                    "outcomes": [],
+                },
+            ],
+        }
+    }
+    assert doc == expected
 
 
 def test_convert_flashcards_from_fixture() -> None:
-    """End-to-end: extract and convert golden flashcard fixture."""
+    """End-to-end: extract and convert golden flashcard fixture; assert entire document."""
     fixture_path = Path(__file__).parent / "fixtures" / "flashcards_page.html"
     html = fixture_path.read_text(encoding="utf-8")
     notes: list[str] = []
@@ -100,15 +143,43 @@ def test_convert_flashcards_from_fixture() -> None:
         title="Oncology Vocabulary",
         notes=notes,
     )
-    flashcards = doc["flashcards"]
-    assert flashcards["slug"] == "oncology-vocabulary"
-    assert flashcards["title"] == "Oncology Vocabulary"
-    assert len(flashcards["cards"]) == 4
-    assert flashcards["cards"][0]["term"] == "Oncology"
-    card0_def = flashcards["cards"][0]["definition"]
-    assert "prevention, diagnosis, and treatment" in card0_def
-    assert flashcards["cards"][1]["term"] == "Cancer"
-    assert flashcards["cards"][3]["term"] == "Malignant Tumor"
+    expected = {
+        "flashcards": {
+            "slug": "oncology-vocabulary",
+            "title": "Oncology Vocabulary",
+            "cards": [
+                {
+                    "term": "Oncology",
+                    "definition": (
+                        "The branch of medicine that deals with the prevention, "
+                        "diagnosis, and treatment of tumors and cancer."
+                    ),
+                },
+                {
+                    "term": "Cancer",
+                    "definition": (
+                        "A disease characterized by the uncontrolled growth and "
+                        "spread of abnormal cells."
+                    ),
+                },
+                {
+                    "term": "Benign Tumor",
+                    "definition": (
+                        "A non-cancerous growth that does not spread to other "
+                        "parts of the body and is usually not life-threatening."
+                    ),
+                },
+                {
+                    "term": "Malignant Tumor",
+                    "definition": (
+                        "A cancerous growth that can invade nearby tissues and "
+                        "spread (metastasize) to other parts of the body."
+                    ),
+                },
+            ],
+        }
+    }
+    assert doc == expected
 
 
 def test_convert_matching_drops_duplicate_definitions() -> None:
