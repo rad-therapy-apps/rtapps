@@ -16,3 +16,7 @@ packages:
   # packages/schemas, packages/api-client — shared/generated packages (filtered as
   # `@rtapps/api-client`, etc.).
   - packages/*
+allowBuilds:
+  # @sentry/sveltekit pulls in @sentry/cli (source-map upload) as an optional dep; its
+  # postinstall isn't needed since we don't run its CLI (no upload step configured).
+  '@sentry/cli': false

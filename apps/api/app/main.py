@@ -24,6 +24,7 @@ served directly by Uvicorn (`app.main:app`) in dev/prod.
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI
 
 from app import health
@@ -60,6 +61,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # settings defaults to the process-wide cached Settings, but callers (tests,
     # app/openapi_export.py) can pass their own to point at a different database/env.
     settings = settings or load_settings()
+    if settings.sentry_dsn:
+        # Opt-in (blank dsn = no-op): errors only, no performance tracing/sampling.
+        sentry_sdk.init(dsn=settings.sentry_dsn, environment=settings.env)
     docs_enabled = settings.env != "prod"  # hide interactive docs/schema in production
     app = FastAPI(
         title="RTApps API",
