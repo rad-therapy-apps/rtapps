@@ -7,7 +7,7 @@
 
 ## Context
 
-The legacy workbook is ~95 paged lessons, ~15 quizzes, flashcard decks, matching, sequencing and ~10 calculators, all as hand-edited HTML with inline JavaScript (155 of 161 pages carry bespoke scripts), no metadata, no shared question bank, answer keys shipped to the browser. The mentor — the content author — is non-technical and must be able to edit and publish a lesson unaided (Phase 3 exit criterion). Students must never receive answer keys. Educator analytics need a stable reference to *what the student saw* even after the author edits it. Rich text must include headings, lists, tables, images from object storage, callouts and KaTeX math; nothing else.
+The legacy workbook is ~95 paged lessons, ~15 quizzes, flashcard decks, matching, sequencing and ~10 calculators, all as hand-edited HTML with inline JavaScript (155 of 161 pages carry bespoke scripts), no metadata, no shared question bank, answer keys shipped to the browser. The mentor — the content author — must be able to edit and publish a lesson unaided (Phase 3 exit criterion). Students must never receive answer keys. Educator analytics need a stable reference to *what the student saw* even after the author edits it. Rich text must include headings, lists, tables, images from object storage, callouts and KaTeX math; nothing else.
 
 Forces: authoring UI is the schedule sink (identified risk); XSS from author content must be impossible by construction, not by sanitisation; content must be migrated from legacy HTML by a script with a per-page report; the whole system runs on one VM at zero cost.
 
