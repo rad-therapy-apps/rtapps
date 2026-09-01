@@ -1,0 +1,75 @@
+{
+  "quiz": {
+    "slug": "ct-and-radioisotope-safety-quiz",
+    "title": "CT & Radioisotope Safety: Quiz",
+    "pass_percent": 80,
+    "shuffle": true,
+    "questions": [
+      {
+        "stem": "PET (Positron Emission Tomography) is an important imaging modality because it primarily examines:",
+        "options": [
+          "Anatomical structures",
+          "Bone density",
+          "Metabolic processes",
+          "Blood flow speed"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "In CT imaging, what is the effect of increasing the pitch (e.g., from 1 to 1.5)?",
+        "options": [
+          "Patient dose increases",
+          "Patient dose decreases",
+          "Image noise decreases",
+          "Scan time increases"
+        ],
+        "answer": 1,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Annihilation radiation, the basis for PET imaging, consists of two photons each with an energy of:",
+        "options": [
+          "140 keV",
+          "511 keV",
+          "1.02 MeV",
+          "Varies with the isotope"
+        ],
+        "answer": 1,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Miscentering a patient by just 2 cm in a CT scanner can increase their radiation dose by as much as:",
+        "options": [
+          "5%",
+          "10%",
+          "25%",
+          "50%"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "In the event of a radiological emergency involving radioactive iodine, what can be administered to block its uptake in the thyroid gland?",
+        "options": [
+          "Potassium iodide",
+          "Barium sulfate",
+          "Saline solution",
+          "FDG"
+        ],
+        "answer": 0,
+        "explanation": null,
+        "outcomes": []
+      }
+    ]
+  },
+  "subject": {
+    "slug": "radiation-protection",
+    "title": "Radiation Protection",
+    "order": 9
+  }
+}

@@ -1,0 +1,783 @@
+{
+  "subject": {
+    "slug": "sectional-anatomy",
+    "title": "Sectional Anatomy",
+    "order": 11
+  },
+  "lesson": {
+    "slug": "head-and-neck",
+    "title": "Sectional Anatomy: Head & Neck",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Imaging the Neck \u2014 Approach and Windows",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The neck packs vessels, airway, glands, cartilage, and nodes into a small volume, so planning uses "
+                    },
+                    {
+                      "type": "text",
+                      "text": "thin-slice contrast-enhanced CT",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", often fused with MRI/PET. Read on a soft-tissue window, the anatomy changes dramatically over just a few centimeters \u2014 which is why we work level by level."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Superior neck, near the nasopharynx. Identify the air-filled nasopharynx centrally, the parotid and masticator regions laterally, and the mandible anterolaterally."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Vertebral levels give fast craniocaudal orientation here: hard palate ~C1, "
+                        },
+                        {
+                          "type": "text",
+                          "text": "hyoid ~C3",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "thyroid cartilage ~C4\u2013C5",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "cricoid ~C6",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Pharynx \u2014 Three Tiers",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The pharynx divides into three tiers that map directly onto disease-site definitions:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Region"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Extent"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Nasopharynx",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Skull base to soft palate"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Oropharynx",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Soft palate to hyoid (tonsils, base of tongue)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Hypopharynx",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Hyoid to cricoid; includes the pyriform sinuses"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Oropharyngeal level. Identify the tongue base centrally, the rami of the mandible, and the parapharyngeal fat planes whose loss can signal tumor spread."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "hn_p2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The pyriform sinuses are found in which pharyngeal subdivision?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Nasopharynx",
+              "Oropharynx",
+              "Hypopharynx"
+            ],
+            "answer": 2,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The pyriform sinuses are recesses of the hypopharynx, lateral to the laryngeal inlet between the hyoid and cricoid."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Larynx",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The laryngeal skeleton is a stack of cartilages best appreciated in sequence: the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "epiglottis",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "hyoid bone",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "thyroid cartilage",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "cricoid cartilage",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the only complete cartilage ring, marking the larynx\u2192trachea and pharynx\u2192esophagus transition."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Laryngeal level. Identify the airway centrally, the thyroid cartilage forming the anterior shield, and the carotid spaces posterolaterally."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "hn_p3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which laryngeal cartilage is the only complete ring and marks the pharynx-to-esophagus transition (~C6)?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Thyroid cartilage",
+              "Cricoid cartilage",
+              "Epiglottis"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The cricoid is the only complete cartilage ring; at ~C6 it marks the transition of larynx to trachea and pharynx to esophagus."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Vessels, Glands, and Nodal Levels",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The carotid sheath is the constant reference on every axial neck slice."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lower neck. Identify the thyroid gland straddling the trachea, the paired common carotid arteries and internal jugular veins in the carotid spaces, and the esophagus behind the trachea."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Cervical node levels I\u2013VII",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " are the backbone of head-and-neck target definition \u2014 elective nodal volumes are drawn by level. Recognizing the boundaries between levels on axial CT is essential; explore them in the 3D lymphatics tool linked at the end."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "hn_p4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which paired structures lie in the carotid space immediately lateral to the airway?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Common carotid artery and internal jugular vein",
+              "Aorta and inferior vena cava"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The carotid sheath (common carotid artery, internal jugular vein, vagus nerve) flanks the airway. Aorta and IVC are thoracic/abdominal."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Anatomic Verification for Head & Neck",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The neck is "
+                    },
+                    {
+                      "type": "text",
+                      "text": "semi-rigid and deformable",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ": the cervical spine flexes and extends, and the mandible and shoulders move independently, so verification blends bony and soft-tissue judgment."
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Immobilization with a "
+                            },
+                            {
+                              "type": "text",
+                              "text": "5-point thermoplastic mask",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " including the shoulders."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Daily CBCT matched to the cervical vertebrae, watching "
+                            },
+                            {
+                              "type": "text",
+                              "text": "neck flexion/extension",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " and shoulder position a single rigid match can miss."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Weight loss and tumor shrinkage",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " change the external contour and internal anatomy over a course, frequently triggering "
+                            },
+                            {
+                              "type": "text",
+                              "text": "adaptive re-planning",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "hn_p5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why does head-and-neck verification often need more than a single rigid bony match?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The neck deforms (flexion/extension) and changes with weight loss and tumor shrinkage over a course",
+              "The cervical vertebrae are invisible on CBCT"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Deformation and anatomic change over treatment mean rigid alignment alone can miss real change \u2014 a common trigger for adaptive re-planning."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've read the neck from nasopharynx to thyroid on real CT \u2014 the three pharyngeal tiers, the laryngeal cartilages, the carotid/jugular vessels and thyroid \u2014 connected it to cervical nodal levels, and seen why deformation makes H&N a bony "
+                    },
+                    {
+                      "type": "text",
+                      "text": "and",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " soft-tissue verification problem."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cross-reference: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Head & Neck Treatment Planning"
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "3D Head & Neck Lymphatics model"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,837 @@
+{
+  "subject": {
+    "slug": "treatment-delivery-procedures",
+    "title": "Treatment Delivery Procedures",
+    "order": 12
+  },
+  "lesson": {
+    "slug": "treatment-delivery-procedures-field-size",
+    "title": "Console Operations: Field Size",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Introduction to Field Size",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose: Why This Matters This lesson introduces how treatment field sizes are defined and set using the Linac's secondary collimators (jaws). Accurate field size definition is fundamental to ensuring the radiation beam covers the intended target volume while sparing surrounding healthy tissue."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do You will learn about the concept of field size, the role of X and Y collimator jaws, symmetric vs. asymmetric field settings, and how these parameters are typically displayed and controlled from the console."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success By the end, you should be able to define field size, identify the collimator jaws, differentiate between symmetric and asymmetric fields, and understand how individual jaw positions determine overall field dimensions."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The field size is typically defined at the machine's "
+                    },
+                    {
+                      "type": "text",
+                      "text": "isocenter",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which is the point where the axes of rotation of the gantry, collimator, and couch intersect."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Collimator Jaws - Defining the Field",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Linear accelerators are equipped with "
+                    },
+                    {
+                      "type": "text",
+                      "text": "secondary collimators",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", often called \"jaws,\" located in the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "treatment head",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " after components like the flattening filter or scattering foil and ion chambers[cite: 398]. These are typically made of a high-density material like "
+                    },
+                    {
+                      "type": "text",
+                      "text": "lead or tungsten",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "[cite: 399]."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The jaws can be moved to define the radiation field's rectangular shape and size, typically up to a maximum of "
+                    },
+                    {
+                      "type": "text",
+                      "text": "40x40 cm at the isocenter",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "[cite: 401]. Their movement is controlled by the RTT via a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "remote hand pendant in the treatment room or through the software at the treatment machine console",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " outside the room[cite: 399]."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "X and Y Jaws:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Y Jaws (Y1 and Y2):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " These two opposing jaws define the field "
+                            },
+                            {
+                              "type": "text",
+                              "text": "length"
+                            },
+                            {
+                              "type": "text",
+                              "text": " (often superior-inferior). Y1 and Y2 represent the position of each jaw edge relative to the central axis."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "X Jaws (X1 and X2):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " These two opposing jaws define the field "
+                            },
+                            {
+                              "type": "text",
+                              "text": "width"
+                            },
+                            {
+                              "type": "text",
+                              "text": " (often left-right). X1 and X2 represent the position of each jaw edge relative to the central axis."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The total field size is expressed as "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Width (X-dimension) x Length (Y-dimension)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " (e.g., 10 cm x 15 cm). These overall dimensions are always "
+                    },
+                    {
+                      "type": "text",
+                      "text": "positive values",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and are typically displayed on the console rounded to the nearest tenth of a centimeter."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Accessory slots for items like wedges or custom blocks are generally located just below these secondary collimators[cite: 403]."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Symmetric vs. Asymmetric Fields",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Modern Linacs allow for both symmetric and asymmetric jaw settings[cite: 400]."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Symmetric Fields:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The isocenter is at the geometric center of the radiation field."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Opposing jaw pairs are equidistant from the central axis. For example: "
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            },
+                            {
+                              "type": "text",
+                              "text": "If X1 is set to -5.0 cm, then X2 is set to +5.0 cm, resulting in a total X-width of 10.0 cm."
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            },
+                            {
+                              "type": "text",
+                              "text": "If Y1 is set to -7.5 cm, then Y2 is set to +7.5 cm, resulting in a total Y-length of 15.0 cm."
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Asymmetric Fields (Independent Jaws):"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The isocenter is "
+                            },
+                            {
+                              "type": "text",
+                              "text": "not",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " at the geometric center of the field."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Each of the four jaws (X1, X2, Y1, Y2) can be positioned independently[cite: 400]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Useful for techniques like half-beam blocking or field matching without shifting the patient or isocenter. "
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Example: X1 at 0.0 cm (central axis) and X2 at +8.0 cm creates an 8.0 cm wide field shifted entirely to one side of the X-axis isocenter."
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Regardless of symmetric or asymmetric settings, the resulting "
+                    },
+                    {
+                      "type": "text",
+                      "text": "total field width and length are always positive values",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and usually expressed to one decimal place (e.g., 12.5 cm x 8.0 cm)."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page3_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: If X1 = -7.0 cm and X2 = +7.0 cm, and Y1 = -10.0 cm and Y2 = +10.0 cm, what is the total field size?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "7.0cm x 10.0cm",
+              "14.0cm x 20.0cm",
+              "3.5cm x 5.0cm"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Console Display & Field Visualization",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The Linac control console provides digital readouts of these settings."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Console Readouts:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Individual jaw positions (X1, X2, Y1, Y2) are displayed, typically in centimeters, indicating their position relative to the isocenter (e.g., X1= -5.0 cm, X2= +5.0 cm)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The total field width (e.g., 10.0 cm) and total field length (e.g., 15.0 cm) are usually calculated and displayed automatically. These are positive values, often rounded to the nearest tenth of a centimeter."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Field Light Visualizer:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The Linac's field light projects onto the patient, visually representing the area defined by the X and Y jaws."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Crosshairs or other markings within the light field indicate the position of the central axis (isocenter)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "RTTs use this to align the radiation field with the patient's skin marks or anatomical landmarks."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Daily QA checks verify the congruence between the light field and the actual radiation field to ensure accuracy."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Summary & Activity Link",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understanding field size definition and control is fundamental."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Recap:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Field size is defined by "
+                            },
+                            {
+                              "type": "text",
+                              "text": "X-jaws (width)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " and "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Y-jaws (length)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", located in the treatment head[cite: 398]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Jaws are controlled via console or pendant [cite: 399] and can create "
+                            },
+                            {
+                              "type": "text",
+                              "text": "symmetric",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " or "
+                            },
+                            {
+                              "type": "text",
+                              "text": "asymmetric",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " fields[cite: 400]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Total field dimensions are always positive values, typically displayed to the nearest tenth of a centimeter."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The field light provides a visual guide, and its accuracy is critical."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Practice Setting Field Sizes:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Use the \"Field Size Simulator Activity\" to get hands-on experience with adjusting jaw positions and observing the resulting field size."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Go to Field Size Simulator"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

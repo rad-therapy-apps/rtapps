@@ -1,0 +1,456 @@
+{
+  "subject": {
+    "slug": "treatment-delivery-procedures",
+    "title": "Treatment Delivery Procedures",
+    "order": 12
+  },
+  "lesson": {
+    "slug": "image-production",
+    "title": "Image Production: kV, EPID, and CBCT",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Verifying What You Can't See",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Once a patient is set up on the couch, you need a way to confirm the internal anatomy actually lines up with the plan \u2014 skin marks alone don't guarantee the tumor is where you think it is. Modern LINACs carry their own onboard imaging systems specifically for this: the kV imaging device and the Electronic Portal Imaging Device (EPID)."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Electronic Portal Imaging Device (EPID)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The EPID uses the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "treatment beam itself",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (megavoltage, MV) to form an image \u2014 it's mounted opposite the treatment head and retracts out of the way when not in use."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "EPIDs replaced film-based portal imaging with silicon imaging technology. Images can be reviewed immediately online rather than waiting for film processing, and the panel can be positioned to reduce image-receptor distance for better image quality."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because MV imaging relies on the treatment beam, Compton scattering dominates at these energies \u2014 producing lower subject contrast than kV imaging. EPID is still valuable specifically because it verifies the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "actual treatment beam's",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " position, not just a separate imaging beam's."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The kV Imaging Device (OBI)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The kV imaging device \u2014 often called the On-Board Imager (OBI) \u2014 uses a diagnostic-energy X-ray tube and detector, mounted on a retractable arm perpendicular to the treatment beam."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "kV imaging provides "
+                        },
+                        {
+                          "type": "text",
+                          "text": "better image contrast than MV EPID",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " imaging, since diagnostic energies favor photoelectric absorption (which is what actually creates contrast between tissue types), rather than Compton scattering."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why does kV imaging generally produce better contrast than MV portal imaging?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "kV imaging uses a stronger radiation dose",
+              "kV energies favor photoelectric absorption, which creates contrast; MV energies are dominated by Compton scattering"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The physics of the interaction, not the dose, is what drives the contrast difference \u2014 photoelectric absorption depends strongly on tissue type, while Compton scattering doesn't."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Image-Guided Radiation Therapy (IGRT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Using onboard imaging to verify and adjust setup before (or during) treatment is called "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Image-Guided Radiation Therapy (IGRT)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The kV/OBI system supports several distinct imaging modes:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "2D kV imaging",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 a single planar image, compared against a DRR (Digitally Reconstructed Radiograph) from the planning CT"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Fluoroscopic acquisition",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 real-time imaging, useful for observing motion"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Cone-Beam CT (CBCT)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 a full 3D volumetric image, acquired by rotating the kV source/detector around the patient using a wider beam angle than conventional CT, capturing a larger volume per rotation"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Other Onboard Localization Devices",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Beyond the standard kV/EPID pairing, some departments use additional in-room localization technology: a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "CT scanner on rails",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " that slides into the treatment room for a full diagnostic-quality CT immediately before treatment, or surface-imaging systems tracking the patient's external contour in real time."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which of these is NOT a standard onboard imaging device used for target localization in radiation therapy?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "EPID",
+              "kV Cone-Beam CT",
+              "An in-room PET scanner"
+            ],
+            "answer": 2,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "EPID, kV CBCT, and CT-on-rails are all real, standard localization tools. An in-room PET scanner is not a standard onboard localization device in conventional radiation therapy practice."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "DRRs and Comparing Images",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "DRR (Digitally Reconstructed Radiograph)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a synthetic 2D image generated by \"casting rays\" through the planning CT dataset, simulating what an X-ray from a given angle would look like. Daily setup images (kV or portal) are compared against the DRR to verify the patient's position matches the plan."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bony anatomy, fiducial markers, and (increasingly) soft-tissue matching via CBCT are all used depending on the treatment site and what structures are most reliable to match against day to day."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered the EPID (MV, uses the treatment beam itself), the kV imaging device/OBI (better contrast, supports 2D/fluoroscopic/CBCT modes), IGRT as a concept, other in-room localization options, and how DRRs serve as the reference for daily image comparison."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This connects directly to what you covered in Imaging and Processing under Principles and Practice I \u2014 this lesson is specifically the radiation therapy machine's own onboard imaging, rather than diagnostic imaging in general."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

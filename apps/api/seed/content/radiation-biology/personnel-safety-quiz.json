@@ -1,0 +1,75 @@
+{
+  "quiz": {
+    "slug": "personnel-safety-quiz",
+    "title": "Personnel Safety & Dose Limits: Quiz",
+    "pass_percent": 80,
+    "shuffle": true,
+    "questions": [
+      {
+        "stem": "Which of the following is the most effective means of protection from ionizing radiation?",
+        "options": [
+          "Reducing time",
+          "Increasing distance",
+          "Using shielding",
+          "Wearing a dosimeter"
+        ],
+        "answer": 1,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "A facility that employs a pregnant radiographer should provide an additional monitor to ensure the monthly EqD to the embryo-fetus does not exceed:",
+        "options": [
+          "50 mSv",
+          "5 mSv",
+          "1 mSv",
+          "0.5 mSv"
+        ],
+        "answer": 3,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "If a radiographer stands 1 m away from an x-ray tube and receives an exposure rate of 4.0 mGy/hr, what will the exposure rate be at 2 m?",
+        "options": [
+          "1 mGy/hr",
+          "2 mGy/hr",
+          "8 mGy/hr",
+          "16 mGy/hr"
+        ],
+        "answer": 0,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "The NCRP recommends a lifetime effective dose limit for an occupationally exposed individual, which is calculated as:",
+        "options": [
+          "Age in years x 1 mSv",
+          "Age in years x 10 mSv",
+          "Age in years x 50 mSv",
+          "A flat limit of 1000 mSv"
+        ],
+        "answer": 1,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Which agency is responsible for regulations regarding an employee's 'right to know' about hazards in the workplace?",
+        "options": [
+          "NRC",
+          "FDA",
+          "EPA",
+          "OSHA"
+        ],
+        "answer": 3,
+        "explanation": null,
+        "outcomes": []
+      }
+    ]
+  },
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  }
+}

@@ -1,0 +1,647 @@
+{
+  "subject": {
+    "slug": "principles-and-practice-i",
+    "title": "Principles and Practice I",
+    "order": 5
+  },
+  "lesson": {
+    "slug": "math-review",
+    "title": "Math Review",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Three Calculations You'll Use Constantly",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This lesson covers three math skills that come up in treatment planning and daily practice: the wavelength/frequency relationship (the physics foundation behind imaging and beam energy), magnification (correcting for beam divergence in images and field size), and the inverse square law (how dose rate changes with distance). None of these require more than algebra \u2014 the challenge is usually setting the problem up correctly, not the arithmetic itself."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wavelength and Frequency",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "All electromagnetic waves travel at the speed of light, c = 3.0 \u00d7 10"
+                    },
+                    {
+                      "type": "text",
+                      "text": "8",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " m/s, related to frequency (\u03bd) and wavelength (\u03bb) by:"
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "c = \u03bd \u00d7 \u03bb",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " so "
+                        },
+                        {
+                          "type": "text",
+                          "text": "\u03bd = c / \u03bb",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " and "
+                        },
+                        {
+                          "type": "text",
+                          "text": "\u03bb = c / \u03bd",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Worked example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Find the wavelength of a wave with frequency 4.5 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "14",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Hz."
+                        },
+                        {
+                          "type": "hardBreak"
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u03bb = c / \u03bd = (3.0 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "8",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ") / (4.5 \u00d7 10"
+                        },
+                        {
+                          "type": "text",
+                          "text": "14",
+                          "marks": [
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ") = "
+                        },
+                        {
+                          "type": "text",
+                          "text": "6.67 \u00d7 10",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "-7",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "superscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " m",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If frequency increases, what happens to wavelength?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It increases too",
+              "It decreases"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Frequency and wavelength are inversely related \u2014 as one goes up, the other goes down, since their product must stay equal to the constant speed of light."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Magnification",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because a beam diverges from its source, any image or field projected onto a surface is always slightly larger than the actual object \u2014 this is "
+                    },
+                    {
+                      "type": "text",
+                      "text": "magnification",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "M = SID / SOD",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (Source-to-Image Distance \u00f7 Source-to-Object Distance)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Worked example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Source-to-object distance (SOD) = 90 cm, object-to-detector distance (OTD) = 35 cm."
+                        },
+                        {
+                          "type": "hardBreak"
+                        },
+                        {
+                          "type": "text",
+                          "text": " Step 1 \u2014 find SID: SID = SOD + OTD = 90 + 35 = 125 cm"
+                        },
+                        {
+                          "type": "hardBreak"
+                        },
+                        {
+                          "type": "text",
+                          "text": " Step 2 \u2014 find M: M = SID / SOD = 125 / 90 = "
+                        },
+                        {
+                          "type": "text",
+                          "text": "1.38",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Inverse Square Law",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Beam intensity falls off with distance from the source \u2014 specifically, it's "
+                    },
+                    {
+                      "type": "text",
+                      "text": "inversely proportional to the square of the distance",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "I",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "1",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u00d7 D",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "1",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "\u00b2 = I",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "2",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u00d7 D",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "2",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "\u00b2",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Worked example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " Intensity is 2 cGy/MU at 100 cm. What's the intensity at 130 cm?"
+                        },
+                        {
+                          "type": "hardBreak"
+                        },
+                        {
+                          "type": "text",
+                          "text": " I"
+                        },
+                        {
+                          "type": "text",
+                          "text": "2",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " = I"
+                        },
+                        {
+                          "type": "text",
+                          "text": "1",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u00d7 (D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "1",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "/D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "2",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ")\u00b2 = 2 \u00d7 (100/130)\u00b2 = 2 \u00d7 0.592 = "
+                        },
+                        {
+                          "type": "text",
+                          "text": "1.18 cGy/MU",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As distance from the source increases, beam intensity:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Increases proportionally",
+              "Decreases, and faster than a simple 1-to-1 ratio"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because the relationship is inverse-square, intensity drops off much faster than distance increases \u2014 doubling distance cuts intensity to a quarter, not a half."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered the wavelength/frequency relationship, magnification, and the inverse square law \u2014 the same three calculation types that show up constantly in imaging physics and daily treatment planning."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The companion worksheet has real practice problems combining SSD/SAD field size changes, dose corrections for incorrect setup distance, and magnification \u2014 the kind of calculations you'll actually be asked to verify in clinic."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,2537 @@
+{
+  "subject": {
+    "slug": "treatment-planning",
+    "title": "Treatment Planning",
+    "order": 13
+  },
+  "lesson": {
+    "slug": "treatment-techniques-mu-lesson",
+    "title": "Treatment Techniques & MU Calculations",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Introduction",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose of this Lesson"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This lesson will introduce you to fundamental radiation therapy treatment techniques and the principles behind Monitor Unit (MU) calculations. Understanding these concepts is crucial for ensuring accurate and safe treatment delivery to patients."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What You Will Learn (Objectives)"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Differentiate between SSD, SAD, and electron treatment setups."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Identify key parameters used in MU calculations for each technique."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Understand the basic formulas and factors involved in determining MUs."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Recognize how changes in treatment parameters can affect MU values."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task Overview"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You will navigate through several pages explaining these techniques and the factors influencing MU calculations. Each section may include \"Quick Checks\" to reinforce your understanding. Finally, you will be introduced to an MU calculator tool to practice applying these concepts."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Successful completion of this lesson means you can: "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Clearly explain the setup for SSD, SAD, and electron treatments."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "List the main factors used in MU calculations for these techniques."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Conceptually understand why MU calculations are necessary and how they relate to the prescribed dose."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Photon SSD Technique",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Source-to-Surface Distance (SSD)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " technique, also known as a fixed SSD technique, is commonly used for treating superficial tumors or when a specific dose at a shallow depth is required."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Setup Characteristics:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The distance from the radiation source (target in the Linac) to the patient's skin surface is kept constant, typically 100 cm."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The machine's isocenter is usually located at this fixed SSD on the patient's surface."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Dose is often prescribed to D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (depth of maximum dose) or another specific depth."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Parameters & Concepts for MU Calculation:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Prescription Dose (TD):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The total dose to be delivered to the prescription point."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "SSD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The fixed source-to-surface distance (e.g., 100 cm)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Depth (d):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Depth of the calculation point from the skin surface."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "D",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ":",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Depth of maximum ionization/dose buildup for the given energy and field size."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Percent Depth Dose (PDD):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Ratio of dose at depth 'd' to dose at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", for a given field size and SSD. `PDD(d, FS, E, SSD) = (Dose at depth / Dose at Dmax) * 100%`"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Output Factor (OF) or Dose Rate:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " cGy/MU at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for a reference field size (e.g., 10x10 cm) at the standard SSD."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Field Size Factors (Sc, Sp):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Correct for changes in scatter due to collimator and phantom size."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Inverse Square Factor (ISF):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Accounts for changes in dose rate if the treatment SSD differs from the calibration SSD, or to correct PDD for depths other than Dmax. `ISF = ((SSD_cal + Dmax_cal) / (SSD_treat + d))^2` (when PDD is defined at Dmax) or `((SSD_cal + d_cal) / (SSD_treat + d))^2`"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Accessory Factors:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Tray Factor (TF), Wedge Factor (WF)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Basic SSD MU Formula (Conceptual):"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "`MU = Prescription_Dose / (Output_Factor_ref * (PDD/100) * Sc * Sp * Tray_Factor * Wedge_Factor * ISF_PDD_correction)`"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The specific implementation of ISF can vary depending on how PDD tables are normalized and if calibration SSD is different from treatment SSD."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Photon SAD Technique",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Source-to-Axis Distance (SAD)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " technique, also known as an isocentric technique, is widely used for treating deeper tumors and for rotational therapies (like IMRT/VMAT)."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Setup Characteristics:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The distance from the radiation source to the machine's isocenter is fixed (typically 100 cm)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The machine isocenter is positioned at a specific point "
+                            },
+                            {
+                              "type": "text",
+                              "text": "within the patient",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", usually the center of the target volume."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The patient's skin surface will be at varying distances from the source depending on the beam angle and patient anatomy."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Dose is prescribed to the isocenter or another point defined relative to the isocenter."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Parameters & Concepts for MU Calculation:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Prescription Dose (TD):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Dose to the prescription point (often isocenter)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "SAD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Fixed source-to-axis distance (e.g., 100 cm)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Depth (d):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Depth of the calculation point (isocenter) from the surface "
+                            },
+                            {
+                              "type": "text",
+                              "text": "along the beam's central axis",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Tissue-Maximum Ratio (TMR)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " or Tissue-Phantom Ratio (TPR): Ratio of dose at depth 'd' in phantom to dose at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " in phantom, with the phantom surface shifted so that depth 'd' is at the SAD. TMR is normalized to Dmax at depth. `TMR(d, FS, E)`"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Output Factor (OF) or Dose Rate:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " cGy/MU at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for a reference field size (e.g., 10x10 cm) in phantom, with the measurement point at SAD (effectively, output in air corrected by BSF/PSF). More commonly, calibration is done at Dmax for a 10x10 field at SAD."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Field Size Factors (Sc, Sp):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Collimator Scatter and Phantom Scatter factors."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Accessory Factors:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Tray Factor (TF), Wedge Factor (WF)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Inverse Square Factor (ISF):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Generally, for SAD calculations, the ISF is implicitly included in the TMR/TPR values *if measured correctly*. If output is defined at a point other than SAD, an ISF correction would be needed. `ISF = (SAD_cal / SAD_treat)^2`."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Basic SAD MU Formula (Conceptual):"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "`MU = Prescription_Dose / (Output_Factor_ref * TMR * Sc * Sp * Tray_Factor * Wedge_Factor * [ISF_if_needed])`"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Electron Beam Technique",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Electron beams are used to treat superficial tumors (e.g., skin lesions, boost fields) due to their characteristic finite range in tissue, which spares deeper healthy tissues."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Setup Characteristics:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Electrons are produced by the Linac and usually collimated by electron "
+                            },
+                            {
+                              "type": "text",
+                              "text": "applicators (cones)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " that attach to the gantry head."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The end of the applicator is typically placed close to or directly on the patient's skin surface (often at 100 cm SSD to the applicator end)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Custom "
+                            },
+                            {
+                              "type": "text",
+                              "text": "cutouts",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (cerrobend or lead) are often used within the applicator to shape the field to the target."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Parameters & Concepts for MU Calculation:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Prescription Dose (TD):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Dose prescribed, often to a certain percentage depth dose (e.g., 90% or 80% isodose line)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Electron Energy (MeV):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Determines the depth of penetration and D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Applicator (Cone) Size:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " e.g., 6x6, 10x10, 15x15 cm."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Treatment SSD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Distance from the source to the skin surface."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Depth (d):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Depth of calculation."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "PDD",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "electron",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ":",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Percent depth dose for electrons, highly dependent on energy and cone size."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Output Factor (OF",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "cone",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " cGy/MU for the specific energy and cone size, measured at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for that cone at the standard SSD (usually 100 cm). This accounts for changes in scatter and electron fluency."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Effective SSD (SSD",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "eff",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Electrons don't strictly follow the inverse square law like photons due to scatter. An \"effective SSD\" is used for air gap corrections. It's typically shorter than the nominal SSD and varies with energy and cone size."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Inverse Square Factor (ISF",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "electron",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Uses SSD"
+                            },
+                            {
+                              "type": "text",
+                              "text": "eff",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ". `ISF = ((SSD_eff + Dmax_cal) / (SSD_eff + Dmax_cal + gap))^2` or simplified to `((SSD_eff) / (SSD_eff + gap))^2` if output is at surface. Where `gap = Treatment_SSD - Standard_SSD_of_calibration`."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Cutout Factor:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " If a custom cutout is used, it will further modify the output and requires a specific factor, usually measured."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Basic Electron MU Formula (Conceptual):"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "`MU = Prescription_Dose / (Output_Factor_cone * (PDD_electron/100) * ISF_electron * [Cutout_Factor])`"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Photon MU Calculation Factors",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Several factors modify the dose delivered per MU for photon beams. Understanding these is key."
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Machine Output (Dose Rate):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The fundamental calibration of the machine, usually stated as cGy/MU at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for a 10x10 cm field at a reference SSD (for SSD calcs) or SAD (for SAD calcs). E.g., 1.0 cGy/MU."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Equivalent Square Field Size (FS",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "eq",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Since dose output varies with field size, non-square fields are converted to an equivalent square field. A common formula is `4A/P` (4 * Area / Perimeter)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Collimator Scatter Factor (Sc):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Also known as Output Factor in Air (OF"
+                            },
+                            {
+                              "type": "text",
+                              "text": "air",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "). Accounts for scatter radiation from the machine's collimators and flattening filter. It depends on the collimator setting (field size). It's normalized to 1.0 for a 10x10 cm field."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Phantom Scatter Factor (Sp):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Accounts for scatter radiation within the phantom/patient. It depends on the field size at depth and energy. It's normalized to 1.0 for a 10x10 cm field. "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Sometimes Sc and Sp are combined into a Total Scatter Factor (S"
+                            },
+                            {
+                              "type": "text",
+                              "text": "cp",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ") = Sc * Sp."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Percent Depth Dose (PDD) - for SSD setups:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " `PDD = (Dose at depth d / Dose at Dmax) * 100%`. Depends on energy, depth, field size, and SSD."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Tissue-Maximum Ratio (TMR) - for SAD setups:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " `TMR = (Dose at depth d in phantom / Dose at Dmax in phantom at same point)`. Independent of SSD but depends on energy, depth, and field size. TPR is similar but normalized to a reference depth."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Inverse Square Factor (ISF):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Corrects for changes in distance from the source. For SSD: `ISF_PDD_corr = ((SSD + Dmax) / (SSD + d))^2` (to correct PDD at d to Dmax). For SAD, if output is defined at a distance other than treatment SAD, or to correct TMR/TPR if tables are for different SAD. Often implicitly included."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Tray Factor (TF):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Accounts for attenuation by a blocking tray. Value is typically < 1.0."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Wedge Factor (WF):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Accounts for attenuation by a physical wedge or the effect of a dynamic/virtual wedge. Value is typically < 1.0."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Electron MU Calculation Factors",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Electron MU calculations also involve several specific factors:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Machine Output (Dose Rate):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Calibrated as cGy/MU at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for a reference applicator (often 10x10 cm) at a standard SSD (usually 100 cm)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Applicator (Cone) Factor / Output Factor (OF",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "cone",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Specific to each electron energy and applicator/cone size. This factor accounts for the scatter conditions and electron fluency produced by that specific cone. It's normalized to 1.0 for the reference cone if calibration is done that way, or it's an absolute factor relative to a baseline."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Percent Depth Dose (PDD",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "electron",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " `PDD = (Dose at depth d / Dose at Dmax) * 100%`. Highly dependent on electron energy and applicator size (due to scatter)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Effective SSD (SSD",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "eff",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Electrons scatter significantly in air. The inverse square law doesn't apply perfectly as it does for photons. An \"effective SSD\" is determined experimentally for each energy/cone combination to allow for air gap corrections. It's usually shorter than the nominal SSD."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Inverse Square Factor for Electrons (ISF",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "electron",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                },
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Uses the SSD"
+                            },
+                            {
+                              "type": "text",
+                              "text": "eff",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " to correct for differences between the treatment SSD and the standard SSD at which the PDD and output factors were measured. A common formula for the gap correction factor is: `ISF = ((SSD_eff + Dmax_cal) / (SSD_eff + Dmax_cal + gap))^2`, where `gap = Actual_SSD - Standard_SSD_cal`. If PDD is already defined at the surface, it simplifies."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Cutout Factor:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " If an irregularly shaped field is created using a cutout (e.g., cerrobend block) placed in the applicator, this cutout will change the electron scatter and output. A specific cutout factor, usually measured or determined from tables, must be applied."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page6_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For electrons, the Inverse Square Law correction typically uses:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The nominal Linac SSD (e.g., 100cm).",
+              "An 'Effective SSD' specific to the energy and applicator.",
+              "No ISF is needed for electrons."
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Correct! Due to scatter, an 'Effective SSD' is used for more accurate air gap corrections with electrons."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Using the MU Calculator & Practice",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Now that you've learned about the different techniques and factors, it's time to see them in action!"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The MU Calculator tool linked below allows you to input various treatment parameters for SSD, SAD, and electron techniques and see the calculated Monitor Units. It also provides a simple visualization of the beam setup."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "How to Use the Calculator:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Select the \"Treatment Technique\" (Photon SSD, Photon SAD, or Electron)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The relevant input fields for that technique will appear."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Enter the parameters like dose, depth, field size (using jaw settings), energy, SSD, applicator size, etc."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Some factors (like Dmax, Tray Factor, Wedge Factor, Electron Output Factors) will auto-update based on your selections from built-in tables."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Click \"Calculate Monitor Units\" to see the result and a breakdown of the factors used."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Practice Scenarios:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Use the calculator to solve the following (you can open the calculator in a new tab):"
+                    }
+                  ]
+                },
+                {
+                  "type": "orderedList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Photon SSD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Energy 6MV, Rx Dose 200 cGy, Depth 5cm, SSD 100cm, Field Size 12x12cm, No Tray, No Wedge. What are the MUs?"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Photon SAD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Energy 10MV, Rx Dose 180 cGy, Depth to Iso 10cm, Field Size 8x15cm, No Tray, 15-deg Wedge. What are the MUs?"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Electron:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Energy 9MeV, Applicator 10x10cm, Rx Dose 250 cGy, Depth 2.0cm, Treatment SSD 100cm. What are the MUs?"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The calculator uses specific beam data tables. Your clinic's data may differ. This tool is for educational understanding."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Open MU Calculator Activity"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Summary & Next Steps",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In this lesson, we've covered:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The fundamental differences and applications of **SSD, SAD, and Electron** treatment techniques."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The core concept of **Monitor Units (MUs)** and their relation to delivering the prescribed dose."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Key dosimetric factors like **PDD, TMR, Sc, Sp, Output Factors, ISF, TF, WF, and electron-specific factors** that influence MU calculations."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Accurate MU calculation is paramount for patient safety and treatment efficacy. While modern treatment planning systems (TPS) automate many of these calculations, understanding the underlying principles remains essential for RTTs to:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Perform independent checks or manual calculations when needed."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Troubleshoot discrepancies."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Understand the impact of setup variations on dose delivery."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Communicate effectively with dosimetrists and physicists."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Further Learning:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To deepen your understanding, consider researching:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Your specific clinic's MU calculation protocols and beam data."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Advanced MU calculation techniques for IMRT, VMAT, and SBRT."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The role of quality assurance in MU verification."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Thank you for completing this lesson! Use the button below if you need to return to a main menu."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

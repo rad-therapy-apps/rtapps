@@ -1,0 +1,772 @@
+{
+  "subject": {
+    "slug": "treatment-delivery-procedures",
+    "title": "Treatment Delivery Procedures",
+    "order": 12
+  },
+  "lesson": {
+    "slug": "treatment-delivery-procedures-mlc",
+    "title": "Console Operations: MLCs & Field Shaping",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Beyond Rectangles - Introducing MLCs",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose: Why This Matters This lesson introduces Multi-Leaf Collimators (MLCs), a critical component in modern Linacs for precise radiation beam shaping. Understanding MLCs is key to comprehending advanced treatment techniques like 3D-CRT, IMRT, and VMAT."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do You will learn: What MLCs are and where they are located. How MLCs shape the radiation beam. The difference between MLC shaping and jaw collimation. The basic principles of how MLCs enable conformal therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success By the end, you should be able to: Describe the function of MLCs. Explain why MLCs are important for conforming dose to the tumor. Differentiate the roles of jaws and MLCs in field definition."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While X and Y jaws create rectangular fields, tumors are rarely simple shapes. MLCs provide the solution!"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "What are Multi-Leaf Collimators (MLCs)?",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Multi-Leaf Collimator (MLC)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " system is a device located in the treatment head of a linear accelerator, typically positioned below the secondary (X and Y) jaws[cite: 504, 507]. It consists of numerous individual \"leaves\" made of a high-density material like tungsten."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Characteristics:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Individual Leaves:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " MLCs usually have between 52 to 160 leaves, arranged in opposing banks[cite: 507]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Independent Movement:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Each leaf (or sometimes pairs of leaves) can be moved independently into or out of the radiation field under computer control[cite: 507, 1442]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Leaf Width:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The width of each leaf as projected at the isocenter is typically small (e.g., 0.25 cm, 0.5 cm, or 1.0 cm), allowing for fine shaping of the beam[cite: 508]. Micro-MLCs have even smaller leaf widths for highly precise treatments like SRS[cite: 509]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Purpose:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " To conform the shape of the radiation beam very closely to the projected outline of the target volume (Beam's Eye View - BEV), thereby shielding surrounding healthy tissues[cite: 503]."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "MLCs have largely replaced the need for custom-made cerrobend blocks for many treatments, offering greater efficiency and flexibility[cite: 504]."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "How MLCs Shape the Beam",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The secondary X and Y jaws define the maximum rectangular outer boundary of the radiation field. The MLCs then provide further, more intricate shaping "
+                    },
+                    {
+                      "type": "text",
+                      "text": "within",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " this jaw-defined aperture."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Conformal Shaping:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The computer-controlled movement of each leaf allows the MLCs to create an opening that closely matches the shape of the tumor from the beam's perspective."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "This is critical for "
+                            },
+                            {
+                              "type": "text",
+                              "text": "3D Conformal Radiation Therapy (3D-CRT)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", where the goal is to deliver a uniform dose to the target while minimizing dose to adjacent normal structures[cite: 503, 506]."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Design Considerations:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Leaf End Shape:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " MLC leaves often have a rounded-end design to maintain a consistent penumbra (the fuzzy edge of the beam) as they move across the field[cite: 556]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Tongue-and-Groove Design:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " To minimize radiation leakage between adjacent leaves, they often have an interlocking \"tongue-and-groove\" design[cite: 544]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Transmission:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " While MLCs are thick, a very small amount of radiation can still transmit through the leaves (typically <2%) or leak between them (interleaf leakage, ideally <3-4%)[cite: 526, 529, 578]. These factors are accounted for in treatment planning."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page3_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: What is the primary advantage of MLCs over using only X and Y jaws for field shaping?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "MLCs can create much larger rectangular fields.",
+              "MLCs can create complex, non-rectangular shapes to conform closely to the tumor.",
+              "MLCs completely eliminate the need for X and Y jaws."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "MLCs in Advanced Techniques",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "MLCs are not just for static conformal shaping; their ability to move dynamically during treatment is key to several advanced radiation therapy techniques."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Intensity-Modulated Radiation Therapy (IMRT):"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "In IMRT, MLCs move dynamically during beam delivery to modulate (vary) the intensity of radiation across different parts of the field[cite: 1635, 1641]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "This allows for \"dose painting,\" where higher doses can be delivered to specific parts of the tumor while simultaneously creating steep dose gradients to protect nearby critical organs[cite: 1628, 1631]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Two common IMRT delivery modes using MLCs are: "
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Step-and-Shoot (Segmental MLC):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The beam is turned off, MLC leaves move to shape a segment, the beam is turned on for that segment, then off again to move to the next segment[cite: 1638, 1639]."
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Sliding Window (Dynamic MLC):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The MLC leaves move continuously across the field while the beam remains on, varying the exposure time (and thus intensity) to different parts of the target[cite: 1641]."
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Volumetric Modulated Arc Therapy (VMAT):"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "VMAT takes IMRT a step further by delivering modulated beams as the Linac gantry rotates around the patient[cite: 482]."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "MLC leaf positions, dose rate, and gantry speed can all change continuously during the arc, allowing for highly complex and efficient dose delivery."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The precise and rapid movement of MLCs, controlled by sophisticated computer systems, is essential for these advanced techniques."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Console Operations & MLCs",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "From the Linac control console, Radiation Therapists manage and verify MLC settings as part of the overall treatment parameters."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What RTTs Typically See/Do:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Treatment plans (often from systems like MOSAIQ or Aria) will contain the specific MLC leaf positions for each beam or segment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "These MLC patterns are automatically loaded into the Linac control system."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "RTTs verify that the correct plan and MLC sequence are loaded."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The console may display a representation of the MLC leaf positions for each field."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "IGRT systems are often used to ensure the patient is correctly aligned before delivering treatments that rely on precise MLC shaping."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Any errors or warnings related to MLC positioning or function are displayed on the console and must be addressed."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While RTTs don't manually program individual leaf movements for IMRT/VMAT (this is done in the treatment planning system), they are responsible for ensuring the correct MLC plan is loaded and that the machine delivers it as intended, including performing relevant QA checks."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ready to Simulate?"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The \"MLC & Field Shaping Lab Activity\" will allow you to visualize how jaw settings define an outer boundary and how preset MLC patterns can further shape the field within that boundary. You can then progress to more advanced console emulators as they become available to explore dynamic MLC movements."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Go to MLC & Field Shaping Lab"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

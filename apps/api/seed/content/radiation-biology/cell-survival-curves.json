@@ -1,0 +1,1150 @@
+{
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  },
+  "lesson": {
+    "slug": "cell-survival-curves",
+    "title": "Cell Survival Curves",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Plotting How Cells Die",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since the mid-1950s, when Puck and Marcus first irradiated human cervical carcinoma cells (the famous "
+                    },
+                    {
+                      "type": "text",
+                      "text": "HeLa cells",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ") in a petri dish, radiobiologists have studied cell response using "
+                    },
+                    {
+                      "type": "text",
+                      "text": "survival curves",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 a plot of radiation dose (x-axis) against the surviving fraction of cells (y-axis), typically on a semi-log scale."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "A shoulder region at low doses (below ~150 cGy) shows that cells must accumulate damage across multiple targets before dying. Above that, the curve becomes a straight line on the semi-log plot \u2014 meaning equal dose increases cause equal "
+                        },
+                        {
+                          "type": "text",
+                          "text": "fractional",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " decreases in survival, even though the absolute number of cells killed keeps shrinking."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Why the Curve Has That Shape",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This exponential response happens because radiation interacts randomly with critical targets in a cell. If a cell has multiple targets (n > 1) that must each be hit to cause lethal damage, three outcomes are possible after irradiation: some cells are lethally damaged (all targets hit), some are sublethally damaged (only some targets hit), and some are undamaged (no targets hit)."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Three Survival Curve Parameters",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Three parameters describe a survival curve's shape, all illustrated on the multitarget, single-hit model:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Parameter"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "What it represents"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "n (extrapolation number)",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Where the extrapolated linear portion crosses the y-axis; theoretically represents the number of critical targets that must be inactivated. For mammalian cells exposed to X-rays, n typically ranges from 2 to 10."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "D",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "q",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " (quasithreshold dose)",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The width of the shoulder region \u2014 the dose below which little cell death is apparent. A higher D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "q",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " suggests the cell population is better at repairing sublethal damage (more radioresistant)."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "D",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "0",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " (D37 dose)",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The dose that reduces the surviving fraction to 37% along the curve's linear portion \u2014 a direct measure of radiosensitivity. Radiosensitive cells have a "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "low",
+                                  "marks": [
+                                    {
+                                      "type": "italic"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "0",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "; radioresistant cells have a "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "high",
+                                  "marks": [
+                                    {
+                                      "type": "italic"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "0",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": ". For mammalian cells, D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "0",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " is typically 100\u2013220 cGy."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A cell line has a very low D0 value. What does that indicate?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The cells are highly radioresistant",
+              "The cells are highly radiosensitive"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "D0 is inversely related to radiosensitivity \u2014 a low D0 means it takes very little dose to reduce survival to 37%, meaning the cells are quite radiosensitive."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Multitarget, Single-Hit Equation",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "These parameters relate through: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "log",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "e",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " n = D",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "q",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "/D",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "0",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Surviving fraction can be calculated as "
+                    },
+                    {
+                      "type": "text",
+                      "text": "SF = 1 \u2212 (1 \u2212 e",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "\u2212D/D0",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ")",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "n",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where D is the total dose delivered. This equation accurately models the response of complex cell types \u2014 including most mammalian cells \u2014 where more than one target must be inactivated for lethal damage."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "What Happens to an Irradiated Cell",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "After irradiation, a cell's fate falls into a small number of categories:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Response"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "What happens"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Division delay",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Cells in interphase at the time of irradiation are delayed in reaching G2/mitosis. Dose-dependent: higher dose, longer delay. If dose is below ~1000 cGy, most cell lines recover and proceed through mitosis \u2014 sometimes producing a higher-than-normal number of dividing cells afterward, called "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "mitotic overshoot",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Interphase death",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Death before the cell ever reaches mitosis (also called nonmitotic death). Can occur in both dividing and non-dividing cells; mature lymphocytes are a notable exception, sensitive to interphase death at doses as low as 50 cGy."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Reproductive failure",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The most common cellular response \u2014 a decrease in a cell's ability to divide an unlimited number of times after irradiation (also called mitotic death). Tied directly to the extent of chromosome damage caused by the dose."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Apoptosis",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Programmed cell death, unrelated to a failed mitosis attempt. Involves genes like p53 and bcl-2; characterized by nuclear fragmentation, cell lysis, and phagocytosis of the resulting fragments by neighboring cells."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radiosensitivity and the Cell Cycle",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A cell's radiosensitivity depends heavily on where it is in the cell cycle at the moment of irradiation:"
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Cells are "
+                        },
+                        {
+                          "type": "text",
+                          "text": "most sensitive",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " in the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "G2 and M phases",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", of "
+                        },
+                        {
+                          "type": "text",
+                          "text": "intermediate",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " sensitivity in "
+                        },
+                        {
+                          "type": "text",
+                          "text": "G1",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", and "
+                        },
+                        {
+                          "type": "text",
+                          "text": "most resistant",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " during "
+                        },
+                        {
+                          "type": "text",
+                          "text": "S phase",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 especially late S. The D0 for late-S-phase cells can be as much as 2.5 times higher than for the same cells in G2/M."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This matters practically: when irradiating a population of asynchronous cells at low doses, the survivors are disproportionately S-phase cells \u2014 they were the most likely to survive that particular dose."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Fractionation and Repair",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Elkind and Sutton-Gilbert showed in 1960 that splitting a total dose into two fractions (rather than delivering it all at once) increases overall cell survival. When enough time separates the fractions, the survival curve's shoulder essentially "
+                    },
+                    {
+                      "type": "text",
+                      "text": "repeats",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " after the second fraction \u2014 direct evidence that cells repair sublethal damage from the first fraction before the second one arrives."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "This repair of sublethal damage after low-LET irradiation typically completes within a few hours. Hypoxia reduces a cell's capacity to repair sublethal damage \u2014 part of why fractionated therapy can favor tumor control over single-dose treatment when tumors contain hypoxic regions."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page7_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why does the survival curve's shoulder tend to \"reappear\" after a second fraction, given enough time between fractions?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Because the cells repair sublethal damage from the first fraction before the second arrives",
+              "Because the second fraction uses a different dose rate"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The reappearing shoulder is direct evidence of sublethal damage repair between fractions \u2014 cells that survived the first fraction have largely recovered by the time the second fraction arrives."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "High-LET vs. Low-LET Survival Curves",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Survival curves look different depending on the radiation's LET. With high-LET radiation (like neutrons or alpha particles), the shoulder region (D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "q",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ") is "
+                    },
+                    {
+                      "type": "text",
+                      "text": "reduced or absent",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the curve is steeper (lower D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "0",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ") than with low-LET radiation (X-rays, gamma rays) at equivalent doses. This reflects the denser ionization pattern of high-LET radiation \u2014 more double-strand DNA breaks per track, less opportunity for the cell to repair between hits."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered how survival curves are constructed and why they take their characteristic shape, the three parameters (n, D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "q",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "0",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ") and what each tells you about a cell population, the four cellular responses to radiation, the cell-cycle radiosensitivity pattern, fractionation and sublethal damage repair, and how high-LET radiation changes the curve's shape."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This is the direct foundation for RBE and OER, and for the R's of Radiobiology \u2014 both covered in their own lessons."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

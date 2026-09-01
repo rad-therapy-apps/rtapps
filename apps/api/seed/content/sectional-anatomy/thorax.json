@@ -1,0 +1,732 @@
+{
+  "subject": {
+    "slug": "sectional-anatomy",
+    "title": "Sectional Anatomy",
+    "order": 11
+  },
+  "lesson": {
+    "slug": "thorax",
+    "title": "Sectional Anatomy: Thorax",
+    "order": 0,
+    "pages": [
+      {
+        "title": "The Thorax \u2014 Two Challenges, and How We Image It",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Thoracic planning is defined by "
+                    },
+                    {
+                      "type": "text",
+                      "text": "respiratory motion",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "tissue heterogeneity",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (the beam crosses low-density lung, so the plan must apply density correction). The thorax is read on "
+                    },
+                    {
+                      "type": "text",
+                      "text": "two windows",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ": a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "lung window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for parenchyma and airways, and a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "mediastinal window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for vessels, nodes, and the heart."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Boundaries and levels orient you: the thoracic inlet superiorly, the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "sternal angle / carina at ~T4\u2013T5",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", and the diaphragm inferiorly (moving with respiration)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Normal Lung Anatomy in 3D",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rotate this normal-lung model to appreciate the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "lobar anatomy",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the branching "
+                    },
+                    {
+                      "type": "text",
+                      "text": "airways",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the trachea dividing at the carina into main bronchi, then lobar and segmental branches."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Interactive normal lungs and airways. Drag to rotate, scroll to zoom. Note the asymmetry: three lobes on the right, two on the left."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "3D model: \"Lungs - normal study\" by valchanov (sketchfab.com/valchanov), CC-BY-4.0."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "t_p2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The trachea bifurcates into the main bronchi at the carina, at approximately which level?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "C6\u2013C7",
+              "T4\u2013T5",
+              "T10\u2013T11"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The carina sits at about T4\u2013T5, near the sternal angle \u2014 a stable midline landmark for localization and setup checks."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "A Lung Carcinoma in 3D",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This model shows a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "lung carcinoma",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " in relation to the surrounding lung \u2014 the kind of gross tumor volume a therapist localizes on the planning scan."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Interactive lung carcinoma model. Consider how the tumor's position (central vs. peripheral, upper vs. lower lobe) changes its motion and its proximity to the mediastinal critical structures."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "3D model: \"Lung carcinoma\" by valchanov (sketchfab.com/valchanov), CC-BY-4.0."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "t_p3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Compared with an upper-lobe tumor, a lower-lobe tumor generally requires:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "A larger internal target volume, because it moves more with the diaphragm",
+              "No motion management, because lower lobes are fixed"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lower-lobe tumors sit near the diaphragm and move more with respiration, so their ITV (from 4D-CT) is typically larger than an upper-lobe tumor's."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Mediastinal Structures and Nodes",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On the mediastinal window you must confidently name the great vessels \u2014 "
+                    },
+                    {
+                      "type": "text",
+                      "text": "ascending",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "descending aorta",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "aortic arch",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "superior vena cava",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "azygos vein",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " arching over the right main bronchus \u2014 plus the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "esophagus",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " posteriorly and the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "spinal cord",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " in the canal."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Thoracic nodal stations (e.g., paratracheal, subcarinal, hilar) guide elective volumes and are described relative to these mediastinal landmarks. Explore them in the workbook's "
+                        },
+                        {
+                          "type": "text",
+                          "text": "3D lymphatics model"
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "t_p4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which vessel arches over the right main bronchus to drain into the superior vena cava?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Descending aorta",
+              "Azygos vein",
+              "Ascending aorta"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The azygos vein arches over the right main bronchus to join the SVC \u2014 a classic mediastinal landmark."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Anatomic Verification in a Moving Chest",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Thoracic verification is dominated by "
+                    },
+                    {
+                      "type": "text",
+                      "text": "respiratory motion",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", so bony matching alone is insufficient for a target that slides with breathing."
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Setup verified with "
+                            },
+                            {
+                              "type": "text",
+                              "text": "CBCT",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ": match first to the vertebrae/carina, then assess the "
+                            },
+                            {
+                              "type": "text",
+                              "text": "tumor",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " against the ITV."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Motion managed with "
+                            },
+                            {
+                              "type": "text",
+                              "text": "4D-CT-derived ITVs",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", "
+                            },
+                            {
+                              "type": "text",
+                              "text": "breath-hold",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", or "
+                            },
+                            {
+                              "type": "text",
+                              "text": "gating",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A pure bony match can leave a mobile tumor outside the high-dose region even when the spine lines up perfectly."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "t_p5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why can a perfect vertebral bony match still leave a lower-lobe lung tumor mispositioned?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The tumor moves with respiration independently of the spine",
+              "Vertebrae are never visible on CBCT"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lung tumors move with breathing relative to the skeleton, so the target must be verified against the ITV, not inferred from bone alone."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've explored normal lung and airway anatomy, a lung carcinoma, and thoracic nodal anatomy in 3D, connected them to dual-window mediastinal reading and the carina landmark, and seen why respiratory motion makes thoracic verification a target-based task."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cross-reference: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Thorax Treatment Planning"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

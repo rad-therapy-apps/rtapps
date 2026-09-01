@@ -1,0 +1,631 @@
+{
+  "subject": {
+    "slug": "sectional-anatomy",
+    "title": "Sectional Anatomy",
+    "order": 11
+  },
+  "lesson": {
+    "slug": "skeletal",
+    "title": "Sectional Anatomy: Skeletal & Spine",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Imaging the Spine and Skeleton",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Skeletal treatment \u2014 bone metastases, spine SBRT, palliative bone fields \u2014 relies on "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bone-window CT",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (often with MRI for cord and marrow). The column is read segment by segment: 7 cervical, 12 thoracic, 5 lumbar, then sacrum and coccyx."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sagittal reconstruction (bone window) from the SBRT spine CT. Multiple vertebral bodies stack anteriorly, separated by intervertebral discs, with the spinal canal running posteriorly \u2014 the view used to confirm the treated level."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Counting vertebrae from a fixed landmark (the C2 dens superiorly or the sacrum inferiorly) on the sagittal view is how the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "correct level",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is confirmed \u2014 a wrong-level error is among the most serious in spine treatment."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Parts of a Vertebra",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Every typical vertebra shares the same parts \u2014 naming them precisely is essential for spine contouring."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bone window: the vertebral body anteriorly, the pedicles and laminae forming the arch, transverse and spinous processes, enclosing the vertebral (spinal) canal. Soft-tissue window, same level: the spinal cord within the canal and paraspinal muscles become visible."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "s_p2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which part of a vertebra connects the body to the lamina and is used to define compartment-based spine CTVs?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Spinous process",
+              "Pedicle",
+              "Odontoid process"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The pedicles bridge the body and the posterior arch. Consensus spine-SBRT contouring defines target compartments partly by pedicle/posterior-element involvement."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "C1, C2, and the Craniovertebral Junction",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The first two cervical vertebrae are atypical: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "C1 (atlas)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a ring with no body; "
+                    },
+                    {
+                      "type": "text",
+                      "text": "C2 (axis)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " carries the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "odontoid process (dens)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " projecting upward, around which the atlas rotates. This junction is a common landmark for level-counting and for high-cervical targets."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Because the atlas has no body and the axis has the dens, the craniovertebral junction looks unlike any other level on axial imaging \u2014 a reliable anchor when numbering vertebrae downward."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "s_p3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The odontoid process (dens) is a feature of which vertebra?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "C1 (atlas)",
+              "C2 (axis)",
+              "T1"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The dens projects up from C2 (the axis); the C1 atlas is a ring without a body that rotates around it."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Spinal Cord and Meninges",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Within the canal, the cord is wrapped in three "
+                    },
+                    {
+                      "type": "text",
+                      "text": "meninges",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (superficial to deep): "
+                    },
+                    {
+                      "type": "text",
+                      "text": "dura mater",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "arachnoid mater",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "pia mater",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", with CSF in the subarachnoid space. In adults the cord tapers at the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "conus medullaris (~L1\u2013L2)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "; below it the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "cauda equina",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " nerve roots descend."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The spinal cord sits centrally within the canal, surrounded by CSF and the meninges \u2014 the dose-limiting structure for essentially all spine treatment."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Precisely identifying the cord (and, for SBRT, a tight "
+                        },
+                        {
+                          "type": "text",
+                          "text": "cord + setup margin",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ") on each slice is what allows an ablative dose to a vertebral target while respecting cord tolerance."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Anatomic Verification for Bone and Spine Targets",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Skeletal targets are the site where a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bony match is the target match",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the tumor is in or on the bone."
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Palliative bone fields: straightforward "
+                            },
+                            {
+                              "type": "text",
+                              "text": "kV bony matching",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " to the treated vertebrae or bony landmark."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Spine SBRT",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ": near-rigid immobilization, "
+                            },
+                            {
+                              "type": "text",
+                              "text": "CBCT matched to the vertebral body",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", and "
+                            },
+                            {
+                              "type": "text",
+                              "text": "6DoF couch correction",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " to remove rotations, because the cord sits millimeters from an ablative dose."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Always verify the "
+                            },
+                            {
+                              "type": "text",
+                              "text": "correct level",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " by counting from a fixed landmark."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "s_p5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is 6DoF couch correction particularly important for spine SBRT?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It corrects small rotations so the ablative dose stays off the spinal cord millimeters away",
+              "It lets the couch rotate the patient 90 degrees for lateral fields"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ablative dose sits immediately adjacent to the cord, so even small uncorrected rotations risk a cord overdose; 6DoF removes pitch/roll/yaw a translation-only couch cannot."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've read the spine on a sagittal reconstruction and axial bone/soft-tissue windows \u2014 the parts of a vertebra, the atypical C1/C2, the cord and meninges \u2014 and seen why skeletal targets make bony matching the target match, with spine SBRT demanding 6DoF precision and correct-level verification."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cross-reference: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Skeletal Treatment Planning"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

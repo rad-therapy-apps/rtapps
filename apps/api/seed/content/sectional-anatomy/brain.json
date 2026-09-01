@@ -1,0 +1,909 @@
+{
+  "subject": {
+    "slug": "sectional-anatomy",
+    "title": "Sectional Anatomy",
+    "order": 11
+  },
+  "lesson": {
+    "slug": "brain",
+    "title": "Sectional Anatomy: Brain",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Imaging the Brain \u2014 Modalities and Windows",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cranial radiation therapy is planned on a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "CT simulation scan fused with MRI",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". CT supplies the electron density for dose calculation and the rigid bony reference for setup; MRI supplies the soft-tissue contrast needed to define the target and organs at risk. The same CT is read on different "
+                    },
+                    {
+                      "type": "text",
+                      "text": "windows",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " depending on the tissue of interest."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Brain window (WL ~40, WW ~80): maximizes gray\u2013white contrast, ventricles, and parenchymal detail. Bone window (wide WW): the same scan re-windowed shows cortex, sinus walls, and skull-base foramina instead."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The rigid cranium makes the brain one of the most reproducible sites to set up: a "
+                        },
+                        {
+                          "type": "text",
+                          "text": "bony match",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " on the skull is an excellent surrogate for intracranial target position \u2014 a theme we return to on the verification page."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Axial Level 1 \u2014 Posterior Fossa",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Working from inferior to superior, the lowest intracranial level shown here is the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "posterior fossa",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Orient yourself first: anterior is at the top, and by radiologic convention the patient's "
+                    },
+                    {
+                      "type": "text",
+                      "text": "right",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is on the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "left",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " of the image."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Posterior-fossa level. Identify: the cerebellum (posteriorly, filling the fossa), the brainstem (midline, anterior to the cerebellum), the fourth ventricle (CSF between them), and the surrounding temporal lobes anterolaterally."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "b_p2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "At the posterior-fossa level, which CSF-filled structure sits in the midline "
+                    },
+                    {
+                      "type": "text",
+                      "text": "between",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " the brainstem and the cerebellum?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Fourth ventricle",
+              "Lateral ventricle",
+              "Cavum septum pellucidum"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The fourth ventricle lies between the pons/brainstem anteriorly and the cerebellum posteriorly. The lateral ventricles sit far more superiorly, at the levels shown on the next pages."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Axial Level 2 \u2014 Mid-Ventricular",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Higher up, the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "lateral ventricles",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and deep gray matter come into view \u2014 the workhorse level for orientation."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Mid-ventricular level. Identify: the frontal horns of the lateral ventricles anteriorly, the third ventricle in the midline, the thalami flanking it, the basal ganglia laterally, and the falx cerebri running straight down the midline anteriorly and posteriorly."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The "
+                        },
+                        {
+                          "type": "text",
+                          "text": "falx cerebri",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " should sit dead-center. Because it is a straight midline reference, a falx that appears tilted or off-center on a verification image is a fast flag for patient "
+                        },
+                        {
+                          "type": "text",
+                          "text": "rotation",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "b_p3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is the falx cerebri a useful quick check for rotation on an axial image?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It is a straight midline dural structure, so any tilt signals patient rotation",
+              "It is the densest bone in the skull and never moves"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The falx is a midline dural fold that should run straight front-to-back. A tilt or lateral shift indicates rotation \u2014 it is soft tissue, not bone."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Axial Level 3 \u2014 Upper Ventricular / Convexity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Near the vertex, the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bodies of the lateral ventricles",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " narrow and the white matter of the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "centrum semiovale",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " dominates before the ventricles disappear entirely at the highest slices."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Upper level. Identify: the bodies of the lateral ventricles, the centrum semiovale (deep white matter), the cortical gyri and sulci, and the falx continuing in the midline. This is a common level for superficial (convexity) metastases."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Reading a stack top-to-bottom in this way \u2014 convexity \u2192 ventricles \u2192 posterior fossa \u2192 skull base \u2014 is exactly how you confirm a target's craniocaudal position and check that no critical structure has been missed on a contour."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Skull Base, Sinuses, and Critical Structures",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Re-windowing to "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bone",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " at the skull base reveals the bony and air-filled anatomy that a soft-tissue window hides."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Skull-base bone window. Identify the paranasal sinuses (ethmoid air cells medially, sphenoid sinus centrally), the orbits anterolaterally, the dense petrous temporal bones, and the sella turcica housing the pituitary."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dose-limiting OARs to recognize at these levels: the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "lenses",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (cataract risk), "
+                        },
+                        {
+                          "type": "text",
+                          "text": "optic nerves and chiasm",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "brainstem",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "cochleae",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", and "
+                        },
+                        {
+                          "type": "text",
+                          "text": "pituitary/hypothalamus",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ". Each must be identified on the planning slices before it can be avoided."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "b_p5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which window would you use to best evaluate the walls of the sphenoid sinus and skull-base foramina?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Bone window (wide window width)",
+              "Brain window (narrow window width)"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A wide-width bone window spreads contrast across the high-HU range where cortical bone lives, resolving thin bony walls and foramina that a narrow brain window renders as uniform white."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "MRI for Target Definition \u2014 Enhancing Core vs. Edema",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This is where MRI earns its place. The two sequences below come from an educational brain-metastasis case, each shown clean and again with its expert segmentation overlaid \u2014 the distinction between them drives how the target is drawn."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "coreContrast-enhanced T1 (T1CE). The red overlay marks the enhancing tumor \u2014 where contrast crosses a broken blood\u2013brain barrier. This typically defines the gross tumor volume (GTV). edemaFLAIR. The blue overlay marks the surrounding edema / whole-tumor region \u2014 FLAIR suppresses CSF so peritumoral edema stands out brightly."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The clinical consequence: T1CE enhancement usually defines the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "GTV",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", while FLAIR shows edema that may or may not be included depending on intent (brain-met SRS often treats the enhancing lesion plus a tight margin, not the whole edema). Reading the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "right sequence for the right structure",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is the core skill."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "b_p6_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On which MRI sequence does an enhancing brain metastasis (broken blood\u2013brain barrier) appear brightest, typically defining the GTV?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Contrast-enhanced T1 (T1CE)",
+              "FLAIR"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Contrast enhancement on T1CE marks where gadolinium leaks through a disrupted blood\u2013brain barrier \u2014 the enhancing lesion that usually defines the GTV. FLAIR highlights surrounding edema, not the enhancing core."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Anatomic Verification for Cranial Treatment",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because the skull is rigid, cranial setup is verified primarily by "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bony matching",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " against the reference DRR or planning CT:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Frameless SRS/SRT",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " uses a thermoplastic mask plus daily volumetric (CBCT) or stereoscopic kV imaging matched to the skull."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "6 degrees-of-freedom (6DoF)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " couch correction removes the small pitch/roll/yaw rotations a mask alone can't, which matters because intracranial OARs sit millimeters from targets."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Reliable matching landmarks: the "
+                            },
+                            {
+                              "type": "text",
+                              "text": "sella",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", "
+                            },
+                            {
+                              "type": "text",
+                              "text": "orbital rims",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", "
+                            },
+                            {
+                              "type": "text",
+                              "text": "petrous ridges",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", and overall cranial contour \u2014 all visible on the bone-window anatomy from Page 5."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "b_p7_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is 6DoF couch correction especially valuable for cranial SRS?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It corrects small rotations (pitch/roll/yaw) so a tight, high-dose target stays off nearby critical structures",
+              "It lets the beam pass through bone without attenuation"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "SRS delivers a high dose to a small target surrounded by critical structures, so even small uncorrected rotations can cause a geographic miss or OAR overdose; 6DoF removes rotational error a translation-only couch cannot."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've read the brain top-to-bottom on real planning imagery \u2014 convexity, mid-ventricular, and posterior-fossa levels on brain window; the skull base on bone window; and the enhancing-core-versus-edema distinction on T1CE and FLAIR MRI \u2014 then tied it to rigid-skull bony verification with 6DoF."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cross-reference: apply this to "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Brain Treatment Planning"
+                    },
+                    {
+                      "type": "text",
+                      "text": ", or practice border identification in the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "CT Borders Game"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

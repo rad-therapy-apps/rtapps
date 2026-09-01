@@ -1,0 +1,54 @@
+{
+  "matching": {
+    "slug": "radiation-effects-matching",
+    "title": "Radiation Effects on Organ Systems: Matching",
+    "pairs": [
+      {
+        "term": "LD 50/30",
+        "definition": "Signifies the whole-body dose of ionizing radiation that can be lethal to 50% of an exposed population within 30 days"
+      },
+      {
+        "term": "ARS",
+        "definition": "Radiation sickness that occurs in humans after whole-body reception of large doses of ionizing radiation (1 Gy or more) delivered over a short time"
+      },
+      {
+        "term": "Atrophy",
+        "definition": "Shrinkage of organs and tissues after a high radiation dose"
+      },
+      {
+        "term": "Epilation",
+        "definition": "Loss of hair (alopecia)"
+      },
+      {
+        "term": "Somatic effects",
+        "definition": "Effects upon the body that was irradiated"
+      },
+      {
+        "term": "Genetic effects",
+        "definition": "Effects upon future generations due to irradiation of germ cells"
+      },
+      {
+        "term": "Prodromal stage",
+        "definition": "The first stage of ARS, occurring within hours after a whole-body absorbed dose of 1 Gy or more"
+      },
+      {
+        "term": "Latent period",
+        "definition": "The period after the initial stage of ARS during which no visible effects or symptoms of radiation exposure occur"
+      },
+      {
+        "term": "Karyotyping",
+        "definition": "The process of mapping chromosomes to observe radiation-induced aberrations"
+      },
+      {
+        "term": "Radiodermatitis",
+        "definition": "Reddening of the skin caused by exposure to ionizing radiation, often seen in early radiologists"
+      }
+    ],
+    "present_n": null
+  },
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  }
+}

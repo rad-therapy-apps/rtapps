@@ -1,0 +1,1195 @@
+{
+  "subject": {
+    "slug": "radiation-protection",
+    "title": "Radiation Protection",
+    "order": 9
+  },
+  "lesson": {
+    "slug": "alara-and-inverse-square-law",
+    "title": "Radiation Safety: ALARA & ISL",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Purpose, Task & Criteria (TILT) & Intro to ALARA",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose: Why This Matters This lesson focuses on fundamental radiation safety principles: ALARA (As Low As Reasonably Achievable) and the Inverse Square Law (ISL). Understanding and applying these concepts is paramount for Radiation Therapists to protect patients, themselves, and the public from unnecessary radiation exposure while delivering effective treatments."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do You will: Learn the definition and components of the ALARA principle (Time, Distance, Shielding). Understand the Inverse Square Law and its mathematical application. Engage with \"Quick Check\" questions to test comprehension. Utilize an interactive simulator to visualize the Inverse Square Law. Complete a worksheet applying ALARA and ISL concepts to practical scenarios."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned By the end, you should be able to: Define ALARA and its three cardinal principles. Explain the Inverse Square Law and calculate changes in dose rate with distance. Apply ALARA and ISL to common situations in radiation therapy. Successfully answer worksheet questions based on the lesson and simulator."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "ALARA"
+                    },
+                    {
+                      "type": "text",
+                      "text": " principle is a cornerstone of radiation protection. It stands for \""
+                    },
+                    {
+                      "type": "text",
+                      "text": "A",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "s "
+                    },
+                    {
+                      "type": "text",
+                      "text": "L",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "ow "
+                    },
+                    {
+                      "type": "text",
+                      "text": "A",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "s "
+                    },
+                    {
+                      "type": "text",
+                      "text": "R",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "easonably "
+                    },
+                    {
+                      "type": "text",
+                      "text": "A",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "chievable.\" This means making every reasonable effort to maintain exposures to ionizing radiation as far below the dose limits as practical, while still achieving the intended purpose (e.g., effective patient treatment)."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Cardinal Principle 1 - TIME",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "One of the three cardinal principles of radiation protection is minimizing "
+                    },
+                    {
+                      "type": "text",
+                      "text": "TIME"
+                    },
+                    {
+                      "type": "text",
+                      "text": " spent in a radiation field or near a radiation source."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Concept: The total radiation dose received is directly proportional to the duration of exposure. Less time = Less dose. Total Dose = Dose Rate \u00d7 Time"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Examples in Radiation Therapy for RTTs:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Working efficiently during patient setup to minimize time in the room once imaging systems (e.g., CBCT) are active and emitting radiation."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Spending minimal necessary time near patients who have received brachytherapy implants that are still radioactive."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Quickly exiting the treatment room once the patient is appropriately set up and before the primary beam is activated."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Planning tasks to reduce presence in radiation areas."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page2_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: If an RTT reduces the time they spend in an area with a constant radiation dose rate by half, their received dose will:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Also be reduced by half.",
+              "Be reduced by a quarter.",
+              "Remain the same."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Cardinal Principle 2 - DISTANCE & Inverse Square Law",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The second cardinal principle is maximizing "
+                    },
+                    {
+                      "type": "text",
+                      "text": "DISTANCE"
+                    },
+                    {
+                      "type": "text",
+                      "text": " from a radiation source."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Concept: The intensity of radiation (and thus the dose rate) from a point source decreases rapidly as the distance from the source increases. This relationship is described by the Inverse Square Law (ISL). Inverse Square Law Formula: I\u2081 / I\u2082 = (d\u2082)\u00b2 / (d\u2081)\u00b2 or I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2 Where: I\u2081 is the intensity at distance d\u2081, and I\u2082 is the intensity at distance d\u2082. This means if you double the distance (d\u2082 = 2d\u2081), the dose rate drops to one-quarter (I\u2082 = I\u2081/4). If you triple the distance, it drops to one-ninth (I\u2082 = I\u2081/9)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Examples in Radiation Therapy for RTTs:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Standing as far back as practicable from the patient/source during imaging procedures (e.g., during fluoroscopy if present, or from a brachytherapy patient)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Using remote controls for equipment when possible, allowing operation from a greater distance."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The design of treatment rooms, with control consoles located outside the heavily shielded room, utilizes distance."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Applying the Inverse Square Law",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let's consider the Inverse Square Law (ISL) practically. The formula is: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If a point source emits a dose rate ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "I\u2081"
+                    },
+                    {
+                      "type": "text",
+                      "text": ") of "
+                    },
+                    {
+                      "type": "text",
+                      "text": "100 mSv/hr"
+                    },
+                    {
+                      "type": "text",
+                      "text": " at a distance ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "d\u2081"
+                    },
+                    {
+                      "type": "text",
+                      "text": ") of "
+                    },
+                    {
+                      "type": "text",
+                      "text": "1 meter"
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "At "
+                            },
+                            {
+                              "type": "text",
+                              "text": "2 meters",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (d\u2082 = 2m):"
+                            },
+                            {
+                              "type": "hardBreak"
+                            },
+                            {
+                              "type": "text",
+                              "text": " I\u2082 = 100 mSv/hr \u00d7 (1m / 2m)\u00b2 = 100 \u00d7 (0.5)\u00b2 = 100 \u00d7 0.25 = "
+                            },
+                            {
+                              "type": "text",
+                              "text": "25 mSv/hr"
+                            },
+                            {
+                              "type": "text",
+                              "text": ". (Distance doubled, intensity is 1/4)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "At "
+                            },
+                            {
+                              "type": "text",
+                              "text": "0.5 meters",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (d\u2082 = 0.5m):"
+                            },
+                            {
+                              "type": "hardBreak"
+                            },
+                            {
+                              "type": "text",
+                              "text": " I\u2082 = 100 mSv/hr \u00d7 (1m / 0.5m)\u00b2 = 100 \u00d7 (2)\u00b2 = 100 \u00d7 4 = "
+                            },
+                            {
+                              "type": "text",
+                              "text": "400 mSv/hr"
+                            },
+                            {
+                              "type": "text",
+                              "text": ". (Distance halved, intensity is 4x)"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This demonstrates the powerful effect of distance. Small changes in distance, especially when close to the source, can lead to very large changes in dose rate."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page4_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: If the dose rate from a point source is 36 mSv/hr at 1 meter, what would the dose rate be at 3 meters?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "12 mSv/hr",
+              "6 mSv/hr",
+              "4 mSv/hr"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Cardinal Principle 3 - SHIELDING",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The third cardinal principle is using "
+                    },
+                    {
+                      "type": "text",
+                      "text": "SHIELDING"
+                    },
+                    {
+                      "type": "text",
+                      "text": " between the radiation source and individuals."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Concept: Shielding involves placing absorbent materials in the path of radiation to reduce its intensity. The effectiveness depends on: The type and energy of the radiation (alpha, beta, gamma, X-rays, neutrons require different shielding). The material of the shield (e.g., lead, concrete, water, plastic). High-Z materials for photons. The thickness of the shield. More thickness = more attenuation. The Half-Value Layer (HVL) is the thickness of a material required to reduce the radiation intensity by 50%."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Examples in Radiation Therapy for RTTs:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Thick concrete or lead-lined walls, doors, and control windows of treatment rooms."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Lead aprons, thyroid shields, and leaded glasses for staff during certain procedures (e.g., fluoroscopy, some brachytherapy source handling)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Custom blocks or Multi-Leaf Collimators (MLCs) on the Linac to shape the beam and shield normal tissues in the patient."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Shielding within the Linac head itself to reduce leakage radiation."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page5_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: For shielding high-energy X-rays used in radiation therapy, which material is commonly used for treatment room walls due to its effectiveness and structural properties?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Thin aluminum foil",
+              "Thick concrete or lead",
+              "Plexiglass"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "\"Reasonably Achievable\" - The \"RA\" in ALARA",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The \"RA\" in ALARA \u2013 "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Reasonably Achievable",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2013 is crucial. It means balancing the goal of minimizing dose with practical, social, and economic factors."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Considerations for \"Reasonably Achievable\":",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Benefit vs. Risk:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The primary objective in therapy is effective treatment. Dose reduction efforts should not compromise this. For diagnostic imaging, image quality must be sufficient."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Practicality & Feasibility:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Is the cost or complexity of an additional safety measure justified by the amount of dose reduction achieved?"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Technological Limits:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Current technology may have inherent limitations in dose reduction."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient Condition:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Patient comfort, cooperation, and overall medical status can influence what is \"reasonable.\""
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "ALARA is not about achieving zero exposure, but about an ongoing process of optimization and responsible radiation use. It requires professional judgment and continuous evaluation of practices."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "RTT's Role & Responsibility in ALARA",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Therapists are key in implementing ALARA daily."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Responsibilities:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Accurate Treatment Delivery:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Precise setup, IGRT, and strict adherence to the treatment plan are paramount for ALARA to the patient's healthy tissues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Applying Cardinal Principles:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Consciously using Time, Distance, and Shielding for self-protection and the protection of colleagues and the public."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Equipment QA:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Diligently performing and documenting daily QA checks."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient Communication:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Clear instructions to patients can improve cooperation, reduce movement, and minimize the need for repeat imaging or adjustments."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Vigilance:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Being alert for potential radiation hazards or deviations from safety protocols. Using \"Stop the Beam\" authority if concerned."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Following Protocols:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Adherence to all departmental and institutional radiation safety policies."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Personal Dosimetry:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Correctly wearing and handling personal dosimeters."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A proactive approach to ALARA demonstrates professionalism and commitment to safety."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Activity - ISL Simulator, Worksheet & Certificate",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've reviewed the ALARA principle and its components. Now it's time to apply this knowledge."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Part 1: Inverse Square Law Simulator"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Reference: Source emits 100.0 mSv/hr at 1.0 meter. Meter 1.0 m Adjust Distance (meters): Current Distance: 1.0 m Simulated Dose Rate: 100.0 mSv/hr Relative Dose Rate to Reference (100 mSv/hr at 1m) 100% Formula: I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Part 2: ALARA Worksheet {/* Worksheet questions q1-q13 from previous version - content omitted for brevity but should be included here */} Worksheet Part A: Inverse Square Law & Simulator Use the simulator above. Reference: Source emits 100.0 mSv/hr at 1.0 meter. 1. Initial Setup: What is the simulated dose rate at 1.0m? How does the \"dose bar\" height correspond? 2. Increasing Distance: Move slider to 2.0m. a) Simulated dose rate? b) Calculate expected using ISL (Show work). c) Comparison (simulated vs. calculated)? d) Describe visual changes. 3. Further Distance: Set distance to 4.0m. a) Simulated dose rate? b) Calculate expected using ISL (Show work). c) Relationship when doubling distance (2m to 4m)? 4. Decreasing Distance: Return to 1.0m, then decrease to 0.5m. a) Simulated dose rate at 0.5m? b) Calculate expected using ISL (Show work). c) Effect of halving distance? 5. Applying the Simulator: a) An RTT is 1.5 meters from a source. Approx. dose rate? b) RTT needs dose rate \u2264 25 mSv/hr. Min. distance? Worksheet Part B: Conceptual ALARA 6. Define ALARA: Explain in your own words. What does it stand for, and what is its goal? 7. Time Limitation: How does ALARA relate to time? Provide an RT example. 8. Distance Maximization: Explain ISL's relation to ALARA's \"Distance\". Describe a practical RT example. 9. Shielding Utilization: How does shielding reduce exposure? Example in RT. 10. Practical ALARA Strategies: List 3+ other strategies RTTs use for ALARA. 11. \"Reasonably Achievable\": What does \"RA\" in ALARA imply? Is it always absolute minimization? Reflection 12. How did using the simulator help you understand the ISL? 13. What is your most important takeaway regarding ALARA in RT?"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Activity Completion Certificate Enter Your Name for Certificate: Generate Certificate Certificate of Completion Has successfully completed the ALARA & Inverse Square Law Activity. RTApps Learning Print Certificate Please enter your name to generate the certificate."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

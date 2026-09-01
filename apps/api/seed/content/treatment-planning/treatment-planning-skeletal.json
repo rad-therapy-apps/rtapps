@@ -1,0 +1,515 @@
+{
+  "subject": {
+    "slug": "treatment-planning",
+    "title": "Treatment Planning",
+    "order": 13
+  },
+  "lesson": {
+    "slug": "treatment-planning-skeletal",
+    "title": "Skeletal Treatment Planning",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Two Very Different Clinical Goals",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Skeletal treatment covers two genuinely different scenarios: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "palliative",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " treatment of painful bone metastases (the far more common case), and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "SBRT",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for spine metastases or primary bone tumors requiring ablative, highly conformal dose near the spinal cord."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Palliative Bone Metastasis Regimens",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Regimen"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Notes"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "8 Gy \u00d7 1 fraction"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Single-fraction option; comparable pain relief to longer courses, higher retreatment rate"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "20 Gy in 5 fractions"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Common multi-fraction option"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "30 Gy in 10 fractions"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Longer course, sometimes preferred for better prognosis patients or complex sites"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Simple parallel-opposed or limited-field techniques are typically sufficient for straightforward palliative cases \u2014 the priority is fast, effective pain relief with minimal patient burden, not maximal conformality. Target volumes for palliative treatment are correspondingly simple: the involved bone plus a generous margin, without the elaborate contouring detail spine SBRT requires."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Spine SBRT",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Spine SBRT",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a fundamentally different planning problem: delivering ablative dose (commonly 16\u201324 Gy in 1\u20133 fractions) to a vertebral metastasis while sharply sparing the immediately adjacent spinal cord."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The "
+                        },
+                        {
+                          "type": "text",
+                          "text": "spinal cord dose constraint",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is the single most critical limit in this planning scenario \u2014 commonly capped around 12\u201314 Gy to a small cord volume in a single fraction, dramatically lower than the target dose just millimeters away. This demands highly conformal VMAT/IMRT planning and rigid immobilization with image guidance immediately before each fraction."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is spine SBRT considered a more demanding planning problem than a standard palliative bone met treatment?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It requires shaping a steep dose falloff between the target and the immediately adjacent spinal cord",
+              "It always requires a longer overall treatment course"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The defining challenge is the steep dose gradient needed between the ablative target dose and the strict cord constraint just millimeters away \u2014 palliative treatment doesn't demand that level of conformality."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Spine SBRT Target Volumes",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because a single vertebra sits so close to the cord, spine SBRT uses standardized, consensus-based contouring rather than a generic margin expansion \u2014 following guidelines from groups like the International Spine Radiosurgery Consortium:"
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The "
+                        },
+                        {
+                          "type": "text",
+                          "text": "GTV",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is the radiographically visible tumor within the vertebra. The "
+                        },
+                        {
+                          "type": "text",
+                          "text": "CTV",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is built following the involved vertebral "
+                        },
+                        {
+                          "type": "text",
+                          "text": "anatomic compartments",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (body, pedicle, lamina, spinous process) rather than a simple uniform expansion \u2014 if only the vertebral body is involved, the CTV generally does not extend into the posterior elements, and vice versa. This compartment-based approach is specifically designed to avoid unnecessarily including the epidural space (and therefore the cord) in the target when the tumor hasn't actually spread there."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "PTV",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " margin is added, but kept extremely tight (often just 1\u20132 mm) given the proximity to the cord \u2014 which is exactly why rigid immobilization and daily image guidance are non-negotiable for this technique."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why does spine SBRT contour the CTV by anatomic compartment rather than a simple uniform margin?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "To avoid unnecessarily extending the target into the epidural space/cord when disease hasn't spread there",
+              "Compartment-based contouring is simply faster to draw"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Compartment-based CTV contouring specifically avoids including uninvolved regions near the cord, which is essential given how tight the cord dose constraint is."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Extremity Treatment",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Extremity bone lesions (metastatic or primary sarcoma) follow similar general principles to spine treatment \u2014 positioning for reproducibility, appropriate immobilization (often a custom cast or vacuum bag), and OAR awareness specific to the limb (joints, growth plates in pediatric patients, skin folds). Field arrangement is typically simpler than spine SBRT given the absence of an immediately adjacent critical structure like the cord, so target volumes usually follow a more conventional uniform-margin approach."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered the palliative vs. SBRT distinction, standard palliative fractionation options, the demanding cord-sparing requirements of spine SBRT, compartment-based spine SBRT target volume contouring, and extremity treatment considerations."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cross-reference: for disease-specific staging and anatomy of bone-involving malignancies, see Sarcoma and Metastatic & Palliative Care under Tumor Sites Localization."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

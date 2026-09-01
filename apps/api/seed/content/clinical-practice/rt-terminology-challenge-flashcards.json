@@ -1,0 +1,109 @@
+{
+  "flashcards": {
+    "slug": "rt-terminology-challenge-flashcards",
+    "title": "Terminology Challenge: Flashcards",
+    "cards": [
+      {
+        "term": "Anterior",
+        "definition": "Front of the body"
+      },
+      {
+        "term": "Posterior",
+        "definition": "Back of the body"
+      },
+      {
+        "term": "Superior",
+        "definition": "Towards the head"
+      },
+      {
+        "term": "Inferior",
+        "definition": "Away from the head"
+      },
+      {
+        "term": "Medial",
+        "definition": "Toward the midline"
+      },
+      {
+        "term": "Lateral",
+        "definition": "Away from the midline"
+      },
+      {
+        "term": "Metastasis",
+        "definition": "The spread of cancer cells from the primary site"
+      },
+      {
+        "term": "Benign",
+        "definition": "Not cancerous; does not invade nearby tissue"
+      },
+      {
+        "term": "Malignant",
+        "definition": "Cancerous; can invade and destroy nearby tissue"
+      },
+      {
+        "term": "Fraction (Fx)",
+        "definition": "A single radiation treatment session"
+      },
+      {
+        "term": "Gray (Gy)",
+        "definition": "The standard unit of absorbed radiation dose"
+      },
+      {
+        "term": "MLC",
+        "definition": "Device with individual leaves to shape the radiation beam"
+      },
+      {
+        "term": "Gantry",
+        "definition": "The rotating part of the Linac housing the treatment head"
+      },
+      {
+        "term": "IMRT",
+        "definition": "Technique that varies radiation intensity within each beam"
+      },
+      {
+        "term": "VMAT",
+        "definition": "Technique delivering radiation as the gantry rotates"
+      },
+      {
+        "term": "SBRT/SRS",
+        "definition": "Technique using high doses in 1-5 fractions for small tumors"
+      },
+      {
+        "term": "IGRT",
+        "definition": "Using imaging to verify patient position before/during treatment"
+      },
+      {
+        "term": "CBCT",
+        "definition": "Provides a 3D image of the patient for alignment"
+      },
+      {
+        "term": "Brachytherapy",
+        "definition": "Placing radioactive sources directly inside or near a tumor"
+      },
+      {
+        "term": "Palliative",
+        "definition": "Treatment given to relieve symptoms and improve quality of life"
+      },
+      {
+        "term": "Adjuvant",
+        "definition": "Treatment given after the primary treatment to kill remaining cells"
+      },
+      {
+        "term": "Hypo-",
+        "definition": "A prefix meaning 'deficient' or 'below'"
+      },
+      {
+        "term": "-oma",
+        "definition": "A suffix meaning 'tumor' or 'mass'"
+      },
+      {
+        "term": "Simulation",
+        "definition": "The process of mapping the tumor to plan treatment"
+      }
+    ]
+  },
+  "subject": {
+    "slug": "clinical-practice",
+    "title": "Clinical Practice",
+    "order": 1
+  }
+}
