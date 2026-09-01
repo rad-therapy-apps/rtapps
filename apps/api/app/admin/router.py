@@ -1,13 +1,17 @@
-"""Routes for the admin API: user search/list, role change, deactivation, audit-log view.
+"""Routes for the admin API: user search/list, role change, deactivation, erasure, audit-log
+view.
 
 What this file does: `GET /users` lists/searches users with cursor pagination; `PATCH
 /users/{id}/role` changes a user's role (audited); `POST /users/{id}/deactivate` soft-disables
-a user and revokes their sessions (audited); `GET /audit-log` lists audit rows with filters.
+a user and revokes their sessions (audited); `POST /users/{id}/erase` tombstones a user's PII
+and deletes their sessions/identities (audited); `GET /audit-log` lists audit rows with filters.
 Every route requires `UserRole.admin`.
 Used here and why: `require_role(UserRole.admin)` as a router-level dependency (same
 "apply to the whole router" pattern as `app.content.router`); `_target` centralises the
-404/400 checks shared by role-change and deactivate; UUIDv7 ids sort by creation time, so
-`User.id.desc()` plus `User.id < cursor` gives newest-first cursor pagination for free.
+404 (unknown user) / 409 (last-active-admin guard, when the route asks for one) / 400
+(acting on your own account) checks shared by role-change, deactivate, and erase; UUIDv7 ids
+sort by creation time, so `User.id.desc()` plus `User.id < cursor` gives newest-first cursor
+pagination for free.
 How it fits the project: FR-M-01/02/04 — the admin surface the owner uses to promote/demote
 and deactivate accounts, and to read the audit trail those actions (and others) leave.
 Depends on: `app.admin.schemas`, `app.audit.models.AuditLog`, `app.audit.service.record_audit`,
@@ -83,12 +87,19 @@ async def list_users(
     return UserPage(items=items, next_cursor=next_cursor)
 
 
-async def _target(db: AsyncSession, user_id: uuid.UUID, actor: User) -> User:
-    # Shared 404 (unknown user) / 400 (acting on your own account) guard for the two
-    # mutating routes below.
+async def _target(
+    db: AsyncSession, user_id: uuid.UUID, actor: User, *, guard_title: str | None = None
+) -> User:
+    # Shared 404 (unknown user) / 409 (last-active-admin guard) / 400 (acting on your own
+    # account) checks for the three mutating routes below. `guard_title` is the 409 Problem
+    # title to raise when `target` is the sole active admin; pass None to skip that check
+    # (change_role does this when the new role is still admin — that's not a demotion).
+    # The guard fires before the self-modification check, same as before this was shared.
     target = await db.get(User, user_id)
     if target is None:
         raise Problem(404, "User not found")
+    if guard_title is not None and await _is_last_active_admin(db, target):
+        raise Problem(409, guard_title)
     if target.id == actor.id:
         raise Problem(400, "You cannot change your own account here")
     return target
@@ -102,15 +113,9 @@ async def change_role(
     actor: User = Depends(require_user),
     db: AsyncSession = Depends(get_session),
 ) -> User:
-    # Fetch the target first to check the last admin guard before self-modification guard.
-    target = await db.get(User, user_id)
-    if target is None:
-        raise Problem(404, "User not found")
-    # Guard against demoting the last active admin (fires before self-modification check).
-    if body.role != UserRole.admin and await _is_last_active_admin(db, target):
-        raise Problem(409, "Cannot demote the last admin")
-    if target.id == actor.id:
-        raise Problem(400, "You cannot change your own account here")
+    # Only guard against demoting the last active admin when the new role isn't admin.
+    guard_title = "Cannot demote the last admin" if body.role != UserRole.admin else None
+    target = await _target(db, user_id, actor, guard_title=guard_title)
     previous = target.role
     target.role = body.role
     # Audited in the same transaction as the mutation, so the row and the audit entry
@@ -135,15 +140,7 @@ async def deactivate_user(
     actor: User = Depends(require_user),
     db: AsyncSession = Depends(get_session),
 ) -> User:
-    # Fetch the target first to check the last admin guard before self-modification guard.
-    target = await db.get(User, user_id)
-    if target is None:
-        raise Problem(404, "User not found")
-    # Guard against deactivating the last active admin (fires before self-modification check).
-    if await _is_last_active_admin(db, target):
-        raise Problem(409, "Cannot deactivate the last admin")
-    if target.id == actor.id:
-        raise Problem(400, "You cannot change your own account here")
+    target = await _target(db, user_id, actor, guard_title="Cannot deactivate the last admin")
     # Already deactivated: nothing changes, so no sessions to revoke and no audit row (a
     # second "deactivate_user" entry would misrepresent the log).
     if target.deactivated_at is not None:
@@ -173,16 +170,11 @@ async def erase_user(
     db: AsyncSession = Depends(get_session),
 ) -> User:
     # Erase a user's PII and delete their sessions and identity links.
-    target = await db.get(User, user_id)
-    if target is None:
-        raise Problem(404, "User not found")
-    # Guard against erasing the last active admin (fires before self-modification check).
-    if await _is_last_active_admin(db, target):
-        raise Problem(409, "Cannot erase the last admin")
-    if target.id == actor.id:
-        raise Problem(400, "You cannot change your own account here")
-    # Already erased: email starts with "erased-", so just return unchanged (no second audit row).
-    if target.email.startswith("erased-"):
+    target = await _target(db, user_id, actor, guard_title="Cannot erase the last admin")
+    # Already erased: email is exactly the tombstone value, so just return unchanged (no
+    # second audit row). An exact match (not a prefix check) so a user who happened to
+    # register "erased-bob@example.edu" doesn't silently short-circuit their own erasure.
+    if target.email == f"erased-{target.id}@erased.invalid":
         return target
     # Tombstone the user: replace PII with placeholder values.
     target.email = f"erased-{target.id}@erased.invalid"

@@ -1,23 +1,32 @@
 """What this file tests: `app.admin.router` — admin-only access, user search and cursor
 pagination, audited role change (effective on the user's next request), audited
-deactivation (session refused afterwards), and the audit-log listing with filters.
-Used here and why: httpx + real Postgres; the deactivated user's own client is reused to
-prove their existing session stops working (FR-M-01/02 "takes effect on next request").
+deactivation (session refused afterwards), and audited erasure (session/identity deletion,
+activity_result rollup survival, exact-match idempotency), and the audit-log listing with
+filters.
+Used here and why: httpx + real Postgres; the deactivated/erased user's own client is
+reused, or their session cookie captured beforehand, to prove their existing session stops
+working (FR-M-01/02 "takes effect on next request").
 How it fits the project: FR-M-01/02/04; the admin surface the owner needs to promote the
 mentor to educator on the test VM without psql.
 Works with: pytest-asyncio, httpx.
-Depends on: `client`, `db`, `register` (conftest); `promote`, `login` from `test_cohorts.py`.
+Depends on: `client`, `db`, `register` (conftest); `promote`, `login` from `test_cohorts.py`;
+`QUIZ_DOC` from `test_activity_importer.py`; `app.content.activity_importer.import_any`;
+`app.attempts.rollup.ActivityResult`.
 Used by: CI `api` job; `make test-api`.
 """
 
 import uuid
 
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.models import User, UserRole
+from app.attempts.rollup import ActivityResult
+from app.auth.models import Identity, User, UserRole
 from app.auth.passwords import hash_password
+from app.content.activity_importer import import_any
 from tests.conftest import register
+from tests.test_activity_importer import QUIZ_DOC
 from tests.test_cohorts import login, promote
 
 
@@ -171,9 +180,16 @@ async def test_last_admin_guard_on_erase(client: AsyncClient, db: AsyncSession) 
 async def test_erase_user_tombstones_pii_deletes_identities_sessions(
     client: AsyncClient, db: AsyncSession
 ) -> None:
-    # Register a non-admin user, then make an admin (switches client to admin session).
+    # Register a non-admin user and capture their session cookie before switching the
+    # client to an admin session (make_admin's register/login overwrites the cookie jar).
     gone_email = "gone@example.edu"
     await register(client, email=gone_email, name="Gone User")
+    victim_session = client.cookies["rt_session"]
+    # Give the victim a linked identity so we can prove it gets deleted too.
+    gone_user = await db.scalar(select(User).where(User.email == gone_email))
+    assert gone_user is not None
+    db.add(Identity(user_id=gone_user.id, provider="google", subject="sub-123"))
+    await db.commit()
     await make_admin(client, db)
     # Get the gone user's ID.
     gone = (await client.get("/api/v1/admin/users", params={"q": gone_email})).json()["items"][0]
@@ -184,17 +200,44 @@ async def test_erase_user_tombstones_pii_deletes_identities_sessions(
     erased_user = r.json()
     assert erased_user["email"].startswith("erased-")
     assert erased_user["display_name"] == "Erased user"
-    # Old session no longer works (login with erased email fails because email is changed).
-    login_r = await client.post(
-        "/api/v1/auth/login", json={"email": gone_email, "password": "password-123"}
-    )
-    assert login_r.status_code == 401  # Email is erased, so no match
+    # The victim's captured session cookie no longer authenticates (proves Session deletion,
+    # not just that a fresh login with the erased email would fail). Swap the client's
+    # cookie jar to the victim's session for this one request, then restore the admin's.
+    admin_session = client.cookies["rt_session"]
+    client.cookies.set("rt_session", victim_session)
+    me_r = await client.get("/api/v1/auth/me")
+    assert me_r.status_code == 401
+    client.cookies.set("rt_session", admin_session)
     # Audit log has exactly one erase_user entry with sessions_deleted and
     # identities_deleted counts.
     log = (await client.get("/api/v1/admin/audit-log", params={"action": "erase_user"})).json()
     assert len(log) == 1
     assert log[0]["target_id"] == gone_id
     assert "sessions_deleted" in log[0]["detail"] and "identities_deleted" in log[0]["detail"]
+    assert log[0]["detail"]["identities_deleted"] == 1
+    # The Identity row is actually gone.
+    remaining = await db.scalar(select(Identity).where(Identity.user_id == gone_user.id))
+    assert remaining is None
+
+
+async def test_erase_user_keeps_activity_result_rollup(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    # An activity_result rollup row is analytics data, not PII, so it must survive erasure.
+    gone_email = "gone@example.edu"
+    await register(client, email=gone_email, name="Gone User")
+    gone_user = await db.scalar(select(User).where(User.email == gone_email))
+    assert gone_user is not None
+    activity = await import_any(db, QUIZ_DOC)
+    rollup = ActivityResult(user_id=gone_user.id, activity_id=activity.id, attempts=1)
+    db.add(rollup)
+    await db.commit()
+    await make_admin(client, db)
+    gone = (await client.get("/api/v1/admin/users", params={"q": gone_email})).json()["items"][0]
+    r = await client.post(f"/api/v1/admin/users/{gone['id']}/erase")
+    assert r.status_code == 200
+    kept = await db.scalar(select(ActivityResult).where(ActivityResult.user_id == gone_user.id))
+    assert kept is not None
 
 
 async def test_erase_user_idempotent(client: AsyncClient, db: AsyncSession) -> None:
@@ -215,6 +258,26 @@ async def test_erase_user_idempotent(client: AsyncClient, db: AsyncSession) -> N
     assert r2.json()["email"] == first_email
     log = (await client.get("/api/v1/admin/audit-log", params={"action": "erase_user"})).json()
     assert len(log) == 1  # Only one audit entry
+
+
+async def test_erase_user_with_erased_prefix_email_is_still_erased(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    # A user who happens to register an "erased-" prefixed email must not be mistaken for
+    # an already-erased user: the idempotency check is an exact match on the tombstone
+    # value, not a prefix check.
+    fake_email = "erased-fake@example.edu"
+    await register(client, email=fake_email, name="Fake Erased")
+    await make_admin(client, db)
+    fake = (await client.get("/api/v1/admin/users", params={"q": fake_email})).json()["items"][0]
+    fake_id = fake["id"]
+    r = await client.post(f"/api/v1/admin/users/{fake_id}/erase")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["email"] == f"erased-{fake_id}@erased.invalid"
+    assert body["display_name"] == "Erased user"
+    log = (await client.get("/api/v1/admin/audit-log", params={"action": "erase_user"})).json()
+    assert len(log) == 1 and log[0]["target_id"] == fake_id
 
 
 async def test_list_users_ilike_escaping(client: AsyncClient, db: AsyncSession) -> None:
