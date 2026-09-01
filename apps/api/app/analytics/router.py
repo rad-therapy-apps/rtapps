@@ -23,10 +23,11 @@ Used by: `app.main` (mounted); `tests/test_analytics.py`.
 
 import uuid
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.analytics.csv_export import csv_response
 from app.analytics.queries import (
     activity_rows,
     activity_stats,
@@ -55,6 +56,113 @@ from app.errors import Problem
 router = APIRouter(prefix="/cohorts", tags=["analytics"])
 
 
+# CSV export routes must come before JSON routes (same paths with .csv suffix) so they match first.
+@router.get("/{cohort_id}/overview.csv", response_class=Response)
+async def cohort_overview_csv(
+    request: Request,
+    cohort: Cohort = Depends(require_cohort_educator),
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> Response:
+    # Export the overview's student table as CSV: one row per student with the on-screen columns.
+    students = await student_rows(db, cohort)
+    rows = [(s.display_name, s.email, s.attempted, s.passed, s.mean_best_percent) for s in students]
+    # Audit the export.
+    await record_audit(
+        db,
+        actor=user,
+        action="export_csv",
+        target_type="cohort",
+        target_id=cohort.id,
+        cohort_id=cohort.id,
+        request=request,
+        detail={"view": "overview"},
+    )
+    await db.commit()
+    return csv_response(
+        "overview.csv",
+        ["display_name", "email", "attempted", "passed", "mean_best_percent"],
+        rows,
+    )
+
+
+@router.get("/{cohort_id}/activities/{activity_id}.csv", response_class=Response)
+async def activity_stats_csv(
+    activity_id: uuid.UUID,
+    request: Request,
+    cohort: Cohort = Depends(require_cohort_educator),
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> Response:
+    # An unpublished (or nonexistent) activity has never had a snapshot to grade against.
+    activity = await db.get(Activity, activity_id)
+    if activity is None or activity.status != "published":
+        raise Problem(404, "Activity not found")
+    # Export the activity's stats items table as CSV: one row per item with the on-screen columns.
+    stats = await activity_stats(db, cohort, activity)
+    rows = [
+        (item.key, item.label, item.answered, item.correct, item.percent_correct)
+        for item in stats.items
+    ]
+    # Audit the export.
+    await record_audit(
+        db,
+        actor=user,
+        action="export_csv",
+        target_type="activity",
+        target_id=activity.id,
+        cohort_id=cohort.id,
+        request=request,
+        detail={"view": "activity", "activity_id": str(activity.id)},
+    )
+    await db.commit()
+    return csv_response(
+        f"activity-{activity.id}.csv",
+        ["item", "label", "answered", "correct", "percent_correct"],
+        rows,
+    )
+
+
+@router.get("/{cohort_id}/outcomes.csv", response_class=Response)
+async def outcome_mastery_csv(
+    request: Request,
+    cohort: Cohort = Depends(require_cohort_educator),
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> Response:
+    # Export the outcome mastery table as CSV: one row per outcome with the on-screen columns.
+    outcomes = await outcome_rows(db, cohort)
+    rows = [
+        (o.code, o.title, o.questions, o.answered, o.percent_correct, o.students_below_threshold)
+        for o in outcomes
+    ]
+    # Audit the export.
+    await record_audit(
+        db,
+        actor=user,
+        action="export_csv",
+        target_type="cohort",
+        target_id=cohort.id,
+        cohort_id=cohort.id,
+        request=request,
+        detail={"view": "outcomes"},
+    )
+    await db.commit()
+    return csv_response(
+        "outcomes.csv",
+        [
+            "outcome",
+            "title",
+            "questions",
+            "answered",
+            "percent_correct",
+            "students_below_threshold",
+        ],
+        rows,
+    )
+
+
+# JSON routes.
 @router.get("/{cohort_id}/overview", response_model=CohortOverviewOut)
 async def cohort_overview(
     request: Request,

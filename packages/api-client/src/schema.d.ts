@@ -334,6 +334,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/cohorts/{cohort_id}/activities/{activity_id}.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Activity Stats Csv */
+    get: operations["activity_stats_csv_api_v1_cohorts__cohort_id__activities__activity_id__csv_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts/{cohort_id}/members": {
     parameters: {
       query?: never;
@@ -385,6 +402,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/cohorts/{cohort_id}/outcomes.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Outcome Mastery Csv */
+    get: operations["outcome_mastery_csv_api_v1_cohorts__cohort_id__outcomes_csv_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts/{cohort_id}/overview": {
     parameters: {
       query?: never;
@@ -394,6 +428,23 @@ export interface paths {
     };
     /** Cohort Overview */
     get: operations["cohort_overview_api_v1_cohorts__cohort_id__overview_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cohorts/{cohort_id}/overview.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cohort Overview Csv */
+    get: operations["cohort_overview_csv_api_v1_cohorts__cohort_id__overview_csv_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1804,6 +1855,36 @@ export interface operations {
       };
     };
   };
+  activity_stats_csv_api_v1_cohorts__cohort_id__activities__activity_id__csv_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_members_api_v1_cohorts__cohort_id__members_get: {
     parameters: {
       query?: never;
@@ -1896,6 +1977,35 @@ export interface operations {
       };
     };
   };
+  outcome_mastery_csv_api_v1_cohorts__cohort_id__outcomes_csv_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   cohort_overview_api_v1_cohorts__cohort_id__overview_get: {
     parameters: {
       query?: never;
@@ -1915,6 +2025,35 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CohortOverviewOut"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cohort_overview_csv_api_v1_cohorts__cohort_id__overview_csv_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {

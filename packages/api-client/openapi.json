@@ -2735,6 +2735,52 @@
         ]
       }
     },
+    "/api/v1/cohorts/{cohort_id}/activities/{activity_id}.csv": {
+      "get": {
+        "operationId": "activity_stats_csv_api_v1_cohorts__cohort_id__activities__activity_id__csv_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "cohort_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cohort Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Activity Stats Csv",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
     "/api/v1/cohorts/{cohort_id}/members": {
       "get": {
         "operationId": "list_members_api_v1_cohorts__cohort_id__members_get",
@@ -2871,6 +2917,42 @@
         ]
       }
     },
+    "/api/v1/cohorts/{cohort_id}/outcomes.csv": {
+      "get": {
+        "operationId": "outcome_mastery_csv_api_v1_cohorts__cohort_id__outcomes_csv_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohort_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cohort Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Outcome Mastery Csv",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
     "/api/v1/cohorts/{cohort_id}/overview": {
       "get": {
         "operationId": "cohort_overview_api_v1_cohorts__cohort_id__overview_get",
@@ -2909,6 +2991,42 @@
           }
         },
         "summary": "Cohort Overview",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}/overview.csv": {
+      "get": {
+        "operationId": "cohort_overview_csv_api_v1_cohorts__cohort_id__overview_csv_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohort_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cohort Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cohort Overview Csv",
         "tags": [
           "analytics"
         ]
