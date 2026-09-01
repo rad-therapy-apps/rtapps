@@ -85,16 +85,11 @@ async def test_kind_and_access_vocabulary() -> None:
 async def test_quiz_round_trip(db: AsyncSession) -> None:
     subject = await make_subject(db)
     quiz, activity = await make_quiz(db, subject)
+    await db.refresh(quiz)
     loaded = await db.get(Quiz, quiz.id)
     assert loaded is not None
-    assert loaded.slug == quiz.slug
-    assert loaded.title == quiz.title
-    # Verify questions were created via direct query
-    qq_list = await db.scalars(
-        select(QuizQuestion).where(QuizQuestion.quiz_id == quiz.id).order_by(QuizQuestion.position)
-    )
-    positions = [qq.position for qq in qq_list]
-    assert positions == [1, 2]
+    assert [qq.position for qq in loaded.questions] == [1, 2]
+    assert loaded.questions[0].question.body["answer"] == 0
     assert activity.access == "practice"  # default
 
 

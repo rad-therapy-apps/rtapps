@@ -120,5 +120,5 @@ class QuestionOutcome(Base):
         ForeignKey("question.id", ondelete="CASCADE"), nullable=False
     )
     outcome_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("outcome.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("outcome.id", ondelete="CASCADE"), nullable=False, index=True
     )
