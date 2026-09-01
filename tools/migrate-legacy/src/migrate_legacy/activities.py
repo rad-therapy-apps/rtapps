@@ -9,19 +9,21 @@ JSON shape used by the API importer.
 Used here and why: classification is key-signature-first (quiz has {question,
 options, answer}; flashcards/matching both have {term, definition}), then
 name/filename hints (matching vs flashcards disambiguated by "match" in the
-variable or file name). Converters (quiz and flashcards here; matching and
-sequencing deferred to Task 7) build the final import-doc structure, mapping
-legacy fields to the API schema (e.g. answer text to 0-based index).
+variable or file name). Converters build the final import-doc structure,
+mapping legacy fields to the API schema (e.g. answer text to 0-based index,
+sequencing rows sorted by their `order` key).
 
-How it fits the project: implements the classification and initial-stage
-conversion for the activity-data migration path (Task 6/7 of plan 3a).
-Tasks 6 → 7 boundary: this file has the full classifier (all four kinds),
-but quiz/flashcards converters only; matching/sequencing converters arrive
-in Task 7 and call the same conversion pattern.
+How it fits the project: implements the classification and conversion stages
+of the activity-data migration path (Task 6/7 of plan 3a). All four kinds
+(quiz, flashcards, matching, sequencing) are classified and converted here;
+Task 7's `scan.py` calls these converters per classified array and injects
+the `subject` key (these converters emit docs without one, since the scanner
+overrides `subject` per-file anyway).
 
 Works with: `extract.js_arrays` (input); `convert_lesson` (integration point).
 Depends on: nothing (pure logic).
-Used by: Task 7's scanner; `tests/test_activities.py` exercises this directly.
+Used by: `scan.py`'s whole-repo scanner; `tests/test_activities.py` exercises
+this directly.
 """
 
 from typing import Any
@@ -146,5 +148,65 @@ def convert_flashcards(
             "slug": slug,
             "title": title,
             "cards": [c for c in cards if c["term"] and c["definition"]],
+        }
+    }
+
+
+def convert_matching(
+    data: list[dict[str, Any]], *, slug: str, title: str, notes: list[str]
+) -> dict[str, Any]:
+    """Convert legacy matching data to import-doc format.
+
+    Extracts term/definition pairs via `_pair`, then drops any pair whose
+    definition duplicates an earlier one — the API importer rejects duplicate
+    definitions outright, so this is done ahead of time with a note instead of
+    letting the whole document fail. `present_n` is left `None`: legacy pages
+    present every pair, they don't sample a subset.
+    """
+    seen_definitions: set[str] = set()
+    pairs = []
+    for row in data:
+        pair = _pair(row)
+        if pair["definition"] in seen_definitions:
+            notes.append(f"dropped pair with duplicate definition {pair['definition']!r} in {slug}")
+            continue
+        seen_definitions.add(pair["definition"])
+        pairs.append(pair)
+    return {
+        "matching": {
+            "slug": slug,
+            "title": title,
+            "pairs": pairs,
+            "present_n": None,
+        }
+    }
+
+
+def convert_sequencing(
+    data: list[dict[str, Any]], *, slug: str, title: str, notes: list[str]
+) -> dict[str, Any]:
+    """Convert legacy sequencing/ordering data to import-doc format.
+
+    Rows are sorted by their `order` key. If any row is missing `order`
+    entirely, sorting can't be trusted, so the whole array is left in its
+    original document order instead, with a note for a human to check.
+    """
+    if all("order" in row for row in data):
+        rows = sorted(data, key=lambda row: row["order"])
+    else:
+        rows = data
+        notes.append(f"row(s) missing order key in {slug}; kept in document order")
+    items = [
+        {
+            "label": _label(row),
+            **({"detail": str(row["description"]).strip()} if row.get("description") else {}),
+        }
+        for row in rows
+    ]
+    return {
+        "sequencing": {
+            "slug": slug,
+            "title": title,
+            "items": items,
         }
     }

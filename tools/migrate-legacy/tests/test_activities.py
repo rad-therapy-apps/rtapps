@@ -2,7 +2,13 @@
 
 from pathlib import Path
 
-from migrate_legacy.activities import classify_arrays, convert_flashcards, convert_quiz
+from migrate_legacy.activities import (
+    classify_arrays,
+    convert_flashcards,
+    convert_matching,
+    convert_quiz,
+    convert_sequencing,
+)
 from migrate_legacy.extract import js_arrays
 
 
@@ -103,3 +109,62 @@ def test_convert_flashcards_from_fixture() -> None:
     assert "prevention, diagnosis, and treatment" in card0_def
     assert flashcards["cards"][1]["term"] == "Cancer"
     assert flashcards["cards"][3]["term"] == "Malignant Tumor"
+
+
+def test_convert_matching_drops_duplicate_definitions() -> None:
+    notes: list[str] = []
+    doc = convert_matching(
+        [
+            {"term": "Anode", "definition": "Positive electrode."},
+            {"term": "Cathode", "definition": "Negative electrode."},
+            {"term": "Target", "definition": "Positive electrode."},  # duplicate definition
+        ],
+        slug="tube-parts-matching",
+        title="Tube Parts: Matching",
+        notes=notes,
+    )
+    matching = doc["matching"]
+    assert matching["pairs"] == [
+        {"term": "Anode", "definition": "Positive electrode."},
+        {"term": "Cathode", "definition": "Negative electrode."},
+    ]
+    assert matching["present_n"] is None
+    assert any("duplicate definition" in n for n in notes)
+
+
+def test_convert_matching_passthrough_no_duplicates() -> None:
+    doc = convert_matching(
+        [{"term": "A", "definition": "a"}, {"term": "B", "definition": "b"}],
+        slug="s",
+        title="T",
+        notes=[],
+    )
+    assert doc["matching"]["pairs"] == [
+        {"term": "A", "definition": "a"},
+        {"term": "B", "definition": "b"},
+    ]
+
+
+def test_convert_sequencing_sorts_by_order_and_adds_detail() -> None:
+    doc = convert_sequencing(
+        [
+            {"order": 2, "name": "Second", "description": "Do this second."},
+            {"order": 1, "name": "First"},
+        ],
+        slug="steps-sequencing",
+        title="Steps: Sequencing",
+        notes=[],
+    )
+    items = doc["sequencing"]["items"]
+    assert items == [
+        {"label": "First"},
+        {"label": "Second", "detail": "Do this second."},
+    ]
+
+
+def test_convert_sequencing_missing_order_keeps_document_order() -> None:
+    notes: list[str] = []
+    data = [{"name": "Second"}, {"order": 1, "name": "First"}]
+    doc = convert_sequencing(data, slug="s", title="T", notes=notes)
+    assert doc["sequencing"]["items"] == [{"label": "Second"}, {"label": "First"}]
+    assert any("missing order" in n for n in notes)
