@@ -1,23 +1,26 @@
 """Student-facing read API for published curriculum content.
 
-What this file does: three GET routes — list subjects with a published-lesson count, one
-subject's published lessons, and one lesson's current published snapshot with answer keys
-removed. There is no write path here; authoring goes through `app.content.importer` (and,
-eventually, an authoring UI) instead.
+What this file does: four GET routes — list subjects with a published-lesson count, one
+subject's published lessons, one lesson's current published snapshot with answer keys
+removed, and one activity's current published snapshot with answer keys removed. There is
+no write path here; authoring goes through `app.content.importer` (and, eventually, an
+authoring UI) instead.
 
 Used here and why: a FastAPI `APIRouter` with `require_user` applied to the whole router
 (every route needs a logged-in session, even though nothing here is role-gated) so no
 individual route can forget the auth dependency.
 
 How it fits the project: this is the "serve" end of the content pipeline (ADR-0003) —
-every route only ever reads rows with `status == "published"` or a lesson's
+every route only ever reads rows with `status == "published"` or a lesson/activity's
 `current_version_id`; the underlying working-copy edits and unpublished drafts are never
 reachable from here.
 
 Works with:
-  Depends on: `app.auth.deps.require_user` (session dependency), `app.content.models`
-    (ContentVersion, Lesson, Subject), `app.content.schemas` (response models),
-    `app.content.snapshot.strip_answers`, `app.db.get_session`, `app.errors.Problem`.
+  Depends on: `app.auth.deps.require_user` (session dependency), `app.auth.models` (User,
+    UserRole), `app.content.models` (Activity, ContentVersion, Lesson, Subject),
+    `app.content.schemas` (response models), `app.content.snapshot.strip_answers`,
+    `app.content.activity_snapshots.strip_activity_answers`, `app.db.get_session`,
+    `app.errors.Problem`.
   Used by: `app.main` mounts this router under the API prefix.
 """
 

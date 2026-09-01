@@ -1,5 +1,5 @@
 """What this file tests: `app/content/router.py` — the student-facing read endpoints
-(/subjects, /subjects/{slug}, /lessons/{slug}), through the full HTTP stack.
+(/subjects, /subjects/{slug}, /lessons/{slug}, /activities/{id}), through the full HTTP stack.
 
 Used here and why: httpx AsyncClient against the ASGI app — no network — exercising auth
 gating, listing/filtering by published status, and the response body actually returned to
@@ -12,7 +12,9 @@ answer keys/explanations never reach students at the HTTP boundary either.
 
 Works with: pytest-asyncio, httpx.
 Depends on: `client`, `db` fixtures and the `register`/`seed_lesson` helpers from
-`conftest.py`; `app.content.router`.
+`conftest.py`; `import_any` from `app.content.activity_importer`; `QUIZ_DOC`/`SUBJECT`
+fixtures from `tests.test_activity_importer`; `login`/`promote` helpers from
+`tests.test_cohorts`; `app.content.router`.
 Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 """
 

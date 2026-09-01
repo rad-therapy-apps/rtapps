@@ -11,7 +11,8 @@ How it fits the project: these are the outer envelope around the stripped
 which is documented by the ProseMirror/prose-doc schema rather than by a Pydantic model.
 
 Works with:
-  Used by: `app.content.router` (all four response models).
+  Used by: `app.content.router` (all six response models: SubjectOut, LessonRefOut,
+    ActivityRefOut, SubjectDetailOut, LessonOut, ActivityOut).
 """
 
 import uuid
