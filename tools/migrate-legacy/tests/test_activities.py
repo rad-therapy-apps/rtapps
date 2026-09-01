@@ -203,6 +203,44 @@ def test_convert_matching_drops_duplicate_definitions() -> None:
     assert any("duplicate definition" in n for n in notes)
 
 
+def test_convert_matching_drops_duplicate_terms() -> None:
+    notes: list[str] = []
+    doc = convert_matching(
+        [
+            {"term": "Anode", "definition": "Positive electrode."},
+            {"term": "Cathode", "definition": "Negative electrode."},
+            {"term": "Anode", "definition": "Also positive."},  # duplicate term
+        ],
+        slug="tube-parts-matching",
+        title="Tube Parts: Matching",
+        notes=notes,
+    )
+    matching = doc["matching"]
+    assert matching["pairs"] == [
+        {"term": "Anode", "definition": "Positive electrode."},
+        {"term": "Cathode", "definition": "Negative electrode."},
+    ]
+    assert any("duplicate term" in n and "Anode" in n for n in notes)
+
+
+def test_convert_matching_dedup_floor_guard_notes_when_below_two_pairs() -> None:
+    """If dedup drops the pair count below 2 (the API importer's minimum), a
+    note flags it even though the (too-short) document is still built."""
+    notes: list[str] = []
+    doc = convert_matching(
+        [
+            {"term": "Anode", "definition": "Positive electrode."},
+            {"term": "Anode", "definition": "Positive electrode, again."},  # dup term
+            {"term": "Cathode", "definition": "Positive electrode."},  # dup definition
+        ],
+        slug="tube-parts-matching",
+        title="Tube Parts: Matching",
+        notes=notes,
+    )
+    assert doc["matching"]["pairs"] == [{"term": "Anode", "definition": "Positive electrode."}]
+    assert any("fewer than 2 pairs after dedup" in n for n in notes)
+
+
 def test_convert_matching_passthrough_no_duplicates() -> None:
     doc = convert_matching(
         [{"term": "A", "definition": "a"}, {"term": "B", "definition": "b"}],

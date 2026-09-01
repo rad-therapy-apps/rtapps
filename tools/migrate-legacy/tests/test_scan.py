@@ -49,3 +49,33 @@ def test_scan_lesson_document_has_subject_and_slug(tmp_path: Path) -> None:
     lesson = json.loads((tmp_path / "subject-a/lesson-one.json").read_text())
     assert lesson["subject"] == {"slug": "subject-a", "title": "Subject A", "order": 0}
     assert lesson["lesson"]["slug"] == "lesson-one"
+
+
+def test_scan_duplicate_kind_in_file_gets_suffix_and_note(tmp_path: Path) -> None:
+    """Rule 4: two quiz arrays in one file. The first keeps its plain slug and
+    stays `converted`; the second gets a `-2` slug suffix and a needs-review
+    note about the collision."""
+    reports = scan_tree(FIXTURE_ROOT, tmp_path, subjects=["Subject_C"])
+    assert (tmp_path / "subject-c/two-quizzes-quiz.json").exists()
+    assert (tmp_path / "subject-c/two-quizzes-quiz-2.json").exists()
+    page = "Subject_C/Two_Quizzes/index.html"
+    quiz_reports = [r for r in reports if r["page"] == page and r["kind"] == "quiz"]
+    assert len(quiz_reports) == 2
+    first, second = quiz_reports
+    assert first["status"] == "converted"
+    assert second["status"] == "needs-review"
+    assert any("multiple quiz arrays" in n for n in second["notes"])
+
+
+def test_scan_cross_subject_slug_collision_gets_subject_prefix_and_note(tmp_path: Path) -> None:
+    """Rule 5: two files in different subjects (Subject_D, Subject_E) both named
+    `Same_Name` produce the same base slug. The first (sorted first) keeps its
+    plain slug; the second is renamed `{subject_slug}-{slug}` with a note."""
+    reports = scan_tree(FIXTURE_ROOT, tmp_path, subjects=["Subject_D", "Subject_E"])
+    assert (tmp_path / "subject-d/same-name-flashcards.json").exists()
+    assert (tmp_path / "subject-e/subject-e-same-name-flashcards.json").exists()
+    d_report = next(r for r in reports if r["page"] == "Subject_D/Same_Name/index.html")
+    e_report = next(r for r in reports if r["page"] == "Subject_E/Same_Name/index.html")
+    assert d_report["status"] == "converted"
+    assert e_report["status"] == "needs-review"
+    assert any("slug collision" in n for n in e_report["notes"])

@@ -108,11 +108,13 @@ class _PendingDoc:
 
 def _subject_dirs(root: Path, subjects: list[str] | None) -> list[str]:
     """The sorted list of subject directory names to scan. Explicit
-    `subjects` are used as given (still sorted, for rule 1's `order`);
-    otherwise every top-level, non-excluded directory containing at least
-    one `.html` file anywhere under it."""
+    `subjects` are filtered through `EXCLUDED_DIRS` same as auto-discovery
+    (still sorted, for rule 1's `order`); otherwise every top-level,
+    non-excluded directory containing at least one `.html` file anywhere
+    under it."""
     if subjects is not None:
-        return sorted(subjects)
+        # Rule 3: EXCLUDED_DIRS are never scanned, even when named explicitly.
+        return sorted(s for s in subjects if s not in EXCLUDED_DIRS)
     names = []
     for entry in sorted(root.iterdir(), key=lambda p: p.name):
         if not entry.is_dir() or entry.name in EXCLUDED_DIRS:
@@ -189,9 +191,12 @@ def _scan_file(
                 base_slug = f"{_slugify(html_path.parent.name)}-{kind}"
 
             # Notes classify_arrays recorded specifically about this array (e.g.
-            # an "ambiguous ... defaulted to flashcards" note) — matched by array
-            # name since classify_arrays shares one notes list per file.
-            doc_notes = [n for n in classify_notes if name in n]
+            # an "ambiguous ... defaulted to flashcards" note) — classify_arrays
+            # shares one notes list per file and tags each note "[name] ...", so
+            # match on that exact tag (not a bare substring: a variable literally
+            # named "cards" would otherwise match a note about "flashcards" too).
+            tag = f"[{name}] "
+            doc_notes = [n[len(tag) :] for n in classify_notes if n.startswith(tag)]
 
             if occurrence > 1:
                 base_slug = f"{base_slug}-{occurrence}"
@@ -233,7 +238,14 @@ def _resolve_collisions(items: list[_PendingDoc]) -> None:
         subject_slug = _slugify(item.subject_name)
         slug = item.base_slug
         if slug in seen_slugs:
-            slug = f"{subject_slug}-{item.base_slug}"
+            renamed = f"{subject_slug}-{item.base_slug}"
+            # Three-way (or worse) collision guard: `subject_slug-slug` can
+            # itself already be claimed, so keep suffixing -2, -3, ... until free.
+            suffix = 2
+            while renamed in seen_slugs:
+                renamed = f"{subject_slug}-{item.base_slug}-{suffix}"
+                suffix += 1
+            slug = renamed
             item.notes.append(f"slug collision on {item.base_slug!r}; renamed to {slug!r}")
         seen_slugs.add(slug)
         item.final_slug = slug

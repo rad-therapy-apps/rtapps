@@ -68,11 +68,17 @@ def classify_arrays(
             elif "flashcard" in lname or "flash" in lname or "flash" in fname:
                 out.append(("flashcards", name, data))
             elif "card" in lname:
-                # Generic "card" / "cards" is ambiguous, default to flashcards with note
-                notes.append(f"ambiguous term/definition array {name}; defaulted to flashcards")
+                # Generic "card" / "cards" is ambiguous, default to flashcards with note.
+                # Tagged "[name] ..." so callers can attribute a note to its exact array
+                # (a plain substring match would let e.g. "cards" match "flashcards" too).
+                notes.append(
+                    f"[{name}] ambiguous term/definition array {name}; defaulted to flashcards"
+                )
                 out.append(("flashcards", name, data))
             else:
-                notes.append(f"ambiguous term/definition array {name}; defaulted to flashcards")
+                notes.append(
+                    f"[{name}] ambiguous term/definition array {name}; defaulted to flashcards"
+                )
                 out.append(("flashcards", name, data))
         elif "order" in keys and ({"name", "title", "label"} & keys):
             out.append(("sequencing", name, data))
@@ -158,20 +164,30 @@ def convert_matching(
     """Convert legacy matching data to import-doc format.
 
     Extracts term/definition pairs via `_pair`, then drops any pair whose
-    definition duplicates an earlier one — the API importer rejects duplicate
-    definitions outright, so this is done ahead of time with a note instead of
-    letting the whole document fail. `present_n` is left `None`: legacy pages
-    present every pair, they don't sample a subset.
+    definition *or* term duplicates an earlier one — the API importer
+    (`MatchingPayload`) rejects duplicate definitions and duplicate terms
+    outright, so both are pre-sanitized here with a note instead of letting
+    the whole document fail. `present_n` is left `None`: legacy pages present
+    every pair, they don't sample a subset.
     """
     seen_definitions: set[str] = set()
+    seen_terms: set[str] = set()
     pairs = []
     for row in data:
         pair = _pair(row)
         if pair["definition"] in seen_definitions:
             notes.append(f"dropped pair with duplicate definition {pair['definition']!r} in {slug}")
             continue
+        if pair["term"] in seen_terms:
+            notes.append(f"duplicate term {pair['term']!r} dropped in {slug}")
+            continue
         seen_definitions.add(pair["definition"])
+        seen_terms.add(pair["term"])
         pairs.append(pair)
+    if len(pairs) < 2:
+        # MatchingPayload requires at least 2 pairs; dedup can drop below that
+        # floor, so flag it for a human even though we still write the doc.
+        notes.append(f"fewer than 2 pairs after dedup in {slug}")
     return {
         "matching": {
             "slug": slug,
