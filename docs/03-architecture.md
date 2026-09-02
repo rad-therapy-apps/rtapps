@@ -210,7 +210,7 @@ erDiagram
   ACTIVITY }o--o{ DATA_TABLE : "calculator config"
   QUIZ ||--o{ QUIZ_QUESTION : has
   QUESTION ||--o{ QUIZ_QUESTION : "used in"
-  ACTIVITY }o--o{ OUTCOME : "maps to"
+  QUESTION }o--o{ OUTCOME : "tagged with"
   ACTIVITY ||--o{ CONTENT_VERSION : "published as"
   USER ||--o{ ATTEMPT : makes
   ACTIVITY ||--o{ ATTEMPT : receives
@@ -224,7 +224,7 @@ erDiagram
 
 ### 6.2 Tables
 
-Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; soft-delete only where stated; JSONB columns are validated against a JSON Schema at the API boundary. Status/kind columns are text with CHECK constraints (only `user.role` is a native enum). **Implemented in v0.1.0:** `subject`, `lesson`, `lesson_page`, `content_block` (`rich_text`, `knowledge_check`), `question` (`single_choice`), `activity` (`lesson`), `content_version`, `attempt`, `attempt_item`. **Implemented in v0.2.0:** `cohort` (+ `threshold_percent`), `enrollment`, `activity_result` (+ `latest_percent`), `audit_log` (+ `request_id`). `program` is deferred until a second institution exists (a nullable FK added later is a plain migration); the rest arrive with their phases.
+Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; soft-delete only where stated; JSONB columns are validated against a JSON Schema at the API boundary. Status/kind columns are text with CHECK constraints (only `user.role` is a native enum). **Implemented in v0.1.0:** `subject`, `lesson`, `lesson_page`, `content_block` (`rich_text`, `knowledge_check`), `question` (`single_choice`), `activity` (`lesson`), `content_version`, `attempt`, `attempt_item`. **Implemented in v0.2.0:** `cohort` (+ `threshold_percent`), `enrollment`, `activity_result` (+ `latest_percent`), `audit_log` (+ `request_id`). **Implemented in v0.3.0** (plan 3a — quiz/flashcards/matching/sequencing, ADR-0006, program): the seven new tables `quiz`, `quiz_question`, `flashcard_deck`, `matching_activity`, `sequencing_activity`, `outcome`, `question_outcome`; `activity.access` (ADR-0006); `program` (+ `cohort.program_id`, nullable). `program` is a single row today ("Radiation Therapy") with no admin UI yet — a second institution is still a data change, not a migration.
 
 **Identity and cohorts**
 
@@ -233,7 +233,7 @@ Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; sof
 | `user` | `email` (citext, unique), `display_name`, `role` ∈ student/educator/admin, `password_hash` (nullable for Google-only), `deactivated_at` | No date of birth, no student number, no address. Minimal PII by design. |
 | `identity` | `user_id`, `provider` (google), `subject`, `email_verified` | Allows several providers per user. |
 | `session` | `id` = SHA-256 of the token, `user_id`, `expires_at`, `ua_hash`, `revoked_at` | Raw token exists only in the cookie. |
-| `program` | `name`, `owner_id` | One row today ("Radiation Therapy"); everything hangs off it for later multi-program use. |
+| `program` | `name` | One row today ("Radiation Therapy"); `cohort.program_id` is nullable so existing cohorts don't need one. No ownership column or admin UI yet — added when a second institution needs one. |
 | `cohort` | `program_id`, `name`, `join_code` (unique, rotatable), `starts_on`, `ends_on` | |
 | `enrollment` | `user_id`, `cohort_id`, `role` ∈ student/educator, `joined_at`; unique (user, cohort) | An educator "owns" a cohort by being enrolled in it with role educator. |
 
@@ -246,14 +246,14 @@ Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; sof
 | `lesson_page` | `lesson_id`, `order`, `title` | The "Page 3 of 10" unit students navigate. |
 | `content_block` | `page_id`, `order`, `type` ∈ rich_text/knowledge_check/media/embed/callout, `body` JSONB | `rich_text` → ProseMirror doc; `knowledge_check` → `{question_id}`; `media` → `{media_asset_id, caption}`; `embed` → `{activity_id}`. |
 | `question` | `type` ∈ single_choice/true_false/multi_select/numeric_tolerance/ordering/matching, `stem` JSONB (ProseMirror), `body` JSONB, `explanation` JSONB, `difficulty`, `outcome_ids` uuid[] | `body` shape per type: options + correct index(es); `{value, tolerance, unit}`; ordered items; pairs. Questions are reusable across lessons and quizzes (the legacy workbook has no shared banks; this fixes that). |
-| `quiz` | `activity_id`, `pass_percent` (default 80), `shuffle`, `attempts_allowed`, `show_explanations` | |
-| `quiz_question` | `quiz_id`, `question_id`, `order`, `points` | |
-| `flashcard_deck` | `activity_id`, `cards` JSONB `[{front, back, media_asset_id?, pronounce?}]` | Score tiers (gold/silver/bronze) live in `activity.config`. |
-| `matching_activity` | `activity_id`, `pairs` JSONB `[{left, right}]`, `present_n`, `pass_percent` | |
-| `sequencing_activity` | `activity_id`, `items` JSONB (ordered; optional buckets such as eras) | |
+| `quiz` | `slug`, `title` | Linked from `activity.ref_id`, not a column here (the existing polymorphic pattern). `pass_percent`, `shuffle` and (when set) `attempts_allowed` live in the paired `activity.config` JSONB, not on this table (v0.3.0 deviation — config-on-activity, below); `attempts_allowed` and `show_explanations` are unused as of v0.3.0. `shuffle` is stored but not honoured yet: `QuizPlayer.svelte` presents questions in snapshot order regardless of the flag, a deliberate v0.3.0 deviation that keeps e2e coverage deterministic (shuffling matters for the assessment phase, where it's tied to attempt integrity, not practice). |
+| `quiz_question` | `quiz_id`, `question_id`, `position` | Fixes a bank question's order within one quiz; questions are shared bank rows (`question`, `single_choice` only as of v0.3.0), reusable across quizzes. |
+| `flashcard_deck` | `slug`, `title`, `cards` JSONB `[{term, definition}]` | Score tiers (gold/silver/bronze) are not yet implemented; grading is completion-only (§6.3). |
+| `matching_activity` | `slug`, `title`, `pairs` JSONB `[{term, definition}]` | `present_n` and `pass_percent` live in `activity.config`, not here; `present_n` is stored but the player presents all pairs as of v0.3.0 — per-attempt sampling arrives with assessment mode. |
+| `sequencing_activity` | `slug`, `title`, `items` JSONB (correct order; `[{label, detail?}]`) | `pass_percent` lives in `activity.config`. |
 | `data_table` | `key` (e.g. `pdd_6mv`), `title`, `unit`, `grid` JSONB `{row_axis, col_axis, values}` | PDD/TMR/wedge/tray tables; author-editable; referenced by calculators. |
-| `activity` | `kind` ∈ lesson/quiz/flashcards/matching/sequencing/calculator/simulator/external, `ref_id`, `title`, `subject_id`, `lesson_id?`, `config` JSONB, `status`, `current_version_id` | The polymorphic thing a student "does". `calculator`/`simulator` are code-backed: `config` names the implementation (`{code_key: "mu_calc", tables: [...]}`). `external` covers re-hosted legacy tools that post via the SDK. |
-| `outcome` / `activity_outcome` | `code` (SLO such as `3.2`), `title` | Learning outcomes for analytics. |
+| `activity` | `kind` ∈ lesson/quiz/flashcards/matching/sequencing/calculator/simulator/external, `ref_id`, `title`, `subject_id`, `lesson_id?`, `config` JSONB, `status`, `access` ∈ practice/assessment (default `practice`), `current_version_id` | The polymorphic thing a student "does". `config` also holds the per-kind settings that would otherwise be columns on the type table — `pass_percent`/`shuffle` (quiz), `pass_percent`/`present_n` (matching), `pass_percent` (sequencing) — a deliberate v0.3.0 deviation (§6.3). `calculator`/`simulator` are code-backed: `config` names the implementation (`{code_key: "mu_calc", tables: [...]}`). `external` covers re-hosted legacy tools that post via the SDK. `access` is ADR-0006's assessment gate: `practice` activities (all migrated content) are student-visible; `assessment` pools are 404 to students everywhere until the games phase adds assignments. |
+| `outcome` / `question_outcome` | `outcome`: `code` (SLO such as `3.2`), `title`. `question_outcome`: `question_id`, `outcome_id` | Learning outcomes for analytics; tags are on the `question` row (v0.3.0 scope is quiz questions only), not the `activity` row — `activity_outcome`-level tagging is FR-A-14 (3b). |
 | `media_asset` | `owner_id`, `storage_key`, `mime`, `bytes`, `sha256`, `width`, `height`, `alt`, `status` ∈ pending/ready | The file itself is in object storage. |
 
 **Publishing**
@@ -273,24 +273,26 @@ Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; sof
 
 ### 6.3 Grading
 
-`apps/api/app/grading/` holds one pure function per question type — `single_choice.py`, `true_false.py`, `multi_select.py` (partial credit configurable), `numeric_tolerance.py` (absolute or relative tolerance, unit-aware), `ordering.py` (Kendall-style partial credit), `matching.py`. Each takes `(question.body, response) → GradeResult{correct, score, max_score, feedback}`. A lesson attempt's score is the sum over its knowledge checks; a quiz applies `points` and `pass_percent`. These functions are the most heavily tested code in the system (property-based tests).
+`apps/api/app/grading/` holds one pure function per question type; `single_choice.py` is the only one implemented as of v0.3.0 (`(question.body, response) → GradeResult{correct, score, max_score, feedback}`). `true_false.py`, `multi_select.py`, `numeric_tolerance.py`, `ordering.py` and `matching.py` are deferred: instead of a grader per activity kind, `app.content.activity_snapshots.gradeable_items(snapshot)` re-expresses every kind's answers as per-item single-choice — a lesson knowledge check, a quiz question, a matching pair ("pick the right definition") and a sequencing item ("pick the right position") all reduce to `{key: {body: {options, answer}, explanation}}` and grade through `single_choice.py`. `submit_attempt`/`upsert_activity_result` therefore need no per-kind branch; only flashcards branch specially (completion-only — every score field is null, since a card has no single correct answer to grade). This is a deliberate v0.3.0 architectural simplification, not the original per-type-grader design (FR-S-16); the six dedicated graders remain the plan for when a question type needs partial credit or a shape `gradeable_items` can't express. A lesson attempt's score is the sum over its knowledge checks; a quiz applies `pass_percent` from `activity.config` (§6.2). These functions are the most heavily tested code in the system (property-based tests).
 
 ---
 
 ## 7. API
 
-Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAPI's OpenAPI and that document is the contract for the front end. ✅ marks endpoints implemented as of v0.1.0; `packages/api-client` is generated from `openapi.json` and the `contract` CI job fails when it is stale.
+Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAPI's OpenAPI and that document is the contract for the front end. ✅ marks endpoints implemented as of v0.3.0; `packages/api-client` is generated from `openapi.json` and the `contract` CI job fails when it is stale.
 
 | Group | Endpoints | Who |
 |---|---|---|
 | auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/providers`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}` | anyone / signed-in |
 | cohorts | `POST cohorts` ✅, `GET cohorts` ✅, `GET cohorts/{id}` ✅, `PATCH cohorts/{id}` ✅, `POST cohorts/{id}/rotate-code` ✅, `POST cohorts/join {code}` ✅, `GET cohorts/{id}/members` ✅, `DELETE cohorts/{id}/members/{uid}` ✅ | educator (own), student (join) |
-| content (published) | `GET subjects` ✅, `GET subjects/{slug}` ✅, `GET lessons/{slug}` ✅, `GET activities/{id}` — returns the published snapshot with correct answers stripped | signed-in |
+| content (published) | `GET subjects` ✅, `GET subjects/{slug}` ✅, `GET lessons/{slug}` ✅, `GET activities/{id}` ✅ — returns the published snapshot with correct answers stripped; 404 to students for `access = assessment` (ADR-0006) | signed-in |
 | attempts | `POST activities/{id}/attempts` ✅, `POST attempts/{id}/items` ✅, `POST attempts/{id}/submit` ✅ (requires `Idempotency-Key`), `GET me/results` ✅, `GET me/attempts/{id}` | owner of the attempt |
-| analytics | `GET cohorts/{id}/overview` ✅, `GET cohorts/{id}/students/{uid}` ✅, `GET cohorts/{id}/activities/{aid}`, `GET cohorts/{id}/outcomes`, `GET cohorts/{id}/export.csv` — each read audited | educator (own cohort), admin |
+| analytics | `GET cohorts/{id}/overview` ✅, `GET cohorts/{id}/students/{uid}` ✅, `GET cohorts/{id}/activities/{aid}` ✅, `GET cohorts/{id}/outcomes` ✅ (v0.3.0 deviation: quiz items only — §7 note below), `GET cohorts/{id}/overview.csv` ✅, `GET cohorts/{id}/activities/{aid}.csv` ✅, `GET cohorts/{id}/outcomes.csv` ✅ — each read audited | educator (own cohort), admin |
 | authoring | `POST/PATCH lessons`, `PUT lessons/{id}/pages` (whole tree), `POST/PATCH questions`, `POST/PATCH activities`, `POST/PATCH data-tables`, `POST lessons|activities/{id}/publish`, `GET …/versions`, `POST …/versions/{n}/restore`, `POST media/presign`, `POST media/{id}/confirm` | educator, admin |
-| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST users/{id}/erase`, `GET admin/audit-log` ✅ | admin |
+| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST admin/users/{id}/erase` ✅, `GET admin/audit-log` ✅ | admin |
 | system | `GET health`, `GET openapi.json` | public |
+
+Outcome mastery (`GET cohorts/{id}/outcomes`, FR-E-07) is a v0.3.0 deviation from the original scope: `question_outcome` tags questions, and quiz `attempt_item.item_key` is the question id, so only quiz items roll up into outcome percentages — a lesson knowledge check's `item_key` is a content-block key, not a question id, so lesson items (and flashcards/matching/sequencing, untagged as of v0.3.0) don't appear in this view. Documented limitation, not a bug; broader outcome tagging (FR-A-14) is 3b.
 
 Conventions:
 
@@ -317,7 +319,8 @@ Conventions:
 | Patient data | All patient records in the EMR content are fictional; the system stores no real PHI and is not a medical device |
 | Files | Browser uploads/downloads go straight to object storage with short-lived presigned URLs; the API validates MIME/size on `confirm` |
 | Dependencies | Dependabot on uv, pnpm and Actions; `pip-audit`/`pnpm audit` in CI |
-| Rate limiting | Login, register and password-reset endpoints are rate-limited per IP/email at the proxy and the API |
+| Rate limiting | `login`, `register`, password-reset and `join` are rate-limited per IP at the API (NFR-13); see docs/06-operations.md §11 for a known caveat about trusting the proxy as the only path in |
+| Error tracking | `sentry_sdk` in the API reports unhandled exceptions when `SENTRY_DSN` is set (NFR-23). v0.3.0 deviation: web only wires Sentry server-side, in `hooks.server.ts` — no browser-side `@sentry/sveltekit` instrumentation yet, so a client-only JS error (as opposed to a `load`/action failure) is not reported. |
 | Cross-origin clients (Phase 4) | `SameSite=Lax` cookies are not sent to a games site on another origin. Before the SDK ships, decide between hosting games under the same parent domain with a `Domain=` cookie, or issuing short-lived bearer tokens to the SDK (ADR-0002 follow-up). Not needed for Release 1, where every page is same-origin. |
 
 ---

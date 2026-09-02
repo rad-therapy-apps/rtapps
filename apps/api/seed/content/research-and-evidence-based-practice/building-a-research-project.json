@@ -1,0 +1,660 @@
+{
+  "subject": {
+    "slug": "research-and-evidence-based-practice",
+    "title": "Research and Evidence Based Practice",
+    "order": 10
+  },
+  "lesson": {
+    "slug": "building-a-research-project",
+    "title": "Building a Research Project",
+    "order": 0,
+    "pages": [
+      {
+        "title": "From Pieces to a Whole Project",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By now you've worked through forming a question, choosing a design, defining variables, planning your analysis, and understanding ethics approval. This lesson is about assembling those pieces into one coherent, well-written research project or proposal \u2014 the kind that could actually be submitted, reviewed, and acted on."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Why the Methodology Matters",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A brilliant research question gets rejected if the methodology is flawed. The Methods section is the instruction manual for your research \u2014 it needs enough precision that another qualified professional could replicate your study without ever having to contact you for clarification."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Purpose Statement",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Every methodology section opens by grounding the reader: a direct, formal statement of what the study intends to accomplish, followed by the specific research question. Avoid flowery language."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \"The purpose of this quantitative, quasi-experimental study is to determine if the implementation of a standardized pre-treatment safety checklist reduces the frequency of reported setup errors in a radiation oncology department.\""
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Defining Your Participants",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You can't simply say \"I am going to study patients.\" Define the boundaries of your population using explicit inclusion and exclusion criteria."
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": []
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Clinical retrospective example"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Educational example"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Sample",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Convenience sample of 50 patient charts"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Convenience sample of 30 undergraduate RT students"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Inclusion",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Age 18+, intact prostate cancer, prescribed VMAT, treated in a defined date range"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Currently enrolled; completed basic anatomy coursework"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Exclusion",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Hip prostheses; concurrent pelvic node irradiation"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Already completed clinical dosimetry rotations"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why does a methodology section need explicit inclusion/exclusion criteria rather than just \"patients\" or \"students\"?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It's a formatting requirement with no real analytical purpose",
+              "It defines exactly who the findings do and don't apply to, and lets someone else replicate the sample"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Precise criteria define the boundaries of your population and are essential for anyone trying to interpret or replicate your findings."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Measures and Instruments",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "State exactly what tools you're using to collect data \u2014 no detail is too small to specify."
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Clinical chart review:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " name the EMR system explicitly (e.g., ARIA, Mosaiq) and the exact data points extracted (e.g., \"bladder volume in cc from the daily CBCT registration tab\")."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Educational survey:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " name the software (e.g., Qualtrics), the question types, and the validated instrument used if applicable (e.g., the STAI for anxiety)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vague instrumentation is one of the most common reasons a methodology section gets sent back for revision."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Putting the Full Proposal Together",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A complete research proposal typically includes, in order:"
+                    }
+                  ]
+                },
+                {
+                  "type": "orderedList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Problem statement and PICO question"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Brief literature review establishing the gap"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Research design and rationale for choosing it"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Purpose statement"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Participants, with inclusion/exclusion criteria"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Measures and instruments"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Analysis plan, tied to your variables' NOIR levels"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Ethics considerations and anticipated IRB pathway"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Notice this is just the earlier lessons in this section, assembled in the order a reader needs to encounter them \u2014 nothing new to invent here, just organizing what you've already built."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Presenting Your Work",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Whether you're presenting to a department quality-improvement meeting, a poster session, or a formal committee, the same discipline applies: lead with the problem and why it matters, state your question and design plainly, show your key result, and be direct about limitations. A three-sentence plain-language summary for a non-statistical audience is often harder to write than the full technical write-up \u2014 and usually more useful."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered writing a purpose statement, defining participants with inclusion/exclusion criteria, specifying measures and instruments, assembling a full proposal structure, and presenting findings to different audiences."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "That completes the research process from first observation to a finished, presentable project \u2014 you can revisit any lesson in this section independently whenever a specific step is what you need."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

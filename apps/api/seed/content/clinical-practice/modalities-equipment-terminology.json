@@ -1,0 +1,4119 @@
+{
+  "subject": {
+    "slug": "clinical-practice",
+    "title": "Clinical Practice",
+    "order": 1
+  },
+  "lesson": {
+    "slug": "modalities-equipment-terminology",
+    "title": "RT Modalities, Equipment & Terminology",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Purpose, Task & Criteria",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Welcome, future Radiation Therapist! This comprehensive lesson will introduce you to the fundamental treatment modalities, key equipment, and essential medical terminology used in radiation oncology, with a special focus on External Beam Radiation Therapy (EBRT)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose: Why This Matters Understanding the \"what, why, and how\" of radiation therapy treatments and the language used to describe them is critical for your role. This knowledge will enable you to: Safely and accurately operate complex treatment equipment. Effectively communicate with patients and other members of the healthcare team. Comprehend treatment plans and patient charts. Contribute to high-quality patient care and treatment outcomes."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do In this lesson, you will: Learn basic principles of radiation therapy and its goals. Familiarize yourself with essential medical and radiation oncology terminology. Explore the components and functions of a Linear Accelerator (Linac). Understand the processes of patient simulation and immobilization. Be introduced to various EBRT techniques (3D-CRT, IMRT, VMAT, SBRT/SRS) and Image-Guided Radiation Therapy (IGRT). Briefly learn about other modalities like brachytherapy. Test your understanding through \"Quick Check\" questions on each topic. Engage with summative interactive activities at the end of the lesson."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned By the end of this lesson, you should be able to: Define basic radiation therapy concepts and key medical/RT terms. Identify major components of a Linac and their functions. Describe the purpose of simulation, immobilization, and IGRT. Differentiate between common EBRT techniques and their general applications. Successfully answer the \"Quick Check\" questions. Feel prepared to tackle the end-of-lesson interactive activities."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "What is Radiation Therapy? Basic Principles & Goals",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Therapy",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (also called radiotherapy) is a cancer treatment that uses high doses of radiation to kill cancer cells and shrink tumors. At high doses, radiation damages the DNA of cancer cells, preventing them from growing and dividing. While it can also affect normal cells, healthy cells are generally better able to repair themselves from radiation damage than cancer cells."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "How it Works (Simplified):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Radiation (like X-rays or gamma rays) is directed at the tumor."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "This energy damages the genetic material (DNA) within the cancer cells."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Damaged cancer cells lose their ability to reproduce and eventually die."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The body then naturally eliminates these dead cells."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Goals of Radiation Therapy:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Curative Intent:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " To completely eradicate the cancer and prevent it from returning. This may be used alone or in combination with other treatments like surgery or chemotherapy."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Palliative Intent:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " To relieve symptoms and improve the quality of life when a cure is not possible. This can involve shrinking tumors to reduce pain, pressure, or other complications."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Adjuvant Therapy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Given after the primary treatment (like surgery) to kill any remaining cancer cells."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Neoadjuvant Therapy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Given before the primary treatment (like surgery) to shrink a tumor, making it easier to remove or treat."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As a Radiation Therapist, you will play a crucial role in delivering these life-altering treatments with precision and care."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Essential Medical Terminology - Part 1 (Foundational)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understanding medical terminology is like learning a new language. It's built on prefixes, suffixes, and root words, mostly from Greek and Latin."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Common Prefixes:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "a-, an-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " without, not (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "a"
+                            },
+                            {
+                              "type": "text",
+                              "text": "symptomatic - without symptoms)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "ante-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " before (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "ante"
+                            },
+                            {
+                              "type": "text",
+                              "text": "rior - front side)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "anti-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " against (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "anti"
+                            },
+                            {
+                              "type": "text",
+                              "text": "biotic - against life/bacteria)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "brady-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " slow (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "brady"
+                            },
+                            {
+                              "type": "text",
+                              "text": "cardia - slow heart rate)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "dys-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " bad, painful, difficult (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "dys"
+                            },
+                            {
+                              "type": "text",
+                              "text": "phagia - difficulty swallowing)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "hyper-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " excessive, above (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "hyper"
+                            },
+                            {
+                              "type": "text",
+                              "text": "tension - high blood pressure)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "hypo-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " deficient, below (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "hypo"
+                            },
+                            {
+                              "type": "text",
+                              "text": "glycemia - low blood sugar)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "inter-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " between (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "inter"
+                            },
+                            {
+                              "type": "text",
+                              "text": "costal - between the ribs)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "intra-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " within (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "intra"
+                            },
+                            {
+                              "type": "text",
+                              "text": "venous - within a vein)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "macro-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " large (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "macro"
+                            },
+                            {
+                              "type": "text",
+                              "text": "cyte - large cell)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "micro-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " small (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "micro"
+                            },
+                            {
+                              "type": "text",
+                              "text": "scope - instrument to view small things)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "neo-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " new (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "neo"
+                            },
+                            {
+                              "type": "text",
+                              "text": "plasm - new growth/tumor)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "peri-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " surrounding (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "peri"
+                            },
+                            {
+                              "type": "text",
+                              "text": "cardium - around the heart)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "post-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " after, behind (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "post"
+                            },
+                            {
+                              "type": "text",
+                              "text": "erior - back side)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "pre-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " before, in front of (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "pre"
+                            },
+                            {
+                              "type": "text",
+                              "text": "natal - before birth)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "tachy-:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " fast (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "tachy"
+                            },
+                            {
+                              "type": "text",
+                              "text": "pnea - fast breathing)"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Anatomical Planes & Directions:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Anterior (Ventral):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Front of the body."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Posterior (Dorsal):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Back of the body."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Superior (Cranial/Cephalic):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Towards the head or upper part."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Inferior (Caudal):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Away from the head or towards the lower part."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Medial:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Toward the midline of the body."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Lateral:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Away from the midline of the body."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Proximal:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Closer to the origin of a body part or point of attachment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Distal:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Farther from the origin of a body part or point of attachment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Superficial:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Toward or at the body surface."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Deep:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Away from the body surface; more internal."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Sagittal Plane:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Divides body into right and left parts. "
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Midsagittal (Median) Plane:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Sagittal plane exactly at midline."
+                            },
+                            {
+                              "type": "text",
+                              "text": " "
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Frontal (Coronal) Plane:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Divides body into anterior and posterior parts."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Transverse (Horizontal/Axial) Plane:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Divides body into superior and inferior parts."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page3_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: The term \"hypogastric\" refers to a region located:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Above the stomach",
+              "Below the stomach",
+              "Around the stomach"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Essential Medical Terminology - Part 2 (Oncology & RT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Common Oncology Suffixes & Roots:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "-oma:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " tumor, mass (e.g., carcin"
+                            },
+                            {
+                              "type": "text",
+                              "text": "oma"
+                            },
+                            {
+                              "type": "text",
+                              "text": " - cancerous tumor, aden"
+                            },
+                            {
+                              "type": "text",
+                              "text": "oma"
+                            },
+                            {
+                              "type": "text",
+                              "text": " - glandular tumor)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "onc/o:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " tumor (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "onc"
+                            },
+                            {
+                              "type": "text",
+                              "text": "ology - study of tumors/cancer)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "carcin/o:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " cancer, cancerous (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "carcin"
+                            },
+                            {
+                              "type": "text",
+                              "text": "ogen - cancer-causing substance)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "sarc/o:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " flesh, connective tissue (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "sarc"
+                            },
+                            {
+                              "type": "text",
+                              "text": "oma - cancer of connective tissue)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "-plasia:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " formation, growth (e.g., neo"
+                            },
+                            {
+                              "type": "text",
+                              "text": "plasia"
+                            },
+                            {
+                              "type": "text",
+                              "text": " - new growth)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "-stasis:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " stopping, controlling (e.g., meta"
+                            },
+                            {
+                              "type": "text",
+                              "text": "stasis"
+                            },
+                            {
+                              "type": "text",
+                              "text": " - spread of cancer beyond its origin)"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Oncology Terms:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Benign:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Not cancerous; does not invade nearby tissue or spread."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Malignant:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Cancerous; can invade and destroy nearby tissue and spread to other parts of the body (metastasize)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Metastasis (mets):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The spread of cancer cells from the primary site to other parts of the body."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Primary Site:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The original location where cancer begins."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Staging:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Process of finding out how much cancer is in a person's body and where it's located (e.g., TNM staging - Tumor, Nodes, Metastasis)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Grade:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " How abnormal cancer cells look under a microscope and how quickly the tumor is likely to grow and spread."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Biopsy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Removal of a sample of tissue for examination under a microscope to check for cancer cells."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Common Radiation Therapy Abbreviations:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "RT:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Radiation Therapy"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "EBRT:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " External Beam Radiation Therapy"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Fx:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Fraction (a single radiation treatment session)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Gy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Gray (unit of absorbed radiation dose)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "cGy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Centigray (1/100th of a Gray)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "PTV:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Planning Target Volume"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "CTV:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Clinical Target Volume"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "GTV:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Gross Tumor Volume"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "OAR:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Organ at Risk"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "SSD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Source-to-Skin Distance"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "SAD:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Source-to-Axis Distance"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "MLC:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Multi-Leaf Collimator"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "OBI:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " On-Board Imager"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "CBCT:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Cone-Beam Computed Tomography"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page4_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: A patient's chart indicates \"mets to liver.\" What does \"mets\" likely refer to?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The primary tumor site.",
+              "A benign growth.",
+              "Metastasis, meaning the cancer has spread."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Overview of External Beam Radiation Therapy (EBRT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "External Beam Radiation Therapy (EBRT)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the most common type of radiation therapy. In EBRT, a machine called a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "linear accelerator (Linac)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " directs high-energy radiation beams from outside the body into the tumor."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Concepts of EBRT:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Targeted Treatment:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The primary goal is to deliver a precise dose of radiation to the cancerous tumor while minimizing exposure to surrounding healthy tissues and organs."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Fractionation:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Radiation is typically delivered in a series of daily treatments called "
+                            },
+                            {
+                              "type": "text",
+                              "text": "fractions"
+                            },
+                            {
+                              "type": "text",
+                              "text": ", over several days or weeks. This allows healthy cells time to repair between treatments and can make the overall treatment more effective and tolerable."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Non-Invasive:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Unlike surgery, EBRT does not require incisions. The radiation passes through the skin to reach the tumor."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Customized Plans:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Each patient's treatment is meticulously planned based on their specific tumor type, location, stage, and overall health."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rationale for Using EBRT:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To cure cancer (e.g., early-stage prostate, head and neck, lung cancers)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To shrink tumors before other treatments like surgery (neoadjuvant)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To eliminate any remaining cancer cells after surgery (adjuvant)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To treat cancer that has spread (metastases)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To alleviate symptoms caused by cancer, such as pain or bleeding (palliative)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Therapists are central to the EBRT process, responsible for the accurate daily delivery of these treatments."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Linear Accelerator (Linac) - Key Components",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Linear Accelerator (Linac)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the primary machine used to deliver EBRT. It generates high-energy X-rays or electrons for cancer treatment. Understanding its components is crucial for RTTs."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Linac Diagram"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Image source: "
+                    },
+                    {
+                      "type": "text",
+                      "text": " Linear Accelerator Basics | Oncology Medical Physics ",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://oncologymedicalphysics.com/introduction-to-clinical-linear-accelerators/"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Major Components & Functions:"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Gantry:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The large rotating part of the Linac that houses the radiation-producing components. It can rotate 360 degrees around the patient, allowing treatment from various angles."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Treatment Head (within Gantry):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Contains components that shape and monitor the radiation beam, including: "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Collimators (Jaws):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Heavy metal plates (primary and secondary) that define the general size of the radiation field (e.g., a square or rectangle)."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Multi-Leaf Collimator (MLCs):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Dozens to over a hundred individually controlled metal \"leaves\" that can move independently to precisely shape the radiation beam to conform to the tumor's shape, sparing healthy tissue."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Treatment Couch (Table/Bed):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Where the patient lies during treatment. It can move in multiple directions (up/down, in/out, left/right, and sometimes rotate) to accurately position the patient."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Imaging Systems (IGRT components):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Electronic Portal Imaging Device (EPID):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " An imager on the opposite side of the gantry from the treatment head, used to acquire MV images (using the treatment beam) to verify patient position and beam placement."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "On-Board Imager (OBI):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Typically includes kV X-ray sources and detectors mounted on retractable arms, allowing for planar X-rays (2D) or Cone-Beam CT (CBCT - 3D) images to be taken just before treatment for precise patient alignment."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Control Console:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Located outside the treatment room, where RTTs operate the Linac, monitor the patient via cameras, and deliver the prescribed treatment."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Which Linac component is primarily responsible for shaping the radiation beam to match the complex outline of a tumor?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " The Gantry"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " The Treatment Couch"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " The Multi-Leaf Collimator (MLCs)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The correct answer is C. The MLCs, with their independently moving leaves, allow for highly conformal shaping of the radiation beam."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Patient Simulation for EBRT - Planning the Attack",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Before any radiation treatment can begin, a crucial step called "
+                    },
+                    {
+                      "type": "text",
+                      "text": "simulation"
+                    },
+                    {
+                      "type": "text",
+                      "text": " (often CT simulation) is performed. This process is like creating a detailed map for the radiation treatment."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose of Simulation:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To precisely locate and define the tumor and surrounding healthy organs."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To determine the optimal patient position for treatment that will be reproducible daily."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To create immobilization devices to ensure the patient remains in the exact same position for each treatment fraction."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To acquire CT images that will be used by the dosimetrist and radiation oncologist to design the treatment plan."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To mark the patient's skin (or immobilization device) with reference points for daily setup on the treatment machine."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Typical CT Simulation Process Overview:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient Preparation:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " May include instructions like fasting, full/empty bladder, or specific positioning aids."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Positioning:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The RTT carefully positions the patient on the CT scanner couch in the intended treatment position."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Immobilization:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Custom or standard immobilization devices (masks, vac-bags, etc.) are created or fitted."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Contrast Administration (if needed):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Intravenous (IV) or oral contrast agents may be used to better visualize certain organs or blood vessels."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "CT Scanning:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " A series of CT images are acquired through the area of interest."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Marking:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Reference marks (often small tattoos or permanent ink on skin or device) are placed on the patient. These marks, along with lasers in the CT and treatment rooms, are used for daily alignment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Documentation:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " All setup parameters, devices used, and patient instructions are meticulously documented."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The accuracy of the entire radiation therapy course relies heavily on a precise and reproducible simulation. RTTs play a key role in this process."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Immobilization Devices in EBRT - Precision and Comfort",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Immobilization devices",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " are essential tools in radiation therapy used to ensure the patient remains in the exact same position for every treatment fraction. This reproducibility is critical for accurately targeting the tumor while sparing healthy tissue."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rationale for Immobilization:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Accuracy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Even small movements can cause the radiation beam to miss part of the tumor or irradiate healthy tissue unnecessarily."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Reproducibility:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Ensures the patient is set up identically from simulation through each treatment day."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient Comfort:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " While some devices can feel restrictive, they are designed to help the patient maintain a stable and often more comfortable position for the duration of the treatment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Efficiency:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Consistent setups can make the daily treatment process quicker."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Common Types of Immobilization Devices:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Thermoplastic Masks (Aquaplast\u2122):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Used for head and neck, and sometimes brain treatments. A sheet of plastic is warmed, molded to the patient's contours, and then hardens, creating a custom fit."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Vacuum Bags (Vac-Lok\u2122, Alpha Cradle\u00ae):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Bags filled with small styrofoam beads. Air is evacuated, causing the bag to become rigid and conform to the patient's body shape. Used for various body sites."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Bite Blocks/Oral Stents:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Used in head and neck treatments to position the jaw, tongue, or displace normal tissues away from the radiation field."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Wing Boards\u2122 / Breast Boards:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Used for breast treatments to position the arms out of the way and ensure consistent chest wall positioning."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Knee Sponges/Foot Rests:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Provide support and help maintain leg and foot position."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Prone Head Cushions/Belly Boards:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Used for specific treatments where the patient is lying face down (prone)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page8_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: For a patient receiving radiation therapy to the brain or head and neck region, which type of immobilization device is most commonly custom-made for them?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Vacuum Bag (Vac-Lok\u2122)",
+              "Thermoplastic Mask",
+              "Breast Board"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Image-Guided Radiation Therapy (IGRT) - Seeing is Treating",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Image-Guided Radiation Therapy (IGRT)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " refers to the use of various imaging techniques before and/or during radiation treatment to ensure the accuracy and precision of dose delivery."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose of IGRT:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Verify Patient Position:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " To confirm that the patient is positioned on the treatment couch exactly as they were during simulation."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Account for Organ Motion:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Internal organs can move day-to-day (e.g., bladder filling, bowel gas) or even during treatment (e.g., breathing). IGRT helps to adjust for these changes."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Increase Targeting Accuracy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Allows for smaller treatment margins around the tumor, thereby reducing radiation dose to surrounding healthy tissues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Enable Advanced Techniques:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Essential for highly conformal treatments like IMRT, VMAT, SBRT, and SRS where precision is paramount."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Common IGRT Modalities Used by RTTs:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "kV Planar Imaging (Orthogonal Pairs):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Two X-ray images taken from different angles (usually 90 degrees apart) using the Linac's On-Board Imager (OBI). These are compared to reference images (DRRs - Digitally Reconstructed Radiographs) from the treatment plan."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Cone-Beam Computed Tomography (CBCT):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The OBI rotates around the patient, acquiring a 3D CT-like image set. This provides volumetric information and can be fused with the planning CT for precise alignment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "MV Planar Imaging (Portal Imaging):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Uses the high-energy treatment beam itself to create an image via the Electronic Portal Imaging Device (EPID). Often used to verify beam placement and MLC shaping."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Surface Guidance (e.g., AlignRT\u00ae, Catalyst\u2122):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Uses optical or laser scanning to monitor the patient's external surface in real-time, ensuring they remain in the correct position."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "RTTs are responsible for acquiring these images, comparing them to the plan, making necessary couch adjustments (often automated or with physicist/oncologist approval), and documenting the IGRT process."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page9_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Which IGRT modality provides a 3D volumetric image of the patient in the treatment position, allowing for soft tissue visualization and comparison with the planning CT?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "MV Planar Imaging (EPID)",
+              "kV Planar Imaging (Orthogonal Pairs)",
+              "Cone-Beam Computed Tomography (CBCT)"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Common EBRT Techniques - Part 1",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Several advanced EBRT techniques allow for highly precise radiation delivery."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "3D Conformal Radiation Therapy (3D-CRT) In 3D-CRT, radiation beams are shaped by MLCs to match the 3-dimensional shape of the tumor, based on CT images. Multiple beams are typically used from different angles. Rationale: Allows for higher doses to the tumor while reducing exposure to surrounding normal tissues compared to older 2D techniques. Typical Uses: Still used for various sites, especially when complex dose sculpting isn't paramount or for simpler palliative cases."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Intensity-Modulated Radiation Therapy (IMRT) IMRT is an advanced form of 3D-CRT that allows the intensity of each radiation beam to be varied (modulated) across the beam's profile. This is achieved by complex MLC movements while the beam is on, or by using multiple small segments within each beam. Rationale: Enables even more precise conformity of the high-dose region to complex tumor shapes, especially those near critical organs. Allows for \"dose painting\" \u2013 delivering different dose levels to different parts of the target. Typical Uses: Head and neck cancers, prostate cancer, gynecological cancers, and other sites where sparing nearby sensitive structures is crucial."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page10_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: What is the primary advantage of IMRT over 3D-CRT?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "It uses fewer radiation beams.",
+              "It allows for varying the intensity of radiation within each beam for better dose conformity.",
+              "It does not require the use of MLCs."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Common EBRT Techniques - Part 2",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Volumetric Modulated Arc Therapy (VMAT / RapidArc\u2122 / VERO\u2122) VMAT is an advanced form of IMRT where radiation is delivered as the gantry rotates (one or more arcs) around the patient. During rotation, the MLCs, dose rate, and gantry speed can all change continuously. Rationale: Can deliver highly conformal dose distributions, often with shorter treatment times compared to conventional IMRT. Typical Uses: Similar to IMRT, for complex tumor shapes near critical structures; widely used for many cancer sites."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stereotactic Body Radiation Therapy (SBRT) & Stereotactic Radiosurgery (SRS) These are highly precise techniques that deliver very high doses of radiation to small, well-defined tumors in a few treatment fractions (typically 1 to 5). SRS: Typically refers to treatment of intracranial (brain) or spinal lesions. Often delivered in a single fraction. SBRT (or SABR - Stereotactic Ablative Body Radiotherapy): Refers to treatment of extracranial (outside the brain) tumors, such as in the lung, liver, spine, or prostate. Rationale: Aims to achieve tumor ablation with extreme precision, requiring meticulous immobilization, IGRT, and often motion management techniques. Typical Uses: Small primary tumors (e.g., early-stage lung cancer), metastases (e.g., brain, liver, lung, bone), certain benign conditions."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page11_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Which technique is characterized by delivering very high doses of radiation in 1 to 5 fractions to small, well-defined tumors?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "3D-CRT",
+              "Conventional IMRT (many fractions)",
+              "SBRT/SRS"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Other EBRT Modalities & Considerations",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While Linac-based photon therapies (3D-CRT, IMRT, VMAT, SBRT/SRS) are very common, other EBRT approaches exist:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Proton Therapy Uses beams of protons (positively charged particles) instead of X-rays. Protons deposit most of their energy at a specific depth in tissue (the Bragg peak), with very little dose beyond that point. Advantage: Can potentially reduce dose to healthy tissues located distal to (behind) the tumor, which is particularly beneficial for pediatric patients or tumors near critical organs. Considerations: More complex and expensive; availability is limited compared to photon therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Electron Beam Therapy Uses beams of electrons, which are also produced by Linacs. Electrons have a limited range in tissue, depositing their dose superficially. Advantage: Useful for treating tumors or lesions on or near the skin surface (e.g., skin cancers, keloids, some lymph nodes) while sparing deeper tissues. Considerations: Custom \"cutouts\" or applicators are often used to shape the electron field."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Total Body Irradiation (TBI) A technique where the entire body is irradiated, typically at a low dose rate over one or more fractions. Rationale: Often used as part of a conditioning regimen before bone marrow or stem cell transplantation to eliminate remaining cancer cells and suppress the immune system. Considerations: Requires specialized setup and dosimetry to ensure dose homogeneity across the body."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Introduction to Brachytherapy (A Different Approach)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While this lesson focuses primarily on External Beam Radiation Therapy (EBRT), it's important to be aware of another major category of radiation treatment: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Brachytherapy"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What is Brachytherapy?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Derived from the Greek word \"brachys\" meaning \"short distance,\" brachytherapy involves placing radioactive sources directly "
+                    },
+                    {
+                      "type": "text",
+                      "text": "inside or very close to the tumor"
+                    },
+                    {
+                      "type": "text",
+                      "text": ". This allows a high dose of radiation to be delivered to the target while rapidly decreasing the dose to surrounding healthy tissues due to the short distance."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Differences from EBRT:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Source Location:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " EBRT uses external machines; brachytherapy uses internal sources."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Dose Delivery:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Brachytherapy delivers dose from within, leading to a very steep dose fall-off."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Common Types of Brachytherapy:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Low-Dose Rate (LDR):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Radioactive sources (like seeds) are implanted permanently or temporarily and deliver radiation over hours or days. (e.g., prostate seed implants)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "High-Dose Rate (HDR):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " A highly radioactive source is temporarily placed inside or near the tumor for a few minutes at a time using an afterloader machine. This may be repeated over several fractions. (e.g., gynecological, breast, prostate HDR)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Intracavitary:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Sources placed in body cavities (e.g., uterus, vagina)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Interstitial:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Sources placed directly into tissues (e.g., prostate, breast)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Surface/Plaque:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Sources placed on the surface of the area to be treated (e.g., eye plaques)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While RTTs may not be directly involved in all aspects of brachytherapy (roles can vary by institution and specific procedures often involve specialized teams including physicists, dosimetrists, oncologists, and nurses), understanding its existence and basic principles is important for a comprehensive view of radiation oncology."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Conclusion & Next Steps (Activities)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Congratulations on completing this introduction to radiation therapy modalities, equipment, and terminology! You've covered a lot of ground, from basic radiation principles and essential vocabulary to the intricacies of the linear accelerator, patient setup, and various external beam treatment techniques."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Takeaways:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Radiation therapy is a precise and complex field aimed at treating cancer effectively while minimizing harm to healthy tissue."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A strong grasp of medical and RT-specific terminology is essential for clear communication and understanding."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The Linear Accelerator is a sophisticated machine with multiple components working together to deliver treatment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient simulation, immobilization, and IGRT are critical for treatment accuracy and reproducibility."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Various EBRT techniques (3D-CRT, IMRT, VMAT, SBRT/SRS) offer different ways to conform dose to the tumor."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This foundational knowledge will serve you well as you continue your journey to becoming a skilled and compassionate Radiation Therapist."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next Steps: Interactive Activities"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To further solidify your understanding, please proceed to the following interactive activities:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Activity 1: Match the Modality/Equipment Activity 2: Terminology Challenge Activity 3: Linac Components Labeling"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

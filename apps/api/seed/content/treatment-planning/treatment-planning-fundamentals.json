@@ -1,0 +1,1130 @@
+{
+  "subject": {
+    "slug": "treatment-planning",
+    "title": "Treatment Planning",
+    "order": 13
+  },
+  "lesson": {
+    "slug": "treatment-planning-fundamentals",
+    "title": "Treatment Planning Fundamentals",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Core Terminology",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Term"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Meaning"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Isocenter",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The point of intersection of the three axes of rotation: collimator, gantry, and couch"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "d",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Depth of isocenter or tumor"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "SSD / SAD",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Source-to-Surface Distance / Source-to-Axis Distance (100 cm)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "IFD",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Separation/thickness of the patient"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "CA / CAX",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Central Axis"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You'll see these same terms throughout every site-specific planning lesson \u2014 they're the shared vocabulary of the entire planning process."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Simulation Covers Seven Anatomic Locations",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Simulation (using CT, MRI, and/or PET) is organized around seven anatomic regions: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Brain, Head and Neck, Thorax, Breast, Abdomen, Pelvis, and Skeletal",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the exact same seven sites this workbook's Site-Specific Planning section is built around."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The goal of simulation: identify the affected area, determine the optimum treatment position, identify the target volume and adjacent normal organs relative to external skin marks, use that information for dosimetry planning, and document everything for reproducible daily setup."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Nine-Step CT Simulation Procedure",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "orderedList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Presimulation planning"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Room preparation"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Explanation of procedure (to the patient)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient positioning and immobilization"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "CT data acquisition"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Target and normal tissue localization"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Virtual simulation of treatment fields"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Generation of dose distributions"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Documentation of pertinent data"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Positioning is the foundation",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " of everything downstream \u2014 good setups and accurate treatment delivery start with good simulation and immobilization, whether that's simple (a headrest) or complex (a custom thermoplastic mask)."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Contrast and Localization",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Contrast media",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (barium sulfate, iodinated contrast, negative contrast agents) can help localize tumor volume and normal critical structures that would otherwise be hard to distinguish on CT. Careful patient evaluation is needed beforehand, since some agents carry a real risk of severe allergic reaction."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Localization",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the geometric definition of the position and extent of the tumor or anatomical structures, referenced to surface marks used for treatment setup \u2014 it ends in the placement of isocenter."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What must be checked before administering contrast media during simulation?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The patient's insurance coverage",
+              "The patient's risk of a severe allergic reaction"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Some contrast agents carry real allergic reaction risk, so careful patient evaluation is required before administration."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Contouring and ICRU Treatment Planning Volumes",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Contouring",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the reproduction of a body shape and internal structures, typically drawn through the transverse plane of the treatment beam. Once contoured, the ICRU treatment planning volumes build on each other:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Volume"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Definition"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "GTV / CTV / PTV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The core target hierarchy (see the Brain planning lesson for a worked example)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Treated Volume",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Encompasses additional margin around the target volume to account for limitations in treatment technique"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Irradiated Volume",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The volume of tissue receiving a significant dose (>50% of the specified target dose) \u2014 tissue in front of, behind, and around the target"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Motion and Measuring Separation",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Interfraction motion",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the change in target position from one treatment day to another. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Intrafraction motion",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the change in target position "
+                    },
+                    {
+                      "type": "text",
+                      "text": "during",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " a single treatment delivery \u2014 respiratory motion in the thorax is the classic example."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "IFD (separation)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the patient's thickness along the central axis \u2014 is most often measured directly from CT images today, though it can also be measured manually with a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "caliper",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (a sliding-leg ruler). Separation is used to help determine SSD."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "DVH and the Treatment Plan",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Dose Volume Histogram (DVH)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " graphs radiation dose against tissue volume \u2014 the standard tool for evaluating a plan and comparing doses between different plans or structures (directly related to the therapeutic ratio concept)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A complete treatment plan specifies: number of fields, gantry/collimator/couch angles, beam energy, field size, MLC blocking, beam modifiers, monitor units, isocenter, and the DVH itself."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Verification",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Verification",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the final check before treatment is actually delivered. A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Digitally Reconstructed Radiograph (DRR)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a computer-generated emulation of a radiograph from the beam's-eye view, used to compare against images taken on the actual treatment machine \u2014 confirming the anatomy-to-beam relationship matches the plan."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Orthogonal images",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " are two images taken 90\u00b0 apart, verifying alignment in two planes at once rather than just one."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page8_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why are orthogonal images (90\u00b0 apart) used for verification rather than a single image?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "A single image can only confirm alignment in one plane; two images 90\u00b0 apart confirm alignment more completely",
+              "Orthogonal images use less radiation than a single image"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "One image alone can't rule out a positioning error along the direction the beam travels \u2014 a second image from a different angle is needed to confirm 3D alignment."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Body Planes and Field Size",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "AP images",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " show anatomy in the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "coronal plane",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (inferior/superior and left/right). "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Lateral images",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " show anatomy in the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "sagittal plane",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (inferior/superior and anterior/posterior)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Field size",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is defined by the secondary collimator dimensions (width \u00d7 length) \u2014 on the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "skin surface",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for SSD technique, or "
+                    },
+                    {
+                      "type": "text",
+                      "text": "at isocenter",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for SAD technique. This is the same distinction covered in the Isodose Distribution lesson."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered core terminology, the seven anatomic simulation sites, the nine-step CT simulation procedure, contrast and localization, contouring and ICRU volumes, motion types, DVH, verification and DRRs, and body planes/field size definitions."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This is the conceptual foundation underneath every site-specific planning lesson in this section \u2014 each one assumes you understand the process covered here."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

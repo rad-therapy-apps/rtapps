@@ -12,11 +12,12 @@
  * Works with: `$lib/server/api` (`apiFetch`). Used by: `+page.svelte` (this route).
  */
 import { redirect } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
 import { apiFetch } from '$lib/server/api';
 
 export async function load({ fetch, locals }) {
 	// Already signed in: skip the landing page entirely.
-	if (locals.user) redirect(303, '/home');
+	if (locals.user) redirect(303, resolve('/(app)/home'));
 
 	let api: { status: string; database?: string } = { status: 'unreachable' };
 	try {

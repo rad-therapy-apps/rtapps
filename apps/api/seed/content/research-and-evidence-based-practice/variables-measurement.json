@@ -1,0 +1,845 @@
+{
+  "subject": {
+    "slug": "research-and-evidence-based-practice",
+    "title": "Research and Evidence Based Practice",
+    "order": 10
+  },
+  "lesson": {
+    "slug": "variables-measurement",
+    "title": "Variables & Measurement",
+    "order": 0,
+    "pages": [
+      {
+        "title": "A Great Idea Needs Measurable Variables",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Once you've picked a study design, you need to decide how to actually build it. In research, a brilliant idea is useless if you can't accurately define and measure the outcomes involved."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Independent and Dependent Variables",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Every research question tries to figure out if one thing affects another. To study that scientifically, label the pieces:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Independent Variable (IV)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 the cause. The variable the researcher manipulates, introduces, or categorizes."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Dependent Variable (DV)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 the effect. The outcome being measured, which depends on the IV."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Operationalization",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You can't measure abstract concepts like \"comfort\" or \"efficiency\" directly \u2014 you have to "
+                    },
+                    {
+                      "type": "text",
+                      "text": "operationalize",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " them into concrete, measurable data."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Vague concept:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " IV = Music, DV = Patient anxiety."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Operationalized:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " IV = listening to a patient-selected playlist via headphones vs. no headphones. DV = the patient's numerical score on the State-Trait Anxiety Inventory (STAI)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Which of these is a properly operationalized dependent variable?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Patient comfort",
+              "Patient's numerical score on a standardized anxiety survey"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "\"Comfort\" is abstract; a specific, standardized, numerical measure is what makes a variable actually measurable."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Confounding Variables",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The clinical environment is messy. An IV rarely affects a DV in a perfect vacuum \u2014 you have to anticipate \"hidden\" variables that can skew your data."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Confounding variable (\"the third wheel\"):",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " an outside influence that changes the effect of both the IV and DV, making it look like there's a direct relationship when there isn't."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " studying whether a new skin cream (IV) reduces radiation dermatitis (DV) \u2014 but some patients are on concurrent chemotherapy, which independently worsens skin reactions. Chemotherapy is confounding your results."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Control and Moderating Variables",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Control variable (\"the bouncer\"):",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " a confounding variable you've identified and deliberately kept constant to neutralize it. Fix the skin cream study by only enrolling patients "
+                        },
+                        {
+                          "type": "text",
+                          "text": "not",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " receiving concurrent chemotherapy \u2014 chemotherapy is now a controlled variable."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Moderating variable (\"the volume dial\"):",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " a variable that changes the strength or direction of the IV\u2013DV relationship without causing the outcome itself. Example: studying whether Deep Inspiration Breath Hold (IV) reduces mean heart dose (DV) \u2014 but it works far better for some patients than others because chest wall anatomy moderates how effective it is."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two useful questions when hunting for hidden variables: \"What else could cause my outcome besides my intervention?\" finds confounders. What question helps find moderators?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "\"Would my intervention work better for some people than others, and why?\"",
+              "\"Did I remember to randomize my sample?\""
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Moderators change how well an intervention works for different subgroups \u2014 asking where the effect is stronger or weaker points you toward them."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Levels of Measurement \u2014 NOIR",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Once a dependent variable is operationalized, classify its level of measurement. This single decision dictates which statistical test you're allowed to use later. Remember it as "
+                    },
+                    {
+                      "type": "text",
+                      "text": "NOIR",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Level"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Definition"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Example"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "N",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "ominal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Categories with no inherent order"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Sex, treatment site, mask type"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "O",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "rdinal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Ranked categories, unequal distance between ranks"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Likert scales, toxicity grades"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "I",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "nterval"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Equal distance between points, no true zero"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Temperature in Celsius"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "R",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "atio"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Equal intervals with a true zero"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Dose (Gy), setup error (mm), test scores (%)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Feasibility Reality Check",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Before finalizing your variables, run a feasibility check against what you can actually pull off in your available time and setting:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Sample size:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " quantitative studies generally need at least 30 data points per group for reasonable statistical power. Can you realistically gather that much data in your available window?"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Retrospective vs. prospective:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " prospective studies (collecting new data as it happens) are highly susceptible to delays. Retrospective studies (using existing historical data) are usually faster and more feasible on a tight timeline."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Scope and permissions:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " as a student researcher, you typically cannot alter a patient's actual treatment. Workflow observations, educational tools, and anonymous surveys are usually far easier to get approved than anything touching clinical care decisions."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered independent and dependent variables, operationalization, confounding/control/moderating variables, the NOIR levels of measurement, and a practical feasibility check."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next: your variable's level of measurement determines exactly which statistical test is valid for testing your hypothesis \u2014 that's where we're headed next."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

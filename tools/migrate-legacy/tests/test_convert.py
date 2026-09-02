@@ -20,6 +20,10 @@ Depends on: `migrate_legacy.convert`; tests/fixtures/{Radiation_Biology,Radiatio
 tests/golden/*.json; packages/schemas/prose-doc.schema.json.
 Used by: `make test-tools` / `uv run pytest` (from `tools/migrate-legacy`); the `tools`
 job in `.github/workflows/pr.yml`.
+
+Test list: test_golden (parametrized), test_every_prose_doc_validates (parametrized),
+test_rbe_specifics, test_not_a_paged_lesson_is_unsupported, test_correct_answers_pyjson5_literals,
+test_duplicate_html_documents_deduped.
 """
 
 import json
@@ -83,3 +87,103 @@ def test_not_a_paged_lesson_is_unsupported(tmp_path: Path) -> None:
     (tmp_path / "X/index.html").write_text("<html><body><h1>Quiz</h1></body></html>")
     doc, report = convert_lesson(tmp_path / "X/index.html", tmp_path)
     assert report.status == "unsupported" and doc == {}
+
+
+def test_correct_answers_pyjson5_literals(tmp_path: Path) -> None:
+    # Commit cd7100d changed _correct_answers to use pyjson5.decode instead of
+    # json.loads, tolerating JS object-literal syntax: single quotes, unquoted keys,
+    # and // comments. Verify that a knowledge_check with such a lessonCorrectAnswers
+    # object still resolves its answer correctly (answer index set, no parse error note).
+    html = """<html>
+<head><title>Test</title></head>
+<body>
+<div class="flip-lesson-container">
+<script>
+const lessonCorrectAnswers = {
+    'lq_page1_1': 'B',  // Second option is correct
+    lq_page1_2: 'A'
+};
+</script>
+<div id="lesson-page-1" class="lesson-page">
+<h3>Page 1: Test Page</h3>
+<p>Some introductory text.</p>
+<h4>Quick Check!</h4>
+<div class="interactive-question-block">
+    <p class="question-text">What is the correct answer?</p>
+    <label><input type="radio" name="lq_page1_1" value="A"> Option A</label>
+    <label><input type="radio" name="lq_page1_1" value="B"> Option B</label>
+    <div class="explanation">Option B is correct.</div>
+</div>
+</div>
+</div>
+</body>
+</html>"""
+    (tmp_path / "Y").mkdir()
+    (tmp_path / "Y/index.html").write_text(html)
+    doc, report = convert_lesson(tmp_path / "Y/index.html", tmp_path)
+
+    # The conversion must succeed (status "converted" or "needs-review" is ok)
+    assert doc != {}, "Conversion should produce a doc"
+    # Verify no parse-error note was added (pyjson5 successfully parsed the object)
+    assert not any("unparseable lessonCorrectAnswers" in note for note in report.notes), \
+        f"Should not have unparseable note; got notes: {report.notes}"
+    # Verify the knowledge_check key exists and answer is resolved to index 1 (Option B)
+    checks = [b for p in doc.get("lesson", {}).get("pages", []) for b in p.get("blocks", []) if b.get("type") == "knowledge_check"]
+    assert len(checks) > 0, "Should have at least one knowledge_check"
+    # The check's answer should be 1 (Option B is at index 1, matching lessonCorrectAnswers)
+    assert checks[0].get("answer") == 1, f"Answer should be index 1 for Option B, got {checks[0].get('answer')}"
+
+
+def test_duplicate_html_documents_deduped(tmp_path: Path) -> None:
+    # Commit cd7100d added logic to detect and drop duplicate lesson pages that arise
+    # when legacy files concatenate two whole HTML documents (a source authoring bug).
+    # The parser walks past </html> and picks up both documents' pages, so identical
+    # pages appear twice. Verify that duplicates are dropped and a note is added.
+    html = """<html>
+<head><title>Test</title></head>
+<body>
+<div class="flip-lesson-container">
+<div id="lesson-page-1" class="lesson-page">
+<h3>Page 1: Identical Content</h3>
+<p>This page has identical content in both documents.</p>
+<h4>Quick Check!</h4>
+<div class="interactive-question-block">
+    <p class="question-text">Which option is correct?</p>
+    <label><input type="radio" name="q1" value="A"> Option A</label>
+    <label><input type="radio" name="q1" value="B"> Option B</label>
+    <div class="explanation">Option A is the answer.</div>
+</div>
+</div>
+</div>
+</body>
+</html>
+<html>
+<head><title>Test</title></head>
+<body>
+<div class="flip-lesson-container">
+<div id="lesson-page-1" class="lesson-page">
+<h3>Page 1: Identical Content</h3>
+<p>This page has identical content in both documents.</p>
+<h4>Quick Check!</h4>
+<div class="interactive-question-block">
+    <p class="question-text">Which option is correct?</p>
+    <label><input type="radio" name="q1" value="A"> Option A</label>
+    <label><input type="radio" name="q1" value="B"> Option B</label>
+    <div class="explanation">Option A is the answer.</div>
+</div>
+</div>
+</div>
+</body>
+</html>"""
+    (tmp_path / "Z").mkdir()
+    (tmp_path / "Z/index.html").write_text(html)
+    doc, report = convert_lesson(tmp_path / "Z/index.html", tmp_path)
+
+    # The conversion must succeed
+    assert doc != {}, "Conversion should produce a doc"
+    # Verify exactly one page in the result (the duplicate was dropped)
+    pages = doc.get("lesson", {}).get("pages", [])
+    assert len(pages) == 1, f"Should have 1 page after dedup, got {len(pages)}"
+    # Verify the dedup note was added
+    assert any("duplicate lesson page dropped" in note for note in report.notes), \
+        f"Should have duplicate-dropped note; got notes: {report.notes}"

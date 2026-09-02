@@ -1,0 +1,37 @@
+{
+  "flashcards": {
+    "slug": "linac-parts-flashcards",
+    "title": "Welcome to Build-a-LINAC!: Flashcards",
+    "cards": [
+      {
+        "term": "Gantry Rotation System",
+        "definition": "Unlocks controls to rotate the LINAC gantry."
+      },
+      {
+        "term": "Couch Vertical Drive",
+        "definition": "Unlocks controls for up/down couch movement."
+      },
+      {
+        "term": "Couch Longitudinal Drive",
+        "definition": "Unlocks controls for in/out couch movement."
+      },
+      {
+        "term": "Couch Lateral Drive",
+        "definition": "Unlocks controls for left/right couch movement."
+      },
+      {
+        "term": "Collimator Jaws Control",
+        "definition": "Unlocks controls to open/close collimator jaws."
+      },
+      {
+        "term": "Imaging Panel System",
+        "definition": "Unlocks ability to extend/retract the imaging panel."
+      }
+    ]
+  },
+  "subject": {
+    "slug": "treatment-delivery-procedures",
+    "title": "Treatment Delivery Procedures",
+    "order": 12
+  }
+}

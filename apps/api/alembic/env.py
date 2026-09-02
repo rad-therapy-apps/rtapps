@@ -32,6 +32,7 @@ import app.attempts.rollup
 import app.audit.models
 import app.auth.models
 import app.cohorts.models
+import app.content.activity_models
 import app.content.models  # noqa: F401
 from alembic import context
 from app.db import Base

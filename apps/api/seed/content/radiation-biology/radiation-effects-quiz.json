@@ -1,0 +1,75 @@
+{
+  "quiz": {
+    "slug": "radiation-effects-quiz",
+    "title": "Radiation Effects on Organ Systems: Quiz",
+    "pass_percent": 80,
+    "shuffle": true,
+    "questions": [
+      {
+        "stem": "After a high radiation dose, the shrinkage of organs and tissues is referred to as:",
+        "options": [
+          "Atrophy",
+          "Desquamation",
+          "Erythema",
+          "Radiodermatitis"
+        ],
+        "answer": 0,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Which of the following measures of lethality is perhaps the most accurate for human survival?",
+        "options": [
+          "LD 10/30",
+          "LD 50/30",
+          "LD 50/60",
+          "LD 100/60"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "In humans with the gastrointestinal form of ARS, the part of the body most severely affected is the:",
+        "options": [
+          "Brain",
+          "Heart",
+          "Large intestine",
+          "Small intestine"
+        ],
+        "answer": 3,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Without medical support, the LD 50/30 for adult humans is estimated to be:",
+        "options": [
+          "1.0 to 2.0 Gy",
+          "2.0 to 3.0 Gy",
+          "3.0 to 4.0 Gy",
+          "4.0 to 5.0 Gy"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "The hematopoietic, gastrointestinal, and cerebrovascular syndromes are three separate dose-related syndromes that are part of the:",
+        "options": [
+          "Bone marrow syndrome",
+          "Cytogenetic syndrome",
+          "Prodromal syndrome",
+          "Acute radiation syndrome"
+        ],
+        "answer": 3,
+        "explanation": null,
+        "outcomes": []
+      }
+    ]
+  },
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  }
+}

@@ -6,18 +6,24 @@ verified inside the same transaction as the attempt, not as a separately-called 
 How it fits the project: FR-X-02; ADR-0004 (rollups are derived from attempts).
 Works with: pytest-asyncio, httpx.
 Depends on: `client`, `db`, `register`, `seed_lesson` from `conftest.py`;
-`app.attempts.rollup.ActivityResult`.
+`app.attempts.rollup.ActivityResult`; `app.attempts.rollup.upsert_activity_result`;
+`app.attempts.models.Attempt`; `app.content.models.Activity`.
 Used by: CI `api` job; `make test-api`.
 """
 
 import uuid
+from datetime import UTC, datetime
 
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.attempts.rollup import ActivityResult
+from app.attempts.models import Attempt
+from app.attempts.rollup import ActivityResult, upsert_activity_result
+from app.content.activity_importer import import_any
+from app.content.models import Activity
 from tests.conftest import register, seed_lesson
+from tests.test_activity_importer import SUBJECT
 
 
 async def _run_attempt(client: AsyncClient, activity_id: str, choice: int | None) -> str:
@@ -78,3 +84,63 @@ async def test_replay_does_not_double_count(client: AsyncClient, db: AsyncSessio
         assert r.status_code == 200
     row = await db.scalar(select(ActivityResult))
     assert row is not None and row.attempts == 1
+
+
+async def test_rollup_tie_break_prefers_higher_id_on_equal_submitted_at(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    """Two submitted attempts sharing the exact same `submitted_at`: the recompute's
+    `order_by(submitted_at.asc(), id.asc())` picks the higher id as "latest" — pinning that a
+    later-created UUIDv7 id wins a tie, not insertion order or which row happens to load first."""
+    lesson = await seed_lesson(db)
+    body = await register(client)
+    user_id = uuid.UUID(str(body["id"]))
+    activity = await db.scalar(select(Activity).where(Activity.lesson_id == lesson.id))
+    assert activity is not None and activity.current_version_id is not None
+    tied_at = datetime.now(UTC)
+    low = Attempt(
+        id=uuid.UUID(int=1),
+        user_id=user_id,
+        activity_id=activity.id,
+        content_version_id=activity.current_version_id,
+        status="submitted",
+        submitted_at=tied_at,
+        percent=0.0,
+        passed=False,
+    )
+    high = Attempt(
+        id=uuid.UUID(int=2),
+        user_id=user_id,
+        activity_id=activity.id,
+        content_version_id=activity.current_version_id,
+        status="submitted",
+        submitted_at=tied_at,
+        percent=100.0,
+        passed=True,
+    )
+    db.add_all([low, high])
+    await db.flush()
+
+    result = await upsert_activity_result(db, high)
+    assert result.latest_attempt_id == high.id
+    assert result.latest_percent == 100.0
+
+
+async def test_flashcards_completion_rollup(client: AsyncClient, db: AsyncSession) -> None:
+    """Flashcards: completion-only submission leaves best_percent None, mastery attempted."""
+    deck = await import_any(
+        db,
+        {
+            "subject": SUBJECT,
+            "flashcards": {"slug": "f1", "title": "F", "cards": [{"term": "T", "definition": "D"}]},
+        },
+    )
+    await register(client)
+    attempt = (await client.post(f"/api/v1/activities/{deck.id}/attempts")).json()
+    r = await client.post(
+        f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
+    )
+    assert r.status_code == 200
+    row = await db.scalar(select(ActivityResult))
+    assert row is not None and row.attempts == 1
+    assert row.best_percent is None and row.mastery == "attempted"

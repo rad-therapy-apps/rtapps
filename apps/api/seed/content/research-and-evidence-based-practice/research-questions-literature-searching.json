@@ -1,0 +1,873 @@
+{
+  "subject": {
+    "slug": "research-and-evidence-based-practice",
+    "title": "Research and Evidence Based Practice",
+    "order": 10
+  },
+  "lesson": {
+    "slug": "research-questions-literature-searching",
+    "title": "Research Questions & Literature Searching",
+    "order": 0,
+    "pages": [
+      {
+        "title": "From Observation to Searchable Question",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Once you've noticed a problem worth investigating, the next step is converting that observation into a rigorous, searchable question. A vague question like "
+                    },
+                    {
+                      "type": "text",
+                      "text": "\"How do we improve treatments?\"",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "text",
+                      "text": "\"How do we make learning easier?\"",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " yields too much irrelevant information to be useful. You need precision \u2014 whether your focus is inside the treatment vault or inside the classroom."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Problem Statement",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Before asking a question, define the problem. A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "problem statement",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " clearly identifies the gap between the current state and a desired state, and it's what justifies why a project is worth doing in the first place."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Clinical example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Current state",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 prostate patients frequently experience delays from inadequate bladder filling on daily CBCT. "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Desired state",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 patients maintain consistent bladder volumes, reducing table time. "
+                        },
+                        {
+                          "type": "text",
+                          "text": "The gap",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 it's unclear whether a standardized hydration protocol beats standard verbal instructions at maintaining target volumes."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Educational example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Current state",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 students struggle to visualize 3D anatomy from 2D textbook diagrams. "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Desired state",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 students demonstrate strong spatial awareness before entering clinic. "
+                        },
+                        {
+                          "type": "text",
+                          "text": "The gap",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 whether VR-based training systems improve clinical readiness compared to traditional didactic learning."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The PICO Framework",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To bridge the gap, formulate a specific question. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "PICO",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the gold standard for breaking a broad topic into a testable inquiry. Originally built for clinical medicine, its logic applies just as well to educational and administrative research."
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Letter"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Stands for"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Example"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "P",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Population / Problem"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Prostate cancer patients, undergraduate RT students, therapists performing chart checks"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "I",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Intervention"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "A hydration protocol, a VR simulation system, a standardized safety checklist"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "C",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Comparison"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Verbal instructions, standard 2D textbooks, unstructured workflows"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "O",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Outcome"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Daily CBCT volume consistency, exam scores, incident report rates"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Clinical PICO:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " In prostate cancer patients undergoing VMAT (P), does a standardized hydration protocol (I) compared to standard verbal instructions (C) improve daily CBCT bladder volume consistency (O)?"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Non-clinical PICO:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " In undergraduate radiation therapy students (P), does VR-based training (I), compared to traditional 2D didactic lectures (C), improve spatial anatomy recognition and clinical setup accuracy (O)?"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In the clinical PICO question above, what is the \"C\" (Comparison)?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Standard verbal instructions",
+              "Bladder volume consistency"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The comparison is the current standard practice the intervention is being measured against \u2014 here, verbal instructions."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Searching the Literature",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Once your PICO question is set, find out what's already known. Databases like PubMed, CINAHL, and ERIC (for educational research) rely heavily on Boolean operators to narrow or broaden a search:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "AND",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 narrows the search; both terms must be present (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "radiotherapy education AND virtual reality",
+                              "marks": [
+                                {
+                                  "type": "italic"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ")"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "OR",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 broadens the search; either term qualifies, useful for synonyms (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "simulation OR VR training",
+                              "marks": [
+                                {
+                                  "type": "italic"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ")"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "NOT",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 excludes terms (e.g., "
+                            },
+                            {
+                              "type": "text",
+                              "text": "prostate cancer NOT brachytherapy",
+                              "marks": [
+                                {
+                                  "type": "italic"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ")"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Screening What You Find",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "When screening search results, read the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Abstract",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " first \u2014 specifically the Objective and Conclusion \u2014 to quickly judge whether an article actually fits your PICO parameters before reading the whole thing."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Favor peer-reviewed articles published within the last 5\u20137 years to keep your evidence current, unless you have a specific reason to cite older foundational work."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You want articles about VR training OR simulation training in radiologic education, but want to exclude anything about surgical simulation. Which search captures this?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "(VR training OR simulation training) AND radiologic education NOT surgical",
+              "VR training AND simulation training AND radiologic education AND surgical"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "OR broadens between the two training terms, AND narrows to the right field, and NOT excludes the irrelevant surgical topic."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Is There Really a Gap?",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sometimes a literature search reveals the question has already been thoroughly answered \u2014 that's a useful finding too, and it means either refining your question further or picking a genuinely open angle. A real gap in the literature is a question current research hasn't yet resolved, not just a topic that happens to interest you."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered writing a problem statement, building a PICO question, using Boolean search operators, and screening literature efficiently."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next: once you know what's already been studied, you need to choose the research design that will actually let you answer your specific question."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

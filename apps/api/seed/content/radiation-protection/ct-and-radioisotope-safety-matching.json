@@ -1,0 +1,54 @@
+{
+  "matching": {
+    "slug": "ct-and-radioisotope-safety-matching",
+    "title": "CT & Radioisotope Safety: Matching",
+    "pairs": [
+      {
+        "term": "Pitch (CT)",
+        "definition": "The relationship between the movement of the patient couch and the x-ray beam collimation dimension."
+      },
+      {
+        "term": "Iterative Reconstruction (CT)",
+        "definition": "A process of repeatedly modifying CT data to create an image with the lowest possible noise, reducing patient dose."
+      },
+      {
+        "term": "Annihilation Radiation (PET)",
+        "definition": "Two 511-keV photons created when a positron collides with an electron, used for PET imaging."
+      },
+      {
+        "term": "Radioisotopes",
+        "definition": "Unstable atoms that spontaneously undergo transformations to rectify their unbalanced arrangement."
+      },
+      {
+        "term": "PET",
+        "definition": "An imaging modality that examines metabolic processes within the body using positron-emitting radioisotopes."
+      },
+      {
+        "term": "Tube Current Modulation (CT)",
+        "definition": "An automatic exposure control method that adjusts the mA during a scan to reduce patient dose."
+      },
+      {
+        "term": "FDG (Fluorodeoxyglucose)",
+        "definition": "A radioactive tracer similar to glucose, used in PET to detect metabolically active cells like cancer."
+      },
+      {
+        "term": "Technetium-99m",
+        "definition": "The most common short-lived radioisotope used in diagnostic nuclear medicine."
+      },
+      {
+        "term": "Dirty Bomb",
+        "definition": "A radioactive dispersal device; a conventional explosive mixed with radioactive material."
+      },
+      {
+        "term": "CTDIvol",
+        "definition": "A CT-specific dose marker representing the average absorbed dose within the scanned volume."
+      }
+    ],
+    "present_n": null
+  },
+  "subject": {
+    "slug": "radiation-protection",
+    "title": "Radiation Protection",
+    "order": 9
+  }
+}

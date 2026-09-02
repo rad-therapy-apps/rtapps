@@ -41,8 +41,8 @@
 			</form>
 		{:else}
 			<!-- Signed out: sign-in / register links only. -->
-			<a href={resolve('/login')}>Sign in</a>
-			<a href={resolve('/register')}>Register</a>
+			<a href={resolve('/(auth)/login')}>Sign in</a>
+			<a href={resolve('/(auth)/register')}>Register</a>
 		{/if}
 	</nav>
 </header>

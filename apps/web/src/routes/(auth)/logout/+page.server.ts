@@ -31,6 +31,13 @@ export const actions: Actions = {
 		// Belt-and-braces fallback: delete the cookie locally even if the API call above failed
 		// or didn't clear it, so the browser is never left holding a session cookie.
 		event.cookies.delete('rt_session', { path: '/' });
+		// A literal path, not `resolve('/(auth)/login')`: this form's action is the absolute,
+		// cross-route `/logout` (not the same-page `?/action` convention every other action in
+		// this app uses), so `resolve()`'s relative-path depth — computed from *this* request's
+		// URL (`/logout`) — comes out wrong once the client applies it against whatever deeper
+		// page the sign-out form was actually submitted from (e.g. `/educator/cohorts/{id}` ->
+		// `/educator/cohorts/login`). `/login` has no route params and no base path in this
+		// deployment, so a literal string is both correct and simpler here.
 		redirect(303, '/login');
 	}
 };

@@ -1,0 +1,77 @@
+{
+  "flashcards": {
+    "slug": "oncology-flashcards-activity",
+    "title": "Oncology Vocabulary Flashcard Challenge \ud83e\udde0: Flashcards",
+    "cards": [
+      {
+        "term": "Oncology",
+        "definition": "The branch of medicine that deals with the prevention, diagnosis, and treatment of tumors and cancer."
+      },
+      {
+        "term": "Cancer",
+        "definition": "A disease characterized by the uncontrolled growth and spread of abnormal cells."
+      },
+      {
+        "term": "Benign Tumor",
+        "definition": "A non-cancerous growth that does not spread to other parts of the body and is usually not life-threatening."
+      },
+      {
+        "term": "Malignant Tumor",
+        "definition": "A cancerous growth that can invade nearby tissues and spread (metastasize) to other parts of the body."
+      },
+      {
+        "term": "Metastasis",
+        "definition": "The spread of cancer cells from the primary tumor to distant parts of the body."
+      },
+      {
+        "term": "Biopsy",
+        "definition": "The removal of a small sample of cells or tissue for examination under a microscope to diagnose disease."
+      },
+      {
+        "term": "Diagnostic Workup",
+        "definition": "A series of tests (lab, imaging, etc.) to detect cancer and assess its extent."
+      },
+      {
+        "term": "Curative Intent",
+        "definition": "Treatment aimed at completely eradicating cancer and achieving a long-term cure. Also known as Definitive Treatment."
+      },
+      {
+        "term": "Palliative Intent",
+        "definition": "Treatment focused on relieving symptoms and improving quality of life when a cure is not possible."
+      },
+      {
+        "term": "Primary Treatment",
+        "definition": "The main treatment administered for the best chance of curing the cancer or controlling its growth."
+      },
+      {
+        "term": "Concurrent Treatment",
+        "definition": "Administering two or more types of treatment at the same time (e.g., radiation and chemotherapy)."
+      },
+      {
+        "term": "Adjuvant Treatment",
+        "definition": "Additional treatment given *after* the primary treatment to eliminate any remaining cancer cells and reduce recurrence risk."
+      },
+      {
+        "term": "Neoadjuvant Treatment",
+        "definition": "Treatment given *before* the primary treatment, often to shrink a tumor."
+      },
+      {
+        "term": "Surgery (Oncology)",
+        "definition": "A treatment modality involving the physical removal of tumors or cancerous tissue."
+      },
+      {
+        "term": "Chemotherapy",
+        "definition": "Treatment using drugs to kill cancer cells; typically a systemic treatment."
+      },
+      {
+        "term": "Radiation Therapy",
+        "definition": "Treatment using high-energy radiation to shrink tumors and kill cancer cells; typically a localized treatment."
+      }
+    ]
+  },
+  "subject": {
+    "slug": "orientation-to-radiation-therapy",
+    "title": "Orientation to Radiation Therapy",
+    "order": 3
+  }
+}

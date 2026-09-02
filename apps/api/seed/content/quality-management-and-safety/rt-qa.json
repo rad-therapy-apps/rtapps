@@ -1,0 +1,1861 @@
+{
+  "subject": {
+    "slug": "quality-management-and-safety",
+    "title": "Quality Management and Safety",
+    "order": 6
+  },
+  "lesson": {
+    "slug": "rt-qa",
+    "title": "Quality Assurance: CT & Linac",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Purpose, Task & Criteria",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Welcome, Radiation Therapist! This lesson focuses on the critical daily Quality Assurance (QA) procedures for CT Simulators and Linear Accelerators (Linacs) that you will be responsible for performing. Ensuring equipment functions correctly and accurately is paramount for patient safety and effective treatment."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose: Why This Matters You will learn the \"what, why, and how\" of daily QA tests. This knowledge is essential to: Guarantee the safety of patients and staff. Ensure accurate and precise delivery of radiation treatments as planned. Comply with regulatory requirements and professional standards. Identify potential equipment malfunctions early to prevent errors. Understand your role within the larger QA program managed by medical physicists."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do In this lesson, you will: Review the principles of QA in radiation therapy. Learn the specific daily QA tests for CT Simulators and Linacs. Understand the acceptable tolerances for these tests. Identify common troubleshooting steps for out-of-tolerance results. Recognize when to escalate issues to a medical physicist. Answer \"Quick Check\" questions to assess your understanding."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned By the end of this lesson, you should be able to: List the key daily QA checks for CT Simulators and Linacs performed by RTTs. State the typical tolerances for these daily checks. Describe appropriate actions to take if a QA test is out of tolerance. Explain the importance of accurate QA documentation. Differentiate between RTT daily QA responsibilities and physicist monthly/annual QA."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Introduction to Quality Assurance (QA) Principles",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quality Assurance (QA)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " in radiation therapy encompasses all planned and systematic actions necessary to provide adequate confidence that a facility, system, or component will perform satisfactorily and safely, meeting specified quality standards. It's a comprehensive program designed to ensure consistency in equipment performance and treatment delivery."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is QA Critical in Radiation Therapy?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient Safety:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The primary goal. Errors in radiation delivery can have severe consequences."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Treatment Accuracy:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Ensures the prescribed dose is delivered to the correct location."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Consistency:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Maintains consistent performance of equipment over time."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Regulatory Compliance:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Meets requirements set by bodies like the NRC, state agencies, and accrediting organizations (e.g., ACR, ASTRO)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Professional Standards:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Adheres to guidelines from organizations like the American Association of Physicists in Medicine (AAPM), such as Task Group reports (e.g., TG-40, TG-142 for Linac QA)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tolerances and Action Levels:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Tolerance:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The acceptable range of deviation for a specific QA test. If a measurement falls outside this range, action is required."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Action Level:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " A predefined value or set of conditions that, if exceeded, requires specific corrective actions, potentially including halting treatments until the issue is resolved."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Team Roles in QA:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Radiation Therapists (RTTs):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Perform daily QA checks on treatment and simulation equipment. They are the first line of defense in detecting issues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Medical Physicists:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Oversee the entire QA program, perform more extensive monthly and annual QA, calibrate equipment, troubleshoot complex issues, and ensure regulatory compliance."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Radiation Oncologists:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Ultimately responsible for the safe and effective treatment of patients, relying on the QA program to ensure this."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Daily QA for the CT Simulator (RTT Responsibilities)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The CT Simulator is crucial for accurate treatment planning. Daily QA ensures its readiness and accuracy."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Daily CT Simulator QA Tests:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Test Purpose Typical Tolerance Basic Troubleshooting/Action Warm-up X-ray Tube Ensures stable tube output and prolongs tube life. Follow manufacturer's procedure. If errors occur, note them and inform physicist. Laser Alignment Verify wall, ceiling, and sagittal lasers align with imaging isocenter. \u00b1 2 mm Re-check. If still out, notify physicist. Do not use for patient setup if out of tolerance. Image Quality (Water Phantom) - CT Number of Water Verify CT number accuracy. 0 HU \u00b1 3 HU (or facility specific, e.g. \u00b15 HU) Ensure phantom is correctly positioned. Re-scan. If still out, notify physicist. Image Quality (Water Phantom) - Image Noise Assess consistency of image quality. Within baseline \u00b1 specified HU (facility specific, e.g., < 10 HU or % change) Ensure phantom is stable. Re-scan. If still out, notify physicist. Image Quality (Water Phantom) - Field Uniformity Check for consistency across the image. Within \u00b1 5 HU from center to periphery (facility specific) Re-scan. If artifacts or non-uniformity present, notify physicist. Spatial Integrity / Localization Accuracy Verify accuracy of distance measurements on images (using phantom with known dimensions). \u00b1 1 mm (or facility specific) Re-measure carefully. If still out, notify physicist. Safety Interlocks (e.g., Door) Ensure safety mechanisms are functional. Functional (Pass/Fail) If fails, do not operate. Notify physicist/engineer immediately."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Note: Specific tests and tolerances may vary based on institutional protocols, equipment manufacturer recommendations, and regulatory requirements (e.g., AAPM TG-66 for CT simulator QA)."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page3_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: What is a typical daily tolerance for CT laser alignment?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "\u00b1 5 mm",
+              "\u00b1 2 mm",
+              "\u00b1 0.5 mm"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Daily QA for the Linac - Safety Checks (RTT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Safety is paramount. RTTs perform several daily checks to ensure the Linac's safety features are operational."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Daily Linac Safety QA Tests:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Test Purpose Tolerance Action if Out of Tolerance Door Interlock Ensures beam cannot be activated if door is open, and beam terminates if door opens during treatment. Functional (Pass/Fail) Do not treat. Notify physicist/engineer immediately. Audiovisual Monitors Allows RTT to see and hear the patient during treatment. Functional (Pass/Fail) Do not treat if either system is non-functional. Notify physicist/engineer. Warning Lights Indicate when radiation is being produced (\"Beam On\" lights). Functional (Pass/Fail) Notify physicist. Use caution; treatment may proceed if other safety measures are confirmed and policy allows. Emergency Off Switches Allow immediate termination of radiation and machine power in an emergency. Functional (Pass/Fail - typically checked less frequently than daily by RTT, but RTTs must know locations & function) If known to be non-functional, do not treat. Notify physicist/engineer immediately. Collision Avoidance System (Interlocks/Touch Guards) Prevents gantry/couch/imaging arms from colliding with patient or each other. Functional (Pass/Fail) Do not treat. Notify physicist/engineer immediately. Room Lasers (Alignment with Isocenter) Ensure accurate patient positioning relative to the machine isocenter. \u00b1 2 mm (or facility specific) Re-check. If still out, notify physicist. Do not use for patient setup if out of tolerance. Optical Distance Indicator (ODI) / Rangefinder Measures distance from source to patient surface or isocenter. \u00b1 2 mm (or facility specific) Re-check. If still out, notify physicist."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page4_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: If the treatment room door interlock fails its daily check, what is the immediate action for the RTT?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Proceed with treatments but be extra cautious.",
+              "Try to fix the interlock themselves.",
+              "Do not treat patients and notify the physicist/engineer immediately."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Daily QA for the Linac - Dosimetry Checks (RTT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Verifying the Linac's radiation output is a critical daily task for RTTs to ensure patients receive the prescribed dose."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Daily Linac Dosimetry QA Tests:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Test Purpose Typical Tolerance Action if Out of Tolerance X-ray (Photon) Output Constancy Verify consistency of radiation output for each photon energy. \u00b1 3% from baseline Repeat measurement. If still out, notify physicist. Do not treat with affected energy. Electron Output Constancy Verify consistency of radiation output for each electron energy. \u00b1 3% from baseline Repeat measurement. If still out, notify physicist. Do not treat with affected energy. Backup Monitor Chamber Constancy Ensures the secondary dose monitoring system is functioning correctly relative to the primary. \u00b1 3-5% agreement or within facility limits Notify physicist for investigation."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Daily QA Devices:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " RTTs use specialized phantoms and detector arrays (e.g., Sun Nuclear Daily QA3, PTW DAVID) that can quickly measure output, flatness, symmetry, and sometimes field center for multiple energies."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Temperature and Pressure Corrections:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " If the daily QA device's ion chambers are not sealed, readings must be corrected for ambient temperature and pressure to ensure accurate dose measurement. The formula is: TP"
+                    },
+                    {
+                      "type": "text",
+                      "text": "correction",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " = {(T"
+                    },
+                    {
+                      "type": "text",
+                      "text": "room",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " + 273.15)} x {(22 + 273.15)} \\ {101.33} x {P"
+                    },
+                    {
+                      "type": "text",
+                      "text": "room",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "}, where T"
+                    },
+                    {
+                      "type": "text",
+                      "text": "room",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is in Celsius and P"
+                    },
+                    {
+                      "type": "text",
+                      "text": "room",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is in kPa (or equivalent for mmHg). Many modern devices perform these corrections automatically or guide the user."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Troubleshooting Output Issues:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Ensure QA device is set up correctly and consistently each day."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Verify correct energy and settings selected on Linac and QA device."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Check for any obstructions in the beam path."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "If issues persist after re-measurement, do not proceed with treatment and immediately notify the medical physicist."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page5_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: What is the typical daily tolerance for X-ray and electron output constancy on a Linac?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "\u00b1 1%",
+              "\u00b1 3%",
+              "\u00b1 5%"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Daily QA for the Linac - Mechanical & Imaging Checks (RTT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ensuring the mechanical accuracy of the Linac and basic functionality of its imaging systems is also part of the RTT's daily routine."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Daily Linac Mechanical & Imaging QA Tests:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Test Purpose Typical Tolerance Action if Out of Tolerance Light Field / Radiation Field Coincidence Ensures the light field accurately represents the radiation field. (Often a qualitative daily check by RTT, quantitative by physicist monthly). Visual check for gross misalignment; Quantitative: \u00b1 2 mm or 1% per side Notify physicist if any obvious discrepancy. Collimator Size Indicator Verifies digital readouts match the projected light field size. \u00b1 2 mm per jaw (or facility specific) Re-check. Notify physicist. Gantry & Collimator Angle Indicators Ensures displayed angles match actual gantry/collimator positions. \u00b1 1 degree Check with a spirit level at cardinal angles. Notify physicist. Treatment Couch Position Indicators & Locks Verify accuracy of couch position readouts and functionality of locks. Position: \u00b1 2 mm (or facility specific); Locks: Functional Notify physicist/engineer. Imaging System Functionality (OBI/EPID) Basic check that imaging arms deploy/retract, images can be acquired. Functional (Pass/Fail) Notify physicist/engineer."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Troubleshooting Mechanical/Imaging Issues:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Simple issues like a loose connection might be identifiable, but RTTs should not attempt repairs beyond their training."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Always verify readings with a secondary method if possible (e.g., spirit level for angles, ruler for field size)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Clearly document the issue and report to the physicist or service engineer promptly."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page6_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: What is a typical daily tolerance for the gantry and collimator angle indicators on a Linac?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "\u00b1 0.5 degrees",
+              "\u00b1 1 degree",
+              "\u00b1 2 degrees"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Documentation & Action for Daily QA",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Performing daily QA tests is only part of the responsibility; accurate and diligent documentation is equally crucial."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Importance of QA Documentation:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Record of Performance:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Provides a historical record of equipment performance, allowing for trend analysis to predict potential issues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Legal Record:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Serves as legal documentation that QA was performed and the machine was operating within acceptable limits."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Compliance:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Required by regulatory and accrediting bodies."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Communication:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Informs physicists and engineers of machine status and any actions taken."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What to Document:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Date and time of QA."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Initials/name of the RTT performing the QA."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Specific tests performed."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Measured values for each test."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Whether each test is within tolerance (Pass/Fail)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Any corrective actions taken if a test was initially out of tolerance but resolved."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Notification to physicist if a test remains out of tolerance."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Ambient conditions (temperature, pressure) if manual corrections are applied."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Departments will have specific QA forms or electronic systems for recording this data. It's vital to fill these out completely and legibly every day before patient treatments begin."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Procedures for Out-of-Tolerance Results:"
+                    }
+                  ]
+                },
+                {
+                  "type": "orderedList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Repeat the Measurement:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The first step is always to carefully repeat the test to rule out user error or a transient issue. Ensure the setup is correct."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Verify with a Secondary Method (if possible):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " For example, if a digital angle readout is suspect, check with a spirit level."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Notify the Medical Physicist Immediately:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " If the test remains out of tolerance after re-measurement, the physicist must be informed."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Do NOT Treat Patients:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " If a critical QA parameter (especially safety or dosimetry related) is out of tolerance and cannot be immediately rectified and verified by a physicist, patient treatments on that machine or with that energy/modality must be held."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Document Everything:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Record the out-of-tolerance readings, the re-measurements, who was notified, and what actions were taken."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Overview of Monthly & Annual QA (Physicist's Role)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While Radiation Therapists are responsible for daily QA, a comprehensive QA program involves more extensive testing performed by qualified Medical Physicists at less frequent intervals (typically monthly and annually)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The RTT's daily checks act as a crucial first alert, but the physicist's tests delve deeper into the machine's performance and calibration."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Monthly QA by Medical Physicist (Examples):"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "More comprehensive dosimetry checks: Output calibration for all energies, flatness, symmetry, energy verification."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Mechanical checks: Isocenter stability with gantry/collimator/couch rotation, coincidence of light/radiation fields, jaw position indicators, MLC accuracy (e.g., picket fence test for IMRT)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Safety interlocks: Thorough testing of all safety systems."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Imaging systems (OBI/EPID): Geometric accuracy, image quality parameters (spatial resolution, contrast, noise)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Annual QA by Medical Physicist (Examples):"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Full recalibration of dosimetry systems if needed."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Detailed characterization of all radiation beams."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Comprehensive mechanical alignment and stability checks."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "In-depth testing of all imaging systems and their integration with the treatment machine."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Verification of emergency procedures and safety systems."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Review of the entire QA program and records."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The Medical Physicist uses specialized equipment and procedures for these tests, adhering to guidelines from bodies like the AAPM (e.g., TG-142 report for Linac QA, TG-66 for CT Simulator QA). RTTs may assist physicists during these procedures, providing an excellent learning opportunity."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understanding that daily QA is part of a larger, robust program helps RTTs appreciate the significance of their daily diligence in maintaining a safe and effective treatment environment."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Conclusion & Further Learning",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Performing daily Quality Assurance on the CT Simulator and Linear Accelerator is a cornerstone of the Radiation Therapist's professional responsibilities. These routine checks are vital for ensuring that every patient receives their radiation treatment safely, accurately, and consistently as prescribed."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Takeaways for RTTs:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Consistency is Key:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Perform QA procedures in the exact same manner every day."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Attention to Detail:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Small deviations can indicate larger problems. Be meticulous."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Know Your Tolerances:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Understand what is acceptable and what requires action."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Document Accurately:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Your records are critical legal and clinical documents."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Communicate Effectively:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Promptly report any out-of-tolerance conditions or concerns to the medical physicist."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patient Safety First:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Never proceed with patient treatment if critical QA parameters are not met."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By diligently performing daily QA, RTTs play an indispensable role in the overall quality management program of a radiation oncology department, directly contributing to the safety and efficacy of cancer treatments."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Further Learning & Resources:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "AAPM Task Group Reports (e.g., TG-142 for Linac QA, TG-66 for CT Simulator QA) - often available via AAPM website or institutional access."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Your specific department's QA policy and procedure manual."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Equipment manufacturer's documentation and training materials."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Continuing education courses offered by organizations like ASRT."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This lesson provides a foundation. Continuous learning and adherence to established protocols are essential throughout your career."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

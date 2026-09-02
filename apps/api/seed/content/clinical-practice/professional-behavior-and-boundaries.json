@@ -1,0 +1,1399 @@
+{
+  "subject": {
+    "slug": "clinical-practice",
+    "title": "Clinical Practice",
+    "order": 1
+  },
+  "lesson": {
+    "slug": "professional-behavior-and-boundaries",
+    "title": "Professional Boundaries Lesson",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Introduction to Professional Boundaries",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Welcome! This lesson explores the critical concepts of professional boundaries and dual relationships in the context of radiation therapy. Maintaining these boundaries is essential for ethical practice, patient safety, and preserving the trust inherent in the therapist-patient relationship."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What are Professional Boundaries?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Professional boundaries are the limits that define a safe, therapeutic, and professional relationship between a healthcare provider (like an RTT) and a patient. These boundaries are based on trust, respect, and the professional's duty of care. They distinguish the professional relationship from social, romantic, or business relationships."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why are they important in Radiation Therapy?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Patients undergoing radiation therapy are often vulnerable due to their illness, treatment side effects, and emotional distress."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A clear power imbalance exists; the RTT has specialized knowledge and authority."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Maintaining boundaries protects patients from potential harm or exploitation."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "It ensures the RTT's objectivity and ability to provide the best possible care."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "It upholds the integrity and trustworthiness of the radiation therapy profession."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The ARRT Code of Ethics, particularly "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Principle 1"
+                    },
+                    {
+                      "type": "text",
+                      "text": " (\"The radiologic technologist acts in a professional manner...\") and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Principle 9"
+                    },
+                    {
+                      "type": "text",
+                      "text": " (\"The radiologic technologist respects confidences... and reveals confidential information only as required by law or to protect the welfare of the individual or the community.\"), underpin the need for strong professional boundaries."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page1_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Which of the following best defines a professional boundary in healthcare?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "A flexible guideline that can often be ignored.",
+              "The physical distance maintained between a therapist and patient.",
+              "Limits defining a safe, therapeutic, and professional relationship, based on trust and duty of care.",
+              "Rules that only apply outside of the treatment room."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Understanding Dual Relationships",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "dual relationship"
+                    },
+                    {
+                      "type": "text",
+                      "text": " (or multiple relationship) occurs when a professional (e.g., an RTT) has another, significantly different relationship with a patient in addition to the therapeutic one. This second relationship could be social, familial, romantic, or financial."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why are Dual Relationships Problematic?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Power Imbalance:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The inherent power differential in the therapist-patient relationship can make the secondary relationship exploitative or coercive, even unintentionally."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Loss of Objectivity:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Personal involvement can cloud professional judgment, potentially leading to biased treatment decisions or compromised care."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Potential for Harm:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Patients can be harmed emotionally or financially if the dual relationship sours or if their needs are not prioritized."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Compromised Therapeutic Relationship:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " The trust and focus of the therapeutic relationship can be diluted or damaged."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Ethical Violations:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Dual relationships often violate professional codes of ethics and can lead to disciplinary action."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Examples of Dual Relationships to Avoid:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Entering into a romantic or sexual relationship with a current patient (universally unethical)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Going into business with a patient."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Treating close friends or family members (can be problematic; often requires careful consideration and adherence to policy)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Developing close personal friendships with current patients outside of the clinical setting."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page2_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Which scenario most clearly describes a problematic dual relationship for an RTT?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "An RTT providing care to a patient they met for the first time that day.",
+              "An RTT accepting a small, sealed box of chocolates from a patient on their last day of treatment, as per hospital policy.",
+              "An RTT starting a romantic relationship with a current patient they are actively treating.",
+              "An RTT attending a hospital-organized cancer survivor event where former patients are present."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Boundary Crossings vs. Violations",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It's important to distinguish between boundary "
+                    },
+                    {
+                      "type": "text",
+                      "text": "crossings"
+                    },
+                    {
+                      "type": "text",
+                      "text": " and boundary "
+                    },
+                    {
+                      "type": "text",
+                      "text": "violations"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Boundary Crossing:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A deviation from standard therapeutic activity that is brief, non-exploitative, and may not necessarily be harmful."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Sometimes, a crossing might even be therapeutic if handled thoughtfully and in the patient's best interest (e.g., briefly attending a patient's wedding or funeral if the relationship was long-standing and it aligns with institutional policy and professional judgment)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Crossings require careful consideration and should be rare. They always carry a risk of blurring lines."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Example: An RTT briefly shares a general, positive personal experience to build rapport, without oversharing or shifting focus from the patient."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Boundary Violation:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A more serious breach that is typically harmful, exploitative, or significantly blurs the professional lines."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Violations can cause distress to the patient, compromise their care, and damage the therapeutic relationship."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "They often involve a misuse of the therapist's power."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Examples: Engaging in a sexual relationship with a patient, borrowing money from a patient, sharing inappropriate confidential information about other patients or staff."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The \"Slippery Slope\":"
+                    },
+                    {
+                      "type": "text",
+                      "text": " Minor boundary crossings, if not managed carefully, can sometimes lead to more significant boundary violations over time. It's crucial to be vigilant and address even small deviations."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page3_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: An RTT accepts a patient's friend request on Facebook while the patient is still undergoing treatment. This is most likely a:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Boundary Violation, as it creates a dual relationship and privacy risks.",
+              "Boundary Crossing, but acceptable if the RTT's profile is private.",
+              "Neither, as social media is separate from professional life."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Key Areas for Boundary Management",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "RTTs must be mindful of boundaries in several key areas:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Self-Disclosure:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Sharing personal information should be rare, brief, and for the patient's benefit (e.g., to normalize an experience), not to meet the RTT's own needs. Avoid oversharing or discussing personal problems."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Gifts:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Policies on accepting gifts vary. Generally, decline expensive gifts. Small tokens of appreciation at the end of treatment might be acceptable if policy allows, but this can still be a gray area. Always prioritize patient well-being over any gift."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Social Media:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Maintain separate professional and personal online presences. Avoid friending current patients. Be cautious about what you post publicly, as it can impact your professional image."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Physical Touch:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Touch should be therapeutic, professional, and explained to the patient (e.g., positioning for treatment). Avoid touch that could be misinterpreted as personal or intimate. Always be sensitive to patient comfort and cultural differences. Obtain consent."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Language and Communication:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Use professional language. Avoid overly casual slang, offensive jokes, or terms of endearment that might blur lines."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Post-Treatment Contact:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " While some contact with former patients may occur (e.g., at hospital events), avoid seeking out or developing personal relationships that could be seen as an extension of the therapeutic one, especially if vulnerability persists."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page4_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: When is it generally considered most appropriate for an RTT to accept a gift from a patient?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Any time a patient offers one, to be polite.",
+              "Only if the gift is very expensive and valuable.",
+              "A small, inexpensive token of appreciation at the very end of a long course of treatment, if institutional policy permits and it doesn't create discomfort or expectation.",
+              "If the RTT is having financial difficulties."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Strategies for Maintaining Boundaries & Seeking Help",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Proactively managing boundaries is a key professional skill. Consider these strategies:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Self-Awareness:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Regularly reflect on your interactions. Be aware of your own feelings, vulnerabilities, and potential biases that might lead to boundary issues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Know and Adhere to Policies:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Familiarize yourself with your institution's policies on professional conduct, gifts, social media, etc."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Clear Communication:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Communicate your role and the nature of the therapeutic relationship clearly to patients from the outset."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Set Limits Respectfully:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " If a patient's behavior or request starts to cross a boundary, address it early, politely, and firmly. Explain the professional nature of the relationship."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Consultation:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " If you are unsure about a boundary issue, or if a situation feels uncomfortable, seek guidance from a trusted supervisor, experienced colleague, or ethics committee. Don't try to navigate complex situations alone."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Documentation:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Document any significant boundary concerns or incidents according to institutional policy, especially if they involve patient safety or potential ethical breaches."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Continuing Education:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Stay informed about ethical standards and best practices related to professional boundaries."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page5_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: An RTT feels a patient is becoming overly friendly and asking very personal questions. What is the most appropriate initial step?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Ignore the behavior and hope it stops.",
+              "Immediately report the patient to hospital security.",
+              "Politely and respectfully re-establish professional limits and, if unsure or the behavior persists, consult with a supervisor.",
+              "Share equally personal information to make the patient feel comfortable."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Case Study Application",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Apply your understanding of professional boundaries and dual relationships to the following scenarios. Consider the ethical principles involved, potential risks, and the most appropriate professional response based on ARRT Standards and best practices."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Scenario 1: The Birthday Invitation A patient you have been treating for several weeks is very appreciative of your care and invites you to their upcoming 70th birthday party, which will be held after their treatment course is complete. How do you respond, and what ethical considerations should guide your decision? Scenario 2: The Oversharing Colleague You notice that a colleague frequently shares extensive personal details about their financial struggles and relationship problems with patients during treatment sessions. Patients sometimes appear uncomfortable. How might this behavior impact professional boundaries, and what, if anything, should you do? Scenario 3: The Social Media Request A few months after a younger patient completes their radiation therapy, they find you on a public social media platform and send a friend request along with a message asking for general advice about long-term side effects they are experiencing. How do you handle this situation while maintaining professional boundaries and ensuring the former patient gets appropriate care?"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Conclusion & Further Resources",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Maintaining professional boundaries and avoiding problematic dual relationships are fundamental to ethical practice in radiation therapy. It requires ongoing self-reflection, adherence to professional codes (like the ARRT Standards of Ethics), knowledge of institutional policies, and a commitment to prioritizing patient welfare and trust above all else."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Takeaways:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Boundaries protect both the patient and the RTT."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Dual relationships carry significant risks and are generally to be avoided."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Be mindful of the \"slippery slope\" from minor crossings to more serious violations."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Use strategies like clear communication, self-awareness, and adherence to policy."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "When in doubt, always consult with supervisors or trusted colleagues."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Your commitment to these principles ensures you provide the highest standard of care and uphold the integrity of your profession."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Further Resources:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "ARRT Standards of Ethics",
+                              "marks": [
+                                {
+                                  "type": "link",
+                                  "attrs": {
+                                    "href": "https://www.arrt.org/ethics"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "ASRT Practice Standards for Medical Imaging and Radiation Therapy",
+                              "marks": [
+                                {
+                                  "type": "link",
+                                  "attrs": {
+                                    "href": "https://www.asrt.org/main/standards-regulations/practice-standards"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Your institutional policy manual on professional conduct and ethics."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

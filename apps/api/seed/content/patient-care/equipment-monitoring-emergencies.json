@@ -1,0 +1,1170 @@
+{
+  "subject": {
+    "slug": "patient-care",
+    "title": "Patient Care",
+    "order": 4
+  },
+  "lesson": {
+    "slug": "equipment-monitoring-emergencies",
+    "title": "Equipment, Monitoring & Emergencies",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Why This Matters for RTTs",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As a radiation therapist, you're not just operating equipment \u2014 you're often the only clinical staff member with a patient during simulation and daily treatment. Recognizing abnormal vital signs, managing common tubes and lines safely, and responding to a medical emergency are core parts of the job, not someone else's responsibility."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This lesson covers vital signs, oxygen therapy, chest tubes and lines, and the basics of CPR \u2014 then hands you off to the Vital Signs Simulator for hands-on practice."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Vital Signs",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vital signs are objective, non-invasive measurements that can be taken quickly: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "temperature, pulse, respiration rate, and blood pressure",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " are the core four, with oxygen saturation now considered essential in most clinical settings."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Vital signs assessment should be fast and objective \u2014 it's a snapshot, not a diagnosis. A single abnormal reading is a cue to look closer and reassess, not necessarily an emergency by itself."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Temperature and Respiration",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Body temperature",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " abnormalities: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "hypothermia",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a temperature below 97.7\u00b0F; "
+                    },
+                    {
+                      "type": "text",
+                      "text": "hyperthermia",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (fever) is an oral temperature above 99.5\u00b0F."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Respiration",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the rhythmic exchange of gases through the lungs, measured as breaths per minute. Key abnormalities:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Tachypnea",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 rapid breathing, greater than 20 breaths/min"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Bradypnea",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 abnormally slow respiratory rate"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Dyspnea",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 difficult or labored breathing"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Orthopnea",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 difficulty breathing unless sitting or standing upright"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Apnea",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 absence of spontaneous breathing"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Accurate assessment means tracking rate, depth, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "and",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " pattern \u2014 not just a number."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Pulse and Blood Pressure",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pulse",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " reflects the heart's contractions transmitted through the arterial walls. Common measurement sites: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "radial",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (wrist), "
+                    },
+                    {
+                      "type": "text",
+                      "text": "brachial",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (inner elbow \u2014 common in infants), and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "carotid",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (neck \u2014 the standard site during CPR)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Normal adult pulse: 60\u2013100 bpm. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Tachycardia",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is above 100 bpm; "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bradycardia",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is an abnormally low rate. Children run faster: 70\u2013120 bpm (ages 1\u201310), 100\u2013160 bpm (newborns)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Blood pressure",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is measured in mmHg over the brachial artery. Normal is roughly 120/80: systolic (contraction) under 120, diastolic (relaxation) under 80. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Hypotension",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is below normal; "
+                    },
+                    {
+                      "type": "text",
+                      "text": "hypertension",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is above \u2014 often called the \"silent killer\" since patients are frequently asymptomatic."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "During adult CPR, pulse is typically checked at which site?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Radial",
+              "Carotid",
+              "Brachial"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The carotid artery is the standard adult CPR pulse-check site, assessed for no more than 10 seconds."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Oxygen Therapy Basics",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Oxygen is essential for cellular metabolism, makes up 21% of atmospheric gas, and is "
+                    },
+                    {
+                      "type": "text",
+                      "text": "legally treated as a drug",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 it must be ordered by a physician, not administered at a therapist's discretion."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Oxygen is not flammable itself, but it strongly "
+                        },
+                        {
+                          "type": "text",
+                          "text": "supports combustion",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 a real fire-safety consideration around electrical equipment."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Oxygen flow is measured in "
+                    },
+                    {
+                      "type": "text",
+                      "text": "liters per minute (LPM)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". The universal color for oxygen equipment is "
+                    },
+                    {
+                      "type": "text",
+                      "text": "green",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the flowmeter is green and labeled \"OXYGEN.\""
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Oxygen Delivery Devices",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Devices fall into two broad categories:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Low-flow devices",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 nasal cannula, simple masks"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "High-flow devices",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 aerosol masks, non-rebreathing masks, tents/oxyhoods, ventilators"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "If transporting a patient on portable oxygen, check the supply "
+                        },
+                        {
+                          "type": "text",
+                          "text": "before",
+                          "marks": [
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " transport to make sure there's enough for the trip plus the full procedure \u2014 and secure the tank so it can't roll or fall."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page6_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A patient arrives on oxygen via nasal cannula for a simulation scan. What's the correct action regarding the oxygen device?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Remove it temporarily to get a cleaner scan, then replace it",
+              "Never remove it without the consent/supervision of a physician, respiratory therapist, or nurse"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "An oxygen device should never be completely removed for the sake of a procedure without appropriate medical consent or supervision."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Chest Tubes, Central Lines, and Airway Tubes",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You'll encounter patients with a range of tubes and lines, especially in inpatient or post-surgical settings:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Endotracheal (ET) tubes",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 placed in the trachea for mechanical ventilation or oxygen delivery"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Chest tubes (thoracostomy)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 drain the pleural space or mediastinum. "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Never clamp a chest drain unless specifically ordered",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", and never lift the drainage unit above chest level (this can cause fluid/air to flow back toward the patient)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Central venous pressure (CVP) lines",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 inserted into a major vein for medication administration, fluid management, blood draws/transfusions, and monitoring cardiac pressures"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Pulmonary arterial lines",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 have a balloon tip that floats and wedges into the pulmonary artery for pressure monitoring"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The common thread: these lines exist for a medical reason you may not know the details of. When in doubt, don't disconnect, clamp, or reposition \u2014 ask."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Other Equipment You'll Assist With",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Beyond oxygen and IV-type lines, you'll routinely assist patients with:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Nasogastric (NG) tubes",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 for feeding or decompression; be aware of them during transfers and positioning"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Urinary catheters, urinals, and bedpans",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 maintaining dignity and proper drainage bag positioning (below bladder level) matters during setup"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Infusion pumps",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 keep the pump upright and be mindful of tubing length/tension when moving or positioning a patient"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The general principle across all of these: know what's attached to your patient "
+                    },
+                    {
+                      "type": "text",
+                      "text": "before",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " you move them, and never disconnect something to make positioning \"easier.\""
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Medical Emergencies and CPR Basics",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If a patient goes into cardiac arrest, the sequence is: verify (check responsiveness and breathing, assess carotid pulse for no more than 10 seconds) \u2192 call for help/activate emergency response and get the AED \u2192 begin CPR immediately."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Adult CPR:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " 100\u2013120 compressions/minute, 2 inches (5 cm) depth, ratio of 30 compressions to 2 breaths (one-person). In two-person CPR, one person compresses while the other ventilates, same 30:2 ratio."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Child CPR",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (ages 1\u201312): compression depth about 1/3 the chest diameter (~2 in). One-person ratio 30:2; two-person ratio 15:2."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Infant CPR",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (under 1 year): two or three fingers at the center of the chest just below the nipple line, depth about 1.25 inches. One-person ratio 30:2; two-person ratio 15:2."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page9_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In two-person adult CPR, what compression-to-breath ratio is used?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "15:2",
+              "30:2",
+              "5:1"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two-person adult CPR still uses a 30:2 ratio \u2014 it's the child/infant two-person ratio that changes to 15:2."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Other emergencies you may encounter \u2014 allergic reactions, seizures, diabetic reactions, and physical trauma \u2014 all share the same first steps: stay with the patient, call for help, and don't attempt treatment beyond your scope."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Ready for the Simulator",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered vital signs and their abnormalities, oxygen therapy and delivery devices, chest tubes and central lines, other equipment you'll assist with, and the basics of CPR."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The Vital Signs Simulator will generate random vital sign sets \u2014 about half within normal limits, half using wider ranges that may be abnormal. Use the accompanying worksheet to record and classify what you see."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -155,16 +155,22 @@ class LessonImport(BaseModel):
     lesson: LessonBody
 
 
+async def _upsert_subject(db: AsyncSession, doc: SubjectImport) -> Subject:
+    """Reuse an existing subject by slug, or create it on first import."""
+    subject = await db.scalar(select(Subject).where(Subject.slug == doc.slug))
+    if subject is None:
+        subject = Subject(slug=doc.slug, title=doc.title, order=doc.order)
+        db.add(subject)
+        await db.flush()
+    return subject
+
+
 async def import_lesson(
     db: AsyncSession, doc: LessonImport, *, publish: bool = True, author: User | None = None
 ) -> Lesson:
     """Create or replace the working copy of a lesson from an import document."""
     # Subject upsert by slug: reuse an existing subject, or create it on first import.
-    subject = await db.scalar(select(Subject).where(Subject.slug == doc.subject.slug))
-    if subject is None:
-        subject = Subject(slug=doc.subject.slug, title=doc.subject.title, order=doc.subject.order)
-        db.add(subject)
-        await db.flush()
+    subject = await _upsert_subject(db, doc.subject)
 
     # Lesson upsert by slug: a brand-new lesson is just created; re-importing an existing
     # one (same slug) replaces its whole page/block/question tree from scratch below,
@@ -253,14 +259,16 @@ async def import_lesson(
 
 async def _run(paths: list[Path]) -> None:
     """CLI body: import each file in its own pass, commit once at the end."""
+    from app.content.activity_importer import import_any
+
     settings = load_settings()
     engine = get_engine(settings)
     factory = make_session_factory(engine)
     async with factory() as db:
         for path in paths:
-            doc = LessonImport.model_validate(json.loads(path.read_text()))
-            lesson = await import_lesson(db, doc)
-            print(f"imported {lesson.slug} ({len(lesson.pages)} pages)")
+            doc = json.loads(path.read_text())
+            activity = await import_any(db, doc)
+            print(f"imported {activity.kind} {activity.title}")
         await db.commit()
     await engine.dispose()
 

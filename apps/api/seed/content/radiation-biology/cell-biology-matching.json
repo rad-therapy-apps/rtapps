@@ -1,0 +1,54 @@
+{
+  "matching": {
+    "slug": "cell-biology-matching",
+    "title": "Cell & Molecular Biology: Matching",
+    "pairs": [
+      {
+        "term": "Electrolytes",
+        "definition": "Mineral salts"
+      },
+      {
+        "term": "Antibodies",
+        "definition": "Protein molecules produced by specialized cells in the bone marrow called B lymphocytes"
+      },
+      {
+        "term": "Human genome",
+        "definition": "The total amount of genetic material (DNA) contained within the chromosomes of a human being"
+      },
+      {
+        "term": "Cytosine and thymine",
+        "definition": "Compounds called pyrimidines"
+      },
+      {
+        "term": "Mapping",
+        "definition": "Process of locating and identifying the genes in the genome"
+      },
+      {
+        "term": "Enzymatic proteins",
+        "definition": "Moderate or control the cell's various physiologic activities"
+      },
+      {
+        "term": "Cell division",
+        "definition": "Multiplication process whereby one cell divides to form two or more cells"
+      },
+      {
+        "term": "Protoplasm",
+        "definition": "The chemical building material for all living things"
+      },
+      {
+        "term": "Anaphase",
+        "definition": "The phase of mitosis during which the centromeres are severed and the sister chromatids move apart and are subsequently pulled toward opposite poles of the mitotic spindle"
+      },
+      {
+        "term": "Protein synthesis",
+        "definition": "Process of protein production within a cell"
+      }
+    ],
+    "present_n": null
+  },
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  }
+}

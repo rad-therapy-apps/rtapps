@@ -21,6 +21,7 @@ description = "Converts legacy paged-lesson HTML to lesson-import JSON"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.13",
+    "pyjson5>=1.6",
 ]
 
 [dependency-groups]

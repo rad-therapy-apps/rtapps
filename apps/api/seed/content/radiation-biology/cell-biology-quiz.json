@@ -1,0 +1,75 @@
+{
+  "quiz": {
+    "slug": "cell-biology-quiz",
+    "title": "Cell & Molecular Biology: Quiz",
+    "pass_percent": 80,
+    "shuffle": true,
+    "questions": [
+      {
+        "stem": "In humans, approximately how many genes are contained in all 46 chromosomes?",
+        "options": [
+          "300",
+          "3,000",
+          "30,000",
+          "300,000"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "In the human cell, protein synthesis occurs in which of the following locations?",
+        "options": [
+          "Nucleus",
+          "Mitochondria",
+          "Ribosomes",
+          "Endoplasmic reticulum"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Interphase consists of which of the following phases?",
+        "options": [
+          "M, G1, and S",
+          "G1, S, and G2",
+          "S, G2, and M",
+          "G2, M, and G1"
+        ],
+        "answer": 1,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Which of the following is a process of reduction cell division?",
+        "options": [
+          "Mitosis",
+          "Meiosis",
+          "Molecular synthesis",
+          "Amniocentesis"
+        ],
+        "answer": 1,
+        "explanation": null,
+        "outcomes": []
+      },
+      {
+        "stem": "Which of the following cellular organelles function(s) as a cellular garbage disposal?",
+        "options": [
+          "Endoplasmic reticulum",
+          "Mitochondria",
+          "Lysosomes",
+          "Ribosomes"
+        ],
+        "answer": 2,
+        "explanation": null,
+        "outcomes": []
+      }
+    ]
+  },
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  }
+}

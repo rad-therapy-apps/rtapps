@@ -10,7 +10,8 @@ How it fits the project: ADR-0004 — attempts are the spine, rollups are the re
 Works with:
   Depends on: `app.db.Base`, `app.ids.new_id`, `app.attempts.models.Attempt`.
   Used by: `app.attempts.router.submit_attempt`, `app.analytics.queries`, `app.seed`,
-    `alembic/env.py`, `tests/test_rollup.py`, `tests/test_cohort_models.py`.
+    `alembic/env.py`, `tests/test_rollup.py`, `tests/test_cohort_models.py`,
+    `tests/test_admin.py`, `tests/test_seed.py`.
 """
 
 import uuid
@@ -29,7 +30,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, noload
 
 from app.attempts.models import Attempt
 from app.db import Base
@@ -86,6 +87,7 @@ async def upsert_activity_result(db: AsyncSession, attempt: Attempt) -> Activity
                 Attempt.status == "submitted",
             )
             .order_by(Attempt.submitted_at.asc(), Attempt.id.asc())
+            .options(noload(Attempt.items))  # this rollup never reads items
         )
     ).all()
     result = await db.scalar(

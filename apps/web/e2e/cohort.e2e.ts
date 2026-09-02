@@ -12,27 +12,15 @@
  * How it fits the project: docs/03-architecture.md §11 (End-to-end row); FR-E-01/02/03 (cohort
  * create/join, analytics, student detail). Requires `make seed` first (the educator account and
  * the `rbe-and-oer` lesson); the students and cohort are created here.
- * Works with: the pages under apps/web/src/routes ((app)/educator, (app)/educator/cohorts/[id],
- * (app)/educator/cohorts/[id]/students/[uid], (app)/home) and their form actions (create, join,
- * rotate). Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.
+ * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under apps/web/src/routes
+ * ((app)/educator, (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/students/[uid],
+ * (app)/home) and their form actions (create, join, rotate). Used by: `make e2e` and the CI `e2e`
+ * job in .github/workflows/pr.yml.
  */
 import { test, expect } from '@playwright/test';
+import { registerStudent, signIn, signOut } from './helpers';
 
 const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
-
-async function signIn(page: import('@playwright/test').Page, email: string, password: string) {
-	await page.goto('/login');
-	await page.waitForLoadState('networkidle');
-	await page.getByLabel('Email').fill(email);
-	await page.getByLabel('Password').fill(password);
-	await page.getByRole('button', { name: 'Sign in' }).click();
-	await expect(page).toHaveURL(/\/home$/);
-}
-
-async function signOut(page: import('@playwright/test').Page) {
-	await page.getByRole('button', { name: 'Sign out' }).click(); // root layout form → POST /logout
-	await expect(page).toHaveURL(/\/login$/);
-}
 
 test('educator creates a cohort, a student joins and completes a lesson, the educator sees it', async ({
 	page
@@ -59,13 +47,7 @@ test('educator creates a cohort, a student joins and completes a lesson, the edu
 	await signOut(page);
 
 	// Student: register, join with the code, complete the lesson with one correct answer.
-	await page.goto('/register');
-	await page.waitForLoadState('networkidle');
-	await page.getByLabel('Email').fill(student.email);
-	await page.getByLabel('Display name').fill(student.name);
-	await page.getByLabel('Password').fill(student.password);
-	await page.getByRole('button', { name: 'Register' }).click();
-	await expect(page).toHaveURL(/\/home$/);
+	await registerStudent(page, student);
 	await page.getByLabel('Join code').fill(code);
 	await page.getByRole('button', { name: 'Join cohort' }).click();
 	await expect(page.getByText(`Joined ${cohortName}`)).toBeVisible();
@@ -101,12 +83,11 @@ test('educator creates a cohort, a student joins and completes a lesson, the edu
 	await page.getByRole('button', { name: 'Rotate code' }).click();
 	await expect(page.getByTestId('join-code')).not.toHaveText(code);
 	await signOut(page);
-	await page.goto('/register');
-	await page.waitForLoadState('networkidle');
-	await page.getByLabel('Email').fill(`e2e-cohort-b-${stamp}@example.edu`);
-	await page.getByLabel('Display name').fill('Second');
-	await page.getByLabel('Password').fill(student.password);
-	await page.getByRole('button', { name: 'Register' }).click();
+	await registerStudent(page, {
+		email: `e2e-cohort-b-${stamp}@example.edu`,
+		password: student.password,
+		name: 'Second'
+	});
 	await page.getByLabel('Join code').fill(code);
 	await page.getByRole('button', { name: 'Join cohort' }).click();
 	await expect(page.getByRole('alert')).toContainText('Join code not valid');

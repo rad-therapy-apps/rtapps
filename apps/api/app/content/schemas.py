@@ -11,7 +11,8 @@ How it fits the project: these are the outer envelope around the stripped
 which is documented by the ProseMirror/prose-doc schema rather than by a Pydantic model.
 
 Works with:
-  Used by: `app.content.router` (all four response models).
+  Used by: `app.content.router` (all six response models: SubjectOut, LessonRefOut,
+    ActivityRefOut, SubjectDetailOut, LessonOut, ActivityOut).
 """
 
 import uuid
@@ -21,12 +22,13 @@ from pydantic import BaseModel
 
 
 class SubjectOut(BaseModel):
-    """One row of `GET /subjects`: a subject plus its published-lesson count."""
+    """One row of `GET /subjects`: a subject plus its published-lesson count and activity count."""
 
     slug: str
     title: str
     order: int
     lesson_count: int
+    activity_count: int
 
 
 class LessonRefOut(BaseModel):
@@ -40,13 +42,26 @@ class LessonRefOut(BaseModel):
     order: int
 
 
+class ActivityRefOut(BaseModel):
+    """An activity reference nested inside `SubjectDetailOut` — practice non-lesson activities
+    only, ordered by title.
+    """
+
+    id: uuid.UUID
+    kind: str
+    title: str
+
+
 class SubjectDetailOut(BaseModel):
-    """Response for `GET /subjects/{slug}`: one subject with its published lessons."""
+    """Response for `GET /subjects/{slug}`: one subject with its published lessons and practice
+    non-lesson activities.
+    """
 
     slug: str
     title: str
     summary: str | None
     lessons: list[LessonRefOut]
+    activities: list[ActivityRefOut] = []
 
 
 class LessonOut(BaseModel):
@@ -57,4 +72,15 @@ class LessonOut(BaseModel):
 
     activity_id: uuid.UUID
     content_version_id: uuid.UUID
+    snapshot: dict[str, Any]
+
+
+class ActivityOut(BaseModel):
+    """Response for `GET /activities/{id}`: one activity's current published snapshot with
+    answers stripped.
+    """
+
+    activity_id: uuid.UUID
+    content_version_id: uuid.UUID
+    kind: str
     snapshot: dict[str, Any]

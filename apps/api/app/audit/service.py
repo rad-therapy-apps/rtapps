@@ -25,12 +25,17 @@ from app.auth.models import User
 
 
 def client_ip(request: Request | None) -> str | None:
-    """First X-Forwarded-For hop (set by the proxy), else the socket peer, else None."""
+    """Last X-Forwarded-For hop (proxy-appended), else socket peer, else None.
+
+    Caddy (ADR-0002/0005) APPENDS the real peer address to X-Forwarded-For. Earlier hops
+    are client-supplied and forgeable; using them would bypass rate limiting and forge
+    audit logs. The last hop is the sole trustworthy value.
+    """
     if request is None:
         return None
     forwarded = request.headers.get("x-forwarded-for")
     if forwarded:
-        return forwarded.split(",")[0].strip()[:45]
+        return forwarded.split(",")[-1].strip()[:45]
     return request.client.host if request.client else None
 
 

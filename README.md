@@ -9,7 +9,7 @@ Radiation-therapy education platform — the ground-up rebuild of the RTApps e-w
 - `tools/migrate-legacy` — imports content from the legacy `rtt_e_workbook` repository
 - `infra/` — Docker Compose (dev + prod), Caddy/Cloudflare Tunnel config, backup container, deploy script
 
-Status: **v0.2.0** (milestone M2) — lessons with knowledge checks, cohorts with join codes, audited educator views, admin, and a one-workflow deploy to a test VM (`docs/06-operations.md`). Next: plan 3 (content types + authoring + migration).
+Status: **v0.3.0** (milestone M3) — quizzes, flashcards, matching and sequencing activities; the full legacy corpus migrated (`tools/migrate-legacy scan`); educator per-activity stats, outcome mastery and CSV export; practice/assessment separation (ADR-0006); hardening (rate limits, admin erase, session purge, Sentry, `program` table). Next: plan 3b (authoring).
 
 Getting started: `docs/05-setup.md`; deploying: `docs/06-operations.md`.
 

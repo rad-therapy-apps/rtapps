@@ -1,0 +1,1008 @@
+{
+  "subject": {
+    "slug": "treatment-planning",
+    "title": "Treatment Planning",
+    "order": 13
+  },
+  "lesson": {
+    "slug": "isodose-distribution-lesson",
+    "title": "Isodose Distribution",
+    "order": 0,
+    "pages": [
+      {
+        "title": "SSD vs. SAD Treatment Approaches",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two setup approaches define how a beam is positioned relative to the patient:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Approach"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Reference point"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "SSD (Source-to-Skin Distance)",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The distance from source to the patient's skin surface is fixed (commonly 100 cm); depth is measured from there"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "SAD (Source-to-Axis Distance)",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The distance from source to isocenter is fixed (commonly 100 cm); isocenter sits at a defined depth inside the patient, and the couch/gantry rotate around it"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Multi-field, multi-angle plans overwhelmingly use SAD/isocentric technique, since it lets the gantry rotate to different angles without having to re-measure SSD at every new angle."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Depth, Separation, and Key Terms",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Depth",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for dose calculation is commonly taken at D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", at a specific prescription depth, or at the patient's midline. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Separation (IFD)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the patient's thickness in the beam direction \u2014 surface-to-surface, either AP/PA or lateral \u2014 and it directly determines where midline and isocenter actually sit."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Isocenter",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is the fixed point in space the beam's central axis passes through regardless of gantry angle. "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Isodose lines/curves",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " connect points receiving the same percentage of dose, and the full "
+                        },
+                        {
+                          "type": "text",
+                          "text": "isodose distribution",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is the 2D or 3D map of dose throughout the treated volume \u2014 the entire subject of this lesson."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Percentage Depth Dose (PDD)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Percentage Depth Dose",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " expresses dose at any depth as a percentage of the dose at D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", for a fixed SSD. PDD tables are built per beam energy and field size \u2014 larger fields and higher energies both produce higher PDD at a given depth (more forward-scattered dose, deeper penetration)."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Worked example:",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " A dose of 2500 cGy is prescribed at 6.5 cm depth, where PDD = 62.5%. Given Dose (at D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ") = 2500 / 0.625 = "
+                        },
+                        {
+                          "type": "text",
+                          "text": "4000 cGy",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As field size increases, what generally happens to PDD at a given depth?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "PDD increases",
+              "PDD decreases"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Larger fields produce more forward/lateral scatter contributing to dose at depth, increasing PDD."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Extended SSD and Mayneord's F Factor",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If a patient must be treated at a non-standard SSD (extended beyond the calibration distance), the PDD table values no longer directly apply \u2014 the beam's inverse-square falloff and scatter conditions have both changed."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Mayneord's F Factor",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " corrects PDD between two different SSDs, combining an inverse-square correction with a scatter correction. A helpful mnemonic: "
+                        },
+                        {
+                          "type": "text",
+                          "text": "\"old and deep\" (old SSD + depth) times \"new and short\"",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 capturing the ratio structure of the formula. Extending the SSD generally makes the beam \"colder\" (lower output) at a given point unless compensated for."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "TMR, TPR, and SAR",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For SAD/isocentric technique, dose is calculated differently than for SSD technique, since the reference point (isocenter) is fixed inside the patient rather than at the skin:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "TMR (Tissue-Maximum Ratio)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 compares dose at a given depth to dose at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ", both at the same distance from the source, independent of SSD. This is the standard tool for SAD calculations."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "TPR (Tissue-Phantom Ratio)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 a related ratio using a reference depth other than D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "SAR (Scatter-Air Ratio)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 isolates the scatter contribution to dose, used in the Clarkson method for irregular field calculations, where the field is broken into sectors and scatter is summed sector-by-sector."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Rotational and Arc Treatments",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "rotational/arc treatment",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the beam stays on while the gantry moves continuously \u2014 a full rotation is 360\u00b0; an arc is any span less than that, with a defined start and stop angle."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dose is delivered as "
+                        },
+                        {
+                          "type": "text",
+                          "text": "cGy per degree",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " of rotation. Depth for a rotational field is calculated using an "
+                        },
+                        {
+                          "type": "text",
+                          "text": "average TAR",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", obtained by measuring tumor depth/radius at multiple angular intervals around the full rotation and averaging the resulting TAR values \u2014 since the beam path length through the patient changes continuously as the gantry rotates."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page6_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is an \"average TAR\" used for rotational field dose calculations rather than a single TAR value?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Because the depth to the tumor changes continuously as the gantry rotates around the patient",
+              "Because rotational treatments don't actually use TAR at all"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As the gantry rotates, the beam's path length to the tumor changes continuously, so an average across multiple angles better represents the actual dose delivered."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Gap Calculations for Abutting Fields",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When two adjacent fields are needed to cover a target too large for one field, they can be "
+                    },
+                    {
+                      "type": "text",
+                      "text": "abutted",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 but because photon beams diverge from their source, simply placing field edges together on the skin would create a hot spot at depth (where the diverging beams overlap) or a cold spot (where they diverge apart). A calculated "
+                    },
+                    {
+                      "type": "text",
+                      "text": "gap",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " on the skin surface compensates for this divergence."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Gap = (L",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "1",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "/2)(d/SSD",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "1",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ") + (L",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "2",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "/2)(d/SSD",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "2",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ")",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", where L is each field's length, d is the depth where the fields should meet exactly, and SSD is each field's source-to-skin distance. Electron fields are also commonly abutted, using similar logic adapted for electron beam characteristics."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Entrance and Exit Dose",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In an opposed-field setup (e.g., AP/PA), each beam delivers its highest dose near D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " on the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "entrance",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " side, then falls off with depth \u2014 but some dose still exits the far side of the patient as the beam continues past isocenter. This "
+                    },
+                    {
+                      "type": "text",
+                      "text": "exit dose",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " from the opposing beam adds to the entrance dose of the beam on that side, which is exactly why opposed pairs of fields combine to deliver more uniform dose across the target than a single field ever could."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Bolus",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bolus",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a tissue-equivalent material placed directly on the patient's skin to modify the dose distribution \u2014 specifically to eliminate the skin-sparing effect when a superficial target needs full dose at the surface, or to compensate for irregular patient contours."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The companion Bolus Effect simulator below lets you see exactly how adding bolus shifts D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " toward the skin surface. Click below to open it."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered SSD vs. SAD technique, PDD and extended-SSD correction (Mayneord's F factor), TMR/TPR/SAR for isocentric calculations, rotational/arc treatment dosimetry, gap calculations for abutting fields, entrance/exit dose in opposed pairs, and bolus."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two hands-on companions are available: the Bolus Effect simulator, and a full Depth Dose calculation worksheet with real practice problems."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

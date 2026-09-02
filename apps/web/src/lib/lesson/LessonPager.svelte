@@ -7,7 +7,7 @@
 	is called once per component instance (not per request) so every submit attempt from this
 	pager reuses the same `Idempotency-Key`, matching ADR-0004's retry contract; `{#key pageIndex}`
 	forces each page's block list to remount on navigation so per-page component state (radio
-	selection) doesn't leak across pages; `resolve('/home')` satisfies the
+	selection) doesn't leak across pages; `resolve('/(app)/home')` satisfies the
 	`svelte/no-navigation-without-resolve` lint rule for the internal "Back to home" link.
 	How it fits the project: this is the browser-driven half of ADR-0004's attempt flow — grading
 	each item and the final submit both call the API directly from the client over the session
@@ -141,7 +141,7 @@
 		<button type="button" disabled={submitting} onclick={finish}>Finish lesson</button>
 	{:else}
 		<p aria-live="polite">Score: {formatScore(submitResult)}</p>
-		<a href={resolve('/home')}>Back to home</a>
+		<a href={resolve('/(app)/home')}>Back to home</a>
 	{/if}
 	<!-- Submit failed: `finish()` clears this before every attempt, so in practice it only ever
 		 appears alongside the still-visible Finish button, letting the student retry. -->

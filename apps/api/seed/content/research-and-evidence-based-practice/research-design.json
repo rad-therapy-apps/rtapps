@@ -1,0 +1,423 @@
+{
+  "subject": {
+    "slug": "research-and-evidence-based-practice",
+    "title": "Research and Evidence Based Practice",
+    "order": 10
+  },
+  "lesson": {
+    "slug": "research-design",
+    "title": "Research Design",
+    "order": 0,
+    "pages": [
+      {
+        "title": "The Blueprint for Your Study",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A research design is the architectural blueprint of a study \u2014 it determines exactly how you'll collect and analyze data to answer your research question. Choosing the wrong design doesn't just make a study weaker; it can make the question un-answerable no matter how good your data collection is."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Three Approaches to Data",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The type of question you ask dictates the type of data you need:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Quantitative",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 numerical data, statistical procedures, testing hypotheses and causal relationships"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Qualitative",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 nonnumerical data (interviews, focus groups) exploring subjective experiences or complex phenomena in depth"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Mixed-Methods",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 combines both to give a more complete answer than either alone"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Descriptive Studies",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Descriptive studies",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " collect data without changing or manipulating the environment \u2014 you observe and describe, such as a survey or case study. They're excellent for establishing baseline understanding of a situation, but they can't establish cause and effect."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "True Experimental Design",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "A "
+                        },
+                        {
+                          "type": "text",
+                          "text": "true experimental",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " study introduces a treatment or procedure to test a cause-and-effect hypothesis. It requires four strict elements: "
+                        },
+                        {
+                          "type": "text",
+                          "text": "manipulation",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " of a variable, a "
+                        },
+                        {
+                          "type": "text",
+                          "text": "control group",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "random assignment",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", and "
+                        },
+                        {
+                          "type": "text",
+                          "text": "random selection",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In a clinical setting, hitting all four of these is often genuinely difficult \u2014 you frequently can't randomly assign patients to receive or not receive a treatment believed to be beneficial."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Quasi-Experimental Design",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In clinical settings, assigning people to specific conditions is sometimes impossible or unethical. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Quasi-experimental",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " research still evaluates cause-and-effect relationships, but without the strict randomization of a true experiment."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Example: comparing patient outcomes between two different, pre-existing hospital locations \u2014 you didn't randomly assign patients to each location, but you can still compare outcomes between the groups that already exist."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You use a phantom to compare VMAT delivery times when the gantry rotates clockwise vs. counterclockwise. What approach and design does this represent?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Qualitative descriptive",
+              "Quantitative experimental"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You're gathering numerical data (time) and actively manipulating a variable (rotation direction) in a controlled setting \u2014 that's quantitative and experimental, not just observational."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Matching Design to Real-World Constraints",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The \"best\" design on paper isn't always the feasible one. A true experimental design with full randomization might be methodologically ideal but practically impossible to get approved or to execute with your available patient population, timeframe, or access. Choosing a design is always a negotiation between rigor and what you can actually pull off responsibly."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Evaluating a Source's Design",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When you're reading someone else's published research, identifying their design tells you a lot about how much weight to put on their conclusions. A descriptive study showing an association is not the same evidence as a true experimental study showing causation \u2014 even if both papers report a \"statistically significant\" result."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered quantitative, qualitative, and mixed-methods approaches, plus descriptive, true experimental, and quasi-experimental designs, and how feasibility shapes design choice in practice."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next: once you've picked a design, you need to precisely define and measure the variables that design depends on."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

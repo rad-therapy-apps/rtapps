@@ -1,0 +1,1001 @@
+{
+  "subject": {
+    "slug": "orientation-to-radiation-therapy",
+    "title": "Orientation to Radiation Therapy",
+    "order": 3
+  },
+  "lesson": {
+    "slug": "orientation-to-radiation-therapy-team-and-roles",
+    "title": "The Radiation Oncology Team",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Introduction - The Collaborative Care Team",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Purpose: Why This Matters This lesson will introduce you to the multidisciplinary team involved in radiation oncology. Understanding each member's distinct and overlapping roles is crucial for effective collaboration, seamless patient care, and ensuring treatment accuracy and safety. As a radiation therapist, you are a key player in this team, and recognizing how your colleagues contribute will enhance your own practice and patient outcomes."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do Throughout this lesson, you will: Learn about the primary responsibilities of various professionals in the radiation oncology team. Explore how these roles intersect and require close communication. Consider examples of teamwork and where role crossovers can occur. Answer \"Quick Check\" questions to reinforce your understanding. At the end, you will be directed to a summative speech quiz activity to test your recall of these roles."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned By the end of this lesson, you should be able to: Identify the core members of the radiation oncology team and their main responsibilities. Describe how effective communication and collaboration among team members contribute to patient care. Recognize examples of role crossover and the importance of a team-based approach. Successfully complete the \"Quick Check\" questions."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Effective patient care in radiation oncology is not the job of one person, but the coordinated effort of a highly skilled team. Let's meet the players!"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radiation Oncologist & Oncology Nurse",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Oncologist A physician who specializes in using radiation to treat cancer. Key Responsibilities: Leads the radiation oncology team; evaluates the patient to determine if radiation therapy is appropriate; prescribes the type and amount of radiation; localizes the tumor; monitors patient progress and manages side effects related to radiation; collaborates with other physicians."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Oncology Nurse (often an RN with specialized oncology training/certification) Provides direct nursing care to patients undergoing radiation therapy. Key Responsibilities: Patient education about treatment and side effect management; assessment and monitoring of patient's physical and emotional status; administration of medications; symptom management; coordination of care; emotional support for patients and families; collaboration with the radiation oncologist and other team members regarding patient status and needs."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Collaboration Example:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The radiation oncologist and oncology nurse work closely to manage acute side effects. The nurse assesses the patient, communicates findings to the oncologist, and implements prescribed interventions."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page2_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Who is primarily responsible for prescribing the radiation treatment and leading the overall radiation oncology team?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Oncology Nurse",
+              "Radiation Oncologist",
+              "Medical Physicist"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Medical Physicist & Medical Dosimetrist",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Medical Physicist An expert in radiation physics who ensures the safe and accurate delivery of radiation. Key Responsibilities: Oversees quality assurance (QA) of treatment machines and planning systems; calibrates equipment; consults with the radiation oncologist on treatment planning and delivery techniques; develops and implements radiation safety protocols; involved in commissioning new equipment and techniques."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Medical Dosimetrist Works closely with the radiation oncologist and medical physicist to design optimal radiation treatment plans. Key Responsibilities: Uses specialized software to calculate radiation dose distributions; develops treatment plans that deliver the prescribed dose to the tumor while minimizing exposure to healthy tissues; performs quality checks on treatment plans; assists with brachytherapy planning and procedures."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Collaboration Example:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The dosimetrist designs a complex treatment plan, which is then reviewed and approved by both the medical physicist (for technical accuracy and safety) and the radiation oncologist (for clinical appropriateness)."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page3_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: Which team member is primarily responsible for designing the patient's radiation treatment plan by calculating dose distributions?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Radiation Therapist",
+              "Medical Physicist",
+              "Medical Dosimetrist"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radiation Therapist (RTT)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Therapists are the primary point of contact for patients during their daily treatments. They are highly skilled professionals responsible for the accurate delivery of radiation therapy as prescribed by the radiation oncologist."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Therapist (RTT) Administers daily radiation treatments, positions patients accurately, operates treatment machines, and provides patient support. Key Responsibilities: Accurately interpreting and implementing the treatment plan. Positioning the patient precisely for treatment using immobilization devices. Operating sophisticated radiation therapy equipment (e.g., linear accelerators). Performing daily quality assurance checks on treatment machines. Utilizing imaging systems (e.g., OBI, CBCT) for treatment verification. Monitoring the patient's physical and emotional state during treatment sessions. Observing for and reporting acute side effects to the nurse or oncologist. Educating patients about procedures and self-care for side effects (within scope). Maintaining accurate treatment records. Ensuring radiation safety for the patient, themselves, and others."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Collaboration Example:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " RTTs work very closely with medical physicists for machine QA and with dosimetrists to understand complex plan details. They are the \"eyes and ears\" for the oncologist and nurse regarding the patient's daily condition and tolerance to treatment."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page4_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: A key daily responsibility of the Radiation Therapist is:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Prescribing changes to the radiation dose.",
+              "Accurately positioning the patient and operating the treatment machine.",
+              "Calibrating the treatment machine independently each morning."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Supportive & Ancillary Roles",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Beyond the core clinical team, many other professionals contribute significantly to the comprehensive care of radiation oncology patients:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Social Workers:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Provide psychosocial support, counseling, and connect patients with community resources (financial aid, transportation, support groups)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Registered Dietitians:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Offer nutritional counseling to help manage side effects, maintain weight, and support overall health during treatment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Front Office Staff/Patient Coordinators:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Manage scheduling, patient registration, insurance verification, and are often the first point of contact."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Clinical Research Coordinators/Staff:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Manage clinical trials, enroll patients, and collect data if the department is involved in research."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Rehabilitation Therapists (Physical/Occupational):",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Help patients manage functional impairments or lymphedema resulting from cancer or its treatment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Palliative Care Team:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Focuses on symptom management and improving quality of life for patients with serious illness, can be involved alongside curative treatment."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Teamwork Aspect:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " RTTs often interact with these supportive roles, for example, by identifying a patient struggling emotionally and suggesting a referral to a social worker, or noticing significant weight loss and alerting the nurse or dietitian."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page5_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: If a patient expresses significant anxiety about coping with their diagnosis and treatment, which team member would be most appropriate for the RTT to suggest as a resource (after discussing with the nurse/oncologist)?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Medical Physicist",
+              "Medical Dosimetrist",
+              "Social Worker"
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Teamwork, Communication & Role Crossover",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Effective radiation oncology care hinges on exceptional teamwork and clear communication among all members."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Key Elements of Successful Teamwork:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Respect and Trust:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Valuing the expertise and contribution of each team member."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Open Communication:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Regular, clear, and concise exchange of information (e.g., daily huddles, team meetings, accurate EMR documentation)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Shared Goals:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Everyone focused on the patient's well-being and treatment success."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Understanding Scope of Practice:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Knowing one's own responsibilities and limitations, as well as those of colleagues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Constructive Feedback & Problem Solving:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Addressing issues collaboratively and professionally."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Role Crossover and Interdependence:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "While each role is distinct, there are many areas of interdependence and \"role crossover\" where responsibilities might touch or require close coordination:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "RTTs & Dosimetrists:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " RTTs implement the plans created by dosimetrists. Clear communication is vital if an RTT encounters difficulty achieving a planned setup or has questions about plan parameters."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "RTTs & Nurses:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Both monitor patients. An RTT might be the first to notice an acute skin reaction, which they then report to the nurse for assessment and management advice for the patient."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "RTTs & Physicists:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " RTTs perform daily machine QA checks under the guidance of physicists. Any machine issues are immediately reported to physics for resolution."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Oncologists & the Entire Team:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Oncologists rely on information from all team members to make clinical decisions."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Recognizing these intersections helps in anticipating needs, supporting colleagues, and ensuring a holistic approach to patient care."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "q_page6_1_ans",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Quick Check: If a Radiation Therapist has a question about the specific beam angles or energy listed in a patient's treatment plan, who would be the most appropriate team members to consult initially?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The Social Worker and Front Office Staff.",
+              "The Medical Dosimetrist who created the plan and/or the Medical Physicist.",
+              "Only the Radiation Oncologist."
+            ],
+            "answer": 0,
+            "explanation": null
+          },
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check Answer"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Conclusion & Summative Activity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Throughout this lesson, we've explored the diverse yet interconnected roles within the radiation oncology team. Each professional brings unique expertise essential for delivering safe, effective, and compassionate patient care. As a radiation therapist, you are a vital member of this team, requiring not only technical skill but also strong communication and collaboration abilities."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understanding the responsibilities of your colleagues helps you: "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Anticipate patient needs more effectively."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Communicate more clearly with other team members."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Appreciate the full spectrum of care provided."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Contribute to a positive and efficient team environment."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Summative Activity: Healthcare Roles Speech Quiz"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To reinforce your understanding of these roles, you will now complete a summative activity. This interactive quiz will present descriptions of various healthcare roles, and you will need to verbally identify the correct role."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This activity emphasizes quick recall and understanding of different professional responsibilities within the broader healthcare context, including many of those discussed in this lesson."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Go to Speech Quiz Activity"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Note: The speech quiz contains a broad range of healthcare roles. Focus on identifying those relevant to oncology and radiation therapy as discussed."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

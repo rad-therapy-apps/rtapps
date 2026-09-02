@@ -14,8 +14,8 @@
  * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`StudentDetailOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/educator/cohorts/[id]/+page.svelte`.
  */
-import { error } from '@sveltejs/kit';
 import { apiFetch } from '$lib/server/api';
+import { expectOk } from '$lib/server/expect';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 
@@ -23,10 +23,7 @@ type StudentDetailOut = components['schemas']['StudentDetailOut'];
 
 export const load: PageServerLoad = async (event) => {
 	const res = await apiFetch(event, `/cohorts/${event.params.id}/students/${event.params.uid}`);
-	if (res.status === 404) error(404, 'Student not found');
-	if (res.status === 403) error(403, 'You are not an educator of this cohort');
-	if (!res.ok) error(502, 'Could not load the student');
-	const detail: StudentDetailOut = await res.json();
+	const detail = await expectOk<StudentDetailOut>(res, 'Student not found');
 	// cohortId is passed through only for the page's "back to cohort" link.
 	return { detail, cohortId: event.params.id };
 };

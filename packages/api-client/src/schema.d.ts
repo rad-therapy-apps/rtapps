@@ -4,6 +4,28 @@
  */
 
 export interface paths {
+  "/api/v1/activities/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Activity
+     * @description One activity's current published snapshot, answers stripped.
+     *
+     *     ADR-0006: students never see assessment activities — same 404 as a missing id.
+     */
+    get: operations["get_activity_api_v1_activities__activity_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/activities/{activity_id}/attempts": {
     parameters: {
       query?: never;
@@ -66,6 +88,23 @@ export interface paths {
     put?: never;
     /** Deactivate User */
     post: operations["deactivate_user_api_v1_admin_users__user_id__deactivate_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/admin/users/{user_id}/erase": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Erase User */
+    post: operations["erase_user_api_v1_admin_users__user_id__erase_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -295,6 +334,40 @@ export interface paths {
     patch: operations["patch_cohort_api_v1_cohorts__cohort_id__patch"];
     trace?: never;
   };
+  "/api/v1/cohorts/{cohort_id}/activities/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Activity Stats Out */
+    get: operations["activity_stats_out_api_v1_cohorts__cohort_id__activities__activity_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cohorts/{cohort_id}/activities/{activity_id}.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Activity Stats Csv */
+    get: operations["activity_stats_csv_api_v1_cohorts__cohort_id__activities__activity_id__csv_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts/{cohort_id}/members": {
     parameters: {
       query?: never;
@@ -329,6 +402,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/cohorts/{cohort_id}/outcomes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Outcome Mastery */
+    get: operations["outcome_mastery_api_v1_cohorts__cohort_id__outcomes_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cohorts/{cohort_id}/outcomes.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Outcome Mastery Csv */
+    get: operations["outcome_mastery_csv_api_v1_cohorts__cohort_id__outcomes_csv_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts/{cohort_id}/overview": {
     parameters: {
       query?: never;
@@ -338,6 +445,23 @@ export interface paths {
     };
     /** Cohort Overview */
     get: operations["cohort_overview_api_v1_cohorts__cohort_id__overview_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cohorts/{cohort_id}/overview.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cohort Overview Csv */
+    get: operations["cohort_overview_csv_api_v1_cohorts__cohort_id__overview_csv_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -447,7 +571,8 @@ export interface paths {
     };
     /**
      * List Subjects
-     * @description List subjects that have at least one published lesson, with that lesson count.
+     * @description List subjects that have at least one published activity, with lesson and activity
+     *     counts.
      */
     get: operations["list_subjects_api_v1_subjects_get"];
     put?: never;
@@ -467,9 +592,8 @@ export interface paths {
     };
     /**
      * Get Subject
-     * @description One subject with its published lessons; 404s if the subject or all its lessons are
-     *
-     *     unpublished, so an unpublished subject is indistinguishable from a missing one.
+     * @description One subject with its published lessons and practice non-lesson activities; 404s only
+     *     when the subject has neither published lessons nor published practice activities.
      */
     get: operations["get_subject_api_v1_subjects__slug__get"];
     put?: never;
@@ -484,6 +608,45 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /**
+     * ActivityOut
+     * @description Response for `GET /activities/{id}`: one activity's current published snapshot with
+     *     answers stripped.
+     */
+    ActivityOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /**
+       * Content Version Id
+       * Format: uuid
+       */
+      content_version_id: string;
+      /** Kind */
+      kind: string;
+      /** Snapshot */
+      snapshot: {
+        [key: string]: unknown;
+      };
+    };
+    /**
+     * ActivityRefOut
+     * @description An activity reference nested inside `SubjectDetailOut` — practice non-lesson activities
+     *     only, ordered by title.
+     */
+    ActivityRefOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Kind */
+      kind: string;
+      /** Title */
+      title: string;
+    };
     /** ActivityRowOut */
     ActivityRowOut: {
       /**
@@ -501,6 +664,28 @@ export interface components {
       mean_best_percent: number | null;
       /** Passed */
       passed: number;
+      /** Title */
+      title: string;
+    };
+    /** ActivityStatsOut */
+    ActivityStatsOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Attempts */
+      attempts: number;
+      /** Distribution */
+      distribution: components["schemas"]["BucketOut"][];
+      /** Items */
+      items: components["schemas"]["ItemStatOut"][];
+      /** Kind */
+      kind: string;
+      /** Pass Rate */
+      pass_rate: number | null;
+      /** Students Attempted */
+      students_attempted: number;
       /** Title */
       title: string;
     };
@@ -588,6 +773,11 @@ export interface components {
        * Format: uuid
        */
       id: string;
+      /**
+       * Items
+       * @default []
+       */
+      items: components["schemas"]["SavedItemOut"][];
       /** Max Score */
       max_score: number | null;
       /** Passed */
@@ -638,6 +828,13 @@ export interface components {
       target_id: string | null;
       /** Target Type */
       target_type: string;
+    };
+    /** BucketOut */
+    BucketOut: {
+      /** Count */
+      count: number;
+      /** Label */
+      label: string;
     };
     /** CohortIn */
     CohortIn: {
@@ -723,6 +920,21 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    /** ItemStatOut */
+    ItemStatOut: {
+      /** Answered */
+      answered: number;
+      /** Correct */
+      correct: number;
+      /** Key */
+      key: string;
+      /** Label */
+      label: string;
+      /** Percent Correct */
+      percent_correct: number | null;
+      /** Top Wrong */
+      top_wrong: components["schemas"]["WrongOut"][];
+    };
     /** JoinIn */
     JoinIn: {
       /** Code */
@@ -795,6 +1007,42 @@ export interface components {
        */
       user_id: string;
     };
+    /** OutcomeMasteryOut */
+    OutcomeMasteryOut: {
+      /** Outcomes */
+      outcomes: components["schemas"]["OutcomeRowOut"][];
+    };
+    /** OutcomeRowOut */
+    OutcomeRowOut: {
+      /** Answered */
+      answered: number;
+      /** Code */
+      code: string;
+      /** Percent Correct */
+      percent_correct: number | null;
+      /** Questions */
+      questions: number;
+      /** Students */
+      students: components["schemas"]["OutcomeStudentOut"][];
+      /** Students Below Threshold */
+      students_below_threshold: number;
+      /** Title */
+      title: string;
+    };
+    /** OutcomeStudentOut */
+    OutcomeStudentOut: {
+      /** Answered */
+      answered: number;
+      /** Display Name */
+      display_name: string;
+      /** Percent Correct */
+      percent_correct: number | null;
+      /**
+       * User Id
+       * Format: uuid
+       */
+      user_id: string;
+    };
     /** RegisterIn */
     RegisterIn: {
       /** Display Name */
@@ -837,6 +1085,21 @@ export interface components {
     /** RoleIn */
     RoleIn: {
       role: components["schemas"]["UserRole"];
+    };
+    /** SavedItemOut */
+    SavedItemOut: {
+      /** Correct */
+      correct: boolean | null;
+      /** Item Key */
+      item_key: string;
+      /** Max Score */
+      max_score: number | null;
+      /** Response */
+      response: {
+        [key: string]: unknown;
+      };
+      /** Score */
+      score: number | null;
     };
     /** StudentDetailOut */
     StudentDetailOut: {
@@ -894,9 +1157,15 @@ export interface components {
     };
     /**
      * SubjectDetailOut
-     * @description Response for `GET /subjects/{slug}`: one subject with its published lessons.
+     * @description Response for `GET /subjects/{slug}`: one subject with its published lessons and practice
+     *     non-lesson activities.
      */
     SubjectDetailOut: {
+      /**
+       * Activities
+       * @default []
+       */
+      activities: components["schemas"]["ActivityRefOut"][];
       /** Lessons */
       lessons: components["schemas"]["LessonRefOut"][];
       /** Slug */
@@ -908,9 +1177,11 @@ export interface components {
     };
     /**
      * SubjectOut
-     * @description One row of `GET /subjects`: a subject plus its published-lesson count.
+     * @description One row of `GET /subjects`: a subject plus its published-lesson count and activity count.
      */
     SubjectOut: {
+      /** Activity Count */
+      activity_count: number;
       /** Lesson Count */
       lesson_count: number;
       /** Order */
@@ -958,6 +1229,13 @@ export interface components {
       /** Error Type */
       type: string;
     };
+    /** WrongOut */
+    WrongOut: {
+      /** Count */
+      count: number;
+      /** Option */
+      option: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -967,6 +1245,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  get_activity_api_v1_activities__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActivityOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   start_attempt_api_v1_activities__activity_id__attempts_post: {
     parameters: {
       query?: never;
@@ -1068,6 +1377,37 @@ export interface operations {
     };
   };
   deactivate_user_api_v1_admin_users__user_id__deactivate_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminUserOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  erase_user_api_v1_admin_users__user_id__erase_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -1531,6 +1871,68 @@ export interface operations {
       };
     };
   };
+  activity_stats_out_api_v1_cohorts__cohort_id__activities__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActivityStatsOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  activity_stats_csv_api_v1_cohorts__cohort_id__activities__activity_id__csv_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_members_api_v1_cohorts__cohort_id__members_get: {
     parameters: {
       query?: never;
@@ -1592,6 +1994,66 @@ export interface operations {
       };
     };
   };
+  outcome_mastery_api_v1_cohorts__cohort_id__outcomes_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OutcomeMasteryOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  outcome_mastery_csv_api_v1_cohorts__cohort_id__outcomes_csv_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   cohort_overview_api_v1_cohorts__cohort_id__overview_get: {
     parameters: {
       query?: never;
@@ -1611,6 +2073,35 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CohortOverviewOut"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cohort_overview_csv_api_v1_cohorts__cohort_id__overview_csv_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cohort_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {

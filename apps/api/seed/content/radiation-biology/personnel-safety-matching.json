@@ -1,0 +1,54 @@
+{
+  "matching": {
+    "slug": "personnel-safety-matching",
+    "title": "Personnel Safety & Dose Limits: Matching",
+    "pairs": [
+      {
+        "term": "ALARA concept",
+        "definition": "Principle that occupational exposure should be kept \"as low as reasonably achievable.\""
+      },
+      {
+        "term": "Inverse square law (ISL)",
+        "definition": "The intensity of radiation is inversely proportional to the square of the distance from the source."
+      },
+      {
+        "term": "CumEfD limit",
+        "definition": "A radiation worker's lifetime effective dose should not exceed 10 mSv times the person's age in years."
+      },
+      {
+        "term": "Workload (W)",
+        "definition": "The radiation output weighted time that the unit is actually delivering radiation during the week."
+      },
+      {
+        "term": "Use factor (U)",
+        "definition": "The fraction of the work week during which the radiation beam is directed at a particular barrier."
+      },
+      {
+        "term": "Occupancy factor (T)",
+        "definition": "Used to account for the fraction of the work week that a space beyond a barrier is occupied."
+      },
+      {
+        "term": "Primary protective barrier",
+        "definition": "Prevents direct, or unscattered, radiation from reaching personnel or the public on the other side."
+      },
+      {
+        "term": "Secondary radiation",
+        "definition": "Consists of leakage radiation from the tube housing and scatter radiation from the patient."
+      },
+      {
+        "term": "50 mSv",
+        "definition": "Annual occupational effective dose limit for whole-body exposure."
+      },
+      {
+        "term": "0.5 mSv",
+        "definition": "Monthly allowable equivalent dose to the embryo-fetus from an occupationally exposed pregnant technologist."
+      }
+    ],
+    "present_n": null
+  },
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  }
+}

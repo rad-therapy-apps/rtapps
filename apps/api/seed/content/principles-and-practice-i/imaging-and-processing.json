@@ -1,0 +1,499 @@
+{
+  "subject": {
+    "slug": "principles-and-practice-i",
+    "title": "Principles and Practice I",
+    "order": 5
+  },
+  "lesson": {
+    "slug": "imaging-and-processing",
+    "title": "Imaging and Processing in Radiation Oncology",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Imaging Is Woven Through the Whole RT Process",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Medical imaging has transformed how radiation therapy is simulated, planned, and delivered. Different modalities each contribute distinct information, and modern planning often "
+                    },
+                    {
+                      "type": "text",
+                      "text": "fuses",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " multiple modalities together \u2014 combining, say, the anatomical detail of CT with the soft-tissue contrast of MRI or the functional information from PET."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Diagnostic X-Ray and Fluoroscopy",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Plain film X-ray:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " fast, high-resolution, inexpensive. Best for bone and calcium-dense tissue \u2014 fractures, dental imaging, chest and abdominal survey views. The patient must hold still (sometimes hold their breath) since motion blurs the image."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Fluoroscopy:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " real-time X-ray imaging, used for things like guiding orthopedic implant placement during surgery, catheter/pacemaker insertion, or watching contrast agents (like barium) move through the body live."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Mammography",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A specialized low-dose X-ray technique for breast imaging, used both as a screening tool (detecting cancer before symptoms appear) and diagnostically (evaluating a lump, pain, or discharge). "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Digital mammography",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " converts X-rays to electrical signals rather than film \u2014 and can reduce dose by up to 50% compared to conventional film, with newer software cutting dose further while keeping image quality."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "CT (Computed Tomography)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CT provides far more detail than plain X-ray, especially for soft tissue and blood vessels, and scans complete in seconds. The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "gantry",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 a rotating frame with an X-ray tube on one side and a detector on the other \u2014 produces a fan-shaped beam that generates thousands of sectional views per rotation, reconstructed into cross-sectional images."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Image brightness reflects beam attenuation: "
+                        },
+                        {
+                          "type": "text",
+                          "text": "bone appears white",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (high attenuation), "
+                        },
+                        {
+                          "type": "text",
+                          "text": "air appears black",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (low attenuation)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On a CT image, why does bone appear white?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Bone has high beam attenuation",
+              "Bone has low beam attenuation"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Denser tissue like bone attenuates (blocks) more of the beam, which the reconstruction displays as bright/white."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "PET and Nuclear Medicine",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "PET (Positron Emission Tomography) uses small amounts of radioactive tracers (radiopharmaceuticals), injected, swallowed, or inhaled, which accumulate in the tissue being studied and emit gamma rays as they decay. A scanner detects this and a computer reconstructs images showing both structure "
+                    },
+                    {
+                      "type": "text",
+                      "text": "and function",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 useful for locating lymph node involvement before cancer surgery, evaluating tumors, or investigating neurological conditions like seizures."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "MRI",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "MRI uses a powerful magnetic field and radiofrequency pulses \u2014 "
+                    },
+                    {
+                      "type": "text",
+                      "text": "no ionizing radiation at all",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 to produce cross-sectional images with excellent soft-tissue contrast, especially useful for brain tumors, spinal inflammation, and vascular assessment."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "A superconducting magnet creates the static field; gradient coils focus the field on the specific body region; RF pulses are turned on and off, and the energy absorbed/reflected by tissue is measured to reconstruct the image. (The tapping sound during a scan comes from the gradient magnets switching on and off.)"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because of the strong magnetic field, patients with certain implants (like most pacemakers) generally cannot be scanned \u2014 see the MRI Safety Screening lesson under Radiation Protection for the full screening picture. Newer technology combines MRI directly with linear accelerators for real-time adaptive treatment planning."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Ultrasound",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ultrasound uses high-frequency sound waves (not ionizing radiation, no contrast agent needed) to produce live, moving images \u2014 making it a strong choice for imaging pediatric patients or women of childbearing age. Common uses include abdominal, cardiac, breast, and vascular imaging, plus obstetric/prenatal assessment."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radiation Therapy Imaging \u2014 kV vs. MV",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Modern linear accelerators carry their own onboard imaging (OBI) using kV X-rays and flat panel detectors, mounted via a retractable arm. This kV system can acquire real-time 2D images (compared against DRRs for setup verification), fluoroscopic sequences, and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "CBCT",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (Cone Beam CT \u2014 using a wider beam angle than conventional CT to capture a larger volume per rotation)."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Before onboard kV imaging became standard, "
+                        },
+                        {
+                          "type": "text",
+                          "text": "MV portal images",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (using the treatment beam itself) were the only verification option \u2014 but at megavoltage energies, Compton scattering dominates, producing poor subject contrast that makes it hard to distinguish soft tissue from bone. kV imaging gives substantially better image quality at a much lower dose, which is why it's now the standard for daily setup verification."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page8_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why did MV portal imaging historically produce poor image contrast compared to kV imaging?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Compton scattering dominates at megavoltage energies, reducing subject contrast",
+              "MV beams can't penetrate the patient at all"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "At MV energies, Compton scattering (largely independent of atomic number) dominates over photoelectric absorption, which is what actually creates contrast between different tissue types."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered diagnostic X-ray and fluoroscopy, mammography, CT, PET, MRI, ultrasound, and radiation therapy's own onboard kV/CBCT imaging compared to older MV portal imaging."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The common thread: every modality trades off dose, speed, cost, and the specific kind of information it reveals \u2014 which is exactly why modern planning increasingly fuses several of them together rather than relying on just one."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

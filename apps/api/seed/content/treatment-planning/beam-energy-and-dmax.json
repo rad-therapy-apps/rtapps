@@ -1,0 +1,2522 @@
+{
+  "subject": {
+    "slug": "treatment-planning",
+    "title": "Treatment Planning",
+    "order": 13
+  },
+  "lesson": {
+    "slug": "beam-energy-and-dmax",
+    "title": "Beam Energy, Dmax & Depth Dose Characteristics",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Introduction to Dmax (Depth of Maximum Dose)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In radiation therapy, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "D",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (also written as d"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ") refers to the specific depth beneath the patient's skin (or phantom surface) where the absorbed dose from a radiation beam reaches its highest value. It's a critical concept for treatment planning and understanding how different radiation beams interact with tissue."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is D",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        },
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " important?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Treatment Planning:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Knowing D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " helps in positioning the target volume relative to the beam entrance to ensure adequate tumor coverage while potentially sparing superficial tissues."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Skin Sparing:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " For megavoltage photon beams, the dose at the skin surface is lower than at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ". This \"skin-sparing\" effect is often desirable to reduce acute skin reactions."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Beam Characterization:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " is one of the key parameters used to characterize a radiation beam's energy and penetration."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Normalization Point:",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Dose calculations are often normalized to the dose at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " (or another reference depth related to it)."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This lesson will explore D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for both photon and electron beams and the factors that influence it."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Dmax for Photon Beams",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For megavoltage photon beams (like those from a linear accelerator), the depth of D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is primarily determined by the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "beam's energy",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "As the energy of the photon beam "
+                        },
+                        {
+                          "type": "text",
+                          "text": "increases",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", the depth of D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " also "
+                        },
+                        {
+                          "type": "text",
+                          "text": "increases",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (occurs deeper in the tissue)."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "This is because higher-energy photons produce secondary electrons (through Compton and Photoelectric interactions) that have more energy and are predominantly scattered in the forward direction. These electrons travel further into the tissue before depositing their maximum energy, leading to a dose build-up region."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "heading",
+                      "attrs": {
+                        "level": 4
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Skin-Sparing Effect:"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The dose at the very surface of the skin is lower than the dose at D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ". This build-up of dose from the surface to D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is known as the \"skin-sparing\" effect, which is clinically beneficial for reducing acute skin reactions."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "While the overall shape of the Percentage Depth Dose (PDD) curve is influenced by field size (due to scatter radiation), the *specific depth* of D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for photons is less sensitive to changes in field size compared to electron beams."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Typical Photon Dmax Depths",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Here are typical approximate D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " depths in water for common megavoltage photon beam energies used in radiation therapy:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Beam Energy (MV)"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Approximate D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Depth (cm)"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Cobalt-60 (~1.25 MV average)"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "0.5 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "4 MV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "1.0 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "6 MV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "1.5 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "10 MV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "2.5 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "15 MV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "3.0 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "18 MV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "3.5 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "20-25 MV"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "~4.0-5.0 cm"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Note: These are general values and can vary slightly between different linear accelerator models, machine calibration, and measurement conditions.",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page3_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What is the approximate D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " depth for a 10 MV photon beam?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "1.5 cm",
+              "2.5 cm",
+              "3.5 cm"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A 10 MV photon beam typically has a D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " around 2.5 cm."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Dmax for Electron Beams",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Electron beams behave quite differently from photon beams in terms of dose deposition."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Factors Influencing Electron D",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            },
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ":",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "bulletList",
+                      "content": [
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Energy:",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Higher electron energy leads to a deeper D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " and greater penetration."
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Field Size:",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Electron D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " is "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "significantly dependent on field size",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": ", especially for smaller fields (determined by the applicator/cone and any custom cutouts). As field size decreases below a certain point (related to the lateral range of electrons), the D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " depth shifts shallower due to a loss of lateral scatter equilibrium."
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Scattering:",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Electrons scatter much more readily in tissue than photons, leading to a less sharply defined beam edge and a more complex dose distribution."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "heading",
+                      "attrs": {
+                        "level": 4
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Key Characteristics of Electron Beams:"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "bulletList",
+                      "content": [
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Higher Surface Dose:",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Electrons typically deliver a higher dose at or very near the surface (e.g., 80-95% of maximum dose) compared to the skin-sparing effect of megavoltage photons."
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Rapid Dose Fall-off:",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Beyond D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": ", the dose from an electron beam decreases sharply, leading to a relatively well-defined "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "practical range (R",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "p",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": ")",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " beyond which the dose is negligible. This makes them ideal for treating superficial targets while sparing deeper normal tissues."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Electron Beam Depth Rules of Thumb",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Due to their characteristic dose fall-off, several \"rules of thumb\" are used to quickly estimate useful depths for electron beams based on their energy (E) in MeV:"
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "bulletList",
+                      "content": [
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Practical Range (R",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "p",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": ") in cm \u2248 E / 2",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " "
+                                },
+                                {
+                                  "type": "hardBreak"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "This is the depth at which the electrons essentially stop, and the dose drops to a very low level (often defined by extrapolating the steepest part of the fall-off to zero)."
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Depth of 80% Isodose Line in cm \u2248 E / 3",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " "
+                                },
+                                {
+                                  "type": "hardBreak"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "This depth is often considered the approximate "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "therapeutic range",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " for many clinical situations."
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Depth of 90% Isodose Line in cm \u2248 E / 4",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " "
+                                },
+                                {
+                                  "type": "hardBreak"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "This provides a more conservative estimate of the depth adequately covered by the beam."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " depth itself for electrons is typically shallow, often 0.5 cm to a few centimeters, increasing with energy. For example, a 9 MeV electron beam might have a D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " around 2.0 - 2.2 cm, its 80% depth around 3 cm, and its practical range around 4.5 cm (these vary with field size)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For a 12 MeV electron beam, what is the approximate depth of the 80% isodose line?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "3 cm",
+              "4 cm",
+              "6 cm"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Using E/3, the 80% depth is approximately 12 MeV / 3 = 4 cm."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Summary: Photon vs. Electron Dmax & Dose Deposition",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It's crucial to understand the fundamental differences in how photons and electrons deposit dose:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Characteristic"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Megavoltage Photons"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Electron Beams"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Primary D",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Dependence",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Beam Energy"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Beam Energy & Field Size"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Skin Sparing",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Significant (dose builds up)"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Minimal (high surface dose)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Dose Fall-off Beyond D",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Gradual"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Rapid, with a defined practical range"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Penetration",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Highly penetrating (exit dose)"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Superficial penetration (finite range)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Lateral Scatter",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Less significant for beam edge definition"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "More significant, affects penumbra and small field dosimetry"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Typical Clinical Use",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Deep-seated tumors"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Superficial tumors (e.g., skin, lymph nodes, boost sites)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Dose Changes: Depth vs. Distance from Source",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It's important to distinguish between dose changes due to penetration "
+                    },
+                    {
+                      "type": "text",
+                      "text": "depth",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " within a patient/phantom and dose changes due to "
+                    },
+                    {
+                      "type": "text",
+                      "text": "distance",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " from the radiation source (Source-to-Surface Distance, SSD)."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "heading",
+                      "attrs": {
+                        "level": 4
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dose Changes Due to Depth (Fixed SSD):"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "When radiation enters a medium, the dose changes as it penetrates deeper. This is described by:"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "bulletList",
+                      "content": [
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Percentage Depth Dose (PDD):",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " The ratio (as a percentage) of the absorbed dose at a specific depth to the absorbed dose at D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": ", along the central axis of the beam, for a fixed SSD. "
+                                },
+                                {
+                                  "type": "hardBreak"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Dose at depth = Dose at D",
+                                  "marks": [
+                                    {
+                                      "type": "code"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "code"
+                                    },
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " \u00d7 (PDD at depth / 100)",
+                                  "marks": [
+                                    {
+                                      "type": "code"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Tissue-Maximum Ratio (TMR) or Tissue-Phantom Ratio (TPR):",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Used for SAD (Source-to-Axis Distance) setups, these ratios relate dose at depth to dose in a phantom at D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " (TMR) or a reference depth (TPR) *at the same point in space*."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "These factors account for attenuation and scatter within the medium."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page7_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If the dose at D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " for a 6MV beam (SSD setup) is 200 cGy and the PDD at 5cm depth is 85%, the dose at 5cm depth is:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "85 cGy",
+              "170 cGy",
+              "200 cGy"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dose at 5cm = 200 cGy * (85/100) = 170 cGy."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Dose Changes Due to Distance from Source (Extended SSD)",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "heading",
+                      "attrs": {
+                        "level": 4
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Dose Changes Due to Distance from Source (Variable SSD):"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "When the SSD changes from a standard calibration distance (e.g., 100 cm) to a new, non-standard distance (often called extended SSD), the dose rate at D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (and other depths) changes due to:"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "bulletList",
+                      "content": [
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Inverse Square Law (ISL):",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " The primary effect. As distance increases, intensity decreases by the square of the distance."
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Changes in Scatter:",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " Scatter contribution to D"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "max",
+                                  "marks": [
+                                    {
+                                      "type": "subscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " can change slightly with SSD."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "To correct PDD values or dose rates for non-standard SSDs, the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Mayneord F Factor",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " is often used for photon beams:"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "F = [(SSD\u2082 + D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ") / (SSD\u2081 + D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ")]\u00b2 \u00d7 [(SSD\u2081 + depth) / (SSD\u2082 + depth)]\u00b2"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The first term accounts for ISL at D"
+                        },
+                        {
+                          "type": "text",
+                          "text": "max",
+                          "marks": [
+                            {
+                              "type": "subscript"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", and the second for ISL at depth. Simpler ISL corrections are often applied to the output factor."
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Crucially: PDD, TMR, and TPR inherently account for attenuation and scatter *at a given SSD or SAD*. The Mayneord F Factor (or ISL) is used when the *SSD itself changes* from the reference condition.",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Clarifying Depth vs. Distance Corrections",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Let's summarize the distinction:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "To find the dose at a certain "
+                            },
+                            {
+                              "type": "text",
+                              "text": "depth",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for a *given, fixed SSD setup*, you use PDD (or TMR/TPR for SAD setups). "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Example: Dose at D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " is 100 cGy, PDD at 10 cm is 67%. Dose at 10 cm = 100 * 0.67 = 67 cGy."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "If you change the "
+                            },
+                            {
+                              "type": "text",
+                              "text": "SSD",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " from the standard calibration distance (e.g., from 100 cm to 110 cm), the dose rate at *all points* (including D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " and other depths) will change primarily due to the Inverse Square Law. You would use an ISL correction factor (or Mayneord F factor for PDD adjustments) to find the new dose rate or adjust monitor units. "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Example: If output is 1 cGy/MU at 100 cm SSD, at 110 cm SSD, the output will be 1 * (100/110)\u00b2 cGy/MU."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It's vital not to confuse these two distinct scenarios and apply the correct factors."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Transition to Activity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've now reviewed the ALARA principle, the Inverse Square Law, and the concepts of D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "max",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and depth dose characteristics for photon and electron beams, including the important distinction between depth-related dose changes and distance-related dose changes."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The following activity will allow you to:"
+                    }
+                  ]
+                },
+                {
+                  "type": "orderedList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Interactively explore the Inverse Square Law using a simulator."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Apply your understanding of ALARA, ISL, and D"
+                            },
+                            {
+                              "type": "text",
+                              "text": "max",
+                              "marks": [
+                                {
+                                  "type": "subscript"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " concepts by answering worksheet questions."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Click \"Start Activity\" below to begin."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

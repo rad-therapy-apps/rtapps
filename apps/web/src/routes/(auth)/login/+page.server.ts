@@ -19,6 +19,7 @@
  * (`problemMessage`, `safeNext`). Used by: `+page.svelte` (this route).
  */
 import { fail, redirect } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
 import { apiFetch, relaySetCookie } from '$lib/server/api';
 import { problemMessage, safeNext } from '$lib/server/auth-forms';
 import type { Actions, PageServerLoad } from './$types';
@@ -26,7 +27,7 @@ import type { Actions, PageServerLoad } from './$types';
 // Renders the login form, pre-filling `googleEnabled` and a validated `next` redirect target.
 export const load: PageServerLoad = async (event) => {
 	// Already signed in: don't show the login form again.
-	if (event.locals.user) redirect(303, '/home');
+	if (event.locals.user) redirect(303, resolve('/(app)/home'));
 
 	let googleEnabled = false;
 	try {

@@ -1,0 +1,674 @@
+{
+  "subject": {
+    "slug": "sectional-anatomy",
+    "title": "Sectional Anatomy",
+    "order": 11
+  },
+  "lesson": {
+    "slug": "pelvis",
+    "title": "Sectional Anatomy: Pelvis",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Imaging the Pelvis \u2014 Bony Framework",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The bony pelvis is the reproducible scaffold for localization and matching. Each "
+                    },
+                    {
+                      "type": "text",
+                      "text": "os coxae",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is three fused bones \u2014 "
+                    },
+                    {
+                      "type": "text",
+                      "text": "ilium",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "ischium",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "pubis",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 meeting at the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "acetabulum",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bone window at the level of the pubic symphysis and femoral heads seated in the acetabula \u2014 the rigid landmarks used for a bony match."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "The "
+                        },
+                        {
+                          "type": "text",
+                          "text": "pubic symphysis",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "femoral heads",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", and "
+                        },
+                        {
+                          "type": "text",
+                          "text": "sacral promontory",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " make excellent bony references \u2014 but as the next pages show, for the prostate they only get you close."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Bladder, Prostate, and Rectum",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The central pelvic organs stack in a consistent front-to-back order that is the key to reading any pelvic slice."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Superior level: the bladder (fluid density) fills the anterior pelvis, with rectum posteriorly and bowel superiorly. Lower level (pubic symphysis): the prostate sits between the bladder base (above) and rectum (behind), with femoral heads lateral."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "p_p2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On axial pelvic CT, what is the front-to-back order of the central male pelvic organs?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Bladder/prostate anteriorly, rectum posteriorly",
+              "Rectum anteriorly, bladder posteriorly"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Anterior-to-posterior: bladder (with prostate at its base inferiorly), then rectum posteriorly. This order holds on every slice and orients you instantly."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Urinary Tract in 3D",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rotate this model to see how the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "kidneys",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "ureters",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bladder",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " connect \u2014 the drainage pathway whose filling state drives day-to-day changes in pelvic anatomy."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Interactive urinary tract: kidneys \u2192 ureters \u2192 bladder. Drag to rotate, scroll to zoom."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "3D model: \"Urinary tract\" by E-learning UMCG (sketchfab.com/eLearningUMCG), licensed CC-BY-NC-SA-4.0. Embedded unmodified for non-commercial educational use."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Because the bladder is the end of this pathway, how full it is at simulation and at each treatment directly changes its size and the position of neighboring organs \u2014 the theme of the next page."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Filling, Motion, and Interfractional Change",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The pelvis looks bony-stable but its soft-tissue targets move day to day."
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Bladder filling",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " changes bladder size and pushes the uterus/prostate; protocols standardize a "
+                            },
+                            {
+                              "type": "text",
+                              "text": "comfortably full or empty bladder",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Rectal filling and gas",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " displace the prostate/cervix anteriorly \u2014 a major source of motion relative to the pelvic bones."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "This is why a "
+                            },
+                            {
+                              "type": "text",
+                              "text": "bony match alone is inadequate",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for the prostate: the gland moves independently of the pelvis."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "p_p4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Why is a soft-tissue or fiducial match preferred over a pure bony match for prostate treatment?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "The prostate moves relative to the pelvic bones with bladder and rectal filling",
+              "The pelvic bones cannot be seen on CBCT"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rectal and bladder filling shift the prostate independently of the skeleton, so verification must localize the gland itself (CBCT soft tissue or implanted fiducials)."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Anatomic Verification in the Pelvis",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The pelvis is the textbook example of choosing the right match:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Bony match",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " where the target tracks the skeleton (many gynecologic nodal volumes, bone targets)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Soft-tissue / fiducial match",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " for the prostate, which shifts with filling."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Bladder/rectum "
+                            },
+                            {
+                              "type": "text",
+                              "text": "filling protocols",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " and increasingly "
+                            },
+                            {
+                              "type": "text",
+                              "text": "MR-guided",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " workflows keep interfractional anatomy consistent with the plan."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "p_p5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "For prostate SBRT, which is the most reliable daily localization surrogate when soft-tissue contrast is limited?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Implanted fiducial markers in the gland",
+              "The iliac crest",
+              "The xiphoid process"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Fiducials implanted in the prostate give a clear, trackable surrogate that moves with the gland \u2014 more reliable than distant bony landmarks when soft-tissue contrast is limited."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've read the bony pelvis and the bladder/prostate/rectum stack on real CT, explored the urinary tract in 3D, and seen why bladder and rectal filling force a deliberate choice between bony and soft-tissue (fiducial) matching."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cross-reference: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Pelvis Treatment Planning"
+                    },
+                    {
+                      "type": "text",
+                      "text": " and the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "3D Pelvic Lymphatics model"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

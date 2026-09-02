@@ -37,6 +37,17 @@ class ItemGradeOut(BaseModel):
     explanation: dict[str, Any] | None
 
 
+class SavedItemOut(BaseModel):
+    # One saved/graded response in an attempt; returned in AttemptOut.items.
+    model_config = ConfigDict(from_attributes=True)
+
+    item_key: str
+    response: dict[str, Any]
+    correct: bool | None
+    score: float | None
+    max_score: float | None
+
+
 # Response for start_attempt/submit_attempt; from_attributes lets FastAPI serialize the
 # Attempt ORM row returned by those routes directly.
 class AttemptOut(BaseModel):
@@ -52,6 +63,7 @@ class AttemptOut(BaseModel):
     max_score: float | None
     percent: float | None
     passed: bool | None
+    items: list[SavedItemOut] = []
 
 
 # One row of GET /me/results; built by hand in my_results from a joined query, not from a

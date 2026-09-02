@@ -29,11 +29,23 @@ def _request(
 
 
 def test_client_ip_prefers_forwarded_header() -> None:
-    """Behind Caddy the real address is the first X-Forwarded-For entry."""
-    assert client_ip(_request({"x-forwarded-for": "203.0.113.9, 10.0.0.1"})) == "203.0.113.9"
+    """X-Forwarded-For's last hop (proxy-appended) is trusted; fallback to socket peer."""
+    # Multi-hop: first is spoofed, last is appended by trusted proxy
+    assert client_ip(_request({"x-forwarded-for": "203.0.113.9, 10.0.0.1"})) == "10.0.0.1"
+    # No header: fallback to socket peer
     assert client_ip(_request({})) == "10.0.0.7"
+    # No client address
     assert client_ip(_request({}, client=None)) is None
+    # No request
     assert client_ip(None) is None
+
+
+def test_client_ip_multi_hop_last_wins() -> None:
+    """Spoofed first hops are ignored; the proxy-appended last hop is trusted."""
+    # Attacker tries to forge multiple IPs, but only the last (proxy-appended) matters
+    assert client_ip(_request({"x-forwarded-for": "1.2.3.4, 192.168.1.99, 10.0.0.7"})) == "10.0.0.7"
+    # Whitespace handling
+    assert client_ip(_request({"x-forwarded-for": "1.2.3.4 , 10.0.0.8"})) == "10.0.0.8"
 
 
 async def test_record_audit_writes_row(db: AsyncSession) -> None:

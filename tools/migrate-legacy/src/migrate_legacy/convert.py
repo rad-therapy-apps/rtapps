@@ -27,12 +27,12 @@ Used by: `cli.convert_lesson` callers; `tests/test_convert.py` and
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+import pyjson5
 from bs4 import BeautifulSoup, Tag
 
 from migrate_legacy.html2prose import collapse_whitespace, html_to_prose, inline_nodes, strip_edges
@@ -77,14 +77,21 @@ def _find_tag(parent: Tag, name: str, **kwargs: Any) -> Tag | None:
     return found if isinstance(found, Tag) else None
 
 
-def _correct_answers(soup: BeautifulSoup) -> dict[str, str]:
+def _correct_answers(soup: BeautifulSoup, notes: list[str]) -> dict[str, str]:
     """Find the first inline <script> carrying `lessonCorrectAnswers` and parse its
-    object literal as JSON, giving `{radio_name: correct_value}`. Returns `{}` if the
-    document has no such script (every check then falls back to answer index 0)."""
+    object literal via pyjson5 (legacy markup uses JS object-literal syntax: unquoted
+    keys, single quotes, trailing commas, `//` comments — not strict JSON), giving
+    `{radio_name: correct_value}`. Returns `{}` if the document has no such script, or
+    if the literal fails to parse (noted, non-fatal) — every check then falls back to
+    answer index 0, flagged via the existing "no correct answer" note."""
     for script in soup.find_all("script"):
         match = _CORRECT_ANSWERS_RE.search(script.get_text())
         if match:
-            answers: dict[str, str] = json.loads(match.group(1))
+            try:
+                answers: dict[str, str] = pyjson5.decode(match.group(1))
+            except Exception:
+                notes.append("unparseable lessonCorrectAnswers object")
+                return {}
             return answers
     return {}
 
@@ -240,9 +247,14 @@ def _convert(html: str, notes: list[str]) -> dict[str, Any] | None:
     if not page_divs:
         return None
 
-    correct_answers = _correct_answers(soup)
+    correct_answers = _correct_answers(soup, notes)
 
-    pages = []
+    # Some legacy files are two whole documents concatenated (a source authoring bug —
+    # `</html>` immediately followed by another `<head>...<body>`); html.parser still
+    # walks past the close tag and picks up the second copy's `.lesson-page` elements too,
+    # so the same page (identical title + blocks) shows up twice in `page_divs`. Drop an
+    # exact repeat rather than emit a lesson with duplicate knowledge_check keys.
+    pages: list[dict[str, Any]] = []
     for page_num, page_div in enumerate(page_divs, start=1):
         title_el = _find_tag(page_div, "h3")
         if title_el is not None:
@@ -250,7 +262,11 @@ def _convert(html: str, notes: list[str]) -> dict[str, Any] | None:
         else:
             title = f"Page {page_num}"
         blocks = _page_blocks(page_div, title_el, page_num, correct_answers, notes)
-        pages.append({"title": title, "blocks": blocks})
+        page = {"title": title, "blocks": blocks}
+        if page in pages:
+            notes.append(f"duplicate lesson page dropped (page {page_num}, {title!r})")
+            continue
+        pages.append(page)
 
     return {"pages": pages}
 

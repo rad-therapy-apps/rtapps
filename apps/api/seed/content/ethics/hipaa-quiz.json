@@ -1,0 +1,75 @@
+{
+  "quiz": {
+    "slug": "hipaa-quiz",
+    "title": "Activity: Comprehensive HIPAA Quiz: Quiz",
+    "pass_percent": 80,
+    "shuffle": true,
+    "questions": [
+      {
+        "stem": "What does HIPAA primarily stand for?",
+        "options": [
+          "Health Information Privacy and Accessibility Act",
+          "Health Insurance Portability and Accountability Act",
+          "Healthcare Information Protection and Administration Act",
+          "Health Insurance Privacy and Administration Act"
+        ],
+        "answer": 1,
+        "explanation": "HIPAA stands for the Health Insurance Portability and Accountability Act of 1996.",
+        "outcomes": []
+      },
+      {
+        "stem": "Which of the following is considered Protected Health Information (PHI) under HIPAA?",
+        "options": [
+          "A patient's favorite color",
+          "A patient's name and diagnosis",
+          "General hospital statistics not linked to individuals",
+          "A de-identified research dataset"
+        ],
+        "answer": 1,
+        "explanation": "PHI includes individually identifiable health information, such as name, address, dates, and medical records.",
+        "outcomes": []
+      },
+      {
+        "stem": "The HIPAA Security Rule applies specifically to:",
+        "options": [
+          "All paper-based patient records",
+          "Verbal communications between doctors",
+          "Electronic Protected Health Information (ePHI)",
+          "Patient billing information only"
+        ],
+        "answer": 2,
+        "explanation": "The Security Rule establishes national standards for protecting ePHI created, received, used, or maintained by a covered entity.",
+        "outcomes": []
+      },
+      {
+        "stem": "Under the HIPAA Privacy Rule, when is it generally permissible to disclose PHI without patient authorization?",
+        "options": [
+          "For marketing purposes to a third party",
+          "To a patient's employer for a job evaluation",
+          "For Treatment, Payment, or Healthcare Operations (TPO)",
+          "To a news reporter asking about a public figure"
+        ],
+        "answer": 2,
+        "explanation": "HIPAA allows covered entities to use and disclose PHI for TPO without patient authorization, subject to certain conditions.",
+        "outcomes": []
+      },
+      {
+        "stem": "If a breach of unsecured PHI affects 600 individuals, who must be notified?",
+        "options": [
+          "Only the affected individuals",
+          "The affected individuals and the HHS Secretary",
+          "The affected individuals, the HHS Secretary, and prominent media outlets",
+          "Only the HHS Secretary"
+        ],
+        "answer": 2,
+        "explanation": "For breaches affecting more than 500 residents of a state or jurisdiction, covered entities must notify affected individuals, the HHS Secretary, and prominent media outlets serving the State or jurisdiction.",
+        "outcomes": []
+      }
+    ]
+  },
+  "subject": {
+    "slug": "ethics",
+    "title": "Ethics",
+    "order": 2
+  }
+}

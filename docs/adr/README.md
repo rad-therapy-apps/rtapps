@@ -9,6 +9,7 @@ Decisions are recorded in [MADR](https://adr.github.io/madr/) format. One file p
 | [0003](0003-content-in-database-as-prosemirror-json.md) | Curriculum content in Postgres as ProseMirror JSON with working copies and published snapshots | Accepted | 2026-08-27 |
 | [0004](0004-unified-attempt-result-schema.md) | One `attempt` / `attempt_item` schema as the integration spine | Accepted | 2026-08-27 |
 | [0005](0005-single-vm-docker-compose-deployment.md) | Single VM running Docker Compose, images from GHCR, Caddy or Cloudflare Tunnel | Accepted | 2026-08-27 |
+| [0006](0006-practice-assessment-separation.md) | Practice / assessment separation via one `activity.access` column | Accepted | 2026-09-01 |
 
 ## Adding a record
 

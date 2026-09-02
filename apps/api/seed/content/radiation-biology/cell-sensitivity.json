@@ -1,0 +1,472 @@
+{
+  "subject": {
+    "slug": "radiation-biology",
+    "title": "Radiation Biology",
+    "order": 7
+  },
+  "lesson": {
+    "slug": "cell-sensitivity",
+    "title": "Cell Sensitivity",
+    "order": 0,
+    "pages": [
+      {
+        "title": "The Law of Bergoni\u00e9 and Tribondeau",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In 1906, scientists Bergoni\u00e9 and Tribondeau performed experiments using rodent testes \u2014 chosen because they contain cells ranging from immature, mitotically active spermatogonia to mature, nondividing spermatozoa (sperm)."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Their results led to the "
+                        },
+                        {
+                          "type": "text",
+                          "text": "Law of Bergoni\u00e9 and Tribondeau",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ": ionizing radiation is more effective against cells that (1) are actively mitotic, (2) are undifferentiated, and (3) have a long mitotic future."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Maturity, Differentiation, and Radiosensitivity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Differentiation",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " refers to a cell's level of functional/structural specialization. Undifferentiated (immature) cells \u2014 whose primary job is to divide and replace lost cells \u2014 are called "
+                    },
+                    {
+                      "type": "text",
+                      "text": "stem",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " or "
+                    },
+                    {
+                      "type": "text",
+                      "text": "precursor",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " cells, and are extremely radiosensitive. A spermatogonium is a classic example."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A fully differentiated cell (an "
+                    },
+                    {
+                      "type": "text",
+                      "text": "end cell",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ") has a specialized structure or function, doesn't divide, and is radioresistant. Spermatozoa and circulating erythrocytes are examples."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "According to Bergoni\u00e9 and Tribondeau, which cell type would be MOST radiosensitive?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "A highly differentiated, nondividing nerve cell",
+              "An undifferentiated, actively dividing stem cell"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Actively mitotic, undifferentiated cells with a long mitotic future ahead are the most radiosensitive by definition of the law."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Conditional Sensitivity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In 1925, Ancel and Vitemberger added an important refinement: the environmental conditions of a cell before, during, or after radiation exposure can also change the extent and appearance of radiation damage \u2014 a concept known as "
+                    },
+                    {
+                      "type": "text",
+                      "text": "conditional sensitivity",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This means a cell's radiosensitivity isn't a fixed, purely intrinsic property \u2014 it can be modified when the cell is under stress, especially during irradiation itself (which connects directly to the oxygen effect covered in the RBE and OER lesson)."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Three Categories of Factors Affecting Response",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cellular radioresponse and the appearance of a survival curve (its n, D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "q",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and D"
+                    },
+                    {
+                      "type": "text",
+                      "text": "0",
+                      "marks": [
+                        {
+                          "type": "subscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " values) can be modified by three groups of external factors:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Category"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Examples"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Physical",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "LET, dose rate"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Chemical",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Radiosensitizers, radioprotectors"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Biological",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Position in the cell cycle, ability to repair sublethal damage"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A dose-rate effect has been observed for reproductive failure, division delay, chromosome aberrations, and survival time: low dose rates are generally less efficient at producing damage than high dose rates, because cells have more opportunity to repair sublethal damage between hits as the dose rate drops. This dose-rate effect is significant with low-LET radiation but isn't observed with high-LET radiation."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered the Law of Bergoni\u00e9 and Tribondeau, how differentiation level relates to radiosensitivity, conditional sensitivity, and the physical/chemical/biological factor categories that modify cellular response."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Next: applying these same sensitivity principles to classify actual cell populations in the body \u2014 that's the Cell Differentiation lesson."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,9 +1,18 @@
 """cohorts, results, audit: cohort, enrollment, activity_result, audit_log
 
-What this file does: creates the four plan-2 tables.
-How it fits the project: fifth link in the chain; FKs into `user` (0002), `activity` (0003)
-and `attempt` (0004).
-Depends on: `0004_attempts.py`. Used by: `tests/test_migrations.py` (head "0005").
+What this file does: creates the four plan-2 tables — `cohort` (a named group of students
+with a rotatable join code and below-threshold percent), `enrollment` (links a user to a
+cohort with a role; an educator "owns" a cohort by being enrolled in it as `educator`),
+`activity_result` (the denormalised best/latest/mastery rollup per user-activity, ADR-0004),
+and `audit_log` (an append-only row per audited read/write, `app.audit.service.record_audit`).
+
+How it fits the project: fifth link in the migration chain; `enrollment`/`activity_result`/
+`audit_log` all FK into `0002_auth.py`'s `user` table, `activity_result` also FKs into
+`0003_content.py`'s `activity` and `0004_attempts.py`'s `attempt`, which is why this
+migration must come after all three.
+
+Depends on: `0004_attempts.py` (`down_revision = "0004"`; FKs to `user`/`activity`/`attempt`).
+Used by: `tests/test_migrations.py` (head "0005" until `0006_content_types.py` was added).
 
 Revision ID: 0005
 Revises: 0004

@@ -1,0 +1,635 @@
+{
+  "subject": {
+    "slug": "radiation-protection",
+    "title": "Radiation Protection",
+    "order": 9
+  },
+  "lesson": {
+    "slug": "ct-and-radioisotope-safety",
+    "title": "CT and Radioisotope Safety",
+    "order": 0,
+    "pages": [
+      {
+        "title": "Two Very Different Modalities, One Safety Lens",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CT and PET/nuclear medicine work completely differently \u2014 one uses an external X-ray tube, the other uses radioactive tracers injected into the patient \u2014 but both raise real dose and safety questions RTTs need to understand, especially as fusion imaging with these modalities becomes more common in treatment planning."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "CT Dose Optimization \u2014 Pitch",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pitch",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the relationship between how far the patient couch moves per rotation and the width of the X-ray beam. When pitch is approximately 1, spiral CT dose is comparable to conventional CT."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Increasing pitch (e.g., from 1 to 1.5) means the couch moves farther per rotation relative to the beam width \u2014 covering more anatomy per rotation, which "
+                        },
+                        {
+                          "type": "text",
+                          "text": "decreases patient dose",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " (at some potential cost to image quality/noise if not compensated for elsewhere)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Increasing CT pitch from 1 to 1.5 generally has what effect on patient dose?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Dose increases",
+              "Dose decreases"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Higher pitch covers more anatomy per rotation, which generally decreases patient dose."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Tube Current Modulation and Iterative Reconstruction",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tube current modulation",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is an automatic exposure control method that adjusts mA in real time based on patient anatomy as the scan progresses \u2014 reducing dose in thinner body regions without sacrificing image quality where more attenuation exists."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Iterative reconstruction",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a repeated data-processing technique that reconstructs CT images with the lowest possible noise \u2014 allowing the raw scan to be acquired at a lower dose while still producing a diagnostically usable image."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "CTDIvol and Interslice Scatter",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CTDIvol",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (CT Dose Index, volume) is a standardized dose marker representing the average absorbed dose within the scanned volume \u2014 the number you'll see reported directly on the scanner console for every study."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Interslice scatter",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " refers to radiation scattering from the slice actually being imaged into adjacent slices \u2014 a real, if secondary, contributor to total dose in a multi-slice acquisition."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Patient positioning matters more than it might seem: "
+                        },
+                        {
+                          "type": "text",
+                          "text": "miscentering a patient by just 2 cm",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " in the CT gantry can increase their radiation dose by as much as "
+                        },
+                        {
+                          "type": "text",
+                          "text": "25%",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " \u2014 automatic exposure control systems are calibrated assuming correct centering."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page4_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A patient is miscentered by 2 cm in the CT gantry. What's the approximate dose impact?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Negligible, less than 5%",
+              "Up to 25% increase"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Even a small 2 cm miscentering error can increase dose by as much as 25%, since automatic exposure control assumes correct centering."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "How PET Actually Works",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "PET (Positron Emission Tomography) examines "
+                    },
+                    {
+                      "type": "text",
+                      "text": "metabolic processes",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " rather than anatomy directly. A radioactive tracer \u2014 most commonly "
+                    },
+                    {
+                      "type": "text",
+                      "text": "FDG (fluorodeoxyglucose)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a radioactive glucose analog \u2014 is injected and taken up preferentially by metabolically active cells, including many cancers."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "As the tracer's radioisotope decays, it emits a "
+                        },
+                        {
+                          "type": "text",
+                          "text": "positron",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", which almost immediately collides with a nearby electron. This collision produces "
+                        },
+                        {
+                          "type": "text",
+                          "text": "annihilation radiation",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ": two 511-keV photons traveling in opposite directions, which the PET scanner detects in coincidence to localize where the decay occurred."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page5_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "PET imaging is fundamentally based on detecting:"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "X-rays transmitted through the patient",
+              "Paired 511-keV photons from positron-electron annihilation"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "PET detects the two 511-keV annihilation photons produced when an emitted positron collides with an electron \u2014 that's the entire basis of the imaging technique."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radioisotopes in Nuclear Medicine",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radioisotopes",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " are unstable atoms that spontaneously transform to reach a more stable configuration \u2014 recall from the Radioactivity lesson that isotopes share the same number of protons but differ in neutron count."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Technetium-99m",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the most widely used short-lived radioisotope in diagnostic nuclear medicine, valued for its short half-life (minimizing patient dose) and favorable gamma energy for imaging."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radiological Emergency Response",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A "
+                    },
+                    {
+                      "type": "text",
+                      "text": "dirty bomb",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (radioactive dispersal device) combines a conventional explosive with radioactive material \u2014 the danger is primarily from the explosion and contamination spread, not necessarily from a high radiation dose."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "In a radiological emergency specifically involving "
+                        },
+                        {
+                          "type": "text",
+                          "text": "radioactive iodine",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ", "
+                        },
+                        {
+                          "type": "text",
+                          "text": "potassium iodide (KI)",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " can be administered to saturate the thyroid gland with stable (non-radioactive) iodine, blocking uptake of the radioactive form and reducing thyroid dose and cancer risk."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page7_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What can be administered to block thyroid uptake of radioactive iodine in an emergency?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Potassium iodide",
+              "Barium sulfate"
+            ],
+            "answer": 0,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Potassium iodide saturates the thyroid with stable iodine, blocking uptake of the radioactive form."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered CT dose optimization (pitch, tube current modulation, iterative reconstruction, CTDIvol, interslice scatter, and miscentering effects), how PET imaging actually works (FDG, positron emission, annihilation radiation), Technetium-99m's role in nuclear medicine, and radiological emergency response basics."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The CT & Radioisotope Safety activity lets you practice this material through matching, quiz, fill-in-the-blank, and diagram-labeling exercises. Click below to begin."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -57,6 +57,8 @@ class Settings(BaseSettings):
     s3_bucket: str = "rtapps-media"
     google_client_id: str = ""
     google_client_secret: str = ""
+    rate_limit_enabled: bool = True
+    sentry_dsn: str = ""  # blank disables Sentry; set to opt in to error tracking
 
     @property
     def cookie_secure(self) -> bool:

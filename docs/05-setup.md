@@ -36,15 +36,21 @@ cd apps/api && uv run pytest
 If 5433 is taken on your machine, use another host port and set `TEST_DATABASE_URL` to match — CI uses 5433.
 
 ## Seed data
-`make seed` (stack running) creates accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and `student01@example.com` … `student10@example.com` (ten students enrolled in the demo cohort); imports + publishes the lessons in `apps/api/seed/lessons/`; and creates a demo cohort (join code `DEMO42`) owned by `educator@example.com` with the ten `studentNN@example.com` accounts enrolled, plus attempts and rollups. Safe to re-run; it refuses when `ENV=prod`.
+`make seed` (stack running) creates accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and `student01@example.com` … `student10@example.com` (ten students enrolled in the demo cohort); imports + publishes the lessons in `apps/api/seed/lessons/`, the full migrated legacy corpus in `apps/api/seed/content/` (one subdirectory per subject) and the hand-written activity fixtures in `apps/api/seed/activities/` (e.g. the demo quiz); and creates a demo cohort (join code `DEMO42`) owned by `educator@example.com` with the ten `studentNN@example.com` accounts enrolled, plus attempts and rollups on both a lesson and the demo quiz. Safe to re-run; it refuses when `ENV=prod`.
 
-## Migrating legacy lessons
-`tools/migrate-legacy` converts a legacy paged lesson (`div.lesson-page` + `lessonCorrectAnswers`) into an import document:
+All migrated content under `apps/api/seed/content/` is attributed here, once, to the legacy RTApps e-workbook (CC BY-NC 4.0) rather than per-document — this statement is the mechanism satisfying NFR-27's notice requirement for activity documents (quiz/flashcards/matching/sequencing have no in-content notice block of their own). Migrated *lessons* are the exception: they keep the in-content notice the phase-1 converter (`tools/migrate-legacy convert`) already writes into the page.
+
+## Migrating legacy content
+`tools/migrate-legacy scan` walks an entire legacy content tree (all 13 subject folders, or a subset), classifies each page (paged lesson, quiz, flashcards, matching, sequencing, or `unsupported`), converts every supported one, and writes its report:
 ```bash
 cd tools/migrate-legacy
-uv run migrate-legacy convert /path/to/rtt_e_workbook/Radiation_Biology/RBE_and_OER --out ../../apps/api/seed/lessons --report /tmp/report.json
+uv run migrate-legacy scan /path/to/rtt_e_workbook --out ../../apps/api/seed/content --report /tmp/scan-report.json
+# --subjects restricts the walk to named subject directories, e.g.:
+uv run migrate-legacy scan /path/to/rtt_e_workbook --out ../../apps/api/seed/content --subjects Radiation_Biology Ethics
 ```
-Each page is reported as `converted`, `needs-review` (something was mapped lossily or a knowledge check had no answer key) or `unsupported` (not the paged-lesson pattern). Import with `cd apps/api && uv run python -m app.content.importer ../../apps/api/seed/lessons/<slug>.json` or simply `make seed`.
+Each page is reported as `converted`, `needs-review` (something was mapped lossily, e.g. a knowledge check with no answer key or a duplicate matching pair) or `unsupported` (none of the five patterns). `docs/legacy-migration-report.md` is the fix-list generated from a full `scan` run against the legacy repo — the record of what still needs a human pass before (re-)import. Import the converted JSON with `cd apps/api && uv run python -m app.content.importer ../../apps/api/seed/content/<subject>/<slug>.json` (or the activity equivalent for quiz/flashcards/matching/sequencing documents) or simply `make seed`, which imports everything already committed under `seed/content/` and `seed/activities/`.
+
+The single-lesson `migrate-legacy convert` command (one directory in, one lesson JSON out) still exists for a targeted re-conversion of one page; `scan` is the one to reach for over the whole corpus.
 
 ## Google sign-in (optional)
 Email + password works out of the box. To enable "Continue with Google":

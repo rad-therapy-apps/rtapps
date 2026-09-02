@@ -27,6 +27,9 @@ PREV="$(cat .deployed 2>/dev/null || true)"
 echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 "${COMPOSE[@]}" pull --quiet
 # Migrations are a one-shot step BEFORE the new containers start (ADR-0005).
+# If this fails, `set -e` exits the script here — the rollback branch below is never reached,
+# but that's fine: `up -d` (line below) hasn't run yet, so the previously deployed containers
+# are untouched and still serving. There is nothing to roll back to; the old stack never stopped.
 "${COMPOSE[@]}" run --rm --no-deps api alembic upgrade head
 if "${COMPOSE[@]}" up -d --remove-orphans --wait --wait-timeout 180; then
   echo "$TAG" > .deployed

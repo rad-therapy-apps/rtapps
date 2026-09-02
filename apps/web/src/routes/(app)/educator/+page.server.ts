@@ -14,6 +14,7 @@
  * (`problemMessage`), `@rtapps/api-client` (`CohortOut`). Used by: `+page.svelte` (this route).
  */
 import { fail, redirect } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
 import { apiFetch, apiJson } from '$lib/server/api';
 import { problemMessage } from '$lib/server/auth-forms';
 import type { components } from '@rtapps/api-client';
@@ -41,6 +42,6 @@ export const actions: Actions = {
 			return fail(res.status, { error: problemMessage(problem, res.status), name });
 		}
 		const cohort: CohortOut = await res.json();
-		redirect(303, `/educator/cohorts/${cohort.id}`);
+		redirect(303, resolve('/(app)/educator/cohorts/[id]', { id: cohort.id }));
 	}
 };

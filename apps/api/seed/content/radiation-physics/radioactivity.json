@@ -1,0 +1,1422 @@
+{
+  "subject": {
+    "slug": "radiation-physics",
+    "title": "Radiation Physics",
+    "order": 8
+  },
+  "lesson": {
+    "slug": "radioactivity",
+    "title": "Radioactivity and Isotopes",
+    "order": 0,
+    "pages": [
+      {
+        "title": "A Quick Review of the Atom",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "All matter is made of elements and compounds. An "
+                    },
+                    {
+                      "type": "text",
+                      "text": "atom",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the smallest part of an element; a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "molecule",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the smallest part of a compound. Electrons orbit the nucleus in shells; the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "atomic number",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the number of protons in the nucleus, and the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "mass number",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the number of protons plus neutrons."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Atoms with the same atomic number but different mass numbers are "
+                        },
+                        {
+                          "type": "text",
+                          "text": "isotopes",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": " of an element. Radioactive isotopes have unstable nuclei."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "What Makes Radioactivity Happen",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radioactivity",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a phenomenon in which radiation \u2014 particles, electromagnetic radiation, or both \u2014 is given off by the nuclei of elements. A strong nuclear force holds the nucleons (protons and neutrons) together, but this only works when the nucleus has a correct "
+                    },
+                    {
+                      "type": "text",
+                      "text": "proton-to-neutron ratio",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "callout",
+                  "attrs": {
+                    "kind": "key-principle"
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Protons repel each other (like charges); neutrons help counteract this. If the neutron:proton ratio is wrong \u2014 too many or too few neutrons \u2014 the nucleus becomes unstable and eventually disintegrates, a process called "
+                        },
+                        {
+                          "type": "text",
+                          "text": "radioactive decay",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "text": ". Some high-atomic-number nuclides (like uranium, Z=92) have no stable isotope at all."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radioactivity is a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "nuclear",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " process, not an electron/chemical one \u2014 it isn't influenced by chemical changes or environmental conditions, and the rate of decay can't be controlled."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page2_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Can chemical reactions or environmental changes affect the rate of radioactive decay?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Yes, chemical bonding can slow or speed up decay",
+              "No \u2014 radioactivity is a nuclear process unaffected by chemical or environmental conditions"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Since radioactivity originates in the nucleus (not the orbital electrons), it's completely independent of chemical bonding or environmental conditions."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Measuring Activity",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Activity",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the rate of decay. The SI unit is the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Becquerel (Bq)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where 1 Bq = 1 transformation per second. Because a becquerel represents an extremely small activity, the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "megabecquerel (MBq)",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 10"
+                    },
+                    {
+                      "type": "text",
+                      "text": "6",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Bq \u2014 is more commonly used in practice."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When an unstable nucleus decays, it forms a new nuclide called a "
+                    },
+                    {
+                      "type": "text",
+                      "text": "daughter product",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", which may itself be stable or may require a whole chain of further transformations before reaching a stable end product."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Modes of Radioactive Decay",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Unstable nuclei return toward stability through one of several decay modes:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Mode"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "What happens"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Example"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "\u03b2",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "\u2212",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " (negatron) emission",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "A neutron converts to a proton, emitting an electron and antineutrino"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "60",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Co \u2192 "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "60",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Ni + e"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "\u2212",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "\u03b2",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "+",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    },
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " (positron) emission",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "A proton converts to a neutron, emitting a positron and neutrino"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "22",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Na \u2192 "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "22",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Ne + e"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "+",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Electron capture (EC)",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "An atomic electron is captured, converting a proton to a neutron"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "57",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Co + e"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "\u2212",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": " \u2192 "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "57",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Fe"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "\u03b1 emission",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "The nucleus emits a helium nucleus (2 protons + 2 neutrons)"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "238",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "U \u2192 "
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "231",
+                                  "marks": [
+                                    {
+                                      "type": "superscript"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "Pa + \u03b1"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Gamma emission and internal conversion also occur, typically after another decay mode leaves the daughter nucleus in an excited state that then releases energy as a gamma photon."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "The Decay Curve",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As a radioactive sample decays, its activity decreases because progressively less active material remains. Plotting activity against time produces an "
+                    },
+                    {
+                      "type": "text",
+                      "text": "exponential decay curve",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 the same mathematical shape used to describe Cobalt-60 source decay and half-life calculations."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Isotopes, Isobars, Isotones, and Isomers",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "These four terms are easy to mix up \u2014 each describes a different kind of relationship between nuclides:"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Term"
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Same..."
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Different..."
+                                }
+                              ]
+                            }
+                          ],
+                          "attrs": {
+                            "header": true
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Isotopes",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Atomic number (protons)"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Mass number (neutrons)"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Isobars",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Mass number"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Atomic number"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Isotones",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Number of neutrons"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Atomic number"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableRow",
+                      "content": [
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Isomers",
+                                  "marks": [
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Both protons and neutrons (same nuclide)"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "tableCell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Energy level/state"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Example of isotopes: carbon has isotopes with mass numbers from 12 to 14 (same 6 protons, different neutron counts). Example of isobars: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "64",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "Ni (28 protons) and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "64",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "Zn (30 protons) share mass number 64 but are different elements."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "knowledge_check",
+            "key": "lq_page6_1",
+            "stem": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Two nuclides have the same mass number but different atomic numbers. What's their relationship?"
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": [
+              "Isotopes",
+              "Isobars"
+            ],
+            "answer": 1,
+            "explanation": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Same mass number, different atomic number defines isobars \u2014 the reverse of isotopes."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Natural vs. Artificial Radioisotopes",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Many unstable isotopes occur "
+                    },
+                    {
+                      "type": "text",
+                      "text": "naturally",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 uranium and radium are classic examples. Others are "
+                    },
+                    {
+                      "type": "text",
+                      "text": "artificially produced",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " in nuclear reactors or particle accelerators, such as Strontium-90 and Cobalt-60, both of which have real clinical applications."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Radioactive Isotopes in Radiation Therapy",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Several radioisotopes are used directly in treatment, especially in brachytherapy:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Iodine-125 (I-125)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " and "
+                            },
+                            {
+                              "type": "text",
+                              "text": "Iridium-192 (Ir-192)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 prostate seed implants"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Palladium-103 (Pd-103)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 another common seed implant isotope"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Ir-192",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 also used for interstitial implants and breast brachytherapy"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Strontium-90 (Sr-90)",
+                              "marks": [
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " \u2014 a pure beta emitter, used in intravascular brachytherapy and some superficial applications"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Each isotope is chosen based on its half-life, emission type, and energy \u2014 matching the physical properties of the decay to the specific clinical application."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Wrap-Up",
+        "blocks": [
+          {
+            "type": "rich_text",
+            "body": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You've covered what makes a nucleus radioactive, how activity is measured, the major decay modes with real nuclear equations, the isotope/isobar/isotone/isomer distinctions, and where radioisotopes show up directly in radiation therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This connects directly to Cobalt-60's role in the equipment history covered in the LINAC lesson, and to the brachytherapy isotopes you'll encounter in site-specific treatment planning."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -17,9 +17,10 @@
  * (`problemMessage`), `@rtapps/api-client` (`CohortOverviewOut`, `MemberOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/educator/+page.svelte`.
  */
-import { error, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { apiFetch, apiJson } from '$lib/server/api';
 import { problemMessage } from '$lib/server/auth-forms';
+import { expectOk } from '$lib/server/expect';
 import type { components } from '@rtapps/api-client';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -32,16 +33,15 @@ export const load: PageServerLoad = async (event) => {
 		apiFetch(event, `/cohorts/${event.params.id}/overview`),
 		apiFetch(event, `/cohorts/${event.params.id}/members`)
 	]);
-	if (overviewRes.status === 404) error(404, 'Cohort not found');
-	if (overviewRes.status === 403) error(403, 'You are not an educator of this cohort');
-	if (!overviewRes.ok || !membersRes.ok) error(502, 'Could not load the cohort');
-	const overview: CohortOverviewOut = await overviewRes.json();
-	const members: MemberOut[] = await membersRes.json();
+	const overview = await expectOk<CohortOverviewOut>(overviewRes, 'Cohort not found');
+	const members = await expectOk<MemberOut[]>(membersRes, 'Cohort not found');
 	return { overview, members };
 };
 
-// Shared failure path for the mutating actions below: turns a non-ok response into a form `fail`.
+// Shared failure path for the mutating actions below: null on a successful response, otherwise a
+// form `fail` built from the API's problem+json body.
 async function problemOrNull(res: Response) {
+	if (res.ok) return null;
 	const problem = await res.json().catch(() => undefined);
 	return fail(res.status, { error: problemMessage(problem, res.status) });
 }
@@ -50,14 +50,17 @@ export const actions: Actions = {
 	// Rotates the join code; the new code is picked up on the next load (form re-runs load on success).
 	rotate: async (event) => {
 		const res = await apiJson(event, `/cohorts/${event.params.id}/rotate-code`);
-		return res.ok ? { rotated: true } : problemOrNull(res);
+		return (await problemOrNull(res)) ?? { rotated: true };
 	},
 	// Saves the below-threshold percent used to flag activities/students on this cohort.
 	threshold: async (event) => {
 		const form = await event.request.formData();
-		const threshold_percent = Number(form.get('threshold_percent'));
+		const threshold_percent = Number.parseInt(String(form.get('threshold_percent') ?? ''), 10);
+		if (Number.isNaN(threshold_percent)) {
+			return fail(400, { error: 'Threshold must be a number' });
+		}
 		const res = await apiJson(event, `/cohorts/${event.params.id}`, { threshold_percent }, 'PATCH');
-		return res.ok ? { saved: true } : problemOrNull(res);
+		return (await problemOrNull(res)) ?? { saved: true };
 	},
 	// Removes a member from the cohort's roster.
 	remove: async (event) => {
@@ -69,6 +72,6 @@ export const actions: Actions = {
 			undefined,
 			'DELETE'
 		);
-		return res.ok ? { removed: true } : problemOrNull(res);
+		return (await problemOrNull(res)) ?? { removed: true };
 	}
 };
