@@ -97,5 +97,12 @@ jobs:
     needs: [images, migrate-dry-run]
     if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy.yml
+    # A called reusable workflow may only hold permissions its caller job grants; deploy.yml
+    # declares `packages: read`, so this caller job must grant it explicitly now that
+    # workflow-level permissions carry `contents: read` only (least privilege — GitHub
+    # refuses to START the whole workflow otherwise, as a startup_failure).
+    permissions:
+      contents: read
+      packages: read
     with: { environment: test, image_tag: "${{ github.sha }}" }
     secrets: inherit
