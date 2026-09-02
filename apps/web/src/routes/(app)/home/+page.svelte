@@ -30,7 +30,7 @@
 <h1>Welcome, {data.user.display_name}</h1>
 <p>Role: {data.user.role}</p>
 
-<p><a href={resolve('/subjects')}>Browse subjects</a></p>
+<p><a href={resolve('/(app)/subjects')}>Browse subjects</a></p>
 
 <!-- Cohorts and the join-by-code form only apply to students. -->
 {#if data.user.role === 'student'}

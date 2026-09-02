@@ -17,6 +17,7 @@
  * `apps/web/e2e/lesson.e2e.ts`, which registers a fresh account before exercising a lesson.
  */
 import { fail, redirect } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
 import { apiFetch, relaySetCookie } from '$lib/server/api';
 import { problemMessage, safeNext } from '$lib/server/auth-forms';
 import type { Actions, PageServerLoad } from './$types';
@@ -24,7 +25,7 @@ import type { Actions, PageServerLoad } from './$types';
 // Renders the registration form with a validated `next` redirect target.
 export const load: PageServerLoad = async (event) => {
 	// Already signed in: don't show the registration form again.
-	if (event.locals.user) redirect(303, '/home');
+	if (event.locals.user) redirect(303, resolve('/(app)/home'));
 	// safeNext rejects protocol-relative / off-site values (open-redirect guard).
 	return { next: safeNext(event.url.searchParams.get('next')) };
 };

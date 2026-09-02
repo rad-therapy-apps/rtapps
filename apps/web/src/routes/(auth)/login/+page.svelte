@@ -57,7 +57,7 @@
 	<p><a href="/api/v1/auth/google/start" rel="external">Continue with Google</a></p>
 {/if}
 
-<p><a href={resolve('/register')}>Need an account? Register</a></p>
+<p><a href={resolve('/(auth)/register')}>Need an account? Register</a></p>
 
 <style>
 	/* Form layout: stacked fields, capped width. */

@@ -145,7 +145,8 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
     activity = (
         await db.scalar(select(Activity).where(Activity.lesson_id == lesson.id)) if lesson else None
     )
-    assert activity is not None and activity.current_version_id is not None
+    if activity is None or activity.current_version_id is None:
+        raise RuntimeError(f"seed lesson missing or unpublished: {SEED_LESSON_SLUG!r}")
     version = await db.get(ContentVersion, activity.current_version_id)
     assert version is not None
     checks = knowledge_checks(version.snapshot)
@@ -223,7 +224,8 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
         if quiz
         else None
     )
-    assert quiz_activity is not None and quiz_activity.current_version_id is not None
+    if quiz_activity is None or quiz_activity.current_version_id is None:
+        raise RuntimeError(f"seed quiz activity missing or unpublished: {SEED_QUIZ_SLUG!r}")
     quiz_version = await db.get(ContentVersion, quiz_activity.current_version_id)
     assert quiz_version is not None
     quiz_items = gradeable_items(quiz_version.snapshot)

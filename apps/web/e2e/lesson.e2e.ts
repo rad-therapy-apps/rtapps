@@ -8,11 +8,12 @@
  * Playwright's auto-waiting `expect`.
  * How it fits the project: docs/03-architecture.md §11 (End-to-end row); the roadmap's Phase 1
  * exit criterion. Requires `make seed` first (lesson content); the user itself is created here.
- * Works with: the pages under apps/web/src/routes ((auth)/register, (app)/subjects, (app)/lessons,
- * (app)/home) and their components (LessonPager, KnowledgeCheck). Used by: `make e2e` and the CI
- * `e2e` job in .github/workflows/pr.yml.
+ * Works with: `./helpers` (registerStudent); the pages under apps/web/src/routes ((auth)/register,
+ * (app)/subjects, (app)/lessons, (app)/home) and their components (LessonPager, KnowledgeCheck).
+ * Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.
  */
 import { test, expect } from '@playwright/test';
+import { registerStudent } from './helpers';
 
 test('register, complete a lesson, answer a question, and see the score', async ({ page }) => {
 	// Fresh identity per run: registration must succeed even when the stack was reused.
@@ -20,17 +21,8 @@ test('register, complete a lesson, answer a question, and see the score', async 
 	const password = 'password-1234';
 	const displayName = 'E2E Student';
 
-	await page.goto('/register');
-	// Wait for hydration (module requests to finish) before typing: values entered into the
-	// server-rendered form before Svelte hydrates are reset by the `value={…}` bindings.
-	await page.waitForLoadState('networkidle');
-	await page.getByLabel('Email').fill(email);
-	await page.getByLabel('Display name').fill(displayName);
-	await page.getByLabel('Password').fill(password);
-	await page.getByRole('button', { name: 'Register' }).click();
-
 	// The register action relays the API's session cookie and redirects to the signed-in home.
-	await expect(page).toHaveURL(/\/home$/);
+	await registerStudent(page, { email, password, name: displayName });
 
 	// `exact` because the home page also has a "Browse subjects" link.
 	await page.getByRole('link', { name: 'Subjects', exact: true }).click();

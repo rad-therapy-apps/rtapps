@@ -15,6 +15,7 @@
  * in `+layout.svelte` (`action="/logout"`).
  */
 import { redirect } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
 import { apiFetch, relaySetCookie } from '$lib/server/api';
 import type { Actions } from './$types';
 
@@ -31,6 +32,6 @@ export const actions: Actions = {
 		// Belt-and-braces fallback: delete the cookie locally even if the API call above failed
 		// or didn't clear it, so the browser is never left holding a session cookie.
 		event.cookies.delete('rt_session', { path: '/' });
-		redirect(303, '/login');
+		redirect(303, resolve('/(auth)/login'));
 	}
 };

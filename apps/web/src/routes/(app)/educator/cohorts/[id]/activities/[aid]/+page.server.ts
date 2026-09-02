@@ -14,8 +14,8 @@
  * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`ActivityStatsOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/educator/cohorts/[id]/+page.svelte`.
  */
-import { error } from '@sveltejs/kit';
 import { apiFetch } from '$lib/server/api';
+import { expectOk } from '$lib/server/expect';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 
@@ -23,10 +23,7 @@ type ActivityStatsOut = components['schemas']['ActivityStatsOut'];
 
 export const load: PageServerLoad = async (event) => {
 	const res = await apiFetch(event, `/cohorts/${event.params.id}/activities/${event.params.aid}`);
-	if (res.status === 404) error(404, 'Activity not found');
-	if (res.status === 403) error(403, 'You are not an educator of this cohort');
-	if (!res.ok) error(502, 'Could not load the activity stats');
-	const stats: ActivityStatsOut = await res.json();
+	const stats = await expectOk<ActivityStatsOut>(res, 'Activity not found');
 	// cohortId/activityId are passed through only for the page's CSV link and "back to cohort" link.
 	return { stats, cohortId: event.params.id, activityId: event.params.aid };
 };

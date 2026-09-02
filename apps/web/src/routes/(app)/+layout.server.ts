@@ -16,10 +16,11 @@
  * every page under `(app)/`.
  */
 import { redirect } from '@sveltejs/kit';
+import { resolve } from '$app/paths';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = ({ locals }) => {
 	// Defence in depth: guard.ts should already have redirected anonymous users away from (app).
-	if (!locals.user) redirect(303, '/login');
+	if (!locals.user) redirect(303, resolve('/(auth)/login'));
 	return { user: locals.user };
 };

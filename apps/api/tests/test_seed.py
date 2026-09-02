@@ -23,7 +23,7 @@ Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.models import Attempt
@@ -162,6 +162,39 @@ async def test_seed_cohort_students_and_results(db: AsyncSession, settings: Sett
         and second.attempts_created == 0
         and second.quiz_attempts_created == 0
     )
+    assert (await db.scalar(select(func.count()).select_from(Attempt))) == 20
+
+
+async def test_seed_partial_rerun_recreates_only_missing_attempt(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Deleting one demo student's lesson attempt and re-running seed() recreates only that
+    student's attempt (the other nine students' lesson attempts and every quiz attempt are
+    left untouched, since seed() only fills in what's missing, not a full re-import)."""
+    await seed(db, settings)
+    student03 = await db.scalar(select(User).where(User.email == "student03@example.com"))
+    assert student03 is not None
+    lesson_activity = await db.scalar(
+        select(Activity)
+        .join(Lesson, Lesson.id == Activity.lesson_id)
+        .where(Lesson.slug == "rbe-and-oer")
+    )
+    assert lesson_activity is not None
+    await db.execute(
+        delete(Attempt).where(
+            Attempt.user_id == student03.id, Attempt.activity_id == lesson_activity.id
+        )
+    )
+    await db.flush()
+
+    second = await seed(db, settings)
+    assert second.attempts_created == 1 and second.quiz_attempts_created == 0
+    remaining = await db.scalar(
+        select(func.count())
+        .select_from(Attempt)
+        .where(Attempt.user_id == student03.id, Attempt.activity_id == lesson_activity.id)
+    )
+    assert remaining == 1
     assert (await db.scalar(select(func.count()).select_from(Attempt))) == 20
 
 

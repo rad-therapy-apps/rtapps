@@ -72,7 +72,7 @@
 	<button type="submit">Register</button>
 </form>
 
-<p><a href={resolve('/login')}>Already have an account? Sign in</a></p>
+<p><a href={resolve('/(auth)/login')}>Already have an account? Sign in</a></p>
 
 <style>
 	/* Form layout: stacked fields, capped width. */

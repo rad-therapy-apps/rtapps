@@ -16,14 +16,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	// Builds the "Next page" query string, carrying the current search term forward alongside the cursor.
 	function nextPageQuery(cursor: string): string {
-		const q = data.q ? `q=${encodeURIComponent(data.q)}&` : '';
-		return `${q}cursor=${encodeURIComponent(cursor)}`;
+		const params = new SvelteURLSearchParams();
+		if (data.q) params.set('q', data.q);
+		params.set('cursor', cursor);
+		return params.toString();
 	}
 </script>
 

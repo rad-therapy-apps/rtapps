@@ -95,10 +95,11 @@ async def create_cohort(
     user: User = Depends(_require_educator_or_admin),
     db: AsyncSession = Depends(get_session),
 ) -> CohortOut:
-    # Build the cohort row from the validated request body.
+    # Build the cohort row from the validated request body; _assign_fresh_code below assigns
+    # the real join code exactly once (the placeholder here is never persisted).
     cohort = Cohort(
         name=body.name,
-        join_code=generate_join_code(),
+        join_code="",
         threshold_percent=body.threshold_percent,
         starts_on=body.starts_on,
         ends_on=body.ends_on,
@@ -126,14 +127,34 @@ async def create_cohort(
 async def list_my_cohorts(
     user: User = Depends(require_user), db: AsyncSession = Depends(get_session)
 ) -> list[CohortOut]:
-    # Every cohort the caller is enrolled in, newest first, with their role in each.
+    # Every cohort the caller is enrolled in, newest first, with their role in each and a
+    # student count from one grouped query (instead of one COUNT per cohort).
+    student_counts = (
+        select(Enrollment.cohort_id, func.count().label("n"))
+        .where(Enrollment.role == "student")
+        .group_by(Enrollment.cohort_id)
+        .subquery()
+    )
     rows = await db.execute(
-        select(Cohort, Enrollment.role)
+        select(Cohort, Enrollment.role, func.coalesce(student_counts.c.n, 0))
         .join(Enrollment, Enrollment.cohort_id == Cohort.id)
+        .outerjoin(student_counts, student_counts.c.cohort_id == Cohort.id)
         .where(Enrollment.user_id == user.id)
         .order_by(Cohort.created_at.desc())
     )
-    return [await cohort_out(db, c, role) for c, role in rows.all()]
+    return [
+        CohortOut(
+            id=cohort.id,
+            name=cohort.name,
+            join_code=cohort.join_code if role == "educator" else None,
+            threshold_percent=cohort.threshold_percent,
+            starts_on=cohort.starts_on,
+            ends_on=cohort.ends_on,
+            role=role,
+            student_count=count,
+        )
+        for cohort, role, count in rows.all()
+    ]
 
 
 @router.get("/{cohort_id}", response_model=CohortOut)

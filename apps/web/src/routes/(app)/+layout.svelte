@@ -24,11 +24,11 @@
 </script>
 
 <nav>
-	<a href={resolve('/home')}>Home</a>
-	<a href={resolve('/subjects')}>Subjects</a>
+	<a href={resolve('/(app)/home')}>Home</a>
+	<a href={resolve('/(app)/subjects')}>Subjects</a>
 	<!-- Educators and admins both get the educator area; students don't. -->
 	{#if data.user.role !== 'student'}
-		<a href={resolve('/educator')}>Educator</a>
+		<a href={resolve('/(app)/educator')}>Educator</a>
 	{/if}
 	{#if data.user.role === 'admin'}
 		<a href={resolve('/(app)/admin/users')}>Admin</a>
