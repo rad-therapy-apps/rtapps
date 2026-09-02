@@ -50,9 +50,10 @@ openssl rand -base64 24                             # → POSTGRES_PASSWORD (the
 ```
 
 Then edit `.env`: `PUBLIC_ORIGIN` (the public URL), the `S3_*` values for your bucket (Cloudflare
-R2, OCI Object Storage or any S3-compatible service), `BACKUP_BUCKET`, and the ingress values from
-§3. Every variable is documented inline in `infra/prod.env.example`. Never commit `.env`; never
-put its values in GitHub secrets.
+R2, OCI Object Storage or any S3-compatible service), `BACKUP_BUCKET`, `SENTRY_DSN` (optional —
+error tracking for both `api` and `web`; blank disables it, server-side only, see
+`docs/03-architecture.md` §8), and the ingress values from §3. Every variable is documented
+inline in `infra/prod.env.example`. Never commit `.env`; never put its values in GitHub secrets.
 
 ### Backup encryption key
 
@@ -126,6 +127,30 @@ open **Admin → Users**, and promote the mentor's account to `educator` (audite
 the first admin by registering normally and promoting the row with `psql` once:
 `UPDATE "user" SET role = 'admin' WHERE email = '…';`.
 
+### Content updates
+
+To load new or re-converted content (`tools/migrate-legacy scan` output, or a hand-authored
+activity fixture) into a deployed environment without a full redeploy, run the importer inside
+the running `api` container the same way `make seed` does, pointing at the file(s):
+
+```bash
+ssh deploy@YOUR_HOST 'cd /opt/rtapps && docker compose --env-file .env -f compose.prod.yaml run --rm api python -m app.content.importer seed/content/<subject>/<slug>.json'
+```
+
+On `test`, re-running the whole seed (`python -m app.content.importer` skipped, `python -m
+app.seed` instead — see above) is simplest and idempotent: it re-imports every fixture and every
+file under `seed/content/` and `seed/activities/` without duplicating rows.
+
+### Scheduled jobs (cron)
+
+Add to the `deploy` user's crontab on the VM (`crontab -e`) — `docs/02-requirements.md` NFR-26,
+sessions purged 30 days after expiry:
+
+```cron
+# Nightly session purge, 03:30 UTC (after the backup at BACKUP_HOUR_UTC)
+30 3 * * * docker compose --env-file /opt/rtapps/.env -f /opt/rtapps/compose.prod.yaml run --rm api python -m app.tasks.purge_sessions >> /var/log/rtapps-purge.log 2>&1
+```
+
 ## 6. Verify
 
 ```bash
@@ -189,6 +214,9 @@ ours are so far); otherwise restore last night's backup first (§7).
 - `apt-get upgrade` + reboot in a quiet window (unattended-upgrades handles security patches).
 - Confirm last night's backup object exists and run the restore drill (§7).
 - Review **Admin → Audit log** for unexpected educator reads or role changes.
+- Review the audit log specifically for `export_csv` and `erase_user` actions — these are the two
+  actions with no undo (a CSV once downloaded, an erase once run); confirm each was performed by
+  the account it claims and against a cohort/user that account actually owns.
 - Yearly: rotate the `age` key (new key → `.env` → next backup is encrypted to it; keep the old
   private key until its backups expire).
 
@@ -198,5 +226,19 @@ ours are so far); otherwise restore last night's backup first (§7).
 |---|---|
 | `audit_log` rows | ≥ 2 years (NFR-26; no purge job yet) |
 | Backups | 30 days (`BACKUP_RETENTION_DAYS`) |
-| Sessions | purged 30 days after expiry — purge job is plan-3 backlog |
-| Attempts, content versions | indefinitely (pseudonymised after erase — erase itself is plan-3) |
+| Sessions | purged 30 days after expiry — `app.tasks.purge_sessions`, scheduled per §5 |
+| Attempts, content versions | indefinitely (pseudonymised after erase; `POST admin/users/{id}/erase`) |
+
+## 11. Security notes
+
+- **Per-IP rate limiting assumes the proxy is the only path to the API.** `login`, `register`,
+  password-reset and `join` are rate-limited by the caller's IP as the API sees it (NFR-13). In
+  this deployment (ADR-0005) that's always the request's immediate peer address — Caddy/cloudflared
+  is the only thing that can reach the `api` container, so there is no untrusted hop in front of it
+  supplying a spoofable `X-Forwarded-For`. If a CDN or a second proxy is ever added in front of the
+  existing proxy, the API would need to trust *that* layer's forwarded-for header instead of the
+  raw peer address, and a client that reaches the API directly (bypassing the new front layer)
+  could forge the header to spread requests across IPs and evade the limit. **Known follow-up, not
+  yet built:** validate/pin the trusted-hop count before adding any layer in front of the current
+  proxy; an issue is filed for this at PR time rather than blocking this release, since today's
+  topology has no such hop to spoof.
