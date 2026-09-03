@@ -37,8 +37,6 @@ from app.content.models import Question
 from app.db import Base
 from app.ids import new_id
 
-# NOTE: Additional imports (Any is already imported above) for DataTable model.
-
 
 # Working copy of a quiz: title + ordered question-bank rows via QuizQuestion. Pass
 # percent and shuffle live in the paired Activity.config (the existing pattern), not here.
