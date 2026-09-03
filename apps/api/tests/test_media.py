@@ -110,6 +110,14 @@ async def test_presign_sanitizes_path_traversal_filename(
     assert ".." not in str(body["storage_key"])
 
 
+async def test_presign_sanitizes_dot_segment_filename(
+    client: AsyncClient, db: AsyncSession, fake_storage: FakeStorage
+) -> None:
+    await make_educator(client, db, "edu@example.edu")
+    body = await _presign(client, filename="..")
+    assert str(body["storage_key"]).endswith("/upload")
+
+
 async def test_confirm_before_and_after_upload(
     client: AsyncClient, db: AsyncSession, fake_storage: FakeStorage
 ) -> None:
@@ -180,3 +188,32 @@ async def test_serve_media_unconfirmed_is_404(
 async def test_serve_media_anon_401(client: AsyncClient, fake_storage: FakeStorage) -> None:
     r = await client.get(f"/api/v1/media/{uuid.uuid4()}", follow_redirects=False)
     assert r.status_code == 401
+
+
+async def test_confirm_is_idempotent_no_duplicate_audit(
+    client: AsyncClient, db: AsyncSession, fake_storage: FakeStorage
+) -> None:
+    await make_educator(client, db, "edu@example.edu")
+    body = await _presign(client)
+    asset_id, key = body["id"], body["storage_key"]
+
+    # Mark storage object present
+    fake_storage.objects[str(key)] = 1234
+
+    # Confirm first time
+    r = await client.post(f"/api/v1/authoring/media/{asset_id}/confirm")
+    assert r.status_code == 200
+    out = r.json()
+    assert out["confirmed"] is True
+
+    # Confirm second time (should be idempotent, no duplicate audit)
+    r = await client.post(f"/api/v1/authoring/media/{asset_id}/confirm")
+    assert r.status_code == 200
+    out = r.json()
+    assert out["confirmed"] is True
+
+    # Assert exactly one confirm_media audit row
+    audits = (await db.scalars(select(AuditLog).where(AuditLog.action == "confirm_media"))).all()
+    assert len(audits) == 1
+    assert audits[0].target_type == "media_asset"
+    assert audits[0].target_id == uuid.UUID(str(asset_id))

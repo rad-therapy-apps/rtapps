@@ -57,7 +57,9 @@ async def presign_upload(
     asset_id = new_id()
     # Path(...).name strips any directory components (e.g. "../../evil.png" -> "evil.png")
     # so a hostile filename can never escape the asset's own storage prefix.
-    basename = Path(payload.filename).name or "upload"
+    basename = Path(payload.filename).name
+    if basename in {"", ".", ".."}:  # pathlib keeps dot-segments; never let one reach a storage key
+        basename = "upload"
     key = f"media/{asset_id}/{basename}"
     asset = MediaAsset(
         id=asset_id,
@@ -83,6 +85,8 @@ async def confirm_upload(
     asset = await db.get(MediaAsset, asset_id)
     if asset is None:
         raise Problem(404, "Media asset not found")
+    if asset.confirmed:
+        return asset  # idempotent: re-confirming is a no-op and must not re-audit
     # stat_object performs network I/O; run it off the event loop.
     size = await anyio.to_thread.run_sync(storage.stat, asset.storage_key)
     if size is None:
