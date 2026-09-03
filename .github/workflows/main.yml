@@ -73,6 +73,11 @@ jobs:
   migrate-dry-run:
     runs-on: ubuntu-latest
     needs: images
+    # packages: read — this job pulls the just-pushed (private) api image from GHCR; the
+    # workflow-level permissions carry contents: read only since the least-privilege split.
+    permissions:
+      contents: read
+      packages: read
     services:
       postgres:
         image: postgres:16
