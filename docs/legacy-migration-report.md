@@ -18,10 +18,8 @@ Used by: plan 3b authoring; anyone auditing migration coverage.
 This is plan 3b's authoring fix-list; `unsupported` pages (games, simulators, EMR, radio-quiz
 variants) are phase-4 or fix-list material.
 
-The scan converted **19** documents cleanly, flagged **73** for a needs-review human pass
-(imported, but with a lossy element mapping, a missing/ambiguous knowledge-check answer, or a
-slug collision), and found **88** pages with no convertible pattern at all (unsupported --
-nothing written). All 92 converted documents (converted + needs-review) pass the API's
+The scan converted **21** documents cleanly, flagged **71** for a needs-review human pass (imported, but with a lossy element mapping, a missing/ambiguous knowledge-check answer, or a
+slug collision), and found **88** pages with no convertible pattern at all (unsupported -- nothing written). All 92 converted documents (converted + needs-review) pass the API's
 Pydantic import validation (`app.content.activity_importer` / `app.content.importer`).
 
 ## Summary by subject
@@ -34,9 +32,9 @@ Per subject, per kind: converted / needs-review / unsupported counts (a dash mea
 | Clinical Practice | 0/5 | - | 0/1 | - | 8 |
 | Ethics | 0/2 | 1/0 | - | - | 5 |
 | Orientation to Radiation Therapy | 0/6 | - | 1/0 | - | 5 |
-| Patient Care | 1/8 | - | - | - | 7 |
+| Patient Care | 2/7 | - | - | - | 7 |
 | Principles and Practice I | 1/2 | - | - | - | 4 |
-| Quality Management and Safety | 0/1 | - | - | - | 1 |
+| Quality Management and Safety | 1/0 | - | - | - | 1 |
 | Radiation Biology | 2/7 | 3/0 | - | 3/0 | 1 |
 | Radiation Physics | 0/4 | - | - | - | 11 |
 | Radiation Protection | 3/3 | 1/0 | - | 1/0 | 3 |
@@ -44,196 +42,63 @@ Per subject, per kind: converted / needs-review / unsupported counts (a dash mea
 | Sectional Anatomy | 0/8 | - | - | - | 6 |
 | Treatment Delivery Procedures | 0/8 | - | 0/1 | - | 9 |
 | Treatment Planning | 0/11 | - | - | - | 24 |
-| **Total** | 9/71 | 5/0 | 1/2 | 4/0 | 88 |
+| **Total** | 11/69 | 5/0 | 1/2 | 4/0 | 88 |
 
-Grand totals across all 180 scanned pages: **19 converted**, **73 needs-review**, **88 unsupported**.
+Grand totals across all 180 scanned pages: **21 converted**, **71 needs-review**, **88 unsupported**.
 
 ## Needs-review listing
 
-Every document the scanner wrote but flagged for a human pass — grouped by subject, in scan order. Each entry is the source page, the kind converted, and the notes the converter attached (lossy element mappings, missing/ambiguous answer keys, normalised knowledge-check keys, slug collisions).
+Every document the scanner wrote but flagged for a human pass -- grouped by subject, in scan order. Each entry is the source page, the kind converted, and the notes the converter attached (lossy element mappings, missing/ambiguous answer keys, normalised knowledge-check keys, slug collisions).
 
 ### Clinical Practice
 
 - **Clinical_Practice/Modalities_Equipment_Terminology/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - unsupported inline element span (×29)
-  - unsupported inline element ul (×4)
-  - unsupported inline element li (×10)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - img without media asset
-  - unsupported inline element h4
-  - unsupported inline element div (×2)
-  - unsupported inline element p
-  - unsupported inline element label (×3)
+  - img placeholder (https://oncologymedicalphysics.com/wp-content/uploads/2021/04/Linac-Components-OMP.png)
   - unsupported inline element button
-  - no correct answer for q_page8_1_ans
-  - unsupported element button on page 8
-  - no correct answer for q_page9_1_ans
-  - unsupported element button on page 9
-  - unsupported element div on page 10 (×2)
-  - no correct answer for q_page10_1_ans
-  - unsupported element button on page 10
-  - unsupported element div on page 11 (×2)
-  - no correct answer for q_page11_1_ans
-  - unsupported element button on page 11
-  - unsupported element div on page 12 (×3)
-  - unsupported element div on page 14
+  - dropped non-https link
 - **Clinical_Practice/Modalities_Equipment_Terminology/rt_terminology_challenge/index.html** (flashcards)
   - ambiguous term/definition array vocab; defaulted to flashcards
 - **Clinical_Practice/Professional_Behavior_and_Boundaries/index.html** (lesson)
-  - unsupported inline element span (×6)
-  - no correct answer for q_page1_1_ans
-  - unsupported element button on page 1
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 6
+  - unsupported inline element textarea (×3)
 - **Clinical_Practice/Professional_Organizations/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - unsupported element div on page 2 (×2)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - unsupported element div on page 3
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 4
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - unsupported element div on page 5
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 6 (×2)
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
-  - unsupported element div on page 7
-  - no correct answer for q_page7_1_ans
-  - unsupported element button on page 7
-  - unsupported element div on page 8
+  - mixed inline content wrapped in paragraph in div (×8)
 - **Clinical_Practice/Professionalism_and_Success/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - unsupported element div on page 3
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
   - highlight→bold (×8)
-  - unsupported inline element ol
-  - unsupported inline element li (×3)
-  - unsupported element div on page 4
-  - unsupported inline element span
 - **Clinical_Practice/Team_and_Roles/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - unsupported element div on page 2 (×2)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - unsupported element div on page 3 (×2)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 4
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
-  - unsupported inline element ul
-  - unsupported inline element li (×4)
-  - unsupported element div on page 7
+  - dropped non-https link
 
 ### Ethics
 
 - **Ethics/ARRT_Ethics/index.html** (lesson)
-  - unsupported inline element span (×7)
-  - unsupported element div on page 7 (×2)
-  - unsupported element div on page 8 (×4)
-  - unsupported element div on page 9 (×2)
+  - mixed inline content wrapped in paragraph in div (×3)
 - **Ethics/Medical_Law/index.html** (lesson)
   - highlight→bold (×10)
-  - unsupported inline element ul
-  - unsupported inline element li (×2)
 
 ### Orientation to Radiation Therapy
 
 - **Orientation_to_Radiation_Therapy/Becoming_a_Radiation_Therapist/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×6)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - unsupported element div on page 5
 - **Orientation_to_Radiation_Therapy/Evolution_of_Radiation_Therapy/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×2)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 7
+  - dropped non-https link
 - **Orientation_to_Radiation_Therapy/History_of_Radiologic_Technology/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×7)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - unsupported element div on page 6
+  - dropped non-https link
 - **Orientation_to_Radiation_Therapy/Study_Skills_and_Time_Management/index.html** (lesson)
-  - unsupported element div on page 1 (×4)
   - highlight→bold (×3)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 7
+  - dropped non-https link
 - **Orientation_to_Radiation_Therapy/Team_and_Roles/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - unsupported element div on page 2 (×2)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - unsupported element div on page 3 (×2)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 4
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
-  - unsupported inline element ul
-  - unsupported inline element li (×4)
-  - unsupported element div on page 7
+  - dropped non-https link
   - slug collision on 'team-and-roles'; renamed to 'orientation-to-radiation-therapy-team-and-roles'
 - **Orientation_to_Radiation_Therapy/What_is_Oncology/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×14)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported inline element ul
-  - unsupported inline element li (×4)
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 6
+  - dropped non-https link
 
 ### Patient Care
 
 - **Patient_Care/Clinical_Objectives/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×2)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - no correct answer for q_page7_1_ans
-  - unsupported element button on page 7
-  - unsupported element div on page 8
+  - dropped non-https link
 - **Patient_Care/Communication_Patient_Education/index.html** (lesson)
   - highlight→bold (×4)
 - **Patient_Care/Equipment_Monitoring_Emergencies/index.html** (lesson)
@@ -243,30 +108,11 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
 - **Patient_Care/Medical_Record_Documentation/index.html** (lesson)
   - highlight→bold (×2)
 - **Patient_Care/Patient_Identifiers/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×12)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported inline element ul
-  - unsupported inline element li (×4)
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 6
+  - dropped non-https link
 - **Patient_Care/Patient_Journey/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×5)
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
-  - unsupported element div on page 8
-- **Patient_Care/Pharmacology_Contrast_Media/index.html** (lesson)
-  - unsupported inline element ul
-  - unsupported inline element li (×2)
+  - dropped non-https link
 
 ### Principles and Practice I
 
@@ -274,23 +120,6 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
   - highlight→bold (×2)
 - **Principles_and_Practice_I/Math_Review/index.html** (lesson)
   - highlight→bold (×2)
-
-### Quality Management and Safety
-
-- **Quality_Management_and_Safety/rt_qa/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - unsupported element div on page 3
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 4
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - unsupported element div on page 5
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 6
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
 
 ### Radiation Biology
 
@@ -314,29 +143,10 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
 - **Radiation_Physics/Radioactivity/index.html** (lesson)
   - highlight→bold (×3)
 - **Radiation_Physics/Sources_of_Radiation/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - unsupported inline element span (×15)
-  - img without media asset (×4)
-  - unsupported element div on page 3
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 4
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - unsupported element div on page 5 (×2)
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
-  - unsupported element div on page 6 (×2)
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
-  - unsupported element div on page 7 (×2)
-  - unsupported element div on page 8 (×2)
-  - no correct answer for q_page8_1_ans
-  - unsupported element button on page 8
-  - unsupported element div on page 9 (×2)
-  - unsupported inline element ul (×2)
-  - unsupported inline element li (×7)
-  - unsupported element div on page 11
+  - img placeholder (https://placehold.co/600x250/E9D5FF/4C1D95?text=Electromagnetic+Spectrum+Diagram+(Ionizing+vs+Non-Ionizing))
+  - img placeholder (https://placehold.co/500x250/E0E7FF/4338CA?text=Cosmic+Rays+Illustration)
+  - img placeholder (https://placehold.co/500x250/E0E7FF/4338CA?text=Terrestrial+Radiation+Sources)
+  - img placeholder (https://placehold.co/600x350/E9D5FF/4C1D95?text=Pie+Chart:+Typical+U.S.+Radiation+Exposure+Sources)
 - **Radiation_Physics/em_spectrum/index.html** (lesson)
   - highlight→bold (×2)
 - **Radiation_Physics/photon_interactions/index.html** (lesson)
@@ -345,20 +155,14 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
 ### Radiation Protection
 
 - **Radiation_Protection/ALARA_and_Inverse_Square_Law/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - unsupported element hr on page 1
-  - unsupported inline element span (×10)
-  - unsupported element div on page 2
-  - no correct answer for q_page2_1_ans
-  - unsupported element button on page 2
-  - unsupported element div on page 3
-  - no correct answer for q_page4_1_ans
-  - unsupported element button on page 4
-  - unsupported element div on page 5
-  - no correct answer for q_page5_1_ans
-  - unsupported element button on page 5
   - unsupported element hr on page 8
-  - unsupported element div on page 8 (×3)
+  - img placeholder (https://placehold.co/36x36/FBBF24/78350F?text=S)
+  - mixed inline content wrapped in paragraph in div (×3)
+  - unsupported inline element form
+  - unsupported inline element h3 (×3)
+  - unsupported inline element textarea (×16)
+  - unsupported inline element button (×2)
 - **Radiation_Protection/CT_and_Radioisotope_Safety/ct_radioisotope_safety_lesson.html** (lesson)
   - highlight→bold (×2)
 - **Radiation_Protection/Personnel_Monitoring_Dosimetry/index.html** (lesson)
@@ -385,16 +189,23 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
   - unsupported element model-viewer on page 2
   - dropped non-https link (×2)
 - **Sectional_Anatomy/Brain/index.html** (lesson)
-  - unsupported element div on page 1
+  - unsupported inline element figure (×4)
+  - img placeholder (img/ct_midventricular.png)
+  - unsupported inline element figcaption (×4)
+  - img placeholder (img/ct_bone_skullbase.png)
   - unsupported element figure on page 2
   - unsupported element figure on page 3
   - unsupported element figure on page 4
   - unsupported element figure on page 5
-  - unsupported element div on page 6
+  - img placeholder (img/mr_t1ce_seg.png)
+  - img placeholder (img/mr_flair_seg.png)
   - dropped non-https link (×2)
 - **Sectional_Anatomy/Breast/index.html** (lesson)
   - unsupported element figure on page 1
-  - unsupported element div on page 2
+  - unsupported inline element figure (×2)
+  - img placeholder (img/breast_midbreast.png)
+  - unsupported inline element figcaption (×2)
+  - img placeholder (img/breast_lung_window.png)
   - unsupported element figure on page 3
   - unsupported element figure on page 4
   - dropped non-https link
@@ -408,12 +219,18 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
   - dropped non-https link (×2)
 - **Sectional_Anatomy/Pelvis/index.html** (lesson)
   - unsupported element figure on page 1
-  - unsupported element div on page 2
+  - unsupported inline element figure (×2)
+  - img placeholder (img/prostate_bladder.png)
+  - unsupported inline element figcaption (×2)
+  - img placeholder (img/prostate_gland.png)
   - unsupported element model-viewer on page 3
   - dropped non-https link (×2)
 - **Sectional_Anatomy/Skeletal/index.html** (lesson)
   - unsupported element figure on page 1
-  - unsupported element div on page 2
+  - unsupported inline element figure (×2)
+  - img placeholder (img/spine_axial_bone.png)
+  - unsupported inline element figcaption (×2)
+  - img placeholder (img/spine_axial_soft.png)
   - unsupported element figure on page 4
   - dropped non-https link
 - **Sectional_Anatomy/Thorax/index.html** (lesson)
@@ -431,30 +248,15 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
   - duplicate lesson page dropped (page 9, 'Collimator Rotation vs. Field Size')
   - duplicate lesson page dropped (page 10, 'Ready for the Simulator')
 - **Treatment_Delivery_Procedures/Field_Size/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×13)
-  - unsupported inline element span (×3)
-  - unsupported inline element ul (×2)
-  - unsupported inline element li (×3)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported element div on page 5
+  - dropped non-https link
   - slug collision on 'field-size'; renamed to 'treatment-delivery-procedures-field-size'
 - **Treatment_Delivery_Procedures/LINAC_Parts/Build_a_LINAC_Game.html** (flashcards)
   - ambiguous term/definition array enhancementsData; defaulted to flashcards
 - **Treatment_Delivery_Procedures/LINAC_Parts/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
-  - img without media asset
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
+  - img placeholder (https://i.ibb.co/XtcC7N1/linac-overview-diagram.png)
   - highlight→bold (×7)
-  - no correct answer for q_page6_1_ans
-  - unsupported element button on page 6
-  - unsupported inline element ul
-  - unsupported inline element li (×3)
-  - no correct answer for q_page10_1_ans
-  - unsupported element button on page 10
-  - unsupported element div on page 11
+  - dropped non-https link
 - **Treatment_Delivery_Procedures/LINAC_Parts/linear_accelerator_lesson.html** (lesson)
   - highlight→bold (×7)
   - slug collision on 'linac-parts'; renamed to 'treatment-delivery-procedures-linac-parts'
@@ -465,13 +267,8 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
 - **Treatment_Delivery_Procedures/MLC/console_mlc_lesson.html** (lesson)
   - highlight→bold (×3)
 - **Treatment_Delivery_Procedures/MLC/index.html** (lesson)
-  - unsupported element div on page 1 (×3)
   - highlight→bold (×3)
-  - no correct answer for q_page3_1_ans
-  - unsupported element button on page 3
-  - unsupported inline element ul
-  - unsupported inline element li (×2)
-  - unsupported element div on page 5
+  - dropped non-https link
   - slug collision on 'mlc'; renamed to 'treatment-delivery-procedures-mlc'
 
 ### Treatment Planning
@@ -480,8 +277,6 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
   - highlight→bold (×14)
   - no correct answer for lq_page3_1
   - no correct answer for lq_page5_1
-  - unsupported inline element ul (×2)
-  - unsupported inline element li (×2)
 - **Treatment_Planning/Isodose_Distribution_lesson/index.html** (lesson)
   - highlight→bold (×3)
 - **Treatment_Planning/Site_Specific_Planning/Abdomen/index.html** (lesson)
@@ -505,15 +300,12 @@ Every document the scanner wrote but flagged for a human pass — grouped by sub
 - **Treatment_Planning/Treatment_Planning_Fundamentals/index.html** (lesson)
   - highlight→bold
 - **Treatment_Planning/treatment_techniques_mu_lesson/index.html** (lesson)
-  - unsupported inline element ul
-  - unsupported inline element li (×3)
   - highlight→bold (×6)
-  - unsupported inline element p
-  - unsupported element div on page 7
+  - dropped non-https link
 
 ## Unsupported listing
 
-Pages the scanner recognised no convertible pattern in at all (not the paged-lesson pattern, and no classifiable quiz/flashcards/matching/sequencing array) — nothing was written for these. Per the note at the top of this document, most of these are phase-4 (games, simulators, EMR sim) or plan 3b fix-list material, not converter bugs.
+Pages the scanner recognised no convertible pattern in at all (not the paged-lesson pattern, and no classifiable quiz/flashcards/matching/sequencing array) -- nothing was written for these. Per the note at the top of this document, most of these are phase-4 (games, simulators, EMR sim) or plan 3b fix-list material, not converter bugs.
 
 ### 3D LINAC
 
@@ -644,4 +436,3 @@ Pages the scanner recognised no convertible pattern in at all (not the paged-les
 - **Treatment_Planning/dicom_viewer/index.html**
 - **Treatment_Planning/tps_workbook/index.html**
 - **Treatment_Planning/vocabulary/index.html**
-

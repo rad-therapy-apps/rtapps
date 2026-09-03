@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson provides a comprehensive overview of the radiation therapy profession: its critical function in cancer care, typical responsibilities, and the journey to becoming a qualified professional in the United States."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Explore the RTT's scope of practice, educational/credentialing pathways, and understand the importance of state licensure and ongoing professional development."
+                      "text": "This lesson provides a comprehensive overview of the radiation therapy profession: its critical function in cancer care, typical responsibilities, and the journey to becoming a qualified professional in the United States."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end, you should be able to describe an RTT's main duties, outline steps for ARRT certification, and understand state licensure and CE importance."
+                      "text": "Explore the RTT's scope of practice, educational/credentialing pathways, and understand the importance of state licensure and ongoing professional development."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end, you should be able to describe an RTT's main duties, outline steps for ARRT certification, and understand state licensure and CE importance."
                     }
                   ]
                 },
@@ -232,25 +268,8 @@
               "They guarantee employment.",
               "They meet standards for certification eligibility."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -552,25 +571,8 @@
               "True",
               "False"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -693,11 +695,40 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The Importance of Reputation in a Specialized Field"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "The Importance of Reputation in a Specialized Field Because radiation therapy is a relatively smaller and more interconnected professional community, your actions, work ethic, and overall professionalism can have a significant and often lasting impact. Word travels, and your reputation will precede you. Building and maintaining a positive reputation through consistent ethical behavior, strong clinical skills, a collaborative attitude, and a commitment to patient care is therefore paramount for long-term career success and positive working relationships."
+                      "text": "Because radiation therapy is a relatively smaller and more interconnected professional community, your actions, work ethic, and overall professionalism can have a significant and often lasting impact. Word travels, and your reputation will precede you."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Building and maintaining a positive reputation through consistent ethical behavior, strong clinical skills, a collaborative attitude, and a commitment to patient care is therefore "
+                    },
+                    {
+                      "type": "text",
+                      "text": "paramount for long-term career success"
+                    },
+                    {
+                      "type": "text",
+                      "text": " and positive working relationships."
                     }
                   ]
                 }
@@ -948,5 +979,13 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold"
+  ]
 }

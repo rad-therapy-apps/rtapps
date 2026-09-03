@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson instills a thorough understanding of critical patient identification protocols, treatment site verification procedures, and overarching safety measures essential in the radiation therapy environment to prevent errors and ensure patient well-being."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Learn about standardized identification methods, techniques for site verification, common safety checks, and the RTT's vital role in maintaining a safe treatment environment."
+                      "text": "This lesson instills a thorough understanding of critical patient identification protocols, treatment site verification procedures, and overarching safety measures essential in the radiation therapy environment to prevent errors and ensure patient well-being."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success Understand and be able to describe multi-step patient ID processes, methods for treatment site verification, and key daily safety protocols."
+                      "text": "Learn about standardized identification methods, techniques for site verification, common safety checks, and the RTT's vital role in maintaining a safe treatment environment."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understand and be able to describe multi-step patient ID processes, methods for treatment site verification, and key daily safety protocols."
                     }
                   ]
                 },
@@ -272,25 +308,8 @@
               "Asking the patient to state their full name and date of birth, then matching it to the chart.",
               "Asking \"Are you Mrs. Johnson?\""
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -550,25 +569,8 @@
               "After the treatment is completed to document settings.",
               "Immediately before initiating the beam for each treatment."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -616,39 +618,28 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Safety interlocks (e.g., door, beam-on indicators)."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Audio and visual patient monitoring systems."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Emergency stop buttons functionality."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Laser alignment and ODI/rangefinder accuracy."
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -1004,25 +995,8 @@
               "Yes, to help prevent future errors and improve systems.",
               "Only if your supervisor sees it happen."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1231,7 +1205,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Patient Safety & ID Lab"
+                      "text": " Go to Patient Safety & ID Lab "
                     }
                   ]
                 }
@@ -1241,5 +1215,20 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson will introduce you to the multidisciplinary team involved in radiation oncology. Understanding each member's distinct and overlapping roles is crucial for effective collaboration, seamless patient care, and ensuring treatment accuracy and safety. As a radiation therapist, you are a key player in this team, and recognizing how your colleagues contribute will enhance your own practice and patient outcomes."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Throughout this lesson, you will: Learn about the primary responsibilities of various professionals in the radiation oncology team. Explore how these roles intersect and require close communication. Consider examples of teamwork and where role crossovers can occur. Answer \"Quick Check\" questions to reinforce your understanding. At the end, you will be directed to a summative speech quiz activity to test your recall of these roles."
+                      "text": "This lesson will introduce you to the multidisciplinary team involved in radiation oncology. Understanding each member's distinct and overlapping roles is crucial for effective collaboration, seamless patient care, and ensuring treatment accuracy and safety. As a radiation therapist, you are a key player in this team, and recognizing how your colleagues contribute will enhance your own practice and patient outcomes."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,164 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end of this lesson, you should be able to: Identify the core members of the radiation oncology team and their main responsibilities. Describe how effective communication and collaboration among team members contribute to patient care. Recognize examples of role crossover and the importance of a team-based approach. Successfully complete the \"Quick Check\" questions."
+                      "text": "Throughout this lesson, you will:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Learn about the primary responsibilities of various professionals in the radiation oncology team."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Explore how these roles intersect and require close communication."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Consider examples of teamwork and where role crossovers can occur."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Answer \"Quick Check\" questions to reinforce your understanding."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "At the end, you will be directed to a summative speech quiz activity to test your recall of these roles."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end of this lesson, you should be able to:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Identify the core members of the radiation oncology team and their main responsibilities."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Describe how effective communication and collaboration among team members contribute to patient care."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Recognize examples of role crossover and the importance of a team-based approach."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Successfully complete the \"Quick Check\" questions."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -67,11 +239,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Radiation Oncologist A physician who specializes in using radiation to treat cancer. Key Responsibilities: Leads the radiation oncology team; evaluates the patient to determine if radiation therapy is appropriate; prescribes the type and amount of radiation; localizes the tumor; monitors patient progress and manages side effects related to radiation; collaborates with other physicians."
+                      "text": "Radiation Oncologist"
                     }
                   ]
                 },
@@ -80,7 +255,60 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Oncology Nurse (often an RN with specialized oncology training/certification) Provides direct nursing care to patients undergoing radiation therapy. Key Responsibilities: Patient education about treatment and side effect management; assessment and monitoring of patient's physical and emotional status; administration of medications; symptom management; coordination of care; emotional support for patients and families; collaboration with the radiation oncologist and other team members regarding patient status and needs."
+                      "text": "A physician who specializes in using radiation to treat cancer. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Key Responsibilities:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Leads the radiation oncology team; evaluates the patient to determine if radiation therapy is appropriate; prescribes the type and amount of radiation; localizes the tumor; monitors patient progress and manages side effects related to radiation; collaborates with other physicians."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Oncology Nurse (often an RN with specialized oncology training/certification)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Provides direct nursing care to patients undergoing radiation therapy. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Key Responsibilities:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Patient education about treatment and side effect management; assessment and monitoring of patient's physical and emotional status; administration of medications; symptom management; coordination of care; emotional support for patients and families; collaboration with the radiation oncologist and other team members regarding patient status and needs."
                     }
                   ]
                 },
@@ -127,25 +355,8 @@
               "Radiation Oncologist",
               "Medical Physicist"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -158,11 +369,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Medical Physicist An expert in radiation physics who ensures the safe and accurate delivery of radiation. Key Responsibilities: Oversees quality assurance (QA) of treatment machines and planning systems; calibrates equipment; consults with the radiation oncologist on treatment planning and delivery techniques; develops and implements radiation safety protocols; involved in commissioning new equipment and techniques."
+                      "text": "Medical Physicist"
                     }
                   ]
                 },
@@ -171,7 +385,60 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Medical Dosimetrist Works closely with the radiation oncologist and medical physicist to design optimal radiation treatment plans. Key Responsibilities: Uses specialized software to calculate radiation dose distributions; develops treatment plans that deliver the prescribed dose to the tumor while minimizing exposure to healthy tissues; performs quality checks on treatment plans; assists with brachytherapy planning and procedures."
+                      "text": "An expert in radiation physics who ensures the safe and accurate delivery of radiation. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Key Responsibilities:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Oversees quality assurance (QA) of treatment machines and planning systems; calibrates equipment; consults with the radiation oncologist on treatment planning and delivery techniques; develops and implements radiation safety protocols; involved in commissioning new equipment and techniques."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Medical Dosimetrist"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Works closely with the radiation oncologist and medical physicist to design optimal radiation treatment plans. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Key Responsibilities:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Uses specialized software to calculate radiation dose distributions; develops treatment plans that deliver the prescribed dose to the tumor while minimizing exposure to healthy tissues; performs quality checks on treatment plans; assists with brachytherapy planning and procedures."
                     }
                   ]
                 },
@@ -218,25 +485,8 @@
               "Medical Physicist",
               "Medical Dosimetrist"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -258,11 +508,106 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radiation Therapist (RTT)"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Radiation Therapist (RTT) Administers daily radiation treatments, positions patients accurately, operates treatment machines, and provides patient support. Key Responsibilities: Accurately interpreting and implementing the treatment plan. Positioning the patient precisely for treatment using immobilization devices. Operating sophisticated radiation therapy equipment (e.g., linear accelerators). Performing daily quality assurance checks on treatment machines. Utilizing imaging systems (e.g., OBI, CBCT) for treatment verification. Monitoring the patient's physical and emotional state during treatment sessions. Observing for and reporting acute side effects to the nurse or oncologist. Educating patients about procedures and self-care for side effects (within scope). Maintaining accurate treatment records. Ensuring radiation safety for the patient, themselves, and others."
+                      "text": "Administers daily radiation treatments, positions patients accurately, operates treatment machines, and provides patient support. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Key Responsibilities:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Accurately interpreting and implementing the treatment plan."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Positioning the patient precisely for treatment using immobilization devices."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Operating sophisticated radiation therapy equipment (e.g., linear accelerators)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Performing daily quality assurance checks on treatment machines."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Utilizing imaging systems (e.g., OBI, CBCT) for treatment verification."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Monitoring the patient's physical and emotional state during treatment sessions."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Observing for and reporting acute side effects to the nurse or oncologist."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Educating patients about procedures and self-care for side effects (within scope)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Maintaining accurate treatment records."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Ensuring radiation safety for the patient, themselves, and others."
                     }
                   ]
                 },
@@ -309,25 +654,8 @@
               "Accurately positioning the patient and operating the treatment machine.",
               "Calibrating the treatment machine independently each morning."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -534,25 +862,8 @@
               "Medical Dosimetrist",
               "Social Worker"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -859,25 +1170,8 @@
               "The Medical Dosimetrist who created the plan and/or the Medical Physicist.",
               "Only the Radiation Oncologist."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -907,39 +1201,28 @@
                     },
                     {
                       "type": "text",
-                      "text": " "
-                    },
-                    {
-                      "type": "text",
                       "text": "Anticipate patient needs more effectively."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
                       "text": "Communicate more clearly with other team members."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
                       "text": "Appreciate the full spectrum of care provided."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
                       "text": "Contribute to a positive and efficient team environment."
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
                     }
                   ]
                 },
@@ -978,7 +1261,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Speech Quiz Activity"
+                      "text": " Go to Speech Quiz Activity "
                     }
                   ]
                 },
@@ -997,5 +1280,8 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "dropped non-https link"
+  ]
 }

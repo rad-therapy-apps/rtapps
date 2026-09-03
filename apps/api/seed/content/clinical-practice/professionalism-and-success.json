@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson familiarizes you with essential academic/clinical policies, professional conduct, ARRT competency expectations, evaluation methods, and clinical objectives that guide your program."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Learn about foundational elements, emphasizing academic integrity, professionalism, and competency-based clinical learning to navigate your program successfully and ethically."
+                      "text": "This lesson familiarizes you with essential academic/clinical policies, professional conduct, ARRT competency expectations, evaluation methods, and clinical objectives that guide your program."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success Understand academic integrity, clinical conduct, ARRT competencies, evaluation methods, and how clinical objectives direct learning."
+                      "text": "Learn about foundational elements, emphasizing academic integrity, professionalism, and competency-based clinical learning to navigate your program successfully and ethically."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understand academic integrity, clinical conduct, ARRT competencies, evaluation methods, and how clinical objectives direct learning."
                     }
                   ]
                 },
@@ -140,25 +176,8 @@
               "It directly relates to patient safety and professional trustworthiness.",
               "It is only important for research papers."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -269,11 +288,46 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Initiative, Engagement & Device Use"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Initiative, Engagement & Device Use Demonstrate initiative by seeking learning opportunities, asking thoughtful (inquisitive) questions, and staying actively engaged in all clinical activities. This shows your commitment and significantly enhances your learning experience. Furthermore, personal cell phones or mobile devices should not be used during active clinical duties or in patient care areas, unless explicitly permitted by your preceptor for a specific, approved educational or clinical purpose. Your focus should always be on the patient, the procedure, and the learning opportunity at hand."
+                      "text": "Demonstrate initiative by seeking learning opportunities, asking thoughtful (inquisitive) questions, and staying actively "
+                    },
+                    {
+                      "type": "text",
+                      "text": "engaged"
+                    },
+                    {
+                      "type": "text",
+                      "text": " in all clinical activities. This shows your commitment and significantly enhances your learning experience. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Furthermore, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "personal cell phones or mobile devices should not be used during active clinical duties"
+                    },
+                    {
+                      "type": "text",
+                      "text": " or in patient care areas, unless explicitly permitted by your preceptor for a specific, approved educational or clinical purpose. Your focus should always be on the patient, the procedure, and the learning opportunity at hand."
                     }
                   ]
                 }
@@ -301,25 +355,8 @@
               "True",
               "False"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -412,10 +449,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Observe:",
                               "marks": [
                                 {
@@ -428,8 +461,7 @@
                               "text": " Initially, you'll watch qualified RTTs perform procedures, learning the steps, rationale, and safety checks. (Corresponds to Bloom's: Remembering, Understanding)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -445,8 +477,7 @@
                               "text": " You'll begin to assist with procedures under direct supervision, applying what you've observed and learned. (Corresponds to Bloom's: Applying, Analyzing)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -460,10 +491,6 @@
                             {
                               "type": "text",
                               "text": " With increasing proficiency, you'll perform entire procedures independently and consistently, still under appropriate student supervision, meeting all objectives. (Corresponds to Bloom's: Evaluating, Creating/Synthesizing)"
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -495,11 +522,38 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Strive for Mastery & Continuous Practice"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Strive for Mastery & Continuous Practice While your program will define the minimum number of successful competency demonstrations required, you are strongly encouraged to perform and be evaluated on competencies multiple times, as many as clinically feasible. Each repetition builds skill, confidence, and reinforces learning, making you a stronger, more proficient practitioner. Avoid the mindset of, \"I already have that competency, so I don't need to do that procedure anymore.\" Instead, embrace every opportunity to practice, refine your technique, and deepen your understanding. True professionals are always learning and honing their craft."
+                      "text": "While your program will define the minimum number of successful competency demonstrations required, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "you are strongly encouraged to perform and be evaluated on competencies multiple times"
+                    },
+                    {
+                      "type": "text",
+                      "text": ", as many as clinically feasible. Each repetition builds skill, confidence, and reinforces learning, making you a stronger, more proficient practitioner. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Avoid the mindset of, \"I already have that competency, so I don't need to do that procedure anymore.\" Instead, embrace every opportunity to practice, refine your technique, and deepen your understanding. True professionals are always learning and honing their craft."
                     }
                   ]
                 }
@@ -3304,5 +3358,15 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold"
+  ]
 }

@@ -27,11 +27,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters As a radiation therapist, a solid understanding of where radiation comes from is foundational. This knowledge helps in: Contextualizing medical radiation doses for patients. Appreciating the principles of radiation protection (ALARA). Understanding the origins of the therapeutic radiation you will administer. Communicating confidently about radiation with patients and the public."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -40,7 +43,44 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do In this lesson, you will navigate through pages that explain: The basic definition of radiation and the difference between ionizing and non-ionizing types. The various components of natural background radiation (cosmic, terrestrial, internal, radon). Common sources of man-made radiation, with an emphasis on medical applications. How these different sources compare in terms of average public exposure. You will answer \"Quick Check\" questions to test your comprehension along the way."
+                      "text": "As a radiation therapist, a solid understanding of where radiation comes from is foundational. This knowledge helps in: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Contextualizing medical radiation doses for patients."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Appreciating the principles of radiation protection (ALARA)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Understanding the origins of the therapeutic radiation you will administer."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Communicating confidently about radiation with patients and the public."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -49,7 +89,92 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned Upon completing this lesson, you will be able to: Clearly distinguish between natural and man-made sources of ionizing radiation. List and describe the four main components of natural background radiation. Identify medical procedures as the primary source of man-made radiation exposure to the public. Name at least two other categories of man-made radiation sources. Explain the ALARA principle in the context of radiation exposure."
+                      "text": "In this lesson, you will navigate through pages that explain: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The basic definition of radiation and the difference between ionizing and non-ionizing types."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The various components of natural background radiation (cosmic, terrestrial, internal, radon)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Common sources of man-made radiation, with an emphasis on medical applications."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "How these different sources compare in terms of average public exposure."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "You will answer \"Quick Check\" questions to test your comprehension along the way."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Upon completing this lesson, you will be able to: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Clearly distinguish between natural and man-made sources of ionizing radiation."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "List and describe the four main components of natural background radiation."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Identify medical procedures as the primary source of man-made radiation exposure to the public."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Name at least two other categories of man-made radiation sources."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Explain the ALARA principle in the context of radiation exposure."
                     }
                   ]
                 }
@@ -174,6 +299,13 @@
                   ]
                 },
                 {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "66361191-f644-5e3d-ad3a-549df0e762a0",
+                    "alt": "Electromagnetic Spectrum"
+                  }
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
@@ -221,13 +353,65 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Cosmic Radiation"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Cosmic Radiation Cosmic rays are highly energetic particles that originate from the sun (solar cosmic rays) and from outside our solar system, in deep space (galactic cosmic rays). These particles include protons, alpha particles, and heavier atomic nuclei, as well as secondary particles produced when primary cosmic rays interact with the Earth's atmosphere. The Earth's atmosphere and magnetic field act as shields, absorbing or deflecting a significant portion of this incoming radiation. The dose from cosmic radiation increases with altitude. At higher elevations (e.g., in mountainous regions or during air travel), there is less atmospheric shielding, leading to greater exposure. For example, a person living in Denver, Colorado (the \"Mile High City\") receives about twice the cosmic radiation dose as someone at sea level. Exposure also varies slightly with latitude (higher at poles, lower at equator) due to the Earth's magnetic field. Solar activity, like solar flares, can temporarily increase the intensity of cosmic radiation reaching Earth."
+                      "text": "Cosmic rays are highly energetic particles that originate from the sun (solar cosmic rays) and from outside our solar system, in deep space (galactic cosmic rays). These particles include protons, alpha particles, and heavier atomic nuclei, as well as secondary particles produced when primary cosmic rays interact with the Earth's atmosphere. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The Earth's atmosphere and magnetic field act as shields, absorbing or deflecting a significant portion of this incoming radiation."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The dose from cosmic radiation "
+                    },
+                    {
+                      "type": "text",
+                      "text": "increases with altitude"
+                    },
+                    {
+                      "type": "text",
+                      "text": ". At higher elevations (e.g., in mountainous regions or during air travel), there is less atmospheric shielding, leading to greater exposure. For example, a person living in Denver, Colorado (the \"Mile High City\") receives about twice the cosmic radiation dose as someone at sea level."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Exposure also varies slightly with latitude (higher at poles, lower at equator) due to the Earth's magnetic field."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Solar activity, like solar flares, can temporarily increase the intensity of cosmic radiation reaching Earth."
                     }
                   ]
+                },
+                {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "28cd698b-4e5e-5cf1-bb69-ed617a81ad48",
+                    "alt": "Cosmic Rays Illustration"
+                  }
                 }
               ]
             }
@@ -254,25 +438,8 @@
               "There is less atmospheric shielding at higher altitudes.",
               "The sun is closer to the airplane."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -294,13 +461,94 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Terrestrial Radiation"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Terrestrial Radiation This type of radiation originates from radioactive materials (radionuclides) that have been present in the Earth's crust since its formation. These radionuclides are found in varying concentrations in soil, rocks, and minerals. The primary radionuclides contributing to terrestrial radiation are isotopes of uranium (U), thorium (Th), and potassium (K), particularly Potassium-40 (40K). These elements undergo radioactive decay, emitting gamma rays, alpha particles, and beta particles. Gamma rays from these sources are the main contributor to external exposure from terrestrial radiation. The concentration of these radioactive elements varies significantly depending on local geology. For example, areas rich in granite or certain shales may have higher background radiation levels. Building materials derived from the earth, such as brick, concrete, stone, and drywall, can also contain these naturally occurring radioactive materials and contribute to indoor radiation exposure."
+                      "text": "This type of radiation originates from radioactive materials (radionuclides) that have been present in the Earth's crust since its formation. These radionuclides are found in varying concentrations in soil, rocks, and minerals. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The primary radionuclides contributing to terrestrial radiation are isotopes of "
+                    },
+                    {
+                      "type": "text",
+                      "text": "uranium (U)"
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "text",
+                      "text": "thorium (Th)"
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "potassium (K)"
+                    },
+                    {
+                      "type": "text",
+                      "text": ", particularly Potassium-40 ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "40",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "K)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "These elements undergo radioactive decay, emitting gamma rays, alpha particles, and beta particles. Gamma rays from these sources are the main contributor to external exposure from terrestrial radiation."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The concentration of these radioactive elements varies significantly depending on local geology. For example, areas rich in granite or certain shales may have higher background radiation levels."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Building materials derived from the earth, such as brick, concrete, stone, and drywall, can also contain these naturally occurring radioactive materials and contribute to indoor radiation exposure."
                     }
                   ]
+                },
+                {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "12fa833e-5303-5540-a6c1-dc076c87dc24",
+                    "alt": "Terrestrial Radiation Illustration"
+                  }
                 }
               ]
             }
@@ -327,25 +575,8 @@
               "Iodine-131",
               "Potassium-40"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -358,11 +589,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Internal Radiation Sources Our bodies naturally contain small amounts of radioactive materials. These radionuclides are taken in through the food we eat, the water we drink, and the air we breathe. The most significant contributor to internal radiation dose is Potassium-40 (40K). Potassium is an essential element for human life, and a small fraction of all potassium is naturally radioactive 40K. Other naturally occurring radionuclides that contribute to internal dose include Carbon-14 (14C) and isotopes from the uranium and thorium decay series, such as Polonium-210 (210Po) and Lead-210 (210Pb)."
+                      "text": "Internal Radiation Sources"
                     }
                   ]
                 },
@@ -371,7 +605,182 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Radon and Thoron Radon (specifically Radon-222, 222Rn) is a colorless, odorless, radioactive gas. It is formed from the natural radioactive decay of uranium, which is found in varying amounts in nearly all soils and rocks. Thoron (Radon-220, 220Rn) is a similar radioactive gas produced from the decay of thorium. Radon gas can move from the ground into the air and seep into homes and other buildings through cracks in foundations, walls, or floors. Once inside, radon can accumulate, especially in poorly ventilated areas like basements. When radon and its short-lived decay products (often called radon daughters or progeny) are inhaled, they can deposit in the lungs and irradiate sensitive lung tissue. This exposure increases the risk of developing lung cancer. Radon is typically the largest single source of natural background radiation exposure for the average person. Radon levels can vary greatly from one location to another and even from one house to the next. Testing is the only way to know the radon level in a specific building."
+                      "text": "Our bodies naturally contain small amounts of radioactive materials. These radionuclides are taken in through the food we eat, the water we drink, and the air we breathe. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The most significant contributor to internal radiation dose is "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Potassium-40 ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "40",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "K)"
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Potassium is an essential element for human life, and a small fraction of all potassium is naturally radioactive "
+                    },
+                    {
+                      "type": "text",
+                      "text": "40",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "K."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Other naturally occurring radionuclides that contribute to internal dose include "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Carbon-14 ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "14",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "C)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " and isotopes from the uranium and thorium decay series, such as Polonium-210 ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "210",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "Po) and Lead-210 ("
+                    },
+                    {
+                      "type": "text",
+                      "text": "210",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "Pb)."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radon and Thoron"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Radon (specifically Radon-222, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "222",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rn)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " is a colorless, odorless, radioactive gas. It is formed from the natural radioactive decay of uranium, which is found in varying amounts in nearly all soils and rocks. Thoron (Radon-220, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "220",
+                      "marks": [
+                        {
+                          "type": "superscript"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rn) is a similar radioactive gas produced from the decay of thorium. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Radon gas can move from the ground into the air and seep into homes and other buildings through cracks in foundations, walls, or floors."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Once inside, radon can accumulate, especially in poorly ventilated areas like basements."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "When radon and its short-lived decay products (often called radon daughters or progeny) are inhaled, they can deposit in the lungs and irradiate sensitive lung tissue. This exposure increases the risk of developing lung cancer."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Radon is typically the largest single source of natural background radiation exposure for the average person."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Radon levels can vary greatly from one location to another and even from one house to the next. Testing is the only way to know the radon level in a specific building."
                     }
                   ]
                 }
@@ -400,25 +809,8 @@
               "Increased risk of lung cancer",
               "Thyroid disorders"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -444,11 +836,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "1. Diagnostic X-rays X-rays are a form of electromagnetic radiation used to create images of the inside of the body. Conventional Radiography: Includes common procedures like chest X-rays, dental X-rays, and bone X-rays to detect fractures or disease. Mammography is a specialized X-ray of the breast. Computed Tomography (CT) Scans: A CT scanner takes multiple X-ray images from different angles around the body. A computer then processes these images to create detailed cross-sectional (slice-like) views. While providing excellent diagnostic information, CT scans typically deliver a higher radiation dose than a single conventional X-ray. The increasing use of CT scans is a major reason for the rise in medical radiation exposure. Fluoroscopy: Produces a continuous, real-time X-ray image, like an X-ray \"movie.\" It's used to observe movement or to guide medical procedures, such as barium studies for the gastrointestinal tract or catheter placement during angiography."
+                      "text": "1. Diagnostic X-rays"
                     }
                   ]
                 },
@@ -457,7 +852,92 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "2. Diagnostic Nuclear Medicine This field uses small amounts of radioactive materials, called radiopharmaceuticals or radiotracers, which are typically injected, swallowed, or inhaled. These substances are designed to accumulate in specific organs or tissues. A special camera (e.g., gamma camera for SPECT scans, or a PET scanner) detects the radiation emitted from the radiopharmaceutical within the body. This information is used to create images that show how organs or tissues are functioning, or to detect disease. Examples include bone scans, thyroid scans, cardiac stress tests, and PET scans (often used in oncology for staging and monitoring treatment response)."
+                      "text": "X-rays are a form of electromagnetic radiation used to create images of the inside of the body. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Conventional Radiography:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Includes common procedures like chest X-rays, dental X-rays, and bone X-rays to detect fractures or disease. Mammography is a specialized X-ray of the breast."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Computed Tomography (CT) Scans:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " A CT scanner takes multiple X-ray images from different angles around the body. A computer then processes these images to create detailed cross-sectional (slice-like) views. While providing excellent diagnostic information, CT scans typically deliver a higher radiation dose than a single conventional X-ray. The increasing use of CT scans is a major reason for the rise in medical radiation exposure."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Fluoroscopy:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Produces a continuous, real-time X-ray image, like an X-ray \"movie.\" It's used to observe movement or to guide medical procedures, such as barium studies for the gastrointestinal tract or catheter placement during angiography."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "2. Diagnostic Nuclear Medicine"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This field uses small amounts of radioactive materials, called "
+                    },
+                    {
+                      "type": "text",
+                      "text": "radiopharmaceuticals"
+                    },
+                    {
+                      "type": "text",
+                      "text": " or radiotracers, which are typically injected, swallowed, or inhaled. These substances are designed to accumulate in specific organs or tissues. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "A special camera (e.g., gamma camera for SPECT scans, or a PET scanner) detects the radiation emitted from the radiopharmaceutical within the body."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "This information is used to create images that show how organs or tissues are functioning, or to detect disease. Examples include bone scans, thyroid scans, cardiac stress tests, and PET scans (often used in oncology for staging and monitoring treatment response)."
                     }
                   ]
                 }
@@ -486,25 +966,8 @@
               "Computed Tomography (CT) Scan",
               "Nuclear Medicine PET Scan"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -526,11 +989,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "1. Radiation Therapy (Radiotherapy) This is your field! Radiation therapy uses high doses of ionizing radiation to kill cancer cells and shrink tumors. External Beam Radiation Therapy (EBRT): Radiation is delivered from a machine outside the body (e.g., a Linear Accelerator or Linac). This is the most common form of radiation therapy. Brachytherapy: Radioactive sources are placed directly inside or very close to the tumor. While the goal is to target the tumor, some radiation dose to surrounding healthy tissues is unavoidable. The planning and delivery processes are designed to maximize the tumor dose while minimizing healthy tissue exposure. Occupational exposure for healthcare workers involved in these procedures is also a key consideration for radiation protection."
+                      "text": "1. Radiation Therapy (Radiotherapy)"
                     }
                   ]
                 },
@@ -539,7 +1005,72 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "2. Therapeutic Nuclear Medicine As mentioned previously, some nuclear medicine procedures are therapeutic. These involve administering larger doses of specific radiopharmaceuticals that target and destroy diseased cells. Examples include Iodine-131 for thyroid cancer or hyperthyroidism, and newer targeted radionuclide therapies for cancers like prostate cancer or neuroendocrine tumors. Patients receiving these treatments may themselves become temporarily radioactive, requiring specific radiation safety precautions for themselves and those around them."
+                      "text": "This is your field! Radiation therapy uses high doses of ionizing radiation to kill cancer cells and shrink tumors. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "External Beam Radiation Therapy (EBRT):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Radiation is delivered from a machine outside the body (e.g., a Linear Accelerator or Linac). This is the most common form of radiation therapy."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Brachytherapy:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Radioactive sources are placed directly inside or very close to the tumor."
+                    },
+                    {
+                      "type": "text",
+                      "text": " While the goal is to target the tumor, some radiation dose to surrounding healthy tissues is unavoidable. The planning and delivery processes are designed to maximize the tumor dose while minimizing healthy tissue exposure. Occupational exposure for healthcare workers involved in these procedures is also a key consideration for radiation protection."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "2. Therapeutic Nuclear Medicine"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As mentioned previously, some nuclear medicine procedures are therapeutic. These involve administering larger doses of specific radiopharmaceuticals that target and destroy diseased cells. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Examples include Iodine-131 for thyroid cancer or hyperthyroidism, and newer targeted radionuclide therapies for cancers like prostate cancer or neuroendocrine tumors."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Patients receiving these treatments may themselves become temporarily radioactive, requiring specific radiation safety precautions for themselves and those around them."
                     }
                   ]
                 },
@@ -583,11 +1114,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "1. Industrial Uses Industrial Radiography: X-rays or gamma rays are used for non-destructive testing (NDT) to inspect welds, pipes, and structures for internal flaws. Gauges: Devices containing radioactive sources are used to measure thickness, density, or levels in manufacturing processes (e.g., paper, plastics, beverages). Sterilization: Large irradiators using Cobalt-60 or electron beams sterilize medical supplies, some food products, and mail. Well Logging: Radioactive sources are used in the oil and gas industry to analyze geological formations down boreholes. Radiation protection for workers in these industries is strictly regulated."
+                      "text": "1. Industrial Uses"
                     }
                   ]
                 },
@@ -596,7 +1130,166 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "2. Consumer Products A few consumer products historically or currently contain small amounts of radioactive material, generally posing negligible risk: Ionization Smoke Detectors: Contain a tiny, shielded source of Americium-241. Some Ceramics and Glassware: Older Fiestaware (orange-red) used uranium in its glaze. Some antique glassware used uranium for coloration. Luminous Watches/Dials (Older): Used radium or tritium paint. Modern tritium watches use sealed gas tubes. Building Materials: Some natural stone like granite can emit low levels of radiation. Tobacco Products: Tobacco plants can absorb naturally occurring radioactive elements (Polonium-210, Lead-210) from soil and fertilizers."
+                      "text": "Industrial Radiography:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " X-rays or gamma rays are used for non-destructive testing (NDT) to inspect welds, pipes, and structures for internal flaws."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Gauges:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Devices containing radioactive sources are used to measure thickness, density, or levels in manufacturing processes (e.g., paper, plastics, beverages)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Sterilization:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Large irradiators using Cobalt-60 or electron beams sterilize medical supplies, some food products, and mail."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Well Logging:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Radioactive sources are used in the oil and gas industry to analyze geological formations down boreholes."
+                    },
+                    {
+                      "type": "text",
+                      "text": " Radiation protection for workers in these industries is strictly regulated."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "2. Consumer Products"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A few consumer products historically or currently contain small amounts of radioactive material, generally posing negligible risk: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Ionization Smoke Detectors:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Contain a tiny, shielded source of Americium-241."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Some Ceramics and Glassware:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Older Fiestaware (orange-red) used uranium in its glaze. Some antique glassware used uranium for coloration."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Luminous Watches/Dials (Older):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Used radium or tritium paint. Modern tritium watches use sealed gas tubes."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Building Materials:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Some natural stone like granite can emit low levels of radiation."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Tobacco Products:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Tobacco plants can absorb naturally occurring radioactive elements (Polonium-210, Lead-210) from soil and fertilizers."
                     }
                   ]
                 }
@@ -625,25 +1318,8 @@
               "Non-destructive testing of pipeline welds using X-rays.",
               "Watching television."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -656,11 +1332,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "1. Nuclear Power Generation Nuclear power plants use controlled nuclear fission (splitting of heavy atoms like uranium) to produce heat, which generates steam to drive turbines and produce electricity. During normal operation, nuclear power plants release very small, controlled amounts of radioactive materials into the environment. These releases are strictly monitored and regulated to ensure they are well below levels that would pose a risk to public health. The average radiation dose to the public from normally operating nuclear power plants is extremely low, contributing a very minor fraction to overall man-made radiation exposure. Accidents at nuclear power plants (e.g., Chernobyl, Fukushima) can release larger amounts of radioactive material, but these are rare events with extensive safety systems designed to prevent them."
+                      "text": "1. Nuclear Power Generation"
                     }
                   ]
                 },
@@ -669,7 +1348,64 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "2. Atmospheric Fallout This refers to radioactive particles that were dispersed into the atmosphere from nuclear weapons testing conducted primarily between the 1940s and early 1960s. These tests released various radionuclides (e.g., Strontium-90, Cesium-137) into the upper atmosphere, which then gradually settled back to Earth (fallout), distributing globally. The Comprehensive Nuclear-Test-Ban Treaty has significantly reduced atmospheric testing. The contribution of fallout to current background radiation levels has decreased substantially over the decades due to radioactive decay and environmental dispersion. It now represents a very small component of the average person's annual radiation dose."
+                      "text": "Nuclear power plants use controlled nuclear fission (splitting of heavy atoms like uranium) to produce heat, which generates steam to drive turbines and produce electricity. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "During normal operation, nuclear power plants release very small, controlled amounts of radioactive materials into the environment. These releases are strictly monitored and regulated to ensure they are well below levels that would pose a risk to public health."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The average radiation dose to the public from normally operating nuclear power plants is extremely low, contributing a very minor fraction to overall man-made radiation exposure."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Accidents at nuclear power plants (e.g., Chernobyl, Fukushima) can release larger amounts of radioactive material, but these are rare events with extensive safety systems designed to prevent them."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "2. Atmospheric Fallout"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This refers to radioactive particles that were dispersed into the atmosphere from nuclear weapons testing conducted primarily between the 1940s and early 1960s. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "These tests released various radionuclides (e.g., Strontium-90, Cesium-137) into the upper atmosphere, which then gradually settled back to Earth (fallout), distributing globally."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The Comprehensive Nuclear-Test-Ban Treaty has significantly reduced atmospheric testing."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The contribution of fallout to current background radiation levels has decreased substantially over the decades due to radioactive decay and environmental dispersion. It now represents a very small component of the average person's annual radiation dose."
                     }
                   ]
                 },
@@ -745,39 +1481,28 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Radon and Thoron: Largest component (~2.28 mSv)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Internal (from food/water): (~0.29 mSv)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Terrestrial (from ground): (~0.21 mSv)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Cosmic (from space): (~0.33 mSv)"
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -804,37 +1529,34 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Medical Procedures: Largest component by far (~3.0 mSv, with CT scans being a major part)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Consumer Products: (~0.05 mSv)"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
                               "text": "Industrial/Occupational/Nuclear Fuel Cycle: (Very small for general public, ~0.001 mSv)"
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
                       ]
                     }
                   ]
+                },
+                {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "7074591b-16d4-54ba-8845-2d70ce888e1d",
+                    "alt": "Pie Chart of Radiation Exposure Sources"
+                  }
                 },
                 {
                   "type": "paragraph",
@@ -1055,11 +1777,23 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Looking Ahead:"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Looking Ahead: Building on this, future lessons will explore how radiation interacts with matter, how its effects are measured, and the detailed principles and practices of radiation protection and safety in a clinical setting."
+                      "text": "Building on this, future lessons will explore how radiation interacts with matter, how its effects are measured, and the detailed principles and practices of radiation protection and safety in a clinical setting."
                     }
                   ]
                 }
@@ -1069,5 +1803,11 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "img placeholder (https://placehold.co/600x250/E9D5FF/4C1D95?text=Electromagnetic+Spectrum+Diagram+(Ionizing+vs+Non-Ionizing))",
+    "img placeholder (https://placehold.co/500x250/E0E7FF/4338CA?text=Cosmic+Rays+Illustration)",
+    "img placeholder (https://placehold.co/500x250/E0E7FF/4338CA?text=Terrestrial+Radiation+Sources)",
+    "img placeholder (https://placehold.co/600x350/E9D5FF/4C1D95?text=Pie+Chart:+Typical+U.S.+Radiation+Exposure+Sources)"
+  ]
 }

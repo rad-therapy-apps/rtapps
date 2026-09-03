@@ -118,7 +118,49 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Soft-tissue window: breast, pectoralis, chest wall. Lung window, same level: the lung under the chest wall is now clearly delineated."
+                      "text": "[Breast soft-tissue window]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Soft-tissue window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ": breast, pectoralis, chest wall."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "[Breast lung window]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Lung window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", same level: the lung under the chest wall is now clearly delineated."
                     }
                   ]
                 }
@@ -830,5 +872,17 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element figure on page 1",
+    "unsupported inline element figure",
+    "img placeholder (img/breast_midbreast.png)",
+    "unsupported inline element figcaption",
+    "unsupported inline element figure",
+    "img placeholder (img/breast_lung_window.png)",
+    "unsupported inline element figcaption",
+    "unsupported element figure on page 3",
+    "unsupported element figure on page 4",
+    "dropped non-https link"
+  ]
 }

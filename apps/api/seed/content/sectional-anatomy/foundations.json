@@ -1265,5 +1265,9 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "dropped non-https link",
+    "dropped non-https link"
+  ]
 }

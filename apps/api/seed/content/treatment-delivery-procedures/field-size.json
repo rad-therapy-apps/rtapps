@@ -534,5 +534,18 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "duplicate lesson page dropped (page 6, 'What \"Field Size\" Means at the Console')",
+    "duplicate lesson page dropped (page 7, 'Jaws \u2014 Symmetric vs. Asymmetric')",
+    "highlight\u2192bold",
+    "duplicate lesson page dropped (page 8, 'Field Size Is Defined at Isocenter')",
+    "highlight\u2192bold",
+    "duplicate lesson page dropped (page 9, 'Collimator Rotation vs. Field Size')",
+    "duplicate lesson page dropped (page 10, 'Ready for the Simulator')"
+  ]
 }

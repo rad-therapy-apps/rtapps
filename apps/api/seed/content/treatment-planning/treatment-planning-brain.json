@@ -1003,5 +1003,8 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "slug collision on 'brain'; renamed to 'treatment-planning-brain'"
+  ]
 }

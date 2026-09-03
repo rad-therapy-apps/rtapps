@@ -105,5 +105,8 @@
     "slug": "clinical-practice",
     "title": "Clinical Practice",
     "order": 1
-  }
+  },
+  "import_notes": [
+    "ambiguous term/definition array vocab; defaulted to flashcards"
+  ]
 }

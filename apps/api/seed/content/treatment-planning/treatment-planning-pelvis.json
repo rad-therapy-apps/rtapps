@@ -814,5 +814,8 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "slug collision on 'pelvis'; renamed to 'treatment-planning-pelvis'"
+  ]
 }

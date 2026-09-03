@@ -728,5 +728,11 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element model-viewer on page 2",
+    "unsupported element model-viewer on page 3",
+    "dropped non-https link",
+    "dropped non-https link"
+  ]
 }

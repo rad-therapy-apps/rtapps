@@ -709,5 +709,8 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "slug collision on 'head-and-neck'; renamed to 'treatment-planning-head-and-neck'"
+  ]
 }

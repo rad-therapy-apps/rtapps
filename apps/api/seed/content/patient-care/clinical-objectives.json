@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson introduces fundamental patient care skills crucial for Radiation Therapists, focusing on safety, communication, and basic clinical procedures to ensure a positive treatment experience."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Learn about patient identification, communication, vital signs, safe patient handling, oxygen administration, infection control, and BLS/AED overview."
+                      "text": "This lesson introduces fundamental patient care skills crucial for Radiation Therapists, focusing on safety, communication, and basic clinical procedures to ensure a positive treatment experience."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success Understand steps for patient ID, vital signs importance, safe transfer principles, O2 basics, universal precautions, and BLS/AED components."
+                      "text": "Learn about patient identification, communication, vital signs, safe patient handling, oxygen administration, infection control, and BLS/AED overview."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Understand steps for patient ID, vital signs importance, safe transfer principles, O2 basics, universal precautions, and BLS/AED components."
                     }
                   ]
                 },
@@ -217,25 +253,8 @@
               "Two",
               "Three"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -422,25 +441,8 @@
               "Sphygmomanometer",
               "Pulse Oximeter"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1024,25 +1026,8 @@
               "Automated External Defibrillator",
               "Assisted Electrical Diagnosis"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1187,7 +1172,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Patient Care Skills Activity"
+                      "text": " Go to Patient Care Skills Activity "
                     }
                   ]
                 }
@@ -1197,5 +1182,10 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

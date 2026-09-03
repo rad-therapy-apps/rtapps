@@ -779,5 +779,13 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element figure on page 1",
+    "unsupported element figure on page 2",
+    "unsupported element figure on page 3",
+    "unsupported element figure on page 4",
+    "dropped non-https link",
+    "dropped non-https link"
+  ]
 }

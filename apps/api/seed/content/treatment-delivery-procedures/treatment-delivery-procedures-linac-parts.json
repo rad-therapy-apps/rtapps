@@ -1504,5 +1504,15 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "slug collision on 'linac-parts'; renamed to 'treatment-delivery-procedures-linac-parts'"
+  ]
 }

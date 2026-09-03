@@ -33,5 +33,8 @@
     "slug": "treatment-delivery-procedures",
     "title": "Treatment Delivery Procedures",
     "order": 12
-  }
+  },
+  "import_notes": [
+    "ambiguous term/definition array enhancementsData; defaulted to flashcards"
+  ]
 }

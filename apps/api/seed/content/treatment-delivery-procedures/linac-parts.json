@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson provides a detailed understanding of the linear accelerator (Linac), its primary components, their functions, and the Radiation Therapist's (RTT's) crucial role in its safe operation and daily quality assurance (QA)."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do You will learn about the Linac's overall structure, how the radiation beam is produced and shaped, key safety features, and the operational checks RTTs perform daily."
+                      "text": "This lesson provides a detailed understanding of the linear accelerator (Linac), its primary components, their functions, and the Radiation Therapist's (RTT's) crucial role in its safe operation and daily quality assurance (QA)."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success By the end of this lesson, you should be able to identify major Linac components, describe their purpose, explain basic emergency procedures for Linac operation, and understand the RTT's responsibilities for daily Linac QA."
+                      "text": "You will learn about the Linac's overall structure, how the radiation beam is produced and shaped, key safety features, and the operational checks RTTs perform daily."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end of this lesson, you should be able to identify major Linac components, describe their purpose, explain basic emergency procedures for Linac operation, and understand the RTT's responsibilities for daily Linac QA."
                     }
                   ]
                 },
@@ -74,6 +110,13 @@
                       "text": "A medical linear accelerator is a complex system with several major sections working in concert."
                     }
                   ]
+                },
+                {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "c74d2883-8c0d-59ee-a87e-c58bef90bcaa",
+                    "alt": "Simplified Linac Block Diagram"
+                  }
                 },
                 {
                   "type": "paragraph",
@@ -369,25 +412,8 @@
               "Klystron or Magnetron",
               "Circulator"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -853,25 +879,8 @@
               "X-ray Target",
               "Scattering Foils"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1118,10 +1127,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Two "
                             },
                             {
@@ -1138,8 +1143,7 @@
                               "text": "."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -1159,8 +1163,7 @@
                               "text": "."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -1178,10 +1181,6 @@
                             {
                               "type": "text",
                               "text": " (projected along the couch or from the gantry)."
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -1658,25 +1657,8 @@
               "Press the nearest Emergency Stop button.",
               "Try to manually stop the gantry."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1805,7 +1787,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Linac Operations Lab"
+                      "text": " Go to Linac Operations Lab "
                     }
                   ]
                 }
@@ -1815,5 +1797,16 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "img placeholder (https://i.ibb.co/XtcC7N1/linac-overview-diagram.png)",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }
