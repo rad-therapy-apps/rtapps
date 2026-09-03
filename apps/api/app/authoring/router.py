@@ -1021,7 +1021,12 @@ async def preview_activity(
     activity = await db.get(Activity, activity_id)
     if activity is None:
         raise Problem(404, "Activity not found")
-    snapshot = await build_activity_snapshot(db, activity)
+    try:
+        snapshot = await build_activity_snapshot(db, activity)
+    except ValueError as exc:
+        # build_activity_snapshot's calculator branch raises this when config["data_tables"]
+        # names a key with no DataTable row — an authoring-time mistake, not a server error.
+        raise Problem(422, str(exc)) from exc
     return strip_activity_answers(snapshot)
 
 

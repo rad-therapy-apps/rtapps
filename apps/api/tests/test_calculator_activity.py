@@ -232,6 +232,15 @@ class TestCalculatorSnapshot:
         )
         assert version is None
 
+    async def test_preview_with_missing_table_key_422(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        # Reference a data-table key that has never been created.
+        calc = await _create_calculator(client, db, data_tables=["no-such-table"])
+        r = await client.get(f"/api/v1/authoring/activities/{calc['activity_id']}/preview")
+        assert r.status_code == 422, r.text
+
     async def test_attempt_start_409(self, client: AsyncClient, db: AsyncSession) -> None:
         await make_educator(client, db, "edu@example.edu")
         await _put_table(client)

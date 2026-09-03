@@ -37,13 +37,16 @@ Used by: `app.authoring.router`.
 
 import uuid
 from datetime import datetime
-from typing import Any, Self
+from typing import Annotated, Any, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.content.activity_importer import FlashcardCard, MatchingPair, SequencingItem
 from app.content.importer import PageImport
 from app.content.models import ACTIVITY_ACCESS
+
+# Finite float type that rejects NaN and Infinity, for grid fields
+FiniteFloat = Annotated[float, Field(allow_inf_nan=False)]
 
 
 class LessonCreateIn(BaseModel):
@@ -343,8 +346,8 @@ class GridRow(BaseModel):
     """One row of a data-table grid: a numeric row key (e.g. depth in cm) plus one value
     per column, in the same order as `GridIn.cols`."""
 
-    key: float
-    values: list[float] = Field(min_length=1)
+    key: FiniteFloat
+    values: list[FiniteFloat] = Field(min_length=1)
 
 
 class GridIn(BaseModel):
@@ -354,7 +357,7 @@ class GridIn(BaseModel):
 
     row_label: str = Field(min_length=1, max_length=80)
     col_label: str = Field(min_length=1, max_length=80)
-    cols: list[float] = Field(min_length=1)
+    cols: list[FiniteFloat] = Field(min_length=1)
     rows: list[GridRow] = Field(min_length=1)
 
     @model_validator(mode="after")

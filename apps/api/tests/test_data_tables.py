@@ -154,3 +154,33 @@ class TestGridValidation:
         await make_educator(client, db, "edu@example.edu")
         bad = {**GRID, "rows": []}
         assert await self._put(client, bad) == 422
+
+    async def test_nan_in_cols_422(self, client: AsyncClient, db: AsyncSession) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        # Send raw JSON with NaN token to exercise Pydantic validation
+        r = await client.put(
+            "/api/v1/authoring/data-tables/some-table",
+            content='{"title":"T","grid":{"row_label":"d","col_label":"f","cols":[1.0,NaN],"rows":[{"key":1.0,"values":[1.0,2.0]}]}}',
+            headers={"content-type": "application/json"},
+        )
+        assert r.status_code == 422, r.text
+
+    async def test_nan_in_row_key_422(self, client: AsyncClient, db: AsyncSession) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        # Send raw JSON with NaN in row key
+        r = await client.put(
+            "/api/v1/authoring/data-tables/some-table",
+            content='{"title":"T","grid":{"row_label":"d","col_label":"f","cols":[1.0,2.0],"rows":[{"key":NaN,"values":[1.0,2.0]}]}}',
+            headers={"content-type": "application/json"},
+        )
+        assert r.status_code == 422, r.text
+
+    async def test_nan_in_row_values_422(self, client: AsyncClient, db: AsyncSession) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        # Send raw JSON with NaN in row values
+        r = await client.put(
+            "/api/v1/authoring/data-tables/some-table",
+            content='{"title":"T","grid":{"row_label":"d","col_label":"f","cols":[1.0,2.0],"rows":[{"key":1.0,"values":[NaN,2.0]}]}}',
+            headers={"content-type": "application/json"},
+        )
+        assert r.status_code == 422, r.text
