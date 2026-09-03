@@ -25,11 +25,13 @@ describe('decideAccess', () => {
 	it('redirects anonymous users to login with next', () => {
 		expect(decideAccess('/home', null)).toEqual({ redirect: '/login?next=%2Fhome' });
 	});
-	// Scenario: role-gated prefixes (`/admin`, `/educator`) hit by student vs. admin.
-	// Invariant: only the required role (or admin, for educator paths) is let through.
+	// Scenario: role-gated prefixes (`/admin`, `/educator`, `/author`) hit by student vs. admin.
+	// Invariant: only the required role (or admin, for educator/author paths) is let through.
 	it('enforces role prefixes', () => {
 		expect(decideAccess('/admin/users', student)).toEqual({ redirect: '/home' });
 		expect(decideAccess('/admin/users', admin)).toEqual({ allow: true });
 		expect(decideAccess('/educator/cohorts', student)).toEqual({ redirect: '/home' });
+		expect(decideAccess('/author', student)).toEqual({ redirect: '/home' });
+		expect(decideAccess('/author', admin)).toEqual({ allow: true });
 	});
 });

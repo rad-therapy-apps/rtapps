@@ -1,6 +1,6 @@
 <!--
 	What this file does: Layout markup for the `(app)` route group. Renders a role-gated nav bar
-	above every signed-in page (home, subjects, lessons, educator, admin).
+	above every signed-in page (home, subjects, lessons, educator, author, admin).
 
 	Used here and why: Svelte 5 runes (`$props()`); a route group layout — the `(app)` segment
 	itself contributes nothing to the URL, only to which layout/guard applies; `resolve()` for
@@ -8,12 +8,12 @@
 	root layout (`routes/+layout.svelte`), so it isn't repeated here.
 
 	How it fits the project: `data.user` comes from `(app)/+layout.server.ts`'s `load`; the
-	Educator/Admin links are shown by role only for wayfinding — the actual authorization is
+	Educator/Author/Admin links are shown by role only for wayfinding — the actual authorization is
 	`guard.ts`'s route-group gating. `docs/03-architecture.md` §4, §9.
 
 	Works with: `$app/paths`, `(app)/+layout.server.ts`. Used by: every page under `(app)/` (home,
 	subjects, subjects/[slug], lessons/[slug], educator, educator/cohorts/[id],
-	educator/cohorts/[id]/students/[uid]).
+	educator/cohorts/[id]/students/[uid], author).
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
@@ -26,9 +26,10 @@
 <nav>
 	<a href={resolve('/(app)/home')}>Home</a>
 	<a href={resolve('/(app)/subjects')}>Subjects</a>
-	<!-- Educators and admins both get the educator area; students don't. -->
+	<!-- Educators and admins both get the educator and author areas; students don't. -->
 	{#if data.user.role !== 'student'}
 		<a href={resolve('/(app)/educator')}>Educator</a>
+		<a href={resolve('/(app)/author')}>Author</a>
 	{/if}
 	{#if data.user.role === 'admin'}
 		<a href={resolve('/(app)/admin/users')}>Admin</a>
