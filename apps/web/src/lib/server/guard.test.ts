@@ -12,6 +12,7 @@ import { decideAccess } from './guard';
 
 const student = { id: '1', email: 's@x', display_name: 'S', role: 'student' as const };
 const admin = { ...student, role: 'admin' as const };
+const educator = { ...student, role: 'educator' as const };
 
 describe('decideAccess', () => {
 	// Scenario: public paths, signed out.
@@ -33,5 +34,7 @@ describe('decideAccess', () => {
 		expect(decideAccess('/educator/cohorts', student)).toEqual({ redirect: '/home' });
 		expect(decideAccess('/author', student)).toEqual({ redirect: '/home' });
 		expect(decideAccess('/author', admin)).toEqual({ allow: true });
+		expect(decideAccess('/author', educator)).toEqual({ allow: true });
+		expect(decideAccess('/author/lessons/abc', educator)).toEqual({ allow: true });
 	});
 });
