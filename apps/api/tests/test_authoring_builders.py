@@ -162,7 +162,7 @@ class TestQuestionBank:
         matching_ids = [q["id"] for q in result.json()]
         assert q_underscore["id"] in matching_ids, "Question with literal underscore should match"
         assert q_wildcard_bait["id"] not in matching_ids, (
-            "Question with 'scoreXa' should not match search for 'score_a' (underscore not wildcard)"
+            "'scoreXa' must not match 'score_a' (underscore is literal, not a wildcard)"
         )
 
 
