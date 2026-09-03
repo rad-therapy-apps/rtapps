@@ -870,6 +870,169 @@
         "title": "CohortPatch",
         "type": "object"
       },
+      "FlashcardCard": {
+        "description": "A single flashcard: term and definition.",
+        "properties": {
+          "definition": {
+            "minLength": 1,
+            "title": "Definition",
+            "type": "string"
+          },
+          "term": {
+            "minLength": 1,
+            "title": "Term",
+            "type": "string"
+          }
+        },
+        "required": [
+          "term",
+          "definition"
+        ],
+        "title": "FlashcardCard",
+        "type": "object"
+      },
+      "FlashcardDeckAuthorOut": {
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/FlashcardCard"
+            },
+            "title": "Cards",
+            "type": "array"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "deck_id": {
+            "format": "uuid",
+            "title": "Deck Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "deck_id",
+          "subject_slug",
+          "slug",
+          "title",
+          "status",
+          "access",
+          "config",
+          "cards"
+        ],
+        "title": "FlashcardDeckAuthorOut",
+        "type": "object"
+      },
+      "FlashcardDeckCreateIn": {
+        "description": "`POST /authoring/flashcard-decks` body: meta plus the initial card set (`cards` is a\nNOT NULL JSONB column on `FlashcardDeck`, so at least one card is required up front).",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/FlashcardCard"
+            },
+            "minItems": 1,
+            "title": "Cards",
+            "type": "array"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "slug": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cards",
+          "subject_slug",
+          "title",
+          "slug"
+        ],
+        "title": "FlashcardDeckCreateIn",
+        "type": "object"
+      },
+      "FlashcardDeckPutIn": {
+        "description": "`PUT /authoring/flashcard-decks/{id}` body: wholesale card-list replace.",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/FlashcardCard"
+            },
+            "minItems": 1,
+            "title": "Cards",
+            "type": "array"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cards",
+          "title"
+        ],
+        "title": "FlashcardDeckPutIn",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1244,6 +1407,169 @@
         "title": "LoginIn",
         "type": "object"
       },
+      "MatchingAuthorOut": {
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "matching_id": {
+            "format": "uuid",
+            "title": "Matching Id",
+            "type": "string"
+          },
+          "pairs": {
+            "items": {
+              "$ref": "#/components/schemas/MatchingPair"
+            },
+            "title": "Pairs",
+            "type": "array"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "matching_id",
+          "subject_slug",
+          "slug",
+          "title",
+          "status",
+          "access",
+          "config",
+          "pairs"
+        ],
+        "title": "MatchingAuthorOut",
+        "type": "object"
+      },
+      "MatchingCreateIn": {
+        "description": "`POST /authoring/matching` body: meta plus the initial pair set (`pairs` is a NOT\nNULL JSONB column on `MatchingActivity`, so at least two pairs are required up front).",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "pairs": {
+            "items": {
+              "$ref": "#/components/schemas/MatchingPair"
+            },
+            "minItems": 2,
+            "title": "Pairs",
+            "type": "array"
+          },
+          "slug": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pairs",
+          "subject_slug",
+          "title",
+          "slug"
+        ],
+        "title": "MatchingCreateIn",
+        "type": "object"
+      },
+      "MatchingPair": {
+        "description": "A single term-definition pair in a matching activity.",
+        "properties": {
+          "definition": {
+            "minLength": 1,
+            "title": "Definition",
+            "type": "string"
+          },
+          "term": {
+            "minLength": 1,
+            "title": "Term",
+            "type": "string"
+          }
+        },
+        "required": [
+          "term",
+          "definition"
+        ],
+        "title": "MatchingPair",
+        "type": "object"
+      },
+      "MatchingPutIn": {
+        "description": "`PUT /authoring/matching/{id}` body: wholesale pair-list replace.",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "pairs": {
+            "items": {
+              "$ref": "#/components/schemas/MatchingPair"
+            },
+            "minItems": 2,
+            "title": "Pairs",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pairs",
+          "title"
+        ],
+        "title": "MatchingPutIn",
+        "type": "object"
+      },
       "MediaAssetOut": {
         "description": "Response shape for confirm; built from a MediaAsset ORM row via from_attributes.",
         "properties": {
@@ -1546,6 +1872,225 @@
         "title": "PresignOut",
         "type": "object"
       },
+      "QuestionAuthorIn": {
+        "description": "Body for `POST /authoring/questions` and `PUT /authoring/questions/{id}`: a single\nbank question with a plain-text stem/explanation \u2014 the router wraps/unwraps\n`app.content.activity_importer.text_doc()` on the way to/from `Question.stem`/\n`Question.explanation`, so no raw ProseMirror JSON crosses this API.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "integer"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 2,
+            "title": "Options",
+            "type": "array"
+          },
+          "stem": {
+            "minLength": 1,
+            "title": "Stem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stem",
+          "options",
+          "answer"
+        ],
+        "title": "QuestionAuthorIn",
+        "type": "object"
+      },
+      "QuestionAuthorOut": {
+        "description": "`QuestionAuthorIn`, flattened back out with its bank id.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "integer"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "stem",
+          "options",
+          "answer",
+          "explanation"
+        ],
+        "title": "QuestionAuthorOut",
+        "type": "object"
+      },
+      "QuizAuthorOut": {
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionAuthorOut"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "quiz_id": {
+            "format": "uuid",
+            "title": "Quiz Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "quiz_id",
+          "subject_slug",
+          "slug",
+          "title",
+          "status",
+          "access",
+          "config",
+          "questions"
+        ],
+        "title": "QuizAuthorOut",
+        "type": "object"
+      },
+      "QuizCreateIn": {
+        "description": "`POST /authoring/quizzes` body: meta only. Unlike flashcards/matching/sequencing, a\nquiz has no NOT NULL content column forcing questions up front \u2014 they live in the\n`quiz_question` join table, so a brand-new quiz can start with zero questions and have\nthem added via `PUT /authoring/quizzes/{id}`.",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "slug": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_slug",
+          "title",
+          "slug"
+        ],
+        "title": "QuizCreateIn",
+        "type": "object"
+      },
+      "QuizPutIn": {
+        "description": "`PUT /authoring/quizzes/{id}` body: the ordered question-bank id list. Positions are\nrewritten 1..n in list order; an id absent from the bank, or repeated, is rejected.",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "question_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Question Ids",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "question_ids"
+        ],
+        "title": "QuizPutIn",
+        "type": "object"
+      },
       "RegisterIn": {
         "properties": {
           "display_name": {
@@ -1758,6 +2303,174 @@
           "max_score"
         ],
         "title": "SavedItemOut",
+        "type": "object"
+      },
+      "SequencingAuthorOut": {
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SequencingItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "sequencing_id": {
+            "format": "uuid",
+            "title": "Sequencing Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "sequencing_id",
+          "subject_slug",
+          "slug",
+          "title",
+          "status",
+          "access",
+          "config",
+          "items"
+        ],
+        "title": "SequencingAuthorOut",
+        "type": "object"
+      },
+      "SequencingCreateIn": {
+        "description": "`POST /authoring/sequencing` body: meta plus the initial item set in correct order\n(`items` is a NOT NULL JSONB column on `SequencingActivity`, so at least two items are\nrequired up front).",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SequencingItem"
+            },
+            "minItems": 2,
+            "title": "Items",
+            "type": "array"
+          },
+          "slug": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "subject_slug",
+          "title",
+          "slug"
+        ],
+        "title": "SequencingCreateIn",
+        "type": "object"
+      },
+      "SequencingItem": {
+        "description": "A single item in a sequencing activity.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "label": {
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "SequencingItem",
+        "type": "object"
+      },
+      "SequencingPutIn": {
+        "description": "`PUT /authoring/sequencing/{id}` body: wholesale item-list replace.",
+        "properties": {
+          "access": {
+            "default": "practice",
+            "title": "Access",
+            "type": "string"
+          },
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SequencingItem"
+            },
+            "minItems": 2,
+            "title": "Items",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "title"
+        ],
+        "title": "SequencingPutIn",
         "type": "object"
       },
       "StudentDetailOut": {
@@ -2952,6 +3665,141 @@
         ]
       }
     },
+    "/api/v1/authoring/flashcard-decks": {
+      "post": {
+        "operationId": "create_flashcard_deck_api_v1_authoring_flashcard_decks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlashcardDeckCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlashcardDeckAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Flashcard Deck",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/flashcard-decks/{activity_id}": {
+      "get": {
+        "operationId": "get_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlashcardDeckAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Flashcard Deck",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "operationId": "update_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlashcardDeckPutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlashcardDeckAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Flashcard Deck",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
     "/api/v1/authoring/lessons": {
       "post": {
         "description": "Create a draft lesson with an empty page tree, plus its paired draft activity\n(kind \"lesson\", access \"practice\") \u2014 the starting point for a from-scratch author, or\nfor pasting in pages via the follow-up `PUT .../pages` call.",
@@ -3144,6 +3992,141 @@
         ]
       }
     },
+    "/api/v1/authoring/matching": {
+      "post": {
+        "operationId": "create_matching_api_v1_authoring_matching_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchingCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchingAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Matching",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/matching/{activity_id}": {
+      "get": {
+        "operationId": "get_matching_api_v1_authoring_matching__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchingAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Matching",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "operationId": "update_matching_api_v1_authoring_matching__activity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchingPutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchingAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Matching",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
     "/api/v1/authoring/media/presign": {
       "post": {
         "description": "Create a pending media asset and a presigned PUT URL for a direct-to-storage upload.",
@@ -3227,6 +4210,426 @@
         "summary": "Confirm Upload",
         "tags": [
           "media"
+        ]
+      }
+    },
+    "/api/v1/authoring/questions": {
+      "get": {
+        "description": "The question bank, optionally filtered by stem text (ILIKE over `stem` cast to text).\n\nNo subject filter: `Question` carries no `subject_id` column of its own (it's shared\nbank material referenced from quizzes and lesson knowledge checks alike) \u2014 a deviation\nfrom a per-subject browse experience recorded in plan 3b's task-9 notes.",
+        "operationId": "list_questions_api_v1_authoring_questions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionAuthorOut"
+                  },
+                  "title": "Response List Questions Api V1 Authoring Questions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Questions",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "post": {
+        "description": "Add a new bank question, independent of any quiz \u2014 attach it to one via\n`PUT /authoring/quizzes/{id}`'s `question_ids`.",
+        "operationId": "create_question_api_v1_authoring_questions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionAuthorIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Question",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/questions/{question_id}": {
+      "put": {
+        "description": "Edit a bank question in place \u2014 any quiz referencing it sees the new content.",
+        "operationId": "update_question_api_v1_authoring_questions__question_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Question Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionAuthorIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Question",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/quizzes": {
+      "post": {
+        "description": "Create an empty draft quiz + its paired draft activity; add questions via the `PUT`.",
+        "operationId": "create_quiz_api_v1_authoring_quizzes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Quiz",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/quizzes/{activity_id}": {
+      "get": {
+        "operationId": "get_quiz_api_v1_authoring_quizzes__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Quiz",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "description": "Replace the quiz's question set wholesale, rewriting positions 1..n in list order.",
+        "operationId": "update_quiz_api_v1_authoring_quizzes__activity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizPutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Quiz",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/sequencing": {
+      "post": {
+        "operationId": "create_sequencing_api_v1_authoring_sequencing_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SequencingCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequencingAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Sequencing",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/sequencing/{activity_id}": {
+      "get": {
+        "operationId": "get_sequencing_api_v1_authoring_sequencing__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequencingAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Sequencing",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "operationId": "update_sequencing_api_v1_authoring_sequencing__activity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SequencingPutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequencingAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Sequencing",
+        "tags": [
+          "authoring"
         ]
       }
     },

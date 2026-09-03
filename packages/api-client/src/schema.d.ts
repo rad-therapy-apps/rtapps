@@ -281,6 +281,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/flashcard-decks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Flashcard Deck */
+    post: operations["create_flashcard_deck_api_v1_authoring_flashcard_decks_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/flashcard-decks/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Flashcard Deck */
+    get: operations["get_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__get"];
+    /** Update Flashcard Deck */
+    put: operations["update_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/authoring/lessons": {
     parameters: {
       query?: never;
@@ -349,6 +384,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/matching": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Matching */
+    post: operations["create_matching_api_v1_authoring_matching_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/matching/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Matching */
+    get: operations["get_matching_api_v1_authoring_matching__activity_id__get"];
+    /** Update Matching */
+    put: operations["update_matching_api_v1_authoring_matching__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/authoring/media/presign": {
     parameters: {
       query?: never;
@@ -383,6 +453,131 @@ export interface paths {
      * @description Verify the object landed in storage and mark the asset servable (audited).
      */
     post: operations["confirm_upload_api_v1_authoring_media__asset_id__confirm_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/questions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Questions
+     * @description The question bank, optionally filtered by stem text (ILIKE over `stem` cast to text).
+     *
+     *     No subject filter: `Question` carries no `subject_id` column of its own (it's shared
+     *     bank material referenced from quizzes and lesson knowledge checks alike) — a deviation
+     *     from a per-subject browse experience recorded in plan 3b's task-9 notes.
+     */
+    get: operations["list_questions_api_v1_authoring_questions_get"];
+    put?: never;
+    /**
+     * Create Question
+     * @description Add a new bank question, independent of any quiz — attach it to one via
+     *     `PUT /authoring/quizzes/{id}`'s `question_ids`.
+     */
+    post: operations["create_question_api_v1_authoring_questions_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/questions/{question_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update Question
+     * @description Edit a bank question in place — any quiz referencing it sees the new content.
+     */
+    put: operations["update_question_api_v1_authoring_questions__question_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/quizzes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Quiz
+     * @description Create an empty draft quiz + its paired draft activity; add questions via the `PUT`.
+     */
+    post: operations["create_quiz_api_v1_authoring_quizzes_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/quizzes/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Quiz */
+    get: operations["get_quiz_api_v1_authoring_quizzes__activity_id__get"];
+    /**
+     * Update Quiz
+     * @description Replace the quiz's question set wholesale, rewriting positions 1..n in list order.
+     */
+    put: operations["update_quiz_api_v1_authoring_quizzes__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/sequencing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Sequencing */
+    post: operations["create_sequencing_api_v1_authoring_sequencing_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/sequencing/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Sequencing */
+    get: operations["get_sequencing_api_v1_authoring_sequencing__activity_id__get"];
+    /** Update Sequencing */
+    put: operations["update_sequencing_api_v1_authoring_sequencing__activity_id__put"];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1087,6 +1282,88 @@ export interface components {
       /** Threshold Percent */
       threshold_percent?: number | null;
     };
+    /**
+     * FlashcardCard
+     * @description A single flashcard: term and definition.
+     */
+    FlashcardCard: {
+      /** Definition */
+      definition: string;
+      /** Term */
+      term: string;
+    };
+    /** FlashcardDeckAuthorOut */
+    FlashcardDeckAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Cards */
+      cards: components["schemas"]["FlashcardCard"][];
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /**
+       * Deck Id
+       * Format: uuid
+       */
+      deck_id: string;
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * FlashcardDeckCreateIn
+     * @description `POST /authoring/flashcard-decks` body: meta plus the initial card set (`cards` is a
+     *     NOT NULL JSONB column on `FlashcardDeck`, so at least one card is required up front).
+     */
+    FlashcardDeckCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Cards */
+      cards: components["schemas"]["FlashcardCard"][];
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * FlashcardDeckPutIn
+     * @description `PUT /authoring/flashcard-decks/{id}` body: wholesale card-list replace.
+     */
+    FlashcardDeckPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Cards */
+      cards: components["schemas"]["FlashcardCard"][];
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Title */
+      title: string;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -1264,6 +1541,88 @@ export interface components {
       /** Password */
       password: string;
     };
+    /** MatchingAuthorOut */
+    MatchingAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /**
+       * Matching Id
+       * Format: uuid
+       */
+      matching_id: string;
+      /** Pairs */
+      pairs: components["schemas"]["MatchingPair"][];
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * MatchingCreateIn
+     * @description `POST /authoring/matching` body: meta plus the initial pair set (`pairs` is a NOT
+     *     NULL JSONB column on `MatchingActivity`, so at least two pairs are required up front).
+     */
+    MatchingCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Pairs */
+      pairs: components["schemas"]["MatchingPair"][];
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * MatchingPair
+     * @description A single term-definition pair in a matching activity.
+     */
+    MatchingPair: {
+      /** Definition */
+      definition: string;
+      /** Term */
+      term: string;
+    };
+    /**
+     * MatchingPutIn
+     * @description `PUT /authoring/matching/{id}` body: wholesale pair-list replace.
+     */
+    MatchingPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Pairs */
+      pairs: components["schemas"]["MatchingPair"][];
+      /** Title */
+      title: string;
+    };
     /**
      * MediaAssetOut
      * @description Response shape for confirm; built from a MediaAsset ORM row via from_attributes.
@@ -1382,6 +1741,115 @@ export interface components {
       /** Upload Url */
       upload_url: string;
     };
+    /**
+     * QuestionAuthorIn
+     * @description Body for `POST /authoring/questions` and `PUT /authoring/questions/{id}`: a single
+     *     bank question with a plain-text stem/explanation — the router wraps/unwraps
+     *     `app.content.activity_importer.text_doc()` on the way to/from `Question.stem`/
+     *     `Question.explanation`, so no raw ProseMirror JSON crosses this API.
+     */
+    QuestionAuthorIn: {
+      /** Answer */
+      answer: number;
+      /** Explanation */
+      explanation?: string | null;
+      /** Options */
+      options: string[];
+      /** Stem */
+      stem: string;
+    };
+    /**
+     * QuestionAuthorOut
+     * @description `QuestionAuthorIn`, flattened back out with its bank id.
+     */
+    QuestionAuthorOut: {
+      /** Answer */
+      answer: number;
+      /** Explanation */
+      explanation: string | null;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Options */
+      options: string[];
+      /** Stem */
+      stem: string;
+    };
+    /** QuizAuthorOut */
+    QuizAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /** Questions */
+      questions: components["schemas"]["QuestionAuthorOut"][];
+      /**
+       * Quiz Id
+       * Format: uuid
+       */
+      quiz_id: string;
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * QuizCreateIn
+     * @description `POST /authoring/quizzes` body: meta only. Unlike flashcards/matching/sequencing, a
+     *     quiz has no NOT NULL content column forcing questions up front — they live in the
+     *     `quiz_question` join table, so a brand-new quiz can start with zero questions and have
+     *     them added via `PUT /authoring/quizzes/{id}`.
+     */
+    QuizCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * QuizPutIn
+     * @description `PUT /authoring/quizzes/{id}` body: the ordered question-bank id list. Positions are
+     *     rewritten 1..n in list order; an id absent from the bank, or repeated, is rejected.
+     */
+    QuizPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Question Ids */
+      question_ids: string[];
+      /** Title */
+      title: string;
+    };
     /** RegisterIn */
     RegisterIn: {
       /** Display Name */
@@ -1454,6 +1922,89 @@ export interface components {
       };
       /** Score */
       score: number | null;
+    };
+    /** SequencingAuthorOut */
+    SequencingAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /** Items */
+      items: components["schemas"]["SequencingItem"][];
+      /**
+       * Sequencing Id
+       * Format: uuid
+       */
+      sequencing_id: string;
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * SequencingCreateIn
+     * @description `POST /authoring/sequencing` body: meta plus the initial item set in correct order
+     *     (`items` is a NOT NULL JSONB column on `SequencingActivity`, so at least two items are
+     *     required up front).
+     */
+    SequencingCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Items */
+      items: components["schemas"]["SequencingItem"][];
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * SequencingItem
+     * @description A single item in a sequencing activity.
+     */
+    SequencingItem: {
+      /** Detail */
+      detail?: string | null;
+      /** Label */
+      label: string;
+    };
+    /**
+     * SequencingPutIn
+     * @description `PUT /authoring/sequencing/{id}` body: wholesale item-list replace.
+     */
+    SequencingPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Items */
+      items: components["schemas"]["SequencingItem"][];
+      /** Title */
+      title: string;
     };
     /** StudentDetailOut */
     StudentDetailOut: {
@@ -2090,6 +2641,105 @@ export interface operations {
       };
     };
   };
+  create_flashcard_deck_api_v1_authoring_flashcard_decks_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FlashcardDeckCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FlashcardDeckAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FlashcardDeckAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FlashcardDeckPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FlashcardDeckAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   create_lesson_api_v1_authoring_lessons_post: {
     parameters: {
       query?: never;
@@ -2224,6 +2874,105 @@ export interface operations {
       };
     };
   };
+  create_matching_api_v1_authoring_matching_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MatchingCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_matching_api_v1_authoring_matching__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_matching_api_v1_authoring_matching__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MatchingPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   presign_upload_api_v1_authoring_media_presign_post: {
     parameters: {
       query?: never;
@@ -2275,6 +3024,303 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["MediaAssetOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_questions_api_v1_authoring_questions_get: {
+    parameters: {
+      query?: {
+        q?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionAuthorOut"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_question_api_v1_authoring_questions_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuestionAuthorIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_question_api_v1_authoring_questions__question_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        question_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuestionAuthorIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_quiz_api_v1_authoring_quizzes_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuizCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_quiz_api_v1_authoring_quizzes__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_quiz_api_v1_authoring_quizzes__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuizPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_sequencing_api_v1_authoring_sequencing_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SequencingCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SequencingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_sequencing_api_v1_authoring_sequencing__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SequencingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_sequencing_api_v1_authoring_sequencing__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SequencingPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SequencingAuthorOut"];
         };
       };
       /** @description Validation Error */
