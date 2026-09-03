@@ -24,6 +24,18 @@
             "title": "Kind",
             "type": "string"
           },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          },
           "needs_review": {
             "title": "Needs Review",
             "type": "boolean"
@@ -50,6 +62,7 @@
         },
         "required": [
           "activity_id",
+          "lesson_id",
           "kind",
           "title",
           "slug",

@@ -1145,6 +1145,8 @@ export interface components {
       import_notes: string[];
       /** Kind */
       kind: string;
+      /** Lesson Id */
+      lesson_id: string | null;
       /** Needs Review */
       needs_review: boolean;
       /** Slug */

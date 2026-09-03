@@ -35,7 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import UserRole
 from app.content.importer import LessonImport, import_lesson
-from app.content.models import Lesson, Subject
+from app.content.models import Activity, Lesson, Subject
 from app.content.service import publish_lesson
 from tests.conftest import register, seed_lesson
 from tests.test_cohorts import make_educator, promote
@@ -142,6 +142,25 @@ async def test_list_activities_flags_needs_review(client: AsyncClient, db: Async
     assert rows["rbe-and-oer-migrated"]["needs_review"] is True
     assert rows["rbe-and-oer-migrated"]["import_notes"] == doc["import_notes"]
     assert rows["rbe-and-oer"]["kind"] == "lesson" and rows["rbe-and-oer"]["status"] == "published"
+
+
+async def test_list_activities_includes_lesson_id(client: AsyncClient, db: AsyncSession) -> None:
+    """A lesson row's `lesson_id` matches its `Lesson.id`; a non-lesson kind's is null."""
+    lesson = await seed_lesson(db)  # subject "radiation-biology", lesson "rbe-and-oer"
+    quiz = Activity(
+        kind="quiz", ref_id=uuid.uuid4(), title="Some Quiz", subject_id=lesson.subject_id
+    )
+    db.add(quiz)
+    await db.commit()
+
+    await make_educator(client, db, "edu@example.edu")
+    r = await client.get("/api/v1/authoring/subjects/radiation-biology/activities")
+    assert r.status_code == 200, r.text
+    rows = {row["title"]: row for row in r.json()}
+    assert rows["RBE and OER"]["kind"] == "lesson"
+    assert rows["RBE and OER"]["lesson_id"] == str(lesson.id)
+    assert rows["Some Quiz"]["kind"] == "quiz"
+    assert rows["Some Quiz"]["lesson_id"] is None
 
 
 async def test_list_activities_unknown_subject_404(client: AsyncClient, db: AsyncSession) -> None:

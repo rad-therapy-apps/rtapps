@@ -74,6 +74,7 @@ class ActivityAuthorRow(BaseModel):
     """One row of `GET /authoring/subjects/{slug}/activities`."""
 
     activity_id: uuid.UUID
+    lesson_id: uuid.UUID | None
     kind: str
     title: str
     slug: str | None

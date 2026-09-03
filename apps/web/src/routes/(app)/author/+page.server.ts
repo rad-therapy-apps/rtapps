@@ -73,6 +73,6 @@ export const actions: Actions = {
 			});
 		}
 		const lesson: LessonAuthorOut = await res.json();
-		redirect(303, `/author/lessons/${lesson.activity_id}`);
+		redirect(303, `/author/lessons/${lesson.lesson_id}`);
 	}
 };

@@ -24,7 +24,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import type { components } from '@rtapps/api-client';
 	import type { ActionData, PageData } from './$types';
+
+	type ActivityAuthorRow = components['schemas']['ActivityAuthorRow'];
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -38,21 +41,22 @@
 		calculator: 'Calculators'
 	};
 
-	// Editor route per kind, keyed by `activity_id` (the only id `ActivityAuthorRow` carries).
-	// `calculator` has no editor route in this plan yet, so it's omitted — its activities render
-	// as plain text below.
-	function editorHref(kind: string, activityId: string): string | undefined {
-		switch (kind) {
+	// Editor route per kind, keyed by `activity_id` for every kind except `lesson`, whose editor
+	// route is keyed by `lesson_id` instead (`GET /authoring/lessons/{lesson_id}`; see
+	// `ActivityAuthorRow.lesson_id`). `calculator` has no editor route in this plan yet, so it's
+	// omitted — its activities render as plain text below.
+	function editorHref(row: ActivityAuthorRow): string | undefined {
+		switch (row.kind) {
 			case 'lesson':
-				return `/author/lessons/${activityId}`;
+				return row.lesson_id ? `/author/lessons/${row.lesson_id}` : undefined;
 			case 'quiz':
-				return `/author/quizzes/${activityId}`;
+				return `/author/quizzes/${row.activity_id}`;
 			case 'flashcards':
-				return `/author/decks/${activityId}`;
+				return `/author/decks/${row.activity_id}`;
 			case 'matching':
-				return `/author/matching/${activityId}`;
+				return `/author/matching/${row.activity_id}`;
 			case 'sequencing':
-				return `/author/sequencing/${activityId}`;
+				return `/author/sequencing/${row.activity_id}`;
 			default:
 				return undefined;
 		}
@@ -75,7 +79,7 @@
 	{:else}
 		<ul>
 			{#each data.needsReview as row (row.activity_id)}
-				{@const href = editorHref(row.kind, row.activity_id)}
+				{@const href = editorHref(row)}
 				<li>
 					{#if href}
 						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- editor route lands in Task 15/16, not yet a known route id -->
@@ -140,7 +144,7 @@
 					<h4>{label} ({activities.length})</h4>
 					<ul>
 						{#each activities as activity (activity.activity_id)}
-							{@const href = editorHref(activity.kind, activity.activity_id)}
+							{@const href = editorHref(activity)}
 							<li>
 								{#if href}
 									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- editor route lands in Task 15/16, not yet a known route id -->

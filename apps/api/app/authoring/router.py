@@ -221,6 +221,7 @@ async def list_subject_activities(
         rows.append(
             ActivityAuthorRow(
                 activity_id=activity.id,
+                lesson_id=activity.lesson_id,
                 kind=activity.kind,
                 title=activity.title,
                 slug=await slug_by_ref(db, activity),
