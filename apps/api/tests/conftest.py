@@ -45,6 +45,7 @@ from typing import cast
 import pytest
 from alembic.config import Config
 from asgi_lifespan import LifespanManager
+from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -125,9 +126,16 @@ async def db(engine: AsyncEngine) -> AsyncIterator[AsyncSession]:
         await trans.rollback()
 
 
+@pytest.fixture
+def app(settings: Settings) -> FastAPI:
+    """The ASGI app the `client` fixture serves; exposed separately so tests can override
+    a dependency (`app.dependency_overrides[...]`) for the duration of a single test.
+    """
+    return create_app(settings)
+
+
 @asynccontextmanager
-async def _make_client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncClient]:
-    app = create_app(settings)
+async def _make_client(app: FastAPI, db: AsyncSession) -> AsyncIterator[AsyncClient]:
     async with LifespanManager(app):
         # Route every request's session onto the test's connection/transaction.
         app.state.session_factory = async_sessionmaker(
@@ -139,9 +147,9 @@ async def _make_client(settings: Settings, db: AsyncSession) -> AsyncIterator[As
 
 
 @pytest.fixture
-async def client(settings: Settings, db: AsyncSession) -> AsyncIterator[AsyncClient]:
+async def client(app: FastAPI, db: AsyncSession) -> AsyncIterator[AsyncClient]:
     """Plain client: no Google OAuth configured, so `/auth/google/*` routes 404."""
-    async with _make_client(settings, db) as c:
+    async with _make_client(app, db) as c:
         yield c
 
 
@@ -156,7 +164,7 @@ async def client_google(db: AsyncSession) -> AsyncIterator[AsyncClient]:
         google_client_secret="csecret",
         rate_limit_enabled=False,
     )
-    async with _make_client(google_settings, db) as c:
+    async with _make_client(create_app(google_settings), db) as c:
         yield c
 
 

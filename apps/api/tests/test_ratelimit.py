@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User, UserRole
 from app.config import Settings
+from app.main import create_app
 from app.ratelimit import reset as reset_ratelimit
 from tests.conftest import TEST_DATABASE_URL, _make_client, register
 
@@ -50,7 +51,7 @@ async def limited_client(db) -> AsyncIterator[AsyncClient]:
         public_origin="https://test",
         rate_limit_enabled=True,
     )
-    async with _make_client(limited_settings, db) as c:
+    async with _make_client(create_app(limited_settings), db) as c:
         yield c
 
 

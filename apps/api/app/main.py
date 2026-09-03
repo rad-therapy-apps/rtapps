@@ -16,7 +16,7 @@ data). Interactive docs (`/api/v1/docs`, `/api/v1/openapi.json`) are disabled in
 
 Depends on: `app.admin.router`, `app.health`, `app.analytics.router`, `app.attempts.router`,
 `app.auth.router`, `app.cohorts.router`, `app.config`, `app.content.router`,
-`app.csrf.OriginCheckMiddleware`, `app.db`, `app.errors`.
+`app.csrf.OriginCheckMiddleware`, `app.db`, `app.errors`, `app.media.router`.
 Used by: `app.openapi_export` (`create_app`); `tests/conftest.py` (`client` fixture);
 served directly by Uvicorn (`app.main:app`) in dev/prod.
 """
@@ -38,6 +38,7 @@ from app.content.router import router as content_router
 from app.csrf import OriginCheckMiddleware
 from app.db import get_engine, make_session_factory
 from app.errors import install_error_handlers
+from app.media.router import router as media_router
 
 API_PREFIX = "/api/v1"  # every route group below is mounted under this prefix (URL versioning)
 
@@ -83,6 +84,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(cohorts_router, prefix=API_PREFIX)
     app.include_router(analytics_router, prefix=API_PREFIX)
     app.include_router(admin_router, prefix=API_PREFIX)
+    app.include_router(media_router, prefix=API_PREFIX)
     return app
 
 

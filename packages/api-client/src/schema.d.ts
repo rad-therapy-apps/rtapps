@@ -281,6 +281,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/media/presign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Presign Upload
+     * @description Create a pending media asset and a presigned PUT URL for a direct-to-storage upload.
+     */
+    post: operations["presign_upload_api_v1_authoring_media_presign_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/media/{asset_id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Confirm Upload
+     * @description Verify the object landed in storage and mark the asset servable (audited).
+     */
+    post: operations["confirm_upload_api_v1_authoring_media__asset_id__confirm_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts": {
     parameters: {
       query?: never;
@@ -554,6 +594,26 @@ export interface paths {
     };
     /** My Results */
     get: operations["my_results_api_v1_me_results_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/media/{asset_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Serve Media
+     * @description Redirect an authenticated viewer to a short-lived presigned GET for the object.
+     */
+    get: operations["serve_media_api_v1_media__asset_id__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -986,6 +1046,25 @@ export interface components {
       /** Password */
       password: string;
     };
+    /**
+     * MediaAssetOut
+     * @description Response shape for confirm; built from a MediaAsset ORM row via from_attributes.
+     */
+    MediaAssetOut: {
+      /** Alt */
+      alt: string | null;
+      /** Bytes */
+      bytes: number;
+      /** Confirmed */
+      confirmed: boolean;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Mime */
+      mime: string;
+    };
     /** MemberOut */
     MemberOut: {
       /** Display Name */
@@ -1042,6 +1121,27 @@ export interface components {
        * Format: uuid
        */
       user_id: string;
+    };
+    /** PresignIn */
+    PresignIn: {
+      /** Bytes */
+      bytes: number;
+      /** Filename */
+      filename: string;
+      /** Mime */
+      mime: string;
+    };
+    /** PresignOut */
+    PresignOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Storage Key */
+      storage_key: string;
+      /** Upload Url */
+      upload_url: string;
     };
     /** RegisterIn */
     RegisterIn: {
@@ -1719,6 +1819,70 @@ export interface operations {
       };
     };
   };
+  presign_upload_api_v1_authoring_media_presign_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PresignIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PresignOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  confirm_upload_api_v1_authoring_media__asset_id__confirm_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        asset_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MediaAssetOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_my_cohorts_api_v1_cohorts_get: {
     parameters: {
       query?: never;
@@ -2246,6 +2410,35 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ResultOut"][];
+        };
+      };
+    };
+  };
+  serve_media_api_v1_media__asset_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        asset_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
