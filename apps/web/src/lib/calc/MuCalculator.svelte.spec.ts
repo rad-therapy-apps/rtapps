@@ -90,4 +90,30 @@ describe('MuCalculator', () => {
 		await expect.element(page.getByTestId('mu-formula')).toHaveTextContent('MU = dose / TMR');
 		await expect.element(page.getByTestId('mu-result')).toHaveTextContent('MU = 210.5');
 	});
+
+	// Scenario: grid cell is exactly 0 at an exact grid point (depth 5, field size 5).
+	// Invariant: MU derivation produces Infinity (dose / 0), but the UI shows a clear message
+	// ("MU is undefined for a zero table value") and never renders "Infinity".
+	it('shows undefined message when table lookup is zero', async () => {
+		const ZERO_PDD_GRID: Grid = {
+			row_label: 'Depth (cm)',
+			col_label: 'Field size (cm)',
+			cols: [5, 10],
+			rows: [
+				{ key: 5, values: [0, 85] },
+				{ key: 10, values: [70, 75] }
+			]
+		};
+
+		await render(MuCalculator, {
+			tables: { 'pdd-6mv': { title: 'PDD 6MV', grid: ZERO_PDD_GRID } }
+		});
+
+		await setInputs('200', '5', '5');
+
+		await expect
+			.element(page.getByTestId('mu-undefined'))
+			.toHaveTextContent('MU is undefined for a zero table value');
+		await expect.element(page.getByTestId('mu-output')).not.toHaveTextContent('Infinity');
+	});
 });

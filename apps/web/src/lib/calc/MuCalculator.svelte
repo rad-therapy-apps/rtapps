@@ -92,12 +92,14 @@
 				outside the table's range (depth {depthBounds?.min}&ndash;{depthBounds?.max} cm, field size {fieldBounds?.min}&ndash;{fieldBounds?.max}
 				cm)
 			</p>
-		{:else}
+		{:else if lookup !== null && Number.isFinite(mu)}
 			<p data-testid="mu-lookup">
 				{neededTableKind.toUpperCase()}: {lookup.toFixed(4)}
 			</p>
 			<p data-testid="mu-formula">{formula}</p>
 			<p data-testid="mu-result">MU = {mu?.toFixed(1)}</p>
+		{:else}
+			<p data-testid="mu-undefined">MU is undefined for a zero table value</p>
 		{/if}
 	</section>
 </div>
