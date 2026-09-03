@@ -34,6 +34,7 @@ Used by: `convert.py`'s `_page_blocks`/`_one_paragraph_doc`/`_explanation_doc`.
 from __future__ import annotations
 
 import re
+import uuid
 from collections.abc import Iterable, Sequence
 from typing import Any
 
@@ -146,12 +147,32 @@ def _inline_nodes_from(
             elif name in ("h4", "h5", "h6"):
                 # A heading nested in inline context: keep the text, bolded.
                 out.extend(inline_nodes(child, notes, [*marks, {"type": "bold"}]))
+            elif name == "img":
+                src = str(child.get("src") or "")
+                alt = collapse_whitespace(str(child.get("alt") or "")).strip() or "image"
+                notes.append(f"img placeholder ({src or 'no src'})")
+                out.append({"type": "text", "text": f"[{alt}]"})
             elif name in _UNWRAP_INLINE:
                 out.extend(inline_nodes(child, notes, marks))
             else:
                 notes.append(f"unsupported inline element {name}")
                 out.extend(inline_nodes(child, notes, marks))
     return out
+
+
+def _image_placeholder(element: Tag, notes: list[str]) -> dict[str, Any]:
+    """Map an <img> to a prose `image` node with a deterministic placeholder id.
+
+    uuid5(src) resolves to no real media_asset, so the renderer shows the alt text;
+    the authoring editor replaces the id when the author uploads the real image.
+    Deterministic so re-scans and golden tests are stable."""
+    src = str(element.get("src") or "")
+    alt = collapse_whitespace(str(element.get("alt") or "")).strip()
+    if not alt:
+        alt = src.rsplit("/", 1)[-1] if src else "image"
+    notes.append(f"img placeholder ({src or 'no src'})")
+    placeholder = str(uuid.uuid5(uuid.NAMESPACE_URL, src or alt))
+    return {"type": "image", "attrs": {"mediaAssetId": placeholder, "alt": alt}}
 
 
 def _paragraph(element: Tag, notes: list[str]) -> dict[str, Any]:
@@ -289,8 +310,7 @@ def element_to_block(element: Tag, notes: list[str], page_num: int = 0) -> dict[
     if name == "blockquote":
         return {"type": "blockquote", "content": blocks_from_container(element, notes, page_num)}
     if name == "img":
-        notes.append("img without media asset")
-        return None
+        return _image_placeholder(element, notes)
     if name == "div":
         # Plain layout div (both callers normally intercept this): recurse rather than
         # flatten, and return a single blockquote-free wrapper is impossible — so fall

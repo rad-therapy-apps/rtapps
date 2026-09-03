@@ -324,9 +324,14 @@ def convert_lesson(index_html: Path, legacy_root: Path) -> tuple[dict[str, Any],
     }
 
     # A document is only "converted" cleanly if nothing was mapped lossily
-    # (unsupported element) or left ambiguous (missing answer key); those two note
-    # prefixes are the ones downgrading it to "needs-review" for a human to check.
-    if any(n.startswith("unsupported element") or n.startswith("no correct answer") for n in notes):
+    # (unsupported element) or left ambiguous (missing answer key); those prefixes
+    # are the ones downgrading it to "needs-review" for a human to check.
+    if any(
+        n.startswith("unsupported element")
+        or n.startswith("no correct answer")
+        or n.startswith("img placeholder")
+        for n in notes
+    ):
         status: Literal["converted", "needs-review", "unsupported"] = "needs-review"
     else:
         status = "converted"
