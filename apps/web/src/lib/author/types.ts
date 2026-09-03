@@ -12,6 +12,9 @@
  * survives reordering a block within or across pages.
  * How it fits the project: the type half of Task 15's lesson editor; `LessonEditor.svelte` is
  * the only place that builds `ClientPage[]` from `AuthorPage[]` (on load) and back (on save).
+ * `ClientPage` carries the same per-instance `instanceId` pattern as `ClientBlock`: the stable
+ * identity the outer pages `{#each}` keys on, so `movePage`/`deletePage` moves a page's whole DOM
+ * subtree (including its already block-keyed children) instead of remounting it in place.
  * Depends on: `$lib/prose/types` (`ProseDoc`).
  * Used by: `LessonEditor.svelte`, `KnowledgeCheckForm.svelte`,
  * `routes/(app)/author/lessons/[id]/+page.server.ts`, `LessonEditor.svelte.spec.ts`.
@@ -42,4 +45,4 @@ export type AuthorPage = { title: string; blocks: AuthorBlock[] };
 export type ClientRichTextBlock = AuthorRichTextBlock & { instanceId: string };
 export type ClientKnowledgeCheckBlock = AuthorKnowledgeCheckBlock & { instanceId: string };
 export type ClientBlock = ClientRichTextBlock | ClientKnowledgeCheckBlock;
-export type ClientPage = { title: string; blocks: ClientBlock[] };
+export type ClientPage = { title: string; blocks: ClientBlock[]; instanceId: string };

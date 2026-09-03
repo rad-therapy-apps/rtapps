@@ -3,16 +3,23 @@
 	blocks via RichTextEditor, knowledge-check blocks via KnowledgeCheckForm), image insertion,
 	dirty tracking, and a save button that PUTs the whole page tree back.
 	Used here and why: editor state is one `$state` array of `ClientPage` (the `AuthorPage` shape
-	plus a per-block `instanceId` — see `./types.ts`); every mutation handler sets `dirty = true`
-	directly rather than deriving it via a deep-compare (cheap, and matches the brief). `put`
-	defaults to the real API client (`$lib/author/api`'s `api.PUT`) but is overridable, the same
-	injectable-client pattern `$lib/activity/attempts.ts`'s players use for `post`, so
-	`LessonEditor.svelte.spec.ts` can assert on the exact PUT body without a network call. `save`
-	is busy-guarded with try/catch/finally so a failed request can never wedge the button (the
-	plan-3a players' rule — see `KnowledgeCheck.svelte`/`LessonPager.svelte`). Each RichTextEditor
-	mount is wrapped in `{#key block.instanceId}` (never array index) so TipTap's one-time-mount
-	contract (Task 14) survives reordering a block. `beforeNavigate` blocks leaving the page with
-	unsaved changes.
+	plus a per-page and per-block `instanceId` — see `./types.ts`); every mutation handler sets
+	`dirty = true` directly rather than deriving it via a deep-compare (cheap, and matches the
+	brief). `put` defaults to the real API client (`$lib/author/api`'s `api.PUT`) but is
+	overridable, the same injectable-client pattern `$lib/activity/attempts.ts`'s players use for
+	`post`, so `LessonEditor.svelte.spec.ts` can assert on the exact PUT body without a network
+	call. `save` is busy-guarded with try/catch/finally so a failed request can never wedge the
+	button (the plan-3a players' rule — see `KnowledgeCheck.svelte`/`LessonPager.svelte`). The
+	outer pages `{#each}` is keyed on `page.instanceId` (never array index) so `movePage`/
+	`deletePage` move a page's whole DOM subtree instead of remounting it in place; each
+	RichTextEditor mount is further wrapped in `{#key block.instanceId}` so TipTap's one-time-mount
+	contract (Task 14) survives reordering a block. A page's last remaining block can't be deleted
+	(the API's `PageImport.blocks` requires at least one), so `deleteBlock`'s control disables
+	itself the same way `KnowledgeCheckForm`'s remove-option button does at its own two-option
+	floor. Image insertion is guarded by an `uploading` flag: busy-guarded so only one upload runs
+	at a time (every block's Image button is disabled meanwhile, via `oninsertimage` going
+	undefined), and a failed upload surfaces in the same error banner `save` uses rather than
+	rejecting silently. `beforeNavigate` blocks leaving the page with unsaved changes.
 	How it fits the project: the core of Task 15's lesson editor; `+page.svelte` renders this for
 	the Edit tab. `PagesIn`/`KnowledgeCheckImport`/`RichTextImport` are Task 8's authoring wire
 	shapes; `replace_lesson_pages` (apps/api) is what actually persists the PUT.
@@ -99,12 +106,13 @@
 		return 'Request failed';
 	}
 
-	// Maps the loaded wire shape into client state once, attaching a stable instanceId per block
-	// (see ./types.ts) so reordering never remounts a RichTextEditor.
+	// Maps the loaded wire shape into client state once, attaching a stable instanceId per page and
+	// per block (see ./types.ts) so reordering never remounts a page's or a RichTextEditor's DOM.
 	function toClientPages(pages: AuthorPage[]): ClientPage[] {
 		return pages.map((page) => ({
 			title: page.title,
-			blocks: page.blocks.map((block) => ({ ...block, instanceId: crypto.randomUUID() }))
+			blocks: page.blocks.map((block) => ({ ...block, instanceId: crypto.randomUUID() })),
+			instanceId: crypto.randomUUID()
 		}));
 	}
 
@@ -112,6 +120,7 @@
 	let dirty = $state(false);
 	let saving = $state(false);
 	let saveError = $state<string | undefined>(undefined);
+	let uploading = $state(false);
 
 	beforeNavigate(({ cancel }) => {
 		if (dirty && !confirm('Discard unsaved changes?')) cancel();
@@ -124,7 +133,7 @@
 	// --- page operations ---
 
 	function addPage() {
-		pages = [...pages, { title: 'Untitled page', blocks: [] }];
+		pages = [...pages, { title: 'Untitled page', blocks: [], instanceId: crypto.randomUUID() }];
 		markDirty();
 	}
 
@@ -182,6 +191,9 @@
 	}
 
 	function deleteBlock(pageIndex: number, blockIndex: number) {
+		// A page must keep at least one block (the API's PageImport.blocks requires min_length=1);
+		// the delete control disables itself in this case (see the template), so this is a backstop.
+		if (pages[pageIndex].blocks.length <= 1) return;
 		if (!confirm('Delete this block?')) return;
 		pages = pages.map((page, i) =>
 			i === pageIndex ? { ...page, blocks: page.blocks.filter((_, bi) => bi !== blockIndex) } : page
@@ -217,7 +229,15 @@
 	async function insertImage(): Promise<{ mediaAssetId: string; alt: string } | null> {
 		const file = await pickFile();
 		if (!file) return null;
-		return uploadImage(file, authorApi);
+		uploading = true;
+		try {
+			return await uploadImage(file, authorApi);
+		} catch (error) {
+			saveError = error instanceof Error ? error.message : 'Image upload failed';
+			return null;
+		} finally {
+			uploading = false;
+		}
 	}
 
 	// --- save ---
@@ -266,7 +286,7 @@
 </script>
 
 <div class="lesson-editor">
-	{#each pages as page, pi (pi)}
+	{#each pages as page, pi (page.instanceId)}
 		<section class="page">
 			<label>
 				Page title
@@ -289,7 +309,7 @@
 							<RichTextEditor
 								doc={block.body}
 								onchange={(body) => updateBlock(pi, bi, { ...block, body })}
-								oninsertimage={insertImage}
+								oninsertimage={uploading ? undefined : insertImage}
 							/>
 						{/key}
 					{:else}
@@ -304,7 +324,13 @@
 							onclick={() => moveBlock(pi, bi, 1)}
 							disabled={bi === page.blocks.length - 1}>Move block down</button
 						>
-						<button type="button" onclick={() => deleteBlock(pi, bi)}>Delete block</button>
+						<button
+							type="button"
+							onclick={() => deleteBlock(pi, bi)}
+							disabled={page.blocks.length <= 1}
+							title={page.blocks.length <= 1 ? 'A page must have at least one block' : undefined}
+							>Delete block</button
+						>
 					</div>
 				</div>
 			{/each}

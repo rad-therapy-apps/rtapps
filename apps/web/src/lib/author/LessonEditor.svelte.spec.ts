@@ -1,14 +1,19 @@
 /**
  * What this file does: component-level tests for `LessonEditor.svelte` — editing a
- * knowledge-check option/answer and saving, a 422 save failure, and add/move/delete block
- * operations, all asserted against the exact PUT body a fake `put` receives.
+ * knowledge-check option/answer and saving, a 422 save failure, add/move/delete block operations
+ * (including the last-block-in-a-page delete guard), and a page reorder, all asserted against the
+ * exact PUT body a fake `put` receives.
  * Used here and why: vitest `client` browser project (real Chromium via
  * `@vitest/browser-playwright`) since a rich-text block mounts a real TipTap editor;
  * `window.confirm` is stubbed to auto-accept (Playwright otherwise auto-dismisses native dialogs,
  * which would make every delete/move-adjacent confirm silently no-op) so the delete-block
- * assertion in the third test is reachable. `put` is a `vi.fn` fake (same injectable-client
- * pattern as `$lib/activity/attempts.test.ts`'s `post`), so the emitted `PagesIn` body can be
- * asserted without a network call.
+ * assertions are reachable. `put` is a `vi.fn` fake (same injectable-client pattern as
+ * `$lib/activity/attempts.test.ts`'s `post`), so the emitted `PagesIn` body can be asserted
+ * without a network call. The third test's scenario was rewritten from an earlier version that
+ * deleted a page's only block and asserted a `blocks: []` PUT as success — the API's
+ * `PageImport.blocks` requires min_length=1, so that PUT would actually 422; the delete-block
+ * control now disables itself for a lone block instead (mirroring
+ * `KnowledgeCheckForm`'s min-2-options remove-option guard), which this test asserts.
  * How it fits the project: the component half of Task 15's lesson editor test plan (`uploadImage`
  * has its own pure-function test; `KnowledgeCheckForm`/`RichTextEditor` are exercised here through
  * `LessonEditor` rather than in isolation, since the scenarios the brief asks for — save,
@@ -161,11 +166,15 @@ describe('LessonEditor', () => {
 		await expect.element(saveButton(container)).not.toBeDisabled();
 	});
 
-	// Scenario: add a rich_text block to page 2, move it above the original block, and delete
-	// page 1's only block, then save.
-	// Invariant: the PUT body's page 1 has no blocks, and page 2's blocks are in the new order
-	// (new empty block first, original block second).
-	it('reflects add/move/delete in the saved body ordering', async () => {
+	// Scenario: add a rich_text block to page 2, move it above the original block, then delete one
+	// of page 2's now-two blocks, and save.
+	// Invariant: a page's *only* block can't be deleted (the API's PageImport.blocks requires
+	// min_length=1 -- the scenario this replaces used to delete page 1's only block and assert a
+	// `blocks: []` PUT as success, which would now 422). Page 1's lone knowledge_check block's
+	// delete control is disabled instead, and page 1's blocks are untouched in the saved body.
+	// Page 2's delete (of one of its two blocks) still goes through, leaving the remaining block in
+	// the saved body.
+	it("disables deleting a page's last block and reflects add/move/delete ordering otherwise", async () => {
 		const putMock = vi.fn(async () => ({ data: {}, error: undefined }));
 		const put = putMock as unknown as PutFn;
 		const { container } = await render(LessonEditor, {
@@ -173,6 +182,9 @@ describe('LessonEditor', () => {
 			initialPages: fixture(),
 			put
 		});
+
+		const page1Block = blocks(pages(container)[0])[0];
+		expect(blockControls(page1Block)[2]).toBeDisabled();
 
 		const page2 = pages(container)[1];
 		const addTextBlock = page2.querySelector<HTMLButtonElement>('.add-block-controls button');
@@ -182,18 +194,68 @@ describe('LessonEditor', () => {
 		const newBlock = blocks(page2)[1];
 		await userEvent.click(blockControls(newBlock)[0]); // move up -> [new-empty, original]
 
-		const page1Block = blocks(pages(container)[0])[0];
-		await userEvent.click(blockControls(page1Block)[2]); // delete (confirm stubbed true)
+		const page2Blocks = blocks(page2);
+		expect(blockControls(page2Blocks[0])[2]).not.toBeDisabled();
+		await userEvent.click(blockControls(page2Blocks[0])[2]); // delete new-empty (confirm stubbed true)
 
 		await userEvent.click(saveButton(container));
 
 		expect(putMock).toHaveBeenCalledTimes(1);
 		const [, init] = putMock.mock.calls[0] as unknown as SaveCall;
 		const body = init.body;
-		expect(body.pages[0].blocks).toEqual([]);
-		expect(body.pages[1].blocks).toEqual([
-			{ type: 'rich_text', body: emptyDoc },
-			{ type: 'rich_text', body: originalDoc }
+		expect(body.pages[0].blocks).toEqual([
+			{
+				type: 'knowledge_check',
+				key: 'kc_aaaaaaaa',
+				stem: emptyDoc,
+				options: ['Alpha', 'Beta'],
+				answer: 0,
+				explanation: null
+			}
 		]);
+		expect(body.pages[1].blocks).toEqual([{ type: 'rich_text', body: originalDoc }]);
+	});
+
+	// Scenario: swap the two pages via `movePage` (page 1's "Move page down" control), then save.
+	// Invariant: the saved body reflects the new page order. This is a cheap ordering guard for the
+	// outer `{#each pages as page, pi (page.instanceId)}` keying fix -- it exercises movePage's state
+	// mutation, though proving the *DOM identity* (no RichTextEditor remount) that motivated keying
+	// on instanceId over array index would need a mount-count/cursor-preservation assertion, which
+	// isn't cheap here.
+	it('reflects a page reorder in the saved body ordering', async () => {
+		const putMock = vi.fn(async () => ({ data: {}, error: undefined }));
+		const put = putMock as unknown as PutFn;
+		const { container } = await render(LessonEditor, {
+			lessonId: 'lesson-1',
+			initialPages: fixture(),
+			put
+		});
+
+		const page1Controls =
+			pages(container)[0].querySelectorAll<HTMLButtonElement>('.page-controls button');
+		await userEvent.click(page1Controls[1]); // "Move page down" -> [Page 2, Page 1]
+
+		await userEvent.click(saveButton(container));
+
+		expect(putMock).toHaveBeenCalledTimes(1);
+		const [, init] = putMock.mock.calls[0] as unknown as SaveCall;
+		const body = init.body;
+		expect(body.pages[0]).toEqual({
+			title: 'Page 2',
+			blocks: [{ type: 'rich_text', body: originalDoc }]
+		});
+		expect(body.pages[1]).toEqual({
+			title: 'Page 1',
+			blocks: [
+				{
+					type: 'knowledge_check',
+					key: 'kc_aaaaaaaa',
+					stem: emptyDoc,
+					options: ['Alpha', 'Beta'],
+					answer: 0,
+					explanation: null
+				}
+			]
+		});
 	});
 });
