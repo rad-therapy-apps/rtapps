@@ -27,6 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.content.models import Activity, Subject
+from app.content.service import publish_activity
 from tests.conftest import register
 from tests.test_cohorts import make_educator
 
@@ -144,6 +145,25 @@ class TestQuestionBank:
             json={"stem": "X?", "options": ["A", "B"], "answer": 0},
         )
         assert r.status_code == 403
+
+    async def test_question_search_escapes_ilike_wildcards(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        # Create two questions: one with a literal underscore in the stem, one with different text.
+        # The `_` in question stems will be treated as plain text, not a wildcard.
+        q_underscore = await _create_question(client, stem="score_a underscore")
+        q_wildcard_bait = await _create_question(client, stem="scoreXa wildcard bait")
+
+        # Search for "score_a" - should match ONLY the question with literal underscore,
+        # not the one with "scoreXa" (which would match if _ was a wildcard).
+        result = await client.get("/api/v1/authoring/questions", params={"q": "score_a"})
+        assert result.status_code == 200, result.text
+        matching_ids = [q["id"] for q in result.json()]
+        assert q_underscore["id"] in matching_ids, "Question with literal underscore should match"
+        assert q_wildcard_bait["id"] not in matching_ids, (
+            "Question with 'scoreXa' should not match search for 'score_a' (underscore not wildcard)"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -299,6 +319,61 @@ class TestQuizBuilder:
             },
         )
         assert r.status_code == 403
+
+    async def test_put_on_published_quiz_leaves_pinned_snapshot_unchanged(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        # Create a quiz with one question.
+        quiz = await self._create_quiz(client, db)
+        q1 = await _create_question(client, stem="Original Question")
+        r = await client.put(
+            f"/api/v1/authoring/quizzes/{quiz['activity_id']}",
+            json={
+                "title": "Original Title",
+                "question_ids": [q1["id"]],
+                "access": "practice",
+                "config": {"pass_percent": 70},
+            },
+        )
+        assert r.status_code == 200, r.text
+
+        # Publish the quiz.
+        activity = await db.get(Activity, uuid.UUID(quiz["activity_id"]))
+        assert activity is not None
+        await publish_activity(db, activity, author=None, change_note="test publish")
+
+        # Student can now see the published quiz content.
+        published = (await client.get(f"/api/v1/activities/{quiz['activity_id']}")).json()
+        assert published["snapshot"]["quiz"]["title"] == "Original Title"
+        assert len(published["snapshot"]["quiz"]["questions"]) == 1
+        # Snapshot stores stems as ProseMirror docs; extract the text from it.
+        original_stem = published["snapshot"]["quiz"]["questions"][0]["stem"]
+        assert isinstance(original_stem, dict) and "content" in original_stem
+
+        # Edit the working copy to something different.
+        q2 = await _create_question(client, stem="New Question")
+        r = await client.put(
+            f"/api/v1/authoring/quizzes/{quiz['activity_id']}",
+            json={
+                "title": "Edited After Publish",
+                "question_ids": [q2["id"]],
+                "access": "assessment",
+                "config": {"pass_percent": 90},
+            },
+        )
+        assert r.status_code == 200, r.text
+        # Working copy did change.
+        assert r.json()["title"] == "Edited After Publish"
+        assert r.json()["questions"][0]["stem"] == "New Question"
+
+        # But the served student snapshot is still the pre-edit content (edit != publish).
+        still_published = (await client.get(f"/api/v1/activities/{quiz['activity_id']}")).json()
+        assert still_published["snapshot"]["quiz"]["title"] == "Original Title"
+        assert len(still_published["snapshot"]["quiz"]["questions"]) == 1
+        # Snapshot stem should be unchanged (same ProseMirror doc as before).
+        still_original_stem = still_published["snapshot"]["quiz"]["questions"][0]["stem"]
+        assert still_original_stem == original_stem
 
 
 # ---------------------------------------------------------------------------

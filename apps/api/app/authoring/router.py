@@ -319,6 +319,13 @@ async def replace_pages(
 # ---------------------------------------------------------------------------
 
 
+def _escape_like(q: str) -> str:
+    # Escape backslash, percent, and underscore for ILIKE pattern matching.
+    # This is duplicated from `app.admin.router._escape_like()` to avoid cross-router
+    # imports; the admin router has the same pattern and maintains it independently.
+    return q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def _doc_text(doc: dict[str, Any]) -> str:
     """Concatenate a ProseMirror doc's text nodes back to plain text — the inverse of
     `activity_importer.text_doc()`."""
@@ -402,7 +409,10 @@ async def list_questions(
     """
     stmt = select(Question).order_by(Question.id).limit(50)
     if q:
-        stmt = stmt.where(cast(Question.stem, Text).ilike(f"%{q}%"))
+        # Escape ILIKE wildcards so literal % and _ in the search match only themselves.
+        escaped = _escape_like(q.strip())
+        pattern = f"%{escaped}%"
+        stmt = stmt.where(cast(Question.stem, Text).ilike(pattern, escape="\\"))
     questions = (await db.scalars(stmt)).all()
     return [_question_out(question) for question in questions]
 
