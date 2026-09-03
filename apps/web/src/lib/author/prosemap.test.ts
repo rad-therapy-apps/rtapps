@@ -25,9 +25,10 @@ addFormats(ajv);
 const validate = ajv.compile(schema);
 
 // Exercises every node type (paragraph, heading 2/3/4, bulletList/orderedList/listItem,
-// blockquote, callout x3 kinds, table with a header row and a plain row, image, math,
-// hardBreak) and every mark type (bold, italic, underline, code, subscript, superscript, link,
-// and a two-mark combination) the closed schema allows.
+// blockquote, callout x3 kinds plus one nesting a bulletList (content is `block+`, not just
+// paragraph), table with a header row and a plain row, image, math, hardBreak) and every mark
+// type (bold, italic, underline, code, subscript, superscript, link, and a two-mark combination)
+// the closed schema allows.
 const FIXTURE: ProseDoc = {
 	type: 'doc',
 	content: [
@@ -91,6 +92,23 @@ const FIXTURE: ProseDoc = {
 			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'warning' }] }]
 		},
 		{
+			// Callout content is `block+` (not just paragraph): a callout nesting a bulletList,
+			// left untested until now (Task 14 review follow-up).
+			type: 'callout',
+			attrs: { kind: 'key-principle' },
+			content: [
+				{
+					type: 'bulletList',
+					content: [
+						{
+							type: 'listItem',
+							content: [{ type: 'paragraph', content: [{ type: 'text', text: 'nested bullet' }] }]
+						}
+					]
+				}
+			]
+		},
+		{
 			type: 'table',
 			content: [
 				{
@@ -142,7 +160,8 @@ describe('prosemap', () => {
 	// Invariant: our `tableCell{attrs:{header:true}}` becomes TipTap's distinct `tableHeader`
 	// node (no `attrs` on it — TipTap fills in its own colspan/rowspan/colwidth defaults).
 	it('toEditor maps a header tableCell to a tableHeader node', () => {
-		const cell = toEditor(FIXTURE).content?.[10].content?.[0].content?.[0];
+		// Index 11: shifted by one from the extra callout fixture entry added above.
+		const cell = toEditor(FIXTURE).content?.[11].content?.[0].content?.[0];
 		expect(cell).toEqual({
 			type: 'tableHeader',
 			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Part' }] }]
@@ -152,7 +171,7 @@ describe('prosemap', () => {
 	// Scenario: a plain (non-header) table cell, in the toEditor direction.
 	// Invariant: passes through unchanged as `tableCell`.
 	it('toEditor leaves a plain tableCell as tableCell', () => {
-		const cell = toEditor(FIXTURE).content?.[10].content?.[1].content?.[0];
+		const cell = toEditor(FIXTURE).content?.[11].content?.[1].content?.[0];
 		expect(cell).toEqual({
 			type: 'tableCell',
 			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Cathode' }] }]
