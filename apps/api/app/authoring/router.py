@@ -1,5 +1,5 @@
-"""Authoring API for lesson working copies, the question bank, and the quiz/flashcard-deck/
-matching/sequencing activity builders.
+"""Authoring API for lesson working copies, the question bank, the quiz/flashcard-deck/
+matching/sequencing activity builders, data tables, and calculator activities.
 
 What this file does: `GET /subjects` and `GET /subjects/{slug}/activities` let an author
 browse what exists (any status, not just published); `POST /lessons` creates a draft lesson
@@ -8,10 +8,14 @@ browse what exists (any status, not just published); `POST /lessons` creates a d
 /questions[...]` is the flattened question bank; `POST/GET/PUT` under `/quizzes`,
 `/flashcard-decks`, `/matching`, `/sequencing` each create a working-copy row (Quiz/
 FlashcardDeck/MatchingActivity/SequencingActivity) plus its paired draft `Activity`, and
-read/replace that row's content by *activity* id (Task 9). Every route here edits the
-*working copy* only — publishing (Task 10) is a separate step, so an author can save an
-in-progress edit to a published activity without it reaching students until they
-explicitly publish.
+read/replace that row's content by *activity* id (Task 9). `GET/PUT` under `/data-tables`
+manage the shared, keyed `DataTable` lookup rows an author edits directly (no paired
+`Activity` — a table isn't itself attemptable); `POST/GET/PUT` under `/calculators` create
+and edit calculator activities, whose `Activity.config` (`calc_type` + the `data_tables`
+keys it references) *is* the working copy, with no row of its own (Task 11). Every route
+here edits the *working copy* only — publishing (Task 10) is a separate step, so an author
+can save an in-progress edit to a published activity without it reaching students until
+they explicitly publish.
 
 Used here and why: `build_snapshot` (the same function `publish_lesson` freezes into a
 `content_version`) is reused verbatim for lesson `GET`s — it already returns the
@@ -31,33 +35,37 @@ same one-paragraph ProseMirror doc the importer writes; `_doc_text` here is its 
 responses (kept local rather than importing `activity_snapshots._plain_text`, which is
 module-private to that layer).
 
-How it fits the project: plan 3b Task 8 (lessons) and Task 9 (question bank + builders) —
-Task 9's builders are what Task 16's builder pages consume. `POST .../publish` (Task 10)
-freezes the current working copy into the next immutable `ContentVersion` and points
-students at it — a lesson's own `current_version_id` is kept in sync via `publish_lesson`,
-every other kind via `publish_activity` directly; `GET .../preview` returns the exact
-stripped snapshot students will see the moment that publish happens; `GET .../versions`
-lists the publish history newest-first.
+How it fits the project: plan 3b Task 8 (lessons), Task 9 (question bank + builders), and
+Task 11 (data tables + calculator) — Task 9's builders and Task 11's calculator are what
+Task 16's builder pages consume. `POST .../publish` (Task 10) freezes the current working
+copy into the next immutable `ContentVersion` and points students at it — a lesson's own
+`current_version_id` is kept in sync via `publish_lesson`, every other kind via
+`publish_activity` directly; a `ValueError` from that (a calculator referencing a
+`data_tables` key with no `DataTable` row) becomes a 422, not a 500. `GET .../preview`
+returns the exact stripped snapshot students will see the moment that publish happens;
+`GET .../versions` lists the publish history newest-first.
 `dependencies=[Depends(require_author)]` at router level (not per-route) means no route
 here can be added later without the educator/admin gate.
 
 Depends on: `app.audit.service.record_audit`, `app.authoring.deps.require_author`,
 `app.authoring.schemas` (all request/response models), `app.auth.models.User`,
 `app.content.activity_importer` (`text_doc`), `app.content.activity_models`
-(Quiz/QuizQuestion/FlashcardDeck/MatchingActivity/SequencingActivity),
+(Quiz/QuizQuestion/FlashcardDeck/MatchingActivity/SequencingActivity/DataTable),
 `app.content.activity_snapshots` (`build_activity_snapshot`, `strip_activity_answers`),
 `app.content.importer` (`ProseValidationError`, `replace_lesson_pages`), `app.content.models`
 (ACTIVITY_ACCESS unused directly here but re-exported via schemas, Activity, ContentVersion,
 Lesson, Question, Subject), `app.content.service` (`publish_activity`, `publish_lesson`),
-`app.content.snapshot.build_snapshot`, `app.db.get_session`, `app.errors.Problem`.
+`app.content.snapshot.build_snapshot`, `app.db.get_session`, `app.errors.Problem`,
+`app.ids.new_id` (a calculator's `Activity.ref_id`, which points at nothing).
 Used by: `app.main` (mounted); `tests/test_authoring_lessons.py`,
-`tests/test_authoring_builders.py`, `tests/test_authoring_publish.py`.
+`tests/test_authoring_builders.py`, `tests/test_authoring_publish.py`,
+`tests/test_data_tables.py`, `tests/test_calculator_activity.py`.
 """
 
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy import Text, cast, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,6 +75,11 @@ from app.auth.models import User
 from app.authoring.deps import require_author
 from app.authoring.schemas import (
     ActivityAuthorRow,
+    CalculatorAuthorOut,
+    CalculatorCreateIn,
+    CalculatorPutIn,
+    DataTableOut,
+    DataTablePutIn,
     FlashcardDeckAuthorOut,
     FlashcardDeckCreateIn,
     FlashcardDeckPutIn,
@@ -91,6 +104,7 @@ from app.authoring.schemas import (
 )
 from app.content.activity_importer import FlashcardCard, MatchingPair, SequencingItem, text_doc
 from app.content.activity_models import (
+    DataTable,
     FlashcardDeck,
     MatchingActivity,
     Quiz,
@@ -105,6 +119,7 @@ from app.content.service import publish_activity, publish_lesson
 from app.content.snapshot import build_snapshot
 from app.db import get_session
 from app.errors import Problem
+from app.ids import new_id
 
 router = APIRouter(prefix="/authoring", tags=["authoring"], dependencies=[Depends(require_author)])
 
@@ -806,6 +821,132 @@ async def update_sequencing(
 
 
 # ---------------------------------------------------------------------------
+# Data tables (Task 11)
+# ---------------------------------------------------------------------------
+
+
+def _data_table_out(table: DataTable) -> DataTableOut:
+    return DataTableOut(
+        key=table.key, title=table.title, grid=table.grid, updated_at=table.updated_at
+    )
+
+
+@router.get("/data-tables", response_model=list[DataTableOut])
+async def list_data_tables(db: AsyncSession = Depends(get_session)) -> list[DataTableOut]:
+    """Every author-editable numeric lookup table (PDD/TMR/etc.) — the grid editor's list
+    view (Task 16) and a calculator builder's table picker both read this."""
+    rows = (await db.scalars(select(DataTable).order_by(DataTable.key))).all()
+    return [_data_table_out(row) for row in rows]
+
+
+@router.get("/data-tables/{key}", response_model=DataTableOut)
+async def get_data_table(key: str, db: AsyncSession = Depends(get_session)) -> DataTableOut:
+    table = await db.scalar(select(DataTable).where(DataTable.key == key))
+    if table is None:
+        raise Problem(404, "Data table not found")
+    return _data_table_out(table)
+
+
+@router.put("/data-tables/{key}", response_model=DataTableOut)
+async def upsert_data_table(
+    key: str,
+    payload: DataTablePutIn,
+    response: Response,
+    user: User = Depends(require_author),
+    db: AsyncSession = Depends(get_session),
+) -> DataTableOut:
+    """Create-or-replace one data table by its stable `key` (200 on update, 201 on create;
+    there is no separate create endpoint). A calculator activity's `config["data_tables"]`
+    references tables by this same key, resolved to a live row only at publish time (see
+    `build_activity_snapshot`'s calculator branch) — editing a table here never touches an
+    already-published calculator's frozen snapshot.
+    """
+    table = await db.scalar(select(DataTable).where(DataTable.key == key))
+    created = table is None
+    if table is None:
+        table = DataTable(key=key, title=payload.title, grid=payload.grid.model_dump())
+        db.add(table)
+    else:
+        table.title = payload.title
+        table.grid = payload.grid.model_dump()
+    table.updated_by = user.id
+    await db.commit()
+    await db.refresh(table)
+    response.status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+    return _data_table_out(table)
+
+
+# ---------------------------------------------------------------------------
+# Calculator (Task 11)
+# ---------------------------------------------------------------------------
+
+
+def _calculator_out(activity: Activity, subject: Subject) -> CalculatorAuthorOut:
+    return CalculatorAuthorOut(
+        activity_id=activity.id,
+        subject_slug=subject.slug,
+        title=activity.title,
+        status=activity.status,
+        calc_type=activity.config.get("calc_type", ""),
+        data_tables=list(activity.config.get("data_tables", [])),
+    )
+
+
+async def _resolve_calculator(db: AsyncSession, activity_id: uuid.UUID) -> tuple[Activity, Subject]:
+    activity = await db.get(Activity, activity_id)
+    if activity is None or activity.kind != "calculator":
+        raise Problem(404, "Calculator not found")
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None
+    return activity, subject
+
+
+@router.post(
+    "/calculators", response_model=CalculatorAuthorOut, status_code=status.HTTP_201_CREATED
+)
+async def create_calculator(
+    payload: CalculatorCreateIn, db: AsyncSession = Depends(get_session)
+) -> CalculatorAuthorOut:
+    """Create a calculator activity. Unlike the other builders, it has no per-activity
+    working-copy row of its own (see `_SLUG_MODELS`'s comment) — `ref_id` is a fresh id with
+    nothing behind it, and its whole "content" is `config` itself: `calc_type` plus the
+    `data_tables` keys it references, resolved to real `DataTable` rows only later, at
+    publish/snapshot time.
+    """
+    subject = await _subject_for_create(db, payload.subject_slug)
+    activity = await _create_activity(
+        db,
+        kind="calculator",
+        ref_id=new_id(),
+        subject=subject,
+        title=payload.title,
+        access="practice",
+        config={"calc_type": payload.calc_type, "data_tables": payload.data_tables},
+    )
+    await db.commit()
+    return _calculator_out(activity, subject)
+
+
+@router.get("/calculators/{activity_id}", response_model=CalculatorAuthorOut)
+async def get_calculator(
+    activity_id: uuid.UUID, db: AsyncSession = Depends(get_session)
+) -> CalculatorAuthorOut:
+    activity, subject = await _resolve_calculator(db, activity_id)
+    return _calculator_out(activity, subject)
+
+
+@router.put("/calculators/{activity_id}", response_model=CalculatorAuthorOut)
+async def update_calculator(
+    activity_id: uuid.UUID, payload: CalculatorPutIn, db: AsyncSession = Depends(get_session)
+) -> CalculatorAuthorOut:
+    activity, subject = await _resolve_calculator(db, activity_id)
+    activity.title = payload.title
+    activity.config = {"calc_type": payload.calc_type, "data_tables": payload.data_tables}
+    await db.commit()
+    return _calculator_out(activity, subject)
+
+
+# ---------------------------------------------------------------------------
 # Publish, preview, versions (Task 10)
 # ---------------------------------------------------------------------------
 
@@ -846,12 +987,18 @@ async def publish(
     config = dict(activity.config)
     config.pop("import_notes", None)
     activity.config = config
-    if activity.kind == "lesson":
-        lesson = await db.get(Lesson, activity.lesson_id)
-        assert lesson is not None  # Activity.lesson_id always resolves for kind "lesson"
-        version = await publish_lesson(db, lesson, user, payload.change_note)
-    else:
-        version = await publish_activity(db, activity, user, payload.change_note)
+    try:
+        if activity.kind == "lesson":
+            lesson = await db.get(Lesson, activity.lesson_id)
+            assert lesson is not None  # Activity.lesson_id always resolves for kind "lesson"
+            version = await publish_lesson(db, lesson, user, payload.change_note)
+        else:
+            version = await publish_activity(db, activity, user, payload.change_note)
+    except ValueError as exc:
+        # build_activity_snapshot's calculator branch raises this when config["data_tables"]
+        # names a key with no DataTable row — an authoring-time mistake, not a server error.
+        await db.rollback()
+        raise Problem(422, str(exc)) from exc
     await record_audit(
         db,
         actor=user,

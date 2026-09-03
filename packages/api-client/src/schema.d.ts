@@ -348,6 +348,94 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/calculators": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Calculator
+     * @description Create a calculator activity. Unlike the other builders, it has no per-activity
+     *     working-copy row of its own (see `_SLUG_MODELS`'s comment) — `ref_id` is a fresh id with
+     *     nothing behind it, and its whole "content" is `config` itself: `calc_type` plus the
+     *     `data_tables` keys it references, resolved to real `DataTable` rows only later, at
+     *     publish/snapshot time.
+     */
+    post: operations["create_calculator_api_v1_authoring_calculators_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/calculators/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Calculator */
+    get: operations["get_calculator_api_v1_authoring_calculators__activity_id__get"];
+    /** Update Calculator */
+    put: operations["update_calculator_api_v1_authoring_calculators__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/data-tables": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Data Tables
+     * @description Every author-editable numeric lookup table (PDD/TMR/etc.) — the grid editor's list
+     *     view (Task 16) and a calculator builder's table picker both read this.
+     */
+    get: operations["list_data_tables_api_v1_authoring_data_tables_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/data-tables/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Data Table */
+    get: operations["get_data_table_api_v1_authoring_data_tables__key__get"];
+    /**
+     * Upsert Data Table
+     * @description Create-or-replace one data table by its stable `key` (200 on update, 201 on create;
+     *     there is no separate create endpoint). A calculator activity's `config["data_tables"]`
+     *     references tables by this same key, resolved to a live row only at publish time (see
+     *     `build_activity_snapshot`'s calculator branch) — editing a table here never touches an
+     *     already-published calculator's frozen snapshot.
+     */
+    put: operations["upsert_data_table_api_v1_authoring_data_tables__key__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/authoring/flashcard-decks": {
     parameters: {
       query?: never;
@@ -1294,6 +1382,53 @@ export interface components {
       /** Label */
       label: string;
     };
+    /** CalculatorAuthorOut */
+    CalculatorAuthorOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Calc Type */
+      calc_type: string;
+      /** Data Tables */
+      data_tables: string[];
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * CalculatorCreateIn
+     * @description `POST /authoring/calculators` body. No `access`/`slug`: a calculator has no
+     *     per-activity working-copy row to slug (see `app.authoring.router._SLUG_MODELS`'s
+     *     comment) and is always `access="practice"`.
+     */
+    CalculatorCreateIn: {
+      /** Calc Type */
+      calc_type: string;
+      /** Data Tables */
+      data_tables: string[];
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * CalculatorPutIn
+     * @description `PUT /authoring/calculators/{activity_id}` body: title plus the same content fields
+     *     as create.
+     */
+    CalculatorPutIn: {
+      /** Calc Type */
+      calc_type: string;
+      /** Data Tables */
+      data_tables: string[];
+      /** Title */
+      title: string;
+    };
     /** CohortIn */
     CohortIn: {
       /** Ends On */
@@ -1348,6 +1483,35 @@ export interface components {
       starts_on?: string | null;
       /** Threshold Percent */
       threshold_percent?: number | null;
+    };
+    /**
+     * DataTableOut
+     * @description `GET /authoring/data-tables[/{key}]` response, and what `PUT` echoes back.
+     */
+    DataTableOut: {
+      /** Grid */
+      grid: {
+        [key: string]: unknown;
+      };
+      /** Key */
+      key: string;
+      /** Title */
+      title: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /**
+     * DataTablePutIn
+     * @description Body for `PUT /authoring/data-tables/{key}`: an upsert keyed by the path's `key`
+     *     (200 on update, 201 on create — there is no separate create endpoint).
+     */
+    DataTablePutIn: {
+      grid: components["schemas"]["GridIn"];
+      /** Title */
+      title: string;
     };
     /**
      * FlashcardCard
@@ -1430,6 +1594,33 @@ export interface components {
       };
       /** Title */
       title: string;
+    };
+    /**
+     * GridIn
+     * @description Body shape for `DataTable.grid`: a numeric lookup table with named row/col axes.
+     *     `values` must line up 1:1 with `cols`; both `cols` and row `key`s must be strictly
+     *     ascending, matching what Task 17's MU player assumes when it looks a value up.
+     */
+    GridIn: {
+      /** Col Label */
+      col_label: string;
+      /** Cols */
+      cols: number[];
+      /** Row Label */
+      row_label: string;
+      /** Rows */
+      rows: components["schemas"]["GridRow"][];
+    };
+    /**
+     * GridRow
+     * @description One row of a data-table grid: a numeric row key (e.g. depth in cm) plus one value
+     *     per column, in the same order as `GridIn.cols`.
+     */
+    GridRow: {
+      /** Key */
+      key: number;
+      /** Values */
+      values: number[];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -2826,6 +3017,191 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["VersionOut"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_calculator_api_v1_authoring_calculators_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalculatorCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalculatorAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_calculator_api_v1_authoring_calculators__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalculatorAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_calculator_api_v1_authoring_calculators__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalculatorPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalculatorAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_data_tables_api_v1_authoring_data_tables_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataTableOut"][];
+        };
+      };
+    };
+  };
+  get_data_table_api_v1_authoring_data_tables__key__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataTableOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  upsert_data_table_api_v1_authoring_data_tables__key__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataTablePutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataTableOut"];
         };
       };
       /** @description Validation Error */

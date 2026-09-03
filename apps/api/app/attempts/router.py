@@ -1,9 +1,11 @@
 """Routes for the attempt lifecycle: start, per-item grade, submit, and a student's own results.
 
 What this file does: `start_attempt` opens a new attempt against a published activity's
-current snapshot; `grade_item` grades one knowledge-check response and upserts its
-`AttemptItem`; `submit_attempt` finalises the attempt's score (idempotently, keyed by the
-`Idempotency-Key` header); `my_results` lists the caller's own submitted attempts.
+current snapshot (409 if the activity's kind is `calculator` — Task 11: calculators are a
+standalone tool, not an attemptable activity); `grade_item` grades one knowledge-check
+response and upserts its `AttemptItem`; `submit_attempt` finalises the attempt's score
+(idempotently, keyed by the `Idempotency-Key` header); `my_results` lists the caller's own
+submitted attempts.
 
 Used here and why: a FastAPI `APIRouter` (mounted without a prefix — paths are
 `/activities/{id}/attempts`, `/attempts/{id}/...`, `/me/results`); `_owned_attempt` is a
@@ -70,6 +72,10 @@ async def start_attempt(
     # than distinguishing "doesn't exist" from "not published yet".
     if activity is None or activity.current_version_id is None or activity.status != "published":
         raise Problem(404, "Activity not found")
+    # Task 11: a calculator has no gradeable items or completion state — it's a standalone
+    # tool (Task 17's MU player), never a thing a student "attempts".
+    if activity.kind == "calculator":
+        raise Problem(409, "Calculators are not attemptable")
     # ADR-0006: students cannot start attempts on assessment activities (same 404).
     if activity.access != "practice" and user.role == UserRole.student:
         raise Problem(404, "Activity not found")

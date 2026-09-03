@@ -668,6 +668,111 @@
         "title": "BucketOut",
         "type": "object"
       },
+      "CalculatorAuthorOut": {
+        "properties": {
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "calc_type": {
+            "title": "Calc Type",
+            "type": "string"
+          },
+          "data_tables": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Tables",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "subject_slug",
+          "title",
+          "status",
+          "calc_type",
+          "data_tables"
+        ],
+        "title": "CalculatorAuthorOut",
+        "type": "object"
+      },
+      "CalculatorCreateIn": {
+        "description": "`POST /authoring/calculators` body. No `access`/`slug`: a calculator has no\nper-activity working-copy row to slug (see `app.authoring.router._SLUG_MODELS`'s\ncomment) and is always `access=\"practice\"`.",
+        "properties": {
+          "calc_type": {
+            "title": "Calc Type",
+            "type": "string"
+          },
+          "data_tables": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Tables",
+            "type": "array"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "calc_type",
+          "data_tables",
+          "subject_slug",
+          "title"
+        ],
+        "title": "CalculatorCreateIn",
+        "type": "object"
+      },
+      "CalculatorPutIn": {
+        "description": "`PUT /authoring/calculators/{activity_id}` body: title plus the same content fields\nas create.",
+        "properties": {
+          "calc_type": {
+            "title": "Calc Type",
+            "type": "string"
+          },
+          "data_tables": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Tables",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "calc_type",
+          "data_tables",
+          "title"
+        ],
+        "title": "CalculatorPutIn",
+        "type": "object"
+      },
       "CohortIn": {
         "properties": {
           "ends_on": {
@@ -870,6 +975,57 @@
         "title": "CohortPatch",
         "type": "object"
       },
+      "DataTableOut": {
+        "description": "`GET /authoring/data-tables[/{key}]` response, and what `PUT` echoes back.",
+        "properties": {
+          "grid": {
+            "additionalProperties": true,
+            "title": "Grid",
+            "type": "object"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "grid",
+          "updated_at"
+        ],
+        "title": "DataTableOut",
+        "type": "object"
+      },
+      "DataTablePutIn": {
+        "description": "Body for `PUT /authoring/data-tables/{key}`: an upsert keyed by the path's `key`\n(200 on update, 201 on create \u2014 there is no separate create endpoint).",
+        "properties": {
+          "grid": {
+            "$ref": "#/components/schemas/GridIn"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "grid"
+        ],
+        "title": "DataTablePutIn",
+        "type": "object"
+      },
       "FlashcardCard": {
         "description": "A single flashcard: term and definition.",
         "properties": {
@@ -1031,6 +1187,70 @@
           "title"
         ],
         "title": "FlashcardDeckPutIn",
+        "type": "object"
+      },
+      "GridIn": {
+        "description": "Body shape for `DataTable.grid`: a numeric lookup table with named row/col axes.\n`values` must line up 1:1 with `cols`; both `cols` and row `key`s must be strictly\nascending, matching what Task 17's MU player assumes when it looks a value up.",
+        "properties": {
+          "col_label": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Col Label",
+            "type": "string"
+          },
+          "cols": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "title": "Cols",
+            "type": "array"
+          },
+          "row_label": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Row Label",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/GridRow"
+            },
+            "minItems": 1,
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "row_label",
+          "col_label",
+          "cols",
+          "rows"
+        ],
+        "title": "GridIn",
+        "type": "object"
+      },
+      "GridRow": {
+        "description": "One row of a data-table grid: a numeric row key (e.g. depth in cm) plus one value\nper column, in the same order as `GridIn.cols`.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "number"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "values"
+        ],
+        "title": "GridRow",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -3876,6 +4096,261 @@
           }
         },
         "summary": "List Versions",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/calculators": {
+      "post": {
+        "description": "Create a calculator activity. Unlike the other builders, it has no per-activity\nworking-copy row of its own (see `_SLUG_MODELS`'s comment) \u2014 `ref_id` is a fresh id with\nnothing behind it, and its whole \"content\" is `config` itself: `calc_type` plus the\n`data_tables` keys it references, resolved to real `DataTable` rows only later, at\npublish/snapshot time.",
+        "operationId": "create_calculator_api_v1_authoring_calculators_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculatorCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculatorAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Calculator",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/calculators/{activity_id}": {
+      "get": {
+        "operationId": "get_calculator_api_v1_authoring_calculators__activity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculatorAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Calculator",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "operationId": "update_calculator_api_v1_authoring_calculators__activity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculatorPutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculatorAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Calculator",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/data-tables": {
+      "get": {
+        "description": "Every author-editable numeric lookup table (PDD/TMR/etc.) \u2014 the grid editor's list\nview (Task 16) and a calculator builder's table picker both read this.",
+        "operationId": "list_data_tables_api_v1_authoring_data_tables_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataTableOut"
+                  },
+                  "title": "Response List Data Tables Api V1 Authoring Data Tables Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Data Tables",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/data-tables/{key}": {
+      "get": {
+        "operationId": "get_data_table_api_v1_authoring_data_tables__key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataTableOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Table",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "description": "Create-or-replace one data table by its stable `key` (200 on update, 201 on create;\nthere is no separate create endpoint). A calculator activity's `config[\"data_tables\"]`\nreferences tables by this same key, resolved to a live row only at publish time (see\n`build_activity_snapshot`'s calculator branch) \u2014 editing a table here never touches an\nalready-published calculator's frozen snapshot.",
+        "operationId": "upsert_data_table_api_v1_authoring_data_tables__key__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataTablePutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataTableOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upsert Data Table",
         "tags": [
           "authoring"
         ]

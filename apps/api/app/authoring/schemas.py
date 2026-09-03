@@ -1,10 +1,13 @@
 """Pydantic request/response models for `app.authoring.router`'s lesson working-copy routes,
-question bank, and the quiz/flashcard-deck/matching/sequencing activity builders.
+question bank, quiz/flashcard-deck/matching/sequencing activity builders, data tables, and
+calculator activities.
 
 What this file does: request bodies for creating a lesson, editing its meta, and replacing
 its page tree, plus the response shapes for the subject/activity listings and the lesson
 working copy itself (Task 8); a flattened question-bank in/out pair plus, per builder kind,
-a `*CreateIn`/`*PutIn`/`*AuthorOut` trio (Task 9).
+a `*CreateIn`/`*PutIn`/`*AuthorOut` trio (Task 9); `GridIn`/`DataTableOut`/`DataTablePutIn`
+for the author-editable numeric lookup tables, and `Calculator*` for the calculator activity
+kind, whose whole "content" is its `Activity.config` (Task 11).
 
 Used here and why: `PagesIn` reuses `app.content.importer.PageImport` — the importer's
 existing page/block Pydantic model — rather than redefining the page/block shape a second
@@ -18,11 +21,14 @@ duplicate/range validators to a different field set (slug, pass_percent, outcome
 these builder payloads don't carry, so those validators are mirrored here (`_ActivityCreateMixin`
 subclasses) rather than shared — see task-9-report.md for the reuse-vs-mirror rationale.
 `_AccessConfigMixin` validates `access` against `app.content.models.ACTIVITY_ACCESS` so the
-Pydantic-level check can never drift from the DB's own CHECK constraint.
+Pydantic-level check can never drift from the DB's own CHECK constraint. `CALC_TYPES` is the
+calculator equivalent, but there is no DB CHECK backing it (`calc_type` lives inside the
+free-form `Activity.config` JSONB, not its own column).
 
-How it fits the project: plan 3b Task 8 (lessons) and Task 9 (question bank + builders),
-the authoring API's schema layer sitting between `app.authoring.router` and the working-copy
-tables in `app.content.models`/`app.content.activity_models`.
+How it fits the project: plan 3b Task 8 (lessons), Task 9 (question bank + builders), and
+Task 11 (data tables + calculator) — the authoring API's schema layer sitting between
+`app.authoring.router` and the working-copy tables in `app.content.models`/
+`app.content.activity_models`.
 
 Depends on: `app.content.importer.PageImport`; `app.content.activity_importer` (`FlashcardCard`,
 `MatchingPair`, `SequencingItem`); `app.content.models.ACTIVITY_ACCESS`.
@@ -326,6 +332,107 @@ class SequencingAuthorOut(BaseModel):
 # ---------------------------------------------------------------------------
 # Publish, preview, versions (Task 10)
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Data tables (Task 11)
+# ---------------------------------------------------------------------------
+
+
+class GridRow(BaseModel):
+    """One row of a data-table grid: a numeric row key (e.g. depth in cm) plus one value
+    per column, in the same order as `GridIn.cols`."""
+
+    key: float
+    values: list[float] = Field(min_length=1)
+
+
+class GridIn(BaseModel):
+    """Body shape for `DataTable.grid`: a numeric lookup table with named row/col axes.
+    `values` must line up 1:1 with `cols`; both `cols` and row `key`s must be strictly
+    ascending, matching what Task 17's MU player assumes when it looks a value up."""
+
+    row_label: str = Field(min_length=1, max_length=80)
+    col_label: str = Field(min_length=1, max_length=80)
+    cols: list[float] = Field(min_length=1)
+    rows: list[GridRow] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _consistent(self) -> Self:
+        if any(len(r.values) != len(self.cols) for r in self.rows):
+            raise ValueError("every row's values must match the number of cols")
+        if sorted(self.cols) != self.cols or len(set(self.cols)) != len(self.cols):
+            raise ValueError("cols must be strictly ascending")
+        keys = [r.key for r in self.rows]
+        if sorted(keys) != keys or len(set(keys)) != len(keys):
+            raise ValueError("row keys must be strictly ascending")
+        return self
+
+
+class DataTableOut(BaseModel):
+    """`GET /authoring/data-tables[/{key}]` response, and what `PUT` echoes back."""
+
+    key: str
+    title: str
+    grid: dict[str, Any]
+    updated_at: datetime
+
+
+class DataTablePutIn(BaseModel):
+    """Body for `PUT /authoring/data-tables/{key}`: an upsert keyed by the path's `key`
+    (200 on update, 201 on create — there is no separate create endpoint)."""
+
+    title: str = Field(min_length=1, max_length=200)
+    grid: GridIn
+
+
+# ---------------------------------------------------------------------------
+# Calculator (Task 11)
+# ---------------------------------------------------------------------------
+
+# Not a DB CHECK constraint like ACTIVITY_ACCESS: calc_type lives inside Activity.config
+# (free-form JSONB), so this closed set is enforced at the Pydantic layer only.
+CALC_TYPES = ("mu",)
+
+
+class _CalculatorContentMixin(BaseModel):
+    """`calc_type`/`data_tables` fields shared by the calculator's create and put bodies —
+    together these two fields ARE `Activity.config` for a calculator activity."""
+
+    calc_type: str
+    data_tables: list[str]
+
+    @field_validator("calc_type")
+    @classmethod
+    def _valid_calc_type(cls, v: str) -> str:
+        if v not in CALC_TYPES:
+            raise ValueError(f"calc_type must be one of {CALC_TYPES}")
+        return v
+
+
+class CalculatorCreateIn(_CalculatorContentMixin):
+    """`POST /authoring/calculators` body. No `access`/`slug`: a calculator has no
+    per-activity working-copy row to slug (see `app.authoring.router._SLUG_MODELS`'s
+    comment) and is always `access="practice"`."""
+
+    subject_slug: str
+    title: str = Field(min_length=1, max_length=200)
+
+
+class CalculatorPutIn(_CalculatorContentMixin):
+    """`PUT /authoring/calculators/{activity_id}` body: title plus the same content fields
+    as create."""
+
+    title: str = Field(min_length=1, max_length=200)
+
+
+class CalculatorAuthorOut(BaseModel):
+    activity_id: uuid.UUID
+    subject_slug: str
+    title: str
+    status: str
+    calc_type: str
+    data_tables: list[str]
 
 
 class PublishIn(BaseModel):
