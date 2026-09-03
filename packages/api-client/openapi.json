@@ -1872,6 +1872,24 @@
         "title": "PresignOut",
         "type": "object"
       },
+      "PublishIn": {
+        "description": "Body for `POST /authoring/activities/{id}/publish`: an optional human-readable note\ndescribing this publish, stored verbatim on the new `ContentVersion.change_note`.",
+        "properties": {
+          "change_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Note"
+          }
+        },
+        "title": "PublishIn",
+        "type": "object"
+      },
       "QuestionAuthorIn": {
         "description": "Body for `POST /authoring/questions` and `PUT /authoring/questions/{id}`: a single\nbank question with a plain-text stem/explanation \u2014 the router wraps/unwraps\n`app.content.activity_importer.text_doc()` on the way to/from `Question.stem`/\n`Question.explanation`, so no raw ProseMirror JSON crosses this API.",
         "properties": {
@@ -2864,6 +2882,56 @@
         "title": "ValidationError",
         "type": "object"
       },
+      "VersionOut": {
+        "description": "One row of `GET /authoring/activities/{id}/versions`, and the shape a publish call\nitself returns for the version it just created.",
+        "properties": {
+          "author_display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Display Name"
+          },
+          "change_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Note"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "published_at": {
+            "format": "date-time",
+            "title": "Published At",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "published_at",
+          "change_note",
+          "author_display_name"
+        ],
+        "title": "VersionOut",
+        "type": "object"
+      },
       "WrongOut": {
         "properties": {
           "count": {
@@ -3662,6 +3730,154 @@
         "summary": "Register",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/authoring/activities/{activity_id}/preview": {
+      "get": {
+        "description": "The stripped snapshot of the activity's current working copy \u2014 byte-identical in\nshape to what the student route serves the moment this gets published, but reflecting\nedits made since the last publish (or none, if it's never been published).",
+        "operationId": "preview_activity_api_v1_authoring_activities__activity_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preview Activity Api V1 Authoring Activities  Activity Id  Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Activity",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/activities/{activity_id}/publish": {
+      "post": {
+        "description": "Freeze the working copy into the next immutable version and point students at it.\n\nClears `activity.config[\"import_notes\"]` BEFORE snapshotting, not after:\n`build_activity_snapshot`/`_activity_part` copies `activity.config` verbatim into the\nfrozen `ContentVersion.snapshot`, so clearing the notes only after publish would still\nleave the converter's review-queue notes baked into what students receive.",
+        "operationId": "publish_api_v1_authoring_activities__activity_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/activities/{activity_id}/versions": {
+      "get": {
+        "description": "Every published version of one activity, newest first.",
+        "operationId": "list_versions_api_v1_authoring_activities__activity_id__versions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VersionOut"
+                  },
+                  "title": "Response List Versions Api V1 Authoring Activities  Activity Id  Versions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Versions",
+        "tags": [
+          "authoring"
         ]
       }
     },

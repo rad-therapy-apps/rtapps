@@ -30,6 +30,7 @@ Used by: `app.authoring.router`.
 """
 
 import uuid
+from datetime import datetime
 from typing import Any, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -320,3 +321,26 @@ class SequencingAuthorOut(BaseModel):
     access: str
     config: dict[str, Any]
     items: list[SequencingItem]
+
+
+# ---------------------------------------------------------------------------
+# Publish, preview, versions (Task 10)
+# ---------------------------------------------------------------------------
+
+
+class PublishIn(BaseModel):
+    """Body for `POST /authoring/activities/{id}/publish`: an optional human-readable note
+    describing this publish, stored verbatim on the new `ContentVersion.change_note`."""
+
+    change_note: str | None = None
+
+
+class VersionOut(BaseModel):
+    """One row of `GET /authoring/activities/{id}/versions`, and the shape a publish call
+    itself returns for the version it just created."""
+
+    id: uuid.UUID
+    version: int
+    published_at: datetime
+    change_note: str | None
+    author_display_name: str | None

@@ -281,6 +281,73 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/activities/{activity_id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview Activity
+     * @description The stripped snapshot of the activity's current working copy — byte-identical in
+     *     shape to what the student route serves the moment this gets published, but reflecting
+     *     edits made since the last publish (or none, if it's never been published).
+     */
+    get: operations["preview_activity_api_v1_authoring_activities__activity_id__preview_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/activities/{activity_id}/publish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish
+     * @description Freeze the working copy into the next immutable version and point students at it.
+     *
+     *     Clears `activity.config["import_notes"]` BEFORE snapshotting, not after:
+     *     `build_activity_snapshot`/`_activity_part` copies `activity.config` verbatim into the
+     *     frozen `ContentVersion.snapshot`, so clearing the notes only after publish would still
+     *     leave the converter's review-queue notes baked into what students receive.
+     */
+    post: operations["publish_api_v1_authoring_activities__activity_id__publish_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/activities/{activity_id}/versions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Versions
+     * @description Every published version of one activity, newest first.
+     */
+    get: operations["list_versions_api_v1_authoring_activities__activity_id__versions_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/authoring/flashcard-decks": {
     parameters: {
       query?: never;
@@ -1742,6 +1809,15 @@ export interface components {
       upload_url: string;
     };
     /**
+     * PublishIn
+     * @description Body for `POST /authoring/activities/{id}/publish`: an optional human-readable note
+     *     describing this publish, stored verbatim on the new `ContentVersion.change_note`.
+     */
+    PublishIn: {
+      /** Change Note */
+      change_note?: string | null;
+    };
+    /**
      * QuestionAuthorIn
      * @description Body for `POST /authoring/questions` and `PUT /authoring/questions/{id}`: a single
      *     bank question with a plain-text stem/explanation — the router wraps/unwraps
@@ -2150,6 +2226,29 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+    };
+    /**
+     * VersionOut
+     * @description One row of `GET /authoring/activities/{id}/versions`, and the shape a publish call
+     *     itself returns for the version it just created.
+     */
+    VersionOut: {
+      /** Author Display Name */
+      author_display_name: string | null;
+      /** Change Note */
+      change_note: string | null;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Published At
+       * Format: date-time
+       */
+      published_at: string;
+      /** Version */
+      version: number;
     };
     /** WrongOut */
     WrongOut: {
@@ -2628,6 +2727,105 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["UserOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  preview_activity_api_v1_authoring_activities__activity_id__preview_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  publish_api_v1_authoring_activities__activity_id__publish_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublishIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_versions_api_v1_authoring_activities__activity_id__versions_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionOut"][];
         };
       };
       /** @description Validation Error */

@@ -32,28 +32,38 @@ responses (kept local rather than importing `activity_snapshots._plain_text`, wh
 module-private to that layer).
 
 How it fits the project: plan 3b Task 8 (lessons) and Task 9 (question bank + builders) —
-Task 9's builders are what Task 16's builder pages consume.
+Task 9's builders are what Task 16's builder pages consume. `POST .../publish` (Task 10)
+freezes the current working copy into the next immutable `ContentVersion` and points
+students at it — a lesson's own `current_version_id` is kept in sync via `publish_lesson`,
+every other kind via `publish_activity` directly; `GET .../preview` returns the exact
+stripped snapshot students will see the moment that publish happens; `GET .../versions`
+lists the publish history newest-first.
 `dependencies=[Depends(require_author)]` at router level (not per-route) means no route
 here can be added later without the educator/admin gate.
 
-Depends on: `app.authoring.deps.require_author`, `app.authoring.schemas` (all request/
-response models), `app.content.activity_importer` (`text_doc`), `app.content.activity_models`
-(Quiz/QuizQuestion/FlashcardDeck/MatchingActivity/SequencingActivity), `app.content.importer`
-(`ProseValidationError`, `replace_lesson_pages`), `app.content.models` (ACTIVITY_ACCESS unused
-directly here but re-exported via schemas, Activity, Lesson, Question, Subject),
+Depends on: `app.audit.service.record_audit`, `app.authoring.deps.require_author`,
+`app.authoring.schemas` (all request/response models), `app.auth.models.User`,
+`app.content.activity_importer` (`text_doc`), `app.content.activity_models`
+(Quiz/QuizQuestion/FlashcardDeck/MatchingActivity/SequencingActivity),
+`app.content.activity_snapshots` (`build_activity_snapshot`, `strip_activity_answers`),
+`app.content.importer` (`ProseValidationError`, `replace_lesson_pages`), `app.content.models`
+(ACTIVITY_ACCESS unused directly here but re-exported via schemas, Activity, ContentVersion,
+Lesson, Question, Subject), `app.content.service` (`publish_activity`, `publish_lesson`),
 `app.content.snapshot.build_snapshot`, `app.db.get_session`, `app.errors.Problem`.
 Used by: `app.main` (mounted); `tests/test_authoring_lessons.py`,
-`tests/test_authoring_builders.py`.
+`tests/test_authoring_builders.py`, `tests/test_authoring_publish.py`.
 """
 
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy import Text, cast, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import record_audit
+from app.auth.models import User
 from app.authoring.deps import require_author
 from app.authoring.schemas import (
     ActivityAuthorRow,
@@ -67,6 +77,7 @@ from app.authoring.schemas import (
     MatchingCreateIn,
     MatchingPutIn,
     PagesIn,
+    PublishIn,
     QuestionAuthorIn,
     QuestionAuthorOut,
     QuizAuthorOut,
@@ -76,6 +87,7 @@ from app.authoring.schemas import (
     SequencingCreateIn,
     SequencingPutIn,
     SubjectAuthorOut,
+    VersionOut,
 )
 from app.content.activity_importer import FlashcardCard, MatchingPair, SequencingItem, text_doc
 from app.content.activity_models import (
@@ -85,9 +97,11 @@ from app.content.activity_models import (
     QuizQuestion,
     SequencingActivity,
 )
+from app.content.activity_snapshots import build_activity_snapshot, strip_activity_answers
 from app.content.importer import replace_lesson_pages
-from app.content.models import Activity, Lesson, Question, Subject
+from app.content.models import Activity, ContentVersion, Lesson, Question, Subject
 from app.content.prose import ProseValidationError
+from app.content.service import publish_activity, publish_lesson
 from app.content.snapshot import build_snapshot
 from app.db import get_session
 from app.errors import Problem
@@ -789,3 +803,95 @@ async def update_sequencing(
     activity.title, activity.access, activity.config = payload.title, payload.access, payload.config
     await db.commit()
     return _sequencing_out(sequencing, activity, subject)
+
+
+# ---------------------------------------------------------------------------
+# Publish, preview, versions (Task 10)
+# ---------------------------------------------------------------------------
+
+
+def _version_out(version: ContentVersion, author_display_name: str | None) -> VersionOut:
+    return VersionOut(
+        id=version.id,
+        version=version.version,
+        published_at=version.published_at,
+        change_note=version.change_note,
+        author_display_name=author_display_name,
+    )
+
+
+@router.post(
+    "/activities/{activity_id}/publish",
+    response_model=VersionOut,
+    status_code=status.HTTP_201_CREATED,
+)
+async def publish(
+    activity_id: uuid.UUID,
+    payload: PublishIn,
+    request: Request,
+    user: User = Depends(require_author),
+    db: AsyncSession = Depends(get_session),
+) -> VersionOut:
+    """Freeze the working copy into the next immutable version and point students at it.
+
+    Clears `activity.config["import_notes"]` BEFORE snapshotting, not after:
+    `build_activity_snapshot`/`_activity_part` copies `activity.config` verbatim into the
+    frozen `ContentVersion.snapshot`, so clearing the notes only after publish would still
+    leave the converter's review-queue notes baked into what students receive.
+    """
+    activity = await db.get(Activity, activity_id)
+    if activity is None:
+        raise Problem(404, "Activity not found")
+    # The human pass supersedes the machine flags: publishing clears the review-queue notes.
+    config = dict(activity.config)
+    config.pop("import_notes", None)
+    activity.config = config
+    if activity.kind == "lesson":
+        lesson = await db.get(Lesson, activity.lesson_id)
+        assert lesson is not None  # Activity.lesson_id always resolves for kind "lesson"
+        version = await publish_lesson(db, lesson, user, payload.change_note)
+    else:
+        version = await publish_activity(db, activity, user, payload.change_note)
+    await record_audit(
+        db,
+        actor=user,
+        action="publish_activity",
+        target_type="activity",
+        target_id=activity.id,
+        request=request,
+    )
+    await db.commit()
+    return _version_out(version, user.display_name)
+
+
+@router.get("/activities/{activity_id}/preview")
+async def preview_activity(
+    activity_id: uuid.UUID, db: AsyncSession = Depends(get_session)
+) -> dict[str, Any]:
+    """The stripped snapshot of the activity's current working copy — byte-identical in
+    shape to what the student route serves the moment this gets published, but reflecting
+    edits made since the last publish (or none, if it's never been published)."""
+    activity = await db.get(Activity, activity_id)
+    if activity is None:
+        raise Problem(404, "Activity not found")
+    snapshot = await build_activity_snapshot(db, activity)
+    return strip_activity_answers(snapshot)
+
+
+@router.get("/activities/{activity_id}/versions", response_model=list[VersionOut])
+async def list_versions(
+    activity_id: uuid.UUID, db: AsyncSession = Depends(get_session)
+) -> list[VersionOut]:
+    """Every published version of one activity, newest first."""
+    activity = await db.get(Activity, activity_id)
+    if activity is None:
+        raise Problem(404, "Activity not found")
+    rows = (
+        await db.execute(
+            select(ContentVersion, User.display_name)
+            .outerjoin(User, User.id == ContentVersion.author_id)
+            .where(ContentVersion.activity_id == activity_id)
+            .order_by(ContentVersion.version.desc())
+        )
+    ).all()
+    return [_version_out(version, display_name) for version, display_name in rows]
