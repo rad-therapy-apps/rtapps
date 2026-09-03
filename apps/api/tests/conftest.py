@@ -135,7 +135,7 @@ def app(settings: Settings) -> FastAPI:
 
 
 @asynccontextmanager
-async def _make_client(app: FastAPI, db: AsyncSession) -> AsyncIterator[AsyncClient]:
+async def make_client(app: FastAPI, db: AsyncSession) -> AsyncIterator[AsyncClient]:
     async with LifespanManager(app):
         # Route every request's session onto the test's connection/transaction.
         app.state.session_factory = async_sessionmaker(
@@ -149,7 +149,7 @@ async def _make_client(app: FastAPI, db: AsyncSession) -> AsyncIterator[AsyncCli
 @pytest.fixture
 async def client(app: FastAPI, db: AsyncSession) -> AsyncIterator[AsyncClient]:
     """Plain client: no Google OAuth configured, so `/auth/google/*` routes 404."""
-    async with _make_client(app, db) as c:
+    async with make_client(app, db) as c:
         yield c
 
 
@@ -164,7 +164,7 @@ async def client_google(db: AsyncSession) -> AsyncIterator[AsyncClient]:
         google_client_secret="csecret",
         rate_limit_enabled=False,
     )
-    async with _make_client(create_app(google_settings), db) as c:
+    async with make_client(create_app(google_settings), db) as c:
         yield c
 
 

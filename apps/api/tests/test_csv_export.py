@@ -28,7 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.analytics.csv_export import csv_response
 from app.audit.models import AuditLog
 from app.content.activity_importer import import_any
-from app.content.models import ContentVersion
+from app.content.models import Activity, ContentVersion
 from tests.conftest import register
 from tests.test_activity_importer import QUIZ_DOC
 from tests.test_analytics import _setup
@@ -157,6 +157,25 @@ async def test_activity_csv_404_no_audit_unpublished(client: AsyncClient, db: As
     """GET /cohorts/{id}/activities/{bad_id}.csv: 404, no audit."""
     ctx = await _setup(client, db)
     r = await client.get(f"/api/v1/cohorts/{ctx['cohort']['id']}/activities/{uuid.uuid4()}.csv")
+    assert r.status_code == 404
+    audits = await db.scalars(select(AuditLog).where(AuditLog.action == "export_csv"))
+    assert len(audits.all()) == 0
+
+
+async def test_activity_csv_404_and_no_audit_for_draft_activity(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    """A DRAFT (never-published) activity in the cohort's subject 404s the same as an
+    unknown id — #36: exists in the DB but was never published, so has no snapshot."""
+    ctx = await _setup(client, db)
+    published = await db.get(Activity, uuid.UUID(ctx["aid"]))
+    assert published is not None
+    draft = Activity(
+        kind="quiz", ref_id=uuid.uuid4(), title="Draft Quiz", subject_id=published.subject_id
+    )
+    db.add(draft)
+    await db.flush()
+    r = await client.get(f"/api/v1/cohorts/{ctx['cohort']['id']}/activities/{draft.id}.csv")
     assert r.status_code == 404
     audits = await db.scalars(select(AuditLog).where(AuditLog.action == "export_csv"))
     assert len(audits.all()) == 0
