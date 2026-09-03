@@ -28,7 +28,7 @@ docs/adr/0003 (content in DB, working copy + published snapshots), docs/adr/0006
 
 ## Goals
 
-1. Kevin (educator, non-technical) can open any migrated lesson, fix its text and
+1. Kevin (educator) can open any migrated lesson, fix its text and
    knowledge-check answers in a rich-text editor, preview it exactly as students see it, and
    publish — unaided. This is the milestone exit criterion.
 2. The needs-review backlog (73 docs today) shrinks twice: first by machine (converter fixes +
