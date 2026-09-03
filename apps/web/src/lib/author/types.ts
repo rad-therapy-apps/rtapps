@@ -18,6 +18,13 @@
  * Depends on: `$lib/prose/types` (`ProseDoc`).
  * Used by: `LessonEditor.svelte`, `KnowledgeCheckForm.svelte`,
  * `routes/(app)/author/lessons/[id]/+page.server.ts`, `LessonEditor.svelte.spec.ts`.
+ *
+ * Also carries `Grid`/`GridRow` (Task 16): the data-table grid wire shape (`GridIn`/`GridRow`),
+ * mirrored here for the same reason as `AuthorPage` above -- `DataTableOut.grid` is typed as
+ * opaque JSON by the generated schema (the API treats it as untyped JSONB), so
+ * `routes/(app)/author/data-tables/+page.svelte` casts a loaded grid to `Grid` at that one
+ * boundary; `DataTablePutIn.grid`'s wire type (`GridIn`) already matches this shape structurally,
+ * so no cast is needed on the way back out.
  */
 import type { ProseDoc } from '$lib/prose/types';
 
@@ -46,3 +53,7 @@ export type ClientRichTextBlock = AuthorRichTextBlock & { instanceId: string };
 export type ClientKnowledgeCheckBlock = AuthorKnowledgeCheckBlock & { instanceId: string };
 export type ClientBlock = ClientRichTextBlock | ClientKnowledgeCheckBlock;
 export type ClientPage = { title: string; blocks: ClientBlock[]; instanceId: string };
+
+// --- Data-table grid (Task 16): see the file header above.
+export type GridRow = { key: number; values: number[] };
+export type Grid = { row_label: string; col_label: string; cols: number[]; rows: GridRow[] };
