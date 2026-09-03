@@ -27,6 +27,16 @@
 
 	let grid = $state<Grid>(structuredClone(initialGrid));
 
+	// The API requires cols/row keys strictly ascending (`GridIn`'s model-level validator) --
+	// surfaced here the same way `PairsEditor.svelte`'s duplicate warning is, so a hand-typed
+	// violation is visible before save rather than only after a round-trip 422.
+	function isStrictlyAscending(values: number[]): boolean {
+		return values.every((v, i) => i === 0 || values[i - 1] < v);
+	}
+
+	const colsAscending = $derived(isStrictlyAscending(grid.cols));
+	const rowKeysAscending = $derived(isStrictlyAscending(grid.rows.map((r) => r.key)));
+
 	function emit() {
 		onchange(grid);
 	}
@@ -46,11 +56,14 @@
 	}
 
 	// Adding a column has to extend every existing row's `values` too, so `cols` and each row's
-	// `values` never drift apart in length.
+	// `values` never drift apart in length. The new col defaults to max(existing) + 1 (0 if
+	// empty) so it lands strictly ascending rather than colliding with an existing 0 (e.g. the
+	// data-tables page's 1x1 `EMPTY_GRID`).
 	function addCol() {
+		const nextValue = grid.cols.length > 0 ? Math.max(...grid.cols) + 1 : 0;
 		grid = {
 			...grid,
-			cols: [...grid.cols, 0],
+			cols: [...grid.cols, nextValue],
 			rows: grid.rows.map((r) => ({ ...r, values: [...r.values, 0] }))
 		};
 		emit();
@@ -83,8 +96,10 @@
 		emit();
 	}
 
+	// The new row key defaults to max(existing) + 1 (0 if empty), same reasoning as `addCol`.
 	function addRow() {
-		grid = { ...grid, rows: [...grid.rows, { key: 0, values: grid.cols.map(() => 0) }] };
+		const nextKey = grid.rows.length > 0 ? Math.max(...grid.rows.map((r) => r.key)) + 1 : 0;
+		grid = { ...grid, rows: [...grid.rows, { key: nextKey, values: grid.cols.map(() => 0) }] };
 		emit();
 	}
 
@@ -103,7 +118,7 @@
 	function parseNumber(cell: string): number | undefined {
 		if (cell.trim() === '') return undefined;
 		const n = Number(cell);
-		return Number.isNaN(n) ? undefined : n;
+		return Number.isFinite(n) ? n : undefined;
 	}
 
 	// First row = column values (its own first cell is a throwaway label slot); first cell of
@@ -178,7 +193,7 @@
 								value={col}
 								oninput={(e) => {
 									const n = e.currentTarget.valueAsNumber;
-									if (!Number.isNaN(n)) setColValue(ci, n);
+									if (Number.isFinite(n)) setColValue(ci, n);
 								}}
 								aria-label={`Column ${ci + 1} value`}
 							/>
@@ -198,7 +213,7 @@
 								value={row.key}
 								oninput={(e) => {
 									const n = e.currentTarget.valueAsNumber;
-									if (!Number.isNaN(n)) setRowKey(ri, n);
+									if (Number.isFinite(n)) setRowKey(ri, n);
 								}}
 								aria-label={`Row ${ri + 1} key`}
 							/>
@@ -213,7 +228,7 @@
 									{value}
 									oninput={(e) => {
 										const n = e.currentTarget.valueAsNumber;
-										if (!Number.isNaN(n)) setCellValue(ri, ci, n);
+										if (Number.isFinite(n)) setCellValue(ri, ci, n);
 									}}
 									aria-label={`Row ${ri + 1}, column ${ci + 1} value`}
 								/>
@@ -229,6 +244,13 @@
 		<button type="button" onclick={addRow}>Add row</button>
 		<button type="button" onclick={addCol}>Add column</button>
 	</div>
+
+	{#if !colsAscending}
+		<p role="alert">Column values must be strictly ascending.</p>
+	{/if}
+	{#if !rowKeysAscending}
+		<p role="alert">Row keys must be strictly ascending.</p>
+	{/if}
 
 	<div class="paste-controls">
 		{#if showPaste}

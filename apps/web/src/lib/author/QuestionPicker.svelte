@@ -33,10 +33,30 @@
 		post?: typeof api.POST;
 	} = $props();
 
-	// Same RFC 9457 fallback as LessonEditor.svelte/attempts.ts: apps/api's global exception
-	// handlers return a problem+json body with `title` for every error response.
-	function errorTitle(error: unknown): string {
-		return (error as { title?: string }).title ?? 'Request failed';
+	// Same field-path-preserving 422 formatter as LessonEditor.svelte/the quizzes page.
+	function problemDetail(problem: unknown): string {
+		if (problem && typeof problem === 'object') {
+			const { title, detail, errors } = problem as {
+				title?: unknown;
+				detail?: unknown;
+				errors?: unknown;
+			};
+			if (Array.isArray(errors) && errors.length > 0) {
+				const parts = errors
+					.map((e) => {
+						if (!e || typeof e !== 'object') return undefined;
+						const { loc, msg } = e as { loc?: unknown; msg?: unknown };
+						if (typeof msg !== 'string') return undefined;
+						const path = Array.isArray(loc) ? loc.join('.') : undefined;
+						return path ? `${path}: ${msg}` : msg;
+					})
+					.filter((part): part is string => Boolean(part));
+				if (parts.length > 0) return parts.join('; ');
+			}
+			if (typeof detail === 'string' && detail) return detail;
+			if (typeof title === 'string' && title) return title;
+		}
+		return 'Request failed';
 	}
 
 	// --- search ---
@@ -55,7 +75,7 @@
 				params: { query: { q: query || undefined } }
 			});
 			if (res.error) {
-				searchError = errorTitle(res.error);
+				searchError = problemDetail(res.error);
 				return;
 			}
 			results = res.data ?? [];
@@ -90,7 +110,7 @@
 		try {
 			const res = await post('/api/v1/authoring/questions', { body: draft });
 			if (res.error) {
-				createError = errorTitle(res.error);
+				createError = problemDetail(res.error);
 				return;
 			}
 			onadd(res.data);

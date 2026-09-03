@@ -43,10 +43,6 @@
 		present_n?: number;
 	};
 
-	function errorTitle(error: unknown): string {
-		return (error as { title?: string }).title ?? 'Request failed';
-	}
-
 	// Same field-path-preserving 422 formatter as LessonEditor.svelte.
 	function problemDetail(problem: unknown): string {
 		if (problem && typeof problem === 'object') {
@@ -125,6 +121,7 @@
 		next: { stem: string; options: string[]; answer: number; explanation: string | null }
 	) {
 		questions = questions.map((q, i) => (i === index ? { ...q, ...next } : q));
+		markDirty();
 	}
 
 	async function saveQuestion(index: number) {
@@ -143,7 +140,7 @@
 				}
 			});
 			if (res.error) {
-				questionSaveError = errorTitle(res.error);
+				questionSaveError = problemDetail(res.error);
 				return;
 			}
 			questions = questions.map((q, i) => (i === index ? res.data : q));
