@@ -60,6 +60,14 @@ def test_check_page_answer_onclick_resolves_and_button_dropped():
     assert not any("button" in n for n in notes)
 
 
+def test_object_literal_beats_conflicting_onclick():
+    notes: list[str] = []
+    button = "<button onclick=\"checkPageAnswer('q_page1_1', 'A')\">Check Answer</button>"
+    doc = _convert(_lesson_html("const correctAnswers = {'q_page1_1': 'B'};", button=button), notes)
+    assert _first_check(doc)["answer"] == 1  # the literal's 'B', not the onclick's 'A'
+    assert not any(n.startswith("no correct answer") for n in notes)
+
+
 def test_unresolvable_answer_still_flags():
     notes: list[str] = []
     doc = _convert(_lesson_html("const correctAnswers = {'q_other': 'B'};"), notes)

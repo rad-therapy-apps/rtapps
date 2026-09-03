@@ -56,6 +56,16 @@ def test_plain_div_block_recurses_into_children():
     assert not any(n.startswith("unsupported element div") for n in notes)
 
 
+def test_nested_inline_list_does_not_duplicate_content():
+    notes: list[str] = []
+    nodes = inline_nodes(
+        _el("<p>Signs: <ul><li>one<ul><li>nested</li></ul></li><li>two</li></ul></p>"), notes
+    )
+    texts = [n["text"] for n in nodes if n["type"] == "text"]
+    assert texts.count("nested") == 1
+    assert notes == []
+
+
 def test_unknown_element_still_noted():
     notes: list[str] = []
     inline_nodes(_el("<p><canvas>x</canvas></p>"), notes)

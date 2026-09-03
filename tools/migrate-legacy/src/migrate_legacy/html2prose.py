@@ -138,7 +138,7 @@ def _inline_nodes_from(
                 # An inline-context list can't become a list block (lists are block
                 # nodes); flatten each <li> to its inline content, separated by
                 # hardBreaks, so nothing is lost and nothing needs review.
-                for i, li in enumerate(child.find_all("li")):
+                for i, li in enumerate(child.find_all("li", recursive=False)):
                     if i:
                         out.append({"type": "hardBreak"})
                     out.extend(inline_nodes(li, notes, marks))
@@ -311,12 +311,6 @@ def element_to_block(element: Tag, notes: list[str], page_num: int = 0) -> dict[
         return {"type": "blockquote", "content": blocks_from_container(element, notes, page_num)}
     if name == "img":
         return _image_placeholder(element, notes)
-    if name == "div":
-        # Plain layout div (both callers normally intercept this): recurse rather than
-        # flatten, and return a single blockquote-free wrapper is impossible — so fall
-        # back to the first child block or an empty paragraph.
-        inner = blocks_from_container(element, notes, page_num)
-        return inner[0] if len(inner) == 1 else {"type": "paragraph", "content": []}
 
     notes.append(f"unsupported element {name} on page {page_num}")
     text = collapse_whitespace(element.get_text()).strip()
