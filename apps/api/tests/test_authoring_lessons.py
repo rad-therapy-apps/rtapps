@@ -365,3 +365,35 @@ async def test_update_lesson_meta_unknown_404(client: AsyncClient, db: AsyncSess
         f"/api/v1/authoring/lessons/{uuid.uuid4()}", json={"title": "X", "slug": "x"}
     )
     assert r.status_code == 404
+
+
+async def test_create_lesson_slug_duplicate_returns_409_with_guard(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    """Verify slug duplicate handling returns 409 (from IntegrityError guard).
+
+    The flush is now inside the try/except IntegrityError handler, ensuring that
+    if two concurrent requests race past the pre-check SELECT, the second one's
+    flush hits the unique constraint and gets mapped to 409, not 500.
+    This test verifies that behavior by creating two lessons with the same slug
+    and checking the second returns 409.
+    """
+    await make_educator(client, db, "edu@example.edu")
+
+    subject = Subject(slug="guard-test-subj", title="Guard Test Subject", order=1)
+    db.add(subject)
+    await db.commit()
+
+    # First create succeeds
+    r1 = await client.post(
+        "/api/v1/authoring/lessons",
+        json={"subject_slug": "guard-test-subj", "title": "Lesson One", "slug": "guard-test-slug"},
+    )
+    assert r1.status_code == 201, r1.text
+
+    # Second create with same slug returns 409 from the guard, not 500
+    r2 = await client.post(
+        "/api/v1/authoring/lessons",
+        json={"subject_slug": "guard-test-subj", "title": "Lesson Two", "slug": "guard-test-slug"},
+    )
+    assert r2.status_code == 409, f"Expected 409, got {r2.status_code}: {r2.text}"

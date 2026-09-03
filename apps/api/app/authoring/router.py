@@ -112,7 +112,7 @@ async def slug_by_ref(db: AsyncSession, activity: Activity) -> str | None:
     non-lesson authoring routes reuse this directly.
     """
     if activity.kind == "lesson":
-        lesson = await db.get(Lesson, activity.ref_id)
+        lesson = await db.get(Lesson, activity.lesson_id)
         return lesson.slug if lesson else None
     model = _SLUG_MODELS.get(activity.kind)
     if model is None:
@@ -221,18 +221,18 @@ async def create_lesson(
         raise Problem(409, "A lesson with that slug already exists")
     lesson = Lesson(subject_id=subject.id, slug=payload.slug, title=payload.title)
     db.add(lesson)
-    await db.flush()  # assigns lesson.id before the activity below points ref_id/lesson_id at it
-    activity = Activity(
-        kind="lesson",
-        ref_id=lesson.id,
-        title=lesson.title,
-        subject_id=subject.id,
-        lesson_id=lesson.id,
-        status="draft",
-        access="practice",
-    )
-    db.add(activity)
     try:
+        await db.flush()  # assigns lesson.id before activity creation below
+        activity = Activity(
+            kind="lesson",
+            ref_id=lesson.id,
+            title=lesson.title,
+            subject_id=subject.id,
+            lesson_id=lesson.id,
+            status="draft",
+            access="practice",
+        )
+        db.add(activity)
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
@@ -480,17 +480,17 @@ async def create_quiz(
     await _check_slug_free(db, Quiz, payload.slug, "quiz")
     quiz = Quiz(slug=payload.slug, title=payload.title)
     db.add(quiz)
-    await db.flush()  # assigns quiz.id before the activity below points ref_id at it
-    activity = await _create_activity(
-        db,
-        kind="quiz",
-        ref_id=quiz.id,
-        subject=subject,
-        title=quiz.title,
-        access=payload.access,
-        config=payload.config,
-    )
     try:
+        await db.flush()  # assigns quiz.id before the activity below points ref_id at it
+        activity = await _create_activity(
+            db,
+            kind="quiz",
+            ref_id=quiz.id,
+            subject=subject,
+            title=quiz.title,
+            access=payload.access,
+            config=payload.config,
+        )
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
@@ -581,17 +581,17 @@ async def create_flashcard_deck(
         slug=payload.slug, title=payload.title, cards=[c.model_dump() for c in payload.cards]
     )
     db.add(deck)
-    await db.flush()
-    activity = await _create_activity(
-        db,
-        kind="flashcards",
-        ref_id=deck.id,
-        subject=subject,
-        title=deck.title,
-        access=payload.access,
-        config=payload.config,
-    )
     try:
+        await db.flush()
+        activity = await _create_activity(
+            db,
+            kind="flashcards",
+            ref_id=deck.id,
+            subject=subject,
+            title=deck.title,
+            access=payload.access,
+            config=payload.config,
+        )
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
@@ -661,17 +661,17 @@ async def create_matching(
         slug=payload.slug, title=payload.title, pairs=[p.model_dump() for p in payload.pairs]
     )
     db.add(matching)
-    await db.flush()
-    activity = await _create_activity(
-        db,
-        kind="matching",
-        ref_id=matching.id,
-        subject=subject,
-        title=matching.title,
-        access=payload.access,
-        config=payload.config,
-    )
     try:
+        await db.flush()
+        activity = await _create_activity(
+            db,
+            kind="matching",
+            ref_id=matching.id,
+            subject=subject,
+            title=matching.title,
+            access=payload.access,
+            config=payload.config,
+        )
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
@@ -743,17 +743,17 @@ async def create_sequencing(
         slug=payload.slug, title=payload.title, items=[i.model_dump() for i in payload.items]
     )
     db.add(sequencing)
-    await db.flush()
-    activity = await _create_activity(
-        db,
-        kind="sequencing",
-        ref_id=sequencing.id,
-        subject=subject,
-        title=sequencing.title,
-        access=payload.access,
-        config=payload.config,
-    )
     try:
+        await db.flush()
+        activity = await _create_activity(
+            db,
+            kind="sequencing",
+            ref_id=sequencing.id,
+            subject=subject,
+            title=sequencing.title,
+            access=payload.access,
+            config=payload.config,
+        )
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
