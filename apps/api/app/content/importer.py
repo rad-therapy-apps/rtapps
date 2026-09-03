@@ -153,6 +153,9 @@ class LessonImport(BaseModel):
 
     subject: SubjectImport
     lesson: LessonBody
+    # Converter notes travelling with a migrated document; surfaced as the authoring
+    # UI's needs-review queue via activity.config["import_notes"] (plan 3b).
+    import_notes: list[str] = Field(default_factory=list)
 
 
 async def _upsert_subject(db: AsyncSession, doc: SubjectImport) -> Subject:
@@ -247,6 +250,13 @@ async def import_lesson(
         db.add(activity)
     else:
         activity.title, activity.subject_id = lesson.title, subject.id
+
+    config = dict(activity.config or {})
+    if doc.import_notes:
+        config["import_notes"] = doc.import_notes
+    else:
+        config.pop("import_notes", None)
+    activity.config = config
     await db.flush()
 
     # Publishing here (rather than leaving the caller to do it) is what makes an import

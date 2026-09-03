@@ -93,6 +93,9 @@ class QuizImport(BaseModel):
 
     subject: SubjectImport
     quiz: QuizPayload
+    # Converter notes travelling with a migrated document; surfaced as the authoring
+    # UI's needs-review queue via activity.config["import_notes"] (plan 3b).
+    import_notes: list[str] = Field(default_factory=list)
 
 
 class FlashcardCard(BaseModel):
@@ -115,6 +118,9 @@ class FlashcardsImport(BaseModel):
 
     subject: SubjectImport
     flashcards: FlashcardsPayload
+    # Converter notes travelling with a migrated document; surfaced as the authoring
+    # UI's needs-review queue via activity.config["import_notes"] (plan 3b).
+    import_notes: list[str] = Field(default_factory=list)
 
 
 class MatchingPair(BaseModel):
@@ -159,6 +165,9 @@ class MatchingImport(BaseModel):
 
     subject: SubjectImport
     matching: MatchingPayload
+    # Converter notes travelling with a migrated document; surfaced as the authoring
+    # UI's needs-review queue via activity.config["import_notes"] (plan 3b).
+    import_notes: list[str] = Field(default_factory=list)
 
 
 class SequencingItem(BaseModel):
@@ -182,6 +191,9 @@ class SequencingImport(BaseModel):
 
     subject: SubjectImport
     sequencing: SequencingPayload
+    # Converter notes travelling with a migrated document; surfaced as the authoring
+    # UI's needs-review queue via activity.config["import_notes"] (plan 3b).
+    import_notes: list[str] = Field(default_factory=list)
 
 
 # ===== Database Operations =====
@@ -205,8 +217,14 @@ async def _upsert_activity(
     title: str,
     subject_id: uuid.UUID,
     config: dict[str, Any],
+    import_notes: list[str] | None = None,
 ) -> Activity:
     """Create a new activity or update an existing one by kind + ref_id."""
+    config = dict(config)
+    if import_notes:
+        config["import_notes"] = import_notes
+    else:
+        config.pop("import_notes", None)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == kind, Activity.ref_id == ref_id)
     )
@@ -268,6 +286,7 @@ async def import_quiz(db: AsyncSession, doc: QuizImport, *, author: User | None 
         title=quiz.title,
         subject_id=subject.id,
         config={"pass_percent": doc.quiz.pass_percent, "shuffle": doc.quiz.shuffle},
+        import_notes=doc.import_notes,
     )
     await publish_activity(db, activity, author, change_note="import")
     return activity
@@ -300,6 +319,7 @@ async def import_flashcards(
         title=deck.title,
         subject_id=subject.id,
         config={},
+        import_notes=doc.import_notes,
     )
     await publish_activity(db, activity, author, change_note="import")
     return activity
@@ -337,6 +357,7 @@ async def import_matching(
         title=matching.title,
         subject_id=subject.id,
         config=config,
+        import_notes=doc.import_notes,
     )
     await publish_activity(db, activity, author, change_note="import")
     return activity
@@ -371,6 +392,7 @@ async def import_sequencing(
         title=sequencing.title,
         subject_id=subject.id,
         config={"pass_percent": doc.sequencing.pass_percent},
+        import_notes=doc.import_notes,
     )
     await publish_activity(db, activity, author, change_note="import")
     return activity
