@@ -1,6 +1,66 @@
 {
   "components": {
     "schemas": {
+      "ActivityAuthorRow": {
+        "description": "One row of `GET /authoring/subjects/{slug}/activities`.",
+        "properties": {
+          "access": {
+            "title": "Access",
+            "type": "string"
+          },
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "import_notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Import Notes",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "needs_review": {
+            "title": "Needs Review",
+            "type": "boolean"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "kind",
+          "title",
+          "slug",
+          "status",
+          "access",
+          "needs_review",
+          "import_notes"
+        ],
+        "title": "ActivityAuthorRow",
+        "type": "object"
+      },
       "ActivityOut": {
         "description": "Response for `GET /activities/{id}`: one activity's current published snapshot with\nanswers stripped.",
         "properties": {
@@ -947,6 +1007,172 @@
         "title": "JoinIn",
         "type": "object"
       },
+      "KnowledgeCheckImport": {
+        "description": "A single_choice question block. `key` is the stable id grading looks up later, so\n\nit's validated here (lowercase/underscore, ASCII) and checked for lesson-wide\nuniqueness in `LessonBody._unique_keys` below.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "integer"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "key": {
+            "maxLength": 60,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Key",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 2,
+            "title": "Options",
+            "type": "array"
+          },
+          "stem": {
+            "additionalProperties": true,
+            "title": "Stem",
+            "type": "object"
+          },
+          "type": {
+            "const": "knowledge_check",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "key",
+          "stem",
+          "options",
+          "answer"
+        ],
+        "title": "KnowledgeCheckImport",
+        "type": "object"
+      },
+      "LessonAuthorOut": {
+        "description": "The lesson working copy: meta plus the unstripped page tree (answers included) \u2014\n\nTask 15's editor consumes this verbatim.",
+        "properties": {
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "import_notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Import Notes",
+            "type": "array"
+          },
+          "lesson_id": {
+            "format": "uuid",
+            "title": "Lesson Id",
+            "type": "string"
+          },
+          "pages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "lesson_id",
+          "subject_slug",
+          "slug",
+          "title",
+          "status",
+          "import_notes",
+          "pages"
+        ],
+        "title": "LessonAuthorOut",
+        "type": "object"
+      },
+      "LessonCreateIn": {
+        "description": "Body for `POST /authoring/lessons`: the subject to file it under plus its meta.",
+        "properties": {
+          "slug": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_slug",
+          "title",
+          "slug"
+        ],
+        "title": "LessonCreateIn",
+        "type": "object"
+      },
+      "LessonMetaIn": {
+        "description": "Body for `PUT /authoring/lessons/{id}`: meta only, no pages.",
+        "properties": {
+          "slug": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "slug"
+        ],
+        "title": "LessonMetaIn",
+        "type": "object"
+      },
       "LessonOut": {
         "description": "Response for `GET /lessons/{slug}`: the pinned version id (what an attempt should\n\nreference) plus the answer-stripped snapshot itself.",
         "properties": {
@@ -1213,6 +1439,62 @@
         "title": "OutcomeStudentOut",
         "type": "object"
       },
+      "PageImport": {
+        "description": "One lesson page: a title plus an ordered, non-empty list of blocks.",
+        "properties": {
+          "blocks": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "knowledge_check": "#/components/schemas/KnowledgeCheckImport",
+                  "rich_text": "#/components/schemas/RichTextImport"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RichTextImport"
+                },
+                {
+                  "$ref": "#/components/schemas/KnowledgeCheckImport"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Blocks",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "blocks"
+        ],
+        "title": "PageImport",
+        "type": "object"
+      },
+      "PagesIn": {
+        "description": "Body for `PUT /authoring/lessons/{id}/pages`: the complete replacement page tree.",
+        "properties": {
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/PageImport"
+            },
+            "title": "Pages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pages"
+        ],
+        "title": "PagesIn",
+        "type": "object"
+      },
       "PresignIn": {
         "properties": {
           "bytes": {
@@ -1388,6 +1670,27 @@
           "submitted_at"
         ],
         "title": "ResultOut",
+        "type": "object"
+      },
+      "RichTextImport": {
+        "description": "A prose content block; `body` must already be closed-schema ProseMirror JSON.",
+        "properties": {
+          "body": {
+            "additionalProperties": true,
+            "title": "Body",
+            "type": "object"
+          },
+          "type": {
+            "const": "rich_text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "body"
+        ],
+        "title": "RichTextImport",
         "type": "object"
       },
       "RoleIn": {
@@ -1630,6 +1933,36 @@
           "last_activity_at"
         ],
         "title": "StudentRowOut",
+        "type": "object"
+      },
+      "SubjectAuthorOut": {
+        "description": "One row of `GET /authoring/subjects`: every subject, regardless of publish status.",
+        "properties": {
+          "activity_count": {
+            "title": "Activity Count",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "activity_count"
+        ],
+        "title": "SubjectAuthorOut",
         "type": "object"
       },
       "SubjectDetailOut": {
@@ -2619,6 +2952,198 @@
         ]
       }
     },
+    "/api/v1/authoring/lessons": {
+      "post": {
+        "description": "Create a draft lesson with an empty page tree, plus its paired draft activity\n(kind \"lesson\", access \"practice\") \u2014 the starting point for a from-scratch author, or\nfor pasting in pages via the follow-up `PUT .../pages` call.",
+        "operationId": "create_lesson_api_v1_authoring_lessons_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Lesson",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/lessons/{lesson_id}": {
+      "get": {
+        "description": "The lesson working copy: meta plus the unstripped page tree (answers included) \u2014\nthe author's own edits, regardless of what's currently published.",
+        "operationId": "get_lesson_api_v1_authoring_lessons__lesson_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Lesson",
+        "tags": [
+          "authoring"
+        ]
+      },
+      "put": {
+        "description": "Retitle/reslug a lesson; its pages are untouched (use `PUT .../pages` for those).",
+        "operationId": "update_lesson_meta_api_v1_authoring_lessons__lesson_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonMetaIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Lesson Meta",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/lessons/{lesson_id}/pages": {
+      "put": {
+        "description": "Replace the lesson's whole page tree \u2014 edit, not publish: the served student\nsnapshot (if any) is unchanged until a separate publish (Task 10).",
+        "operationId": "replace_pages_api_v1_authoring_lessons__lesson_id__pages_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PagesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonAuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Replace Pages",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
     "/api/v1/authoring/media/presign": {
       "post": {
         "description": "Create a pending media asset and a presigned PUT URL for a direct-to-storage upload.",
@@ -2702,6 +3227,79 @@
         "summary": "Confirm Upload",
         "tags": [
           "media"
+        ]
+      }
+    },
+    "/api/v1/authoring/subjects": {
+      "get": {
+        "description": "Every subject (any status), with a total activity count \u2014 unlike the student-facing\n`app.content.router.list_subjects`, drafts count too.",
+        "operationId": "list_subjects_api_v1_authoring_subjects_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubjectAuthorOut"
+                  },
+                  "title": "Response List Subjects Api V1 Authoring Subjects Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Subjects",
+        "tags": [
+          "authoring"
+        ]
+      }
+    },
+    "/api/v1/authoring/subjects/{slug}/activities": {
+      "get": {
+        "description": "Every activity in one subject (any status), flagged `needs_review` when the importer\nleft notes behind (`Activity.config[\"import_notes\"]`, Task 4) \u2014 the migrated-content\nreview queue.",
+        "operationId": "list_subject_activities_api_v1_authoring_subjects__slug__activities_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityAuthorRow"
+                  },
+                  "title": "Response List Subject Activities Api V1 Authoring Subjects  Slug  Activities Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Subject Activities",
+        "tags": [
+          "authoring"
         ]
       }
     },

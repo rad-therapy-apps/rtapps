@@ -281,6 +281,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/lessons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Lesson
+     * @description Create a draft lesson with an empty page tree, plus its paired draft activity
+     *     (kind "lesson", access "practice") — the starting point for a from-scratch author, or
+     *     for pasting in pages via the follow-up `PUT .../pages` call.
+     */
+    post: operations["create_lesson_api_v1_authoring_lessons_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/lessons/{lesson_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Lesson
+     * @description The lesson working copy: meta plus the unstripped page tree (answers included) —
+     *     the author's own edits, regardless of what's currently published.
+     */
+    get: operations["get_lesson_api_v1_authoring_lessons__lesson_id__get"];
+    /**
+     * Update Lesson Meta
+     * @description Retitle/reslug a lesson; its pages are untouched (use `PUT .../pages` for those).
+     */
+    put: operations["update_lesson_meta_api_v1_authoring_lessons__lesson_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/lessons/{lesson_id}/pages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Replace Pages
+     * @description Replace the lesson's whole page tree — edit, not publish: the served student
+     *     snapshot (if any) is unchanged until a separate publish (Task 10).
+     */
+    put: operations["replace_pages_api_v1_authoring_lessons__lesson_id__pages_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/authoring/media/presign": {
     parameters: {
       query?: never;
@@ -315,6 +383,49 @@ export interface paths {
      * @description Verify the object landed in storage and mark the asset servable (audited).
      */
     post: operations["confirm_upload_api_v1_authoring_media__asset_id__confirm_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/subjects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Subjects
+     * @description Every subject (any status), with a total activity count — unlike the student-facing
+     *     `app.content.router.list_subjects`, drafts count too.
+     */
+    get: operations["list_subjects_api_v1_authoring_subjects_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/subjects/{slug}/activities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Subject Activities
+     * @description Every activity in one subject (any status), flagged `needs_review` when the importer
+     *     left notes behind (`Activity.config["import_notes"]`, Task 4) — the migrated-content
+     *     review queue.
+     */
+    get: operations["list_subject_activities_api_v1_authoring_subjects__slug__activities_get"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -669,6 +780,31 @@ export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
     /**
+     * ActivityAuthorRow
+     * @description One row of `GET /authoring/subjects/{slug}/activities`.
+     */
+    ActivityAuthorRow: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Import Notes */
+      import_notes: string[];
+      /** Kind */
+      kind: string;
+      /** Needs Review */
+      needs_review: boolean;
+      /** Slug */
+      slug: string | null;
+      /** Status */
+      status: string;
+      /** Title */
+      title: string;
+    };
+    /**
      * ActivityOut
      * @description Response for `GET /activities/{id}`: one activity's current published snapshot with
      *     answers stripped.
@@ -1001,6 +1137,88 @@ export interface components {
       code: string;
     };
     /**
+     * KnowledgeCheckImport
+     * @description A single_choice question block. `key` is the stable id grading looks up later, so
+     *
+     *     it's validated here (lowercase/underscore, ASCII) and checked for lesson-wide
+     *     uniqueness in `LessonBody._unique_keys` below.
+     */
+    KnowledgeCheckImport: {
+      /** Answer */
+      answer: number;
+      /** Explanation */
+      explanation?: {
+        [key: string]: unknown;
+      } | null;
+      /** Key */
+      key: string;
+      /** Options */
+      options: string[];
+      /** Stem */
+      stem: {
+        [key: string]: unknown;
+      };
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "knowledge_check";
+    };
+    /**
+     * LessonAuthorOut
+     * @description The lesson working copy: meta plus the unstripped page tree (answers included) —
+     *
+     *     Task 15's editor consumes this verbatim.
+     */
+    LessonAuthorOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Import Notes */
+      import_notes: string[];
+      /**
+       * Lesson Id
+       * Format: uuid
+       */
+      lesson_id: string;
+      /** Pages */
+      pages: {
+        [key: string]: unknown;
+      }[];
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * LessonCreateIn
+     * @description Body for `POST /authoring/lessons`: the subject to file it under plus its meta.
+     */
+    LessonCreateIn: {
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * LessonMetaIn
+     * @description Body for `PUT /authoring/lessons/{id}`: meta only, no pages.
+     */
+    LessonMetaIn: {
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
      * LessonOut
      * @description Response for `GET /lessons/{slug}`: the pinned version id (what an attempt should
      *
@@ -1122,6 +1340,27 @@ export interface components {
        */
       user_id: string;
     };
+    /**
+     * PageImport
+     * @description One lesson page: a title plus an ordered, non-empty list of blocks.
+     */
+    PageImport: {
+      /** Blocks */
+      blocks: (
+        | components["schemas"]["RichTextImport"]
+        | components["schemas"]["KnowledgeCheckImport"]
+      )[];
+      /** Title */
+      title: string;
+    };
+    /**
+     * PagesIn
+     * @description Body for `PUT /authoring/lessons/{id}/pages`: the complete replacement page tree.
+     */
+    PagesIn: {
+      /** Pages */
+      pages: components["schemas"]["PageImport"][];
+    };
     /** PresignIn */
     PresignIn: {
       /** Bytes */
@@ -1181,6 +1420,21 @@ export interface components {
       score: number | null;
       /** Submitted At */
       submitted_at: string | null;
+    };
+    /**
+     * RichTextImport
+     * @description A prose content block; `body` must already be closed-schema ProseMirror JSON.
+     */
+    RichTextImport: {
+      /** Body */
+      body: {
+        [key: string]: unknown;
+      };
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "rich_text";
     };
     /** RoleIn */
     RoleIn: {
@@ -1254,6 +1508,23 @@ export interface components {
        * Format: uuid
        */
       user_id: string;
+    };
+    /**
+     * SubjectAuthorOut
+     * @description One row of `GET /authoring/subjects`: every subject, regardless of publish status.
+     */
+    SubjectAuthorOut: {
+      /** Activity Count */
+      activity_count: number;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
     };
     /**
      * SubjectDetailOut
@@ -1819,6 +2090,140 @@ export interface operations {
       };
     };
   };
+  create_lesson_api_v1_authoring_lessons_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_lesson_api_v1_authoring_lessons__lesson_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_lesson_meta_api_v1_authoring_lessons__lesson_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonMetaIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  replace_pages_api_v1_authoring_lessons__lesson_id__pages_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PagesIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   presign_upload_api_v1_authoring_media_presign_post: {
     parameters: {
       query?: never;
@@ -1870,6 +2275,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["MediaAssetOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_subjects_api_v1_authoring_subjects_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubjectAuthorOut"][];
+        };
+      };
+    };
+  };
+  list_subject_activities_api_v1_authoring_subjects__slug__activities_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActivityAuthorRow"][];
         };
       };
       /** @description Validation Error */
