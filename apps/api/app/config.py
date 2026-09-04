@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     session_secret: str = DEFAULT_DEV_SECRET
     session_days: int = Field(default=14, ge=1, le=90)  # session cookie lifetime, sliding expiry
     s3_endpoint: str = "http://localhost:9000"
+    # Blank (the default) falls back to `s3_endpoint` (see `s3_browser_endpoint` below) — only
+    # dev's compose stack needs this set to something different (`storage:9000` isn't reachable
+    # from a host-side browser).
+    s3_public_endpoint: str = ""
     s3_access_key: str = "rtapps"
     s3_secret_key: str = "rtapps-secret"
     s3_bucket: str = "rtapps-media"
@@ -69,6 +73,13 @@ class Settings(BaseSettings):
     def google_enabled(self) -> bool:
         # Google sign-in is offered only when both OAuth credentials are configured.
         return bool(self.google_client_id and self.google_client_secret)
+
+    @property
+    def s3_browser_endpoint(self) -> str:
+        # The host embedded in a presigned URL handed to a browser: `s3_public_endpoint` when
+        # set, else `s3_endpoint` itself (a real S3/R2 endpoint, as in prod, is reachable from
+        # both the API and a browser alike, so no override is needed there).
+        return self.s3_public_endpoint or self.s3_endpoint
 
     @model_validator(mode="after")
     def _secret_is_safe_outside_dev(self) -> Self:

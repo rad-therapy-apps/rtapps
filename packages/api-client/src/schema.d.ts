@@ -281,6 +281,507 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/authoring/activities/{activity_id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview Activity
+     * @description The stripped snapshot of the activity's current working copy — byte-identical in
+     *     shape to what the student route serves the moment this gets published, but reflecting
+     *     edits made since the last publish (or none, if it's never been published).
+     */
+    get: operations["preview_activity_api_v1_authoring_activities__activity_id__preview_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/activities/{activity_id}/publish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish
+     * @description Freeze the working copy into the next immutable version and point students at it.
+     *
+     *     Clears `activity.config["import_notes"]` BEFORE snapshotting, not after:
+     *     `build_activity_snapshot`/`_activity_part` copies `activity.config` verbatim into the
+     *     frozen `ContentVersion.snapshot`, so clearing the notes only after publish would still
+     *     leave the converter's review-queue notes baked into what students receive.
+     */
+    post: operations["publish_api_v1_authoring_activities__activity_id__publish_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/activities/{activity_id}/versions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Versions
+     * @description Every published version of one activity, newest first.
+     */
+    get: operations["list_versions_api_v1_authoring_activities__activity_id__versions_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/calculators": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Calculator
+     * @description Create a calculator activity. Unlike the other builders, it has no per-activity
+     *     working-copy row of its own (see `_SLUG_MODELS`'s comment) — `ref_id` is a fresh id with
+     *     nothing behind it, and its whole "content" is `config` itself: `calc_type` plus the
+     *     `data_tables` keys it references, resolved to real `DataTable` rows only later, at
+     *     publish/snapshot time.
+     */
+    post: operations["create_calculator_api_v1_authoring_calculators_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/calculators/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Calculator */
+    get: operations["get_calculator_api_v1_authoring_calculators__activity_id__get"];
+    /** Update Calculator */
+    put: operations["update_calculator_api_v1_authoring_calculators__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/data-tables": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Data Tables
+     * @description Every author-editable numeric lookup table (PDD/TMR/etc.) — the grid editor's list
+     *     view (Task 16) and a calculator builder's table picker both read this.
+     */
+    get: operations["list_data_tables_api_v1_authoring_data_tables_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/data-tables/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Data Table */
+    get: operations["get_data_table_api_v1_authoring_data_tables__key__get"];
+    /**
+     * Upsert Data Table
+     * @description Create-or-replace one data table by its stable `key` (200 on update, 201 on create;
+     *     there is no separate create endpoint). A calculator activity's `config["data_tables"]`
+     *     references tables by this same key, resolved to a live row only at publish time (see
+     *     `build_activity_snapshot`'s calculator branch) — editing a table here never touches an
+     *     already-published calculator's frozen snapshot.
+     */
+    put: operations["upsert_data_table_api_v1_authoring_data_tables__key__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/flashcard-decks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Flashcard Deck */
+    post: operations["create_flashcard_deck_api_v1_authoring_flashcard_decks_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/flashcard-decks/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Flashcard Deck */
+    get: operations["get_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__get"];
+    /** Update Flashcard Deck */
+    put: operations["update_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/lessons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Lesson
+     * @description Create a draft lesson with an empty page tree, plus its paired draft activity
+     *     (kind "lesson", access "practice") — the starting point for a from-scratch author, or
+     *     for pasting in pages via the follow-up `PUT .../pages` call.
+     */
+    post: operations["create_lesson_api_v1_authoring_lessons_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/lessons/{lesson_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Lesson
+     * @description The lesson working copy: meta plus the unstripped page tree (answers included) —
+     *     the author's own edits, regardless of what's currently published.
+     */
+    get: operations["get_lesson_api_v1_authoring_lessons__lesson_id__get"];
+    /**
+     * Update Lesson Meta
+     * @description Retitle/reslug a lesson; its pages are untouched (use `PUT .../pages` for those).
+     */
+    put: operations["update_lesson_meta_api_v1_authoring_lessons__lesson_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/lessons/{lesson_id}/pages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Replace Pages
+     * @description Replace the lesson's whole page tree — edit, not publish: the served student
+     *     snapshot (if any) is unchanged until a separate publish (Task 10).
+     */
+    put: operations["replace_pages_api_v1_authoring_lessons__lesson_id__pages_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/matching": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Matching */
+    post: operations["create_matching_api_v1_authoring_matching_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/matching/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Matching */
+    get: operations["get_matching_api_v1_authoring_matching__activity_id__get"];
+    /** Update Matching */
+    put: operations["update_matching_api_v1_authoring_matching__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/media/presign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Presign Upload
+     * @description Create a pending media asset and a presigned PUT URL for a direct-to-storage upload.
+     */
+    post: operations["presign_upload_api_v1_authoring_media_presign_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/media/{asset_id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Confirm Upload
+     * @description Verify the object landed in storage and mark the asset servable (audited).
+     */
+    post: operations["confirm_upload_api_v1_authoring_media__asset_id__confirm_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/questions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Questions
+     * @description The question bank, optionally filtered by stem text (ILIKE over `stem` cast to text).
+     *
+     *     No subject filter: `Question` carries no `subject_id` column of its own (it's shared
+     *     bank material referenced from quizzes and lesson knowledge checks alike) — a deviation
+     *     from a per-subject browse experience recorded in plan 3b's task-9 notes.
+     */
+    get: operations["list_questions_api_v1_authoring_questions_get"];
+    put?: never;
+    /**
+     * Create Question
+     * @description Add a new bank question, independent of any quiz — attach it to one via
+     *     `PUT /authoring/quizzes/{id}`'s `question_ids`.
+     */
+    post: operations["create_question_api_v1_authoring_questions_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/questions/{question_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update Question
+     * @description Edit a bank question in place — any quiz referencing it sees the new content.
+     */
+    put: operations["update_question_api_v1_authoring_questions__question_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/quizzes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Quiz
+     * @description Create an empty draft quiz + its paired draft activity; add questions via the `PUT`.
+     */
+    post: operations["create_quiz_api_v1_authoring_quizzes_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/quizzes/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Quiz */
+    get: operations["get_quiz_api_v1_authoring_quizzes__activity_id__get"];
+    /**
+     * Update Quiz
+     * @description Replace the quiz's question set wholesale, rewriting positions 1..n in list order.
+     */
+    put: operations["update_quiz_api_v1_authoring_quizzes__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/sequencing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Sequencing */
+    post: operations["create_sequencing_api_v1_authoring_sequencing_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/sequencing/{activity_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Sequencing */
+    get: operations["get_sequencing_api_v1_authoring_sequencing__activity_id__get"];
+    /** Update Sequencing */
+    put: operations["update_sequencing_api_v1_authoring_sequencing__activity_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/subjects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Subjects
+     * @description Every subject (any status), with a total activity count — unlike the student-facing
+     *     `app.content.router.list_subjects`, drafts count too.
+     */
+    get: operations["list_subjects_api_v1_authoring_subjects_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/authoring/subjects/{slug}/activities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Subject Activities
+     * @description Every activity in one subject (any status), flagged `needs_review` when the importer
+     *     left notes behind (`Activity.config["import_notes"]`, Task 4) — the migrated-content
+     *     review queue.
+     */
+    get: operations["list_subject_activities_api_v1_authoring_subjects__slug__activities_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cohorts": {
     parameters: {
       query?: never;
@@ -562,6 +1063,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/media/{asset_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Serve Media
+     * @description Redirect an authenticated viewer to a short-lived presigned GET for the object.
+     */
+    get: operations["serve_media_api_v1_media__asset_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/subjects": {
     parameters: {
       query?: never;
@@ -608,6 +1129,33 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /**
+     * ActivityAuthorRow
+     * @description One row of `GET /authoring/subjects/{slug}/activities`.
+     */
+    ActivityAuthorRow: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Import Notes */
+      import_notes: string[];
+      /** Kind */
+      kind: string;
+      /** Lesson Id */
+      lesson_id: string | null;
+      /** Needs Review */
+      needs_review: boolean;
+      /** Slug */
+      slug: string | null;
+      /** Status */
+      status: string;
+      /** Title */
+      title: string;
+    };
     /**
      * ActivityOut
      * @description Response for `GET /activities/{id}`: one activity's current published snapshot with
@@ -836,6 +1384,53 @@ export interface components {
       /** Label */
       label: string;
     };
+    /** CalculatorAuthorOut */
+    CalculatorAuthorOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Calc Type */
+      calc_type: string;
+      /** Data Tables */
+      data_tables: string[];
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * CalculatorCreateIn
+     * @description `POST /authoring/calculators` body. No `access`/`slug`: a calculator has no
+     *     per-activity working-copy row to slug (see `app.authoring.router._SLUG_MODELS`'s
+     *     comment) and is always `access="practice"`.
+     */
+    CalculatorCreateIn: {
+      /** Calc Type */
+      calc_type: string;
+      /** Data Tables */
+      data_tables: string[];
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * CalculatorPutIn
+     * @description `PUT /authoring/calculators/{activity_id}` body: title plus the same content fields
+     *     as create.
+     */
+    CalculatorPutIn: {
+      /** Calc Type */
+      calc_type: string;
+      /** Data Tables */
+      data_tables: string[];
+      /** Title */
+      title: string;
+    };
     /** CohortIn */
     CohortIn: {
       /** Ends On */
@@ -891,6 +1486,144 @@ export interface components {
       /** Threshold Percent */
       threshold_percent?: number | null;
     };
+    /**
+     * DataTableOut
+     * @description `GET /authoring/data-tables[/{key}]` response, and what `PUT` echoes back.
+     */
+    DataTableOut: {
+      /** Grid */
+      grid: {
+        [key: string]: unknown;
+      };
+      /** Key */
+      key: string;
+      /** Title */
+      title: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /**
+     * DataTablePutIn
+     * @description Body for `PUT /authoring/data-tables/{key}`: an upsert keyed by the path's `key`
+     *     (200 on update, 201 on create — there is no separate create endpoint).
+     */
+    DataTablePutIn: {
+      grid: components["schemas"]["GridIn"];
+      /** Title */
+      title: string;
+    };
+    /**
+     * FlashcardCard
+     * @description A single flashcard: term and definition.
+     */
+    FlashcardCard: {
+      /** Definition */
+      definition: string;
+      /** Term */
+      term: string;
+    };
+    /** FlashcardDeckAuthorOut */
+    FlashcardDeckAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Cards */
+      cards: components["schemas"]["FlashcardCard"][];
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /**
+       * Deck Id
+       * Format: uuid
+       */
+      deck_id: string;
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * FlashcardDeckCreateIn
+     * @description `POST /authoring/flashcard-decks` body: meta plus the initial card set (`cards` is a
+     *     NOT NULL JSONB column on `FlashcardDeck`, so at least one card is required up front).
+     */
+    FlashcardDeckCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Cards */
+      cards: components["schemas"]["FlashcardCard"][];
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * FlashcardDeckPutIn
+     * @description `PUT /authoring/flashcard-decks/{id}` body: wholesale card-list replace.
+     */
+    FlashcardDeckPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Cards */
+      cards: components["schemas"]["FlashcardCard"][];
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Title */
+      title: string;
+    };
+    /**
+     * GridIn
+     * @description Body shape for `DataTable.grid`: a numeric lookup table with named row/col axes.
+     *     `values` must line up 1:1 with `cols`; both `cols` and row `key`s must be strictly
+     *     ascending, matching what Task 17's MU player assumes when it looks a value up.
+     */
+    GridIn: {
+      /** Col Label */
+      col_label: string;
+      /** Cols */
+      cols: number[];
+      /** Row Label */
+      row_label: string;
+      /** Rows */
+      rows: components["schemas"]["GridRow"][];
+    };
+    /**
+     * GridRow
+     * @description One row of a data-table grid: a numeric row key (e.g. depth in cm) plus one value
+     *     per column, in the same order as `GridIn.cols`.
+     */
+    GridRow: {
+      /** Key */
+      key: number;
+      /** Values */
+      values: number[];
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -941,6 +1674,88 @@ export interface components {
       code: string;
     };
     /**
+     * KnowledgeCheckImport
+     * @description A single_choice question block. `key` is the stable id grading looks up later, so
+     *
+     *     it's validated here (lowercase/underscore, ASCII) and checked for lesson-wide
+     *     uniqueness in `LessonBody._unique_keys` below.
+     */
+    KnowledgeCheckImport: {
+      /** Answer */
+      answer: number;
+      /** Explanation */
+      explanation?: {
+        [key: string]: unknown;
+      } | null;
+      /** Key */
+      key: string;
+      /** Options */
+      options: string[];
+      /** Stem */
+      stem: {
+        [key: string]: unknown;
+      };
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "knowledge_check";
+    };
+    /**
+     * LessonAuthorOut
+     * @description The lesson working copy: meta plus the unstripped page tree (answers included) —
+     *
+     *     Task 15's editor consumes this verbatim.
+     */
+    LessonAuthorOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Import Notes */
+      import_notes: string[];
+      /**
+       * Lesson Id
+       * Format: uuid
+       */
+      lesson_id: string;
+      /** Pages */
+      pages: {
+        [key: string]: unknown;
+      }[];
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * LessonCreateIn
+     * @description Body for `POST /authoring/lessons`: the subject to file it under plus its meta.
+     */
+    LessonCreateIn: {
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * LessonMetaIn
+     * @description Body for `PUT /authoring/lessons/{id}`: meta only, no pages.
+     */
+    LessonMetaIn: {
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
      * LessonOut
      * @description Response for `GET /lessons/{slug}`: the pinned version id (what an attempt should
      *
@@ -985,6 +1800,107 @@ export interface components {
       email: string;
       /** Password */
       password: string;
+    };
+    /** MatchingAuthorOut */
+    MatchingAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /**
+       * Matching Id
+       * Format: uuid
+       */
+      matching_id: string;
+      /** Pairs */
+      pairs: components["schemas"]["MatchingPair"][];
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * MatchingCreateIn
+     * @description `POST /authoring/matching` body: meta plus the initial pair set (`pairs` is a NOT
+     *     NULL JSONB column on `MatchingActivity`, so at least two pairs are required up front).
+     */
+    MatchingCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Pairs */
+      pairs: components["schemas"]["MatchingPair"][];
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * MatchingPair
+     * @description A single term-definition pair in a matching activity.
+     */
+    MatchingPair: {
+      /** Definition */
+      definition: string;
+      /** Term */
+      term: string;
+    };
+    /**
+     * MatchingPutIn
+     * @description `PUT /authoring/matching/{id}` body: wholesale pair-list replace.
+     */
+    MatchingPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Pairs */
+      pairs: components["schemas"]["MatchingPair"][];
+      /** Title */
+      title: string;
+    };
+    /**
+     * MediaAssetOut
+     * @description Response shape for confirm; built from a MediaAsset ORM row via from_attributes.
+     */
+    MediaAssetOut: {
+      /** Alt */
+      alt: string | null;
+      /** Bytes */
+      bytes: number;
+      /** Confirmed */
+      confirmed: boolean;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Mime */
+      mime: string;
     };
     /** MemberOut */
     MemberOut: {
@@ -1043,6 +1959,166 @@ export interface components {
        */
       user_id: string;
     };
+    /**
+     * PageImport
+     * @description One lesson page: a title plus an ordered, non-empty list of blocks.
+     */
+    PageImport: {
+      /** Blocks */
+      blocks: (
+        | components["schemas"]["RichTextImport"]
+        | components["schemas"]["KnowledgeCheckImport"]
+      )[];
+      /** Title */
+      title: string;
+    };
+    /**
+     * PagesIn
+     * @description Body for `PUT /authoring/lessons/{id}/pages`: the complete replacement page tree.
+     */
+    PagesIn: {
+      /** Pages */
+      pages: components["schemas"]["PageImport"][];
+    };
+    /** PresignIn */
+    PresignIn: {
+      /** Bytes */
+      bytes: number;
+      /** Filename */
+      filename: string;
+      /** Mime */
+      mime: string;
+    };
+    /** PresignOut */
+    PresignOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Storage Key */
+      storage_key: string;
+      /** Upload Url */
+      upload_url: string;
+    };
+    /**
+     * PublishIn
+     * @description Body for `POST /authoring/activities/{id}/publish`: an optional human-readable note
+     *     describing this publish, stored verbatim on the new `ContentVersion.change_note`.
+     */
+    PublishIn: {
+      /** Change Note */
+      change_note?: string | null;
+    };
+    /**
+     * QuestionAuthorIn
+     * @description Body for `POST /authoring/questions` and `PUT /authoring/questions/{id}`: a single
+     *     bank question with a plain-text stem/explanation — the router wraps/unwraps
+     *     `app.content.activity_importer.text_doc()` on the way to/from `Question.stem`/
+     *     `Question.explanation`, so no raw ProseMirror JSON crosses this API.
+     */
+    QuestionAuthorIn: {
+      /** Answer */
+      answer: number;
+      /** Explanation */
+      explanation?: string | null;
+      /** Options */
+      options: string[];
+      /** Stem */
+      stem: string;
+    };
+    /**
+     * QuestionAuthorOut
+     * @description `QuestionAuthorIn`, flattened back out with its bank id.
+     */
+    QuestionAuthorOut: {
+      /** Answer */
+      answer: number;
+      /** Explanation */
+      explanation: string | null;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Options */
+      options: string[];
+      /** Stem */
+      stem: string;
+    };
+    /** QuizAuthorOut */
+    QuizAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /** Questions */
+      questions: components["schemas"]["QuestionAuthorOut"][];
+      /**
+       * Quiz Id
+       * Format: uuid
+       */
+      quiz_id: string;
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * QuizCreateIn
+     * @description `POST /authoring/quizzes` body: meta only. Unlike flashcards/matching/sequencing, a
+     *     quiz has no NOT NULL content column forcing questions up front — they live in the
+     *     `quiz_question` join table, so a brand-new quiz can start with zero questions and have
+     *     them added via `PUT /authoring/quizzes/{id}`.
+     */
+    QuizCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * QuizPutIn
+     * @description `PUT /authoring/quizzes/{id}` body: the ordered question-bank id list. Positions are
+     *     rewritten 1..n in list order; an id absent from the bank, or repeated, is rejected.
+     */
+    QuizPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Question Ids */
+      question_ids: string[];
+      /** Title */
+      title: string;
+    };
     /** RegisterIn */
     RegisterIn: {
       /** Display Name */
@@ -1082,6 +2158,21 @@ export interface components {
       /** Submitted At */
       submitted_at: string | null;
     };
+    /**
+     * RichTextImport
+     * @description A prose content block; `body` must already be closed-schema ProseMirror JSON.
+     */
+    RichTextImport: {
+      /** Body */
+      body: {
+        [key: string]: unknown;
+      };
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "rich_text";
+    };
     /** RoleIn */
     RoleIn: {
       role: components["schemas"]["UserRole"];
@@ -1100,6 +2191,89 @@ export interface components {
       };
       /** Score */
       score: number | null;
+    };
+    /** SequencingAuthorOut */
+    SequencingAuthorOut: {
+      /** Access */
+      access: string;
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Config */
+      config: {
+        [key: string]: unknown;
+      };
+      /** Items */
+      items: components["schemas"]["SequencingItem"][];
+      /**
+       * Sequencing Id
+       * Format: uuid
+       */
+      sequencing_id: string;
+      /** Slug */
+      slug: string;
+      /** Status */
+      status: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * SequencingCreateIn
+     * @description `POST /authoring/sequencing` body: meta plus the initial item set in correct order
+     *     (`items` is a NOT NULL JSONB column on `SequencingActivity`, so at least two items are
+     *     required up front).
+     */
+    SequencingCreateIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Items */
+      items: components["schemas"]["SequencingItem"][];
+      /** Slug */
+      slug: string;
+      /** Subject Slug */
+      subject_slug: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * SequencingItem
+     * @description A single item in a sequencing activity.
+     */
+    SequencingItem: {
+      /** Detail */
+      detail?: string | null;
+      /** Label */
+      label: string;
+    };
+    /**
+     * SequencingPutIn
+     * @description `PUT /authoring/sequencing/{id}` body: wholesale item-list replace.
+     */
+    SequencingPutIn: {
+      /**
+       * Access
+       * @default practice
+       */
+      access: string;
+      /** Config */
+      config?: {
+        [key: string]: unknown;
+      };
+      /** Items */
+      items: components["schemas"]["SequencingItem"][];
+      /** Title */
+      title: string;
     };
     /** StudentDetailOut */
     StudentDetailOut: {
@@ -1154,6 +2328,23 @@ export interface components {
        * Format: uuid
        */
       user_id: string;
+    };
+    /**
+     * SubjectAuthorOut
+     * @description One row of `GET /authoring/subjects`: every subject, regardless of publish status.
+     */
+    SubjectAuthorOut: {
+      /** Activity Count */
+      activity_count: number;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
     };
     /**
      * SubjectDetailOut
@@ -1228,6 +2419,29 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+    };
+    /**
+     * VersionOut
+     * @description One row of `GET /authoring/activities/{id}/versions`, and the shape a publish call
+     *     itself returns for the version it just created.
+     */
+    VersionOut: {
+      /** Author Display Name */
+      author_display_name: string | null;
+      /** Change Note */
+      change_note: string | null;
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Published At
+       * Format: date-time
+       */
+      published_at: string;
+      /** Version */
+      version: number;
     };
     /** WrongOut */
     WrongOut: {
@@ -1706,6 +2920,1034 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["UserOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  preview_activity_api_v1_authoring_activities__activity_id__preview_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  publish_api_v1_authoring_activities__activity_id__publish_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublishIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_versions_api_v1_authoring_activities__activity_id__versions_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionOut"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_calculator_api_v1_authoring_calculators_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalculatorCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalculatorAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_calculator_api_v1_authoring_calculators__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalculatorAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_calculator_api_v1_authoring_calculators__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalculatorPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalculatorAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_data_tables_api_v1_authoring_data_tables_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataTableOut"][];
+        };
+      };
+    };
+  };
+  get_data_table_api_v1_authoring_data_tables__key__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataTableOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  upsert_data_table_api_v1_authoring_data_tables__key__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataTablePutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataTableOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_flashcard_deck_api_v1_authoring_flashcard_decks_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FlashcardDeckCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FlashcardDeckAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FlashcardDeckAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_flashcard_deck_api_v1_authoring_flashcard_decks__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FlashcardDeckPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FlashcardDeckAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_lesson_api_v1_authoring_lessons_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_lesson_api_v1_authoring_lessons__lesson_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_lesson_meta_api_v1_authoring_lessons__lesson_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonMetaIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  replace_pages_api_v1_authoring_lessons__lesson_id__pages_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PagesIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_matching_api_v1_authoring_matching_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MatchingCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_matching_api_v1_authoring_matching__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_matching_api_v1_authoring_matching__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MatchingPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  presign_upload_api_v1_authoring_media_presign_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PresignIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PresignOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  confirm_upload_api_v1_authoring_media__asset_id__confirm_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        asset_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MediaAssetOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_questions_api_v1_authoring_questions_get: {
+    parameters: {
+      query?: {
+        q?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionAuthorOut"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_question_api_v1_authoring_questions_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuestionAuthorIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_question_api_v1_authoring_questions__question_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        question_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuestionAuthorIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_quiz_api_v1_authoring_quizzes_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuizCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_quiz_api_v1_authoring_quizzes__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_quiz_api_v1_authoring_quizzes__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuizPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_sequencing_api_v1_authoring_sequencing_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SequencingCreateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SequencingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_sequencing_api_v1_authoring_sequencing__activity_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SequencingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_sequencing_api_v1_authoring_sequencing__activity_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activity_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SequencingPutIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SequencingAuthorOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_subjects_api_v1_authoring_subjects_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubjectAuthorOut"][];
+        };
+      };
+    };
+  };
+  list_subject_activities_api_v1_authoring_subjects__slug__activities_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActivityAuthorRow"][];
         };
       };
       /** @description Validation Error */
@@ -2246,6 +4488,35 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ResultOut"][];
+        };
+      };
+    };
+  };
+  serve_media_api_v1_media__asset_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        asset_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

@@ -27,11 +27,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters Understanding the \"what, why, and how\" of radiation therapy treatments and the language used to describe them is critical for your role. This knowledge will enable you to: Safely and accurately operate complex treatment equipment. Effectively communicate with patients and other members of the healthcare team. Comprehend treatment plans and patient charts. Contribute to high-quality patient care and treatment outcomes."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -40,7 +43,44 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do In this lesson, you will: Learn basic principles of radiation therapy and its goals. Familiarize yourself with essential medical and radiation oncology terminology. Explore the components and functions of a Linear Accelerator (Linac). Understand the processes of patient simulation and immobilization. Be introduced to various EBRT techniques (3D-CRT, IMRT, VMAT, SBRT/SRS) and Image-Guided Radiation Therapy (IGRT). Briefly learn about other modalities like brachytherapy. Test your understanding through \"Quick Check\" questions on each topic. Engage with summative interactive activities at the end of the lesson."
+                      "text": "Understanding the \"what, why, and how\" of radiation therapy treatments and the language used to describe them is critical for your role. This knowledge will enable you to: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Safely and accurately operate complex treatment equipment."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Effectively communicate with patients and other members of the healthcare team."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Comprehend treatment plans and patient charts."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Contribute to high-quality patient care and treatment outcomes."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -49,7 +89,234 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end of this lesson, you should be able to: Define basic radiation therapy concepts and key medical/RT terms. Identify major components of a Linac and their functions. Describe the purpose of simulation, immobilization, and IGRT. Differentiate between common EBRT techniques and their general applications. Successfully answer the \"Quick Check\" questions. Feel prepared to tackle the end-of-lesson interactive activities."
+                      "text": "In this lesson, you will:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Learn basic principles of radiation therapy and its goals."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Familiarize yourself with essential medical and radiation oncology terminology."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Explore the components and functions of a Linear Accelerator (Linac)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Understand the processes of patient simulation and immobilization."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Be introduced to various EBRT techniques (3D-CRT, IMRT, VMAT, SBRT/SRS) and Image-Guided Radiation Therapy (IGRT)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Briefly learn about other modalities like brachytherapy."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Test your understanding through \"Quick Check\" questions on each topic."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Engage with summative interactive activities at the end of the lesson."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end of this lesson, you should be able to:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Define basic radiation therapy concepts and key medical/RT terms."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Identify major components of a Linac and their functions."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Describe the purpose of simulation, immobilization, and IGRT."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Differentiate between common EBRT techniques and their general applications."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Successfully answer the \"Quick Check\" questions."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Feel prepared to tackle the end-of-lesson interactive activities."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -1080,10 +1347,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Midsagittal (Median) Plane:",
                               "marks": [
                                 {
@@ -1094,10 +1357,6 @@
                             {
                               "type": "text",
                               "text": " Sagittal plane exactly at midline."
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -1176,25 +1435,8 @@
               "Below the stomach",
               "Around the stomach"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1959,25 +2201,8 @@
               "A benign growth.",
               "Metastasis, meaning the cancer has spread."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -2263,6 +2488,13 @@
                   ]
                 },
                 {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "45e9e6f6-8953-50fb-94ef-25c3dd853854",
+                    "alt": "Diagram of a Linear Accelerator"
+                  }
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
@@ -2296,11 +2528,12 @@
                     },
                     {
                       "type": "text",
-                      "text": "Major Components & Functions:"
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
+                      "text": "Major Components & Functions:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -2320,8 +2553,7 @@
                       "text": " The large rotating part of the Linac that houses the radiation-producing components. It can rotate 360 degrees around the patient, allowing treatment from various angles."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
@@ -2338,10 +2570,6 @@
                     },
                     {
                       "type": "text",
-                      "text": " "
-                    },
-                    {
-                      "type": "text",
                       "text": "Collimators (Jaws):",
                       "marks": [
                         {
@@ -2354,8 +2582,7 @@
                       "text": " Heavy metal plates (primary and secondary) that define the general size of the radiation field (e.g., a square or rectangle)."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
@@ -2375,12 +2602,7 @@
                       "text": " "
                     },
                     {
-                      "type": "text",
-                      "text": " "
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
@@ -2396,8 +2618,7 @@
                       "text": " Where the patient lies during treatment. It can move in multiple directions (up/down, in/out, left/right, and sometimes rotate) to accurately position the patient."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
@@ -2407,10 +2628,6 @@
                           "type": "bold"
                         }
                       ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
                     },
                     {
                       "type": "text",
@@ -2430,8 +2647,7 @@
                       "text": " An imager on the opposite side of the gantry from the treatment head, used to acquire MV images (using the treatment beam) to verify patient position and beam placement."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
@@ -2451,12 +2667,7 @@
                       "text": " "
                     },
                     {
-                      "type": "text",
-                      "text": " "
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
@@ -2470,10 +2681,6 @@
                     {
                       "type": "text",
                       "text": " Located outside the treatment room, where RTTs operate the Linac, monitor the patient via cameras, and deliver the prescribed treatment."
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
                     },
                     {
                       "type": "text",
@@ -3165,25 +3372,8 @@
               "Thermoplastic Mask",
               "Breast Board"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -3469,25 +3659,8 @@
               "kV Planar Imaging (Orthogonal Pairs)",
               "Cone-Beam Computed Tomography (CBCT)"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -3509,11 +3682,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "3D Conformal Radiation Therapy (3D-CRT) In 3D-CRT, radiation beams are shaped by MLCs to match the 3-dimensional shape of the tumor, based on CT images. Multiple beams are typically used from different angles. Rationale: Allows for higher doses to the tumor while reducing exposure to surrounding normal tissues compared to older 2D techniques. Typical Uses: Still used for various sites, especially when complex dose sculpting isn't paramount or for simpler palliative cases."
+                      "text": "3D Conformal Radiation Therapy (3D-CRT)"
                     }
                   ]
                 },
@@ -3522,7 +3698,92 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Intensity-Modulated Radiation Therapy (IMRT) IMRT is an advanced form of 3D-CRT that allows the intensity of each radiation beam to be varied (modulated) across the beam's profile. This is achieved by complex MLC movements while the beam is on, or by using multiple small segments within each beam. Rationale: Enables even more precise conformity of the high-dose region to complex tumor shapes, especially those near critical organs. Allows for \"dose painting\" \u2013 delivering different dose levels to different parts of the target. Typical Uses: Head and neck cancers, prostate cancer, gynecological cancers, and other sites where sparing nearby sensitive structures is crucial."
+                      "text": "In 3D-CRT, radiation beams are shaped by MLCs to match the 3-dimensional shape of the tumor, based on CT images. Multiple beams are typically used from different angles. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rationale:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Allows for higher doses to the tumor while reducing exposure to surrounding normal tissues compared to older 2D techniques. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Typical Uses:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Still used for various sites, especially when complex dose sculpting isn't paramount or for simpler palliative cases."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Intensity-Modulated Radiation Therapy (IMRT)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "IMRT is an advanced form of 3D-CRT that allows the intensity of each radiation beam to be varied (modulated) across the beam's profile. This is achieved by complex MLC movements while the beam is on, or by using multiple small segments within each beam. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rationale:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Enables even more precise conformity of the high-dose region to complex tumor shapes, especially those near critical organs. Allows for \"dose painting\" \u2013 delivering different dose levels to different parts of the target. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Typical Uses:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Head and neck cancers, prostate cancer, gynecological cancers, and other sites where sparing nearby sensitive structures is crucial."
                     }
                   ]
                 }
@@ -3551,25 +3812,8 @@
               "It allows for varying the intensity of radiation within each beam for better dose conformity.",
               "It does not require the use of MLCs."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -3582,11 +3826,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Volumetric Modulated Arc Therapy (VMAT / RapidArc\u2122 / VERO\u2122) VMAT is an advanced form of IMRT where radiation is delivered as the gantry rotates (one or more arcs) around the patient. During rotation, the MLCs, dose rate, and gantry speed can all change continuously. Rationale: Can deliver highly conformal dose distributions, often with shorter treatment times compared to conventional IMRT. Typical Uses: Similar to IMRT, for complex tumor shapes near critical structures; widely used for many cancer sites."
+                      "text": "Volumetric Modulated Arc Therapy (VMAT / RapidArc\u2122 / VERO\u2122)"
                     }
                   ]
                 },
@@ -3595,7 +3842,122 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Stereotactic Body Radiation Therapy (SBRT) & Stereotactic Radiosurgery (SRS) These are highly precise techniques that deliver very high doses of radiation to small, well-defined tumors in a few treatment fractions (typically 1 to 5). SRS: Typically refers to treatment of intracranial (brain) or spinal lesions. Often delivered in a single fraction. SBRT (or SABR - Stereotactic Ablative Body Radiotherapy): Refers to treatment of extracranial (outside the brain) tumors, such as in the lung, liver, spine, or prostate. Rationale: Aims to achieve tumor ablation with extreme precision, requiring meticulous immobilization, IGRT, and often motion management techniques. Typical Uses: Small primary tumors (e.g., early-stage lung cancer), metastases (e.g., brain, liver, lung, bone), certain benign conditions."
+                      "text": "VMAT is an advanced form of IMRT where radiation is delivered as the gantry rotates (one or more arcs) around the patient. During rotation, the MLCs, dose rate, and gantry speed can all change continuously. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rationale:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Can deliver highly conformal dose distributions, often with shorter treatment times compared to conventional IMRT. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Typical Uses:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Similar to IMRT, for complex tumor shapes near critical structures; widely used for many cancer sites."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stereotactic Body Radiation Therapy (SBRT) & Stereotactic Radiosurgery (SRS)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "These are highly precise techniques that deliver very high doses of radiation to small, well-defined tumors in a few treatment fractions (typically 1 to 5). "
+                    },
+                    {
+                      "type": "text",
+                      "text": "SRS:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Typically refers to treatment of intracranial (brain) or spinal lesions. Often delivered in a single fraction."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "SBRT (or SABR - Stereotactic Ablative Body Radiotherapy):",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Refers to treatment of extracranial (outside the brain) tumors, such as in the lung, liver, spine, or prostate."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rationale:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Aims to achieve tumor ablation with extreme precision, requiring meticulous immobilization, IGRT, and often motion management techniques. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Typical Uses:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Small primary tumors (e.g., early-stage lung cancer), metastases (e.g., brain, liver, lung, bone), certain benign conditions."
                     }
                   ]
                 }
@@ -3624,25 +3986,8 @@
               "Conventional IMRT (many fractions)",
               "SBRT/SRS"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -3664,11 +4009,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Proton Therapy Uses beams of protons (positively charged particles) instead of X-rays. Protons deposit most of their energy at a specific depth in tissue (the Bragg peak), with very little dose beyond that point. Advantage: Can potentially reduce dose to healthy tissues located distal to (behind) the tumor, which is particularly beneficial for pediatric patients or tumors near critical organs. Considerations: More complex and expensive; availability is limited compared to photon therapy."
+                      "text": "Proton Therapy"
                     }
                   ]
                 },
@@ -3677,7 +4025,51 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Electron Beam Therapy Uses beams of electrons, which are also produced by Linacs. Electrons have a limited range in tissue, depositing their dose superficially. Advantage: Useful for treating tumors or lesions on or near the skin surface (e.g., skin cancers, keloids, some lymph nodes) while sparing deeper tissues. Considerations: Custom \"cutouts\" or applicators are often used to shape the electron field."
+                      "text": "Uses beams of protons (positively charged particles) instead of X-rays. Protons deposit most of their energy at a specific depth in tissue (the Bragg peak), with very little dose beyond that point. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Advantage:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Can potentially reduce dose to healthy tissues located distal to (behind) the tumor, which is particularly beneficial for pediatric patients or tumors near critical organs. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Considerations:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " More complex and expensive; availability is limited compared to photon therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Electron Beam Therapy"
                     }
                   ]
                 },
@@ -3686,7 +4078,92 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Total Body Irradiation (TBI) A technique where the entire body is irradiated, typically at a low dose rate over one or more fractions. Rationale: Often used as part of a conditioning regimen before bone marrow or stem cell transplantation to eliminate remaining cancer cells and suppress the immune system. Considerations: Requires specialized setup and dosimetry to ensure dose homogeneity across the body."
+                      "text": "Uses beams of electrons, which are also produced by Linacs. Electrons have a limited range in tissue, depositing their dose superficially. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Advantage:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Useful for treating tumors or lesions on or near the skin surface (e.g., skin cancers, keloids, some lymph nodes) while sparing deeper tissues. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Considerations:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Custom \"cutouts\" or applicators are often used to shape the electron field."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Total Body Irradiation (TBI)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A technique where the entire body is irradiated, typically at a low dose rate over one or more fractions. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Rationale:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Often used as part of a conditioning regimen before bone marrow or stem cell transplantation to eliminate remaining cancer cells and suppress the immune system. "
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Considerations:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Requires specialized setup and dosimetry to ensure dose homogeneity across the body."
                     }
                   ]
                 }
@@ -4105,7 +4582,39 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Activity 1: Match the Modality/Equipment Activity 2: Terminology Challenge Activity 3: Linac Components Labeling"
+                      "text": " Activity 1: Match the Modality/Equipment ",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://rtapps79.github.io/rtt_e_workbook/Clinical_Practice/Modalities_Equipment_Terminology/rt_modality_match_activity"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " Activity 2: Terminology Challenge ",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://rtapps79.github.io/rtt_e_workbook/Clinical_Practice/Modalities_Equipment_Terminology/rt_terminology_challenge"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " Activity 3: Linac Components Labeling "
                     }
                   ]
                 }
@@ -4115,5 +4624,10 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "img placeholder (https://oncologymedicalphysics.com/wp-content/uploads/2021/04/Linac-Components-OMP.png)",
+    "unsupported inline element button",
+    "dropped non-https link"
+  ]
 }

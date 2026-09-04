@@ -1,15 +1,18 @@
 """Development seed data: creates the three demo accounts, imports seed lessons plus the
-migrated legacy content and hand-written activity fixtures, and seeds a demo cohort of ten
-students with graded attempts and rollups on both a lesson and a quiz.
+migrated legacy content and hand-written activity fixtures, seeds one published MU
+calculator, and seeds a demo cohort of ten students with graded attempts and rollups on
+both a lesson and a quiz.
 
 What this file does: `seed()` get-or-creates an admin/educator/student account (all
 sharing one dev password) and imports every JSON lesson fixture in `seed/lessons/`,
 publishing each one; it then imports every document under `seed/content/` (the migrated
 legacy corpus) and `seed/activities/` (hand-written fixtures, e.g. the demo quiz) via
-`import_any`; it then get-or-creates a demo cohort owned by the educator, enrols ten
-student accounts in it, and gives each student one submitted attempt (with rollup) on the
-`rbe-and-oer` lesson and one on the `demo-quiz` activity. `main()` is the CLI entry point
-that runs this against a real database and commits.
+`import_any`; it then get-or-creates a `pdd_6mv` `DataTable` and a published "MU
+calculator" activity referencing it, the same way an author's own `POST /data-tables` +
+`POST /calculators` + publish would; it then get-or-creates a demo cohort owned by the
+educator, enrols ten student accounts in it, and gives each student one submitted attempt
+(with rollup) on the `rbe-and-oer` lesson and one on the `demo-quiz` activity. `main()` is
+the CLI entry point that runs this against a real database and commits.
 
 Used here and why: plain SQLAlchemy `select`/`add`/`flush` (no ORM merge helpers) so the
 get-or-create logic and what gets committed stay explicit; refuses to run at all when
@@ -27,10 +30,10 @@ Depends on: `app.attempts.models` (Attempt, AttemptItem), `app.attempts.rollup`
 (upsert_activity_result), `app.auth.models` (User, UserRole), `app.auth.passwords`
 (hash_password), `app.cohorts.models` (Cohort, Enrollment), `app.config`,
 `app.content.importer` (LessonImport, import_lesson), `app.content.activity_importer`
-(import_any), `app.content.activity_models` (Quiz), `app.content.activity_snapshots`
-(gradeable_items), `app.content.models` (Activity, ContentVersion, Lesson),
-`app.content.snapshot` (knowledge_checks), `app.db`, `app.grading.single_choice`
-(grade_single_choice).
+(import_any), `app.content.activity_models` (DataTable, Quiz), `app.content.activity_snapshots`
+(gradeable_items), `app.content.models` (Activity, ContentVersion, Lesson, Subject),
+`app.content.service` (publish_activity), `app.content.snapshot` (knowledge_checks), `app.db`,
+`app.grading.single_choice` (grade_single_choice), `app.ids` (new_id).
 Used by: `tests/test_seed.py` (`seed`); run directly as a script by `make seed`.
 """
 
@@ -50,13 +53,15 @@ from app.auth.passwords import hash_password
 from app.cohorts.models import Cohort, Enrollment
 from app.config import Settings, load_settings
 from app.content.activity_importer import import_any
-from app.content.activity_models import Quiz
+from app.content.activity_models import DataTable, Quiz
 from app.content.activity_snapshots import gradeable_items
 from app.content.importer import LessonImport, import_lesson
-from app.content.models import Activity, ContentVersion, Lesson
+from app.content.models import Activity, ContentVersion, Lesson, Subject
+from app.content.service import publish_activity
 from app.content.snapshot import knowledge_checks
 from app.db import get_engine, make_session_factory
 from app.grading.single_choice import grade_single_choice
+from app.ids import new_id
 
 SEED_PASSWORD = "rtapps-dev-password"  # shared by all three demo accounts (dev/test only)
 SEED_USERS: list[tuple[str, str, UserRole]] = [
@@ -72,6 +77,9 @@ SEED_JOIN_CODE = "DEMO42"  # fixed (not random) so it's get-or-create-able acros
 SEED_STUDENT_COUNT = 10  # how many demo students are enrolled and given an attempt
 SEED_LESSON_SLUG = "rbe-and-oer"  # the lesson the demo students attempt (has 2 knowledge checks)
 SEED_QUIZ_SLUG = "demo-quiz"  # the quiz the demo students attempt (has 4 questions)
+SEED_CALC_SUBJECT_SLUG = "radiation-biology"  # same subject the demo quiz files under
+SEED_PDD_TABLE_KEY = "pdd_6mv"  # the one seeded DataTable, an MU calculator's data_tables key
+SEED_CALC_TITLE = "MU calculator"  # the one seeded calculator activity's title
 
 
 @dataclass
@@ -128,6 +136,56 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
     # --- Demo cohort: the educator owns it; ten students are enrolled with one attempt each ---
     educator = await db.scalar(select(User).where(User.email == "educator@example.com"))
     assert educator is not None
+
+    # --- MU calculator: a seeded pdd_6mv DataTable plus a published calculator activity
+    # referencing it, created the same way the authoring API's own POST /data-tables and
+    # POST /calculators routes do (a DataTable row plus a draft Activity, then publish_activity)
+    # so the seed data always matches what an author could produce by hand. ---
+    calc_subject = await db.scalar(select(Subject).where(Subject.slug == SEED_CALC_SUBJECT_SLUG))
+    if calc_subject is None:
+        raise RuntimeError(
+            f"seed subject missing: {SEED_CALC_SUBJECT_SLUG!r} (expected from demo-quiz)"
+        )
+    table = await db.scalar(select(DataTable).where(DataTable.key == SEED_PDD_TABLE_KEY))
+    if table is None:
+        table = DataTable(
+            key=SEED_PDD_TABLE_KEY,
+            title="PDD 6 MV",
+            # depths (rows) x field sizes (cols); monotone-decreasing with depth, mildly
+            # increasing with field size, matching a real 6 MV PDD curve's shape.
+            grid={
+                "row_label": "Depth (cm)",
+                "col_label": "Field size (cm)",
+                "cols": [5.0, 10.0, 15.0, 20.0],
+                "rows": [
+                    {"key": 1.5, "values": [98.0, 99.0, 99.5, 100.0]},
+                    {"key": 5.0, "values": [88.0, 90.0, 91.0, 92.0]},
+                    {"key": 10.0, "values": [64.0, 67.0, 69.0, 70.0]},
+                    {"key": 20.0, "values": [36.0, 40.0, 43.0, 45.0]},
+                ],
+            },
+            updated_by=educator.id,
+        )
+        db.add(table)
+        await db.flush()
+    calc_activity = await db.scalar(
+        select(Activity).where(Activity.kind == "calculator", Activity.title == SEED_CALC_TITLE)
+    )
+    if calc_activity is None:
+        calc_activity = Activity(
+            kind="calculator",
+            ref_id=new_id(),
+            title=SEED_CALC_TITLE,
+            subject_id=calc_subject.id,
+            access="practice",
+            config={"calc_type": "mu", "data_tables": [SEED_PDD_TABLE_KEY]},
+            status="draft",
+        )
+        db.add(calc_activity)
+        await db.flush()
+    if calc_activity.status != "published":
+        await publish_activity(db, calc_activity, educator, change_note="Initial publish")
+
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
     cohort_created = cohort is None
     if cohort is None:

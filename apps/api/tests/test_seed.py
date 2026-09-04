@@ -1,6 +1,7 @@
 """What this file tests: `app.seed.seed` — the dev/test bring-up routine that
 get-or-creates the three demo accounts, imports the seed lessons plus the migrated legacy
-content and demo quiz, and seeds the demo cohort/students/attempts/rollups.
+content and demo quiz, seeds the published MU calculator, and seeds the demo
+cohort/students/attempts/rollups.
 
 Used here and why: the real Postgres `db`/`client` fixtures from `conftest.py` (not
 mocks), because the point of these tests is that `seed()` is safe to call against a
@@ -16,8 +17,8 @@ Works with: pytest-asyncio, httpx.
 Depends on: `db`, `client`, `settings` fixtures and `TEST_DATABASE_URL` from
 `conftest.py`; `app.seed.seed`; `app.config.Settings`; `app.cohorts.models` (Cohort,
 Enrollment); `app.attempts.models` (Attempt); `app.attempts.rollup` (ActivityResult);
-`app.content.models` (Activity, Lesson); `app.content.activity_models` (Quiz, Outcome,
-QuestionOutcome).
+`app.content.models` (Activity, Lesson); `app.content.activity_models` (DataTable, Quiz,
+Outcome, QuestionOutcome).
 Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 """
 
@@ -31,7 +32,7 @@ from app.attempts.rollup import ActivityResult
 from app.auth.models import User
 from app.cohorts.models import Cohort, Enrollment
 from app.config import Settings
-from app.content.activity_models import Outcome, QuestionOutcome, Quiz
+from app.content.activity_models import DataTable, Outcome, QuestionOutcome, Quiz
 from app.content.models import Activity, Lesson
 from app.seed import seed
 from tests.conftest import TEST_DATABASE_URL
@@ -196,6 +197,49 @@ async def test_seed_partial_rerun_recreates_only_missing_attempt(
     )
     assert remaining == 1
     assert (await db.scalar(select(func.count()).select_from(Attempt))) == 20
+
+
+async def test_seed_creates_published_mu_calculator(db: AsyncSession, settings: Settings) -> None:
+    """The seeded `pdd_6mv` data table and its "MU calculator" activity: the table has a
+    plausible, monotone PDD grid, and the calculator is published and points at it — so the
+    authoring e2e (Task 18) and a student both have a fixed calculator to open; re-seeding
+    creates neither a second table nor a second activity."""
+    await seed(db, settings)
+    table = await db.scalar(select(DataTable).where(DataTable.key == "pdd_6mv"))
+    assert table is not None
+    assert table.grid["cols"] == [5.0, 10.0, 15.0, 20.0]
+    assert [row["key"] for row in table.grid["rows"]] == [1.5, 5.0, 10.0, 20.0]
+
+    calc = await db.scalar(
+        select(Activity).where(Activity.kind == "calculator", Activity.title == "MU calculator")
+    )
+    assert calc is not None
+    assert calc.status == "published"
+    assert calc.config == {"calc_type": "mu", "data_tables": ["pdd_6mv"]}
+
+    await seed(db, settings)
+    assert (
+        await db.scalar(
+            select(func.count()).select_from(DataTable).where(DataTable.key == "pdd_6mv")
+        )
+    ) == 1
+    assert (
+        await db.scalar(
+            select(func.count())
+            .select_from(Activity)
+            .where(Activity.kind == "calculator", Activity.title == "MU calculator")
+        )
+    ) == 1
+
+
+async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Settings) -> None:
+    """At least one seeded activity still carries `import_notes` (the migrated legacy corpus
+    re-scanned in Task 5 always flags some pages for a human pass), so the authoring
+    needs-review queue this task's e2e drives against is guaranteed non-empty."""
+    await seed(db, settings)
+    activities = (await db.scalars(select(Activity))).all()
+    flagged = [a for a in activities if a.config.get("import_notes")]
+    assert len(flagged) > 0
 
 
 async def test_seed_refuses_prod(db: AsyncSession) -> None:

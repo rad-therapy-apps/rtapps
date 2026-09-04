@@ -122,3 +122,18 @@ class QuestionOutcome(Base):
     outcome_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("outcome.id", ondelete="CASCADE"), nullable=False, index=True
     )
+
+
+# Author-editable numeric lookup grid (PDD/TMR etc.), referenced by key from a
+# calculator activity's config and embedded into its snapshot at publish (plan 3b §4).
+class DataTable(TimestampMixin, Base):
+    __tablename__ = "data_table"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=new_id)
+    key: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    # {"row_label": str, "col_label": str, "cols": [num...],
+    # "rows": [{"key": num, "values": [num...]}]}
+    grid: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )

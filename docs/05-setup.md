@@ -27,7 +27,7 @@ Open http://localhost:8080 — the status page shows web and API health.
 | `make test-tools` / `make lint-tools` | the legacy migration tool (`tools/migrate-legacy`) |
 
 ### API tests outside compose
-The API tests need a PostgreSQL. Either use the compose `db` (`TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5432/rtapps_test` after `createdb rtapps_test`), or a throwaway container:
+The API tests need a PostgreSQL. Either use the compose `db` (`TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5442/rtapps_test` after `createdb rtapps_test`; the host publishes on 5442, container internal port remains 5432), or a throwaway container:
 ```bash
 docker run -d --name rtapps-test-pg -e POSTGRES_USER=rtapps -e POSTGRES_PASSWORD=rtapps -e POSTGRES_DB=rtapps_test -p 5433:5432 postgres:16
 export TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5433/rtapps_test
@@ -66,7 +66,7 @@ See `docs/03-architecture.md` §9. Short version: `apps/api` (FastAPI), `apps/we
 ## Troubleshooting
 - **`web` container loops on `pnpm install`** — run `pnpm install` once on the host so `pnpm-lock.yaml` matches, then `make dev` again.
 - **`api` unhealthy** — `make logs`; usually the DB isn't ready yet on first boot; the healthcheck allows ~2.5 minutes (30 s start period + 12 retries × 10 s) before marking it unhealthy.
-- **Port in use** — 8080 (proxy), 5173 (web), 8000 is internal, 5432 (db), 9000/9001 (MinIO), 8025 (Mailpit).
+- **Port in use** — 8080 (proxy), 5173 (web), 8000 is internal, 5442 (db; container internal port 5432), 9000/9001 (MinIO), 8025 (Mailpit).
 
 ## Deploying
 Test/production VM, deploy workflows, backups and restore: see `docs/06-operations.md`.

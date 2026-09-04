@@ -966,7 +966,59 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "1. Fraud or Deceptive Practices: In procuring/maintaining certification, employment, or licenses. False/misleading communications about credentials. Fraudulent billing."
+                      "text": "1. Fraud or Deceptive Practices:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "In procuring/maintaining certification, employment, or licenses."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "False/misleading communications about credentials."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Fraudulent billing."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -975,7 +1027,45 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "2. Subversion: Subverting ARRT exams, CQR, or Education Requirements. Failure to cooperate with ARRT investigations."
+                      "text": "2. Subversion:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Subverting ARRT exams, CQR, or Education Requirements."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Failure to cooperate with ARRT investigations."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -1034,7 +1124,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "3. Unprofessional Conduct: Incl. failure to conform to standards, sexual misconduct, conduct likely to deceive/harm."
+                      "text": "3. Unprofessional Conduct:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Incl. failure to conform to standards, sexual misconduct, conduct likely to deceive/harm."
                     }
                   ]
                 },
@@ -1043,7 +1142,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "4. Scope of Practice Violations: Performing procedures not competent to do, improper delegation."
+                      "text": "4. Scope of Practice Violations:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Performing procedures not competent to do, improper delegation."
                     }
                   ]
                 },
@@ -1052,7 +1160,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "5. Fitness to Practice: Inability to practice safely due to illness, alcohol/drugs, mental/physical condition."
+                      "text": "5. Fitness to Practice:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Inability to practice safely due to illness, alcohol/drugs, mental/physical condition."
                     }
                   ]
                 },
@@ -1061,7 +1178,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "6. Improper Management of Patient Records: False entries, failing to protect confidential info."
+                      "text": "6. Improper Management of Patient Records:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " False entries, failing to protect confidential info."
                     }
                   ]
                 }
@@ -1120,7 +1246,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "7. Violation of State/Federal Law or Regulatory Rule: Incl. narcotics laws, licensure actions, criminal proceedings."
+                      "text": "7. Violation of State/Federal Law or Regulatory Rule:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Incl. narcotics laws, licensure actions, criminal proceedings."
                     }
                   ]
                 },
@@ -1129,7 +1264,53 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "8. Duty to Report: Knowing of a violation by any RTT/Candidate and failing to promptly report to ARRT. Failing to immediately report to one's supervisor an error made in patient care that could be harmful, unethical, or improper."
+                      "text": "8. Duty to Report:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Knowing of a violation by any RTT/Candidate and failing to promptly report to ARRT."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Failing to "
+                            },
+                            {
+                              "type": "text",
+                              "text": "immediately report to one's supervisor"
+                            },
+                            {
+                              "type": "text",
+                              "text": " an error made in patient care that could be harmful, unethical, or improper."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -1243,5 +1424,10 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div"
+  ]
 }

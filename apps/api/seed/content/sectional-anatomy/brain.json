@@ -57,7 +57,49 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Brain window (WL ~40, WW ~80): maximizes gray\u2013white contrast, ventricles, and parenchymal detail. Bone window (wide WW): the same scan re-windowed shows cortex, sinus walls, and skull-base foramina instead."
+                      "text": "[Axial CT of the brain, brain window]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Brain window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (WL ~40, WW ~80): maximizes gray\u2013white contrast, ventricles, and parenchymal detail."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "[Axial CT of the skull base, bone window]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Bone window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (wide WW): the same scan re-windowed shows cortex, sinus walls, and skull-base foramina instead."
                     }
                   ]
                 },
@@ -592,7 +634,83 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "coreContrast-enhanced T1 (T1CE). The red overlay marks the enhancing tumor \u2014 where contrast crosses a broken blood\u2013brain barrier. This typically defines the gross tumor volume (GTV). edemaFLAIR. The blue overlay marks the surrounding edema / whole-tumor region \u2014 FLAIR suppresses CSF so peritumoral edema stands out brightly."
+                      "text": "[Contrast-enhanced T1 MRI with enhancing core segmented]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "core"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Contrast-enhanced T1 (T1CE).",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The red overlay marks the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "enhancing tumor",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 where contrast crosses a broken blood\u2013brain barrier. This typically defines the gross tumor volume (GTV)."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "[FLAIR MRI with surrounding edema segmented]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "edema"
+                    },
+                    {
+                      "type": "text",
+                      "text": "FLAIR.",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The blue overlay marks the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "surrounding edema / whole-tumor region",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " \u2014 FLAIR suppresses CSF so peritumoral edema stands out brightly."
                     }
                   ]
                 },
@@ -905,5 +1023,25 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported inline element figure",
+    "img placeholder (img/ct_midventricular.png)",
+    "unsupported inline element figcaption",
+    "unsupported inline element figure",
+    "img placeholder (img/ct_bone_skullbase.png)",
+    "unsupported inline element figcaption",
+    "unsupported element figure on page 2",
+    "unsupported element figure on page 3",
+    "unsupported element figure on page 4",
+    "unsupported element figure on page 5",
+    "unsupported inline element figure",
+    "img placeholder (img/mr_t1ce_seg.png)",
+    "unsupported inline element figcaption",
+    "unsupported inline element figure",
+    "img placeholder (img/mr_flair_seg.png)",
+    "unsupported inline element figcaption",
+    "dropped non-https link",
+    "dropped non-https link"
+  ]
 }

@@ -13,8 +13,9 @@ How it fits the project: this is Alembic's entrypoint (invoked by `alembic upgra
 called from `entrypoint.dev.sh` in dev and as a one-shot deploy step per ADR-0005 in prod);
 `alembic/versions/*.py` are the actual migrations this file's config drives.
 
-Depends on: `app.attempts.models`, `app.auth.models`, `app.content.models` (imported for
-their side effect of registering tables on `Base.metadata`), `app.db.Base`.
+Depends on: `app.attempts.models`, `app.attempts.rollup`, `app.audit.models`, `app.auth.models`,
+`app.cohorts.models`, `app.content.activity_models`, `app.content.models`, `app.media.models`
+(imported for their side effect of registering tables on `Base.metadata`), `app.db.Base`.
 Used by: the `alembic` CLI (via `alembic.ini`'s `script_location`); `tests/test_migrations.py`
 indirectly, through the `migrated_db` fixture running `alembic upgrade head`.
 """
@@ -27,13 +28,14 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-import app.attempts.models
-import app.attempts.rollup
-import app.audit.models
-import app.auth.models
-import app.cohorts.models
-import app.content.activity_models
-import app.content.models  # noqa: F401
+import app.attempts.models  # noqa: F401, RUF100
+import app.attempts.rollup  # noqa: F401, RUF100
+import app.audit.models  # noqa: F401, RUF100
+import app.auth.models  # noqa: F401, RUF100
+import app.cohorts.models  # noqa: F401, RUF100
+import app.content.activity_models  # noqa: F401, RUF100
+import app.content.models  # noqa: F401, RUF100
+import app.media.models  # noqa: F401, RUF100
 from alembic import context
 from app.db import Base
 

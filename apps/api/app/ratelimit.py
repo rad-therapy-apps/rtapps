@@ -23,7 +23,8 @@ Used by: `app.auth.router`, `app.cohorts.router` (route-level dependencies).
 """
 
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 from fastapi import Request
 
@@ -37,11 +38,12 @@ _buckets: dict[tuple[str, str], tuple[float, float]] = {}
 
 def reset() -> None:
     """Clear all rate limit buckets; used in tests via the reset_rate_limits fixture."""
-    global _buckets
     _buckets.clear()
 
 
-def rate_limit(name: str, *, limit: int = 10, window_s: float = 60.0) -> Callable[..., object]:
+def rate_limit(
+    name: str, *, limit: int = 10, window_s: float = 60.0
+) -> Callable[..., Coroutine[Any, Any, None]]:
     """
     FastAPI dependency factory for per-IP token-bucket rate limiting.
 
@@ -66,7 +68,6 @@ def rate_limit(name: str, *, limit: int = 10, window_s: float = 60.0) -> Callabl
         key = (name, ip)
         now = time.monotonic()
 
-        global _buckets
         if key in _buckets:
             tokens, last_refill = _buckets[key]
             elapsed = now - last_refill

@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson outlines the typical process a patient undergoes when receiving radiation therapy, from the initial consultation through to post-treatment follow-up. Understanding this journey is vital for appreciating the patient's experience and the coordinated efforts of the oncology team."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do You will learn about each distinct stage in the radiation therapy workflow, including the key activities and team members involved at each step."
+                      "text": "This lesson outlines the typical process a patient undergoes when receiving radiation therapy, from the initial consultation through to post-treatment follow-up. Understanding this journey is vital for appreciating the patient's experience and the coordinated efforts of the oncology team."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,46 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end of this lesson, you should be able to: List the main stages of the patient journey in radiation therapy in chronological order. Describe the primary goal of each stage. Identify key healthcare professionals involved at different points in the journey."
+                      "text": "You will learn about each distinct stage in the radiation therapy workflow, including the key activities and team members involved at each step."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end of this lesson, you should be able to: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "List the main stages of the patient journey in radiation therapy in chronological order."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Describe the primary goal of each stage."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Identify key healthcare professionals involved at different points in the journey."
                     }
                   ]
                 },
@@ -231,25 +285,8 @@
               "Determination of RT appropriateness & plan discussion.",
               "Tumor is surgically removed."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -593,25 +630,8 @@
               "Dosimetrists & Physicists",
               "Radiation Oncologist only"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -947,25 +967,8 @@
               "To assess and manage side effects.",
               "To discuss payment options."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1286,7 +1289,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Journey Sequencer Activity"
+                      "text": " Go to Journey Sequencer Activity "
                     }
                   ]
                 }
@@ -1296,5 +1299,13 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

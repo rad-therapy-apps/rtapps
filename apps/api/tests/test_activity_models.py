@@ -78,7 +78,14 @@ async def make_quiz(
 
 
 async def test_kind_and_access_vocabulary() -> None:
-    assert ACTIVITY_KINDS == ("lesson", "quiz", "flashcards", "matching", "sequencing")
+    assert ACTIVITY_KINDS == (
+        "lesson",
+        "quiz",
+        "flashcards",
+        "matching",
+        "sequencing",
+        "calculator",
+    )
     assert ACTIVITY_ACCESS == ("practice", "assessment")
 
 

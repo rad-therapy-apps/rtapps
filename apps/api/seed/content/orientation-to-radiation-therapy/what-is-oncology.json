@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson introduces the field of oncology. Understanding basic terminology, the nature of cancer, and general approaches to diagnosis and treatment is foundational for anyone entering the field of radiation therapy."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do You will: Learn the definition of oncology and key related terms. Understand the difference between benign and malignant tumors. Get an overview of cancer diagnosis and treatment goals. Be introduced to common treatment modalities and timing terminology. Answer \"Quick Check\" questions to test your understanding."
+                      "text": "This lesson introduces the field of oncology. Understanding basic terminology, the nature of cancer, and general approaches to diagnosis and treatment is foundational for anyone entering the field of radiation therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,164 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end, you should be able to: Define oncology and differentiate between benign and malignant conditions. List key components of cancer diagnosis. Describe the main goals of cancer treatment. Define terms like adjuvant and neoadjuvant therapy."
+                      "text": "You will:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Learn the definition of oncology and key related terms."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Understand the difference between benign and malignant tumors."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Get an overview of cancer diagnosis and treatment goals."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Be introduced to common treatment modalities and timing terminology."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Answer \"Quick Check\" questions to test your understanding."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end, you should be able to:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Define oncology and differentiate between benign and malignant conditions."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "List key components of cancer diagnosis."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Describe the main goals of cancer treatment."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Define terms like adjuvant and neoadjuvant therapy."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -207,25 +379,8 @@
               "It can metastasize (spread to other parts of the body).",
               "It only occurs in older individuals."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -416,25 +571,8 @@
               "A blood test for tumor markers",
               "A biopsy and pathological examination"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -613,10 +751,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Chemotherapy:",
                               "marks": [
                                 {
@@ -629,8 +763,7 @@
                               "text": " Uses drugs to kill cancer cells throughout the body."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -646,8 +779,7 @@
                               "text": " Blocks or removes hormones to slow or stop cancer cell growth."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -663,8 +795,7 @@
                               "text": " Drugs that target specific molecules involved in cancer growth."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -678,10 +809,6 @@
                             {
                               "type": "text",
                               "text": " Boosts the body's own immune system to fight cancer."
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -880,25 +1007,8 @@
               "Neoadjuvant therapy",
               "Concurrent therapy"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1141,7 +1251,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Flashcard Activity"
+                      "text": " Go to Flashcard Activity "
                     }
                   ]
                 }
@@ -1151,5 +1261,22 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

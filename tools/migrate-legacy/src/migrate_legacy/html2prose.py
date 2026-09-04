@@ -34,6 +34,7 @@ Used by: `convert.py`'s `_page_blocks`/`_one_paragraph_doc`/`_explanation_doc`.
 from __future__ import annotations
 
 import re
+import uuid
 from collections.abc import Iterable, Sequence
 from typing import Any
 
@@ -51,6 +52,10 @@ _MARK_TAGS = {
     "sub": "subscript",
     "sup": "superscript",
 }
+
+# Inline-context tags whose content is kept and whose wrapper is meaningless in the
+# closed schema: unwrap silently (no note) instead of flagging them for review.
+_UNWRAP_INLINE = {"span", "label", "font", "p", "div", "small", "section", "article"}
 
 # Tags that `element_to_block`/`blocks_from_container` treat as top-level
 # "rich text" block producers; anything else falls into the unsupported bucket.
@@ -129,10 +134,45 @@ def _inline_nodes_from(
                 # invalid mark that would fail schema validation.
                 notes.append("dropped non-https link")
                 out.extend(inline_nodes(child, notes, marks))
+            elif name in ("ul", "ol"):
+                # An inline-context list can't become a list block (lists are block
+                # nodes); flatten each <li> to its inline content, separated by
+                # hardBreaks, so nothing is lost and nothing needs review.
+                for i, li in enumerate(child.find_all("li", recursive=False)):
+                    if i:
+                        out.append({"type": "hardBreak"})
+                    out.extend(inline_nodes(li, notes, marks))
+            elif name == "li":
+                out.extend(inline_nodes(child, notes, marks))
+            elif name in ("h4", "h5", "h6"):
+                # A heading nested in inline context: keep the text, bolded.
+                out.extend(inline_nodes(child, notes, [*marks, {"type": "bold"}]))
+            elif name == "img":
+                src = str(child.get("src") or "")
+                alt = collapse_whitespace(str(child.get("alt") or "")).strip() or "image"
+                notes.append(f"img placeholder ({src or 'no src'})")
+                out.append({"type": "text", "text": f"[{alt}]"})
+            elif name in _UNWRAP_INLINE:
+                out.extend(inline_nodes(child, notes, marks))
             else:
                 notes.append(f"unsupported inline element {name}")
                 out.extend(inline_nodes(child, notes, marks))
     return out
+
+
+def _image_placeholder(element: Tag, notes: list[str]) -> dict[str, Any]:
+    """Map an <img> to a prose `image` node with a deterministic placeholder id.
+
+    uuid5(src) resolves to no real media_asset, so the renderer shows the alt text;
+    the authoring editor replaces the id when the author uploads the real image.
+    Deterministic so re-scans and golden tests are stable."""
+    src = str(element.get("src") or "")
+    alt = collapse_whitespace(str(element.get("alt") or "")).strip()
+    if not alt:
+        alt = src.rsplit("/", 1)[-1] if src else "image"
+    notes.append(f"img placeholder ({src or 'no src'})")
+    placeholder = str(uuid.uuid5(uuid.NAMESPACE_URL, src or alt))
+    return {"type": "image", "attrs": {"mediaAssetId": placeholder, "alt": alt}}
 
 
 def _paragraph(element: Tag, notes: list[str]) -> dict[str, Any]:
@@ -181,6 +221,14 @@ def _table_block(element: Tag, notes: list[str]) -> dict[str, Any]:
     return {"type": "table", "content": rows}
 
 
+_CALLOUT_CLASSES = {"key-principle", "clinical-note", "warning"}
+
+
+def _is_plain_div(el: Tag) -> bool:
+    """A block-level <div> with no callout class: a layout wrapper, not content."""
+    return el.name == "div" and not (set(el.get("class") or []) & _CALLOUT_CLASSES)
+
+
 def blocks_from_container(element: Tag, notes: list[str], page_num: int) -> list[dict[str, Any]]:
     """Map the direct children of a container (callout, blockquote, li, td, …)
     into blocks: block-level children (`<p>`, lists, …) map recursively via
@@ -210,9 +258,12 @@ def blocks_from_container(element: Tag, notes: list[str], page_num: int) -> list
     for child in element.children:
         if isinstance(child, Tag) and child.name in _BLOCK_TAGS:
             flush_run()
-            block = element_to_block(child, notes, page_num)
-            if block is not None:
-                blocks.append(block)
+            if _is_plain_div(child):
+                blocks.extend(blocks_from_container(child, notes, page_num))
+            else:
+                block = element_to_block(child, notes, page_num)
+                if block is not None:
+                    blocks.append(block)
         else:
             run.append(child)
     flush_run()
@@ -259,8 +310,7 @@ def element_to_block(element: Tag, notes: list[str], page_num: int = 0) -> dict[
     if name == "blockquote":
         return {"type": "blockquote", "content": blocks_from_container(element, notes, page_num)}
     if name == "img":
-        notes.append("img without media asset")
-        return None
+        return _image_placeholder(element, notes)
 
     notes.append(f"unsupported element {name} on page {page_num}")
     text = collapse_whitespace(element.get_text()).strip()
@@ -274,7 +324,10 @@ def html_to_prose(
     content = []
     for el in elements:
         if isinstance(el, Tag):
-            block = element_to_block(el, notes, page_num)
-            if block is not None:
-                content.append(block)
+            if _is_plain_div(el):
+                content.extend(blocks_from_container(el, notes, page_num))
+            else:
+                block = element_to_block(el, notes, page_num)
+                if block is not None:
+                    content.append(block)
     return {"type": "doc", "content": content}

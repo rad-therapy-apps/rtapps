@@ -282,6 +282,8 @@ def scan_tree(root: Path, out: Path, subjects: list[str] | None) -> list[dict[st
             continue
         entry.doc[entry.doc_key]["slug"] = entry.final_slug
         entry.doc["subject"] = dict(subject_meta[entry.subject_name])
+        if entry.notes:
+            entry.doc["import_notes"] = list(entry.notes)
         status = "needs-review" if entry.notes else "converted"
         out_dir = out / subject_meta[entry.subject_name]["slug"]
         out_dir.mkdir(parents=True, exist_ok=True)

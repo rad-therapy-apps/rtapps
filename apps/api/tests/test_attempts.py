@@ -19,11 +19,13 @@ Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 
 import uuid
 from typing import Any
+from unittest.mock import patch
 
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import app.attempts.router as attempts_router
 from app.attempts.models import Attempt
 from app.content.activity_importer import import_any
 from app.content.models import Activity
@@ -197,6 +199,36 @@ async def test_start_attempt_resumes_in_progress(client: AsyncClient, db: AsyncS
     assert r2.json()["id"] == r1.json()["id"]  # resumed, not duplicated
     assert r2.json()["items"][0]["item_key"] == key  # saved item comes back
     assert r2.json()["items"][0]["response"] == {"choice": 0}
+
+
+async def test_start_attempt_integrityerror_returns_existing(
+    client: AsyncClient, db: AsyncSession
+) -> None:
+    """A race loser recovers instead of 500ing: simulate it by making the resume-select miss
+    once, so the route's INSERT hits `uq_attempt_one_in_progress` against attempt A (already
+    started), and its IntegrityError handler must roll back to its savepoint and return A."""
+    activity = await import_any(db, QUIZ_DOC)
+    await register(client)
+    r1 = await client.post(f"/api/v1/activities/{activity.id}/attempts")
+    assert r1.status_code == 201
+    attempt_a_id = r1.json()["id"]
+
+    real_resume_attempt = attempts_router._resume_attempt
+    calls = 0
+
+    async def _miss_once(
+        db_: AsyncSession, user_id: uuid.UUID, activity_id: uuid.UUID
+    ) -> Attempt | None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return None  # forces the insert path even though A already exists
+        return await real_resume_attempt(db_, user_id, activity_id)
+
+    with patch.object(attempts_router, "_resume_attempt", side_effect=_miss_once):
+        r2 = await client.post(f"/api/v1/activities/{activity.id}/attempts")
+    assert r2.status_code == 201, r2.text
+    assert r2.json()["id"] == attempt_a_id  # recovered attempt A, not a 500 or a duplicate
 
 
 async def test_quiz_submit_grades_and_passes(client: AsyncClient, db: AsyncSession) -> None:

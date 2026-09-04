@@ -511,5 +511,9 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "slug collision on 'skeletal'; renamed to 'treatment-planning-skeletal'"
+  ]
 }

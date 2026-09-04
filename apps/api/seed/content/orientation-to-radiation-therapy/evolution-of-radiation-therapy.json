@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson traces the development of radiation therapy, from early experiments to today's precise techniques, highlighting its journey as a specialized cancer treatment."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Explore initial therapeutic applications, key technological advancements (Cobalt-60, Linacs), the impact of computers/imaging, and modern precision techniques."
+                      "text": "This lesson traces the development of radiation therapy, from early experiments to today's precise techniques, highlighting its journey as a specialized cancer treatment."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned You'll be able to describe major eras in RT evolution, identify key innovations, and appreciate the field's advancement in precision and safety."
+                      "text": "Explore initial therapeutic applications, key technological advancements (Cobalt-60, Linacs), the impact of computers/imaging, and modern precision techniques."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You'll be able to describe major eras in RT evolution, identify key innovations, and appreciate the field's advancement in precision and safety."
                     }
                   ]
                 },
@@ -343,25 +379,8 @@
               "Better skin sparing and deeper penetration.",
               "No electricity needed."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -716,25 +735,8 @@
               "IMRT",
               "Cobalt-60"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -939,7 +941,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Historical Timeline Challenge!"
+                      "text": " Go to Historical Timeline Challenge! "
                     }
                   ]
                 }
@@ -949,5 +951,10 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

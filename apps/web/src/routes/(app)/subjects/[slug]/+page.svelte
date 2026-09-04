@@ -24,7 +24,8 @@
 		quiz: 'Quizzes',
 		flashcards: 'Flashcards',
 		matching: 'Matching',
-		sequencing: 'Sequencing'
+		sequencing: 'Sequencing',
+		calculator: 'Calculators'
 	};
 	// One group per kind that has at least one activity; a kind with none renders no section.
 	const activityGroups = $derived(

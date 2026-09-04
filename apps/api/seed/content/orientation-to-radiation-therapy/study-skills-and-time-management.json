@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson equips you with strategies for study, time, and stress management crucial for succeeding in the demanding professional phase of your Radiation Therapy program, helping you balance academics, clinicals, and well-being."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "The Unique Challenge Ahead You're now expected to engage in deeper learning, master complex concepts for board exams, demonstrate high professionalism in clinical settings, and manage the emotional aspects of patient care, including grief."
+                      "text": "This lesson equips you with strategies for study, time, and stress management crucial for succeeding in the demanding professional phase of your Radiation Therapy program, helping you balance academics, clinicals, and well-being."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The Unique Challenge Ahead"
                     }
                   ]
                 },
@@ -40,7 +55,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Explore techniques, reflect on habits, and create a personalized success plan via a linked activity."
+                      "text": "You're now expected to engage in deeper learning, master complex concepts for board exams, demonstrate high professionalism in clinical settings, and manage the emotional aspects of patient care, including grief."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -49,7 +76,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned You'll be able to identify new strategies, understand proactive planning, and recognize stress management resources."
+                      "text": "Explore techniques, reflect on habits, and create a personalized success plan via a linked activity."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You'll be able to identify new strategies, understand proactive planning, and recognize stress management resources."
                     }
                   ]
                 }
@@ -447,25 +495,8 @@
               "Spaced Repetition",
               "Interleaving"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1050,7 +1081,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to Personal Success Plan Activity"
+                      "text": " Go to Personal Success Plan Activity "
                     }
                   ]
                 },
@@ -1069,5 +1100,11 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

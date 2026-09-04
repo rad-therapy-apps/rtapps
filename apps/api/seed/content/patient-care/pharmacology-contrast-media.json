@@ -95,10 +95,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Barium sulfate",
                               "marks": [
                                 {
@@ -111,8 +107,7 @@
                               "text": " \u2014 used for GI tract studies, not injected"
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -126,10 +121,6 @@
                             {
                               "type": "text",
                               "text": " \u2014 injected intravenously for CT simulation to help distinguish vessels, organs, and some tumors from surrounding tissue"
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }

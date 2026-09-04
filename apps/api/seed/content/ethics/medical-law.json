@@ -921,10 +921,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Slander:",
                               "marks": [
                                 {
@@ -937,8 +933,7 @@
                               "text": " Spoken defamation."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -952,10 +947,6 @@
                             {
                               "type": "text",
                               "text": " Written defamation (including social media posts)."
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -1408,5 +1399,17 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold"
+  ]
 }

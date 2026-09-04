@@ -1,16 +1,19 @@
-"""Rate limiting tests for login, register, and cohort join endpoints (NFR-13).
+"""What this file tests: per-IP token-bucket rate limiting (NFR-13) on login, register, and
+cohort join — 10 requests per minute per IP, a 429 problem+json past the limit, separate
+buckets per IP (`X-Forwarded-For`), and that `rate_limit_enabled=False` (the shared `client`
+fixture's setting) never limits.
 
-What this file does: verifies that login, register, and join endpoints rate-limit
-per-IP at 10 requests per minute, returning 429 problem+json when exceeded; ensures
-rate limits are per-IP (different X-Forwarded-For gets fresh bucket), and that the
-limit is disabled in test fixtures.
+Used here and why: a `limited_client` fixture (`rate_limit_enabled=True`) alongside the
+shared `client` fixture, and an autouse `reset_rate_limits` fixture so buckets from one
+test never leak into the next.
 
-Used here and why: TDD-driven implementation of NFR-13 per-IP rate limiting using
-token-bucket algorithm. Tests disable rate limiting via the shared `client` fixture
-(settings.rate_limit_enabled=False) and enable it via `limited_client`.
+How it fits the project: protects NFR-13 — per-IP rate limiting on the auth/join endpoints,
+implemented as the in-process token bucket in `app.ratelimit`.
 
-Depends on: `conftest.register`, `app.ratelimit.reset()`.
-Used by: developers implementing rate-limit changes.
+Works with: pytest-asyncio, httpx.
+Depends on: `client`, `db` fixtures and the `register` helper from `conftest.py`;
+`app.ratelimit.reset`.
+Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 """
 
 from collections.abc import AsyncIterator
@@ -22,8 +25,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User, UserRole
 from app.config import Settings
+from app.main import create_app
 from app.ratelimit import reset as reset_ratelimit
-from tests.conftest import TEST_DATABASE_URL, _make_client, register
+from tests.conftest import TEST_DATABASE_URL, make_client, register
 
 # Bad login credentials that trigger 401 (combined check: no user/no password/wrong password)
 BAD_LOGIN = {"email": "nonexistent@example.edu", "password": "wrong"}
@@ -50,7 +54,7 @@ async def limited_client(db) -> AsyncIterator[AsyncClient]:
         public_origin="https://test",
         rate_limit_enabled=True,
     )
-    async with _make_client(limited_settings, db) as c:
+    async with make_client(create_app(limited_settings), db) as c:
         yield c
 
 

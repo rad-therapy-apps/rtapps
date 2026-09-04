@@ -27,11 +27,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters Understanding these organizations is crucial for every member of the radiation oncology team. You will learn about their roles in advancing patient care, providing professional development, setting standards (including ethical codes and practice guidelines), advocating for the profession, and credentialing professionals. This knowledge helps you appreciate the broader context of your practice, access valuable resources, and understand how quality and safety are maintained in the field."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -40,7 +43,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do In this lesson, you will: Read information about key organizations for different roles within radiation oncology. Identify the primary functions of each organization (e.g., guideline development, credentialing, professional society). Answer \"Quick Check\" multiple-choice questions to test your understanding of each section. Explore links to the official websites of these organizations for further information."
+                      "text": "Understanding these organizations is crucial for every member of the radiation oncology team. You will learn about their roles in advancing patient care, providing professional development, setting standards (including ethical codes and practice guidelines), advocating for the profession, and credentialing professionals. This knowledge helps you appreciate the broader context of your practice, access valuable resources, and understand how quality and safety are maintained in the field."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -49,7 +64,136 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned You will be successful in this lesson if you can: Name the primary professional and/or credentialing bodies for Radiation Oncologists, Oncology Nurses, Medical Physicists, Medical Dosimetrists, and Radiation Therapists. Describe the main purpose (e.g., advocacy, guidelines, certification, accreditation) of each highlighted organization. Correctly answer the \"Quick Check\" questions embedded in the lesson."
+                      "text": "In this lesson, you will:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Read information about key organizations for different roles within radiation oncology."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Identify the primary functions of each organization (e.g., guideline development, credentialing, professional society)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Answer \"Quick Check\" multiple-choice questions to test your understanding of each section."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Explore links to the official websites of these organizations for further information."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You will be successful in this lesson if you can:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Name the primary professional and/or credentialing bodies for Radiation Oncologists, Oncology Nurses, Medical Physicists, Medical Dosimetrists, and Radiation Therapists."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Describe the main purpose (e.g., advocacy, guidelines, certification, accreditation) of each highlighted organization."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Correctly answer the \"Quick Check\" questions embedded in the lesson."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -76,11 +220,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "ASTRO (American Society for Radiation Oncology) ASTRO is the premier radiation oncology society, encompassing physicians, nurses, biologists, physicists, radiation therapists, and dosimetrists. Its mission is to advance radiation oncology through excellence in patient care, professional development, and research promotion. Visit ASTRO"
+                      "text": "ASTRO (American Society for Radiation Oncology)"
                     }
                   ]
                 },
@@ -89,7 +236,62 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "NCCN (National Comprehensive Cancer Network) An alliance of leading cancer centers, the NCCN focuses on patient care, research, and education. It develops and publishes widely recognized, evidence-based clinical practice guidelines in oncology, aiming to improve the quality, effectiveness, and accessibility of cancer care. Visit NCCN"
+                      "text": "ASTRO is the premier radiation oncology society, encompassing physicians, nurses, biologists, physicists, radiation therapists, and dosimetrists. Its mission is to advance radiation oncology through excellence in patient care, professional development, and research promotion."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit ASTRO",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.astro.org/"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "NCCN (National Comprehensive Cancer Network)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "An alliance of leading cancer centers, the NCCN focuses on patient care, research, and education. It develops and publishes widely recognized, evidence-based clinical practice guidelines in oncology, aiming to improve the quality, effectiveness, and accessibility of cancer care."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit NCCN",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.nccn.org/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -118,25 +320,8 @@
               "NCCN",
               "AAPM"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -158,11 +343,40 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "ONS (Oncology Nursing Society)"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "ONS (Oncology Nursing Society) ONS is a professional association for over 35,000 members, dedicated to promoting excellence in oncology nursing and quality cancer care. It offers education, resources, networking, and advocates for policies benefiting cancer patients and their families. Certification is provided via the Oncology Nursing Certification Corporation (ONCC). Visit ONS"
+                      "text": "ONS is a professional association for over 35,000 members, dedicated to promoting excellence in oncology nursing and quality cancer care. It offers education, resources, networking, and advocates for policies benefiting cancer patients and their families. Certification is provided via the Oncology Nursing Certification Corporation (ONCC)."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit ONS",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.ons.org/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -191,25 +405,8 @@
               "ONS",
               "ASRT"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -231,11 +428,40 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "AAPM (American Association of Physicists in Medicine)"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "AAPM (American Association of Physicists in Medicine) The AAPM is a scientific, educational, and professional organization for medical physicists. It aims to advance medical physics' science, education, and professional practice. This includes publishing task group reports and guidelines vital for quality assurance, equipment calibration, and safe clinical practice in radiation oncology physics. Visit AAPM"
+                      "text": "The AAPM is a scientific, educational, and professional organization for medical physicists. It aims to advance medical physics' science, education, and professional practice. This includes publishing task group reports and guidelines vital for quality assurance, equipment calibration, and safe clinical practice in radiation oncology physics."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit AAPM",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.aapm.org/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -264,25 +490,8 @@
               "Medical Dosimetrists",
               "Medical Physicists"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -304,11 +513,40 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "AAMD (American Association of Medical Dosimetrists)"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "AAMD (American Association of Medical Dosimetrists) The AAMD is the primary resource for medical dosimetrists, offering education, professional development, and advocacy. It promotes the dosimetrist's role and supports practice standards for treatment planning and patient safety. Visit AAMD"
+                      "text": "The AAMD is the primary resource for medical dosimetrists, offering education, professional development, and advocacy. It promotes the dosimetrist's role and supports practice standards for treatment planning and patient safety."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit AAMD",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.medicaldosimetry.org/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -337,25 +575,8 @@
               "AAMD",
               "ARRT"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -377,11 +598,14 @@
                   ]
                 },
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "ASRT (American Society of Radiologic Technologists) The ASRT is the largest and oldest professional association for medical imaging and radiation therapy professionals. For RTTs, the ASRT provides: Continuing education resources and opportunities. Practice standards and professional guidelines. Advocacy on legislative and regulatory issues affecting the profession. Career resources and networking opportunities. It plays a crucial role in advancing the profession and ensuring RTTs have the tools for high-quality patient care. Visit ASRT"
+                      "text": "ASRT (American Society of Radiologic Technologists)"
                     }
                   ]
                 },
@@ -390,7 +614,113 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "ARRT (American Registry of Radiologic Technologists) The ARRT is the primary credentialing organization for Radiation Therapists in the United States. Its key functions include: Developing and administering the certification examination for RTTs. Establishing educational, ethical, and examination requirements for certification and registration. Requiring continuing education and adherence to ethical standards for maintaining credentials. ARRT certification, denoted by R.T.(T)(ARRT), is a recognized standard demonstrating competence and qualification. Visit ARRT"
+                      "text": "The ASRT is the largest and oldest professional association for medical imaging and radiation therapy professionals. For RTTs, the ASRT provides: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Continuing education resources and opportunities."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Practice standards and professional guidelines."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Advocacy on legislative and regulatory issues affecting the profession."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Career resources and networking opportunities."
+                    },
+                    {
+                      "type": "text",
+                      "text": " It plays a crucial role in advancing the profession and ensuring RTTs have the tools for high-quality patient care."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit ASRT",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.asrt.org/"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "ARRT (American Registry of Radiologic Technologists)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The ARRT is the primary credentialing organization for Radiation Therapists in the United States. Its key functions include: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Developing and administering the certification examination for RTTs."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Establishing educational, ethical, and examination requirements for certification and registration."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Requiring continuing education and adherence to ethical standards for maintaining credentials."
+                    },
+                    {
+                      "type": "text",
+                      "text": " ARRT certification, denoted by R.T.(T)(ARRT), is a recognized standard demonstrating competence and qualification."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit ARRT",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.arrt.org/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -419,25 +749,8 @@
               "JRCERT",
               "ARRT"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -459,11 +772,62 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "JRCERT (Joint Review Committee on Education in Radiologic Technology)"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "JRCERT (Joint Review Committee on Education in Radiologic Technology) The JRCERT is the only agency recognized by the U.S. Department of Education and the Council for Higher Education Accreditation (CHEA) for the accreditation of educational programs in radiography, radiation therapy, magnetic resonance, and medical dosimetry. For radiation therapy programs, JRCERT accreditation signifies: The program meets nationally established standards of educational quality. Graduates are prepared with the knowledge, skills, and professional behaviors required for practice. The program undergoes regular review and evaluation to maintain these standards. Graduation from a JRCERT-accredited program is typically a prerequisite for eligibility to take the ARRT certification examination in radiation therapy. Visit JRCERT"
+                      "text": "The JRCERT is the only agency recognized by the U.S. Department of Education and the Council for Higher Education Accreditation (CHEA) for the accreditation of educational programs in radiography, radiation therapy, magnetic resonance, and medical dosimetry. For radiation therapy programs, JRCERT accreditation signifies: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The program meets nationally established standards of educational quality."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Graduates are prepared with the knowledge, skills, and professional behaviors required for practice."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The program undergoes regular review and evaluation to maintain these standards."
+                    },
+                    {
+                      "type": "text",
+                      "text": " Graduation from a JRCERT-accredited program is typically a prerequisite for eligibility to take the ARRT certification examination in radiation therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Visit JRCERT",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.jrcert.org/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -492,25 +856,8 @@
               "To accredit educational programs in radiation therapy, ensuring they meet quality standards.",
               "To develop clinical treatment guidelines for specific cancers."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -550,11 +897,23 @@
                   ]
                 },
                 {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Final Thought:"
+                    }
+                  ]
+                },
+                {
                   "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "Final Thought: Active participation in one's professional organization(s) not only benefits the individual through learning and networking but also strengthens the profession as a whole, contributing to a higher standard of care for all patients."
+                      "text": "Active participation in one's professional organization(s) not only benefits the individual through learning and networking but also strengthens the profession as a whole, contributing to a higher standard of care for all patients."
                     }
                   ]
                 }
@@ -564,5 +923,15 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div",
+    "mixed inline content wrapped in paragraph in div"
+  ]
 }

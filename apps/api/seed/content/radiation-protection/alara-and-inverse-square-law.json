@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson focuses on fundamental radiation safety principles: ALARA (As Low As Reasonably Achievable) and the Inverse Square Law (ISL). Understanding and applying these concepts is paramount for Radiation Therapists to protect patients, themselves, and the public from unnecessary radiation exposure while delivering effective treatments."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do You will: Learn the definition and components of the ALARA principle (Time, Distance, Shielding). Understand the Inverse Square Law and its mathematical application. Engage with \"Quick Check\" questions to test comprehension. Utilize an interactive simulator to visualize the Inverse Square Law. Complete a worksheet applying ALARA and ISL concepts to practical scenarios."
+                      "text": "This lesson focuses on fundamental radiation safety principles: ALARA (As Low As Reasonably Achievable) and the Inverse Square Law (ISL). Understanding and applying these concepts is paramount for Radiation Therapists to protect patients, themselves, and the public from unnecessary radiation exposure while delivering effective treatments."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,85 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end, you should be able to: Define ALARA and its three cardinal principles. Explain the Inverse Square Law and calculate changes in dose rate with distance. Apply ALARA and ISL to common situations in radiation therapy. Successfully answer worksheet questions based on the lesson and simulator."
+                      "text": "You will: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Learn the definition and components of the ALARA principle (Time, Distance, Shielding)."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Understand the Inverse Square Law and its mathematical application."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Engage with \"Quick Check\" questions to test comprehension."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Utilize an interactive simulator to visualize the Inverse Square Law."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Complete a worksheet applying ALARA and ISL concepts to practical scenarios."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end, you should be able to: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Define ALARA and its three cardinal principles."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Explain the Inverse Square Law and calculate changes in dose rate with distance."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Apply ALARA and ISL to common situations in radiation therapy."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Successfully answer worksheet questions based on the lesson and simulator."
                     }
                   ]
                 },
@@ -165,7 +258,30 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Concept: The total radiation dose received is directly proportional to the duration of exposure. Less time = Less dose. Total Dose = Dose Rate \u00d7 Time"
+                      "text": "Concept:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The total radiation dose received is directly proportional to the duration of exposure. Less time = Less dose."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Total Dose = Dose Rate \u00d7 Time",
+                      "marks": [
+                        {
+                          "type": "code"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -271,23 +387,6 @@
             ],
             "answer": 0,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -321,7 +420,65 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Concept: The intensity of radiation (and thus the dose rate) from a point source decreases rapidly as the distance from the source increases. This relationship is described by the Inverse Square Law (ISL). Inverse Square Law Formula: I\u2081 / I\u2082 = (d\u2082)\u00b2 / (d\u2081)\u00b2 or I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2 Where: I\u2081 is the intensity at distance d\u2081, and I\u2082 is the intensity at distance d\u2082. This means if you double the distance (d\u2082 = 2d\u2081), the dose rate drops to one-quarter (I\u2082 = I\u2081/4). If you triple the distance, it drops to one-ninth (I\u2082 = I\u2081/9)."
+                      "text": "Concept:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " The intensity of radiation (and thus the dose rate) from a point source decreases rapidly as the distance from the source increases. This relationship is described by the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Inverse Square Law (ISL)"
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Inverse Square Law Formula:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "I\u2081 / I\u2082 = (d\u2082)\u00b2 / (d\u2081)\u00b2 or I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Where: I\u2081 is the intensity at distance d\u2081, and I\u2082 is the intensity at distance d\u2082."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This means if you double the distance (d\u2082 = 2d\u2081), the dose rate drops to one-quarter (I\u2082 = I\u2081/4). If you triple the distance, it drops to one-ninth (I\u2082 = I\u2081/9)."
                     }
                   ]
                 },
@@ -581,25 +738,8 @@
               "6 mSv/hr",
               "4 mSv/hr"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -633,7 +773,104 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Concept: Shielding involves placing absorbent materials in the path of radiation to reduce its intensity. The effectiveness depends on: The type and energy of the radiation (alpha, beta, gamma, X-rays, neutrons require different shielding). The material of the shield (e.g., lead, concrete, water, plastic). High-Z materials for photons. The thickness of the shield. More thickness = more attenuation. The Half-Value Layer (HVL) is the thickness of a material required to reduce the radiation intensity by 50%."
+                      "text": "Concept:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Shielding involves placing absorbent materials in the path of radiation to reduce its intensity. The effectiveness depends on:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The "
+                            },
+                            {
+                              "type": "text",
+                              "text": "type and energy"
+                            },
+                            {
+                              "type": "text",
+                              "text": " of the radiation (alpha, beta, gamma, X-rays, neutrons require different shielding)."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The "
+                            },
+                            {
+                              "type": "text",
+                              "text": "material"
+                            },
+                            {
+                              "type": "text",
+                              "text": " of the shield (e.g., lead, concrete, water, plastic). High-Z materials for photons."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "The "
+                            },
+                            {
+                              "type": "text",
+                              "text": "thickness"
+                            },
+                            {
+                              "type": "text",
+                              "text": " of the shield. More thickness = more attenuation."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Half-Value Layer (HVL)"
+                    },
+                    {
+                      "type": "text",
+                      "text": " is the thickness of a material required to reduce the radiation intensity by 50%."
                     }
                   ]
                 },
@@ -737,25 +974,8 @@
               "Thick concrete or lead",
               "Plexiglass"
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1163,7 +1383,53 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Reference: Source emits 100.0 mSv/hr at 1.0 meter. Meter 1.0 m Adjust Distance (meters): Current Distance: 1.0 m Simulated Dose Rate: 100.0 mSv/hr Relative Dose Rate to Reference (100 mSv/hr at 1m) 100% Formula: I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2"
+                      "text": "Reference: Source emits "
+                    },
+                    {
+                      "type": "text",
+                      "text": "100.0",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " mSv/hr at "
+                    },
+                    {
+                      "type": "text",
+                      "text": "1.0",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " meter."
+                    }
+                  ]
+                },
+                {
+                  "type": "image",
+                  "attrs": {
+                    "mediaAssetId": "115eb46a-e9ee-5182-b5a3-86d41c271ad6",
+                    "alt": "Radiation Source Icon"
+                  }
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Meter"
                     }
                   ]
                 },
@@ -1172,7 +1438,11 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Part 2: ALARA Worksheet {/* Worksheet questions q1-q13 from previous version - content omitted for brevity but should be included here */} Worksheet Part A: Inverse Square Law & Simulator Use the simulator above. Reference: Source emits 100.0 mSv/hr at 1.0 meter. 1. Initial Setup: What is the simulated dose rate at 1.0m? How does the \"dose bar\" height correspond? 2. Increasing Distance: Move slider to 2.0m. a) Simulated dose rate? b) Calculate expected using ISL (Show work). c) Comparison (simulated vs. calculated)? d) Describe visual changes. 3. Further Distance: Set distance to 4.0m. a) Simulated dose rate? b) Calculate expected using ISL (Show work). c) Relationship when doubling distance (2m to 4m)? 4. Decreasing Distance: Return to 1.0m, then decrease to 0.5m. a) Simulated dose rate at 0.5m? b) Calculate expected using ISL (Show work). c) Effect of halving distance? 5. Applying the Simulator: a) An RTT is 1.5 meters from a source. Approx. dose rate? b) RTT needs dose rate \u2264 25 mSv/hr. Min. distance? Worksheet Part B: Conceptual ALARA 6. Define ALARA: Explain in your own words. What does it stand for, and what is its goal? 7. Time Limitation: How does ALARA relate to time? Provide an RT example. 8. Distance Maximization: Explain ISL's relation to ALARA's \"Distance\". Describe a practical RT example. 9. Shielding Utilization: How does shielding reduce exposure? Example in RT. 10. Practical ALARA Strategies: List 3+ other strategies RTTs use for ALARA. 11. \"Reasonably Achievable\": What does \"RA\" in ALARA imply? Is it always absolute minimization? Reflection 12. How did using the simulator help you understand the ISL? 13. What is your most important takeaway regarding ALARA in RT?"
+                      "text": "1.0"
+                    },
+                    {
+                      "type": "text",
+                      "text": " m"
                     }
                   ]
                 },
@@ -1181,7 +1451,745 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Activity Completion Certificate Enter Your Name for Certificate: Generate Certificate Certificate of Completion Has successfully completed the ALARA & Inverse Square Law Activity. RTApps Learning Print Certificate Please enter your name to generate the certificate."
+                      "text": "Adjust Distance (meters):"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Current Distance: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "1.0"
+                    },
+                    {
+                      "type": "text",
+                      "text": " m"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Simulated Dose Rate:"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "100.0"
+                    },
+                    {
+                      "type": "text",
+                      "text": " mSv/hr"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Relative Dose Rate to Reference (100 mSv/hr at 1m)"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "100%"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Formula: I\u2082 = I\u2081 \u00d7 (d\u2081 / d\u2082)\u00b2"
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Part 2: ALARA Worksheet"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": " {/* Worksheet questions q1-q13 from previous version - content omitted for brevity but should be included here */} "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Worksheet Part A: Inverse Square Law & Simulator"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Use the simulator above. Reference: Source emits 100.0 mSv/hr at 1.0 meter.",
+                      "marks": [
+                        {
+                          "type": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "1. Initial Setup:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " What is the simulated dose rate at 1.0m? How does the \"dose bar\" height correspond?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "2. Increasing Distance:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Move slider to 2.0m."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "a) Simulated dose rate?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "b) Calculate expected using ISL (Show work)."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "c) Comparison (simulated vs. calculated)?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "d) Describe visual changes."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "3. Further Distance:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Set distance to 4.0m."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "a) Simulated dose rate?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "b) Calculate expected using ISL (Show work)."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "c) Relationship when doubling distance (2m to 4m)?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "4. Decreasing Distance:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Return to 1.0m, then decrease to 0.5m."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "a) Simulated dose rate at 0.5m?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "b) Calculate expected using ISL (Show work)."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "c) Effect of halving distance?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "5. Applying the Simulator:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "a) An RTT is 1.5 meters from a source. Approx. dose rate?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "b) RTT needs dose rate \u2264 25 mSv/hr. Min. distance?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Worksheet Part B: Conceptual ALARA"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "6. Define ALARA:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Explain in your own words. What does it stand for, and what is its goal?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "7. Time Limitation:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " How does ALARA relate to time? Provide an RT example."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "8. Distance Maximization:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " Explain ISL's relation to ALARA's \"Distance\". Describe a practical RT example."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "9. Shielding Utilization:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " How does shielding reduce exposure? Example in RT."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "10. Practical ALARA Strategies:",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " List 3+ other strategies RTTs use for ALARA."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "11. \"Reasonably Achievable\":",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " What does \"RA\" in ALARA imply? Is it always absolute minimization?"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Reflection"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "12. How did using the simulator help you understand the ISL?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "13. What is your most important takeaway regarding ALARA in RT?",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 3
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Activity Completion Certificate"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Enter Your Name for Certificate:"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Generate Certificate"
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Certificate of Completion"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Has successfully completed the ALARA & Inverse Square Law Activity."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "RTApps Learning"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Print Certificate"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Please enter your name to generate the certificate."
                     }
                   ]
                 }
@@ -1191,5 +2199,35 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element hr on page 1",
+    "unsupported element hr on page 8",
+    "img placeholder (https://placehold.co/36x36/FBBF24/78350F?text=S)",
+    "mixed inline content wrapped in paragraph in div",
+    "unsupported inline element form",
+    "unsupported inline element h3",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element h3",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element h3",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "mixed inline content wrapped in paragraph in div",
+    "unsupported inline element button",
+    "unsupported inline element button",
+    "mixed inline content wrapped in paragraph in div"
+  ]
 }

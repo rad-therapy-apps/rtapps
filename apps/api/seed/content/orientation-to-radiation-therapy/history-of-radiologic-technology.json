@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson explores the groundbreaking discoveries that launched the field of radiologic technology, allowing us to \"see\" inside the human body and harness new forms of energy for medicine."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do Journey through the late 19th and early 20th centuries to learn about X-rays, radioactivity, key scientists, and their initial medical applications."
+                      "text": "This lesson explores the groundbreaking discoveries that launched the field of radiologic technology, allowing us to \"see\" inside the human body and harness new forms of energy for medicine."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,28 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success: How You'll Know You've Learned By the end, you should be able to identify discoverers of X-rays/radioactivity, describe their initial medical impact, and recognize the scope of radiologic sciences."
+                      "text": "Journey through the late 19th and early 20th centuries to learn about X-rays, radioactivity, key scientists, and their initial medical applications."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success: How You'll Know You've Learned"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end, you should be able to identify discoverers of X-rays/radioactivity, describe their initial medical impact, and recognize the scope of radiologic sciences."
                     }
                   ]
                 },
@@ -206,25 +242,8 @@
               "Henri Becquerel",
               "Wilhelm Conrad Roentgen"
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -765,7 +784,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Test Your Knowledge: History Timeline Activity!"
+                      "text": " Test Your Knowledge: History Timeline Activity! "
                     }
                   ]
                 }
@@ -775,5 +794,15 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }

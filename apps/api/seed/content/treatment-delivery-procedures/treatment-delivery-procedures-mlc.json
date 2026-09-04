@@ -18,11 +18,14 @@
               "type": "doc",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
                   "content": [
                     {
                       "type": "text",
-                      "text": "Purpose: Why This Matters This lesson introduces Multi-Leaf Collimators (MLCs), a critical component in modern Linacs for precise radiation beam shaping. Understanding MLCs is key to comprehending advanced treatment techniques like 3D-CRT, IMRT, and VMAT."
+                      "text": "Purpose: Why This Matters"
                     }
                   ]
                 },
@@ -31,7 +34,19 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Task: What You Will Do You will learn: What MLCs are and where they are located. How MLCs shape the radiation beam. The difference between MLC shaping and jaw collimation. The basic principles of how MLCs enable conformal therapy."
+                      "text": "This lesson introduces Multi-Leaf Collimators (MLCs), a critical component in modern Linacs for precise radiation beam shaping. Understanding MLCs is key to comprehending advanced treatment techniques like 3D-CRT, IMRT, and VMAT."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Task: What You Will Do"
                     }
                   ]
                 },
@@ -40,7 +55,71 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Criteria for Success By the end, you should be able to: Describe the function of MLCs. Explain why MLCs are important for conforming dose to the tumor. Differentiate the roles of jaws and MLCs in field definition."
+                      "text": "You will learn: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "What MLCs are and where they are located."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "How MLCs shape the radiation beam."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The difference between MLC shaping and jaw collimation."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "The basic principles of how MLCs enable conformal therapy."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 4
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Criteria for Success"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "By the end, you should be able to: "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Describe the function of MLCs."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Explain why MLCs are important for conforming dose to the tumor."
+                    },
+                    {
+                      "type": "hardBreak"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Differentiate the roles of jaws and MLCs in field definition."
                     }
                   ]
                 },
@@ -410,25 +489,8 @@
               "MLCs can create complex, non-rectangular shapes to conform closely to the tumor.",
               "MLCs completely eliminate the need for X and Y jaws."
             ],
-            "answer": 0,
+            "answer": 1,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -504,10 +566,6 @@
                             },
                             {
                               "type": "text",
-                              "text": " "
-                            },
-                            {
-                              "type": "text",
                               "text": "Step-and-Shoot (Segmental MLC):",
                               "marks": [
                                 {
@@ -520,8 +578,7 @@
                               "text": " The beam is turned off, MLC leaves move to shape a segment, the beam is turned on for that segment, then off again to move to the next segment[cite: 1638, 1639]."
                             },
                             {
-                              "type": "text",
-                              "text": " "
+                              "type": "hardBreak"
                             },
                             {
                               "type": "text",
@@ -535,10 +592,6 @@
                             {
                               "type": "text",
                               "text": " The MLC leaves move continuously across the field while the beam remains on, varying the exposure time (and thus intensity) to different parts of the target[cite: 1641]."
-                            },
-                            {
-                              "type": "text",
-                              "text": " "
                             }
                           ]
                         }
@@ -758,7 +811,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Go to MLC & Field Shaping Lab"
+                      "text": " Go to MLC & Field Shaping Lab "
                     }
                   ]
                 }
@@ -768,5 +821,12 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link",
+    "slug collision on 'mlc'; renamed to 'treatment-delivery-procedures-mlc'"
+  ]
 }

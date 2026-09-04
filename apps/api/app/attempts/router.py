@@ -1,9 +1,11 @@
 """Routes for the attempt lifecycle: start, per-item grade, submit, and a student's own results.
 
 What this file does: `start_attempt` opens a new attempt against a published activity's
-current snapshot; `grade_item` grades one knowledge-check response and upserts its
-`AttemptItem`; `submit_attempt` finalises the attempt's score (idempotently, keyed by the
-`Idempotency-Key` header); `my_results` lists the caller's own submitted attempts.
+current snapshot (409 if the activity's kind is `calculator` — Task 11: calculators are a
+standalone tool, not an attemptable activity); `grade_item` grades one knowledge-check
+response and upserts its `AttemptItem`; `submit_attempt` finalises the attempt's score
+(idempotently, keyed by the `Idempotency-Key` header); `my_results` lists the caller's own
+submitted attempts.
 
 Used here and why: a FastAPI `APIRouter` (mounted without a prefix — paths are
 `/activities/{id}/attempts`, `/attempts/{id}/...`, `/me/results`); `_owned_attempt` is a
@@ -24,10 +26,11 @@ Used by: `app/main.py` mounts this router; `tests/test_attempts.py`.
 
 import uuid
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.models import Attempt, AttemptItem
@@ -55,6 +58,26 @@ async def _owned_attempt(db: AsyncSession, attempt_id: uuid.UUID, user: User) ->
     return attempt
 
 
+async def _resume_attempt(
+    db: AsyncSession, user_id: uuid.UUID, activity_id: uuid.UUID
+) -> Attempt | None:
+    """The one in_progress attempt for (user, activity), if any — used both for the normal
+    resume path and, after a race loss on `uq_attempt_one_in_progress`, to fetch the winner."""
+    return cast(
+        Attempt | None,
+        await db.scalar(
+            select(Attempt)
+            .where(
+                Attempt.user_id == user_id,
+                Attempt.activity_id == activity_id,
+                Attempt.status == "in_progress",
+            )
+            .order_by(Attempt.started_at.desc())
+            .limit(1)
+        ),
+    )
+
+
 @router.post(
     "/activities/{activity_id}/attempts",
     status_code=status.HTTP_201_CREATED,
@@ -70,21 +93,16 @@ async def start_attempt(
     # than distinguishing "doesn't exist" from "not published yet".
     if activity is None or activity.current_version_id is None or activity.status != "published":
         raise Problem(404, "Activity not found")
+    # Task 11: a calculator has no gradeable items or completion state — it's a standalone
+    # tool (Task 17's MU player), never a thing a student "attempts".
+    if activity.kind == "calculator":
+        raise Problem(409, "Calculators are not attemptable")
     # ADR-0006: students cannot start attempts on assessment activities (same 404).
     if activity.access != "practice" and user.role == UserRole.student:
         raise Problem(404, "Activity not found")
     # Resume: one in-progress attempt per (user, activity) — return it with its saved
     # items instead of stacking a duplicate (FR: attempt resume).
-    existing = await db.scalar(
-        select(Attempt)
-        .where(
-            Attempt.user_id == user.id,
-            Attempt.activity_id == activity.id,
-            Attempt.status == "in_progress",
-        )
-        .order_by(Attempt.started_at.desc())
-        .limit(1)
-    )
+    existing = await _resume_attempt(db, user.id, activity.id)
     if existing is not None:
         return existing
     # Pin content_version_id now: this is the ADR-0004 guarantee that later edits/republishes
@@ -94,7 +112,22 @@ async def start_attempt(
         activity_id=activity.id,
         content_version_id=activity.current_version_id,
     )
-    db.add(attempt)
+    try:
+        # Savepoint around just the insert: `db.add` must happen *inside* the nested
+        # transaction (begin_nested's own autoflush would otherwise flush the pending
+        # insert before the savepoint even exists). The partial unique index
+        # uq_attempt_one_in_progress (Task 6) is the arbiter for two concurrent starts, and
+        # a race loser must recover without aborting the whole request's transaction.
+        async with db.begin_nested():
+            db.add(attempt)
+            await db.flush()
+    except IntegrityError:
+        # Lost the race: someone else's in_progress attempt already exists. The savepoint
+        # rollback above already expunged our never-persisted row; return the winner via
+        # the same resume path (same response shape, including items) instead of a 500.
+        winner = await _resume_attempt(db, user.id, activity.id)
+        assert winner is not None
+        return winner
     await db.commit()
     await db.refresh(attempt)
     return attempt

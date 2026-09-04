@@ -1,0 +1,153 @@
+<!--
+	What this file does: the matching activity editor at `(app)/author/matching/[id]` -- a thin
+	wrapper around `PairsEditor.svelte` (term/definition, `minRows=2`) plus title, and the shared
+	`PublishPanel`.
+	Used here and why: Svelte 5 runes; `access`/`config` have no UI here but are still echoed back
+	verbatim in the save PUT for the same reason as the deck route (`MatchingPutIn` replaces them
+	wholesale). `dirty`/`saving`/`saveError`/`beforeNavigate` mirror `LessonEditor.svelte`'s idiom.
+	How it fits the project: `data.matching`/`data.versions`/`data.importNotes` come from this
+	route's `load`; `MatchingPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15) is
+	reused verbatim for the Publish tab. `MatchingPair`'s wire shape (`term`/`definition`) is
+	exactly `PairsEditor`'s row shape.
+	Depends on: `$app/navigation` (`beforeNavigate`), `$lib/author/PairsEditor.svelte`,
+	`$lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`).
+	Used by: reached from `(app)/author`'s dashboard.
+-->
+<script lang="ts">
+	import { beforeNavigate } from '$app/navigation';
+	import PairsEditor from '$lib/author/PairsEditor.svelte';
+	import PublishPanel from '$lib/author/PublishPanel.svelte';
+	import { api } from '$lib/author/api';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+
+	function problemDetail(problem: unknown): string {
+		if (problem && typeof problem === 'object') {
+			const { title, detail, errors } = problem as {
+				title?: unknown;
+				detail?: unknown;
+				errors?: unknown;
+			};
+			if (Array.isArray(errors) && errors.length > 0) {
+				const parts = errors
+					.map((e) => {
+						if (!e || typeof e !== 'object') return undefined;
+						const { loc, msg } = e as { loc?: unknown; msg?: unknown };
+						if (typeof msg !== 'string') return undefined;
+						const path = Array.isArray(loc) ? loc.join('.') : undefined;
+						return path ? `${path}: ${msg}` : msg;
+					})
+					.filter((part): part is string => Boolean(part));
+				if (parts.length > 0) return parts.join('; ');
+			}
+			if (typeof detail === 'string' && detail) return detail;
+			if (typeof title === 'string' && title) return title;
+		}
+		return 'Request failed';
+	}
+
+	let activeTab = $state<'edit' | 'publish'>('edit');
+
+	let title = $state(data.matching.title);
+	let pairs = $state(data.matching.pairs);
+
+	let dirty = $state(false);
+	let saving = $state(false);
+	let saveError = $state<string | undefined>(undefined);
+
+	beforeNavigate(({ cancel }) => {
+		if (dirty && !confirm('Discard unsaved changes?')) cancel();
+	});
+
+	function markDirty() {
+		dirty = true;
+	}
+
+	async function save() {
+		if (saving) return;
+		saving = true;
+		saveError = undefined;
+		try {
+			const res = await api.PUT('/api/v1/authoring/matching/{activity_id}', {
+				params: { path: { activity_id: data.matching.activity_id } },
+				body: { title, access: data.matching.access, config: data.matching.config, pairs }
+			});
+			if (res.error) {
+				saveError = problemDetail(res.error);
+				return;
+			}
+			dirty = false;
+		} catch {
+			saveError = 'Request failed';
+		} finally {
+			saving = false;
+		}
+	}
+</script>
+
+<svelte:head>
+	<title>{data.matching.title} — Author — RTApps</title>
+</svelte:head>
+
+<h1>{data.matching.title}</h1>
+
+<div role="tablist" aria-label="Matching editor tabs">
+	<button
+		type="button"
+		role="tab"
+		aria-selected={activeTab === 'edit'}
+		onclick={() => (activeTab = 'edit')}
+	>
+		Edit
+	</button>
+	<button
+		type="button"
+		role="tab"
+		aria-selected={activeTab === 'publish'}
+		onclick={() => (activeTab = 'publish')}
+	>
+		Publish
+	</button>
+</div>
+
+{#if activeTab === 'edit'}
+	<div role="tabpanel">
+		<label>
+			Title
+			<input
+				value={title}
+				oninput={(e) => {
+					title = e.currentTarget.value;
+					markDirty();
+				}}
+			/>
+		</label>
+
+		<PairsEditor
+			rows={pairs}
+			onchange={(next) => {
+				pairs = next;
+				markDirty();
+			}}
+			termLabel="Term"
+			definitionLabel="Definition"
+			minRows={2}
+		/>
+
+		<div class="save-controls">
+			<button type="button" onclick={save} disabled={!dirty || saving}>Save</button>
+			{#if saveError}
+				<p role="alert">{saveError}</p>
+			{/if}
+		</div>
+	</div>
+{:else}
+	<div role="tabpanel">
+		<PublishPanel
+			activityId={data.matching.activity_id}
+			importNotes={data.importNotes}
+			versions={data.versions}
+		/>
+	</div>
+{/if}

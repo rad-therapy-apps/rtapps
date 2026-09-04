@@ -187,25 +187,8 @@
               "Limits defining a safe, therapeutic, and professional relationship, based on trust and duty of care.",
               "Rules that only apply outside of the treatment room."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -469,25 +452,8 @@
               "An RTT starting a romantic relationship with a current patient they are actively treating.",
               "An RTT attending a hospital-organized cancer survivor event where former patients are present."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -714,23 +680,6 @@
             ],
             "answer": 0,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -920,25 +869,8 @@
               "A small, inexpensive token of appreciation at the very end of a long course of treatment, if institutional policy permits and it doesn't create discomfort or expectation.",
               "If the RTT is having financial difficulties."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1151,25 +1083,8 @@
               "Politely and respectfully re-establish professional limits and, if unsure or the behavior persists, consult with a supervisor.",
               "Share equally personal information to make the patient feel comfortable."
             ],
-            "answer": 0,
+            "answer": 2,
             "explanation": null
-          },
-          {
-            "type": "rich_text",
-            "body": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Check Answer"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ]
       },
@@ -1195,7 +1110,52 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Scenario 1: The Birthday Invitation A patient you have been treating for several weeks is very appreciative of your care and invites you to their upcoming 70th birthday party, which will be held after their treatment course is complete. How do you respond, and what ethical considerations should guide your decision? Scenario 2: The Oversharing Colleague You notice that a colleague frequently shares extensive personal details about their financial struggles and relationship problems with patients during treatment sessions. Patients sometimes appear uncomfortable. How might this behavior impact professional boundaries, and what, if anything, should you do? Scenario 3: The Social Media Request A few months after a younger patient completes their radiation therapy, they find you on a public social media platform and send a friend request along with a message asking for general advice about long-term side effects they are experiencing. How do you handle this situation while maintaining professional boundaries and ensuring the former patient gets appropriate care?"
+                      "text": "Scenario 1: The Birthday Invitation"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A patient you have been treating for several weeks is very appreciative of your care and invites you to their upcoming 70th birthday party, which will be held after their treatment course is complete. How do you respond, and what ethical considerations should guide your decision?"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Scenario 2: The Oversharing Colleague"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "You notice that a colleague frequently shares extensive personal details about their financial struggles and relationship problems with patients during treatment sessions. Patients sometimes appear uncomfortable. How might this behavior impact professional boundaries, and what, if anything, should you do?"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Scenario 3: The Social Media Request"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "A few months after a younger patient completes their radiation therapy, they find you on a public social media platform and send a friend request along with a message asking for general advice about long-term side effects they are experiencing. How do you handle this situation while maintaining professional boundaries and ensuring the former patient gets appropriate care?"
                     }
                   ]
                 }
@@ -1395,5 +1355,10 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported inline element textarea",
+    "unsupported inline element textarea",
+    "unsupported inline element textarea"
+  ]
 }

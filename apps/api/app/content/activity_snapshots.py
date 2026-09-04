@@ -1,24 +1,31 @@
-"""What this file does: builds snapshots for quiz, flashcards, matching, and sequencing
-activities; strips answers from them; extracts gradeable items and human labels; provides
-a generalized interface for all activity kinds that the publish service then extends.
+"""What this file does: builds snapshots for quiz, flashcards, matching, sequencing, and
+calculator activities; strips answers from them; extracts gradeable items and human labels;
+provides a generalized interface for all activity kinds that the publish service then
+extends.
 
 Used here and why: these functions are the generalization of the lesson pipeline
-(`app.content.snapshot.build_snapshot` et al) to cover the four new activity kinds added
-in Task 1. Every snapshot has the same `activity` key and kind-specific sibling keys
-(quiz/flashcards/matching/sequencing/lesson), so a single service (`publish_activity`)
-can handle all kinds uniformly via the same versioning and publish flow.
+(`app.content.snapshot.build_snapshot` et al) to cover the new activity kinds added in
+Task 1 and Task 11. Every snapshot has the same `activity` key and kind-specific sibling
+keys (quiz/flashcards/matching/sequencing/lesson/calculator), so a single service
+(`publish_activity`) can handle all kinds uniformly via the same versioning and publish
+flow. The calculator branch embeds each referenced `DataTable`'s current title/grid by
+value at publish time — a deliberate snapshot (ADR-0003's pinning guarantee extended to
+data tables): editing or deleting a `DataTable` row afterwards never changes an
+already-published calculator's frozen content, the same as any other kind's snapshot.
 
-How it fits the project: plan 3a (FR-E-05/06, FR-S-07/08). The snapshot layer is the
-middle step of publish (ADR-0003): authored working copy -> snapshot assembly ->
-immutable `content_version.snapshot` -> stripping for students. Tasks 3-5 and later
-read snapshots via `build_activity_snapshot` and `strip_activity_answers`.
+How it fits the project: plan 3a (FR-E-05/06, FR-S-07/08) and plan 3b Task 11 (data tables
++ calculator). The snapshot layer is the middle step of publish (ADR-0003): authored
+working copy -> snapshot assembly -> immutable `content_version.snapshot` -> stripping for
+students. Tasks 3-5, 11, and later read snapshots via `build_activity_snapshot` and
+`strip_activity_answers`.
 
 Works with:
   Depends on: `app.content.activity_models` (Quiz, FlashcardDeck, MatchingActivity,
-    SequencingActivity), `app.content.models` (Activity, Lesson, Subject),
+    SequencingActivity, DataTable), `app.content.models` (Activity, Lesson, Subject),
     `app.content.snapshot` (build_snapshot, strip_answers, knowledge_checks, DEFAULT_CONFIG).
   Used by: `app.content.service.publish_activity`, `app.content.router`,
-    `app.attempts.router`, `tests/test_activity_snapshots.py`, Tasks 3-5/9.
+    `app.attempts.router`, `tests/test_activity_snapshots.py`,
+    `tests/test_calculator_activity.py`, Tasks 3-5/9/11.
 """
 
 import copy
@@ -28,7 +35,13 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.content.activity_models import FlashcardDeck, MatchingActivity, Quiz, SequencingActivity
+from app.content.activity_models import (
+    DataTable,
+    FlashcardDeck,
+    MatchingActivity,
+    Quiz,
+    SequencingActivity,
+)
 from app.content.models import Activity, Lesson, Subject
 from app.content.snapshot import DEFAULT_CONFIG, build_snapshot, knowledge_checks, strip_answers
 
@@ -170,6 +183,21 @@ async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[
                 "items": items,
             },
         }
+    # Calculator: embed each referenced DataTable by value (title + grid), not by reference —
+    # this is what pins the calculator's content at publish time (see the module docstring).
+    if activity.kind == "calculator":
+        tables: dict[str, Any] = {}
+        for key in activity.config.get("data_tables", []):
+            table = await db.scalar(select(DataTable).where(DataTable.key == key))
+            if table is None:
+                # Caught by the publish route and turned into a 422 (an authoring mistake:
+                # a data table was renamed/deleted after the calculator was pointed at it).
+                raise ValueError(f"calculator references missing data table {key!r}")
+            tables[key] = {"title": table.title, "grid": table.grid}
+        return {
+            "activity": _activity_part(activity),
+            "calculator": {"calc_type": activity.config.get("calc_type"), "data_tables": tables},
+        }
     raise ValueError(f"unknown activity kind {activity.kind}")
 
 
@@ -200,7 +228,8 @@ def strip_activity_answers(snapshot: dict[str, Any]) -> dict[str, Any]:
         out["sequencing"]["items"] = sorted(
             out["sequencing"]["items"], key=lambda i: str(i["label"]).lower()
         )
-    # Flashcards: nothing secret.
+    # Flashcards and calculator: nothing secret — pass the deep copy through unchanged.
+    # (A data table's grid is a reference tool, not an answer key.)
     return out
 
 
@@ -250,7 +279,8 @@ def gradeable_items(snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
             it["key"]: {"body": {"options": options, "answer": idx}, "explanation": None}
             for idx, it in enumerate(items)
         }
-    # Flashcards: completion-only (no gradeable items).
+    # Flashcards and calculator: completion-only (no gradeable items) — moot for calculator
+    # anyway, since Task 11's attempts guard rejects starting an attempt on one at all.
     return {}
 
 

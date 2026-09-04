@@ -183,7 +183,96 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Superior level: the bladder (fluid density) fills the anterior pelvis, with rectum posteriorly and bowel superiorly. Lower level (pubic symphysis): the prostate sits between the bladder base (above) and rectum (behind), with femoral heads lateral."
+                      "text": "[Axial CT at the bladder]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Superior level: the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "bladder",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (fluid density) fills the anterior pelvis, with "
+                    },
+                    {
+                      "type": "text",
+                      "text": "rectum",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " posteriorly and bowel superiorly."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "[Axial CT at the prostate]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Lower level (pubic symphysis): the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "prostate",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " sits between the bladder base (above) and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "rectum",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " (behind), with "
+                    },
+                    {
+                      "type": "text",
+                      "text": "femoral heads",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " lateral."
                     }
                   ]
                 }
@@ -670,5 +759,17 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element figure on page 1",
+    "unsupported inline element figure",
+    "img placeholder (img/prostate_bladder.png)",
+    "unsupported inline element figcaption",
+    "unsupported inline element figure",
+    "img placeholder (img/prostate_gland.png)",
+    "unsupported inline element figcaption",
+    "unsupported element model-viewer on page 3",
+    "dropped non-https link",
+    "dropped non-https link"
+  ]
 }

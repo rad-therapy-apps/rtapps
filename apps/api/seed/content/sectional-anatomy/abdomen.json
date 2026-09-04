@@ -708,5 +708,10 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element model-viewer on page 2",
+    "dropped non-https link",
+    "dropped non-https link"
+  ]
 }

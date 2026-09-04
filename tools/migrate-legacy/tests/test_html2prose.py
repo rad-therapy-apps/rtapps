@@ -260,15 +260,20 @@ def test_unknown_element_is_noted_and_mapped_to_paragraph() -> None:
     assert notes == ["unsupported element marquee on page 3"]
 
 
-# Mapping rule: <img> has no media-asset mapping yet, so it is dropped (returns
-# None) with an "img without media asset" note — deliberately not prefixed
-# "unsupported element", so it does not by itself force needs-review status.
-def test_img_is_dropped_without_flagging_unsupported_prefix() -> None:
+# Mapping rule: <img> becomes a placeholder `image` node with a deterministic uuid5
+# mediaAssetId (so re-scans are stable), preserving the alt text. The note is
+# "img placeholder (<src>)" to be actionable for review (the author must attach
+# the actual asset), and the placeholder presence downgrades the document to
+# needs-review status.
+def test_img_becomes_placeholder_image_node() -> None:
+    import uuid
+
     img = _fragment('<img src="a.png" alt="a">')
     notes: list[str] = []
     block = element_to_block(img, notes)
-    assert block is None
-    assert notes == ["img without media asset"]
+    expected_id = str(uuid.uuid5(uuid.NAMESPACE_URL, "a.png"))
+    assert block == {"type": "image", "attrs": {"mediaAssetId": expected_id, "alt": "a"}}
+    assert notes == ["img placeholder (a.png)"]
 
 
 # Mapping rule: html_to_prose wraps a top-level sequence of elements (a page's

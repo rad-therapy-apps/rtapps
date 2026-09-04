@@ -45,10 +45,17 @@ _PAGE_TITLE_RE = re.compile(r"^Page\s+\d+:\s*", re.IGNORECASE)
 _QUICK_CHECK_RE = re.compile(r"^quick\s+check[!.,;:]*$", re.IGNORECASE)
 # Strips a leading "A. " / "B. " answer-letter prefix off explanation text.
 _EXPLANATION_PREFIX_RE = re.compile(r"^[A-Z]\.\s*")
-# Pulls the `const lessonCorrectAnswers = {...};` object literal out of an inline
-# <script>; the captured group is parsed as JSON below (`_correct_answers`) to map
-# each radio `name` to its correct `value`.
-_CORRECT_ANSWERS_RE = re.compile(r"const\s+lessonCorrectAnswers\s*=\s*(\{.*?\});", re.DOTALL)
+# Pulls the `const lessonCorrectAnswers = {...};` (or the `correctAnswers` variant some
+# pages use — keys there lack the radio name's `_ans` suffix) object literal out of an
+# inline <script>; the captured group is parsed as JSON below (`_correct_answers`).
+_CORRECT_ANSWERS_RE = re.compile(
+    r"const\s+(?:lessonCorrectAnswers|correctAnswers)\s*=\s*(\{.*?\});", re.DOTALL
+)
+# The third answer encoding: per-question check buttons carrying the answer inline,
+# e.g. onclick="checkPageAnswer('q_page3_1', 'B')".
+_CHECK_PAGE_ANSWER_RE = re.compile(
+    r"checkPageAnswer\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]"
+)
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 # Anything not already lowercase alnum/underscore gets folded to `_` when normalising
 # a knowledge-check key (see `_normalise_key`).
@@ -78,22 +85,25 @@ def _find_tag(parent: Tag, name: str, **kwargs: Any) -> Tag | None:
 
 
 def _correct_answers(soup: BeautifulSoup, notes: list[str]) -> dict[str, str]:
-    """Find the first inline <script> carrying `lessonCorrectAnswers` and parse its
-    object literal via pyjson5 (legacy markup uses JS object-literal syntax: unquoted
-    keys, single quotes, trailing commas, `//` comments — not strict JSON), giving
-    `{radio_name: correct_value}`. Returns `{}` if the document has no such script, or
-    if the literal fails to parse (noted, non-fatal) — every check then falls back to
-    answer index 0, flagged via the existing "no correct answer" note."""
+    """Gather `{key: correct_value}` from every encoding the legacy pages use: the
+    first `lessonCorrectAnswers`/`correctAnswers` object literal (parsed with pyjson5
+    for JS-literal syntax), then any `checkPageAnswer('<key>', '<value>')` onclick
+    args (which never override an object-literal entry). Keys may or may not carry
+    the radio name's `_ans` suffix; `_build_knowledge_check` tries both."""
+    answers: dict[str, str] = {}
     for script in soup.find_all("script"):
         match = _CORRECT_ANSWERS_RE.search(script.get_text())
         if match:
             try:
-                answers: dict[str, str] = pyjson5.decode(match.group(1))
+                answers.update(pyjson5.decode(match.group(1)))
             except Exception:
                 notes.append("unparseable lessonCorrectAnswers object")
-                return {}
-            return answers
-    return {}
+            break
+    for tag in soup.find_all(onclick=True):
+        m = _CHECK_PAGE_ANSWER_RE.search(str(tag["onclick"]))
+        if m and m.group(1) not in answers:
+            answers[m.group(1)] = m.group(2)
+    return answers
 
 
 def _one_paragraph_doc(element: Tag, notes: list[str]) -> dict[str, Any]:
@@ -158,13 +168,16 @@ def _build_knowledge_check(
 
     key = _normalise_key(raw_key, notes)
 
-    # Answer index resolution: look up the raw (pre-normalisation) radio `name` in
-    # `lessonCorrectAnswers` and resolve its value to a position in `values`. If the
-    # key is missing or its value doesn't match any option, default to index 0 and
-    # flag it — the check still imports, but a human must confirm/fix the answer.
+    # Answer index resolution: the answer dict may be keyed by the raw radio `name`
+    # (lessonCorrectAnswers) or by the name without its `_ans` suffix (the
+    # correctAnswers/checkPageAnswer variants); try both before giving up.
+    lookup_keys = [raw_key]
+    if raw_key.endswith("_ans"):
+        lookup_keys.append(raw_key[: -len("_ans")])
+    resolved = next((correct_answers[k] for k in lookup_keys if k in correct_answers), None)
     answer = 0
-    if raw_key in correct_answers and correct_answers[raw_key] in values:
-        answer = values.index(correct_answers[raw_key])
+    if resolved is not None and resolved in values:
+        answer = values.index(resolved)
     else:
         notes.append(f"no correct answer for {key}")
 
@@ -212,7 +225,10 @@ def _page_blocks(
             collapse_whitespace(child.get_text()).strip()
         ):
             continue
-        if child.name == "button" and "check-page-answers" in (child.get("class") or []):
+        if child.name == "button" and (
+            "check-page-answers" in (child.get("class") or [])
+            or _CHECK_PAGE_ANSWER_RE.search(str(child.get("onclick") or ""))
+        ):
             continue
         if child.name == "div" and "interactive-question-block" in (child.get("class") or []):
             flush()
@@ -308,9 +324,14 @@ def convert_lesson(index_html: Path, legacy_root: Path) -> tuple[dict[str, Any],
     }
 
     # A document is only "converted" cleanly if nothing was mapped lossily
-    # (unsupported element) or left ambiguous (missing answer key); those two note
-    # prefixes are the ones downgrading it to "needs-review" for a human to check.
-    if any(n.startswith("unsupported element") or n.startswith("no correct answer") for n in notes):
+    # (unsupported element) or left ambiguous (missing answer key); those prefixes
+    # are the ones downgrading it to "needs-review" for a human to check.
+    if any(
+        n.startswith("unsupported element")
+        or n.startswith("no correct answer")
+        or n.startswith("img placeholder")
+        for n in notes
+    ):
         status: Literal["converted", "needs-review", "unsupported"] = "needs-review"
     else:
         status = "converted"

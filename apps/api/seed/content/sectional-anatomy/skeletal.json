@@ -105,7 +105,140 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Bone window: the vertebral body anteriorly, the pedicles and laminae forming the arch, transverse and spinous processes, enclosing the vertebral (spinal) canal. Soft-tissue window, same level: the spinal cord within the canal and paraspinal muscles become visible."
+                      "text": "[Axial CT of a vertebra, bone window]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Bone window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ": the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "vertebral body",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " anteriorly, the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "pedicles",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "laminae",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " forming the arch, "
+                    },
+                    {
+                      "type": "text",
+                      "text": "transverse",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "text",
+                      "text": "spinous processes",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", enclosing the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "vertebral (spinal) canal",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "[Axial CT of a vertebra, soft-tissue window]"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Soft-tissue window",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ", same level: the "
+                    },
+                    {
+                      "type": "text",
+                      "text": "spinal cord",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " within the canal and paraspinal muscles become visible."
                     }
                   ]
                 }
@@ -627,5 +760,16 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "unsupported element figure on page 1",
+    "unsupported inline element figure",
+    "img placeholder (img/spine_axial_bone.png)",
+    "unsupported inline element figcaption",
+    "unsupported inline element figure",
+    "img placeholder (img/spine_axial_soft.png)",
+    "unsupported inline element figcaption",
+    "unsupported element figure on page 4",
+    "dropped non-https link"
+  ]
 }

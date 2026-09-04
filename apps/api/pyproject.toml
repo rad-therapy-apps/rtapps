@@ -33,6 +33,7 @@ dependencies = [
   "httpx>=0.28",
   "jsonschema>=4.23",
   "sentry-sdk>=2.68.1",
+  "minio>=7.2.20",
 ]
 
 # Dev-only dependencies (test/lint/type-check tooling); excluded from the runtime image by

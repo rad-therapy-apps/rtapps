@@ -687,5 +687,8 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold"
+  ]
 }

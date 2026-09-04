@@ -9,6 +9,10 @@
 	forces each page's block list to remount on navigation so per-page component state (radio
 	selection) doesn't leak across pages; `resolve('/(app)/home')` satisfies the
 	`svelte/no-navigation-without-resolve` lint rule for the internal "Back to home" link.
+	`collectImageIds` walks each rich_text block's doc for `image` nodes and resolves every
+	mediaAssetId found to `/api/v1/media/{id}` (the same authenticated redirect route the TipTap
+	editor's own `AuthorImage` uses), passed to `ProseDoc` as `images` — the missing half of Task
+	15's image insertion, which only wired the editor's own rendering (Task 18).
 	How it fits the project: this is the browser-driven half of ADR-0004's attempt flow — grading
 	each item and the final submit both call the API directly from the client over the session
 	cookie (ADR-0002); the pages/blocks themselves are ADR-0003's snapshot shape. See
@@ -26,6 +30,7 @@
 	import { lessonSnapshot } from './snapshot';
 	import { resolve } from '$app/paths';
 	import type { components } from '@rtapps/api-client';
+	import type { RichTextBlock } from './types';
 
 	type LessonOut = components['schemas']['LessonOut'];
 	type AttemptOut = components['schemas']['AttemptOut'];
@@ -50,6 +55,30 @@
 	// this same key, so a browser retry of "Finish lesson" after a dropped response is treated by
 	// the API as the same idempotent submit rather than a second one (ADR-0004).
 	const idempotencyKey = crypto.randomUUID();
+
+	// Every `image` node's mediaAssetId anywhere in a rich_text doc (nested inside a list/table/
+	// blockquote/callout, not just top-level), recursively.
+	function collectImageIds(node: {
+		type: string;
+		attrs?: { mediaAssetId?: string };
+		content?: unknown[];
+	}): string[] {
+		const ids = node.type === 'image' && node.attrs?.mediaAssetId ? [node.attrs.mediaAssetId] : [];
+		const children = (node.content ?? []) as (typeof node)[];
+		return ids.concat(children.flatMap(collectImageIds));
+	}
+
+	// mediaAssetId -> `/api/v1/media/{id}`, the same authenticated redirect-to-storage route the
+	// TipTap editor's own `AuthorImage` renders (`$lib/author/extensions.ts`) — resolved here
+	// (not by ProseDoc/ProseNode, which never fetch by id themselves) since this route is the
+	// only rich_text consumer that has images to resolve at all.
+	const images: Record<string, string> = Object.fromEntries(
+		pages
+			.flatMap((p) => p.blocks)
+			.filter((b): b is RichTextBlock => b.type === 'rich_text')
+			.flatMap((b) => collectImageIds(b.body))
+			.map((id) => [id, `/api/v1/media/${id}`])
+	);
 
 	// Which page (0-based) is currently displayed.
 	let pageIndex = $state(0);
@@ -113,7 +142,7 @@
 		 unnecessarily; rich-text blocks have no such id, so `rt-${i}` (position) is used instead. -->
 	{#each currentPage.blocks as block, i (block.type === 'knowledge_check' ? block.key : `rt-${i}`)}
 		{#if block.type === 'rich_text'}
-			<ProseDoc doc={block.body} />
+			<ProseDoc doc={block.body} {images} />
 		{:else}
 			<KnowledgeCheck
 				{block}

@@ -24,7 +24,10 @@ Works with:
     `app.db` (CLI's own DB session), `app.content.models` (the tables written to),
     `app.content.prose` (prose validation), `app.content.service.publish_lesson`.
   Used by: `app.seed` and the content/importer test modules import `LessonImport` and
-    `import_lesson` directly; the CLI entry point (`main`) is invoked as a module script.
+    `import_lesson` directly; the CLI entry point (`main`) is invoked as a module script;
+    `app.authoring.router` reuses `PageImport` (the page/block shape) and
+    `replace_lesson_pages` (the delete-then-rebuild body extracted from `import_lesson`) for
+    the `PUT /authoring/lessons/{id}/pages` route.
 """
 
 import asyncio
@@ -34,7 +37,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from sqlalchemy import select
+from sqlalchemy import inspect, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
@@ -153,6 +156,9 @@ class LessonImport(BaseModel):
 
     subject: SubjectImport
     lesson: LessonBody
+    # Converter notes travelling with a migrated document; surfaced as the authoring
+    # UI's needs-review queue via activity.config["import_notes"] (plan 3b).
+    import_notes: list[str] = Field(default_factory=list)
 
 
 async def _upsert_subject(db: AsyncSession, doc: SubjectImport) -> Subject:
@@ -163,6 +169,59 @@ async def _upsert_subject(db: AsyncSession, doc: SubjectImport) -> Subject:
         db.add(subject)
         await db.flush()
     return subject
+
+
+async def replace_lesson_pages(db: AsyncSession, lesson: Lesson, pages: list[PageImport]) -> None:
+    """Replace `lesson`'s whole page/block/question tree in place, delete-then-rebuild (not
+    diff) — `pages` is taken as the complete lesson. Shared by `import_lesson`'s reimport
+    path and the authoring `PUT /authoring/lessons/{id}/pages` route (`app.authoring.router`),
+    so both write paths delete/insert exactly the same way.
+
+    `inspect(lesson).pending` distinguishes a brand-new, not-yet-flushed lesson (nothing to
+    delete — a pending object's `pages` collection initialises empty without a lazy load)
+    from an existing one, whose old tree must be cleared first.
+    """
+    if not inspect(lesson).pending:
+        # Reimport delete ordering matters here because of ContentBlock.question_id's
+        # ondelete="RESTRICT": a Question row can't be deleted while a block still points
+        # at it. So (1) collect the old question ids first, (2) clear the pages collection
+        # and flush — cascade="all, delete-orphan" deletes the old pages and blocks, freeing
+        # the questions from their RESTRICT — then (3) delete those now-orphaned questions.
+        # Doing it in the other order would raise a foreign-key violation.
+        await db.refresh(lesson, ["pages"])
+        old_question_ids = [b.question_id for p in lesson.pages for b in p.blocks if b.question_id]
+        lesson.pages.clear()
+        await db.flush()
+        for qid in old_question_ids:
+            q = await db.get(Question, qid)
+            if q is not None:
+                await db.delete(q)
+        await db.flush()
+
+    # Build the tree through the relationships so the in-memory collections stay accurate
+    # (cascades persist pages, blocks and questions on the next flush).
+    for order, page in enumerate(pages, start=1):
+        lp = LessonPage(order=order, title=page.title)
+        lesson.pages.append(lp)
+        for border, block in enumerate(page.blocks, start=1):
+            if isinstance(block, RichTextImport):
+                lp.blocks.append(ContentBlock(order=border, type="rich_text", body=block.body))
+            else:
+                q = Question(
+                    type="single_choice",
+                    stem=block.stem,
+                    body={"options": block.options, "answer": block.answer},
+                    explanation=block.explanation,
+                )
+                lp.blocks.append(
+                    ContentBlock(
+                        order=border,
+                        type="knowledge_check",
+                        body={"key": block.key},
+                        question=q,
+                    )
+                )
+    await db.flush()
 
 
 async def import_lesson(
@@ -192,46 +251,8 @@ async def import_lesson(
             doc.lesson.title,
             doc.lesson.order,
         )
-        await db.refresh(lesson, ["pages"])
-        # Reimport delete ordering matters here because of ContentBlock.question_id's
-        # ondelete="RESTRICT": a Question row can't be deleted while a block still points
-        # at it. So (1) collect the old question ids first, (2) clear the pages collection
-        # and flush — cascade="all, delete-orphan" deletes the old pages and blocks, freeing
-        # the questions from their RESTRICT — then (3) delete those now-orphaned questions.
-        # Doing it in the other order would raise a foreign-key violation.
-        old_question_ids = [b.question_id for p in lesson.pages for b in p.blocks if b.question_id]
-        lesson.pages.clear()
-        await db.flush()
-        for qid in old_question_ids:
-            q = await db.get(Question, qid)
-            if q is not None:
-                await db.delete(q)
-        await db.flush()
 
-    # Build the tree through the relationships so the in-memory collections stay accurate
-    # (cascades persist pages, blocks and questions on the next flush).
-    for order, page in enumerate(doc.lesson.pages, start=1):
-        lp = LessonPage(order=order, title=page.title)
-        lesson.pages.append(lp)
-        for border, block in enumerate(page.blocks, start=1):
-            if isinstance(block, RichTextImport):
-                lp.blocks.append(ContentBlock(order=border, type="rich_text", body=block.body))
-            else:
-                q = Question(
-                    type="single_choice",
-                    stem=block.stem,
-                    body={"options": block.options, "answer": block.answer},
-                    explanation=block.explanation,
-                )
-                lp.blocks.append(
-                    ContentBlock(
-                        order=border,
-                        type="knowledge_check",
-                        body={"key": block.key},
-                        question=q,
-                    )
-                )
-    await db.flush()
+    await replace_lesson_pages(db, lesson, doc.lesson.pages)
 
     # Activity upsert, kept 1:1 with the lesson (see Activity.lesson_id unique=True):
     # created alongside a brand-new lesson, or just re-titled if the lesson already had one.
@@ -247,6 +268,13 @@ async def import_lesson(
         db.add(activity)
     else:
         activity.title, activity.subject_id = lesson.title, subject.id
+
+    config = dict(activity.config or {})
+    if doc.import_notes:
+        config["import_notes"] = doc.import_notes
+    else:
+        config.pop("import_notes", None)
+    activity.config = config
     await db.flush()
 
     # Publishing here (rather than leaving the caller to do it) is what makes an import

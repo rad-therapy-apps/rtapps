@@ -1071,5 +1071,11 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "dropped non-https link",
+    "dropped non-https link",
+    "slug collision on 'thorax'; renamed to 'treatment-planning-thorax'"
+  ]
 }

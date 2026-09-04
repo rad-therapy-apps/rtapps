@@ -153,31 +153,21 @@
                     },
                     {
                       "type": "text",
-                      "text": " "
-                    },
-                    {
-                      "type": "text",
                       "text": "Clearly explain the setup for SSD, SAD, and electron treatments."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
                       "text": "List the main factors used in MU calculations for these techniques."
                     },
                     {
-                      "type": "text",
-                      "text": " "
+                      "type": "hardBreak"
                     },
                     {
                       "type": "text",
                       "text": "Conceptually understand why MU calculations are necessary and how they relate to the prescribed dose."
-                    },
-                    {
-                      "type": "text",
-                      "text": " "
                     }
                   ]
                 }
@@ -2533,5 +2523,14 @@
         ]
       }
     ]
-  }
+  },
+  "import_notes": [
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "highlight\u2192bold",
+    "dropped non-https link"
+  ]
 }
