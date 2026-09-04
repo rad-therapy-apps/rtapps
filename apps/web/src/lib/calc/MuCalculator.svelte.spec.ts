@@ -105,7 +105,7 @@ describe('MuCalculator', () => {
 			.toHaveTextContent('1.0000 (not configured)');
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.toHaveTextContent('1.0000 (not configured)');
+			.toHaveTextContent('1.0000 (no wedge)');
 		await expect
 			.element(page.getByTestId('mu-formula'))
 			.toHaveTextContent('MU = dose / (K · (PDD/100) · Sc · Sp · WF · TF · ISF)');
@@ -180,7 +180,8 @@ describe('MuCalculator', () => {
 	// its default (100).
 	// Invariant: MU equals the hand-assembled chain dose / (K · (PDD/100) · Sc · Sp · WF · TF ·
 	// ISF), computed here from the same fixtures via `interpolate2d`/`ssdIsf`; the teaching output
-	// names which table filled each role ("table: <key>").
+	// names which table filled each role ("table: <key>"), and ISF/Mayneord labels show "(formula)"
+	// not "(input)" since they are computed via formulas.
 	it('assembles the full SSD factor chain (Sc, Sp, WF, TF, ISF)', async () => {
 		await render(MuCalculator, {
 			tables: {
@@ -212,6 +213,7 @@ describe('MuCalculator', () => {
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
 			.toHaveTextContent(`${wf.toFixed(4)} (table: wedge-45)`);
+		await expect.element(page.getByTestId('mu-factor-isf')).toHaveTextContent(`(formula)`);
 		await expect
 			.element(page.getByTestId('mu-result'))
 			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
@@ -274,5 +276,99 @@ describe('MuCalculator', () => {
 		await expect
 			.element(page.getByTestId('mu-result'))
 			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+	});
+
+	// Scenario (FIX 2 — wedge label at angle 0): wedge table is configured and present, but wedge
+	// angle is set to 0. The wedge value correctly becomes 1.0, and the source label must reflect
+	// this by showing "no wedge" rather than the table key.
+	// Invariant: the wedge line shows 1.0000 and (no wedge), and the table key does NOT appear on
+	// that line.
+	it('shows "no wedge" label when wedge angle is 0, even with a wedge table configured', async () => {
+		await render(MuCalculator, {
+			tables: {
+				'pdd-6mv': { title: 'PDD 6MV', grid: PDD_GRID },
+				'wedge-45': { title: 'Wedge 45', grid: WEDGE_GRID }
+			}
+		});
+
+		await setInputs('200', '10', '10');
+		await userEvent.fill(page.getByLabelText('Wedge angle (deg)').element(), '0');
+
+		const pdd = interpolate2d(PDD_GRID, 10, 10)!;
+		const isf = ssdIsf(100, 1.5, 10)!;
+		const expectedMu = 200 / (1 * (pdd / 100) * isf);
+
+		await expect
+			.element(page.getByTestId('mu-factor-wedge'))
+			.toHaveTextContent('1.0000 (no wedge)');
+		await expect.element(page.getByTestId('mu-factor-wedge')).not.toHaveTextContent('wedge-45');
+		await expect
+			.element(page.getByTestId('mu-result'))
+			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+	});
+
+	// Scenario (FIX 3 — progressive role exclusion): a single table key "sc_wedge_test" contains
+	// both "sc" and "wedge" substrings. The role-assignment algorithm searches progressively,
+	// removing each matched entry from the pool before the next role's search, so this key must
+	// fill ONLY the sc role (first in search order) and wedge shows "(not configured)". Angle is 45
+	// to avoid the "no wedge" label that appears at angle 0.
+	// Invariant: Sc line shows the value and (table: sc_wedge_test); Sp and WF both show 1.0000
+	// (not configured); no table key appears on the WF line.
+	it('assigns a multi-substring table key to the first matching role only (progressive exclusion)', async () => {
+		await render(MuCalculator, {
+			tables: {
+				'pdd-6mv': { title: 'PDD 6MV', grid: PDD_GRID },
+				sc_wedge_test: { title: 'SC Wedge Test', grid: SC_GRID }
+			}
+		});
+
+		await setInputs('200', '10', '10');
+		await userEvent.fill(page.getByLabelText('Wedge angle (deg)').element(), '45');
+
+		const sc = interpolate2d(SC_GRID, SC_GRID.rows[0].key, 10)!;
+		const pdd = interpolate2d(PDD_GRID, 10, 10)!;
+		const isf = ssdIsf(100, 1.5, 10)!;
+		const expectedMu = 200 / (1 * (pdd / 100) * sc * isf);
+
+		await expect
+			.element(page.getByTestId('mu-factor-sc'))
+			.toHaveTextContent(`${sc.toFixed(4)} (table: sc_wedge_test)`);
+		await expect
+			.element(page.getByTestId('mu-factor-sp'))
+			.toHaveTextContent('1.0000 (not configured)');
+		await expect
+			.element(page.getByTestId('mu-factor-wedge'))
+			.toHaveTextContent('1.0000 (not configured)');
+		await expect
+			.element(page.getByTestId('mu-factor-wedge'))
+			.not.toHaveTextContent('sc_wedge_test');
+		await expect
+			.element(page.getByTestId('mu-result'))
+			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+	});
+
+	// Scenario (minor/cheap case): wedge lookup is requested at an angle outside the wedge table's
+	// range (e.g., angle 90 on a 0–60 grid). The interpolation returns null (out of range), and the
+	// UI shows a factor-out-of-range message, never "Infinity" or "NaN".
+	// Invariant: the factor-out-of-range message appears; the output does not contain "Infinity"
+	// or "NaN".
+	it('handles wedge lookup out of range without rendering Infinity/NaN', async () => {
+		await render(MuCalculator, {
+			tables: {
+				'pdd-6mv': { title: 'PDD 6MV', grid: PDD_GRID },
+				'wedge-60': { title: 'Wedge 60', grid: WEDGE_GRID }
+			}
+		});
+
+		await setInputs('200', '10', '10');
+		await userEvent.fill(page.getByLabelText('Wedge angle (deg)').element(), '90');
+
+		await expect
+			.element(page.getByTestId('mu-factor-out-of-range'))
+			.toHaveTextContent(
+				'one or more scatter, wedge, or correction factors are outside their table'
+			);
+		await expect.element(page.getByTestId('mu-output')).not.toHaveTextContent('Infinity');
+		await expect.element(page.getByTestId('mu-output')).not.toHaveTextContent('NaN');
 	});
 });

@@ -66,9 +66,14 @@
 	const remainingEntries = $derived(
 		allEntries.filter(([key]) => key !== pddEntry?.[0] && key !== tmrEntry?.[0])
 	);
+	// Progressive role exclusion: each matched entry is removed from the pool before the next role's
+	// search (order: sc, then sp, then wedge) — prevents a key matching multiple substrings from
+	// being assigned to more than one role.
 	const scEntry = $derived(findEntry(remainingEntries, 'sc'));
-	const spEntry = $derived(findEntry(remainingEntries, 'sp'));
-	const wedgeEntry = $derived(findEntry(remainingEntries, 'wedge'));
+	const scExcluded = $derived(remainingEntries.filter(([key]) => key !== scEntry?.[0]));
+	const spEntry = $derived(findEntry(scExcluded, 'sp'));
+	const spExcluded = $derived(scExcluded.filter(([key]) => key !== spEntry?.[0]));
+	const wedgeEntry = $derived(findEntry(spExcluded, 'wedge'));
 
 	// null when out of range (interpolate2d's contract) or when there's no table to read from.
 	const lookup = $derived(grid ? interpolate2d(grid, depth, fieldSize) : null);
@@ -97,7 +102,9 @@
 	const wedgeValue = $derived(
 		wedgeAngle === 0 || !wedgeEntry ? 1 : lookup1d(wedgeEntry[1].grid, wedgeAngle)
 	);
-	const wedgeSource = $derived(wedgeEntry ? `table: ${wedgeEntry[0]}` : 'not configured');
+	const wedgeSource = $derived(
+		wedgeAngle === 0 ? 'no wedge' : wedgeEntry ? `table: ${wedgeEntry[0]}` : 'not configured'
+	);
 
 	// SSD-mode-only corrections (Task 1 formulas): the Mayneord depth-dose shift (toggle) and the
 	// inverse-square factor TG-51 always applies away from the reference SSD; both fixed at 1 (no
@@ -223,10 +230,10 @@
 			<p data-testid="mu-factor-wedge">WF: {(wedgeValue ?? 1).toFixed(4)} ({wedgeSource})</p>
 			<p data-testid="mu-factor-tray">TF: {trayFactor.toFixed(4)} (input)</p>
 			{#if technique === 'ssd'}
-				<p data-testid="mu-factor-isf">ISF: {(isf ?? 1).toFixed(4)} (input)</p>
+				<p data-testid="mu-factor-isf">ISF: {(isf ?? 1).toFixed(4)} (formula)</p>
 				{#if mayneordOn}
 					<p data-testid="mu-factor-mayneord">
-						Mayneord F: {(mayneordFactor ?? 1).toFixed(4)} (input)
+						Mayneord F: {(mayneordFactor ?? 1).toFixed(4)} (formula)
 					</p>
 				{/if}
 			{/if}
