@@ -32,7 +32,7 @@ from app.config import load_settings
 
 class MediaStorage(Protocol):
     def presigned_put(self, key: str) -> str: ...
-    def presigned_get(self, key: str) -> str: ...
+    def presigned_get(self, key: str, mime: str) -> str: ...
     def stat(self, key: str) -> int | None: ...
 
 
@@ -82,9 +82,15 @@ class MinioStorage:
             self._bucket, key, expires=timedelta(minutes=10)
         )
 
-    def presigned_get(self, key: str) -> str:
+    def presigned_get(self, key: str, mime: str) -> str:
+        # Pass the DB-validated mime as response-content-type header so the storage response
+        # carries the asset's validated content type, preventing a mismatched direct-to-storage
+        # PUT from controlling the served Content-Type.
         return self._public_client.presigned_get_object(
-            self._bucket, key, expires=timedelta(minutes=5)
+            self._bucket,
+            key,
+            expires=timedelta(minutes=5),
+            response_headers={"response-content-type": mime},
         )
 
     def stat(self, key: str) -> int | None:

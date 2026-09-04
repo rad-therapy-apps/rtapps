@@ -45,8 +45,9 @@ class FakeStorage:
     def presigned_put(self, key: str) -> str:
         return f"https://fake-storage/put/{key}"
 
-    def presigned_get(self, key: str) -> str:
-        return f"https://fake-storage/get/{key}"
+    def presigned_get(self, key: str, mime: str) -> str:
+        # Record mime in the URL so tests can verify it was passed
+        return f"https://fake-storage/get/{key}?mime={mime}"
 
     def stat(self, key: str) -> int | None:
         return self.objects.get(key)
@@ -166,7 +167,8 @@ async def test_serve_media(
     await register(client, email="student@example.edu")  # student, fresh session
     r = await client.get(f"/api/v1/media/{asset_id}", follow_redirects=False)
     assert r.status_code == 302
-    assert r.headers["location"] == f"https://fake-storage/get/{key}"
+    # Verify the redirect includes the DB-validated mime (image/png from VALID_PAYLOAD)
+    assert r.headers["location"] == f"https://fake-storage/get/{key}?mime=image/png"
 
     unknown_id = uuid.uuid4()
     r = await client.get(f"/api/v1/media/{unknown_id}", follow_redirects=False)
@@ -188,6 +190,39 @@ async def test_serve_media_unconfirmed_is_404(
 async def test_serve_media_anon_401(client: AsyncClient, fake_storage: FakeStorage) -> None:
     r = await client.get(f"/api/v1/media/{uuid.uuid4()}", follow_redirects=False)
     assert r.status_code == 401
+
+
+async def test_serve_media_with_different_mimes(
+    client: AsyncClient, db: AsyncSession, fake_storage: FakeStorage
+) -> None:
+    """Verify different mime types get their own presigned URLs with correct mime."""
+    await make_educator(client, db, "edu@example.edu")
+
+    # Create and confirm a PNG asset
+    body_png = await _presign(client, mime="image/png")
+    asset_id_png, key_png = body_png["id"], body_png["storage_key"]
+    fake_storage.objects[str(key_png)] = 1000
+    r = await client.post(f"/api/v1/authoring/media/{asset_id_png}/confirm")
+    assert r.status_code == 200
+
+    # Create and confirm a JPEG asset
+    body_jpg = await _presign(client, mime="image/jpeg")
+    asset_id_jpg, key_jpg = body_jpg["id"], body_jpg["storage_key"]
+    fake_storage.objects[str(key_jpg)] = 2000
+    r = await client.post(f"/api/v1/authoring/media/{asset_id_jpg}/confirm")
+    assert r.status_code == 200
+
+    await register(client, email="student@example.edu")
+
+    # Verify PNG asset gets image/png mime in its presigned URL
+    r = await client.get(f"/api/v1/media/{asset_id_png}", follow_redirects=False)
+    assert r.status_code == 302
+    assert r.headers["location"] == f"https://fake-storage/get/{key_png}?mime=image/png"
+
+    # Verify JPEG asset gets image/jpeg mime in its presigned URL
+    r = await client.get(f"/api/v1/media/{asset_id_jpg}", follow_redirects=False)
+    assert r.status_code == 302
+    assert r.headers["location"] == f"https://fake-storage/get/{key_jpg}?mime=image/jpeg"
 
 
 async def test_confirm_is_idempotent_no_duplicate_audit(
