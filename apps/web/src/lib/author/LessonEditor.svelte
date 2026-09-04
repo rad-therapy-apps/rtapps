@@ -38,6 +38,7 @@
 	import KnowledgeCheckForm from './KnowledgeCheckForm.svelte';
 	import { uploadImage, type AuthorApi } from './uploadImage';
 	import { api } from './api';
+	import { errorTitle, problemDetail } from './problem';
 	import type {
 		AuthorBlock,
 		AuthorKnowledgeCheckBlock,
@@ -49,12 +50,6 @@
 	import type { components } from '@rtapps/api-client';
 
 	type PagesIn = components['schemas']['PagesIn'];
-
-	// Same RFC 9457 fallback as attempts.ts/KnowledgeCheck.svelte: apps/api's global exception
-	// handlers return a problem+json body with `title` for every error response.
-	function errorTitle(error: unknown): string {
-		return (error as { title?: string }).title ?? 'Request failed';
-	}
 
 	// The real AuthorApi wiring for uploadImage, built on the same injected `put`'s sibling
 	// (`api.POST`) — a default so `LessonEditor.svelte.spec.ts` never needs to exercise it.
@@ -86,35 +81,6 @@
 	} = $props();
 
 	const EMPTY_DOC: ProseDoc = { type: 'doc', content: [{ type: 'paragraph' }] };
-
-	// The 422 body's `errors[]` carries a full JSON path per entry (`loc`), unlike
-	// `$lib/server/auth-forms.ts`'s `problemMessage` (server-only, unusable from a client
-	// component) which collapses `loc` to its last segment — shown here in full so the path is
-	// actually visible to the author.
-	function problemDetail(problem: unknown): string {
-		if (problem && typeof problem === 'object') {
-			const { title, detail, errors } = problem as {
-				title?: unknown;
-				detail?: unknown;
-				errors?: unknown;
-			};
-			if (Array.isArray(errors) && errors.length > 0) {
-				const parts = errors
-					.map((e) => {
-						if (!e || typeof e !== 'object') return undefined;
-						const { loc, msg } = e as { loc?: unknown; msg?: unknown };
-						if (typeof msg !== 'string') return undefined;
-						const path = Array.isArray(loc) ? loc.join('.') : undefined;
-						return path ? `${path}: ${msg}` : msg;
-					})
-					.filter((part): part is string => Boolean(part));
-				if (parts.length > 0) return parts.join('; ');
-			}
-			if (typeof detail === 'string' && detail) return detail;
-			if (typeof title === 'string' && title) return title;
-		}
-		return 'Request failed';
-	}
 
 	// `LessonAuthorOut.pages` (this route's `load`) is `build_snapshot` reused verbatim
 	// (apps/api/app/authoring/router.py's own docstring) — the same shape the student-facing
