@@ -41,7 +41,7 @@
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@types/node": "^24",
+		"@types/node": "^25",
 		"@vitest/browser-playwright": "^4.1.8",
 		"ajv": "^8.20.0",
 		"ajv-formats": "^3.0.1",
