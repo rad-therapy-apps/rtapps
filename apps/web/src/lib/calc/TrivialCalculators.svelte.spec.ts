@@ -43,8 +43,13 @@ describe('InverseSquareCalculator', () => {
 		const { container } = await render(InverseSquareCalculator, { tables: {} });
 
 		await fillByLabel('Distance 1, d1 (cm)', '100');
-		await fillByLabel('Distance 2, d2 (cm)', '200');
+		// Test reactivity: fill a different d2 value first, verify output changes
+		await fillByLabel('Distance 2, d2 (cm)', '100');
+		// d2=100: I2 = 100*(100/100)^2 = 100.0
+		await expect.poll(() => container.textContent).toContain('100.0');
 
+		// Now fill the target value and verify the final result
+		await fillByLabel('Distance 2, d2 (cm)', '200');
 		await expect.poll(() => container.textContent).toContain('25.0');
 	});
 
@@ -70,8 +75,15 @@ describe('ExtendedSsdCalculator', () => {
 
 		await fillByLabel('Reference SSD, SSD0 (cm)', '100');
 		await fillByLabel('Extended SSD, SSDe (cm)', '150');
-		await fillByLabel('Depth (cm)', '10');
+		// Test reactivity: fill a different depth value first, verify output changes
+		await fillByLabel('Depth (cm)', '5');
+		// depth=5: isf = ((100+5)/(150+5))^2 = (105/155)^2 = 0.45889...
+		// muMult = 1/0.45889 = 2.17909...
+		await expect.poll(() => container.textContent).toContain('0.4589');
+		await expect.poll(() => container.textContent).toContain('2.1791');
 
+		// Now fill the target value and verify the final result
+		await fillByLabel('Depth (cm)', '10');
 		await expect.poll(() => container.textContent).toContain('0.4727');
 		await expect.poll(() => container.textContent).toContain('2.1157');
 	});
@@ -85,9 +97,14 @@ describe('GapCalculator', () => {
 
 		await fillByLabel('Field length 1 (cm)', '10');
 		await fillByLabel('Field length 2 (cm)', '20');
-		await fillByLabel('Match depth (cm)', '5');
+		// Test reactivity: fill a different depth value first, verify output changes
+		await fillByLabel('Match depth (cm)', '10');
+		// depth=10, ssd=100: gap = 0.5*10*(10/100) + 0.5*20*(10/100) = 0.5 + 1.0 = 1.50
 		await fillByLabel('SSD (cm)', '100');
+		await expect.poll(() => container.textContent).toContain('1.50 cm');
 
+		// Now fill the target value and verify the final result
+		await fillByLabel('Match depth (cm)', '5');
 		await expect.poll(() => container.textContent).toContain('0.75 cm');
 	});
 });
@@ -100,9 +117,15 @@ describe('MagnificationCalculator', () => {
 		const { container } = await render(MagnificationCalculator, { tables: {} });
 
 		await fillByLabel('Source-to-image distance, SID (cm)', '140');
-		await fillByLabel('Source-to-object distance, SOD (cm)', '100');
+		// Test reactivity: fill a different SOD value first, verify output changes
+		await fillByLabel('Source-to-object distance, SOD (cm)', '140');
+		// sod=140: m = 140/140 = 1.0, imgSize = 4*1.0 = 4.00
 		await fillByLabel('Object size (cm)', '4');
+		await expect.poll(() => container.textContent).toContain('1.00');
+		await expect.poll(() => container.textContent).toContain('4.00');
 
+		// Now fill the target value and verify the final result
+		await fillByLabel('Source-to-object distance, SOD (cm)', '100');
 		await expect.poll(() => container.textContent).toContain('1.40');
 		await expect.poll(() => container.textContent).toContain('5.60');
 	});
