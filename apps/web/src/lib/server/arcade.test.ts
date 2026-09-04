@@ -10,8 +10,10 @@
  * Used by: `pnpm --filter web test` (vitest `server` project, `pr.yml` job `web`).
  */
 import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { resolveArcadeFile } from './arcade';
+import { readArcadeFile, resolveArcadeFile } from './arcade';
 
 const root = '/srv/arcade';
 
@@ -31,5 +33,17 @@ describe('resolveArcadeFile', () => {
 		expect(resolveArcadeFile(root, '..', 'index.html')).toBeNull();
 		expect(resolveArcadeFile(root, 'G!', '')).toBeNull();
 		expect(resolveArcadeFile(root, 'g', 'x.exe')).toBeNull();
+		expect(resolveArcadeFile(root, 'g', '/etc/passwd')).toBeNull();
+	});
+});
+
+describe('readArcadeFile', () => {
+	it('reads a regular file and returns null for missing paths and directories', () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'arcade-'));
+		fs.writeFileSync(path.join(dir, 'ok.html'), 'hi');
+		fs.mkdirSync(path.join(dir, 'trap.html'));
+		expect(readArcadeFile(path.join(dir, 'ok.html'))?.toString()).toBe('hi');
+		expect(readArcadeFile(path.join(dir, 'missing.html'))).toBeNull();
+		expect(readArcadeFile(path.join(dir, 'trap.html'))).toBeNull();
 	});
 });

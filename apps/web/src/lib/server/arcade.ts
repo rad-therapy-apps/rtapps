@@ -10,6 +10,7 @@
  * Depends on: `node:path` (for POSIX/Windows path resolution and normalization).
  * Used by: `apps/web/src/routes/(app)/arcade/[slug]/[...file]/+server.ts`.
  */
+import fs from 'node:fs';
 import path from 'node:path';
 
 /** Extension → Content-Type allow-map; anything not listed here 404s. */
@@ -43,4 +44,15 @@ export function resolveArcadeFile(
 	const contentType = ARCADE_TYPES[path.extname(filePath).toLowerCase()];
 	if (!contentType) return null;
 	return { filePath, contentType };
+}
+
+/** Read a resolved arcade file, or null (→ 404) when it is missing or not a regular file
+ *  (e.g. a directory named with an allow-listed extension — EISDIR must be a 404, not a 500). */
+export function readArcadeFile(filePath: string): Buffer | null {
+	try {
+		if (!fs.statSync(filePath).isFile()) return null;
+		return fs.readFileSync(filePath);
+	} catch {
+		return null;
+	}
 }

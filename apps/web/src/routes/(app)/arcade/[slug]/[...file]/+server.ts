@@ -11,10 +11,9 @@
  * `node:fs` (file I/O), `node:path` (path resolution).
  * Used by: SvelteKit router, hooks.server.ts authorization flow.
  */
-import fs from 'node:fs';
 import path from 'node:path';
 import { error } from '@sveltejs/kit';
-import { resolveArcadeFile } from '$lib/server/arcade';
+import { readArcadeFile, resolveArcadeFile } from '$lib/server/arcade';
 import type { RequestHandler } from './$types';
 
 // cwd is apps/web in dev/tests and /app in the production image (Dockerfile WORKDIR),
@@ -26,8 +25,12 @@ export const GET: RequestHandler = ({ params, locals }) => {
 	// in depth in case the guard's path rules ever change.
 	if (!locals.user) throw error(401, 'Not signed in');
 	const resolved = resolveArcadeFile(ARCADE_ROOT, params.slug, params.file);
-	if (!resolved || !fs.existsSync(resolved.filePath)) throw error(404, 'Not found');
-	return new Response(fs.readFileSync(resolved.filePath), {
+	if (!resolved) throw error(404, 'Not found');
+	const body = readArcadeFile(resolved.filePath);
+	if (!body) throw error(404, 'Not found');
+	// Copy into a plain-ArrayBuffer-backed Uint8Array: Response's BodyInit rejects Buffer's
+	// ArrayBufferLike typing. Game files are small; a per-request copy is fine at this scale.
+	return new Response(new Uint8Array(body), {
 		headers: { 'Content-Type': resolved.contentType }
 	});
 };
