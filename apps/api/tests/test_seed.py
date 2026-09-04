@@ -33,7 +33,7 @@ from app.auth.models import User
 from app.cohorts.models import Cohort, Enrollment
 from app.config import Settings
 from app.content.activity_models import DataTable, Outcome, QuestionOutcome, Quiz
-from app.content.models import Activity, Lesson
+from app.content.models import Activity, ContentVersion, Lesson, Subject
 from app.seed import seed
 from tests.conftest import TEST_DATABASE_URL
 
@@ -215,7 +215,10 @@ async def test_seed_creates_published_mu_calculator(db: AsyncSession, settings: 
     )
     assert calc is not None
     assert calc.status == "published"
-    assert calc.config == {"calc_type": "mu", "data_tables": ["pdd_6mv"]}
+    assert calc.config == {
+        "calc_type": "mu",
+        "data_tables": ["pdd_6mv", "sc_6mv", "sp_6mv", "wedge_factors"],
+    }
 
     await seed(db, settings)
     assert (
@@ -230,6 +233,96 @@ async def test_seed_creates_published_mu_calculator(db: AsyncSession, settings: 
             .where(Activity.kind == "calculator", Activity.title == "MU calculator")
         )
     ) == 1
+
+
+async def test_seed_creates_scatter_and_wedge_tables(db: AsyncSession, settings: Settings) -> None:
+    """The three new single-row `DataTable`s (Task 6), transcribed verbatim from the legacy
+    MU_Calculator's 6 MV `scData`/`spData`/`wedgeFactors`: ascending cols (field sizes or
+    wedge angles), one row keyed `0`; the MU calculator's latest published snapshot embeds
+    all four tables by value; re-seeding creates none of them twice."""
+    await seed(db, settings)
+
+    sc = await db.scalar(select(DataTable).where(DataTable.key == "sc_6mv"))
+    assert sc is not None
+    assert sc.grid["cols"] == sorted(sc.grid["cols"])
+    assert [row["key"] for row in sc.grid["rows"]] == [0]
+    assert sc.grid["rows"][0]["values"][:3] == [0.948, 0.961, 0.97]
+
+    sp = await db.scalar(select(DataTable).where(DataTable.key == "sp_6mv"))
+    assert sp is not None
+    assert sp.grid["cols"] == sorted(sp.grid["cols"])
+    assert [row["key"] for row in sp.grid["rows"]] == [0]
+    assert sp.grid["rows"][0]["values"][:3] == [0.981, 0.983, 0.987]
+
+    wedge = await db.scalar(select(DataTable).where(DataTable.key == "wedge_factors"))
+    assert wedge is not None
+    assert wedge.grid["cols"] == [0, 15, 30, 45, 60]
+    assert [row["key"] for row in wedge.grid["rows"]] == [0]
+    assert wedge.grid["rows"][0]["values"] == [1.0, 0.828, 0.714, 0.580, 0.424]
+
+    calc = await db.scalar(
+        select(Activity).where(Activity.kind == "calculator", Activity.title == "MU calculator")
+    )
+    assert calc is not None and calc.current_version_id is not None
+    version = await db.get(ContentVersion, calc.current_version_id)
+    assert version is not None
+    assert set(version.snapshot["calculator"]["data_tables"].keys()) == {
+        "pdd_6mv",
+        "sc_6mv",
+        "sp_6mv",
+        "wedge_factors",
+    }
+
+    await seed(db, settings)
+    for key in ("sc_6mv", "sp_6mv", "wedge_factors"):
+        count = await db.scalar(
+            select(func.count()).select_from(DataTable).where(DataTable.key == key)
+        )
+        assert count == 1
+
+
+async def test_seed_creates_six_practice_calculators(db: AsyncSession, settings: Settings) -> None:
+    """Six new practice calculators (Task 6), get-or-created by title like the MU
+    calculator: each has the right calc_type/subject and no data tables of its own, and both
+    `inverse_square` instances exist (Treatment Planning teaching the law itself, Radiation
+    Protection the ALARA framing); re-seeding creates none of them twice."""
+    await seed(db, settings)
+    expected = [
+        ("Inverse Square Law", "inverse_square", "treatment-planning"),
+        ("Extended SSD", "extended_ssd", "treatment-planning"),
+        ("Gap Calculation", "gap", "treatment-planning"),
+        ("Magnification", "magnification", "treatment-planning"),
+        ("SI Unit Converter", "si_convert", "radiation-physics"),
+        ("ALARA: Inverse Square in Practice", "inverse_square", "radiation-protection"),
+    ]
+    for title, calc_type, subject_slug in expected:
+        activity = await db.scalar(
+            select(Activity).where(Activity.kind == "calculator", Activity.title == title)
+        )
+        assert activity is not None, title
+        assert activity.status == "published"
+        assert activity.config == {"calc_type": calc_type, "data_tables": []}
+        subject = await db.get(Subject, activity.subject_id)
+        assert subject is not None and subject.slug == subject_slug
+
+    inverse_square_count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(
+            Activity.kind == "calculator",
+            Activity.config["calc_type"].astext == "inverse_square",
+        )
+    )
+    assert inverse_square_count == 2
+
+    await seed(db, settings)
+    for title, _, _ in expected:
+        count = await db.scalar(
+            select(func.count())
+            .select_from(Activity)
+            .where(Activity.kind == "calculator", Activity.title == title)
+        )
+        assert count == 1
 
 
 async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Settings) -> None:

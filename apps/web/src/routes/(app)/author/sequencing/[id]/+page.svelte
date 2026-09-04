@@ -21,34 +21,10 @@
 	import { duplicates } from '$lib/author/duplicates';
 	import PublishPanel from '$lib/author/PublishPanel.svelte';
 	import { api } from '$lib/author/api';
+	import { problemDetail } from '$lib/author/problem';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-
-	function problemDetail(problem: unknown): string {
-		if (problem && typeof problem === 'object') {
-			const { title, detail, errors } = problem as {
-				title?: unknown;
-				detail?: unknown;
-				errors?: unknown;
-			};
-			if (Array.isArray(errors) && errors.length > 0) {
-				const parts = errors
-					.map((e) => {
-						if (!e || typeof e !== 'object') return undefined;
-						const { loc, msg } = e as { loc?: unknown; msg?: unknown };
-						if (typeof msg !== 'string') return undefined;
-						const path = Array.isArray(loc) ? loc.join('.') : undefined;
-						return path ? `${path}: ${msg}` : msg;
-					})
-					.filter((part): part is string => Boolean(part));
-				if (parts.length > 0) return parts.join('; ');
-			}
-			if (typeof detail === 'string' && detail) return detail;
-			if (typeof title === 'string' && title) return title;
-		}
-		return 'Request failed';
-	}
 
 	let activeTab = $state<'edit' | 'publish'>('edit');
 

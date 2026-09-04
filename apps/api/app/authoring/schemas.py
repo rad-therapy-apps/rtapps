@@ -396,7 +396,8 @@ class DataTablePutIn(BaseModel):
 
 # Not a DB CHECK constraint like ACTIVITY_ACCESS: calc_type lives inside Activity.config
 # (free-form JSONB), so this closed set is enforced at the Pydantic layer only.
-CALC_TYPES = ("mu",)
+# Matches the keys in apps/web/src/lib/calc/registry.ts so form and registry can never drift.
+CALC_TYPES = ("mu", "inverse_square", "extended_ssd", "gap", "magnification", "si_convert")
 
 
 class _CalculatorContentMixin(BaseModel):

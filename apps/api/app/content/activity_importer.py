@@ -278,6 +278,12 @@ async def import_quiz(db: AsyncSession, doc: QuizImport, *, author: User | None 
             outcome = await _upsert_outcome(db, code)
             db.add(QuestionOutcome(question_id=q.id, outcome_id=outcome.id))
     await db.flush()
+    # Refresh the in-memory `quiz.questions` collection from the rows just inserted above
+    # (added via bare `db.add(...)`, which bypasses the relationship). Without this, a
+    # reimport's `quiz.questions.clear()` earlier in this function leaves the collection
+    # loaded-but-stale, so a snapshot built later in this same session (e.g. the publish
+    # call below) would see zero/missing questions (issue #42).
+    await db.refresh(quiz, ["questions"])
     # Upsert the activity and publish.
     activity = await _upsert_activity(
         db,

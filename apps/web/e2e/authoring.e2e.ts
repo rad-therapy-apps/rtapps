@@ -167,7 +167,12 @@ test('a student computes MU from the seeded calculator', async ({ page }) => {
 	const depth = 10;
 	const fieldSize = 10;
 	const pdd = PDD_ROWS[depth][PDD_COLS.indexOf(fieldSize)];
-	const expectedMu = dose / (pdd / 100);
+	// The seeded calculator's config now carries the sc_6mv/sp_6mv/wedge_factors tables too
+	// (both scatter factors are exactly 1.0 at field size 10, wedge angle defaults to 0 →
+	// no wedge), so at these inputs the only factor beyond PDD is the inverse-square factor
+	// at the component's defaults: SSD 100, dmax 1.5.
+	const isf = ((100 + 1.5) / (100 + depth)) ** 2;
+	const expectedMu = dose / ((pdd / 100) * isf);
 
 	await signIn(page, STUDENT.email, STUDENT.password);
 	await page.getByRole('link', { name: 'Subjects', exact: true }).click();

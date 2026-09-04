@@ -19,6 +19,7 @@
 <script lang="ts">
 	import BankQuestionForm, { type BankQuestionValue } from './BankQuestionForm.svelte';
 	import { api } from './api';
+	import { problemDetail } from './problem';
 	import type { components } from '@rtapps/api-client';
 
 	type QuestionAuthorOut = components['schemas']['QuestionAuthorOut'];
@@ -32,32 +33,6 @@
 		get?: typeof api.GET;
 		post?: typeof api.POST;
 	} = $props();
-
-	// Same field-path-preserving 422 formatter as LessonEditor.svelte/the quizzes page.
-	function problemDetail(problem: unknown): string {
-		if (problem && typeof problem === 'object') {
-			const { title, detail, errors } = problem as {
-				title?: unknown;
-				detail?: unknown;
-				errors?: unknown;
-			};
-			if (Array.isArray(errors) && errors.length > 0) {
-				const parts = errors
-					.map((e) => {
-						if (!e || typeof e !== 'object') return undefined;
-						const { loc, msg } = e as { loc?: unknown; msg?: unknown };
-						if (typeof msg !== 'string') return undefined;
-						const path = Array.isArray(loc) ? loc.join('.') : undefined;
-						return path ? `${path}: ${msg}` : msg;
-					})
-					.filter((part): part is string => Boolean(part));
-				if (parts.length > 0) return parts.join('; ');
-			}
-			if (typeof detail === 'string' && detail) return detail;
-			if (typeof title === 'string' && title) return title;
-		}
-		return 'Request failed';
-	}
 
 	// --- search ---
 

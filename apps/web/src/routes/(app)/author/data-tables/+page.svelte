@@ -2,7 +2,7 @@
 	What this file does: the data-tables page at `(app)/author/data-tables` -- lists every
 	author-editable numeric lookup table, edits one at a time (title + `GridEditor`, `PUT`
 	upsert), and a "New calculator" form (title, subject, table-keys multi-select, `calc_type`
-	fixed "mu") that creates a calculator activity and publishes it from its own row.
+	select fed by `CALC_TYPES`) that creates a calculator activity and publishes it from its own row.
 	Used here and why: `editing` (null | { key, title, grid, isNew }) holds the one table being
 	worked on; selecting a different table (or "New table") re-seeds it, guarded by the same
 	dirty-discard confirm `beforeNavigate` uses so a mid-edit switch can't silently drop work.
@@ -21,7 +21,8 @@
 	/authoring/calculators` (Task 11) is what the calculator form posts; `PublishPanel` (Task
 	10/15) is reused verbatim.
 	Depends on: `$app/navigation` (`beforeNavigate`), `$lib/author/GridEditor.svelte`,
-	`$lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`), `$lib/author/types` (`Grid`).
+	`$lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`), `$lib/author/types` (`Grid`),
+	`$lib/calc/registry` (`CALC_TYPES`).
 	Used by: reached from `(app)/author`'s dashboard ("Data tables" link).
 -->
 <script lang="ts">
@@ -29,7 +30,9 @@
 	import GridEditor from '$lib/author/GridEditor.svelte';
 	import PublishPanel from '$lib/author/PublishPanel.svelte';
 	import { api } from '$lib/author/api';
+	import { errorTitle, problemDetail } from '$lib/author/problem';
 	import type { Grid } from '$lib/author/types';
+	import { CALC_TYPES } from '$lib/calc/registry';
 	import type { components } from '@rtapps/api-client';
 	import type { PageData } from './$types';
 
@@ -38,35 +41,6 @@
 	type VersionOut = components['schemas']['VersionOut'];
 
 	let { data }: { data: PageData } = $props();
-
-	function errorTitle(error: unknown): string {
-		return (error as { title?: string }).title ?? 'Request failed';
-	}
-
-	function problemDetail(problem: unknown): string {
-		if (problem && typeof problem === 'object') {
-			const { title, detail, errors } = problem as {
-				title?: unknown;
-				detail?: unknown;
-				errors?: unknown;
-			};
-			if (Array.isArray(errors) && errors.length > 0) {
-				const parts = errors
-					.map((e) => {
-						if (!e || typeof e !== 'object') return undefined;
-						const { loc, msg } = e as { loc?: unknown; msg?: unknown };
-						if (typeof msg !== 'string') return undefined;
-						const path = Array.isArray(loc) ? loc.join('.') : undefined;
-						return path ? `${path}: ${msg}` : msg;
-					})
-					.filter((part): part is string => Boolean(part));
-				if (parts.length > 0) return parts.join('; ');
-			}
-			if (typeof detail === 'string' && detail) return detail;
-			if (typeof title === 'string' && title) return title;
-		}
-		return 'Request failed';
-	}
 
 	const EMPTY_GRID: Grid = {
 		row_label: '',
@@ -179,6 +153,7 @@
 
 	let calcTitle = $state('');
 	let calcSubjectSlug = $state(data.subjects[0]?.slug ?? '');
+	let calcType = $state('mu');
 	let calcTableKeys = $state<string[]>([]);
 	let calcSaving = $state(false);
 	let calcError = $state<string | undefined>(undefined);
@@ -200,7 +175,7 @@
 				body: {
 					title: calcTitle,
 					subject_slug: calcSubjectSlug,
-					calc_type: 'mu',
+					calc_type: calcType,
 					data_tables: calcTableKeys
 				}
 			});
@@ -211,6 +186,7 @@
 			createdCalculator = res.data;
 			calcVersions = [];
 			calcTitle = '';
+			calcType = 'mu';
 			calcTableKeys = [];
 		} catch {
 			calcError = 'Request failed';
@@ -304,7 +280,14 @@
 			{/each}
 		{/if}
 	</fieldset>
-	<p>Calc type: <code>mu</code></p>
+	<label>
+		Calc type
+		<select value={calcType} onchange={(e) => (calcType = e.currentTarget.value)}>
+			{#each CALC_TYPES as type (type)}
+				<option value={type}>{type}</option>
+			{/each}
+		</select>
+	</label>
 	<button type="button" onclick={createCalculator} disabled={calcSaving}>Create calculator</button>
 	{#if calcError}
 		<p role="alert">{calcError}</p>

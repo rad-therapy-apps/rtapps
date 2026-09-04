@@ -116,4 +116,4 @@ async def serve_media(
     asset = await db.get(MediaAsset, asset_id)
     if asset is None or not asset.confirmed:
         raise Problem(404, "Media asset not found")
-    return RedirectResponse(storage.presigned_get(asset.storage_key), status_code=302)
+    return RedirectResponse(storage.presigned_get(asset.storage_key, asset.mime), status_code=302)

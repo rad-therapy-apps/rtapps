@@ -1,18 +1,20 @@
 """Development seed data: creates the three demo accounts, imports seed lessons plus the
-migrated legacy content and hand-written activity fixtures, seeds one published MU
-calculator, and seeds a demo cohort of ten students with graded attempts and rollups on
-both a lesson and a quiz.
+migrated legacy content and hand-written activity fixtures, seeds the published MU
+calculator plus six further published practice calculators, and seeds a demo cohort of ten
+students with graded attempts and rollups on both a lesson and a quiz.
 
 What this file does: `seed()` get-or-creates an admin/educator/student account (all
 sharing one dev password) and imports every JSON lesson fixture in `seed/lessons/`,
 publishing each one; it then imports every document under `seed/content/` (the migrated
 legacy corpus) and `seed/activities/` (hand-written fixtures, e.g. the demo quiz) via
-`import_any`; it then get-or-creates a `pdd_6mv` `DataTable` and a published "MU
-calculator" activity referencing it, the same way an author's own `POST /data-tables` +
-`POST /calculators` + publish would; it then get-or-creates a demo cohort owned by the
-educator, enrols ten student accounts in it, and gives each student one submitted attempt
-(with rollup) on the `rbe-and-oer` lesson and one on the `demo-quiz` activity. `main()` is
-the CLI entry point that runs this against a real database and commits.
+`import_any`; it then get-or-creates four `DataTable`s (`pdd_6mv`/`sc_6mv`/`sp_6mv`/
+`wedge_factors`) and a published "MU calculator" activity referencing all four, plus six
+further published practice calculators covering the rest of `CALC_TYPES`, the same way an
+author's own `POST /data-tables` + `POST /calculators` + publish would; it then
+get-or-creates a demo cohort owned by the educator, enrols ten student accounts in it, and
+gives each student one submitted attempt (with rollup) on the `rbe-and-oer` lesson and one
+on the `demo-quiz` activity. `main()` is the CLI entry point that runs this against a real
+database and commits.
 
 Used here and why: plain SQLAlchemy `select`/`add`/`flush` (no ORM merge helpers) so the
 get-or-create logic and what gets committed stay explicit; refuses to run at all when
@@ -78,8 +80,31 @@ SEED_STUDENT_COUNT = 10  # how many demo students are enrolled and given an atte
 SEED_LESSON_SLUG = "rbe-and-oer"  # the lesson the demo students attempt (has 2 knowledge checks)
 SEED_QUIZ_SLUG = "demo-quiz"  # the quiz the demo students attempt (has 4 questions)
 SEED_CALC_SUBJECT_SLUG = "radiation-biology"  # same subject the demo quiz files under
-SEED_PDD_TABLE_KEY = "pdd_6mv"  # the one seeded DataTable, an MU calculator's data_tables key
+SEED_PDD_TABLE_KEY = "pdd_6mv"  # PDD, an MU calculator's data_tables key
+SEED_SC_TABLE_KEY = "sc_6mv"  # collimator scatter factor, ditto
+SEED_SP_TABLE_KEY = "sp_6mv"  # phantom scatter factor, ditto
+SEED_WEDGE_TABLE_KEY = "wedge_factors"  # wedge factor, ditto
+SEED_MU_DATA_TABLES = [
+    SEED_PDD_TABLE_KEY,
+    SEED_SC_TABLE_KEY,
+    SEED_SP_TABLE_KEY,
+    SEED_WEDGE_TABLE_KEY,
+]
 SEED_CALC_TITLE = "MU calculator"  # the one seeded calculator activity's title
+
+# Six further published practice calculators (Task 6), get-or-created by title like the MU
+# calculator above: (title, calc_type, subject_slug). Every entry's data_tables is empty —
+# only the MU calculator has data tables of its own. Two inverse_square entries are
+# deliberate, not a duplicate: one teaches the raw Treatment Planning formula, the other
+# reframes the same law as an ALARA dose-at-distance tool in Radiation Protection.
+SEED_CALCULATORS: list[tuple[str, str, str]] = [
+    ("Inverse Square Law", "inverse_square", "treatment-planning"),
+    ("Extended SSD", "extended_ssd", "treatment-planning"),
+    ("Gap Calculation", "gap", "treatment-planning"),
+    ("Magnification", "magnification", "treatment-planning"),
+    ("SI Unit Converter", "si_convert", "radiation-physics"),
+    ("ALARA: Inverse Square in Practice", "inverse_square", "radiation-protection"),
+]
 
 
 @dataclass
@@ -168,9 +193,140 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
         )
         db.add(table)
         await db.flush()
+
+    # Three more single-row DataTables (Task 6), transcribed verbatim from the legacy
+    # MU_Calculator's `scData`/`spData`/`wedgeFactors` 6 MV series (row key 0 — there is
+    # only ever one row — cols are field sizes or wedge angles, ascending).
+    sc_table = await db.scalar(select(DataTable).where(DataTable.key == SEED_SC_TABLE_KEY))
+    if sc_table is None:
+        sc_table = DataTable(
+            key=SEED_SC_TABLE_KEY,
+            title="Sc (collimator scatter factor) 6 MV",
+            grid={
+                "row_label": "Energy",
+                "col_label": "Field size (cm)",
+                "cols": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    22,
+                    24,
+                    26,
+                    28,
+                    30,
+                ],
+                "rows": [
+                    {
+                        "key": 0,
+                        "values": [
+                            0.948,
+                            0.961,
+                            0.97,
+                            0.979,
+                            0.987,
+                            0.994,
+                            1,
+                            1.004,
+                            1.009,
+                            1.013,
+                            1.017,
+                            1.021,
+                            1.024,
+                            1.028,
+                            1.031,
+                            1.03,
+                            1.033,
+                            1.035,
+                            1.038,
+                            1.041,
+                            1.045,
+                            1.048,
+                        ],
+                    }
+                ],
+            },
+            updated_by=educator.id,
+        )
+        db.add(sc_table)
+        await db.flush()
+    sp_table = await db.scalar(select(DataTable).where(DataTable.key == SEED_SP_TABLE_KEY))
+    if sp_table is None:
+        sp_table = DataTable(
+            key=SEED_SP_TABLE_KEY,
+            title="Sp (phantom scatter factor) 6 MV",
+            grid={
+                "row_label": "Energy",
+                "col_label": "Field size (cm)",
+                "cols": [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26],
+                "rows": [
+                    {
+                        "key": 0,
+                        "values": [
+                            0.981,
+                            0.983,
+                            0.987,
+                            0.990,
+                            0.993,
+                            0.997,
+                            1.000,
+                            1.003,
+                            1.007,
+                            1.010,
+                            1.013,
+                            1.016,
+                            1.017,
+                            1.020,
+                            1.022,
+                            1.025,
+                            1.027,
+                            1.017,
+                            1.019,
+                            1.03,
+                        ],
+                    }
+                ],
+            },
+            updated_by=educator.id,
+        )
+        db.add(sp_table)
+        await db.flush()
+    wedge_table = await db.scalar(select(DataTable).where(DataTable.key == SEED_WEDGE_TABLE_KEY))
+    if wedge_table is None:
+        wedge_table = DataTable(
+            key=SEED_WEDGE_TABLE_KEY,
+            title="Wedge factor 6 MV",
+            grid={
+                "row_label": "Energy",
+                "col_label": "Wedge angle (deg)",
+                "cols": [0, 15, 30, 45, 60],
+                "rows": [{"key": 0, "values": [1.0, 0.828, 0.714, 0.580, 0.424]}],
+            },
+            updated_by=educator.id,
+        )
+        db.add(wedge_table)
+        await db.flush()
+
     calc_activity = await db.scalar(
         select(Activity).where(Activity.kind == "calculator", Activity.title == SEED_CALC_TITLE)
     )
+    # Tracks whether this run needs a (re-)publish: a brand-new activity always does; an
+    # existing one only when its data_tables config just changed underneath it (e.g. this
+    # task adding sc_6mv/sp_6mv/wedge_factors to an activity seeded before they existed).
+    config_changed = False
     if calc_activity is None:
         calc_activity = Activity(
             kind="calculator",
@@ -178,13 +334,40 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
             title=SEED_CALC_TITLE,
             subject_id=calc_subject.id,
             access="practice",
-            config={"calc_type": "mu", "data_tables": [SEED_PDD_TABLE_KEY]},
+            config={"calc_type": "mu", "data_tables": SEED_MU_DATA_TABLES},
             status="draft",
         )
         db.add(calc_activity)
         await db.flush()
-    if calc_activity.status != "published":
+    elif calc_activity.config.get("data_tables") != SEED_MU_DATA_TABLES:
+        calc_activity.config = {"calc_type": "mu", "data_tables": SEED_MU_DATA_TABLES}
+        config_changed = True
+    if calc_activity.status != "published" or config_changed:
         await publish_activity(db, calc_activity, educator, change_note="Initial publish")
+
+    # --- Six more published practice calculators (Task 6): get-or-create by title, same
+    # pattern as the MU calculator above, but with no data tables of their own. ---
+    for calc_title, calc_type, subject_slug in SEED_CALCULATORS:
+        subject = await db.scalar(select(Subject).where(Subject.slug == subject_slug))
+        if subject is None:
+            raise RuntimeError(f"seed subject missing: {subject_slug!r}")
+        activity = await db.scalar(
+            select(Activity).where(Activity.kind == "calculator", Activity.title == calc_title)
+        )
+        if activity is None:
+            activity = Activity(
+                kind="calculator",
+                ref_id=new_id(),
+                title=calc_title,
+                subject_id=subject.id,
+                access="practice",
+                config={"calc_type": calc_type, "data_tables": []},
+                status="draft",
+            )
+            db.add(activity)
+            await db.flush()
+        if activity.status != "published":
+            await publish_activity(db, activity, educator, change_note="Initial publish")
 
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
     cohort_created = cohort is None

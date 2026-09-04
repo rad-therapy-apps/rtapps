@@ -88,6 +88,22 @@ async def test_quiz_reimport_updates_not_duplicates(db: AsyncSession) -> None:
     assert v.version == 2
 
 
+async def test_quiz_reimport_snapshot_has_all_questions(db: AsyncSession) -> None:
+    # Issue #42: on reimport, `import_quiz` clears `quiz.questions` then re-adds the new
+    # QuizQuestion rows via bare `db.add(...)` (bypassing the relationship), so the
+    # in-memory collection stays stale (still empty) even though the DB rows are correct.
+    # `import_quiz` builds its own snapshot via `publish_activity` -> `build_activity_snapshot`
+    # in that same call, while `quiz` is still alive on the stack (so the ORM identity map
+    # can't have evicted it) — that stored ContentVersion.snapshot is the reliable fingerprint;
+    # rebuilding a snapshot afresh afterward isn't, since by then `quiz`'s only reference has
+    # gone out of scope and a weak-identity-map re-fetch would reload cleanly and mask the bug.
+    await import_any(db, QUIZ_DOC)
+    a2 = await import_any(db, QUIZ_DOC)
+    v = await db.get(ContentVersion, a2.current_version_id)
+    assert v is not None
+    assert len(v.snapshot["quiz"]["questions"]) == len(QUIZ_DOC["quiz"]["questions"]) == 2
+
+
 async def test_matching_flashcards_sequencing_import(db: AsyncSession) -> None:
     for doc, kind in (
         (
