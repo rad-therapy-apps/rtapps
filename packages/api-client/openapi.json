@@ -1039,6 +1039,21 @@
         "title": "DataTablePutIn",
         "type": "object"
       },
+      "ExternalSubmitIn": {
+        "description": "Score reported by an external activity's player page (plan 4a). The server is\nauthoritative for the denominator: `max_score` comes from the pinned snapshot's\nactivity config and the score is clamped into [0, max_score] \u2014 a tampered client\ncan inflate its own practice percent to at most 100, never break the scale.",
+        "properties": {
+          "score": {
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "score"
+        ],
+        "title": "ExternalSubmitIn",
+        "type": "object"
+      },
       "FlashcardCard": {
         "description": "A single flashcard: term and definition.",
         "properties": {
@@ -3714,6 +3729,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ExternalSubmitIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {

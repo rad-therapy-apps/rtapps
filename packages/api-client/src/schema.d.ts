@@ -1516,6 +1516,17 @@ export interface components {
       title: string;
     };
     /**
+     * ExternalSubmitIn
+     * @description Score reported by an external activity's player page (plan 4a). The server is
+     *     authoritative for the denominator: `max_score` comes from the pinned snapshot's
+     *     activity config and the score is clamped into [0, max_score] — a tampered client
+     *     can inflate its own practice percent to at most 100, never break the scale.
+     */
+    ExternalSubmitIn: {
+      /** Score */
+      score: number;
+    };
+    /**
      * FlashcardCard
      * @description A single flashcard: term and definition.
      */
@@ -2733,7 +2744,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ExternalSubmitIn"] | null;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {

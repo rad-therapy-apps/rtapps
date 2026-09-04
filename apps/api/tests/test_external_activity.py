@@ -8,18 +8,23 @@ is created directly via the ORM instead of through an authoring endpoint.
 
 How it fits the project: plan 4a §3 (player route contract), docs/03-architecture.md §6.5.
 Depends on: `client`/`db` fixtures and `register` from `conftest.py`; `make_educator` from
-`test_cohorts.py`; `app.content.service.publish_activity`.
+`test_cohorts.py`; `app.content.service.publish_activity`; `import_any`/`QUIZ_DOC` for the
+submit-rejection test against a non-external (quiz) activity.
 Used by: CI `api` job; `make test-api`.
 """
+
+from typing import Any
 
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.content.activity_importer import import_any
 from app.content.models import Activity, Subject
 from app.content.service import publish_activity
 from app.ids import new_id
 from tests.conftest import register
+from tests.test_activity_importer import QUIZ_DOC
 from tests.test_cohorts import make_educator
 
 
@@ -30,6 +35,31 @@ async def _ensure_subject(db: AsyncSession, slug: str = "radiation-biology") -> 
         db.add(subject)
         await db.flush()
     return subject
+
+
+async def _publish_external_activity(db: AsyncSession, max_score: int = 5000) -> Activity:
+    subject = await _ensure_subject(db)
+    activity = Activity(
+        kind="external",
+        ref_id=new_id(),
+        title="Cell Defender",
+        subject_id=subject.id,
+        status="draft",
+        access="practice",
+        config={"arcade_slug": "cell-defender", "max_score": max_score},
+    )
+    db.add(activity)
+    await db.flush()
+    await publish_activity(db, activity, author=None, change_note="test")
+    return activity
+
+
+async def _start_attempt(client: AsyncClient, activity_id: Any) -> dict[str, Any]:
+    r = await client.post(f"/api/v1/activities/{activity_id}/attempts")
+    assert r.status_code == 201, r.text
+    body: dict[str, Any] = r.json()
+    assert body["status"] == "in_progress"
+    return body
 
 
 class TestExternalActivitySnapshot:
@@ -82,3 +112,61 @@ class TestExternalActivitySnapshot:
         assert body["kind"] == "external"
         assert body["snapshot"]["external"]["arcade_slug"] == "cell-defender"
         assert body["snapshot"]["external"]["max_score"] == 5000
+
+
+class TestExternalActivitySubmit:
+    async def test_external_attempt_submit_records_clamped_score(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_external_activity(db)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit",
+            headers={"Idempotency-Key": "k1"},
+            json={"score": 1200},
+        )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["score"] == 1200 and body["max_score"] == 5000
+        assert body["percent"] == 24.0 and body["passed"] is None
+
+        # A fresh attempt with an inflated score clamps to max_score, never exceeding 100%.
+        attempt2 = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt2['id']}/submit",
+            headers={"Idempotency-Key": "k2"},
+            json={"score": 999999},
+        )
+        assert r.status_code == 200, r.text
+        body2 = r.json()
+        assert body2["score"] == 5000 and body2["max_score"] == 5000
+        assert body2["percent"] == 100.0
+
+    async def test_external_submit_requires_score_payload(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_external_activity(db)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
+        )
+        assert r.status_code == 422
+
+    async def test_score_payload_rejected_for_graded_kinds(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        activity = await import_any(db, QUIZ_DOC)
+        await register(client)
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit",
+            headers={"Idempotency-Key": "k1"},
+            json={"score": 3},
+        )
+        assert r.status_code == 422
