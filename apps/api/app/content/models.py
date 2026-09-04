@@ -56,7 +56,15 @@ from app.ids import new_id
 LESSON_STATUSES = ("draft", "published", "archived")
 BLOCK_TYPES = ("rich_text", "knowledge_check")
 QUESTION_TYPES = ("single_choice",)
-ACTIVITY_KINDS = ("lesson", "quiz", "flashcards", "matching", "sequencing", "calculator")
+ACTIVITY_KINDS = (
+    "lesson",
+    "quiz",
+    "flashcards",
+    "matching",
+    "sequencing",
+    "calculator",
+    "external",
+)
 ACTIVITY_ACCESS = ("practice", "assessment")
 
 

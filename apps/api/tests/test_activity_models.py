@@ -85,6 +85,7 @@ async def test_kind_and_access_vocabulary() -> None:
         "matching",
         "sequencing",
         "calculator",
+        "external",
     )
     assert ACTIVITY_ACCESS == ("practice", "assessment")
 
