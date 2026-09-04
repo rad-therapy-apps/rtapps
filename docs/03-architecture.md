@@ -169,9 +169,9 @@ The browser never sees a correct answer before it has answered; grading is serve
 
 `GET /api/v1/cohorts/{id}/overview` → the API checks that the caller is an educator **enrolled in that cohort with role educator** (in the SQL query, not in the client), writes an `audit_log` row (`actor, action=read_cohort_overview, cohort`), and returns aggregates computed from `activity_result` and `attempt_item`.
 
-### 4.6 Author publishes a lesson
+### 4.6 Authoring: edit, preview, publish
 
-`POST /api/v1/lessons/{id}/publish` → the API validates the working copy (schema, every knowledge check has a correct answer), assembles the full tree (pages → blocks → questions) into one JSON document, inserts a `content_version` (version n+1, author, change note), sets `lesson.current_version_id`, and records an audit row. Students reading the lesson from that moment receive version n+1; attempts already in progress keep their pinned version.
+The `/author` dashboard lists the needs-review queue (activities still carrying migrated-content `import_notes`) plus every subject's activities; `/author/lessons/{id}` is a three-tab editor (Edit/Preview/Publish) over one activity's working copy. Every `/api/v1/authoring/*` route is gated by `require_author` (educator or admin — anyone else gets 403, not 404) at the router level. `PUT .../lessons/{id}/pages` replaces the whole page/block/question tree (delete-then-rebuild, not diffed) — an edit, not a publish: the served student snapshot is unchanged until a separate publish. `GET .../activities/{id}/preview` rebuilds the same stripped snapshot the student route serves, fresh off the working copy, so an author sees an edit before committing to it. `POST .../activities/{id}/publish` validates the working copy (schema, every knowledge check has a correct answer), assembles it into one JSON document, inserts a `content_version` (version n+1, author, change note), clears `import_notes`, and records an audit row; students reading the lesson from that moment receive version n+1, attempts already in progress keep their pinned version. Images go in through a three-step presign flow: `POST media/presign` creates a pending `MediaAsset` row and a presigned PUT URL, the browser uploads directly to storage, then `POST media/{id}/confirm` verifies the object landed and marks it servable; `GET /media/{id}` redirects any signed-in user to a short-lived presigned GET.
 
 ---
 
@@ -183,7 +183,7 @@ Lesson text is authored in **TipTap** (a ProseMirror editor) and stored as **Pro
 |---|---|
 | Marks | `bold`, `italic`, `underline`, `link` (https only), `code`, `subscript`, `superscript` |
 
-One schema file drives four things: the TipTap extension list in the editor, the API validator (unknown node or mark → 422), the legacy-migration mapper, and the renderer. The validator (`app/content/prose.py`, `jsonschema`), the mapper (`tools/migrate-legacy`) and the renderer exist as of v0.1.0; the editor is Phase 3. Until then `math` nodes render as their KaTeX source in a `<code class="math">`. The renderer, `apps/web/src/lib/prose/ProseNode.svelte`, is a recursive component that switches on node type and emits real Svelte elements. It **never** uses `{@html}`, so there is no HTML-injection surface no matter what an author pastes.
+One schema file drives four things: the TipTap extension list in the editor, the API validator (unknown node or mark → 422), the legacy-migration mapper, and the renderer. The validator (`app/content/prose.py`, `jsonschema`), the mapper (`tools/migrate-legacy`) and the renderer exist as of v0.1.0; the editor (`apps/web/src/lib/author/RichTextEditor.svelte`) shipped in v0.4.0 (plan 3b). It has no math input UI yet, so `math` nodes still render as their KaTeX source in a `<code class="math">`. The renderer, `apps/web/src/lib/prose/ProseNode.svelte`, is a recursive component that switches on node type and emits real Svelte elements. It **never** uses `{@html}`, so there is no HTML-injection surface no matter what an author pastes.
 
 ---
 
@@ -396,7 +396,7 @@ Single VM is expected to serve a program of a few hundred students comfortably. 
 | API | pytest + httpx against a real Postgres (transaction rolled back per test) | Auth flows; the permission matrix (student cannot read another cohort; educator cannot read a cohort they're not in); attempt lifecycle; publish/version pinning; audit rows written |
 | Shared schemas | JSON fixture files (valid + invalid) run by both Python and TypeScript tests | ProseMirror documents, question bodies, attempt payloads |
 | Web units | vitest + @testing-library/svelte | `ProseNode` renders every node type and rejects unknown ones; activity components emit the right response shapes |
-| End-to-end | Playwright against the compose stack | register → join cohort → open lesson → answer → see score → educator sees it |
+| End-to-end | Playwright against the compose stack | register → join cohort → open lesson → answer → see score → educator sees it; educator fixes a needs-review lesson (edit → preview → publish, with an image upload) → student sees the published edit; student computes MU from the seeded calculator |
 | Migration tool | pytest golden files | Three legacy pages → expected JSON |
 | Contract | CI job | `openapi.json` → regenerated client must match the committed one |
 

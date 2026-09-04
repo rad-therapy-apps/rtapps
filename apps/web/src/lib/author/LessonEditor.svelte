@@ -20,6 +20,10 @@
 	at a time (every block's Image button is disabled meanwhile, via `oninsertimage` going
 	undefined), and a failed upload surfaces in the same error banner `save` uses rather than
 	rejecting silently. `beforeNavigate` blocks leaving the page with unsaved changes.
+	`normalizeBlock` (Task 18) reconciles a real drift between the GET and PUT wire shapes: the
+	authoring GET (`build_snapshot` reused verbatim) nests a knowledge_check's options/answer
+	under `body`, but the PUT (`KnowledgeCheckImport`) and this editor's own state are flat — an
+	existing lesson's knowledge checks rendered with zero options before this normalization.
 	How it fits the project: the core of Task 15's lesson editor; `+page.svelte` renders this for
 	the Edit tab. `PagesIn`/`KnowledgeCheckImport`/`RichTextImport` are Task 8's authoring wire
 	shapes; `replace_lesson_pages` (apps/api) is what actually persists the PUT.
@@ -34,7 +38,13 @@
 	import KnowledgeCheckForm from './KnowledgeCheckForm.svelte';
 	import { uploadImage, type AuthorApi } from './uploadImage';
 	import { api } from './api';
-	import type { AuthorPage, ClientPage, ClientBlock } from './types';
+	import type {
+		AuthorBlock,
+		AuthorKnowledgeCheckBlock,
+		AuthorPage,
+		ClientPage,
+		ClientBlock
+	} from './types';
 	import type { ProseDoc } from '../prose/types';
 	import type { components } from '@rtapps/api-client';
 
@@ -106,12 +116,36 @@
 		return 'Request failed';
 	}
 
+	// `LessonAuthorOut.pages` (this route's `load`) is `build_snapshot` reused verbatim
+	// (apps/api/app/authoring/router.py's own docstring) — the same shape the student-facing
+	// snapshot uses, which nests a knowledge_check's options/answer under `body` and adds
+	// `question_id`, NOT the flat `AuthorKnowledgeCheckBlock` shape `PagesIn`'s PUT expects (or
+	// that `LessonEditor.svelte.spec.ts`'s hand-written fixtures use). Normalize on load so the
+	// editor — and the PUT `toPagesIn` sends back below — only ever deals with the flat shape.
+	function normalizeBlock(block: AuthorBlock): AuthorBlock {
+		if (block.type !== 'knowledge_check') return block;
+		const raw = block as unknown as AuthorKnowledgeCheckBlock & {
+			body?: { options: string[]; answer: number };
+		};
+		return {
+			type: 'knowledge_check',
+			key: raw.key,
+			stem: raw.stem,
+			options: raw.body ? raw.body.options : raw.options,
+			answer: raw.body ? raw.body.answer : raw.answer,
+			explanation: raw.explanation
+		};
+	}
+
 	// Maps the loaded wire shape into client state once, attaching a stable instanceId per page and
 	// per block (see ./types.ts) so reordering never remounts a page's or a RichTextEditor's DOM.
 	function toClientPages(pages: AuthorPage[]): ClientPage[] {
 		return pages.map((page) => ({
 			title: page.title,
-			blocks: page.blocks.map((block) => ({ ...block, instanceId: crypto.randomUUID() })),
+			blocks: page.blocks.map((block) => ({
+				...normalizeBlock(block),
+				instanceId: crypto.randomUUID()
+			})),
 			instanceId: crypto.randomUUID()
 		}));
 	}

@@ -89,7 +89,11 @@
 					{/if}
 					{#if row.import_notes.length > 0}
 						<ul>
-							{#each row.import_notes.slice(0, 2) as note (note)}
+							<!-- Keyed on position, not `note` itself (Task 18): the same converter note
+								 text legitimately repeats per occurrence on a real migrated lesson, and a
+								 keyed-each requires unique keys — keying on the value threw
+								 `each_key_duplicate` for any such row (see PublishPanel.svelte's own fix). -->
+							{#each row.import_notes.slice(0, 2) as note, i (i)}
 								<li>{note}</li>
 							{/each}
 						</ul>

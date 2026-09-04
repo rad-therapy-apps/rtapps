@@ -71,7 +71,12 @@
 			<p>Nothing flagged.</p>
 		{:else}
 			<ul>
-				{#each importNotes as note (note)}
+				<!-- Keyed on position, not `note` itself (Task 18): the same converter note text
+					 (e.g. "highlight→bold") legitimately repeats once per occurrence on a real
+					 migrated lesson, and a keyed-each requires unique keys — keying on the value
+					 threw `each_key_duplicate` and broke this whole tab whenever a lesson had more
+					 than one identical note. -->
+				{#each importNotes as note, i (i)}
 					<li>{note}</li>
 				{/each}
 			</ul>

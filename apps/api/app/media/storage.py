@@ -37,25 +37,53 @@ class MediaStorage(Protocol):
 
 
 class MinioStorage:
-    """S3-compatible storage via the minio SDK (endpoint/creds from Settings)."""
+    """S3-compatible storage via the minio SDK (endpoint/creds from Settings).
+
+    Two clients, one endpoint each: `_client` (`s3_endpoint`) for `stat`, real network I/O the
+    API container itself performs, so it needs the docker-internal hostname in dev
+    (`storage:9000`); `_public_client` (`s3_browser_endpoint`) for presigning only (pure local
+    HMAC signing, no I/O — the signature is valid for whatever host/path/query it was computed
+    against, regardless of which client instance produced it), so a browser-issued PUT/GET
+    against the returned URL needs the host a browser can actually reach (`localhost:9000` in
+    dev). The two are identical in prod (a real S3/R2 endpoint is reachable from both sides).
+    """
 
     def __init__(self) -> None:
         settings = load_settings()
+        # `region="us-east-1"` (MinIO's own default for a non-AWS host) makes the SDK's
+        # `_get_region` return it directly instead of issuing a real GetBucketLocation request —
+        # `get_media_storage` builds a fresh `MinioStorage` per request (no client reuse across
+        # requests to cache a looked-up region), and `_public_client` below points at a host only
+        # a browser can reach, unreachable from inside this container; without a fixed region,
+        # the first presigned-URL call on that client would 500 trying to look one up.
         parsed = urlparse(settings.s3_endpoint)
         self._client = Minio(
             parsed.netloc,
             access_key=settings.s3_access_key,
             secret_key=settings.s3_secret_key,
             secure=parsed.scheme == "https",
+            region="us-east-1",
+        )
+        public_parsed = urlparse(settings.s3_browser_endpoint)
+        self._public_client = Minio(
+            public_parsed.netloc,
+            access_key=settings.s3_access_key,
+            secret_key=settings.s3_secret_key,
+            secure=public_parsed.scheme == "https",
+            region="us-east-1",
         )
         self._bucket = settings.s3_bucket
 
     def presigned_put(self, key: str) -> str:
         # Pure local signing (no network I/O) - safe to call directly from an async route.
-        return self._client.presigned_put_object(self._bucket, key, expires=timedelta(minutes=10))
+        return self._public_client.presigned_put_object(
+            self._bucket, key, expires=timedelta(minutes=10)
+        )
 
     def presigned_get(self, key: str) -> str:
-        return self._client.presigned_get_object(self._bucket, key, expires=timedelta(minutes=5))
+        return self._public_client.presigned_get_object(
+            self._bucket, key, expires=timedelta(minutes=5)
+        )
 
     def stat(self, key: str) -> int | None:
         # Network I/O - callers must run this off the event loop (anyio.to_thread.run_sync).
