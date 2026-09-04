@@ -62,9 +62,11 @@ class MinioStorage:
             access_key=settings.s3_access_key,
             secret_key=settings.s3_secret_key,
             secure=parsed.scheme == "https",
-            region="us-east-1",
         )
         public_parsed = urlparse(settings.s3_browser_endpoint)
+        # `region="us-east-1"` on the public client avoids a GetBucketLocation request against
+        # an endpoint only browsers can reach (unreachable from inside this container).
+        # The internal client must NOT pin a region — the real backend's signing region governs.
         self._public_client = Minio(
             public_parsed.netloc,
             access_key=settings.s3_access_key,
