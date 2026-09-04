@@ -11,7 +11,8 @@
  * How it fits the project: TDD step 1 of plan 3c Task 2; the values below are hand-computed the
  * same way `formulas.test.ts`'s fixtures are (Task 1).
  * Depends on: `./InverseSquareCalculator.svelte`, `./ExtendedSsdCalculator.svelte`,
- * `./GapCalculator.svelte`, `./MagnificationCalculator.svelte`, vitest-browser-svelte.
+ * `./GapCalculator.svelte`, `./MagnificationCalculator.svelte`, `./SiConverter.svelte`,
+ * vitest-browser-svelte.
  * Used by: `pnpm --filter web test` (vitest `client` project, `pr.yml` job `web`).
  */
 import { describe, expect, it } from 'vitest';
@@ -21,9 +22,14 @@ import InverseSquareCalculator from './InverseSquareCalculator.svelte';
 import ExtendedSsdCalculator from './ExtendedSsdCalculator.svelte';
 import GapCalculator from './GapCalculator.svelte';
 import MagnificationCalculator from './MagnificationCalculator.svelte';
+import SiConverter from './SiConverter.svelte';
 
 async function fillByLabel(label: string, value: string) {
 	await userEvent.fill(page.getByLabelText(label).element(), value);
+}
+
+async function selectByLabel(label: string, value: string) {
+	await userEvent.selectOptions(page.getByLabelText(label).element(), value);
 }
 
 // Assertions read `container.textContent` (rather than a `.calc`/`.calc-result` locator) because
@@ -99,5 +105,20 @@ describe('MagnificationCalculator', () => {
 
 		await expect.poll(() => container.textContent).toContain('1.40');
 		await expect.poll(() => container.textContent).toContain('5.60');
+	});
+});
+
+describe('SiConverter', () => {
+	// Scenario: absorbed dose, 250 cGy -> Gy (audit §11): siConvert(250, 1e-2, 1) = 2.5, rendered
+	// in the legacy page's fixed 4-decimal format ("2.5000").
+	// Invariant: the rendered result contains "2.5".
+	it('converts 250 cGy to Gy', async () => {
+		const { container } = await render(SiConverter, { tables: {} });
+
+		await selectByLabel('From unit', 'centigray (cGy)');
+		await selectByLabel('To unit', 'Gray (Gy)');
+		await fillByLabel('Value', '250');
+
+		await expect.poll(() => container.textContent).toContain('2.5');
 	});
 });
