@@ -136,6 +136,43 @@ class TestCalculatorBuilder:
         )
         assert r.status_code == 422, r.text
 
+    async def test_create_accepts_all_valid_calc_types(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """Each valid calc_type (gap, magnification, si_convert, etc.) creates successfully
+        with empty data_tables; unknown types still reject."""
+        await make_educator(client, db, "edu@example.edu")
+        await _ensure_subject(db)
+
+        # Test all valid calc_types
+        valid_types = ["mu", "inverse_square", "extended_ssd", "gap", "magnification", "si_convert"]
+        for calc_type in valid_types:
+            r = await client.post(
+                "/api/v1/authoring/calculators",
+                json={
+                    "subject_slug": "radiation-biology",
+                    "title": f"{calc_type.replace('_', ' ').title()} Calculator",
+                    "calc_type": calc_type,
+                    "data_tables": [],
+                },
+            )
+            assert r.status_code == 201, f"Failed for calc_type={calc_type}: {r.text}"
+            body = r.json()
+            assert body["calc_type"] == calc_type
+            assert body["data_tables"] == []
+
+        # Test that bogus type still 422s
+        r = await client.post(
+            "/api/v1/authoring/calculators",
+            json={
+                "subject_slug": "radiation-biology",
+                "title": "Bogus",
+                "calc_type": "bogus",
+                "data_tables": [],
+            },
+        )
+        assert r.status_code == 422, r.text
+
     async def test_get_kind_mismatch_404_for_lesson_activity(
         self, client: AsyncClient, db: AsyncSession
     ) -> None:
