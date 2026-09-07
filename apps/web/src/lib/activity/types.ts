@@ -1,8 +1,8 @@
 /**
- * What this file does: TypeScript types for the five practice-activity snapshot shapes returned,
+ * What this file does: TypeScript types for the six practice-activity snapshot shapes returned,
  * answers stripped, by `GET /activities/{id}` (quiz, flashcards, matching, sequencing,
- * calculator), plus the one boundary cast from the opaque `ActivityOut.snapshot` JSON to those
- * shapes.
+ * calculator, external), plus the one boundary cast from the opaque `ActivityOut.snapshot` JSON
+ * to those shapes.
  * Used here and why: hand-written types mirroring `apps/api/app/content/activity_snapshots.py`'s
  * `strip_activity_answers` output, following the `lib/lesson/types.ts`/`snapshot.ts` pattern so
  * `+page.svelte`/`QuizPlayer.svelte`/`FlashcardPlayer.svelte` get an exhaustive-checkable
@@ -17,7 +17,7 @@
  * Depends on: `$lib/prose/types` (`ProseDoc`, embedded as the quiz stem), `$lib/calc/interpolate`
  * (`Grid`, the calculator data table's wire shape).
  * Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `QuizPlayer.svelte`,
- * `FlashcardPlayer.svelte`, `QuizPlayer.svelte.spec.ts`.
+ * `FlashcardPlayer.svelte`, `ExternalPlayer.svelte`, `QuizPlayer.svelte.spec.ts`.
  */
 import type { ProseDoc } from '$lib/prose/types';
 import type { Grid } from '$lib/calc/interpolate';
@@ -87,10 +87,20 @@ export type CalculatorSnapshot = {
 	};
 };
 
-// The five practice-activity snapshot shapes (ADR-0006 excludes lesson/assessment activities
+export type ExternalSnapshot = {
+	activity: { id: string; kind: 'external'; title: string };
+	external: { arcade_slug: string; max_score: number; subject: { slug: string; title: string } };
+};
+
+// The six practice-activity snapshot shapes (ADR-0006 excludes lesson/assessment activities
 // from this route), discriminated on `activity.kind`.
 export type ActivitySnapshot =
-	QuizSnapshot | FlashcardsSnapshot | MatchingSnapshot | SequencingSnapshot | CalculatorSnapshot;
+	| QuizSnapshot
+	| FlashcardsSnapshot
+	| MatchingSnapshot
+	| SequencingSnapshot
+	| CalculatorSnapshot
+	| ExternalSnapshot;
 
 /**
  * `snapshot` is typed as a plain object by the OpenAPI schema (it's opaque JSON to the API), so

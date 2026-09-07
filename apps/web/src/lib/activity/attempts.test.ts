@@ -10,7 +10,13 @@
  * Used by: `pnpm --filter web test` (vitest `server` project).
  */
 import { describe, expect, it, vi } from 'vitest';
-import { gradeItem, startAttempt, submitAttempt, type PostFn } from './attempts';
+import {
+	gradeItem,
+	startAttempt,
+	submitAttempt,
+	submitExternalAttempt,
+	type PostFn
+} from './attempts';
 
 describe('startAttempt', () => {
 	// Scenario: the API resumes/starts an attempt with one saved item.
@@ -127,6 +133,29 @@ describe('submitAttempt', () => {
 			headers: { 'Idempotency-Key': expect.any(String) }
 		});
 		expect(submitted).toEqual({ percent: 100, passed: true });
+	});
+});
+
+describe('submitExternalAttempt', () => {
+	// Scenario: an external (arcade) activity reports its raw score for the server to clamp
+	// against the pinned snapshot's max_score.
+	// Invariant: the request body is exactly {score}, a fresh Idempotency-Key header is present,
+	// and percent/passed are returned.
+	it('submitExternalAttempt posts the score with an Idempotency-Key', async () => {
+		const calls: unknown[] = [];
+		const post = (async (url: string, init: unknown) => {
+			calls.push({ url, init });
+			return { data: { percent: 24.0, passed: null }, error: undefined };
+		}) as unknown as PostFn;
+		const result = await submitExternalAttempt(post, 'a1', 1200);
+		expect(result).toEqual({ percent: 24.0, passed: null });
+		const { url, init } = calls[0] as {
+			url: string;
+			init: { body: unknown; headers: Record<string, string> };
+		};
+		expect(url).toBe('/api/v1/attempts/{attempt_id}/submit');
+		expect(init.body).toEqual({ score: 1200 });
+		expect(init.headers['Idempotency-Key']).toBeTruthy();
 	});
 });
 
