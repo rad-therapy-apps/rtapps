@@ -35,7 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attempts.models import Attempt, AttemptItem
 from app.attempts.rollup import upsert_activity_result
-from app.attempts.schemas import AttemptOut, ItemGradeOut, ItemIn, ResultOut
+from app.attempts.schemas import AttemptOut, ExternalSubmitIn, ItemGradeOut, ItemIn, ResultOut
 from app.auth.deps import require_user
 from app.auth.models import User, UserRole
 from app.content.activity_snapshots import gradeable_items
@@ -177,6 +177,7 @@ async def grade_item(
 @router.post("/attempts/{attempt_id}/submit", response_model=AttemptOut)
 async def submit_attempt(
     attempt_id: uuid.UUID,
+    payload: ExternalSubmitIn | None = None,
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     user: User = Depends(require_user),
     db: AsyncSession = Depends(get_session),
@@ -196,7 +197,22 @@ async def submit_attempt(
     version = await db.get(ContentVersion, attempt.content_version_id)
     assert version is not None
     kind = version.snapshot["activity"]["kind"]
-    if kind == "flashcards":
+    if kind != "external" and payload is not None:
+        raise Problem(422, "A score payload is only valid for external activities")
+    if kind == "external":
+        # Plan 4a: the game's client-reported score. Server-authoritative max from the
+        # PINNED snapshot config; clamp so a tampered client caps out at 100%.
+        if payload is None:
+            raise Problem(422, "External activities require a score payload")
+        max_score = float(version.snapshot["activity"]["config"].get("max_score") or 0)
+        if max_score <= 0:
+            raise Problem(422, "Activity has no max_score configured")
+        score = min(payload.score, max_score)
+        attempt.score = score
+        attempt.max_score = max_score
+        attempt.percent = round(100.0 * score / max_score, 2)
+        attempt.passed = None  # practice: no pass mark for games in 4a
+    elif kind == "flashcards":
         # Completion-only: no score fields at all (max_score 0 must not fake percent=100).
         attempt.score = attempt.max_score = attempt.percent = None
         attempt.passed = None

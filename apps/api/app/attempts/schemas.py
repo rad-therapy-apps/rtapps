@@ -78,3 +78,12 @@ class ResultOut(BaseModel):
     score: float | None
     max_score: float | None
     submitted_at: datetime | None
+
+
+class ExternalSubmitIn(BaseModel):
+    """Score reported by an external activity's player page (plan 4a). The server is
+    authoritative for the denominator: `max_score` comes from the pinned snapshot's
+    activity config and the score is clamped into [0, max_score] — a tampered client
+    can inflate its own practice percent to at most 100, never break the scale."""
+
+    score: float = Field(ge=0)

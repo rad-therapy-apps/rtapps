@@ -1,6 +1,6 @@
 <!--
 	What this file does: Subject detail page at `(app)/subjects/[slug]`. Shows the subject's
-	summary, links to each of its lessons, and links to its practice activities grouped by kind.
+	summary, links to each of its lessons, links to its practice activities grouped by kind, and the Games + Simulator shelf.
 
 	Used here and why: `resolve()` with route params to build each lesson/activity href, per
 	`svelte/no-navigation-without-resolve`; Svelte 5 runes (`$props()`, `$derived()` for grouping
@@ -25,7 +25,8 @@
 		flashcards: 'Flashcards',
 		matching: 'Matching',
 		sequencing: 'Sequencing',
-		calculator: 'Calculators'
+		calculator: 'Calculators',
+		external: 'Games'
 	};
 	// One group per kind that has at least one activity; a kind with none renders no section.
 	const activityGroups = $derived(
@@ -73,3 +74,10 @@
 		{/each}
 	</ul>
 {/each}
+
+<!-- Phase-4 shelf (plan 4a): the Simulator section's entry is a placeholder until plan 4c
+     replaces it with the real simulator application entry. Static on every subject page. -->
+<h2>Simulator</h2>
+<button disabled title="The RT simulator arrives in a future update"
+	>Enter the simulator — coming soon</button
+>

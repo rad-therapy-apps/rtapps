@@ -70,7 +70,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     docs_enabled = settings.env != "prod"  # hide interactive docs/schema in production
     app = FastAPI(
         title="RTApps API",
-        version="0.5.0",
+        version="0.6.0",
         lifespan=lifespan,
         openapi_url=f"{API_PREFIX}/openapi.json" if docs_enabled else None,
         docs_url=f"{API_PREFIX}/docs" if docs_enabled else None,

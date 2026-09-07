@@ -16,14 +16,15 @@
 	3a Task 14/15, plan 3b Task 17.
 	Works with: `$lib/activity/QuizPlayer.svelte`, `$lib/activity/FlashcardPlayer.svelte`,
 	`$lib/activity/MatchingPlayer.svelte`, `$lib/activity/SequencingPlayer.svelte`,
-	`$lib/calc/registry`, `$lib/activity/types` (`activitySnapshot`). Used by: reached from
-	`(app)/subjects/[slug]/+page.svelte`.
+	`$lib/activity/ExternalPlayer.svelte`, `$lib/calc/registry`, `$lib/activity/types`
+	(`activitySnapshot`). Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
 -->
 <script lang="ts">
 	import QuizPlayer from '$lib/activity/QuizPlayer.svelte';
 	import FlashcardPlayer from '$lib/activity/FlashcardPlayer.svelte';
 	import MatchingPlayer from '$lib/activity/MatchingPlayer.svelte';
 	import SequencingPlayer from '$lib/activity/SequencingPlayer.svelte';
+	import ExternalPlayer from '$lib/activity/ExternalPlayer.svelte';
 	import { registry } from '$lib/calc/registry';
 	import { activitySnapshot } from '$lib/activity/types';
 	import type {
@@ -31,7 +32,8 @@
 		FlashcardsSnapshot,
 		MatchingSnapshot,
 		SequencingSnapshot,
-		CalculatorSnapshot
+		CalculatorSnapshot,
+		ExternalSnapshot
 	} from '$lib/activity/types';
 	import type { PageData } from './$types';
 
@@ -82,5 +84,10 @@
 		{:else}
 			<p>this calculator isn't supported yet</p>
 		{/if}
+	{:else if snapshot.activity.kind === 'external'}
+		<ExternalPlayer
+			activityId={data.activity.activity_id}
+			snapshot={snapshot as ExternalSnapshot}
+		/>
 	{/if}
 {/key}

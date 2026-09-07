@@ -36,12 +36,11 @@
 		# Send the full referrer only to same-origin destinations; downgrade to
 		# origin-only cross-origin, and never on an HTTPS→HTTP downgrade.
 		Referrer-Policy strict-origin-when-cross-origin
-		# Blocks this origin from being framed at all (clickjacking defense).
-		# NOTE(review, issue #16): same Phase-4 caveat as infra/Caddyfile — Phase 4's
-		# legacy simulators/EMR/DICOM viewers are meant to be re-hosted as
-		# iframe-embedded "external" activities, which DENY would break. Revisit then;
-		# not needed for Release 1.
-		X-Frame-Options DENY
+		# Clickjacking defense: only THIS origin may frame the app. Was DENY through
+		# Release 1; plan 4a's arcade player embeds same-origin /arcade/* iframes
+		# (the phase-4 caveat noted here under issue #16), which DENY blocked outright.
+		# Cross-origin framing remains forbidden. MUST match infra/Caddyfile.
+		X-Frame-Options SAMEORIGIN
 		# Force HTTPS for a year, including subdomains, on every future visit (NFR-08).
 		# Harmless when actually served over plain HTTP (tunnel mode): browsers only
 		# honor this header on responses received over HTTPS in the first place.

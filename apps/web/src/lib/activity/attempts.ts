@@ -15,7 +15,7 @@
  * `docs/03-architecture.md` §4.4.
  * Depends on: `$lib/lesson/api` (`api.POST`'s type, for `PostFn`), `$lib/prose/types`
  * (`ProseDoc`), `@rtapps/api-client`.
- * Used by: `QuizPlayer.svelte`, `FlashcardPlayer.svelte`, `attempts.test.ts`.
+ * Used by: `QuizPlayer.svelte`, `FlashcardPlayer.svelte`, `ExternalPlayer.svelte`, `attempts.test.ts`.
  */
 import { api } from '$lib/lesson/api';
 import type { components } from '@rtapps/api-client';
@@ -84,6 +84,23 @@ export async function submitAttempt(post: PostFn, attemptId: string): Promise<Su
 	const res = await post('/api/v1/attempts/{attempt_id}/submit', {
 		params: { path: { attempt_id: attemptId } },
 		headers: { 'Idempotency-Key': crypto.randomUUID() }
+	});
+	if (res.error) throw new Error(errorTitle(res.error));
+	const attempt = res.data as AttemptOut;
+	return { percent: attempt.percent, passed: attempt.passed };
+}
+
+/** POST /attempts/{id}/submit with the external game's reported score (plan 4a). The server
+ *  clamps against the pinned snapshot's max_score — this client never sends a denominator. */
+export async function submitExternalAttempt(
+	post: PostFn,
+	attemptId: string,
+	score: number
+): Promise<SubmittedAttempt> {
+	const res = await post('/api/v1/attempts/{attempt_id}/submit', {
+		params: { path: { attempt_id: attemptId } },
+		headers: { 'Idempotency-Key': crypto.randomUUID() },
+		body: { score }
 	});
 	if (res.error) throw new Error(errorTitle(res.error));
 	const attempt = res.data as AttemptOut;

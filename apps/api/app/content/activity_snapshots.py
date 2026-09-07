@@ -198,6 +198,18 @@ async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[
             "activity": _activity_part(activity),
             "calculator": {"calc_type": activity.config.get("calc_type"), "data_tables": tables},
         }
+    # External: an embedded browser app (plan 4a). There is no working-copy row to resolve —
+    # the snapshot pins the arcade slug and score ceiling straight from the activity config,
+    # so a later config edit never changes what an already-pinned attempt was played against.
+    if activity.kind == "external":
+        return {
+            "activity": _activity_part(activity),
+            "external": {
+                "arcade_slug": activity.config.get("arcade_slug"),
+                "max_score": activity.config.get("max_score"),
+                "subject": subject,
+            },
+        }
     raise ValueError(f"unknown activity kind {activity.kind}")
 
 
