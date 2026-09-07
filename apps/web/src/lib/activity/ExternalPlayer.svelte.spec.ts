@@ -107,7 +107,10 @@ describe('ExternalPlayer', () => {
 
 		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
 		await expect.element(page.getByText('24%', { exact: false })).toBeInTheDocument();
-		expect(page.getByRole('img', { name: /badge/i }).elements().length).toBe(0);
+		// Codebase badge idiom is <p class="badge" data-testid="quiz-badge">🏅 Badge earned!</p>;
+		// games show no badge (practice semantics in 4a), so both must be absent.
+		expect(page.getByTestId('quiz-badge').elements().length).toBe(0);
+		expect(page.getByText(/badge earned/i).elements().length).toBe(0);
 		expect(post).toHaveBeenCalledWith('/api/v1/attempts/{attempt_id}/submit', {
 			params: { path: { attempt_id: 'attempt-1' } },
 			headers: { 'Idempotency-Key': expect.any(String) },
@@ -170,6 +173,90 @@ describe('ExternalPlayer', () => {
 		dispatchResult({ type: 'other', score: 1200 });
 		dispatchResult({ type: 'rtapps:result' });
 		dispatchResult({ type: 'rtapps:result', score: 1200 }, 'https://evil.example');
+
+		// Give any (wrongly) triggered submit a tick to fire before asserting it didn't.
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(submitCalls).toBe(0);
+	});
+
+	// Scenario: a message with score as a string (which Number() would coerce to a number).
+	// Invariant: ignored — no submit call goes out, rejecting coercion of strings.
+	it('ignores a message with score as a string', async () => {
+		let submitCalls = 0;
+		const post: Post = vi.fn(async (path: string) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				submitCalls += 1;
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: 24, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', score: '1200', max: 5000 });
+
+		// Give any (wrongly) triggered submit a tick to fire before asserting it didn't.
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(submitCalls).toBe(0);
+	});
+
+	// Scenario: a message with score as null (which Number() would coerce to 0).
+	// Invariant: ignored — no submit call goes out, rejecting coercion of null.
+	it('ignores a message with score as null', async () => {
+		let submitCalls = 0;
+		const post: Post = vi.fn(async (path: string) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				submitCalls += 1;
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: 24, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', score: null, max: 5000 });
+
+		// Give any (wrongly) triggered submit a tick to fire before asserting it didn't.
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(submitCalls).toBe(0);
+	});
+
+	// Scenario: a message with score as a boolean (which Number() would coerce to 0 or 1).
+	// Invariant: ignored — no submit call goes out, rejecting coercion of booleans.
+	it('ignores a message with score as a boolean', async () => {
+		let submitCalls = 0;
+		const post: Post = vi.fn(async (path: string) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				submitCalls += 1;
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: 24, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', score: true, max: 5000 });
 
 		// Give any (wrongly) triggered submit a tick to fire before asserting it didn't.
 		await new Promise((resolve) => setTimeout(resolve, 50));

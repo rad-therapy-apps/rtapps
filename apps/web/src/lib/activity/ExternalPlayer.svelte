@@ -68,8 +68,10 @@
 		if (event.origin !== window.location.origin) return;
 		const data = event.data as { type?: string; score?: unknown };
 		if (data?.type !== 'rtapps:result') return;
-		const score = Number(data.score);
-		if (!Number.isFinite(score)) return;
+		// Contract: score must arrive as a finite number — no coercion of strings/null/booleans
+		// (Number() would turn null into 0 and "1200" into 1200; both must be ignored).
+		const score = data.score;
+		if (typeof score !== 'number' || !Number.isFinite(score)) return;
 		if (reportedScore !== null || status !== 'playing') return;
 		reportedScore = score;
 		void submitScore(score);
