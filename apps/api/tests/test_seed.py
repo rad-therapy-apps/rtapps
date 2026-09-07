@@ -62,6 +62,11 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
     # Every seed/content + seed/activities document is (re)imported on every call (an
     # upsert, not a get-or-create), so the count is stable across calls, not 0.
     assert first.activities_imported == second.activities_imported == 93
+    # Seeded get-or-create activities (calculators, arcade games) increase the total but
+    # are created only once; one more activity now (Cell Defender).
+    total_activities_first = await db.scalar(select(func.count()).select_from(Activity))
+    total_activities_second = await db.scalar(select(func.count()).select_from(Activity))
+    assert total_activities_first == total_activities_second
 
 
 async def test_seed_users_can_log_in(
@@ -323,6 +328,27 @@ async def test_seed_creates_six_practice_calculators(db: AsyncSession, settings:
             .where(Activity.kind == "calculator", Activity.title == title)
         )
         assert count == 1
+
+
+async def test_seed_creates_cell_defender(db: AsyncSession, settings: Settings) -> None:
+    """The seeded Cell Defender arcade activity (Plan 4a pilot): published, kind external,
+    access practice, config with arcade_slug and max_score; subject is radiation-biology;
+    re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Cell Defender"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "cell-defender", "max_score": 5000}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-biology"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Cell Defender")
+    )
+    assert count == 1
 
 
 async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Settings) -> None:

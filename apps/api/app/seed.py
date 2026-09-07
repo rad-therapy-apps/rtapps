@@ -106,6 +106,15 @@ SEED_CALCULATORS: list[tuple[str, str, str]] = [
     ("ALARA: Inverse Square in Practice", "inverse_square", "radiation-protection"),
 ]
 
+# Plan 4a pilot game (get-or-created by title, like the practice calculators). max_score
+# 5000 ≈ a strong full run of Cell Defender (per-enemy 50-100 + per-level 250 bonuses);
+# percent is clamped server-side, and a per-game tuning pass is plan 4b audit scope.
+SEED_ARCADE_GAME = {
+    "title": "Cell Defender",
+    "subject_slug": "radiation-biology",
+    "config": {"arcade_slug": "cell-defender", "max_score": 5000},
+}
+
 
 @dataclass
 class SeedSummary:
@@ -368,6 +377,35 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
             await db.flush()
         if activity.status != "published":
             await publish_activity(db, activity, educator, change_note="Initial publish")
+
+    # --- Cell Defender arcade game (Plan 4a pilot): get-or-create by title, same pattern
+    # as the practice calculators above. ---
+    arcade_subject = await db.scalar(
+        select(Subject).where(Subject.slug == SEED_ARCADE_GAME["subject_slug"])
+    )
+    if arcade_subject is None:
+        raise RuntimeError(
+            f"seed subject missing: {SEED_ARCADE_GAME['subject_slug']!r} (expected from demo-quiz)"
+        )
+    arcade_activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == SEED_ARCADE_GAME["title"]
+        )
+    )
+    if arcade_activity is None:
+        arcade_activity = Activity(
+            kind="external",
+            ref_id=new_id(),
+            title=SEED_ARCADE_GAME["title"],
+            subject_id=arcade_subject.id,
+            access="practice",
+            config=SEED_ARCADE_GAME["config"],
+            status="draft",
+        )
+        db.add(arcade_activity)
+        await db.flush()
+    if arcade_activity.status != "published":
+        await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
 
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
     cohort_created = cohort is None
