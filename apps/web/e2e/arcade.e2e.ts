@@ -58,9 +58,7 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 		.frames()
 		.find((f) => f.url().includes('/arcade/cell-defender'))!
 		.evaluate(() =>
-			(
-				window as unknown as { RTApps: { reportResult(s: number): void } }
-			).RTApps.reportResult(1200)
+			(window as unknown as { RTApps: { reportResult(s: number): void } }).RTApps.reportResult(1200)
 		);
 
 	// 1200 / the seeded max_score of 5000 = 24%.

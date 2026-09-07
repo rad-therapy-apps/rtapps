@@ -9,7 +9,7 @@ Radiation-therapy education platform — the ground-up rebuild of the RTApps e-w
 - `tools/migrate-legacy` — imports content from the legacy `rtt_e_workbook` repository
 - `infra/` — Docker Compose (dev + prod), Caddy/Cloudflare Tunnel config, backup container, deploy script
 
-Status: **v0.5.0** (milestone M5) — calculator suite shipped (MU photon dose-to-monitor-units with configurable machine factors, plus inverse-square, extended-SSD, gap, magnification, and SI unit converters). Previous (M4): in-app authoring, media upload, MU calculator framework. Next: phase 4 (games, simulators, SDK).
+Status: **v0.6.0** (M6) — arcade spine + Cell Defender pilot (games behind auth, scores in the attempt spine); next: 4b games at scale.
 
 Getting started: `docs/05-setup.md`; deploying: `docs/06-operations.md`.
 

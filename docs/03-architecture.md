@@ -279,6 +279,10 @@ Conventions: UUID v7 primary keys; `created_at`/`updated_at` on every table; sof
 
 The calculator suite (`kind=calculator`, v0.5.0) ships with six implementations: `mu` (photon-dose-to-monitor-units), `inverse_square`, `extended_ssd`, `gap`, `magnification`, and `si_convert` (SI unit conversion). The MU calculator is photon-complete: given dose and a source configuration, it computes **MU = dose / (K · (PDD/100 in SSD mode, or TMR in SAD mode) · Sc · Sp · wedge_factor · tray_factor · inverse_square_factor)**, with an optional Mayneord F correction multiplying the PDD for extended-SSD geometries. The machine-specific factors Sc (collimator), Sp (phantom), and wedge factors are sourced from author-editable single-row `data_table` grids; any missing table degrades gracefully to a factor of 1.0, making incomplete configurations functional in the meantime.
 
+### 6.5 External activities & the arcade
+
+External-kind activities (`kind=external`, v0.6.0) embed browser-based games and educational apps served from `apps/web/arcade/<slug>/` behind session authentication (any signed-in role) via a SvelteKit route with an extension-based allow-map and strict path containment. The student route renders each game as a full-viewport same-origin iframe; the proxy sends `X-Frame-Options: SAMEORIGIN` to prevent clickjacking. The game's only integration with RTApps is through the public shimmed JavaScript interface, `RTApps.reportResult(score)`, which posts a single result message; the player route owns the attempt lifecycle (create, submit, finalize). On submit, the server clamps the reported score against the pinned content version's `max_score`; `percent` is computed as (score / max_score × 100), and `passed` remains null since external activities are practice, not assessment.
+
 ---
 
 ## 7. API
