@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vital Signs Challenge Game</title>
+      <style>
+       body {
+    background-color: #e0e0e0; /* Lighter background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* More standard UI font */
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+#game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 900px; /* Limit overall width */
+}
+
+/* --- Monitor Styles (Adapted) --- */
+.monitor-screen {
+    background-color: #00001a;
+    border: 3px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%; /* Make monitor responsive */
+    max-width: 800px;
+    /* height: 450px; -- Remove fixed height */
+    aspect-ratio: 16 / 9; /* Maintain aspect ratio */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    color: #ffffff;
+    overflow: hidden;
+    margin-bottom: 20px;
+    position: relative;
+    box-sizing: border-box;
+    font-family: 'Lucida Console', 'Consolas', monospace; /* Keep digital font for monitor */
+}
+
+.watermark {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: clamp(3em, 10vw, 6em); /* Responsive font size */
+    font-weight: bold; color: rgba(255, 255, 255, 0.08);
+    pointer-events: none; z-index: 10; white-space: nowrap;
+}
+
+.vital-sign-section {
+    background-color: #000000; border: 1px solid #222; border-radius: 5px;
+    padding: 10px 15px; display: flex; flex-direction: column;
+    justify-content: space-between; position: relative; z-index: 1;
+    overflow: hidden; /* Prevent content spill */
+    box-sizing: border-box;
+}
+
+.vital-header { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
+.label { font-size: clamp(0.8em, 2.5vw, 1.1em); font-weight: bold; text-transform: uppercase; }
+.unit { font-size: clamp(0.6em, 2vw, 0.8em); color: #aaaaaa; }
+.reading { flex-grow: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; overflow: hidden; white-space: nowrap; }
+.value { font-size: clamp(2em, 8vw, 4em); font-weight: bold; line-height: 1; }
+.value span { font-size: 1em; } /* Ensure nested spans inherit correctly */
+.nibp .value { font-size: clamp(1.2em, 5vw, 2.5em); display: flex; align-items: baseline; } /* Adjust NIBP specifically */
+.nibp .map { font-size: 0.5em; margin-left: clamp(4px, 1vw, 8px); color: #cccccc; }
+.nibp .timestamp { font-size: clamp(0.5em, 1.5vw, 0.7em); color: #aaaaaa; text-align: right; position: absolute; bottom: 5px; right: 10px; }
+.temp .value { font-size: clamp(1.8em, 7vw, 3em); } /* Adjust Temp */
+
+/* Colors */
+.ecg .label, .ecg .value { color: #00ff00; } .ecg .unit { color: #90ee90; }
+.spo2 .label, .spo2 .value { color: #00ffff; } .spo2 .unit { color: #add8e6; }
+.nibp .label, .nibp .value { color: #ffff00; } .nibp .unit { color: #dddd00; }
+.resp .label, .resp .value { color: #ffffff; } .resp .unit { color: #cccccc; }
+.temp .label, .temp .value { color: #ffffff; } .temp .unit { color: #cccccc; }
+
+/* Placeholder section for game info */
+.placeholder { background-color: #111; border: 1px dashed #333; display: flex; justify-content: center; align-items: center; }
+.game-info { text-align: center; font-size: clamp(0.9em, 3vw, 1.2em); line-height: 1.5; }
+.round-feedback { font-weight: bold; margin-top: 10px; height: 1.5em; } /* Reserve space */
+
+/* --- Classification Area Styles --- */
+.classification-area {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 800px; /* Match monitor width */
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+.classification-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+.classification-row:last-child {
+    border-bottom: none;
+}
+
+.vital-label {
+    font-weight: bold;
+    color: #333;
+    flex-basis: 180px; /* Ensure label has enough space */
+    flex-shrink: 0; /* Prevent shrinking */
+    margin-right: 10px;
+    font-size: 0.95em;
+}
+
+.options {
+    display: flex;
+    gap: 15px; /* Space between radio buttons */
+    flex-grow: 1;
+    justify-content: center; /* Center options within available space */
+    flex-wrap: wrap;
+}
+
+.options label {
+    cursor: pointer;
+    display: inline-flex; /* Align radio and text */
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9em;
+}
+/* Hide actual radio button, style label if needed later */
+/* .options input[type="radio"] { } */
+
+.feedback {
+    margin-left: 15px;
+    font-size: 1.2em;
+    width: 20px; /* Reserve space */
+    text-align: center;
+    font-weight: bold;
+}
+
+.feedback.correct { color: green; }
+.feedback.incorrect { color: red; }
+
+/* --- Button Styles --- */
+#classification-form button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    background-color: #007bff; /* Blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+    font-weight: bold;
+}
+#classification-form button:hover { background-color: #0056b3; }
+#classification-form button:disabled { background-color: #cccccc; cursor: not-allowed;}
+
+
+/* --- Game Over Screen --- */
+.game-over-screen {
+    text-align: center;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    margin-top: 30px;
+}
+.game-over-screen h2 { margin-top: 0; color: #dc3545; }
+.game-over-screen p { font-size: 1.2em; margin-bottom: 20px; }
+#replay-button {
+     padding: 10px 25px;
+    font-size: 1.1em;
+    background-color: #28a745; /* Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+#replay-button:hover { background-color: #218838; }
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .monitor-screen {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
+        grid-template-rows: repeat(3, auto);
+        aspect-ratio: unset; /* Allow height to adjust */
+        height: auto;
+    }
+    .vital-label {
+        flex-basis: 100%; /* Stack label above options */
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    .options {
+        justify-content: space-around; /* Distribute options */
+        width: 100%;
+    }
+     .feedback {
+        flex-basis: 100%;
+        text-align: center;
+        margin-top: 5px;
+        margin-left: 0;
+    }
+    .classification-row {
+        justify-content: center; /* Center content when wrapped */
+    }
+}
+@media (max-width: 480px) {
+     .monitor-screen {
+        grid-template-columns: 1fr; /* Single column on very small screens */
+        grid-template-rows: repeat(6, auto);
+    }
+    h1 { font-size: 1.5em; }
+    h2 { font-size: 1.2em; }
+    .classification-area { padding: 15px; }
+    #classification-form button { padding: 10px 15px; }
+}
+    </style> 
+
+</head>
+<body>
+    <h1>Vital Signs Challenge</h1>
+    <div id="game-area">
+        <div class="monitor-screen">
+            <div class="watermark">RTApps</div>
+            <div class="vital-sign-section ecg">
+                <div class="vital-header"><span class="label">HR</span> <span class="unit">bpm</span></div>
+                <div class="reading"><span class="value" id="hr-value">--</span></div>
+            </div>
+            <div class="vital-sign-section spo2">
+                <div class="vital-header"><span class="label">SpO2</span> <span class="unit">%</span></div>
+                <div class="reading"><span class="value" id="spo2-value">--</span></div>
+            </div>
+            <div class="vital-sign-section nibp">
+                <div class="vital-header"><span class="label">NIBP</span> <span class="unit">mmHg</span></div>
+                <div class="reading">
+                    <span class="value">
+                        <span id="nibp-sys-value">--</span>/<span id="nibp-dia-value">--</span>
+                        <span class="map">(<span id="nibp-map-value">--</span>)</span>
+                    </span>
+                </div>
+                <div class="timestamp" id="nibp-time">--:-- --</div>
+            </div>
+            <div class="vital-sign-section resp">
+                <div class="vital-header"><span class="label">RR</span> <span class="unit">/min</span></div>
+                <div class="reading"><span class="value" id="rr-value">--</span></div>
+            </div>
+            <div class="vital-sign-section temp">
+                <div class="vital-header"><span class="label">Temp</span> <span class="unit" id="temp-unit">&deg;F (&deg;C)</span></div>
+                <div class="reading"><span class="value" id="temp-value">--.-</span></div>
+            </div>
+            <div class="vital-sign-section placeholder">
+                <div class="game-info">
+                    <div>Patient: <span id="patient-num">1</span> / <span id="total-patients">10</span></div>
+                    <div>Score: <span id="score">0</span></div>
+                    <div id="round-feedback" class="round-feedback"></div>
+                </div>
+            </div>
+        </div>
+        <div id="classification-area" class="classification-area">
+            <h2>Classify the Vitals (Normal Ranges Below)</h2>
+            <form id="classification-form">
+                <div class="classification-row">
+                    <span class="vital-label">HR (60-100):</span>
+                    <div class="options">
+                        <label><input type="radio" name="hr_class" value="low" required> Low</label>
+                        <label><input type="radio" name="hr_class" value="normal"> Normal</label>
+                        <label><input type="radio" name="hr_class" value="high"> High</label>
+                    </div>
+                    <span class="feedback" id="hr-feedback"></span>
+                </div>
+                <div class="classification-row">
+                    <span class="vital-label">SpO2 (95-100%):</span>
+                    <div class="options">
+                        <label><input type="radio" name="spo2_class" value="low" required> Low</label>
+                        <label><input type="radio" name="spo2_class" value="normal"> Normal</label>
+                        <label><input type="radio" name="spo2_class" value="high"> High</label>
+                    </div>
+                    <span class="feedback" id="spo2-feedback"></span>
+                </div>
+                <div class="classification-row">
+                    <span class="vital-label">RR (12-20):</span>
+                    <div class="options">
+                        <label><input type="radio" name="rr_class" value="low" required> Low</label>
+                        <label><input type="radio" name="rr_class" value="normal"> Normal</label>
+                        <label><input type="radio" name="rr_class" value="high"> High</label>
+                    </div>
+                    <span class="feedback" id="rr-feedback"></span>
+                </div>
+                <div class="classification-row">
+                    <span class="vital-label">Temp (97.0-99.0°F):</span>
+                    <div class="options">
+                        <label><input type="radio" name="temp_class" value="low" required> Low</label>
+                        <label><input type="radio" name="temp_class" value="normal"> Normal</label>
+                        <label><input type="radio" name="temp_class" value="high"> High</label>
+                    </div>
+                    <span class="feedback" id="temp-feedback"></span>
+                </div>
+                <div class="classification-row">
+                    <span class="vital-label">NIBP Sys (100-120):</span>
+                    <div class="options">
+                        <label><input type="radio" name="nibpsys_class" value="low" required> Low</label>
+                        <label><input type="radio" name="nibpsys_class" value="normal"> Normal</label>
+                        <label><input type="radio" name="nibpsys_class" value="high"> High</label>
+                    </div>
+                    <span class="feedback" id="nibpsys-feedback"></span>
+                </div>
+                <div class="classification-row">
+                    <span class="vital-label">NIBP Dia (60-80):</span>
+                    <div class="options">
+                        <label><input type="radio" name="nibpdia_class" value="low" required> Low</label>
+                        <label><input type="radio" name="nibpdia_class" value="normal"> Normal</label>
+                        <label><input type="radio" name="nibpdia_class" value="high"> High</label>
+                    </div>
+                    <span class="feedback" id="nibpdia-feedback"></span>
+                </div>
+                <button type="submit" id="submit-button">Submit Answers</button>
+            </form>
+        </div>
+    </div>
+    <div id="game-over-screen" class="game-over-screen" style="display: none;">
+        <h2>Game Over!</h2>
+        <p>Your Final Score: <span id="final-score">0</span> / <span id="max-score">60</span></p>
+        <button id="replay-button">Play Again</button>
+    </div>
+    <script src="/arcade/rtapps-shim.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const hrValueEl = document.getElementById('hr-value');
+    const spo2ValueEl = document.getElementById('spo2-value');
+    const rrValueEl = document.getElementById('rr-value');
+    const tempValueEl = document.getElementById('temp-value');
+    const nibpSysValueEl = document.getElementById('nibp-sys-value');
+    const nibpDiaValueEl = document.getElementById('nibp-dia-value');
+    const nibpMapValueEl = document.getElementById('nibp-map-value');
+    const nibpTimeEl = document.getElementById('nibp-time');
+    const patientNumEl = document.getElementById('patient-num');
+    const totalPatientsEl = document.getElementById('total-patients');
+    const scoreEl = document.getElementById('score');
+    const roundFeedbackEl = document.getElementById('round-feedback');
+    const classificationForm = document.getElementById('classification-form');
+    const submitButton = document.getElementById('submit-button');
+    const classificationArea = document.getElementById('classification-area');
+    const feedbackElements = {
+        hr: document.getElementById('hr-feedback'),
+        spo2: document.getElementById('spo2-feedback'),
+        rr: document.getElementById('rr-feedback'),
+        temp: document.getElementById('temp-feedback'),
+        nibpsys: document.getElementById('nibpsys-feedback'),
+        nibpdia: document.getElementById('nibpdia-feedback')
+    };
+    const gameArea = document.getElementById('game-area');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const finalScoreEl = document.getElementById('final-score');
+    const maxScoreEl = document.getElementById('max-score');
+    const replayButton = document.getElementById('replay-button');
+    // --- Game Configuration ---
+    const TOTAL_PATIENTS = 10;
+    const MAX_SCORE_PER_PATIENT = 6;
+    totalPatientsEl.textContent = TOTAL_PATIENTS;
+    maxScoreEl.textContent = TOTAL_PATIENTS * MAX_SCORE_PER_PATIENT;
+    // --- Normal Ranges ---
+    const normalRanges = {
+        hr: { min: 60, max: 100 },
+        spo2: { min: 95, max: 100 },
+        rr: { min: 12, max: 20 },
+        temp: { min: 97.0, max: 99.0 },
+        nibpsys: { min: 100, max: 120 },
+        nibpdia: { min: 60, max: 80 }
+    };
+    // --- State ---
+    let currentPatient = 1;
+    let score = 0;
+    let currentVitals = {};
+    // --- Utility Functions ---
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function getRandomFloat(min, max, decimals = 1) {
+        const factor = Math.pow(10, decimals);
+        return Math.round((Math.random() * (max - min) + min) * factor) / factor;
+    }
+    function getRandomTime() {
+        let hour = getRandomInt(1, 12);
+        let minute = getRandomInt(0, 59);
+        let ampm = Math.random() < 0.5 ? 'AM' : 'PM';
+        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${ampm}`;
+    }
+    // Randomize a vital sign as low, normal, or high
+    function randomizeVital(range, type = 'int') {
+        const roll = Math.random();
+        let value, classification;
+        if (roll < 0.33) {
+            // Low
+            if (type === 'float') {
+                value = getRandomFloat(range.min - (range.max - range.min), range.min - 0.1);
+            } else {
+                value = getRandomInt(range.min - (range.max - range.min), range.min - 1);
+            }
+            classification = 'low';
+        } else if (roll < 0.66) {
+            // Normal
+            if (type === 'float') {
+                value = getRandomFloat(range.min, range.max);
+            } else {
+                value = getRandomInt(range.min, range.max);
+            }
+            classification = 'normal';
+        } else {
+            // High
+            if (type === 'float') {
+                value = getRandomFloat(range.max + 0.1, range.max + (range.max - range.min));
+            } else {
+                value = getRandomInt(range.max + 1, range.max + (range.max - range.min));
+            }
+            classification = 'high';
+        }
+        return { value, classification };
+    }
+    // --- Game Logic ---
+    function generatePatientVitals() {
+        // HR, SpO2, RR, Temp, NIBP Sys, NIBP Dia
+        const hr = randomizeVital(normalRanges.hr);
+        const spo2 = randomizeVital(normalRanges.spo2);
+        const rr = randomizeVital(normalRanges.rr);
+        const temp = randomizeVital(normalRanges.temp, 'float');
+        const nibpsys = randomizeVital(normalRanges.nibpsys);
+        const nibpdia = randomizeVital(normalRanges.nibpdia);
+        // MAP calculation: MAP ≈ (Sys + 2*Dia)/3
+        const map = Math.round((nibpsys.value + 2 * nibpdia.value) / 3);
+        return {
+            hr, spo2, rr, temp, nibpsys, nibpdia, map,
+            time: getRandomTime()
+        };
+    }
+    function displayVitals(vitals) {
+        hrValueEl.textContent = vitals.hr.value;
+        spo2ValueEl.textContent = vitals.spo2.value;
+        rrValueEl.textContent = vitals.rr.value;
+        tempValueEl.textContent = vitals.temp.value.toFixed(1);
+        nibpSysValueEl.textContent = vitals.nibpsys.value;
+        nibpDiaValueEl.textContent = vitals.nibpdia.value;
+        nibpMapValueEl.textContent = vitals.map;
+        nibpTimeEl.textContent = vitals.time;
+    }
+    function clearFeedback() {
+        for (const key in feedbackElements) {
+            feedbackElements[key].textContent = '';
+            feedbackElements[key].className = 'feedback';
+        }
+        roundFeedbackEl.textContent = '';
+    }
+    function resetForm() {
+        classificationForm.reset();
+    }
+    function updateScore() {
+        scoreEl.textContent = score;
+    }
+    function updatePatientNum() {
+        patientNumEl.textContent = currentPatient;
+    }
+    function handleSubmit(event) {
+        event.preventDefault();
+        let roundScore = 0;
+        // Check each vital
+        const answers = {
+            hr: classificationForm.hr_class.value,
+            spo2: classificationForm.spo2_class.value,
+            rr: classificationForm.rr_class.value,
+            temp: classificationForm.temp_class.value,
+            nibpsys: classificationForm.nibpsys_class.value,
+            nibpdia: classificationForm.nibpdia_class.value
+        };
+        for (const key of Object.keys(answers)) {
+            if (answers[key] === currentVitals[key].classification) {
+                feedbackElements[key].textContent = '✔';
+                feedbackElements[key].className = 'feedback correct';
+                roundScore++;
+            } else {
+                feedbackElements[key].textContent = '✖';
+                feedbackElements[key].className = 'feedback incorrect';
+            }
+        }
+        score += roundScore;
+        updateScore();
+        // Feedback
+        roundFeedbackEl.textContent = `You got ${roundScore} out of 6 correct!`;
+        // Disable form and button
+        for (const input of classificationForm.elements) {
+            input.disabled = true;
+        }
+        submitButton.disabled = true;
+        // Next patient after delay
+        setTimeout(() => {
+            if (currentPatient < TOTAL_PATIENTS) {
+                currentPatient++;
+                updatePatientNum();
+                nextPatient();
+            } else {
+                showGameOver();
+            }
+        }, 1500);
+    }
+    function nextPatient() {
+        currentVitals = generatePatientVitals();
+        displayVitals(currentVitals);
+        clearFeedback();
+        resetForm();
+        // Enable form and button
+        for (const input of classificationForm.elements) {
+            input.disabled = false;
+        }
+        submitButton.disabled = false;
+    }
+    function showGameOver() {
+        gameArea.style.display = 'none';
+        gameOverScreen.style.display = 'block';
+        finalScoreEl.textContent = score;
+        // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+        if (window.RTApps) window.RTApps.reportResult(score);
+    }
+    function resetGame() {
+        score = 0;
+        currentPatient = 1;
+        updateScore();
+        updatePatientNum();
+        gameArea.style.display = 'block';
+        gameOverScreen.style.display = 'none';
+        nextPatient();
+    }
+    // --- Event Listeners ---
+    classificationForm.addEventListener('submit', handleSubmit);
+    replayButton.addEventListener('click', resetGame);
+    // --- Start Game ---
+    resetGame();
+});
+    </script>
+</body>
+</html>

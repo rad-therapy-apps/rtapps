@@ -106,14 +106,47 @@ SEED_CALCULATORS: list[tuple[str, str, str]] = [
     ("ALARA: Inverse Square in Practice", "inverse_square", "radiation-protection"),
 ]
 
-# Plan 4a pilot game (get-or-created by title, like the practice calculators). max_score
-# 5000 ≈ a strong full run of Cell Defender (per-enemy 50-100 + per-level 250 bonuses);
-# percent is clamped server-side, and a per-game tuning pass is plan 4b audit scope.
-SEED_ARCADE_GAME = {
-    "title": "Cell Defender",
-    "subject_slug": "radiation-biology",
-    "config": {"arcade_slug": "cell-defender", "max_score": 5000},
-}
+# Arcade games (plans 4a/4b), get-or-created by title like the practice calculators.
+# max_score derivations live in each plan-4b batch's evidence table
+# (.superpowers/sdd/task-N-report.md) and the audit; unbounded games carry heuristic
+# caps (server clamps; percent ≤ 100). completion_only games have no max_score.
+SEED_ARCADE_GAMES = [
+    {
+        "title": "Cell Defender",
+        "subject_slug": "radiation-biology",
+        "config": {"arcade_slug": "cell-defender", "max_score": 5000},
+    },
+    {
+        "title": "Anatomy Atlas Adventure",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "anatomy-atlas", "max_score": 500},
+    },
+    {
+        "title": "Dose Calc Dash",
+        "subject_slug": "treatment-planning",
+        "config": {"arcade_slug": "dose-calc-dash", "max_score": 400},
+    },
+    {
+        "title": "Adaptive Consultation Assessment",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "adaptive-consultation", "max_score": 239},
+    },
+    {
+        "title": "Adaptive Ethical Decision-Making Simulator",
+        "subject_slug": "ethics",
+        "config": {"arcade_slug": "ethical-decisions", "max_score": 50},
+    },
+    {
+        "title": "Legal Eagle Lineup",
+        "subject_slug": "ethics",
+        "config": {"arcade_slug": "legal-eagle", "max_score": 900},
+    },
+    {
+        "title": "Vital Signs Challenge",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "vital-signs", "max_score": 60},
+    },
+]
 
 
 @dataclass
@@ -378,34 +411,33 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
         if activity.status != "published":
             await publish_activity(db, activity, educator, change_note="Initial publish")
 
-    # --- Cell Defender arcade game (Plan 4a pilot): get-or-create by title, same pattern
-    # as the practice calculators above. ---
-    arcade_subject = await db.scalar(
-        select(Subject).where(Subject.slug == SEED_ARCADE_GAME["subject_slug"])
-    )
-    if arcade_subject is None:
-        raise RuntimeError(
-            f"seed subject missing: {SEED_ARCADE_GAME['subject_slug']!r} (expected from demo-quiz)"
+    # --- Arcade games (plans 4a/4b): get-or-create by title, same pattern as the practice
+    # calculators above. ---
+    for game in SEED_ARCADE_GAMES:
+        arcade_subject = await db.scalar(
+            select(Subject).where(Subject.slug == game["subject_slug"])
         )
-    arcade_activity = await db.scalar(
-        select(Activity).where(
-            Activity.kind == "external", Activity.title == SEED_ARCADE_GAME["title"]
+        if arcade_subject is None:
+            raise RuntimeError(
+                f"seed subject missing: {game['subject_slug']!r} (expected from demo-quiz)"
+            )
+        arcade_activity = await db.scalar(
+            select(Activity).where(Activity.kind == "external", Activity.title == game["title"])
         )
-    )
-    if arcade_activity is None:
-        arcade_activity = Activity(
-            kind="external",
-            ref_id=new_id(),
-            title=SEED_ARCADE_GAME["title"],
-            subject_id=arcade_subject.id,
-            access="practice",
-            config=SEED_ARCADE_GAME["config"],
-            status="draft",
-        )
-        db.add(arcade_activity)
-        await db.flush()
-    if arcade_activity.status != "published":
-        await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
+        if arcade_activity is None:
+            arcade_activity = Activity(
+                kind="external",
+                ref_id=new_id(),
+                title=game["title"],
+                subject_id=arcade_subject.id,
+                access="practice",
+                config=game["config"],
+                status="draft",
+            )
+            db.add(arcade_activity)
+            await db.flush()
+        if arcade_activity.status != "published":
+            await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
 
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
     cohort_created = cohort is None

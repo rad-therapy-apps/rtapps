@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Eagle Lineup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Slab', serif;
+            background-color: #3d2c23; /* Wood desk color */
+            color: #333;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+        }
+        #game-wrapper {
+            position: relative;
+            width: 1000px;
+            height: 650px;
+            background: #5d4037;
+            border-radius: 10px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+        #case-file {
+            position: absolute;
+            width: 600px;
+            height: 400px;
+            background-color: #f5f5dc; /* Beige paper */
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            padding: 30px;
+            border: 1px solid #ccc;
+            font-family: 'Roboto Slab', serif;
+            cursor: pointer;
+        }
+        #case-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        #case-scenario {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        #stamp-area {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 120px;
+            background: #4e342e;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .stamp {
+            background-color: #c62828; /* Red stamp color */
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 3px solid #8e0000;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .stamp:hover, .stamp.selected {
+            background-color: #e53935;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        .ui-panel {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            display: flex;
+            gap: 20px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* Stamping Animation */
+        #animated-stamp {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 150px;
+            border: 10px solid;
+            border-radius: 10px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            font-weight: bold;
+            text-transform: uppercase;
+            z-index: 15;
+            pointer-events: none;
+        }
+        #animated-stamp.stamping {
+            display: flex;
+            animation: stamp-animation 0.5s ease-out forwards;
+        }
+        @keyframes stamp-animation {
+            0% { transform: translate(-50%, -50%) scale(2) rotate(-15deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.1) rotate(-15deg); opacity: 0; }
+        }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f5f5dc; border: 5px solid #8e0000; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 30px #000; z-index: 100; width: 90%; max-width: 600px; color: #333; }
+        .modal h2 { font-size: 2em; font-weight: bold; color: #8e0000; margin-bottom: 20px; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button { background-color: #8e0000; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div class="ui-panel">
+            <div id="score-ui">Score: 0</div>
+            <div id="timer-ui">Time: 120</div>
+            <div id="cases-ui">Cases: 0/0</div>
+        </div>
+        <div id="case-file">
+            <h2 id="case-title">Case #1</h2>
+            <p id="case-scenario">Scenario details will appear here.</p>
+        </div>
+        <div id="stamp-area"></div>
+        <div id="animated-stamp"></div>
+    </div>
+    
+    <div id="startScreen" class="modal">
+        <h2>Legal Eagle Lineup</h2>
+        <p>Welcome to the legal review desk. A series of case files will appear. Read the scenario, select the correct legal or ethical "stamp," then click the case file to apply it. Process all cases before time runs out!</p>
+        <button id="startButton">Start Review</button>
+    </div>
+    
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Start New Shift</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const caseFileEl = document.getElementById('case-file');
+const caseTitleEl = document.getElementById('case-title');
+const caseScenarioEl = document.getElementById('case-scenario');
+const stampAreaEl = document.getElementById('stamp-area');
+const animatedStampEl = document.getElementById('animated-stamp');
+const scoreUI = document.getElementById('score-ui');
+const timerUI = document.getElementById('timer-ui');
+const casesUI = document.getElementById('cases-ui');
+
+// --- Game State ---
+let score = 0;
+let timeLeft = 120;
+let gameRunning = false;
+let gameInterval;
+let caseFiles = [];
+let currentCaseIndex = 0;
+let selectedStamp = null;
+
+// --- Case File Data ---
+const allCaseFiles = [
+    { name: 'Battery', scenario: 'A patient clearly states they do not want to be treated today, but the therapist proceeds with the setup and treats them anyway.', feedback: 'Correct! This is Battery, the intentional, unconsented touching of another person. The patient withdrew consent.' },
+    { name: 'Negligence', scenario: 'A therapist fails to notice a significant weight loss in a patient over several weeks, leading to an incorrect dose calculation that resulted in over-radiation.', feedback: 'Correct! This is Negligence, a failure to provide the expected standard of care, resulting in harm.' },
+    { name: 'HIPAA Violation', scenario: 'Two therapists are discussing a patient\'s unique and identifiable cancer diagnosis in a public elevator where other patients and visitors can hear.', feedback: 'Correct! This is a HIPAA Violation. Discussing Protected Health Information (PHI) in a non-secure, public area is a breach of patient confidentiality.' },
+    { name: 'Respondeat Superior', scenario: 'A new therapist, while working under the clinic\'s protocols, makes a setup error. In the subsequent lawsuit, the hospital itself is held liable.', feedback: 'Correct! This is Respondeat Superior ("Let the master answer"), where the employer is responsible for the actions of its employees.' },
+    { name: 'Informed Consent', scenario: 'A physician explains a procedure but fails to mention any of the potential serious side effects. The patient agrees without knowing the full risks.', feedback: 'Correct! This is a failure of Informed Consent. For consent to be valid, the patient must be informed of the risks, benefits, and alternatives.' },
+    { name: 'Malpractice', scenario: 'A qualified radiation oncologist misinterprets a clear CT scan, plans a treatment field that completely misses the tumor, and treats the patient for several weeks.', feedback: 'Correct! This is Malpractice, which is a specific type of negligence committed by a professional in their field.' },
+    { name: 'Beneficence', scenario: 'A therapist notices a patient is struggling with transportation and connects them with a hospital social worker to arrange for volunteer drivers.', feedback: 'Correct! This is an act of Beneficence, the ethical principle of acting in the best interest of the patient and promoting their well-being.' },
+    { name: 'Res Ipsa Loquitur', scenario: 'A patient wakes from anesthesia after a brachytherapy procedure with a severe burn on their leg, in an area unrelated to the treatment. This injury would not have happened without negligence.', feedback: 'Correct! This is Res Ipsa Loquitur ("The thing speaks for itself"), where negligence is inferred because the event doesn\'t normally happen unless someone was negligent.' },
+    { name: 'Primum Non Nocere', scenario: 'When deciding on a beam arrangement, a therapist alerts the dosimetrist that the current plan delivers an unnecessarily high dose to the patient\'s healthy lung.', feedback: 'Correct! This follows the principle of Primum Non Nocere ("First, do no harm"), the fundamental ethical imperative to avoid causing unnecessary harm.' }
+];
+
+const stampTypes = ['Battery', 'Negligence', 'HIPAA Violation', 'Respondeat Superior', 'Informed Consent', 'Malpractice', 'Beneficence', 'Res Ipsa Loquitur', 'Primum Non Nocere'];
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    
+    score = 0;
+    timeLeft = 120;
+    currentCaseIndex = 0;
+    
+    caseFiles = [...allCaseFiles].sort(() => 0.5 - Math.random());
+    
+    createStamps();
+    loadCase(currentCaseIndex);
+    updateUI();
+    
+    gameRunning = true;
+    if (gameInterval) clearInterval(gameInterval);
+    gameInterval = setInterval(() => {
+        if (gameRunning) {
+            timeLeft--;
+            updateUI();
+            if (timeLeft <= 0) {
+                endGame(false, "Time's up! You couldn't clear the docket.");
+            }
+        }
+    }, 1000);
+}
+
+function createStamps() {
+    stampAreaEl.innerHTML = '';
+    stampTypes.forEach(type => {
+        const stamp = document.createElement('div');
+        stamp.className = 'stamp';
+        stamp.textContent = type;
+        stamp.dataset.type = type;
+        stamp.addEventListener('click', () => {
+            if (selectedStamp) {
+                selectedStamp.classList.remove('selected');
+            }
+            selectedStamp = stamp;
+            stamp.classList.add('selected');
+        });
+        stampAreaEl.appendChild(stamp);
+    });
+}
+
+function loadCase(index) {
+    if (index >= caseFiles.length) {
+        endGame(true, "Case files cleared! Excellent work, Supervisor.");
+        return;
+    }
+    const caseData = caseFiles[index];
+    caseTitleEl.textContent = `Case #${index + 1}`;
+    caseScenarioEl.textContent = caseData.scenario;
+    if (selectedStamp) {
+        selectedStamp.classList.remove('selected');
+        selectedStamp = null;
+    }
+    updateUI();
+}
+
+function updateUI() {
+    scoreUI.textContent = `Score: ${score}`;
+    timerUI.textContent = `Time: ${timeLeft}`;
+    casesUI.textContent = `Cases: ${currentCaseIndex}/${caseFiles.length}`;
+}
+
+function handleCaseFileClick() {
+    if (!gameRunning || !selectedStamp) return;
+    gameRunning = false; // Pause the game
+    
+    const correctType = caseFiles[currentCaseIndex].name;
+    const selectedType = selectedStamp.dataset.type;
+    const feedbackText = caseFiles[currentCaseIndex].feedback;
+    
+    let isCorrect = selectedType === correctType;
+
+    // Show stamping animation
+    playStampAnimation(isCorrect);
+    
+    setTimeout(() => {
+        if (isCorrect) {
+            score += 100;
+        } else {
+            score -= 25;
+            if (score < 0) score = 0;
+        }
+        
+        // Show detailed feedback in the case file area
+        caseScenarioEl.textContent = isCorrect ? feedbackText : `Incorrect. This was ${correctType}. ${feedbackText}`;
+        updateUI();
+
+        // Pause to let player read feedback
+        setTimeout(() => {
+            currentCaseIndex++;
+            loadCase(currentCaseIndex);
+            if (!endScreen.classList.contains('hidden')) return;
+            gameRunning = true;
+        }, 3000);
+
+    }, 500); // Delay after stamp animation
+}
+
+function playStampAnimation(isCorrect) {
+    animatedStampEl.textContent = isCorrect ? "Correct" : "Incorrect";
+    animatedStampEl.style.color = isCorrect ? '#27ae60' : '#c0392b';
+    animatedStampEl.style.borderColor = isCorrect ? '#27ae60' : '#c0392b';
+    animatedStampEl.classList.add('stamping');
+    
+    // Remove the class after the animation is done to allow it to be re-triggered
+    setTimeout(() => {
+        animatedStampEl.classList.remove('stamping');
+    }, 500);
+}
+
+function endGame(won, message) {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    
+    document.getElementById('endTitle').textContent = won ? "Shift Complete!" : "Review Failed";
+    document.getElementById('endMessage').textContent = message;
+    document.getElementById('finalScore').textContent = score;
+    // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+
+    endScreen.classList.remove('hidden');
+}
+
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', () => init());
+caseFileEl.addEventListener('click', handleCaseFileClick);
+
+</script>
+</body>
+</html>
