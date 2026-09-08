@@ -19,6 +19,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.attempts.rollup import ActivityResult
 from app.content.activity_importer import import_any
 from app.content.models import Activity, Subject
 from app.content.service import publish_activity
@@ -47,6 +48,23 @@ async def _publish_external_activity(db: AsyncSession, max_score: int = 5000) ->
         status="draft",
         access="practice",
         config={"arcade_slug": "cell-defender", "max_score": max_score},
+    )
+    db.add(activity)
+    await db.flush()
+    await publish_activity(db, activity, author=None, change_note="test")
+    return activity
+
+
+async def _publish_completion_only_activity(db: AsyncSession) -> Activity:
+    subject = await _ensure_subject(db)
+    activity = Activity(
+        kind="external",
+        ref_id=new_id(),
+        title="Beam Sculptor",
+        subject_id=subject.id,
+        status="draft",
+        access="practice",
+        config={"arcade_slug": "beam-sculptor", "completion_only": True},
     )
     db.add(activity)
     await db.flush()
@@ -168,5 +186,55 @@ class TestExternalActivitySubmit:
             f"/api/v1/attempts/{attempt['id']}/submit",
             headers={"Idempotency-Key": "k1"},
             json={"score": 3},
+        )
+        assert r.status_code == 422
+
+    async def test_completion_only_submit_records_null_scores(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_completion_only_activity(db)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
+        )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["score"] is None and body["max_score"] is None
+        assert body["percent"] is None and body["passed"] is None
+        assert body["status"] == "submitted"
+
+        row = await db.scalar(
+            select(ActivityResult).where(ActivityResult.activity_id == activity.id)
+        )
+        assert row is not None
+
+    async def test_completion_only_rejects_score_payload(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_completion_only_activity(db)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit",
+            headers={"Idempotency-Key": "k1"},
+            json={"score": 50},
+        )
+        assert r.status_code == 422
+
+    async def test_scored_external_still_requires_payload(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_external_activity(db)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
         )
         assert r.status_code == 422
