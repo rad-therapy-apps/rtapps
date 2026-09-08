@@ -612,6 +612,135 @@ async def test_seed_creates_procedure_pursuit(db: AsyncSession, settings: Settin
     assert count == 1
 
 
+async def test_seed_batch_3_anatomy_angler(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 3: Anatomy Angler — published, kind external, access practice,
+    config with arcade_slug and max_score (2000: unbounded heuristic cap, strong-session
+    estimate per audit); subject is sectional-anatomy; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Anatomy Angler")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "anatomy-angler", "max_score": 2000}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Anatomy Angler")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_side_effect_sorcerer(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 3: Side Effect Sorcerer — published, kind external, access practice,
+    config with arcade_slug and max_score (859: fixed enemy count 6 waves, sum derived);
+    subject is radiation-biology; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Side Effect Sorcerer"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "side-effect-sorcerer", "max_score": 859}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-biology"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Side Effect Sorcerer")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_gantry_position_guessing_game(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4b batch 3: Gantry Position Guessing Game — published, kind external, access
+    practice, config with arcade_slug and max_score (10: perfect streak of 10 correct);
+    subject is treatment-delivery-procedures; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Gantry Position Guessing Game"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "gantry-game", "max_score": 10}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Gantry Position Guessing Game")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_linac_component_identification(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4b batch 3: LINAC Component Identification — published, kind external, access
+    practice, config with arcade_slug and max_score (10: 10 components to identify);
+    subject is treatment-delivery-procedures; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "LINAC Component Identification"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "linac-parts", "max_score": 10}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "LINAC Component Identification")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_ssd_practice(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 3: SSD Practice - BEV — published, kind external, access practice,
+    config with arcade_slug and max_score (20: max user-configurable problems); subject is
+    treatment-planning; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "SSD Practice - BEV")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "ssd-practice", "max_score": 20}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-planning"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "SSD Practice - BEV")
+    )
+    assert count == 1
+
+
 async def test_seed_refuses_prod(db: AsyncSession) -> None:
     """seed() must raise before touching the database when settings.env == "prod"."""
     # session_secret is 40 chars (>= the 32-char minimum) purely so this Settings object

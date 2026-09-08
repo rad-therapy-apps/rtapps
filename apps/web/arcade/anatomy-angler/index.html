@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy Angler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0a23;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        canvas {
+            background-color: #000;
+            border: 2px solid #00ffdd;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffdd;
+            cursor: crosshair;
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 800px;
+            background: #001f3f;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00ffdd;
+        }
+        .ui-element { text-align: center; }
+        .ui-element h3 { color: #00ffdd; font-size: 1em; margin-bottom: 5px; }
+        .ui-element p { font-size: 1.5em; }
+        #target-display {
+            background-color: #f9e79f;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+        
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #00ffdd;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px #00ffdd;
+            z-index: 100;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal h2 { font-size: 2em; color: #00ffdd; margin-bottom: 20px; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button, .quiz-option {
+            background: linear-gradient(145deg, #0d7377, #14ffec);
+            color: #0a0a23;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .quiz-option { display: block; width: 100%; text-align: left; margin-bottom: 10px; font-size: 1em; padding: 12px 20px; }
+        .quiz-option.correct { background: linear-gradient(145deg, #4caf50, #81c784); }
+        .quiz-option.incorrect { background: linear-gradient(145deg, #f44336, #e57373); }
+        .feedback { margin-top: 15px; font-size: 1em; padding: 10px; border-radius: 5px; }
+        .feedback.correct { background-color: rgba(76, 175, 80, 0.3); border: 1px solid #4caf50; }
+        .feedback.incorrect { background-color: rgba(244, 67, 54, 0.3); border: 1px solid #f44336; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div class="ui-panel">
+            <div class="ui-element">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="ui-element">
+                <h3>Current Target</h3>
+                <p id="target-display">Heart</p>
+            </div>
+            <div class="ui-element">
+                <h3>Time Left</h3>
+                <p id="timer">60</p>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>Anatomy Angler</h2>
+        <p>A CT slice will be shown with anatomical structures floating by. Your goal is to "catch" the correct structure indicated at the top of the screen by clicking on it. Avoid clicking on the wrong structures! Catch Question Bubbles for bonus points.</p>
+        <button id="startButton">Start Contouring</button>
+    </div>
+    
+    <div id="quizScreen" class="modal hidden">
+        <h2 id="quizTitle">Anatomy Check!</h2>
+        <p id="quizQuestion"></p>
+        <div id="quizOptions"></div>
+        <div id="quizFeedback" class="hidden"></div>
+    </div>
+
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle">Shift Over!</h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Start New Case</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('startScreen');
+const quizScreen = document.getElementById('quizScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const scoreEl = document.getElementById('score');
+const targetDisplayEl = document.getElementById('target-display');
+const timerEl = document.getElementById('timer');
+const finalScoreEl = document.getElementById('finalScore');
+
+// --- Game State ---
+let score = 0;
+let timeLeft = 60;
+let gameRunning = false;
+let currentTarget = null;
+let structures = [];
+let particles = [];
+let gameInterval;
+let spawnInterval;
+let animationFrameId;
+
+// --- MODIFIED: Game Data with new scoring logic ---
+const structureData = {
+    GTV: { color: 'rgba(231, 76, 60, 0.8)', shape: 'blob', reward: 50, penalty: 25 },
+    Heart: { color: 'rgba(192, 57, 43, 0.7)', shape: 'heart', reward: 30, penalty: 25 },
+    SpinalCord: { color: 'rgba(241, 196, 15, 0.9)', shape: 'circle', reward: 40, penalty: 50 },
+    Lung: { color: 'rgba(52, 73, 94, 0.7)', shape: 'lung', reward: 20, penalty: 10 },
+    Rib: { color: 'rgba(236, 240, 241, 0.9)', shape: 'circle', reward: 15, penalty: 5 },
+    Question: { color: 'rgba(52, 152, 219, 0.9)', shape: 'circle', isQuestion: true }
+};
+
+
+const questions = {
+    Heart: { question: "The heart is considered a parallel organ. What does this mean for radiation planning?", options: ["The whole organ must be kept under a low dose", "Only a small part of it is sensitive", "Its function is not affected by dose to a small volume, but by the mean dose to the whole organ", "It can tolerate very high doses"], correctAnswer: 2, feedback: "Correct! For parallel organs like the heart and lungs, the mean dose to the entire organ is a critical predictor of toxicity." },
+    SpinalCord: { question: "What is the approximate TD 5/5 for the spinal cord, a critical serial organ?", options: ["~20 Gy", "~35 Gy", "~47 Gy", "~60 Gy"], correctAnswer: 2, feedback: "Correct! The spinal cord's tolerance is around 47 Gy. Exceeding this carries a risk of myelopathy, making it a critical structure to spare." },
+    GTV: { question: "What does GTV stand for?", options: ["General Treatment Volume", "Gross Tumor Volume", "Good Target Value", "Geometric Target Volume"], correctAnswer: 1, feedback: "Correct! The GTV is the visible, palpable, or demonstrable extent and location of the tumor." },
+    Lung: { question: "What is a common dose constraint used for the lungs to avoid pneumonitis?", options: ["V5 < 100%", "V10 < 80%", "V20 < 30-35%", "V50 < 5%"], correctAnswer: 2, feedback: "Correct! Keeping the volume of the lungs that receives 20 Gy (V20) below 30-35% is a standard guideline to reduce the risk of radiation pneumonitis."}
+};
+
+const structureTypes = Object.keys(structureData);
+
+// --- Game Objects ---
+class Structure {
+    constructor() {
+        this.type = structureTypes[Math.floor(Math.random() * structureTypes.length)];
+        const data = structureData[this.type];
+        this.x = canvas.width;
+        this.y = Math.random() * (canvas.height - 150) + 75;
+        this.w = this.type === 'Lung' ? Math.random() * 60 + 80 : Math.random() * 20 + 40;
+        this.h = this.type === 'Lung' ? this.w * 1.2 : this.w;
+        this.speed = Math.random() * 2 + 1;
+        this.color = data.color;
+        this.shape = data.shape;
+        this.isQuestion = data.isQuestion || false;
+    }
+
+    draw() {
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 2;
+
+        switch(this.shape) {
+            case 'circle':
+                ctx.beginPath();
+                ctx.arc(this.x + this.w / 2, this.y + this.h / 2, this.w / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                break;
+            case 'heart':
+                this.drawHeart();
+                break;
+            case 'lung':
+                this.drawLung();
+                break;
+            case 'blob':
+                this.drawBlob();
+                break;
+        }
+
+        if (this.isQuestion) {
+            ctx.fillStyle = "white";
+            ctx.font = "bold 40px Orbitron";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText("?", this.x + this.w / 2, this.y + this.h / 2);
+        }
+    }
+
+    drawHeart() {
+        let x = this.x + this.w/2;
+        let y = this.y + this.h/2;
+        ctx.beginPath();
+        ctx.moveTo(x, y + this.h/4);
+        ctx.bezierCurveTo(x, y, x - this.w/2, y - this.h/4, x - this.w/2, y - this.h/4);
+        ctx.bezierCurveTo(x - this.w/2, y - this.h/2, x - this.w/4, y - this.h/2, x, y);
+        ctx.bezierCurveTo(x + this.w/4, y - this.h/2, x + this.w/2, y - this.h/2, x + this.w/2, y - this.h/4);
+        ctx.bezierCurveTo(x + this.w/2, y - this.h/4, x, y, x, y + this.h/4);
+        ctx.fill();
+        ctx.stroke();
+    }
+    
+    drawLung() {
+        let x = this.x;
+        let y = this.y;
+        let w = this.w;
+        let h = this.h;
+        ctx.beginPath();
+        ctx.moveTo(x, y + h);
+        ctx.lineTo(x, y + h * 0.5);
+        ctx.bezierCurveTo(x, y, x + w, y, x + w, y + h * 0.5);
+        ctx.lineTo(x + w, y + h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    drawBlob() {
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y + this.h/2);
+        ctx.bezierCurveTo(this.x, this.y, this.x + this.w * 1.2, this.y - this.h * 0.2, this.x + this.w, this.y + this.h/2);
+        ctx.bezierCurveTo(this.x + this.w * 0.8, this.y + this.h, this.x, this.y + this.h, this.x, this.y + this.h/2);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    update() {
+        this.x -= this.speed;
+        this.draw();
+    }
+}
+
+class Particle {
+    constructor(x, y, color, text) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.color = color;
+        this.alpha = 1.0;
+        this.speedY = -1;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.font = 'bold 24px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.text, this.x, this.y);
+        ctx.restore();
+    }
+
+    update() {
+        this.y += this.speedY;
+        this.alpha -= 0.02;
+        this.draw();
+    }
+}
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    score = 0;
+    timeLeft = 60;
+    structures = [];
+    particles = [];
+    gameRunning = true;
+    
+    setNewTarget();
+    spawnInterval = setInterval(spawnStructure, 1500);
+    gameInterval = setInterval(gameTick, 1000);
+    
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    gameLoop();
+}
+
+function gameTick() {
+    if (!gameRunning) return;
+    timeLeft--;
+    if (timeLeft <= 0) {
+        endGame(false, "Time's up!");
+    }
+}
+
+function spawnStructure() {
+    if (gameRunning) {
+        structures.push(new Structure());
+    }
+}
+
+function setNewTarget() {
+    const targetableStructures = structureTypes.filter(t => t !== 'Question');
+    currentTarget = targetableStructures[Math.floor(Math.random() * targetableStructures.length)];
+    targetDisplayEl.textContent = currentTarget.replace(/([A-Z])/g, ' $1').trim();
+}
+
+function updateUI() {
+    scoreEl.textContent = score;
+    timerEl.textContent = timeLeft;
+}
+
+function showQuiz(structureType) {
+    gameRunning = false;
+    const questionData = questions[structureType];
+    if (!questionData) {
+        gameRunning = true;
+        gameLoop();
+        return;
+    }
+    
+    const quizQuestionEl = document.getElementById('quizQuestion');
+    const optionsContainer = document.getElementById('quizOptions');
+    
+    quizQuestionEl.textContent = questionData.question;
+    optionsContainer.innerHTML = '';
+    
+    questionData.options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.classList.add('quiz-option');
+        button.onclick = () => handleAnswer(index === questionData.correctAnswer, questionData.feedback);
+        optionsContainer.appendChild(button);
+    });
+
+    document.getElementById('quizFeedback').classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+}
+
+function handleAnswer(isCorrect, feedback) {
+    const feedbackEl = document.getElementById('quizFeedback');
+    document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+    feedbackEl.innerHTML = `<p class="feedback ${isCorrect ? 'correct' : 'incorrect'}">${feedback}</p>`;
+    feedbackEl.classList.remove('hidden');
+    
+    if(isCorrect) {
+        score += 250;
+    }
+
+    setTimeout(() => {
+        quizScreen.classList.add('hidden');
+        gameRunning = true;
+        gameLoop();
+    }, 2500);
+}
+
+
+function endGame(won, message) {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    clearInterval(spawnInterval);
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+
+    document.getElementById('endTitle').textContent = won ? "Contouring Complete!" : "Case Incomplete";
+    document.getElementById('endMessage').textContent = message;
+    finalScoreEl.textContent = score;
+    endScreen.classList.remove('hidden');
+    // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+}
+
+function handleClick(e) {
+    if (!gameRunning) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let clicked = false;
+    for (let i = structures.length - 1; i >= 0; i--) {
+        const s = structures[i];
+        if (x > s.x && x < s.x + s.w && y > s.y && y < s.y + s.h) {
+            clicked = true;
+            if (s.isQuestion) {
+                showQuiz(currentTarget);
+            } else {
+                const data = structureData[s.type];
+                if (s.type === currentTarget) {
+                    // Correctly clicked the target
+                    score += data.reward;
+                    particles.push(new Particle(s.x, s.y, '#2ecc71', `+${data.reward}`));
+                    setNewTarget();
+                } else {
+                    // Incorrectly clicked a non-target
+                    score -= data.penalty;
+                    if (score < 0) score = 0;
+                    particles.push(new Particle(s.x, s.y, '#e74c3c', `-${data.penalty}`));
+                }
+            }
+            structures.splice(i, 1);
+            break; 
+        }
+    }
+}
+
+
+function drawBackground() {
+    ctx.fillStyle = '#a1887f'; 
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2, canvas.height / 2, 380, 280, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(40, 40, 40, 0.8)';
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2 - 150, canvas.height / 2, 100, 150, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2 + 150, canvas.height / 2, 100, 150, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#d32f2f';
+    ctx.beginPath();
+    let hx = canvas.width / 2;
+    let hy = canvas.height / 2;
+    let hw = 120;
+    let hh = 120;
+    ctx.moveTo(hx, hy + hh/4);
+    ctx.bezierCurveTo(hx, hy, hx - hw/2, hy - hh/4, hx - hw/2, hy - hh/4);
+    ctx.bezierCurveTo(hx - hw/2, hy - hh/2, hx - hw/4, hy - hh/2, hx, hy);
+    ctx.bezierCurveTo(hx + hw/4, hy - hh/2, hx + hw/2, hy - hh/2, hx + hw/2, hy - hh/4);
+    ctx.bezierCurveTo(hx + hw/2, hy - hh/4, hx, hy, hx, hy + hh/4);
+    ctx.fill();
+
+    ctx.fillStyle = '#e0e0e0';
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2 + 200, 40, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fbc02d';
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2 + 200, 10, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#f5f5f5';
+    for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.arc(canvas.width/2 - 260, canvas.height/2 - 120 + i*60, 8, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(canvas.width/2 + 260, canvas.height/2 - 120 + i*60, 8, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function gameLoop() {
+    if (!gameRunning) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+
+    for (let i = structures.length - 1; i >= 0; i--) {
+        structures[i].update();
+        if (structures[i].x + structures[i].w < 0) {
+            structures.splice(i, 1);
+        }
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        if (particles[i].alpha <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+    
+    updateUI();
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    init();
+});
+canvas.addEventListener('click', handleClick);
+
+</script>
+</body>
+</html>

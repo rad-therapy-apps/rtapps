@@ -184,6 +184,31 @@ SEED_ARCADE_GAMES = [
         "subject_slug": "treatment-delivery-procedures",
         "config": {"arcade_slug": "procedure-pursuit", "max_score": 1650},
     },
+    {
+        "title": "Anatomy Angler",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "anatomy-angler", "max_score": 2000},
+    },
+    {
+        "title": "Side Effect Sorcerer",
+        "subject_slug": "radiation-biology",
+        "config": {"arcade_slug": "side-effect-sorcerer", "max_score": 859},
+    },
+    {
+        "title": "Gantry Position Guessing Game",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "gantry-game", "max_score": 10},
+    },
+    {
+        "title": "LINAC Component Identification",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "linac-parts", "max_score": 10},
+    },
+    {
+        "title": "SSD Practice - BEV",
+        "subject_slug": "treatment-planning",
+        "config": {"arcade_slug": "ssd-practice", "max_score": 20},
+    },
 ]
 
 

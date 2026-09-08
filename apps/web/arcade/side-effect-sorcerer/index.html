@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Side Effect Sorcerer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #111827;
+            color: #e5e7eb;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        #main-game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        canvas {
+            background-color: #1f2937;
+            border: 2px solid #818cf8;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+            cursor: pointer;
+        }
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            width: 220px;
+            gap: 1rem;
+        }
+        .ui-box {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #4b5563;
+        }
+        .ui-box h3 {
+            color: #818cf8;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1em;
+            margin-bottom: 0.5rem;
+        }
+        .ui-box p {
+            font-size: 1.5em;
+            font-family: 'Orbitron', sans-serif;
+        }
+        #clinical-update-panel {
+            width: 800px;
+            background: #1f2937;
+            border: 1px solid #4b5563;
+            color: #fde047;
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            min-height: 40px;
+        }
+        .tower-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .tower-btn {
+            background: #4b5563;
+            border: 2px solid #6b7280;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8em; /* Smaller font for more text */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .tower-btn:hover, .tower-btn.selected {
+            border-color: #818cf8;
+            background: #c7d2fe;
+            color: #1e1b4b;
+        }
+        .tower-cost { font-size: 0.8em; opacity: 0.8; }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(17, 24, 39, 0.95); border: 2px solid #818cf8; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 30px #818cf8; z-index: 100; width: 90%; max-width: 600px; }
+        .modal h2 { font-size: 2em; color: #818cf8; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 1rem; }
+        .modal ul { text-align: left; list-style-position: inside; margin-bottom: 1rem;}
+        .modal li { margin-bottom: 0.5rem; }
+        .modal button { background-color: #818cf8; color: #1e1b4b; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="main-game-area">
+             <div id="clinical-update-panel">Clinical Status: Stable. Awaiting first wave of side effects.</div>
+             <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+        <div class="controls-panel">
+            <div class="ui-box"><h3>Wave</h3><p id="wave-counter">0 / 0</p></div>
+            <div class="ui-box"><h3>QoL</h3><p id="health">100</p></div>
+            <div class="ui-box"><h3>Resources</h3><p id="resources">300</p></div>
+            <div class="ui-box"><h3>Score</h3><p id="score">0</p></div>
+            <div class="ui-box tower-selection">
+                <h3 class="!mb-2">Interventions</h3>
+                <div class="tower-btn selected" data-tower="anti-emetic">Anti-emetic<div class="tower-cost">$100</div></div>
+                <div class="tower-btn" data-tower="topical-cream">Topical Cream<div class="tower-cost">$75</div></div>
+                <div class="tower-btn" data-tower="magic-mouthwash">Magic Mouthwash<div class="tower-cost">$150</div></div>
+                <div class="tower-btn" data-tower="support">Support Station<div class="tower-cost">$125</div></div>
+                <div class="tower-btn" data-tower="research">R&D<div class="tower-cost">$200</div></div>
+            </div>
+             <button id="next-wave-btn" class="tower-btn bg-green-600 border-green-500 hover:bg-green-500">Start Wave</button>
+        </div>
+    </div>
+    <div id="startScreen" class="modal">
+        <h2>Side Effect Sorcerer</h2>
+        <p>Your mission is to manage a patient's side effects throughout their treatment course. Place intervention towers to counter the incoming waves of toxicities.</p>
+        <ul>
+            <li>🤢 <span class="font-bold">Nausea:</span> Fast but weak. Handled by <span class="font-bold text-yellow-400">Anti-emetics</span>.</li>
+            <li>😡 <span class="font-bold">Dermatitis:</span> Tougher than nausea. Managed with <span class="font-bold text-pink-400">Topical Creams</span>.</li>
+            <li>😵 <span class="font-bold">Fatigue / Anemia:</span> Slows your towers! Counter with a <span class="font-bold text-indigo-400">Support Station</span> to boost their attack speed and damage against them.</li>
+            <li>👄 <span class="font-bold">Mucositis:</span> Heavily armored. Requires <span class="font-bold text-green-400">Magic Mouthwash</span>.</li>
+        </ul>
+        <p>Defeat side effects to earn resources, and survive all waves to win!</p>
+        <button id="startButton">Begin Shift</button>
+    </div>
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">New Game</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const waveEl = document.getElementById('wave-counter');
+const healthEl = document.getElementById('health');
+const resourcesEl = document.getElementById('resources');
+const scoreEl = document.getElementById('score');
+const nextWaveBtn = document.getElementById('next-wave-btn');
+const clinicalUpdateEl = document.getElementById('clinical-update-panel');
+const finalScoreEl = document.getElementById('finalScore');
+
+// --- Game Config ---
+const TILE_SIZE = 50;
+const COLS = canvas.width / TILE_SIZE;
+const ROWS = canvas.height / TILE_SIZE;
+
+// --- Game State ---
+let gameRunning = false, animationFrameId;
+let health, resources, wave, enemies, towers, projectiles, particles, score;
+let selectedTower = 'anti-emetic';
+let grid = [];
+let spawnInterval;
+
+// --- Game Data ---
+const path = [ {x:0, y:5}, {x:3, y:5}, {x:3, y:2}, {x:8, y:2}, {x:8, y:8}, {x:5, y:8}, {x:5, y:10}, {x:12, y:10}, {x:12, y:5}, {x:15, y:5} ];
+const pathLength = path.reduce((acc, point, i) => {
+    if (i === 0) return 0;
+    return acc + Math.hypot(path[i].x - path[i-1].x, path[i].y - path[i-1].y);
+}, 0) * TILE_SIZE;
+
+const doseThresholds = [
+    { dose: 20, position: 0.33, color: 'rgba(250, 204, 21, 0.5)' },
+    { dose: 40, position: 0.66, color: 'rgba(239, 68, 68, 0.5)' }
+];
+// --- MODIFIED TOWER DATA: All attacking towers can now target fatigue/anemia ---
+const towerData = {
+    'anti-emetic': { cost: 100, color: '#f59e0b', range: 120, damage: 2, fireRate: 60, targets: ['nausea', 'fatigue', 'anemia'] },
+    'topical-cream': { cost: 75, color: '#ec4899', range: 100, damage: 1, fireRate: 40, targets: ['dermatitis', 'fatigue', 'anemia'] },
+    'magic-mouthwash': { cost: 150, color: '#10b981', range: 90, damage: 5, fireRate: 80, targets: ['mucositis', 'fatigue', 'anemia'] },
+    'support': { cost: 125, color: '#6366f1', range: 100, effect: 'boost', boost: 0.75, type: 'support' },
+    'research': { cost: 200, color: '#d1d5db', generation: 3, fireRate: 100, type: 'generator' }
+};
+
+const enemyData = {
+    'nausea': { speed: 1.5, health: 5, color: '#16a34a', reward: 5, icon: '🤢' },
+    'dermatitis': { speed: 1, health: 10, color: '#dc2626', reward: 8, icon: '😡' },
+    'fatigue': { speed: 0.8, health: 20, color: '#4b5563', reward: 3, icon: '😵' },
+    'mucositis': { speed: 0.9, health: 25, color: '#c026d3', reward: 20, icon: '👄' },
+    'anemia': { speed: 1.2, health: 15, color: '#facc15', reward: 10, effect: 'slow', icon: '🩸' }
+};
+
+const waveData = [
+    { enemies: { 'nausea': 10 }, interval: 800, bonus: 75, narrative: "Patient reports mild nausea starting..." },
+    { enemies: { 'nausea': 10, 'dermatitis': 5 }, interval: 700, bonus: 100, narrative: "Nausea persists, and some skin redness is now visible." },
+    { enemies: { 'dermatitis': 10, 'fatigue': 8 }, interval: 650, bonus: 150, narrative: "Skin reaction worsening. Patient feeling very fatigued." },
+    { enemies: { 'nausea': 15, 'mucositis': 3 }, interval: 600, bonus: 175, narrative: "WARNING: Oral mucositis has appeared! A serious challenge." },
+    { enemies: { 'dermatitis': 15, 'anemia': 5 }, interval: 500, bonus: 200, narrative: "Skin issues continue, and patient's blood counts are dropping (Anemia). Your interventions will be less effective!" },
+    { enemies: { 'nausea': 10, 'dermatitis': 10, 'mucositis': 5, 'anemia': 5, 'fatigue': 10 }, interval: 400, bonus: 300, narrative: "Final push! All side effects are hitting at once!" },
+];
+
+
+// --- Game Objects ---
+class Tower {
+    constructor(x, y, type) { this.x = (x + 0.5) * TILE_SIZE; this.y = (y + 0.5) * TILE_SIZE; this.type = type; this.data = towerData[type]; this.cooldown = 0; this.boosted = false; }
+    draw() { ctx.fillStyle = this.data.color; ctx.beginPath(); if (this.data.type === 'generator') { ctx.fillRect(this.x - TILE_SIZE/3, this.y - TILE_SIZE/3, TILE_SIZE*2/3, TILE_SIZE*2/3); } else { ctx.arc(this.x, this.y, TILE_SIZE / 3, 0, Math.PI * 2); } ctx.fill(); if (this.boosted) { ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.stroke(); } }
+    update() { if(this.cooldown > 0) this.cooldown--; else { if (this.data.type === 'generator') { resources += this.data.generation; particles.push(new Particle(this.x, this.y, `+$${this.data.generation}`, this.data.color)); this.cooldown = this.data.fireRate; } else if (this.data.type === 'support') { this.applyBoost(); this.cooldown = this.data.fireRate; } else { const target = this.findTarget(); if(target) { let dmg = this.data.damage; if (target.type === 'fatigue' || target.type === 'anemia') { dmg = this.boosted ? this.data.damage * 2 : this.data.damage * 0.2; } projectiles.push(new Projectile(this.x, this.y, target, dmg, this.data.color)); this.cooldown = this.boosted ? this.data.fireRate * this.data.boost : this.data.fireRate; } } } this.draw(); this.boosted = false; }
+    findTarget() { let closest = null, closestDist = Infinity; enemies.forEach(enemy => { if (this.data.targets.includes(enemy.type)) { const dist = Math.hypot(this.x - enemy.x, this.y - enemy.y); if (dist < this.data.range && dist < closestDist) { closestDist = dist; closest = enemy; } } }); return closest; }
+    applyBoost(){ towers.forEach(tower => { if(tower.data.type !== 'support' && tower.data.type !== 'generator'){ if(Math.hypot(this.x - tower.x, this.y - tower.y) < this.data.range) tower.boosted = true; } }); }
+}
+class Enemy {
+    constructor(type) { this.x = (path[0].x + 0.5) * TILE_SIZE; this.y = (path[0].y + 0.5) * TILE_SIZE; this.pathIndex = 0; this.distanceTraveled = 0; this.thresholdsCrossed = new Set(); const data = enemyData[type]; this.type = type; this.speed = data.speed; this.health = data.health; this.maxHealth = data.health; this.color = data.color; this.reward = data.reward; this.effect = data.effect; this.slowed = false; this.icon = data.icon; }
+    draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 15, 0, Math.PI * 2); ctx.fill(); ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.icon, this.x, this.y); ctx.fillStyle = 'red'; ctx.fillRect(this.x - 15, this.y - 25, 30, 5); ctx.fillStyle = 'green'; ctx.fillRect(this.x - 15, this.y - 25, 30 * (this.health / this.maxHealth), 5); }
+    update() { let currentSpeed = this.slowed ? this.speed * 0.5 : this.speed; this.slowed = false; if (this.pathIndex < path.length - 1) { const targetX = (path[this.pathIndex + 1].x + 0.5) * TILE_SIZE; const targetY = (path[this.pathIndex + 1].y + 0.5) * TILE_SIZE; const dx = targetX - this.x; const dy = targetY - this.y; const dist = Math.hypot(dx, dy); if (dist < currentSpeed) { this.distanceTraveled += dist; this.pathIndex++; } else { this.x += (dx / dist) * currentSpeed; this.y += (dy / dist) * currentSpeed; this.distanceTraveled += currentSpeed; } } else { health -= 10; this.health = 0; } doseThresholds.forEach(th => { if (!this.thresholdsCrossed.has(th.dose) && this.distanceTraveled >= pathLength * th.position) { const qolDamage = (this.type === 'fatigue' || this.type === 'anemia') ? 1 : 5; health -= qolDamage; this.thresholdsCrossed.add(th.dose); particles.push(new Particle(this.x, this.y, `-${qolDamage} QoL`, th.color)); } }); if (this.effect === 'slow') { towers.forEach(tower => { if (tower.data.type !== 'support' && tower.data.type !== 'generator'){ if(Math.hypot(this.x - tower.x, this.y - tower.y) < 80) tower.cooldown = Math.max(tower.cooldown, 5); } }); } this.draw(); }
+}
+class Projectile {
+    constructor(x, y, target, damage, color) { this.x = x; this.y = y; this.target = target; this.damage = damage; this.color = color; this.speed = 5; }
+    draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 5, 0, Math.PI * 2); ctx.fill(); }
+    update() { const dx = this.target.x - this.x; const dy = this.target.y - this.y; const dist = Math.hypot(dx, dy); if (dist < this.speed) { this.target.health -= this.damage; particles.push(new Particle(this.x, this.y, `-${this.damage.toFixed(1)}`, this.color)); if(this.target.type === 'dermatitis' || this.target.type === 'mucositis') { this.target.slowed = true; } return true; } else { this.x += (dx / dist) * this.speed; this.y += (dy / dist) * this.speed; } this.draw(); return false; }
+}
+class Particle {
+    constructor(x, y, text, color) { this.x = x; this.y = y; this.text = text; this.color = color; this.alpha = 1.0; this.life = 30; }
+    draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color; ctx.font = 'bold 16px Orbitron'; ctx.textAlign = 'center'; ctx.fillText(this.text, this.x, this.y); ctx.restore(); }
+    update() { this.y -= 1; this.alpha -= 0.03; this.life--; this.draw(); }
+}
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden'); endScreen.classList.add('hidden');
+    score = 0; health = 100; resources = 300; wave = -1; towers = [];
+    enemies = []; projectiles = []; particles = [];
+    buildGrid(); gameRunning = true; nextWaveBtn.disabled = false;
+    nextWaveBtn.textContent = "Start Wave 1";
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    gameLoop();
+}
+function buildGrid() {
+    grid = [];
+    for(let r=0; r<ROWS; r++){ grid.push(new Array(COLS).fill(0)); }
+    for (let i = 0; i < path.length - 1; i++) {
+        const start = path[i]; const end = path[i+1];
+        if (start.x === end.x) { for(let y = Math.min(start.y, end.y); y <= Math.max(start.y, end.y); y++) grid[y][start.x] = 1; }
+        else { for(let x = Math.min(start.x, end.x); x <= Math.max(start.x, end.x); x++) grid[start.y][x] = 1; }
+    }
+}
+function startNextWave() {
+    if (!gameRunning || wave >= waveData.length - 1) return;
+    wave++; updateUI(); const waveConfig = waveData[wave];
+    clinicalUpdateEl.textContent = waveConfig.narrative;
+    let enemiesToSpawn = [];
+    for (const type in waveConfig.enemies) { for (let i = 0; i < waveConfig.enemies[type]; i++) enemiesToSpawn.push(type); }
+    enemiesToSpawn.sort(() => Math.random() - 0.5); 
+    let spawnIndex = 0;
+    if (spawnInterval) clearInterval(spawnInterval);
+    spawnInterval = setInterval(() => { if(spawnIndex < enemiesToSpawn.length) { enemies.push(new Enemy(enemiesToSpawn[spawnIndex])); spawnIndex++; } else { clearInterval(spawnInterval); } }, waveConfig.interval);
+    nextWaveBtn.disabled = true;
+}
+function updateUI() {
+    waveEl.textContent = `${wave + 1} / ${waveData.length}`;
+    healthEl.textContent = health;
+    resourcesEl.textContent = `$${resources}`;
+    scoreEl.textContent = score;
+}
+function endGame(won) {
+    gameRunning = false;
+    cancelAnimationFrame(animationFrameId);
+    if(spawnInterval) clearInterval(spawnInterval);
+    document.getElementById('endTitle').textContent = won ? "Patient Stable!" : "Treatment Overwhelmed!";
+    document.getElementById('endMessage').textContent = won ? "You successfully managed the patient's side effects through all waves." : "The patient's quality of life fell too low. Better luck next time!";
+    finalScoreEl.textContent = score;
+    endScreen.classList.remove('hidden');
+    // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+}
+function handleClick(e) {
+    if(!gameRunning) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
+    const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+    if (x < 0 || x >= COLS || y < 0 || y >= ROWS || grid[y][x] !== 0) return;
+    const cost = towerData[selectedTower].cost;
+    if (resources >= cost) { resources -= cost; towers.push(new Tower(x, y, selectedTower)); grid[y][x] = 2; updateUI(); }
+}
+function drawPathWithThresholds() {
+    ctx.lineWidth = TILE_SIZE; ctx.lineCap = 'round';
+    ctx.strokeStyle = "rgba(129, 140, 248, 0.2)"; ctx.beginPath();
+    ctx.moveTo((path[0].x + 0.5) * TILE_SIZE, (path[0].y + 0.5) * TILE_SIZE);
+    for (let i = 1; i < path.length; i++) { ctx.lineTo((path[i].x + 0.5) * TILE_SIZE, (path[i].y + 0.5) * TILE_SIZE); }
+    ctx.stroke();
+    doseThresholds.forEach(th => {
+        let currentDist = 0;
+        for (let i = 0; i < path.length - 1; i++) {
+            const start = { x: (path[i].x + 0.5) * TILE_SIZE, y: (path[i].y + 0.5) * TILE_SIZE };
+            const end = { x: (path[i+1].x + 0.5) * TILE_SIZE, y: (path[i+1].y + 0.5) * TILE_SIZE };
+            const segmentLength = Math.hypot(end.x - start.x, end.y - start.y);
+            if (currentDist + segmentLength >= pathLength * th.position) {
+                const requiredDist = pathLength * th.position - currentDist;
+                const ratio = requiredDist / segmentLength;
+                const thX = start.x + (end.x - start.x) * ratio;
+                const thY = start.y + (end.y - start.y) * ratio;
+                const perpDx = -(end.y - start.y) / segmentLength;
+                const perpDy = (end.x - start.x) / segmentLength;
+                ctx.beginPath();
+                ctx.moveTo(thX - perpDx * TILE_SIZE * 0.6, thY - perpDy * TILE_SIZE * 0.6);
+                ctx.lineTo(thX + perpDx * TILE_SIZE * 0.6, thY + perpDy * TILE_SIZE * 0.6);
+                ctx.strokeStyle = th.color; ctx.lineWidth = 5; ctx.stroke();
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.textAlign = 'center';
+                ctx.fillText(`${th.dose} Gy`, thX + perpDx * TILE_SIZE * 0.7, thY + perpDy * TILE_SIZE * 0.7);
+                break;
+            }
+            currentDist += segmentLength;
+        }
+    });
+}
+function gameLoop() {
+    if (!gameRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPathWithThresholds();
+    towers.forEach(t => t.update());
+    enemies.forEach(e => e.update());
+    projectiles.forEach(p => p.update());
+    projectiles = projectiles.filter(p => !p.update());
+    enemies = enemies.filter(e => {
+        if (e.health <= 0) {
+            score += e.reward;
+            resources += e.reward;
+            resources += Math.floor((1 - e.distanceTraveled / pathLength) * 5);
+            return false;
+        }
+        return true;
+    });
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => p.update());
+    updateUI();
+    if (health <= 0) { endGame(false); } 
+    else if (wave >= waveData.length -1 && enemies.length === 0) {
+        if(!endScreen.classList.contains('hidden')) return; 
+        endGame(true); 
+    }
+    if (nextWaveBtn.disabled && enemies.length === 0 && wave < waveData.length -1) {
+        resources += waveData[wave].bonus;
+        health = Math.min(100, health + 10); // QoL RECOVERY
+        particles.push(new Particle(canvas.width/2, canvas.height/2, '+10 QoL!', '#22c55e'));
+        nextWaveBtn.disabled = false;
+        nextWaveBtn.textContent = `Start Wave ${wave + 2}`;
+    }
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', init);
+canvas.addEventListener('click', handleClick);
+nextWaveBtn.addEventListener('click', startNextWave);
+document.querySelectorAll('.tower-btn[data-tower]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tower-btn[data-tower]').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTower = btn.dataset.tower;
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gantry Position Guessing Game</title>
+
+    <script src="https://unpkg.com/three@0.163.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.163.0/examples/jsm/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.163.0/examples/jsm/renderers/CSS2DRenderer.js"></script>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars */
+            background-color: #f0f0f0;
+        }
+        #c { /* WebGL Canvas */
+            display: block;
+            width: 100vw;
+            height: calc(60vh - 10px); /* Adjusted for overall layout */
+        }
+        .controls-container {
+            padding: 10px 15px;
+            background-color: #e0e0e0;
+            border-top: 1px solid #ccc;
+            height: calc(40vh - 10px); /* Adjusted for overall layout */
+            box-sizing: border-box;
+            overflow-y: auto; /* Allow scrolling if content overflows */
+            text-align: left;
+        }
+        .gantry-label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        #score-display {
+            text-align: center;
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .controls button {
+            margin: 3px 2px; /* Fine-tuned margin */
+            padding: 8px 10px;
+            font-size: 11.5px; /* Slightly adjusted for fitting more text */
+            cursor: pointer;
+            border: 1px solid #bbb;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .controls button:hover {
+            background-color: #e9e9e9;
+        }
+        #game-status {
+            font-size: 17px;
+            font-weight: bold;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            min-height: 22px;
+            text-align: center;
+        }
+        #next-question-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 18px;
+            font-size: 15px;
+            border: none;
+            border-radius: 5px;
+            display: block;
+            margin: 10px auto;
+        }
+        #next-question-button:hover {
+            background-color: #45a049;
+        }
+        /* CSS for 3D Labels */
+        .label {
+            color: #111;
+            font-family: sans-serif;
+            padding: 2px 5px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            font-size: 11px;
+            border: 1px solid rgba(0,0,0,0.2);
+            text-shadow: 0 0 2px white; /* Improves readability */
+            pointer-events: none; /* Labels should not capture mouse events */
+        }
+        /* Modal and Certificate Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .certificate-content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 5px solid #4CAF50;
+            font-family: 'Georgia', serif;
+        }
+        .certificate-content h2 {
+            color: #2E7D32;
+            margin-bottom: 20px;
+        }
+        .certificate-content p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        .awardee-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+        .award-score {
+             font-size: 1.3em;
+             font-weight: bold;
+             color: #4CAF50;
+        }
+        #game-results {
+            margin-top: 20px;
+            font-style: italic;
+            color: #555;
+        }
+        .certificate-buttons {
+            margin-top: 30px;
+        }
+        .certificate-buttons button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-family: sans-serif;
+        }
+        #print-button { background-color: #0288D1; color: white; }
+        #email-button { background-color: #F57C00; color: white; }
+        #close-modal-button { background-color: #546E7A; color: white; }
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .certificate-content, .certificate-content * {
+                visibility: visible;
+            }
+            .certificate-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 20px;
+                border: 5px solid black;
+                box-shadow: none;
+            }
+            .certificate-buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="c"></canvas>
+    <div class="controls-container">
+        <h1 style="font-size: 18px; text-align:center; margin-top:0; margin-bottom:5px;">Gantry Position Guessing Game</h1>
+        <p style="font-size:13px; text-align:center; margin-bottom: 8px;">The gantry moves to a random position. Click the button that matches its orientation category!</p>
+        
+        <div class="gantry-label" style="text-align:center;">Enter Name: <input type="text" id="student-name-input" placeholder="Your Name Here" style="font-size: 14px; padding: 2px; border-radius: 3px; border: 1px solid #999;"></div>
+
+        <div class="gantry-label" style="text-align:center;">Gantry Angle: <span id="angle-display">?°</span></div>
+        <div id="score-display">Score: 0 | Streak: 0</div>
+
+        <button id="next-question-button" onclick="nextQuestion()">Next Question / Start Game</button>
+        <div id="game-status">Click "Next Question" to start!</div>
+
+        <h2 style="font-size:15px; text-align:center; margin-top:10px; margin-bottom:5px;">Select the Gantry Orientation Category:</h2>
+        <div class="controls" style="text-align: center;">
+            <button onclick="checkAnswer('AP')">AP / Superior (0°)</button>
+            <button onclick="checkAnswer('PA')">PA / Inferior (180°)</button>
+            <button onclick="checkAnswer('LT_LAT')">Lt Lateral (90°)</button>
+            <button onclick="checkAnswer('RT_LAT')">Rt Lateral (270°)</button>
+            <br style="margin-bottom: 3px;">
+            <button onclick="checkAnswer('LAO')">LAO (1°-89°)</button>
+            <button onclick="checkAnswer('LPO')">LPO (91°-179°)</button>
+            <button onclick="checkAnswer('RPO')">RPO (181°-269°)</button>
+            <button onclick="checkAnswer('RAO')">RAO (271°-359°)</button>
+            <br><br>
+            <button onclick="clearBeamsAndResetGantry()" style="background-color: #f44336; color:white;">Clear Visuals & Reset Game</button>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal-overlay" style="display: none;">
+        <div class="certificate-content">
+            <h2>🏆 Certificate of Recognition 🏆</h2>
+            <p>This certificate is awarded to</p>
+            <p class="awardee-name">An Outstanding Gantry Guru</p>
+            <p>for achieving a perfect streak of</p>
+            <p class="award-score">10 Correct Answers in a Row!</p>
+            <div id="game-results"></div>
+            <div class="certificate-buttons">
+                <button id="print-button">Print Certificate</button>
+                <button id="email-button">Email Results</button>
+                <button id="close-modal-button">Close & Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+    <script>
+        // The three.js library is now available globally as the 'THREE' object
+
+        let scene, camera, renderer, controls;
+        let gantry, gantryHead, isocenter, couch, patientPlaceholder;
+        let beams = [];
+        const gantryRadius = 15;
+
+        const angleDisplay = document.getElementById("angle-display");
+        const gameStatusDisplay = document.getElementById("game-status");
+        const scoreDisplay = document.getElementById("score-display");
+
+        let score = 0;
+        let consecutiveCorrectAnswers = 0;
+        let totalAttempts = 0;
+        let labelRenderer; // For CSS2D Labels
+
+        const gameAngleCategories = [
+            { id: "AP",     name: "AP / Superior (0°)",   type: "cardinal", angle: 0 },
+            { id: "PA",     name: "PA / Inferior (180°)", type: "cardinal", angle: 180 },
+            { id: "LT_LAT", name: "Lt Lateral (90°)",     type: "cardinal", angle: 90 },
+            { id: "RT_LAT", name: "Rt Lateral (270°)",    type: "cardinal", angle: 270 },
+            { id: "LAO",    name: "LAO (1°-89°)",         type: "obliqueRange", range: [1, 89] },
+            { id: "LPO",    name: "LPO (91°-179°)",       type: "obliqueRange", range: [91, 179] },
+            { id: "RPO",    name: "RPO (181°-269°)",      type: "obliqueRange", range: [181, 269] },
+            { id: "RAO",    name: "RAO (271°-359°)",      type: "obliqueRange", range: [271, 359] }
+        ];
+
+        let gameCorrectAngle = null;
+        let gameCorrectCategoryId = null;
+        let gameCorrectCategoryName = null;
+        let questionActive = false;
+        
+        function createTextLabel(text, x, y, z, className = 'label') {
+            const div = document.createElement('div');
+            div.className = className;
+            div.textContent = text;
+            // Use THREE.CSS2DObject
+            const label = new THREE.CSS2DObject(div);
+            label.position.set(x, y, z);
+            scene.add(label);
+            return label;
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xdddddd);
+
+            const canvasEl = document.getElementById('c');
+            const canvasComputedStyle = getComputedStyle(canvasEl);
+            const canvasHeight = parseFloat(canvasComputedStyle.height);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / canvasHeight, 0.1, 1000);
+            camera.position.set(0, 20, 40);
+            camera.lookAt(0,0,0);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+            renderer.setSize(window.innerWidth, canvasHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Use THREE.CSS2DRenderer
+            labelRenderer = new THREE.CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, canvasHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = canvasEl.offsetTop + 'px';
+            labelRenderer.domElement.style.left = canvasEl.offsetLeft + 'px';
+            labelRenderer.domElement.style.pointerEvents = 'none';
+            document.body.appendChild(labelRenderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(15, 25, 20);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 500;
+            scene.add(directionalLight);
+
+            // Use THREE.OrbitControls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.update();
+
+            const isoGeometry = new THREE.SphereGeometry(0.35, 24, 24);
+            const isoMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, emissive: 0x330000 });
+            isocenter = new THREE.Mesh(isoGeometry, isoMaterial);
+            isocenter.position.set(0,0,0);
+            scene.add(isocenter);
+
+            const patientGeoParams = { radius: 2.8, height: 11.5 };
+            const patientGeo = new THREE.CylinderGeometry(patientGeoParams.radius, patientGeoParams.radius, patientGeoParams.height, 24);
+            const patientMat = new THREE.MeshStandardMaterial({
+                color: 0xB0BEC5, transparent: true, opacity: 0.35,
+                roughness: 0.6, metalness: 0.1, side: THREE.DoubleSide
+            });
+            patientPlaceholder = new THREE.Mesh(patientGeo, patientMat);
+            patientPlaceholder.rotation.x = Math.PI / 2;
+            patientPlaceholder.position.y = 0;
+            patientPlaceholder.castShadow = true;
+            patientPlaceholder.receiveShadow = true;
+            scene.add(patientPlaceholder);
+
+            const couchGeoParams = { width: 7.5, height: 0.8, length: 26 };
+            const couchGeo = new THREE.BoxGeometry(couchGeoParams.width, couchGeoParams.height, couchGeoParams.length);
+            const couchMat = new THREE.MeshStandardMaterial({ color: 0x546E7A, roughness:0.4, metalness: 0.2 });
+            couch = new THREE.Mesh(couchGeo, couchMat);
+            couch.position.y = - (patientGeoParams.radius + couchGeoParams.height / 2 + 0.05);
+            couch.castShadow = true;
+            couch.receiveShadow = true;
+            scene.add(couch);
+
+            gantry = new THREE.Group();
+            scene.add(gantry);
+
+            const headGeo = new THREE.BoxGeometry(4.5, 4.5, 3.5);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0x37474F, roughness: 0.3, metalness: 0.4 });
+            gantryHead = new THREE.Mesh(headGeo, headMat);
+            gantryHead.position.y = gantryRadius;
+            gantryHead.castShadow = true;
+            gantry.add(gantryHead);
+
+            const labelYOffset = patientGeoParams.radius * 0.3;
+            const patientLabelDepthOffset = patientGeoParams.height / 2 + 1.2;
+            const patientLabelWidthOffset = patientGeoParams.radius + 1.0;
+
+            createTextLabel("Feet", 0, labelYOffset, -patientLabelDepthOffset);
+            createTextLabel("Head", 0, labelYOffset, patientLabelDepthOffset);
+            createTextLabel("Anterior", 0, patientGeoParams.radius + 0.8, 0);
+            createTextLabel("Posterior", 0, couch.position.y + couchGeoParams.height / 2 + 0.2, 0);
+            createTextLabel("Right", patientLabelWidthOffset, labelYOffset, 0);
+            createTextLabel("Left", -patientLabelWidthOffset, labelYOffset, 0);
+
+            setGantryAngle(0, false);
+            scoreDisplay.textContent = `Score: ${score} | Streak: ${consecutiveCorrectAnswers}`;
+
+            document.getElementById('print-button').addEventListener('click', () => {
+                window.print();
+            });
+
+            document.getElementById('email-button').addEventListener('click', () => {
+                const subject = "My Gantry Position Game Results!";
+                const body = `I completed the Gantry Position Guessing Game with a streak of 10 correct answers!\n\nFinal Score: ${score}\nTotal Attempts: ${totalAttempts}\n\nTry the game yourself!`;
+                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            });
+
+            document.getElementById('close-modal-button').addEventListener('click', () => {
+                document.getElementById('results-modal').style.display = 'none';
+                clearBeamsAndResetGantry();
+            });
+
+            window.addEventListener('resize', onWindowResize, false);
+            animate();
+            gameStatusDisplay.textContent = 'Click "Next Question / Start Game" to begin!';
+        }
+
+        function onWindowResize() {
+            const canvasEl = document.getElementById('c');
+            const canvasComputedStyle = getComputedStyle(canvasEl);
+            const canvasHeight = parseFloat(canvasComputedStyle.height);
+            const canvasWidth = parseFloat(canvasComputedStyle.width);
+
+            camera.aspect = canvasWidth / canvasHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvasWidth, canvasHeight);
+            if (labelRenderer) {
+                labelRenderer.setSize(canvasWidth, canvasHeight);
+                labelRenderer.domElement.style.top = canvasEl.offsetTop + 'px';
+                labelRenderer.domElement.style.left = canvasEl.offsetLeft + 'px';
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            if (labelRenderer) {
+                labelRenderer.render(scene, camera);
+            }
+        }
+
+        function setGantryAngle(clinicalAngleDeg, showAngle = true) {
+            const angleRad = THREE.MathUtils.degToRad(clinicalAngleDeg);
+            gantry.rotation.z = angleRad;
+            if (showAngle) {
+                angleDisplay.innerText = `${clinicalAngleDeg}°`;
+            } else {
+                angleDisplay.innerText = `?°`;
+            }
+        }
+
+        function drawBeamVisual(clinicalAngleDeg) {
+            const beamOriginPos = new THREE.Vector3();
+            gantryHead.getWorldPosition(beamOriginPos);
+
+            const beamDirectionVec = new THREE.Vector3().subVectors(isocenter.position, beamOriginPos).normalize();
+            const coneHeight = gantryRadius * 1.7;
+            const fieldDiameterAtIso = 3.5;
+            const radiusAtIso = fieldDiameterAtIso / 2;
+            const coneBaseRadius = (radiusAtIso / gantryRadius) * coneHeight;
+
+            const coneGeo = new THREE.ConeGeometry(coneBaseRadius, coneHeight, 32, 1, true);
+            coneGeo.translate(0, -coneHeight / 2, 0);
+
+            const beamMat = new THREE.MeshBasicMaterial({
+                color: 0x00AFFF, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide
+            });
+            const beamMesh = new THREE.Mesh(coneGeo, beamMat);
+            beamMesh.position.copy(beamOriginPos);
+            
+            const defaultConeOpeningDirection = new THREE.Vector3(0, -1, 0);
+            beamMesh.quaternion.setFromUnitVectors(defaultConeOpeningDirection, beamDirectionVec);
+            
+            scene.add(beamMesh);
+            beams.push(beamMesh);
+        }
+
+        function clearAllBeams() {
+            beams.forEach(beam => {
+                scene.remove(beam);
+                beam.geometry.dispose();
+                beam.material.dispose();
+            });
+            beams = [];
+        }
+
+        function endGame() {
+            gameStatusDisplay.textContent = "Congratulations! You've won!";
+            gameStatusDisplay.style.color = "#4CAF50";
+            questionActive = false;
+            drawBeamVisual(gameCorrectAngle);
+            
+            const studentNameInput = document.getElementById('student-name-input');
+            const studentName = studentNameInput.value.trim();
+
+            const modal = document.getElementById('results-modal');
+            const resultsDisplay = document.getElementById('game-results');
+            const awardeeDisplay = document.querySelector('.awardee-name');
+
+            awardeeDisplay.textContent = studentName || "An Outstanding Gantry Guru";
+            resultsDisplay.textContent = `Final Score: ${score}. Total Attempts: ${totalAttempts}.`;
+
+            modal.style.display = 'flex';
+            // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+            if (window.RTApps) window.RTApps.reportResult(score);
+        }
+
+        window.clearBeamsAndResetGantry = function() {
+            clearAllBeams();
+            setGantryAngle(0, false);
+            angleDisplay.innerText = `?°`;
+            gameStatusDisplay.textContent = 'Click "Next Question / Start Game" to begin!';
+            gameStatusDisplay.style.color = "black";
+            questionActive = false;
+            gameCorrectAngle = null;
+            gameCorrectCategoryId = null;
+            gameCorrectCategoryName = null;
+            
+            score = 0;
+            consecutiveCorrectAnswers = 0;
+            totalAttempts = 0;
+            scoreDisplay.textContent = `Score: 0 | Streak: 0`;
+            
+            const modal = document.getElementById('results-modal');
+            if (modal) {
+                 modal.style.display = 'none';
+            }
+        }
+
+        window.nextQuestion = function() {
+            clearAllBeams();
+            gameStatusDisplay.textContent = "Guess the orientation category!";
+            gameStatusDisplay.style.color = "black";
+
+            const randomIndex = Math.floor(Math.random() * gameAngleCategories.length);
+            const selectedCategory = gameAngleCategories[randomIndex];
+
+            gameCorrectCategoryId = selectedCategory.id;
+            gameCorrectCategoryName = selectedCategory.name;
+
+            if (selectedCategory.type === "cardinal") {
+                gameCorrectAngle = selectedCategory.angle;
+            } else if (selectedCategory.type === "obliqueRange") {
+                const min = selectedCategory.range[0];
+                const max = selected.range[1];
+                gameCorrectAngle = Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            setGantryAngle(gameCorrectAngle, false);
+            questionActive = true;
+        }
+
+        window.checkAnswer = function(selectedCategoryId) {
+            if (!questionActive) {
+                gameStatusDisplay.textContent = "Click 'Next Question' to start a new round.";
+                gameStatusDisplay.style.color = "#FF8C00";
+                return;
+            }
+            
+            questionActive = false;
+            totalAttempts++;
+            setGantryAngle(gameCorrectAngle, true);
+
+            const selectedCategoryData = gameAngleCategories.find(cat => cat.id === selectedCategoryId);
+
+            if (selectedCategoryId === gameCorrectCategoryId) {
+                gameStatusDisplay.textContent = `Correct! It was ${gameCorrectCategoryName} (Angle: ${gameCorrectAngle}°).`;
+                gameStatusDisplay.style.color = "#2E7D32";
+                score++;
+                consecutiveCorrectAnswers++;
+                scoreDisplay.textContent = `Score: ${score} | Streak: ${consecutiveCorrectAnswers}`;
+                drawBeamVisual(gameCorrectAngle);
+                
+                if (consecutiveCorrectAnswers >= 10) {
+                    endGame();
+                    return;
+                }
+            } else {
+                let incorrectMsg = `Incorrect. `;
+                if (selectedCategoryData) {
+                    incorrectMsg += `You chose ${selectedCategoryData.name}. `;
+                }
+                incorrectMsg += `The correct answer was ${gameCorrectCategoryName} (Angle: ${gameCorrectAngle}°).`;
+                gameStatusDisplay.textContent = incorrectMsg;
+                gameStatusDisplay.style.color = "#C62828";
+                consecutiveCorrectAnswers = 0;
+                scoreDisplay.textContent = `Score: ${score} | Streak: ${consecutiveCorrectAnswers}`;
+                drawBeamVisual(gameCorrectAngle);
+            }
+        }
+
+        // --- Initialize ---
+        // Add a listener to ensure the DOM is fully loaded before starting the game
+        document.addEventListener('DOMContentLoaded', (event) => {
+            init();
+        });
+
+    </script>
+
+</body>
+</html>
