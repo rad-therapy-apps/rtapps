@@ -102,7 +102,29 @@ class TestExternalActivitySnapshot:
         assert snap["activity"]["kind"] == "external"
         assert snap["external"]["arcade_slug"] == "cell-defender"
         assert snap["external"]["max_score"] == 5000
+        assert snap["external"]["completion_only"] is False
         assert snap["external"]["subject"]["slug"] == subject.slug
+
+    async def test_publish_and_snapshot_completion_only(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        subject = await _ensure_subject(db)
+
+        activity = Activity(
+            kind="external",
+            ref_id=new_id(),
+            title="Beam Sculptor",
+            subject_id=subject.id,
+            status="draft",
+            access="practice",
+            config={"arcade_slug": "beam-sculptor", "completion_only": True},
+        )
+        db.add(activity)
+        await db.flush()
+
+        version = await publish_activity(db, activity, author=None, change_note="test")
+        assert version.snapshot["external"]["completion_only"] is True
 
     async def test_student_get_returns_external_snapshot(
         self, client: AsyncClient, db: AsyncSession
@@ -130,6 +152,7 @@ class TestExternalActivitySnapshot:
         assert body["kind"] == "external"
         assert body["snapshot"]["external"]["arcade_slug"] == "cell-defender"
         assert body["snapshot"]["external"]["max_score"] == 5000
+        assert body["snapshot"]["external"]["completion_only"] is False
 
 
 class TestExternalActivitySubmit:

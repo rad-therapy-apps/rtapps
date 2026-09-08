@@ -89,7 +89,14 @@ export type CalculatorSnapshot = {
 
 export type ExternalSnapshot = {
 	activity: { id: string; kind: 'external'; title: string };
-	external: { arcade_slug: string; max_score: number; subject: { slug: string; title: string } };
+	external: {
+		arcade_slug: string;
+		max_score: number;
+		// Mirrors the activity's config; true for games that report a bare completion instead of
+		// a score (plan 4b).
+		completion_only?: boolean;
+		subject: { slug: string; title: string };
+	};
 };
 
 // The six practice-activity snapshot shapes (ADR-0006 excludes lesson/assessment activities

@@ -2,6 +2,8 @@
  * What this file does: the RTApps arcade shim — the ONLY integration a game needs. Exposes
  * window.RTApps.reportResult(score, max?) which posts one {type:"rtapps:result"} message to
  * the embedding platform page (ExternalPlayer.svelte), which owns the attempt lifecycle.
+ * A completion-only game (plan 4b) calls window.RTApps.reportCompletion() instead, which posts
+ * {type:"rtapps:result", completion:true} — same once-only latch, no score.
  * Used here and why: plain IIFE, no modules/deps, so any legacy single-file game can include
  * it with one <script> tag. Deliberately public (static/): it holds no secrets and makes no
  * API calls; posting is same-origin-targeted and once-only.
@@ -21,6 +23,14 @@
 					score: Number(score),
 					max: max == null ? null : Number(max)
 				},
+				window.location.origin
+			);
+		},
+		reportCompletion: function () {
+			if (sent || window.parent === window) return;
+			sent = true;
+			window.parent.postMessage(
+				{ type: 'rtapps:result', completion: true },
 				window.location.origin
 			);
 		}

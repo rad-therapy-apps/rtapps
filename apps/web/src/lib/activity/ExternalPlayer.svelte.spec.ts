@@ -35,6 +35,18 @@ const snapshot: ExternalSnapshot = {
 	}
 };
 
+// A completion-only activity's snapshot: no max_score, and the flag flipped that gates the
+// completion↔score cross-message rejection in ExternalPlayer's onMessage.
+const completionSnapshot: ExternalSnapshot = {
+	activity: { id: 'activity-1', kind: 'external', title: 'Beam Sculptor' },
+	external: {
+		arcade_slug: 'beam-sculptor',
+		max_score: 5000,
+		completion_only: true,
+		subject: { slug: 'radiation-biology', title: 'Radiation Biology' }
+	}
+};
+
 // Fields common to every fake AttemptOut response below (start and submit).
 const baseAttempt = {
 	id: 'attempt-1',
@@ -306,5 +318,120 @@ describe('ExternalPlayer', () => {
 		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
 		expect(submitCalls).toBe(2);
 		expect(idempotencyKeys[0]).not.toBe(idempotencyKeys[1]);
+	});
+
+	// Scenario: a completion-only activity's game reports completion (no score).
+	// Invariant: submit is posted with no body (plan 4b's completion-only contract), and the
+	// result panel shows "Completed" with no percent text.
+	it('submits an empty-body submit on a completion message for a completion-only activity', async () => {
+		const post: Post = vi.fn(async (path: string, init?: { body?: unknown }) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				expect(init?.body).toBeUndefined();
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: null, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot: completionSnapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', completion: true });
+
+		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
+		await expect.element(page.getByText('Completed')).toBeInTheDocument();
+		expect(page.getByText(/score recorded/i).elements().length).toBe(0);
+		expect(post).toHaveBeenCalledWith('/api/v1/attempts/{attempt_id}/submit', {
+			params: { path: { attempt_id: 'attempt-1' } },
+			headers: { 'Idempotency-Key': expect.any(String) }
+		});
+	});
+
+	// Scenario: a completion-only activity's game sends a SCORE message instead of completion.
+	// Invariant: ignored — a completion-only activity only accepts a completion message.
+	it('ignores a score message for a completion-only activity', async () => {
+		let submitCalls = 0;
+		const post: Post = vi.fn(async (path: string) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				submitCalls += 1;
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: null, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot: completionSnapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', score: 1200 });
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(submitCalls).toBe(0);
+	});
+
+	// Scenario: a scored activity's game sends a completion message instead of a score.
+	// Invariant: ignored — a scored activity only accepts a score message.
+	it('ignores a completion message for a scored activity', async () => {
+		let submitCalls = 0;
+		const post: Post = vi.fn(async (path: string) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				submitCalls += 1;
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: 24, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', completion: true });
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(submitCalls).toBe(0);
+	});
+
+	// Scenario: the game (or the shim's latch) sends a completion message twice.
+	// Invariant: once-only — the latch shared with the score path blocks the second submit.
+	it('ignores a second completion message after submit', async () => {
+		let submitCalls = 0;
+		const post: Post = vi.fn(async (path: string) => {
+			if (path === '/api/v1/activities/{activity_id}/attempts') {
+				return { data: { ...baseAttempt, items: [] }, error: undefined };
+			}
+			if (path === '/api/v1/attempts/{attempt_id}/submit') {
+				submitCalls += 1;
+				return {
+					data: { ...baseAttempt, status: 'submitted', percent: null, passed: null },
+					error: undefined
+				};
+			}
+			throw new Error(`unexpected path ${path}`);
+		}) as unknown as Post;
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot: completionSnapshot, post });
+		await waitForAttemptStart(post);
+
+		dispatchResult({ type: 'rtapps:result', completion: true });
+		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
+
+		dispatchResult({ type: 'rtapps:result', completion: true });
+
+		expect(submitCalls).toBe(1);
 	});
 });

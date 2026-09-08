@@ -207,6 +207,7 @@ async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[
             "external": {
                 "arcade_slug": activity.config.get("arcade_slug"),
                 "max_score": activity.config.get("max_score"),
+                "completion_only": activity.config.get("completion_only", False),
                 "subject": subject,
             },
         }
