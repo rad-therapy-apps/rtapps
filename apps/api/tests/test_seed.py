@@ -527,7 +527,8 @@ async def test_seed_creates_care_commander(db: AsyncSession, settings: Settings)
 
 async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: Error Reporter — published, kind external, access practice,
-    config with arcade_slug and max_score (500: 4 errors x 100 + 75 + 25);
+    config with arcade_slug and max_score (10825: perfect 25-case MASTERY ACHIEVED
+    playthrough, score/XP accumulate across cases and only reset on full restart);
     subject is quality-management-and-safety; re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Error Reporter"))
@@ -535,7 +536,7 @@ async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings)
     assert activity.kind == "external"
     assert activity.status == "published"
     assert activity.access == "practice"
-    assert activity.config == {"arcade_slug": "error-reporter", "max_score": 500}
+    assert activity.config == {"arcade_slug": "error-reporter", "max_score": 10825}
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "quality-management-and-safety"
 
@@ -548,15 +549,17 @@ async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings)
 
 async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: QA Crusader — published, kind external, access practice,
-    config with arcade_slug and max_score (3000: 6 questions x 500 points);
-    subject is quality-management-and-safety; re-seeding creates it only once."""
+    config with arcade_slug and max_score (10000: Level 3's win floor of 8000 plus a
+    bounded overshoot allowance, since reportResult fires once per level at time-up,
+    not the instant the target score is crossed); subject is quality-management-and-safety;
+    re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "QA Crusader"))
     assert activity is not None
     assert activity.kind == "external"
     assert activity.status == "published"
     assert activity.access == "practice"
-    assert activity.config == {"arcade_slug": "qa-crusader", "max_score": 3000}
+    assert activity.config == {"arcade_slug": "qa-crusader", "max_score": 10000}
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "quality-management-and-safety"
 

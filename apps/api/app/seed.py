@@ -152,14 +152,27 @@ SEED_ARCADE_GAMES = [
         "config": {"arcade_slug": "care-commander", "max_score": 3000},
     },
     {
+        # 10825 = heuristic cap for a perfect "MASTERY ACHIEVED" playthrough (25 cases,
+        # score/XP never reset mid-session): 3 Intern cases @275 + 4 Junior @375 +
+        # 5 Staff @400 + 10 Senior @500 + 3 QA Supervisor @500 = 10825. This is the score
+        # at the exact endGame() call where reportResult fires and the game itself forces
+        # a full reset (only "Play Again From Start" is offered after); not a hard limit
+        # against deliberate grinding, but a defensible strong-session cap (Cell Defender
+        # precedent) — not a single case's ceiling like the previous 500.
         "title": "Error Reporter",
         "subject_slug": "quality-management-and-safety",
-        "config": {"arcade_slug": "error-reporter", "max_score": 500},
+        "config": {"arcade_slug": "error-reporter", "max_score": 10825},
     },
     {
+        # 10000 = Level 3's own win floor (score >= 8000, the highest `targetScore`) plus a
+        # bounded overshoot allowance (2000, ~4 more tolerance-bomb bonuses at 500 each).
+        # score resets to 0 each level and reportResult fires once per level at time-up
+        # (not the instant the target is crossed), so a legitimate Level 3 win can exceed
+        # 8000 by whatever's scored in the remaining seconds; 10000 covers a strong final-
+        # level clear without treating the number as unbounded (Cell Defender precedent).
         "title": "QA Crusader",
         "subject_slug": "quality-management-and-safety",
-        "config": {"arcade_slug": "qa-crusader", "max_score": 3000},
+        "config": {"arcade_slug": "qa-crusader", "max_score": 10000},
     },
     {
         "title": "Safety Supervisor",
