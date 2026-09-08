@@ -95,8 +95,12 @@
 		<!-- Practice semantics: no pass/fail badge for games in 4a. -->
 	</section>
 {:else}
+	<!-- #52: src is the explicit /index.html, never the bare directory URL — SvelteKit
+	     308-strips a trailing slash regardless of route trailingSlash options (verified
+	     empirically), and a stripped URL breaks relative script/style refs in multi-file
+	     games. -->
 	<iframe
-		src={`/arcade/${snapshot.external.arcade_slug}/`}
+		src={`/arcade/${snapshot.external.arcade_slug}/index.html`}
 		title={snapshot.activity.title}
 		class="arcade-frame"
 	></iframe>

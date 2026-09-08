@@ -78,7 +78,9 @@ describe('ExternalPlayer', () => {
 
 		await expect.element(page.getByText('Cell Defender')).toBeInTheDocument();
 		const iframe = document.querySelector('iframe');
-		expect(iframe?.getAttribute('src')).toBe('/arcade/cell-defender/');
+		// #52: an explicit /index.html src — a bare directory URL gets its trailing slash
+		// 308-stripped by SvelteKit, which would break relative asset refs in multi-file games.
+		expect(iframe?.getAttribute('src')).toBe('/arcade/cell-defender/index.html');
 		await waitForAttemptStart(post);
 	});
 
