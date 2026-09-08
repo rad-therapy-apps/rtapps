@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedure Pursuit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0a23;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        canvas {
+            background-color: #001f3f;
+            border: 2px solid #00ffdd;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffdd;
+        }
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #00ffdd;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px #00ffdd;
+            z-index: 100;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal h2 {
+            font-size: 2em;
+            color: #00ffdd;
+            margin-bottom: 20px;
+        }
+        .modal p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .modal button, .quiz-option {
+            background: linear-gradient(145deg, #0d7377, #14ffec);
+            color: #0a0a23;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(20, 255, 236, 0.4);
+            margin-top: 10px;
+        }
+        .modal button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 255, 236, 0.6);
+        }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 1em;
+            padding: 12px 20px;
+        }
+        .quiz-option.correct {
+             background: linear-gradient(145deg, #4caf50, #81c784);
+        }
+        .quiz-option.incorrect {
+             background: linear-gradient(145deg, #f44336, #e57373);
+        }
+        .feedback {
+            margin-top: 15px;
+            font-size: 1em;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .feedback.correct {
+            background-color: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4caf50;
+        }
+        .feedback.incorrect {
+            background-color: rgba(244, 67, 54, 0.3);
+            border: 1px solid #f44336;
+        }
+        /* New Styles for Timer */
+        #timerContainer {
+            width: 100%;
+            height: 10px;
+            background-color: #2a2a57;
+            border-radius: 5px;
+            margin-top: 20px;
+            border: 1px solid #00ffdd;
+        }
+        #timerBar {
+            height: 100%;
+            width: 100%;
+            background-color: #ffc107;
+            border-radius: 5px;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>Procedure Pursuit</h2>
+        <p>Guide your patient through the clinical pathway. Use ARROW KEYS to move. Answer questions at Checkpoints to proceed. Handle STAT events and HAZARDS that appear on the path quickly to earn bonus points or avoid penalties!</p>
+        <button id="startButton">Start Journey</button>
+    </div>
+
+    <div id="quizScreen" class="modal hidden">
+        <h2 id="quizTitle">Checkpoint!</h2>
+        <p id="quizQuestion"></p>
+        <div id="quizOptions"></div>
+        <div id="quizFeedback" class="hidden"></div>
+        <div id="timerContainer" class="hidden">
+            <div id="timerBar"></div>
+        </div>
+    </div>
+    
+    <div id="endScreen" class="modal hidden">
+        <h2>Treatment Complete!</h2>
+        <p>You have successfully guided the patient through the entire procedure. Well done!</p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Start New Patient</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Canvas and Context ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// --- Modals and Buttons ---
+const startScreen = document.getElementById('startScreen');
+const quizScreen = document.getElementById('quizScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+
+// --- Game State ---
+let player;
+let keys = {};
+let gameRunning = false;
+let currentLevelIndex = 0;
+let score = 0;
+let activeCheckpoint = null;
+let events = [];
+let quizTimer;
+let quizTimerInterval;
+
+// --- Question Data ---
+const questions = {
+  assessment: [
+    { question: "Why is it important to review a patient’s medical history before starting radiation therapy?", options: ["To identify contraindications and tailor the treatment plan", "To determine insurance coverage", "To select the treatment machine", "To schedule appointments"], correctAnswer: 0, feedback: "Correct! Reviewing history helps identify risks and customize care." },
+    { question: "What is the purpose of a living will?", options: ["To specify desired medical treatments if the patient becomes incapacitated", "To appoint a financial advisor", "To determine insurance coverage", "To select a hospital"], correctAnswer: 0, feedback: "Correct! A living will details a patient's wishes for care if they cannot communicate." }
+  ],
+  imaging: [
+    { question: "Which imaging modality is most commonly used for radiation therapy planning?", options: ["CT scan", "X-ray", "Ultrasound", "Mammography"], correctAnswer: 0, feedback: "Correct! CT is the standard for planning." },
+    { question: "Why is image fusion important in radiation therapy?", options: ["It combines information from multiple imaging modalities for better targeting", "It increases radiation dose", "It replaces simulation", "To speed up billing"], correctAnswer: 0, feedback: "Correct! Image fusion improves accuracy." }
+  ],
+  simulation: [
+    { question: "What is the main goal of simulation in radiation therapy?", options: ["To accurately localize the treatment area and plan patient positioning", "To deliver the first treatment", "To check insurance", "To measure blood pressure"], correctAnswer: 0, feedback: "Correct! Simulation ensures precise targeting." },
+    { question: "Which device is commonly used to immobilize a head and neck patient during simulation?", options: ["Thermoplastic mask", "Gait belt", "Transfer board", "Wheelchair"], correctAnswer: 0, feedback: "Correct! Thermoplastic masks prevent movement." }
+  ],
+  planning: [
+      { question: "What is a critical structure in treatment planning?", options: ["An organ at risk of radiation damage", "A machine part", "A billing code", "A patient’s family member"], correctAnswer: 0, feedback: "Correct! Critical structures must be protected." },
+      { question: "What does IMRT stand for?", options: ["Intensity Modulated Radiation Therapy", "Internal Medical Radiation Treatment", "Immediate Radiation Therapy", "Image Modulated Radiology Test"], correctAnswer: 0, feedback: "Correct! IMRT allows for precise dose modulation." }
+  ],
+  prescription: [
+    { question: "What information is included in a radiation therapy prescription?", options: ["Site, total dose, fractionation, energy, modality", "Patient’s address", "Insurance number", "Machine serial number"], correctAnswer: 0, feedback: "Correct! Prescriptions include all treatment parameters." },
+    { question: "Who is responsible for signing the radiation therapy prescription?", options: ["Radiation oncologist", "Radiation therapist", "Nurse", "Patient"], correctAnswer: 0, feedback: "Correct! Only the physician can sign the prescription."}
+  ],
+  positioning: [
+    { question: "Why is patient immobilization important during treatment delivery?", options: ["To ensure accurate and reproducible positioning", "To increase comfort only", "To reduce machine noise", "To speed up billing"], correctAnswer: 0, feedback: "Correct! Immobilization prevents movement and errors." },
+    { question: "What is the purpose of indexing immobilization devices?", options: ["To ensure consistent placement on the treatment couch", "To label the device", "To increase weight", "To improve billing"], correctAnswer: 0, feedback: "Correct! Indexing ensures reproducibility."}
+  ],
+  verification: [
+    { question: "What is the purpose of portal imaging in radiation therapy?", options: ["To verify patient positioning and field alignment", "To deliver a higher dose", "To measure blood sugar", "To increase comfort"], correctAnswer: 0, feedback: "Correct! Portal imaging checks setup accuracy." },
+    { question: "What does IGRT stand for?", options: ["Image Guided Radiation Therapy", "Immediate Gamma Radiation Treatment", "Integrated Gamma Ray Therapy", "Image Gated Radio Therapy"], correctAnswer: 0, feedback: "Correct! IGRT uses imaging to guide treatment." }
+  ],
+  delivery: [
+    { question: "What is the safest way to lift a heavy object?", options: ["Bend at the knees and keep the object close", "Bend at the waist", "Twist your back", "Lift quickly"], correctAnswer: 0, feedback: "Correct! Bend at the knees and keep the load close for safe lifting." },
+    { question: "What is the most effective way to prevent the spread of infection?", options: ["Hand hygiene", "Wearing a hat", "Taking vitamins", "Using air freshener"], correctAnswer: 0, feedback: "Correct! Hand hygiene is the most effective infection control measure."}
+  ],
+  documentation: [
+      { question: "How should errors in the treatment record be corrected?", options: ["Draw a single line through the error, initial, and date", "Erase the error", "Use white-out", "Leave it uncorrected"], correctAnswer: 0, feedback: "Correct! Proper correction maintains record integrity." },
+      { question: "What is a medical event in radiation therapy documentation?", options: ["A reportable incident such as an incorrect dose or site", "A patient birthday", "A staff meeting", "A holiday"], correctAnswer: 0, feedback: "Correct! Medical events must be documented and reported."}
+  ],
+  // New categories for timed events
+  stat: [
+      { question: "What should you verify immediately before beam-on?", options: ["Patient ID, site, and treatment plan parameters", "The time of day", "The patient's insurance status", "The weather outside"], correctAnswer: 0, feedback: "Correct! Final verification of patient, site, and plan is a critical safety check." }
+  ],
+  hazard: [
+      { question: "A patient feels faint. What is your immediate action?", options: ["Stop the procedure and assess the patient", "Continue the treatment", "Ask them to stand up", "Offer them water"], correctAnswer: 0, feedback: "Correct! Patient safety is first. Stop and assess immediately." }
+  ]
+};
+
+// --- Game Objects ---
+class Player {
+    constructor(path) {
+        this.path = path;
+        this.pathIndex = 0;
+        this.targetX = path[0].x;
+        this.targetY = path[0].y;
+        this.x = path[0].x;
+        this.y = path[0].y;
+        this.radius = 15;
+        this.speed = 4;
+        this.color = '#00ffdd';
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(this.x - this.radius, this.y - 5, this.radius * 2, 10);
+    }
+
+    update() {
+        const targetPoint = this.path[this.pathIndex];
+        const dx = targetPoint.x - this.x;
+        const dy = targetPoint.y - this.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > this.speed) {
+            this.x += (dx / dist) * this.speed;
+            this.y += (dy / dist) * this.speed;
+        } else {
+            this.x = targetPoint.x;
+            this.y = targetPoint.y;
+        }
+
+        this.draw();
+    }
+    
+    move(direction) {
+        if (direction === 'forward' && this.pathIndex < this.path.length - 1) {
+            this.pathIndex++;
+        }
+        if (direction === 'backward' && this.pathIndex > 0) {
+            this.pathIndex--;
+        }
+    }
+}
+
+class Checkpoint {
+    constructor(x, y, name, questionCategory) {
+        this.x = x;
+        this.y = y;
+        this.radius = 25;
+        this.name = name;
+        this.questionCategory = questionCategory;
+        this.isLocked = true;
+        this.type = 'checkpoint';
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.isLocked ? 'rgba(255, 0, 100, 0.7)' : 'rgba(0, 255, 0, 0.7)';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.name, this.x, this.y + this.radius + 15);
+    }
+}
+
+// New Class for Dynamic Events
+class Event {
+    constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        this.type = type; // 'stat' or 'hazard'
+        this.radius = 20;
+        this.isActive = true;
+    }
+
+    draw() {
+        if (!this.isActive) return;
+        ctx.save();
+        ctx.font = "20px Orbitron";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        if (this.type === 'stat') {
+            ctx.fillStyle = 'rgba(255, 69, 0, 0.8)'; // Orangey-red
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.fillText('STAT', this.x, this.y);
+        } else if (this.type === 'hazard') {
+            ctx.fillStyle = 'rgba(255, 255, 0, 0.8)'; // Yellow
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - this.radius);
+            ctx.lineTo(this.x + this.radius, this.y + this.radius);
+            ctx.lineTo(this.x - this.radius, this.y + this.radius);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.fillText('!', this.x, this.y + 5);
+        }
+        ctx.restore();
+    }
+}
+
+
+// --- Game Levels ---
+const levels = [
+    { 
+        path: [ {x: 50, y: 300}, {x: 150, y: 300}, {x: 250, y: 300}, {x: 350, y: 300}, {x: 450, y: 300}, {x: 550, y: 300}, {x: 650, y: 300}, {x: 750, y: 300}, {x: 850, y: 300}, {x: 950, y: 300} ],
+        checkpoints: [ new Checkpoint(250, 300, "Assessment", "assessment"), new Checkpoint(550, 300, "Imaging", "imaging"), new Checkpoint(850, 300, "Simulation", "simulation") ],
+        events: []
+    },
+    { 
+        path: [ {x: 50, y: 150}, {x: 150, y: 150}, {x: 250, y: 200}, {x: 350, y: 250}, {x: 450, y: 350}, {x: 550, y: 450}, {x: 650, y: 450}, {x: 750, y: 400}, {x: 850, y: 350}, {x: 950, y: 250} ],
+        checkpoints: [ new Checkpoint(350, 250, "Planning", "planning"), new Checkpoint(650, 450, "Prescription", "prescription") ],
+        events: [ { type: 'stat', pathSegment: 2 }, { type: 'hazard', pathSegment: 7 } ]
+    },
+     { 
+        path: [ {x: 50, y: 500}, {x: 150, y: 400}, {x: 250, y: 300}, {x: 350, y: 200}, {x: 450, y: 100}, {x: 550, y: 100}, {x: 650, y: 200}, {x: 750, y: 300}, {x: 850, y: 400}, {x: 950, y: 500} ],
+        checkpoints: [ new Checkpoint(250, 300, "Positioning", "positioning"), new Checkpoint(550, 100, "Verification", "verification"), new Checkpoint(750, 300, "Delivery", "delivery"), new Checkpoint(950, 500, "Documentation", "documentation") ],
+        events: [ { type: 'hazard', pathSegment: 1 }, { type: 'stat', pathSegment: 4 }, { type: 'hazard', pathSegment: 8 } ]
+    }
+];
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    currentLevelIndex = 0;
+    score = 0;
+    setupLevel();
+    gameRunning = true;
+    gameLoop();
+}
+
+function setupLevel() {
+    const level = levels[currentLevelIndex];
+    player = new Player(level.path);
+    events = []; // Clear previous events
+    if (level.events) {
+        level.events.forEach(eventConfig => {
+            const segmentStart = level.path[eventConfig.pathSegment];
+            const segmentEnd = level.path[eventConfig.pathSegment + 1];
+            const eventX = (segmentStart.x + segmentEnd.x) / 2;
+            const eventY = (segmentStart.y + segmentEnd.y) / 2;
+            events.push(new Event(eventX, eventY, eventConfig.type));
+        });
+    }
+}
+
+function drawPath(path) {
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+    }
+    ctx.strokeStyle = 'rgba(0, 255, 221, 0.5)';
+    ctx.lineWidth = 10;
+    ctx.stroke();
+}
+
+function checkCollisions() {
+    if (activeCheckpoint) return; 
+
+    // Checkpoint collisions
+    const level = levels[currentLevelIndex];
+    for (const checkpoint of level.checkpoints) {
+        const dist = Math.hypot(player.x - checkpoint.x, player.y - checkpoint.y);
+        if (dist < player.radius + checkpoint.radius && checkpoint.isLocked) {
+            gameRunning = false;
+            activeCheckpoint = checkpoint;
+            showQuiz(checkpoint);
+        }
+    }
+
+    // Event collisions
+    for (const event of events) {
+        if (!event.isActive) continue;
+        const dist = Math.hypot(player.x - event.x, player.y - event.y);
+        if (dist < player.radius + event.radius) {
+            gameRunning = false;
+            activeCheckpoint = event;
+            event.isActive = false; // Deactivate after hitting
+            showQuiz(event);
+        }
+    }
+}
+
+function showQuiz(source) {
+    const isTimed = (source.type === 'stat' || source.type === 'hazard');
+    const category = source.type === 'checkpoint' ? source.questionCategory : source.type;
+    const questionPool = questions[category];
+    const question = questionPool[Math.floor(Math.random() * questionPool.length)];
+    
+    document.getElementById('quizTitle').textContent = source.name || source.type.toUpperCase() + " Event!";
+    document.getElementById('quizQuestion').textContent = question.question;
+    const optionsContainer = document.getElementById('quizOptions');
+    optionsContainer.innerHTML = '';
+    
+    question.options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.classList.add('quiz-option');
+        button.onclick = () => handleAnswer(index === question.correctAnswer, question.feedback, isTimed);
+        optionsContainer.appendChild(button);
+    });
+
+    document.getElementById('quizFeedback').classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+
+    // Handle timer
+    const timerContainer = document.getElementById('timerContainer');
+    if (isTimed) {
+        timerContainer.classList.remove('hidden');
+        startTimer(10); // 10 second timer
+    } else {
+        timerContainer.classList.add('hidden');
+    }
+}
+
+function startTimer(duration) {
+    clearInterval(quizTimerInterval);
+    let timeLeft = duration;
+    const timerBar = document.getElementById('timerBar');
+    timerBar.style.width = '100%';
+
+    quizTimerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        timerBar.style.width = (timeLeft / duration) * 100 + '%';
+        if (timeLeft <= 0) {
+            clearInterval(quizTimerInterval);
+            handleAnswer(false, "Time's up! Quick decisions are key in the clinic.", true);
+        }
+    }, 100);
+}
+
+function handleAnswer(isCorrect, feedback, wasTimed) {
+    clearInterval(quizTimerInterval); // Stop timer on answer
+    const feedbackEl = document.getElementById('quizFeedback');
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach(button => button.disabled = true);
+
+    feedbackEl.innerHTML = `<p class="feedback ${isCorrect ? 'correct' : 'incorrect'}">${feedback}</p>`;
+    feedbackEl.classList.remove('hidden');
+
+    if (isCorrect) {
+        score += wasTimed ? 150 : 100; // Bonus for timed
+        if(activeCheckpoint.type === 'checkpoint') activeCheckpoint.isLocked = false;
+    } else {
+        score -= wasTimed ? 50 : 25; // Bigger penalty for timed
+        if(score < 0) score = 0;
+    }
+
+    setTimeout(() => {
+        quizScreen.classList.add('hidden');
+        activeCheckpoint = null;
+        gameRunning = true;
+        gameLoop();
+    }, 2000);
+}
+
+
+function checkLevelComplete() {
+    if (player.pathIndex >= player.path.length -1) {
+        const level = levels[currentLevelIndex];
+        const allUnlocked = level.checkpoints.every(c => !c.isLocked);
+        if (allUnlocked) {
+            currentLevelIndex++;
+            if (currentLevelIndex >= levels.length) {
+                endGame();
+            } else {
+                setupLevel();
+            }
+        }
+    }
+}
+
+function endGame() {
+    gameRunning = false;
+    endScreen.classList.remove('hidden');
+    document.getElementById('finalScore').textContent = score;
+    // RTApps platform integration: report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+}
+
+function gameLoop() {
+    if (!gameRunning) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const level = levels[currentLevelIndex];
+    drawPath(level.path);
+    level.checkpoints.forEach(c => c.draw());
+    events.forEach(e => e.draw());
+
+    player.update();
+    checkCollisions();
+    checkLevelComplete();
+
+    requestAnimationFrame(gameLoop);
+}
+
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    init();
+});
+
+window.addEventListener('keydown', (e) => {
+    if (!gameRunning) return;
+    if (e.code === 'ArrowUp' || e.code === 'ArrowRight') {
+        player.move('forward');
+    } else if (e.code === 'ArrowDown' || e.code === 'ArrowLeft') {
+        player.move('backward');
+    }
+});
+
+</script>
+</body>
+</html>

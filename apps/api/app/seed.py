@@ -146,6 +146,31 @@ SEED_ARCADE_GAMES = [
         "subject_slug": "patient-care",
         "config": {"arcade_slug": "vital-signs", "max_score": 60},
     },
+    {
+        "title": "Care Commander",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "care-commander", "max_score": 3000},
+    },
+    {
+        "title": "Error Reporter",
+        "subject_slug": "quality-assurance",
+        "config": {"arcade_slug": "error-reporter", "max_score": 500},
+    },
+    {
+        "title": "QA Crusader",
+        "subject_slug": "quality-assurance",
+        "config": {"arcade_slug": "qa-crusader", "max_score": 3000},
+    },
+    {
+        "title": "Safety Supervisor",
+        "subject_slug": "radiation-safety",
+        "config": {"arcade_slug": "safety-supervisor", "max_score": 1900},
+    },
+    {
+        "title": "Procedure Pursuit",
+        "subject_slug": "clinical-procedures",
+        "config": {"arcade_slug": "procedure-pursuit", "max_score": 1650},
+    },
 ]
 
 
