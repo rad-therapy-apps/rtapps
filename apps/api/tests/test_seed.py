@@ -506,7 +506,7 @@ async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Set
 
 async def test_seed_creates_care_commander(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: Care Commander — published, kind external, access practice,
-    config with arcade_slug and max_score (3000: 15 patients × 200 points max);
+    config with arcade_slug and max_score (3000: 15 patients x 200 points max);
     subject is patient-care; re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Care Commander"))
@@ -527,8 +527,8 @@ async def test_seed_creates_care_commander(db: AsyncSession, settings: Settings)
 
 async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: Error Reporter — published, kind external, access practice,
-    config with arcade_slug and max_score (500: 4 errors × 100 + 75 + 25);
-    subject is quality-assurance; re-seeding creates it only once."""
+    config with arcade_slug and max_score (500: 4 errors x 100 + 75 + 25);
+    subject is quality-management-and-safety; re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Error Reporter"))
     assert activity is not None
@@ -537,7 +537,7 @@ async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings)
     assert activity.access == "practice"
     assert activity.config == {"arcade_slug": "error-reporter", "max_score": 500}
     subject = await db.get(Subject, activity.subject_id)
-    assert subject is not None and subject.slug == "quality-assurance"
+    assert subject is not None and subject.slug == "quality-management-and-safety"
 
     await seed(db, settings)
     count = await db.scalar(
@@ -548,8 +548,8 @@ async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings)
 
 async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: QA Crusader — published, kind external, access practice,
-    config with arcade_slug and max_score (3000: 6 questions × 500 points);
-    subject is quality-assurance; re-seeding creates it only once."""
+    config with arcade_slug and max_score (3000: 6 questions x 500 points);
+    subject is quality-management-and-safety; re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "QA Crusader"))
     assert activity is not None
@@ -558,7 +558,7 @@ async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) ->
     assert activity.access == "practice"
     assert activity.config == {"arcade_slug": "qa-crusader", "max_score": 3000}
     subject = await db.get(Subject, activity.subject_id)
-    assert subject is not None and subject.slug == "quality-assurance"
+    assert subject is not None and subject.slug == "quality-management-and-safety"
 
     await seed(db, settings)
     count = await db.scalar(
@@ -569,8 +569,8 @@ async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) ->
 
 async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: Safety Supervisor — published, kind external, access practice,
-    config with arcade_slug and max_score (1900: 19 hazards × 100 points);
-    subject is radiation-safety; re-seeding creates it only once."""
+    config with arcade_slug and max_score (1900: 19 hazards x 100 points);
+    subject is radiation-protection; re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Safety Supervisor"))
     assert activity is not None
@@ -579,7 +579,7 @@ async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settin
     assert activity.access == "practice"
     assert activity.config == {"arcade_slug": "safety-supervisor", "max_score": 1900}
     subject = await db.get(Subject, activity.subject_id)
-    assert subject is not None and subject.slug == "radiation-safety"
+    assert subject is not None and subject.slug == "radiation-protection"
 
     await seed(db, settings)
     count = await db.scalar(
@@ -590,8 +590,8 @@ async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settin
 
 async def test_seed_creates_procedure_pursuit(db: AsyncSession, settings: Settings) -> None:
     """Plan 4b batch 2: Procedure Pursuit — published, kind external, access practice,
-    config with arcade_slug and max_score (1650: 9 checkpoints × 100 + 5 timed × 150);
-    subject is clinical-procedures; re-seeding creates it only once."""
+    config with arcade_slug and max_score (1650: 9 checkpoints x 100 + 5 timed x 150);
+    subject is treatment-delivery-procedures; re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Procedure Pursuit"))
     assert activity is not None
@@ -600,7 +600,7 @@ async def test_seed_creates_procedure_pursuit(db: AsyncSession, settings: Settin
     assert activity.access == "practice"
     assert activity.config == {"arcade_slug": "procedure-pursuit", "max_score": 1650}
     subject = await db.get(Subject, activity.subject_id)
-    assert subject is not None and subject.slug == "clinical-procedures"
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
     await seed(db, settings)
     count = await db.scalar(

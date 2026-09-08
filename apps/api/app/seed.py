@@ -153,22 +153,22 @@ SEED_ARCADE_GAMES = [
     },
     {
         "title": "Error Reporter",
-        "subject_slug": "quality-assurance",
+        "subject_slug": "quality-management-and-safety",
         "config": {"arcade_slug": "error-reporter", "max_score": 500},
     },
     {
         "title": "QA Crusader",
-        "subject_slug": "quality-assurance",
+        "subject_slug": "quality-management-and-safety",
         "config": {"arcade_slug": "qa-crusader", "max_score": 3000},
     },
     {
         "title": "Safety Supervisor",
-        "subject_slug": "radiation-safety",
+        "subject_slug": "radiation-protection",
         "config": {"arcade_slug": "safety-supervisor", "max_score": 1900},
     },
     {
         "title": "Procedure Pursuit",
-        "subject_slug": "clinical-procedures",
+        "subject_slug": "treatment-delivery-procedures",
         "config": {"arcade_slug": "procedure-pursuit", "max_score": 1650},
     },
 ]
