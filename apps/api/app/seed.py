@@ -209,6 +209,35 @@ SEED_ARCADE_GAMES = [
         "subject_slug": "treatment-planning",
         "config": {"arcade_slug": "ssd-practice", "max_score": 20},
     },
+    {
+        # 10 = MAX_CORRECT, the fixed win condition (game also ends early at
+        # MAX_INCORRECT = 5 wrong, or when the question bank runs out).
+        "title": "CT Simulation Border Challenge",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "ct-borders", "max_score": 10},
+    },
+    {
+        # 22 = vocabulary.length (fixed term bank), shared by the multiple-choice,
+        # matching, and audio-quiz modes; flashcards mode has no score mechanic.
+        "title": "Dosimetry Vocabulary Game",
+        "subject_slug": "radiation-physics",
+        "config": {"arcade_slug": "dosimetry-vocabulary", "max_score": 22},
+    },
+    {
+        # 20 = radUnitsQuestions.length, identical across all 3 scored modes
+        # (choice/matching/audio); flashcards mode has no score mechanic.
+        "title": "Rad Units Challenge",
+        "subject_slug": "radiation-physics",
+        "config": {"arcade_slug": "rad-units", "max_score": 20},
+    },
+    {
+        # 20 = the largest mode's question count (comprehensive = 8 imaging-plane +
+        # 12 terminology questions); planes-only and terminology-only modes are
+        # smaller (8, 12) and score lower against this same denominator.
+        "title": "Sectional Anatomy Quiz",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "sectional-anatomy-quiz", "max_score": 20},
+    },
 ]
 
 

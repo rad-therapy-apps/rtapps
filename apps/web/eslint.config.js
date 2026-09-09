@@ -26,6 +26,11 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 export default defineConfig(
 	// Reuses .gitignore as ESLint's ignore list instead of maintaining a second one.
 	includeIgnoreFile(gitignorePath),
+	// Migrated legacy arcade games (plan 4b): committed, but not linted or reformatted —
+	// same treatment as .prettierignore's `/arcade/` entry. Multi-file games' standalone
+	// script.js files would otherwise surface the legacy code's own unused-var etc. lint
+	// errors, which are out of scope to fix here (surgical-copy games, not authored code).
+	{ ignores: ['arcade/**'] },
 	// Base rule sets: ESLint's own recommended rules, typescript-eslint's recommended rules, and
 	// eslint-plugin-svelte's recommended rules (includes svelte/no-navigation-without-resolve,
 	// svelte/no-at-html-tags at its default severity, etc).

@@ -741,6 +741,111 @@ async def test_seed_batch_3_ssd_practice(db: AsyncSession, settings: Settings) -
     assert count == 1
 
 
+async def test_seed_batch_4_ct_borders(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: CT Simulation Border Challenge — published, kind external, access
+    practice, config with arcade_slug and max_score (10: MAX_CORRECT, the fixed win
+    condition); subject is sectional-anatomy; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "CT Simulation Border Challenge"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "ct-borders", "max_score": 10}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "CT Simulation Border Challenge")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_dosimetry_vocabulary(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: Dosimetry Vocabulary Game — published, kind external, access
+    practice, config with arcade_slug and max_score (22: vocabulary.length, the fixed
+    term bank shared by the multiple-choice/matching/audio-quiz modes); subject is
+    radiation-physics; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Dosimetry Vocabulary Game"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "dosimetry-vocabulary", "max_score": 22}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-physics"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Dosimetry Vocabulary Game")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_rad_units(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: Rad Units Challenge — published, kind external, access practice,
+    config with arcade_slug and max_score (20: radUnitsQuestions.length, identical across
+    the choice/matching/audio-quiz modes); subject is radiation-physics; re-seeding
+    creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Rad Units Challenge")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "rad-units", "max_score": 20}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-physics"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Rad Units Challenge")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_sectional_anatomy_quiz(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: Sectional Anatomy Quiz — published, kind external, access
+    practice, config with arcade_slug and max_score (20: the largest mode's question
+    count, the comprehensive mode's 8 imaging-plane + 12 terminology questions); subject
+    is sectional-anatomy; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Sectional Anatomy Quiz"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "sectional-anatomy-quiz", "max_score": 20}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Sectional Anatomy Quiz")
+    )
+    assert count == 1
+
+
 async def test_seed_refuses_prod(db: AsyncSession) -> None:
     """seed() must raise before touching the database when settings.env == "prod"."""
     # session_secret is 40 chars (>= the 32-char minimum) purely so this Settings object

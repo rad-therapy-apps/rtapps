@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rad Units Challenge - Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main id="menu">
+        <h1>Rad Units Challenge</h1>
+        <div class="instructions">
+            <p>Choose a game mode to practice your knowledge of radiation SI units.</p>
+            <ul>
+                <li><b>Multiple Choice:</b> Test yourself with timed or untimed questions.</li>
+                <li><b>Matching:</b> Match units with their descriptions.</li>
+                <li><b>Flashcards:</b> Study with simple flip cards.</li>
+                <li><b>Audio Quiz:</b> Listen and type or say the correct term.</li>
+            </ul>
+        </div>
+        <nav class="menu-buttons">
+            <a href="quiz.html?mode=choice" class="menu-btn">Multiple Choice</a>
+            <a href="quiz.html?mode=matching" class="menu-btn">Matching</a>
+            <a href="quiz.html?mode=flashcards" class="menu-btn">Flashcards</a>
+            <a href="quiz.html?mode=audio" class="menu-btn">Audio Quiz</a>
+        </nav>
+    </main>
+<div class="menu-footer">
+            Powered by RTApps79 &middot; v1.0
+        </div>
+    </div>
+    <script>
+        function startQuiz(mode) {
+            window.location.href = `quiz.html?mode=${mode}`;
+        }
+    </script>
+</body>
+</html>

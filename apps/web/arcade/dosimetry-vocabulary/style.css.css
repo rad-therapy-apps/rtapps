@@ -1,0 +1,83 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f8faff;
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
+h1 {
+    text-align: center;
+    color: #2d3436;
+    margin-top: 30px;
+}
+.activity {
+    margin: 30px auto;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px #dfe6e9;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+.activity h2 {
+    color: #0984e3;
+    margin-top: 0;
+}
+.question {
+    margin-bottom: 20px;
+}
+input[type="number"], input[type="text"] {
+    width: 120px;
+    padding: 4px 8px;
+    border: 1px solid #b2bec3;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+.check-button {
+    background: #0984e3;
+    color: #fff;
+     #badge-container {
+            text-align: center;
+            margin: 12px 0 20px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 8px 18px;
+            background: gold;
+            color: #333;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 0 5px;
+            font-size: 18px;
+            border: 2px solid #f3c623;
+            box-shadow: 0 0 6px #f7d774;
+        }
+        #timer {
+            text-align: center; 
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .instructions-box {
+            background: #e7f1ff;
+            border-left: 4px solid #007bff;
+            padding: 12px 18px;
+            margin: 0 auto 22px auto;
+            max-width: 700px;
+            color: #333;
+        }
+    border: none;
+    border-radius: 4px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.check-button:hover {
+    background: #74b9ff;
+    color: #222;
+}
+.feedback {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: bold;
+}

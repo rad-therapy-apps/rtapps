@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dosimetry Vocabulary Game</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .game-mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .game-mode-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none; /* Initially hidden */
+            text-align: center;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .option-button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #eee;
+        }
+        .option-button:hover {
+            background-color: #ddd;
+        }
+        .answer-feedback {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .term-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .definition-display {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .match-pairs-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .match-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: grab;
+            min-width: 150px; /* Ensure cards have some width */
+            text-align: center;
+        }
+        .instructions {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        .score {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+          #badge-container {
+            text-align: center;
+            margin: 12px 0 20px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 8px 18px;
+            background: gold;
+            color: #333;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 0 5px;
+            font-size: 18px;
+            border: 2px solid #f3c623;
+            box-shadow: 0 0 6px #f7d774;
+        }
+        #timer {
+            text-align: center; 
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .instructions-box {
+            background: #e7f1ff;
+            border-left: 4px solid #007bff;
+            padding: 12px 18px;
+            margin: 0 auto 22px auto;
+            max-width: 700px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dosimetry Vocabulary Game</h1>
+
+    <div class="instructions-box">
+        <strong>Instructions:</strong>
+        <ul>
+            <li>Select a game mode to practice dosimetry vocabulary with different learning styles.</li>
+            <li><b>Multiple Choice:</b> Pick the correct definition for each term.</li>
+            <li><b>Matching Pairs:</b> Drag and drop terms to their correct definitions.</li>
+            <li><b>Flashcards:</b> Reveal and study the definition for each term.</li>
+            <li><b>Audio Quiz:</b> Listen to the definition and type or say the term.</li>
+            <li>Earn badges as you progress and try to answer quickly for a higher score!</li>
+        </ul>
+    </div>
+
+    <div class="game-mode-selector">
+        <button class="game-mode-button" onclick="startGame('multiple-choice')">Multiple Choice</button>
+        <button class="game-mode-button" onclick="startGame('matching')">Matching Pairs</button>
+        <button class="game-mode-button" onclick="startGame('flashcards')">Flashcards</button>
+        <button class="game-mode-button" onclick="startGame('audio-quiz')">Audio Quiz</button>
+    </div>
+    <!-- Badge Display -->
+    <div id="badge-container"></div>
+
+    <!-- Timer Display -->
+    <div id="timer"></div>
+
+     <!-- Game Containers -->
+    <div id="multiple-choice-game" class="game-container">
+        <h2>Multiple Choice</h2>
+        <div class="question" id="mc-question"></div>
+        <div class="options-container" id="mc-options"></div>
+        <div class="answer-feedback" id="mc-feedback"></div>
+        <button onclick="nextQuestion()">Next Question</button>
+        <div class="score" id="mc-score"></div>
+    </div>
+
+    <div id="matching-game" class="game-container">
+        <h2>Matching Pairs</h2>
+        <p class="instructions">Drag and drop the terms onto their definitions.</p>
+        <div class="match-pairs-container" id="matching-terms"></div>
+        <div class="match-pairs-container" id="matching-definitions"></div>
+        <button onclick="checkMatching()">Check Matches</button>
+        <div class="answer-feedback" id="matching-feedback"></div>
+        <div class="score" id="matching-score"></div>
+    </div>
+
+    <div id="flashcards-game" class="game-container">
+        <h2>Flashcards</h2>
+        <div class="flashcard">
+            <div class="term-display" id="flashcard-term"></div>
+            <div class="definition-display" id="flashcard-definition" style="display: none;"></div>
+            <button onclick="toggleDefinition()">Show Definition</button>
+        </div>
+        <button onclick="nextFlashcard()">Next Card</button>
+        <div class="score" id="flashcard-score"></div>
+    </div>
+
+    <div id="audio-quiz-game" class="game-container">
+        <h2>Audio Quiz</h2>
+        <p class="instructions">Listen to the definition and try to say the correct term.</p>
+        <div class="definition-display" id="audio-definition"></div>
+        <button onclick="speakDefinition()">Play Definition</button>
+        <input type="text" id="audio-answer" placeholder="Type your answer or speak after playing">
+        <button onclick="checkAudioAnswer()">Check Answer</button>
+        <div class="answer-feedback" id="audio-feedback"></div>
+        <button onclick="nextAudioQuestion()">Next Question</button>
+        <div class="score" id="audio-score"></div>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

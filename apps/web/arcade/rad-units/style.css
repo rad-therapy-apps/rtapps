@@ -1,0 +1,205 @@
+:root {
+    --primary-color: #007bff;
+    --correct-color: #28a745;
+    --incorrect-color: #dc3545;
+    --background-color: #f8f9fa;
+    --text-color: #343a40;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+.game-container, .menu-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    margin: 40px auto;
+}
+
+.menu-logo {
+    width: 80px;
+    margin-bottom: 15px;
+}
+
+.menu-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.menu-instructions {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.menu-section {
+    margin: 18px 0;
+}
+
+.menu-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 0;
+    margin: 10px 0;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.menu-btn:hover, .menu-btn:focus {
+    background-color: #0056b3;
+}
+.menu-footer {
+    margin-top: 30px;
+    color: #888;
+    font-size: 0.93em;
+}
+
+.question-container {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.progress {
+    font-size: 1em;
+    margin-bottom: 5px;
+    color: #6c757d;
+    text-align: right;
+}
+.timer {
+    text-align: right;
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1em;
+    margin-bottom: 5px;
+}
+.question {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.options-container {
+    display: flex;
+    flex-direction: column;
+}
+.option {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin: 5px 0;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    user-select: none;
+}
+.option:hover, .option:focus {
+    background-color: #dee2e6;
+    outline: none;
+}
+.option.correct {
+    background-color: var(--correct-color);
+    color: white;
+    border-color: var(--correct-color);
+}
+.option.incorrect {
+    background-color: var(--incorrect-color);
+    color: white;
+    border-color: var(--incorrect-color);
+}
+.feedback {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
+    min-height: 1.5em;
+}
+.controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    align-items: center;
+}
+.next-button, .restart-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.next-button:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+}
+.score {
+    font-size: 1em;
+}
+.restart-button {
+    background-color: var(--correct-color);
+    margin-left: auto;
+}
+.badge-container {
+    margin-top: 25px;
+    text-align: center;
+}
+.badge {
+    display: inline-block;
+    padding: 15px 25px;
+    font-size: 1.1em;
+    border-radius: 20px;
+    background-color: gold;
+    color: #333;
+    font-weight: bold;
+    border: 3px solid #e7c200;
+    margin-bottom: 10px;
+    box-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+.badge.silver {
+    background-color: #C0C0C0;
+    border-color: #aaa;
+    color: #222;
+}
+.badge.bronze {
+    background-color: #cd7f32;
+    border-color: #a96b2c;
+    color: #fff;
+}
+.certificate {
+    margin-top: 8px;
+    font-size: 1em;
+    color: #2d5c1e;
+    background: #f3fbe6;
+    border: 1.5px solid #b5e07a;
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: inline-block;
+}
+.image-plane-container {
+    text-align: center;
+    margin-bottom: 10px;
+}
+.image-plane-container img {
+    max-width: 250px;
+    max-height: 180px;
+    display: block;
+    margin: 0 auto 6px auto;
+}
+
+@media(max-width: 500px){
+    .game-container, .menu-container { width: 97%; padding: 8px; }
+}
