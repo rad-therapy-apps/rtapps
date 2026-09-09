@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OncoLife UNO: The Clinical Shift</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Slab', serif;
+            background-color: #1f2937;
+            color: #e5e7eb;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            background: #111827;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #4b5563;
+            margin-bottom: 1rem;
+        }
+        .ui-element { text-align: center; }
+        .ui-element h3 { color: #38bdf8; font-size: 0.9em; text-transform: uppercase; }
+        .ui-element p { font-size: 1.4em; font-family: 'Orbitron', sans-serif; }
+        .stat-bar-container { width: 150px; height: 8px; background-color: #374151; border-radius: 4px; overflow: hidden; margin-top: 4px;}
+        .stat-bar { height: 100%; width: 50%; border-radius: 4px; transition: width 0.5s ease; }
+        #knowledge-bar { background-color: #60a5fa; }
+        #empathy-bar { background-color: #34d399; }
+        #stress-bar { background-color: #f87171; }
+        
+        #game-board {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #opponent-hand, #player-hand {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 140px;
+            width: 100%;
+        }
+        .card {
+            width: 90px;
+            height: 130px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            font-size: 14px;
+            font-weight: bold; 
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            user-select: none;
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            padding: 8px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .card:hover { transform: translateY(-15px) scale(1.08); z-index: 50; }
+
+        .card.patient-care { background: #059669; color: white; }
+        .card.dosimetry { background: #d97706; color: white; }
+        .card.treatment-delivery { background: #be123c; color: white; }
+        .card.qa { background: #2563eb; color: white; }
+        .card.wild { background: linear-gradient(45deg, #4b5563, #1f2937); color: white; }
+        .card .card-value { font-size: 2em; font-family: 'Orbitron'; }
+        .card .card-name { font-size: 0.8em; }
+
+        #opponent-hand .card { background: #4b5563; }
+        #opponent-hand .card .card-value, #opponent-hand .card .card-name { visibility: hidden; }
+
+        #center-area {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        #deck-pile { width: 100px; height: 140px; background: #111827; border: 2px dashed #4b5563; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 3em; color: #4b5563; cursor: pointer; }
+        #discard-pile { min-width: 100px; min-height: 140px; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 24, 39, 0.9); z-index: 100; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background: #374151; border: 2px solid #38bdf8; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 30px #38bdf8; width: 90%; max-width: 600px; }
+        .modal h2 { font-size: 2em; color: #38bdf8; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button, .choice-btn { background-color: #38bdf8; color: #111827; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+        .choice-btn { width: 100%; margin-top: 0.5rem; }
+        #feedback-area { margin-top: 1rem; padding: 0.75rem; border-radius: 5px; min-height: 50px; font-style: italic; }
+        .feedback-correct { background-color: #059669; color: #d1fae5; }
+        .feedback-incorrect { background-color: #be123c; color: #fee2e2; }
+        #animated-stamp {
+            position: absolute; top: 50%; left: 50%; width: 300px; height: 150px;
+            border: 10px solid; border-radius: 10px; display: none; justify-content: center;
+            align-items: center; font-size: 3em; font-weight: bold; text-transform: uppercase;
+            z-index: 15; pointer-events: none;
+        }
+        #animated-stamp.stamping { display: flex; animation: stamp-animation 0.5s ease-out forwards; }
+        @keyframes stamp-animation {
+            0% { transform: translate(-50%, -50%) scale(2) rotate(-15deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.1) rotate(-15deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="ui-panel">
+            <div class="ui-element"><h3>Knowledge</h3><div class="stat-bar-container"><div id="knowledge-bar" class="stat-bar"></div></div></div>
+            <div class="ui-element"><h3>Empathy</h3><div class="stat-bar-container"><div id="empathy-bar" class="stat-bar"></div></div></div>
+            <div class="ui-element"><h3>Stress</h3><div class="stat-bar-container"><div id="stress-bar" class="stat-bar"></div></div></div>
+            <div class="ui-element"><h3>RadCreds</h3><p id="radcreds-display">0</p></div>
+        </div>
+        <div id="game-board">
+            <div id="opponent-hand"></div>
+            <div id="center-area">
+                <div id="deck-pile">🂠</div>
+                <div id="discard-pile"></div>
+            </div>
+            <div id="player-hand"></div>
+        </div>
+    </div>
+    <div id="startScreen" class="modal">
+        <div class="modal-content">
+            <h2>OncoLife UNO</h2>
+            <p>Welcome to your clinical shift. Manage your hand and your professional skills. Match cards by their clinical domain (color) or task number. Use Scenario cards wisely to boost your stats. The first to clear their hand wins the shift!</p>
+            <button id="startButton">Start Shift</button>
+        </div>
+    </div>
+    <div id="scenarioModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="scenario-title">Clinical Scenario</h2>
+            <p id="scenario-text"></p>
+            <div id="scenario-choices"></div>
+            <div id="feedback-area"></div>
+        </div>
+    </div>
+    <div id="endScreen" class="modal hidden">
+         <div class="modal-content">
+            <h2 id="endTitle"></h2>
+            <p id="endMessage"></p>
+            <p>RadCreds Earned: <span id="radcreds-earned">0</span></p>
+            <button id="restartButton">Start New Shift</button>
+        </div>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const playerHandEl = document.getElementById('player-hand');
+const opponentHandEl = document.getElementById('opponent-hand');
+const discardPileEl = document.getElementById('discard-pile');
+const deckPileEl = document.getElementById('deck-pile');
+const knowledgeBar = document.getElementById('knowledge-bar');
+const empathyBar = document.getElementById('empathy-bar');
+const stressBar = document.getElementById('stress-bar');
+const radcredsDisplay = document.getElementById('radcreds-display');
+const scenarioModal = document.getElementById('scenarioModal');
+const scenarioTitle = document.getElementById('scenario-title');
+const scenarioText = document.getElementById('scenario-text');
+const scenarioChoices = document.getElementById('scenario-choices');
+const feedbackArea = document.getElementById('feedback-area');
+
+// --- Game State ---
+let gameRunning = false;
+let deck = [], playerHand = [], computerHand = [], discardPile = [];
+let stats = {}, radCreds = 0;
+let currentPlayer = 'player';
+let gameInterval; // BUG FIX: Declare gameInterval globally
+
+// --- Card Data ---
+const SUITS = {
+    'patient-care': { name: 'Patient Care', tasks: ['Verify ID', 'Assess Vitals', 'Check Consent', 'Educate', 'Transfer', 'Comfort'] },
+    'dosimetry': { name: 'Dosimetry', tasks: ['Check Plan', 'Calc MUs', 'Verify DVH', 'Fuse Scans', 'Contour OAR', 'QA Plan'] },
+    'treatment-delivery': { name: 'Tx Delivery', tasks: ['Set Gantry', 'Position Couch', 'Confirm Isocenter', 'Verify SSD', 'Place Bolus', 'IGRT Match'] },
+    'qa': { name: 'QA', tasks: ['Door Interlock', 'Output Check', 'Laser Align', 'Audio/Visual', 'E-Stop Check', 'Light Field'] }
+};
+const SCENARIO_CARDS = [
+    { name: "Anxious Patient", suit: "patient-care", type: 'scenario', scenario: {
+        text: "A patient says, 'I'm really scared of being in the room alone.' How do you respond?",
+        choices: [
+            { text: "Reassure them you're watching and can talk via intercom.", outcome: { E: 10, S: -5 }, feedback: "Excellent. You validated their fear and provided reassurance."},
+            { text: "Tell them it will be over quickly.", outcome: { E: -5, S: 2 }, feedback: "This dismisses their feelings, even if well-intentioned."}
+        ]
+    }},
+    { name: "Plan Discrepancy", suit: "dosimetry", type: 'scenario', scenario: {
+        text: "You notice the MUs on the console don't match the plan. What is your first action?",
+        choices: [
+            { text: "Do not treat. Immediately halt the process and notify the physicist.", outcome: { K: 10, S: -5 }, feedback: "Correct. This is a critical safety stop that requires immediate escalation."},
+            { text: "Ask the other therapist if they think it's okay.", outcome: { K: -5, S: 10 }, feedback: "Incorrect. While collaboration is good, a plan discrepancy must be officially cleared by physics."}
+        ]
+    }},
+    { name: "Machine Fault", suit: "qa", type: 'scenario', scenario: {
+        text: "During beam-on, you hear a loud 'clunk' from the gantry and see a minor fault on screen. What do you do?",
+        choices: [
+            { text: "Hit the emergency off, note the gantry angle, and call physics/engineering immediately.", outcome: { K: 10, S: -5 }, feedback: "Perfect. Safety first. You secured the machine and initiated the correct reporting procedure."},
+            { text: "Finish the treatment since it's only a minor fault.", outcome: { K: -15, S: 20 }, feedback: "Incorrect. Never treat with a known machine fault, no matter how minor it seems."}
+        ]
+    }}
+];
+const WILD_CARDS = [
+    { name: 'Consult Physicist', suit: 'wild', type: 'wild', description: 'Change the clinical domain and look at the opponent\'s hand.'},
+    { name: 'Peer Support', suit: 'wild', type: 'wild', description: 'Change the clinical domain and block the next Scenario card played on you.'}
+];
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    
+    stats = { knowledge: 50, empathy: 50, stress: 20 };
+    radCreds = 0;
+    
+    deck = generateDeck();
+    playerHand = [];
+    computerHand = [];
+    discardPile = [];
+
+    dealCards();
+    
+    let firstCard;
+    do {
+        if (deck.length === 0) reshuffleDeck();
+        firstCard = deck.pop();
+    } while (firstCard.type === 'scenario' || firstCard.type === 'wild');
+    
+    discardPile.push(firstCard);
+
+    updateUI();
+    currentPlayer = 'player';
+    gameRunning = true;
+    if (gameInterval) clearInterval(gameInterval); // Clear previous interval before starting a new one
+}
+
+function generateDeck() {
+    let newDeck = [];
+    for (const suit in SUITS) {
+        for (let i = 0; i < 6; i++) {
+            newDeck.push({ suit: suit, value: i, name: SUITS[suit].tasks[i] });
+            newDeck.push({ suit: suit, value: i, name: SUITS[suit].tasks[i] });
+        }
+    }
+    SCENARIO_CARDS.forEach(c => newDeck.push(c, c));
+    WILD_CARDS.forEach(c => newDeck.push(c,c,c,c));
+    return newDeck.sort(() => 0.5 - Math.random());
+}
+
+function dealCards() {
+    for (let i = 0; i < 7; i++) {
+        playerHand.push(deck.pop());
+        computerHand.push(deck.pop());
+    }
+}
+
+function updateUI() {
+    knowledgeBar.style.width = `${stats.knowledge}%`;
+    empathyBar.style.width = `${stats.empathy}%`;
+    stressBar.style.width = `${stats.stress}%`;
+    radcredsDisplay.textContent = radCreds;
+
+    playerHandEl.innerHTML = '';
+    playerHand.forEach((card, index) => {
+        playerHandEl.appendChild(createCardDiv(card, index, 'player'));
+    });
+
+    opponentHandEl.innerHTML = '';
+    computerHand.forEach(() => {
+        opponentHandEl.appendChild(createCardDiv({}, -1, 'computer'));
+    });
+    
+    discardPileEl.innerHTML = '';
+    if (discardPile.length > 0) {
+        discardPileEl.appendChild(createCardDiv(discardPile[discardPile.length - 1], -1, 'discard'));
+    }
+}
+
+function createCardDiv(card, index, owner) {
+    const cardDiv = document.createElement('div');
+    if(owner === 'computer') {
+        cardDiv.className = 'card';
+        cardDiv.style.backgroundColor = '#4b5563';
+        return cardDiv;
+    }
+
+    cardDiv.className = `card ${card.suit || 'wild'}`;
+    cardDiv.innerHTML = `<div class="card-value">${card.icon || card.value || ''}</div><div class="card-name">${card.name}</div>`;
+    
+    if (owner === 'player' && isCardPlayable(card)) {
+        cardDiv.onclick = () => playCard(index);
+    } else if (owner === 'player') {
+        cardDiv.style.opacity = '0.6';
+        cardDiv.style.cursor = 'not-allowed';
+    }
+    return cardDiv;
+}
+
+function isCardPlayable(card) {
+    if (!gameRunning) return false;
+    const topCard = discardPile[discardPile.length - 1];
+    return card.suit === topCard.suit || card.value === topCard.value || card.suit === 'wild';
+}
+
+function playCard(cardIndex) {
+    if (!gameRunning || currentPlayer !== 'player') return;
+
+    const card = playerHand.splice(cardIndex, 1)[0];
+    discardPile.push(card);
+    
+    if(card.type === 'scenario') {
+        showScenario(card.scenario);
+        return; 
+    }
+    
+    endPlayerTurn();
+}
+
+function showScenario(scenario) {
+    gameRunning = false;
+    scenarioTitle.textContent = "Clinical Scenario";
+    scenarioText.textContent = scenario.text;
+    feedbackArea.textContent = "";
+    feedbackArea.className = "feedback-area";
+    scenarioChoices.innerHTML = '';
+    scenario.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice.text;
+        btn.className = 'choice-btn';
+        btn.onclick = () => resolveScenario(choice);
+        scenarioChoices.appendChild(btn);
+    });
+    scenarioModal.classList.remove('hidden');
+}
+
+function resolveScenario(choice) {
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    
+    stats.empathy = Math.max(0, Math.min(100, stats.empathy + (choice.outcome.E || 0)));
+    stats.knowledge = Math.max(0, Math.min(100, stats.knowledge + (choice.outcome.K || 0)));
+    stats.stress = Math.max(0, Math.min(100, stats.stress + (choice.outcome.S || 0)));
+    
+    feedbackArea.textContent = choice.feedback;
+    feedbackArea.classList.add( (choice.outcome.E > 5 || choice.outcome.K > 5) ? 'feedback-correct' : 'feedback-incorrect');
+    
+    updateUI();
+
+    setTimeout(() => {
+        scenarioModal.classList.add('hidden');
+        endPlayerTurn();
+    }, 3000);
+}
+
+function endPlayerTurn() {
+     if (playerHand.length === 0) {
+        endGame(true);
+        return;
+    }
+    currentPlayer = 'computer';
+    updateUI();
+    setTimeout(computerTurn, 1500);
+}
+
+function computerTurn() {
+    let playableCardIndex = computerHand.findIndex(c => isCardPlayable(c));
+
+    if (playableCardIndex !== -1) {
+        const card = computerHand.splice(playableCardIndex, 1)[0];
+        discardPile.push(card);
+        if (card.type === 'scenario') {
+             const randomChoice = card.scenario.choices[Math.floor(Math.random() * card.scenario.choices.length)];
+        }
+    } else {
+        if (deck.length === 0) reshuffleDeck();
+        if (deck.length > 0) computerHand.push(deck.pop());
+    }
+
+    if (computerHand.length === 0) {
+        endGame(false);
+        return;
+    }
+    
+    currentPlayer = 'player';
+    updateUI();
+    gameRunning = true;
+}
+
+function drawCard() {
+    if (!gameRunning || currentPlayer !== 'player') return;
+    if (deck.length === 0) reshuffleDeck();
+    if (deck.length > 0) {
+        playerHand.push(deck.pop());
+        endPlayerTurn();
+    }
+}
+
+function reshuffleDeck() {
+    const topCard = discardPile.length > 0 ? discardPile.pop() : null;
+    deck = [...deck, ...discardPile].sort(() => 0.5 - Math.random());
+    discardPile = topCard ? [topCard] : [];
+}
+
+function endGame(playerWon) {
+    gameRunning = false;
+    // RTApps platform integration (plan 4b): report this session's completion to the
+    // embedding page (fires whether the player's or the computer's hand empties first —
+    // both are the genuine win/lose end state, not a per-round intermediate site).
+    if (window.RTApps) window.RTApps.reportCompletion();
+    if (gameInterval) clearInterval(gameInterval); // Safely clear interval
+    
+    const endTitleEl = document.getElementById('endTitle');
+    const endMessageEl = document.getElementById('endMessage');
+    const radcredsEarnedEl = document.getElementById('radcreds-earned');
+
+    if(playerWon) {
+        let earned = 100 + stats.empathy + stats.knowledge - stats.stress;
+        radCreds += Math.round(earned);
+        endTitleEl.textContent = "Shift Complete!";
+        endMessageEl.textContent = "Excellent work! You've successfully managed your tasks and navigated complex clinical interactions.";
+        radcredsEarnedEl.textContent = Math.round(earned);
+    } else {
+        endTitleEl.textContent = "Shift Over";
+        endMessageEl.textContent = "The computer won this round. Review the scenarios and try again!";
+        radcredsEarnedEl.textContent = 0;
+    }
+    updateUI();
+    endScreen.classList.remove('hidden');
+}
+
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', init);
+deckPileEl.addEventListener('click', drawCard);
+
+</script>
+</body>
+</html>

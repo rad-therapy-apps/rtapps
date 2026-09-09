@@ -91,7 +91,8 @@ export type ExternalSnapshot = {
 	activity: { id: string; kind: 'external'; title: string };
 	external: {
 		arcade_slug: string;
-		max_score: number;
+		// null for completion_only games (plan 4b) — no scored ceiling to show.
+		max_score: number | null;
 		// Mirrors the activity's config; true for games that report a bare completion instead of
 		// a score (plan 4b).
 		completion_only?: boolean;

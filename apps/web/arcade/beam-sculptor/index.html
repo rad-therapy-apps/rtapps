@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beam Sculptor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #111827;
+            color: #e5e7eb;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        .canvas-container {
+            position: relative;
+            background-color: #1f2937;
+            border: 2px solid #38bdf8;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+        canvas {
+            background-color: #111827;
+            cursor: pointer;
+            border: 1px solid #4b5563;
+        }
+        #canvas-grid {
+            display: grid;
+            grid-template-columns: 500px 200px;
+            grid-template-rows: 250px 250px;
+            gap: 1rem;
+        }
+        #axial-canvas-wrapper { grid-row: 1 / 3; position: relative; }
+        #sag-canvas-wrapper { position: relative; }
+        #cor-canvas-wrapper { position: relative; }
+        .view-label {
+            position: absolute;
+            color: #9ca3af;
+            font-size: 0.8em;
+            pointer-events: none;
+        }
+        .controls-panel { display: flex; flex-direction: column; width: 280px; gap: 1rem; }
+        .tool-button, .control-button, #finalize-button { background: #374151; border: 1px solid #4b5563; padding: 1rem; border-radius: 8px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.1em; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .tool-button:hover, .tool-button.selected { background: #38bdf8; color: #111827; border-color: #0ea5e9; transform: translateY(-2px); }
+        #finalize-button { background: #16a34a; border-color: #15803d; margin-top: 1rem; }
+        #finalize-button:hover { background: #22c55e; }
+        .dvh-panel, .beam-controls { background: #1f2937; padding: 1rem; border-radius: 8px; }
+        .dvh-bar-container { width: 100%; height: 25px; background-color: #374151; border-radius: 5px; margin-top: 5px; overflow: hidden; }
+        .dvh-bar { height: 100%; width: 0%; background-color: #38bdf8; transition: width 0.3s ease; text-align: right; padding-right: 5px; font-size: 0.9em; color: #111827; font-weight: bold; }
+        .dvh-label { display: flex; justify-content: space-between; font-size: 0.9em; }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(17, 24, 39, 0.95); border: 2px solid #38bdf8; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 30px #38bdf8; z-index: 100; width: 90%; max-width: 600px; }
+        .modal h2 { font-size: 2em; color: #38bdf8; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button { background-color: #38bdf8; color: #111827; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #38bdf8; cursor: pointer; margin-top: -8px; }
+        input[type=range]::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: #38bdf8; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #4b5563; border-radius: 5px; }
+        input[type=range]::-moz-range-track { width: 100%; height: 4px; cursor: pointer; background: #4b5563; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div class="controls-panel">
+            <h2 class="text-2xl text-center font-bold text-sky-400">PLANNING TOOLS</h2>
+            <div id="tool-selection">
+                <div class="tool-button selected" data-tool="beam">Place Beam</div>
+                <div class="tool-button" data-tool="block">Place Block</div>
+                <div class="tool-button" data-tool="delete">Delete Tool</div>
+            </div>
+            <div id="beam-controls-panel" class="beam-controls hidden">
+                 <h3 class="text-xl text-center font-bold text-sky-400">BEAM CONTROLS</h3>
+                 <div class="mt-4">
+                     <div class="dvh-label"><span>Angle</span><span id="angle-value">0°</span></div>
+                     <input type="range" id="angle-slider" min="0" max="359" value="0" step="1">
+                 </div>
+                 <div class="mt-2">
+                     <div class="dvh-label"><span>Weight</span><span id="weight-value">100%</span></div>
+                     <input type="range" id="weight-slider" min="0.1" max="2" value="1" step="0.1">
+                 </div>
+                 <div class="mt-2">
+                    <button class="control-button w-full" id="wedge-button">Wedge: OFF</button>
+                 </div>
+            </div>
+            <div class="dvh-panel">
+                 <h3 class="text-xl text-center font-bold text-sky-400">LIVE DVH</h3>
+                 <div class="mt-4">
+                    <div class="dvh-label"><span>PTV Coverage</span><span id="ptv-percent">0%</span></div>
+                    <div class="dvh-bar-container"><div id="ptv-bar" class="dvh-bar"></div></div>
+                 </div>
+                 <div class="mt-4">
+                    <div class="dvh-label"><span>Spinal Cord Dose</span><span id="cord-dose">0 Gy</span></div>
+                    <div class="dvh-bar-container"><div id="cord-bar" class="dvh-bar"></div></div>
+                 </div>
+                 <div class="mt-4">
+                    <div class="dvh-label"><span>Heart Dose</span><span id="heart-dose">0 Gy</span></div>
+                    <div class="dvh-bar-container"><div id="heart-bar" class="dvh-bar"></div></div>
+                 </div>
+            </div>
+            <button id="finalize-button">Finalize Plan</button>
+        </div>
+        <div class="canvas-container">
+            <div id="canvas-grid">
+                <div id="axial-canvas-wrapper">
+                    <canvas id="axial-canvas" width="500" height="510"></canvas>
+                </div>
+                <div id="sag-canvas-wrapper">
+                    <canvas id="sag-canvas" width="200" height="250"></canvas>
+                </div>
+                <div id="cor-canvas-wrapper">
+                     <canvas id="cor-canvas" width="200" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>Beam Sculptor</h2>
+        <p>Your objective is to create a radiation treatment plan. Use the tools to place and modify beams. Click on a beam to select it and adjust its angle, weight, and wedge. Aim for >95% PTV coverage while keeping OAR doses below their tolerance!</p>
+        <button id="startButton">Start Planning</button>
+    </div>
+    
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <button id="restartButton">New Case</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const axialCanvas = document.getElementById('axial-canvas');
+const sagCanvas = document.getElementById('sag-canvas');
+const corCanvas = document.getElementById('cor-canvas');
+const axCtx = axialCanvas.getContext('2d');
+const sagCtx = sagCanvas.getContext('2d');
+const corCtx = corCanvas.getContext('2d');
+
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const finalizeButton = document.getElementById('finalize-button');
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const beamControlsPanel = document.getElementById('beam-controls-panel');
+const angleSlider = document.getElementById('angle-slider');
+const angleValue = document.getElementById('angle-value');
+const weightSlider = document.getElementById('weight-slider');
+const weightValue = document.getElementById('weight-value');
+const wedgeButton = document.getElementById('wedge-button');
+
+// --- Game State ---
+let gameRunning = false;
+let currentTool = 'beam';
+let beams = [];
+let selectedBeam = null;
+const iso = { x: 250, y: 250 }; // Isocenter for a 500x500 canvas
+const ptv = { x: 325, y: 250, rx: 60, ry: 40, color: 'rgba(239, 68, 68, 0.7)' };
+const spinalCord = { x: 250, y: 375, r: 15, color: 'rgba(250, 204, 21, 0.8)' };
+const heart = { x: 180, y: 250, w: 80, h: 80, color: 'rgba(220, 38, 38, 0.5)' };
+
+const DOSE_GRID_SIZE = 10;
+let doseGrid = [];
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    beams = [];
+    selectedBeam = null;
+    updateBeamControls();
+    initDoseGrid();
+    calculateDose();
+    gameRunning = true;
+    gameLoop();
+}
+
+function initDoseGrid() {
+    doseGrid = [];
+    const rows = Math.ceil(axialCanvas.height / DOSE_GRID_SIZE);
+    const cols = Math.ceil(axialCanvas.width / DOSE_GRID_SIZE);
+    for (let i = 0; i < rows; i++) {
+        doseGrid.push(new Array(cols).fill(0));
+    }
+}
+
+function calculateDose() {
+    initDoseGrid();
+    beams.forEach(beam => {
+        const angleRad = (beam.angle - 90) * Math.PI / 180;
+        const cosA = Math.cos(angleRad);
+        const sinA = Math.sin(angleRad);
+
+        for (let i = 0; i < doseGrid.length; i++) {
+            for (let j = 0; j < doseGrid[0].length; j++) {
+                const px = j * DOSE_GRID_SIZE + DOSE_GRID_SIZE / 2;
+                const py = i * DOSE_GRID_SIZE + DOSE_GRID_SIZE / 2;
+                
+                const rotatedX = (px - iso.x) * cosA + (py - iso.y) * sinA;
+                const rotatedY = -(px - iso.x) * sinA + (py - iso.y) * cosA;
+
+                if (rotatedX > 0 && Math.abs(rotatedY) < beam.width / 2) {
+                    let doseValue = 1.0 * beam.weight;
+                    
+                    if (beam.wedgeAngle > 0) {
+                        const wedgeFactor = 1 - (rotatedY + beam.width / 2) / beam.width;
+                        doseValue *= (1 - (beam.wedgeAngle / 90) * (1 - wedgeFactor));
+                    }
+                    
+                    beam.blocks.forEach(block => {
+                        if (rotatedY > block.pos - block.width/2 && rotatedY < block.pos + block.width/2) {
+                            doseValue *= 0.05;
+                        }
+                    });
+
+                    doseGrid[i][j] += doseValue;
+                }
+            }
+        }
+    });
+    updateDVH();
+}
+
+function updateDVH() {
+    let ptvPoints = 0, ptvCoveredPoints = 0, cordMaxDose = 0, heartMaxDose = 0;
+    let totalDoseWeight = beams.reduce((sum, beam) => sum + beam.weight, 0) || 1;
+
+    const PRESCRIBED_DOSE_LEVEL = totalDoseWeight;
+    const PTV_THRESHOLD = PRESCRIBED_DOSE_LEVEL * 0.95;
+    const CORD_TOLERANCE_ABS = 45; 
+    const HEART_TOLERANCE_ABS = 40;
+
+    for (let i = 0; i < doseGrid.length; i++) {
+        for (let j = 0; j < doseGrid[0].length; j++) {
+            const px = j * DOSE_GRID_SIZE + DOSE_GRID_SIZE / 2;
+            const py = i * DOSE_GRID_SIZE + DOSE_GRID_SIZE / 2;
+            const doseInGy = (doseGrid[i][j] / PRESCRIBED_DOSE_LEVEL) * 50; 
+
+            if (Math.pow((px - ptv.x) / ptv.rx, 2) + Math.pow((py - ptv.y) / ptv.ry, 2) <= 1) {
+                ptvPoints++;
+                if (doseGrid[i][j] >= PTV_THRESHOLD) {
+                    ptvCoveredPoints++;
+                }
+            }
+            if (Math.hypot(px - spinalCord.x, py - spinalCord.y) < spinalCord.r) {
+                if (doseInGy > cordMaxDose) cordMaxDose = doseInGy;
+            }
+            if (px > heart.x && px < heart.x + heart.w && py > heart.y && py < heart.y + heart.h) {
+                 if (doseInGy > heartMaxDose) heartMaxDose = doseInGy;
+            }
+        }
+    }
+    
+    const ptvCoverage = ptvPoints > 0 ? (ptvCoveredPoints / ptvPoints) * 100 : 0;
+    const cordDosePercent = (cordMaxDose / CORD_TOLERANCE_ABS) * 100;
+    const heartDosePercent = (heartMaxDose / HEART_TOLERANCE_ABS) * 100;
+
+    document.getElementById('ptv-percent').textContent = `${ptvCoverage.toFixed(0)}%`;
+    document.getElementById('ptv-bar').style.width = `${Math.min(ptvCoverage, 100)}%`;
+    document.getElementById('ptv-bar').style.backgroundColor = ptvCoverage >= 95 ? '#22c55e' : '#f97316';
+    document.getElementById('cord-dose').textContent = `${cordMaxDose.toFixed(1)} Gy`;
+    document.getElementById('cord-bar').style.width = `${Math.min(cordDosePercent, 100)}%`;
+    document.getElementById('cord-bar').style.backgroundColor = cordDosePercent > 100 ? '#ef4444' : '#fbbf24';
+    document.getElementById('heart-dose').textContent = `${heartMaxDose.toFixed(1)} Gy`;
+    document.getElementById('heart-bar').style.width = `${Math.min(heartDosePercent, 100)}%`;
+    document.getElementById('heart-bar').style.backgroundColor = heartDosePercent > 100 ? '#ef4444' : '#fbbf24';
+}
+
+// --- Drawing ---
+function drawAnatomy(ctx, view) {
+    ctx.fillStyle = '#4a5568'; ctx.beginPath();
+    if(view === 'axial') ctx.ellipse(iso.x, iso.y, 180, 250, Math.PI/2, 0, Math.PI * 2);
+    if(view === 'sag') ctx.ellipse(100, 125, 80, 120, 0, 0, Math.PI*2);
+    if(view === 'cor') ctx.ellipse(100, 125, 100, 120, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = ptv.color; ctx.beginPath();
+    if(view === 'axial') ctx.ellipse(ptv.x, ptv.y, ptv.rx, ptv.ry, -Math.PI / 6, 0, Math.PI * 2);
+    if(view === 'sag') ctx.ellipse(130, 125, 30, 25, 0, 0, Math.PI*2);
+    if(view === 'cor') ctx.ellipse(130, 125, 30, 25, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = spinalCord.color; ctx.beginPath();
+    if(view === 'axial') ctx.arc(spinalCord.x, spinalCord.y, spinalCord.r, 0, Math.PI * 2);
+    if(view === 'sag') ctx.fillRect(100, 20, 15, 210);
+    if(view === 'cor') ctx.arc(100, 200, 15, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = heart.color; ctx.beginPath();
+    if(view === 'axial') ctx.fillRect(heart.x, heart.y, heart.w, heart.h);
+    if(view === 'sag') ctx.fillRect(60, 100, 40, 50);
+    if(view === 'cor') ctx.fillRect(60, 100, 40, 50);
+    ctx.fill();
+}
+
+function drawOrientationLabels(ctx, view, w, h) {
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '12px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if(view === 'axial') {
+        ctx.fillText('A', w/2, 15); ctx.fillText('P', w/2, h-15);
+        ctx.fillText('R', 15, h/2); ctx.fillText('L', w-15, h/2);
+    } else if(view === 'sag') {
+        ctx.fillText('A', w/2, 15); ctx.fillText('P', w/2, h-15);
+        ctx.fillText('S', w/2, h/2 - 50); ctx.fillText('I', w/2, h/2 + 50);
+    } else { // coronal
+        ctx.fillText('S', w/2, 15); ctx.fillText('I', w/2, h-15);
+        ctx.fillText('R', 15, h/2); ctx.fillText('L', w-15, h/2);
+    }
+}
+
+function drawBeams(ctx, view) {
+    beams.forEach(beam => {
+        if(view === 'axial') {
+            beam.draw(ctx);
+        } else {
+            const clinicalAngle = beam.angle;
+            ctx.save();
+            ctx.strokeStyle = beam.selected ? '#facc15' : '#38bdf8';
+            ctx.lineWidth = beam.selected ? 3 : 2;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            
+            if(view === 'sag') { 
+                if((clinicalAngle >= 0 && clinicalAngle <= 45) || (clinicalAngle >= 315 && clinicalAngle <= 359) || (clinicalAngle >= 135 && clinicalAngle <= 225)) { // AP or PA
+                    ctx.moveTo(view === 'sag' ? 100 : 0, view === 'sag' ? 0 : 125); 
+                    ctx.lineTo(view === 'sag' ? 100 : 200, view === 'sag' ? 250 : 125);
+                } else { // Lats
+                     ctx.moveTo(view === 'sag' ? 0 : 100, view === 'sag' ? 125 : 0); 
+                     ctx.lineTo(view === 'sag' ? 200 : 100, view === 'sag' ? 125 : 250);
+                }
+            } else { // cor
+                if((clinicalAngle >= 45 && clinicalAngle <= 135) || (clinicalAngle >= 225 && clinicalAngle <= 315)) { // Lats
+                     ctx.moveTo(100, 0); ctx.lineTo(100, 250);
+                } else { // AP/PA
+                     ctx.moveTo(0, 125); ctx.lineTo(200, 125);
+                }
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+    });
+}
+
+class Beam {
+    constructor(angle) {
+        this.x = iso.x; this.y = iso.y; this.angle = angle;
+        this.width = 100; this.wedgeAngle = 0; this.weight = 1.0;
+        this.blocks = []; this.selected = false;
+    }
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.angle - 90) * Math.PI / 180);
+        ctx.strokeStyle = this.selected ? '#facc15' : '#38bdf8';
+        ctx.lineWidth = this.selected ? 5 : 3;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(0, -this.width / 2); ctx.lineTo(350, -this.width / 2);
+        ctx.moveTo(0, this.width / 2); ctx.lineTo(350, this.width / 2);
+        ctx.stroke();
+        if(this.wedgeAngle > 0) {
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(50, -this.width / 2);
+            ctx.lineTo(50, this.width / 2);
+            ctx.lineTo(50 - (this.wedgeAngle/60 * 30), this.width / 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+        this.blocks.forEach(block => {
+            ctx.fillStyle = 'rgba(17, 24, 39, 0.8)';
+            ctx.fillRect(0, block.pos - block.width/2, 350, block.width);
+        });
+        ctx.restore();
+    }
+}
+
+// --- Interaction Logic ---
+function selectTool(tool) {
+    currentTool = tool;
+    document.querySelectorAll('.tool-button').forEach(btn => {
+        btn.classList.remove('selected');
+        if (btn.dataset.tool === tool) btn.classList.add('selected');
+    });
+}
+function updateBeamControls() {
+    if (selectedBeam) {
+        beamControlsPanel.classList.remove('hidden');
+        angleSlider.value = selectedBeam.angle;
+        angleValue.textContent = `${selectedBeam.angle.toFixed(0)}°`;
+        weightSlider.value = selectedBeam.weight;
+        weightValue.textContent = `${(selectedBeam.weight * 100).toFixed(0)}%`;
+        wedgeButton.textContent = `Wedge: ${selectedBeam.wedgeAngle > 0 ? selectedBeam.wedgeAngle + '°' : 'OFF'}`;
+    } else {
+        beamControlsPanel.classList.add('hidden');
+    }
+}
+function handleClick(e) {
+    if (!gameRunning) return;
+    const rect = axialCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const clickedBeam = getClickedBeam(x, y);
+
+    if (currentTool === 'beam' && !clickedBeam) {
+        const mathAngle = Math.atan2(y - iso.y, x - iso.x) * 180 / Math.PI;
+        const clinicalAngle = Math.round((mathAngle + 360) % 360);
+        beams.push(new Beam(clinicalAngle));
+    } else if (currentTool === 'delete' && clickedBeam) {
+        beams = beams.filter(b => b !== clickedBeam);
+        if (selectedBeam === clickedBeam) selectedBeam = null;
+    } else if (clickedBeam) {
+        if (currentTool === 'block') {
+             const angleRad = (clickedBeam.angle - 90) * Math.PI / 180;
+             const rotatedY = -(x - clickedBeam.x) * Math.sin(angleRad) + (y - clickedBeam.y) * Math.cos(angleRad);
+             clickedBeam.blocks.push({ pos: rotatedY, width: 30 });
+        } else {
+             beams.forEach(b => b.selected = false);
+             selectedBeam = clickedBeam;
+             selectedBeam.selected = true;
+        }
+    } else {
+        selectedBeam = null;
+        beams.forEach(b => b.selected = false);
+    }
+    
+    updateBeamControls();
+    calculateDose();
+}
+function getClickedBeam(x, y) {
+    let clickedBeam = null;
+    for (let i = beams.length - 1; i >= 0; i--) {
+        const beam = beams[i];
+        const angleRad = (beam.angle - 90) * Math.PI / 180;
+        const rotatedX = (x - beam.x) * Math.cos(angleRad) + (y - beam.y) * Math.sin(angleRad);
+        const rotatedY = -(x - beam.x) * Math.sin(angleRad) + (y - beam.y) * Math.cos(angleRad);
+        if (rotatedX > 0 && rotatedX < 350 && Math.abs(rotatedY) < beam.width / 2) {
+            clickedBeam = beam;
+            break;
+        }
+    }
+    return clickedBeam;
+}
+function finalizePlan() {
+    const ptvCoverage = parseFloat(document.getElementById('ptv-bar').style.width);
+    const cordDosePercent = parseFloat(document.getElementById('cord-bar').style.width);
+    const heartDosePercent = parseFloat(document.getElementById('heart-bar').style.width);
+    let message = "";
+    if (ptvCoverage >= 95 && cordDosePercent <= 100 && heartDosePercent <= 100) {
+        message = "Excellent plan! PTV is covered and OARs are safe. The plan is approved!";
+        endGame(true, message);
+    } else {
+        message = "Plan needs revision. ";
+        if (ptvCoverage < 95) message += "PTV coverage is too low. ";
+        if (cordDosePercent > 100) message += "Spinal cord dose is too high. ";
+        if (heartDosePercent > 100) message += "Heart dose is too high. ";
+        endGame(false, message);
+    }
+}
+function endGame(won, message) {
+    gameRunning = false;
+    // RTApps platform integration (plan 4b): report this session's completion to the
+    // embedding page (fires for both approved and rejected verdicts — playing to a
+    // verdict is the completion).
+    if (window.RTApps) window.RTApps.reportCompletion();
+    document.getElementById('endTitle').textContent = won ? "Plan Approved!" : "Plan Rejected";
+    document.getElementById('endMessage').textContent = message;
+    endScreen.classList.remove('hidden');
+}
+function gameLoop() {
+    if (!gameRunning) return;
+    axCtx.clearRect(0, 0, axialCanvas.width, axialCanvas.height);
+    sagCtx.clearRect(0, 0, sagCanvas.width, sagCanvas.height);
+    corCtx.clearRect(0, 0, corCanvas.width, corCanvas.height);
+
+    drawAnatomy(axCtx, 'axial');
+    drawAnatomy(sagCtx, 'sag');
+    drawAnatomy(corCtx, 'cor');
+
+    // Redrawing dose was moved inside calculateDose(), which is event driven
+    // We only need to draw the beams and anatomy in the loop
+    axCtx.globalAlpha = 1;
+    drawBeams(axCtx, 'axial');
+    drawBeams(sagCtx, 'sag');
+    drawBeams(corCtx, 'cor');
+
+    drawOrientationLabels(axCtx, 'axial', axialCanvas.width, axialCanvas.height);
+    drawOrientationLabels(sagCtx, 'sag', sagCanvas.width, sagCanvas.height);
+    drawOrientationLabels(corCtx, 'cor', corCanvas.width, corCanvas.height);
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Event Listeners
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', init);
+axialCanvas.addEventListener('click', handleClick);
+document.querySelectorAll('.tool-button').forEach(btn => {
+    btn.addEventListener('click', () => selectTool(btn.dataset.tool));
+});
+finalizeButton.addEventListener('click', finalizePlan);
+angleSlider.addEventListener('input', (e) => {
+    if (selectedBeam) {
+        selectedBeam.angle = parseFloat(e.target.value);
+        updateBeamControls();
+        calculateDose();
+    }
+});
+weightSlider.addEventListener('input', (e) => {
+    if (selectedBeam) {
+        selectedBeam.weight = parseFloat(e.target.value);
+        updateBeamControls();
+        calculateDose();
+    }
+});
+wedgeButton.addEventListener('click', () => {
+    if(selectedBeam) {
+        const wedgeAngles = [0, 15, 30, 45, 60];
+        let currentWedgeIndex = wedgeAngles.indexOf(selectedBeam.wedgeAngle);
+        let nextIndex = (currentWedgeIndex + 1) % wedgeAngles.length;
+        selectedBeam.wedgeAngle = wedgeAngles[nextIndex];
+        updateBeamControls();
+        calculateDose();
+    }
+});
+
+</script>
+</body>
+</html>

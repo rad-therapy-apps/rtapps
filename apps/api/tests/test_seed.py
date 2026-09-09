@@ -846,6 +846,60 @@ async def test_seed_batch_4_sectional_anatomy_quiz(db: AsyncSession, settings: S
     assert count == 1
 
 
+async def test_seed_batch_5_beam_sculptor(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 5: Beam Sculptor — published, kind external, access practice,
+    completion-only (no numeric score, binary approved/rejected verdict), config
+    carries completion_only: True and no max_score key; subject is treatment-planning;
+    re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Beam Sculptor")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "beam-sculptor", "completion_only": True}
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-planning"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Beam Sculptor")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_5_onco_uno(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 5: OncoLife UNO: The Clinical Shift — published, kind external,
+    access practice, completion-only (turn-based card game, win/lose at hand-empty, no
+    numeric score), config carries completion_only: True and no max_score key; subject
+    is patient-care; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "OncoLife UNO: The Clinical Shift"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "onco-uno", "completion_only": True}
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "patient-care"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "OncoLife UNO: The Clinical Shift")
+    )
+    assert count == 1
+
+
 async def test_seed_refuses_prod(db: AsyncSession) -> None:
     """seed() must raise before touching the database when settings.env == "prod"."""
     # session_secret is 40 chars (>= the 32-char minimum) purely so this Settings object

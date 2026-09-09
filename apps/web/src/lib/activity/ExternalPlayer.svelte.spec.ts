@@ -41,7 +41,7 @@ const completionSnapshot: ExternalSnapshot = {
 	activity: { id: 'activity-1', kind: 'external', title: 'Beam Sculptor' },
 	external: {
 		arcade_slug: 'beam-sculptor',
-		max_score: 5000,
+		max_score: null,
 		completion_only: true,
 		subject: { slug: 'radiation-biology', title: 'Radiation Biology' }
 	}

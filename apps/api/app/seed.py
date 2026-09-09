@@ -238,6 +238,20 @@ SEED_ARCADE_GAMES = [
         "subject_slug": "sectional-anatomy",
         "config": {"arcade_slug": "sectional-anatomy-quiz", "max_score": 20},
     },
+    {
+        # Completion-only (plan 4b batch 5): no numeric score, a binary approved/rejected
+        # verdict at endGame(won, message) — both outcomes are terminal.
+        "title": "Beam Sculptor",
+        "subject_slug": "treatment-planning",
+        "config": {"arcade_slug": "beam-sculptor", "completion_only": True},
+    },
+    {
+        # Completion-only (plan 4b batch 5): turn-based card game, win/lose at
+        # endGame(playerWon) when either hand empties — no numeric score.
+        "title": "OncoLife UNO: The Clinical Shift",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "onco-uno", "completion_only": True},
+    },
 ]
 
 
