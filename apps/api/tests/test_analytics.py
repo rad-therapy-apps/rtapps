@@ -228,9 +228,12 @@ async def test_activity_stats_attempt_rows_for_external_activity(
     activity, newest first, with display_name/percent — games have no per-item stats, so
     educators get the raw per-attempt scores instead. Seed-style: the two attempts are
     inserted directly with explicit `submitted_at` so ordering doesn't depend on wall-clock
-    timing between two HTTP round trips."""
+    timing between two HTTP round trips. A third student in a DIFFERENT cohort also attempts
+    the same activity, to guard the cohort-scoping predicate (`_cohort_students`): their
+    attempt must never leak into another cohort's `attempt_rows`."""
     await make_educator(client, db, "e@example.edu")
     cohort = await create_cohort(client, "C")
+    other_cohort = await create_cohort(client, "Other")
     activity = await _publish_external_activity(db, max_score=5000)
     users: dict[str, uuid.UUID] = {}
     for email, name in (("a@example.edu", "Student A"), ("b@example.edu", "Student B")):
@@ -239,6 +242,12 @@ async def test_activity_stats_attempt_rows_for_external_activity(
             await client.post("/api/v1/cohorts/join", json={"code": cohort["join_code"]})
         ).status_code == 200
         users[name] = uuid.UUID(str(body["id"]))
+    # Non-member: enrolled in the OTHER cohort, not `cohort` — must be excluded below.
+    body = await register(client, email="c@example.edu", name="Student C")
+    assert (
+        await client.post("/api/v1/cohorts/join", json={"code": other_cohort["join_code"]})
+    ).status_code == 200
+    users["Student C"] = uuid.UUID(str(body["id"]))
     now = datetime.now(UTC)
     db.add_all(
         [
@@ -262,6 +271,16 @@ async def test_activity_stats_attempt_rows_for_external_activity(
                 max_score=5000,
                 percent=50.0,
             ),
+            Attempt(
+                user_id=users["Student C"],
+                activity_id=activity.id,
+                content_version_id=activity.current_version_id,
+                status="submitted",
+                submitted_at=now + timedelta(minutes=2),
+                score=5000,
+                max_score=5000,
+                percent=100.0,
+            ),
         ]
     )
     await db.flush()
@@ -269,6 +288,9 @@ async def test_activity_stats_attempt_rows_for_external_activity(
     r = await client.get(f"/api/v1/cohorts/{cohort['id']}/activities/{activity.id}")
     assert r.status_code == 200, r.text
     rows = r.json()["attempt_rows"]
+    # Student C's attempt is newest (submitted_at + 2 min) but they're not in `cohort` — if
+    # the cohort-scoping predicate ever regressed to leak cross-cohort attempts, their 100%
+    # row would appear first here.
     assert [row["display_name"] for row in rows] == ["Student B", "Student A"]
     assert rows[0]["score"] == 2500.0 and rows[0]["max_score"] == 5000.0
     assert rows[0]["percent"] == 50.0

@@ -44,6 +44,10 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
     there, and creates 0 new users; the migrated-content + activity import counts (upserts,
     not get-or-create) stay identical across both calls."""
     first = await seed(db, settings)
+    # Captured BETWEEN the two calls: the "before the second call" activity total, so the
+    # comparison below actually exercises idempotency instead of comparing a count against
+    # itself (both reads would otherwise happen after both calls completed).
+    total_activities_first = await db.scalar(select(func.count()).select_from(Activity))
     second = await seed(db, settings)
     assert first.users_created == 13 and second.users_created == 0
     # Confirms the get-or-create check actually matched existing rows by email, rather
@@ -64,7 +68,6 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
     assert first.activities_imported == second.activities_imported == 93
     # Seeded get-or-create activities (calculators, arcade games) increase the total but
     # are created only once; one more activity now (Cell Defender).
-    total_activities_first = await db.scalar(select(func.count()).select_from(Activity))
     total_activities_second = await db.scalar(select(func.count()).select_from(Activity))
     assert total_activities_first == total_activities_second
 

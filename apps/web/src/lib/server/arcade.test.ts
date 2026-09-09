@@ -6,7 +6,8 @@
  * How it fits the project: the only test coverage for arcade file resolution security (slug
  * validation, traversal prevention, extension whitelist) used by the `/arcade/<slug>/[...file]`
  * route to serve legacy browser games.
- * Depends on: `./arcade` (resolveArcadeFile), `node:path`, vitest.
+ * Depends on: `./arcade` (resolveArcadeFile, readArcadeFile), `node:fs`, `node:os`,
+ * `node:path`, vitest.
  * Used by: `pnpm --filter web test` (vitest `server` project, `pr.yml` job `web`).
  */
 import { describe, expect, it } from 'vitest';

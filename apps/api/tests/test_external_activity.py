@@ -249,6 +249,36 @@ class TestExternalActivitySubmit:
         )
         assert r.status_code == 422
 
+    async def test_external_submit_rejects_zero_max_config(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_external_activity(db, max_score=0)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit",
+            headers={"Idempotency-Key": "k1"},
+            json={"score": 10},
+        )
+        assert r.status_code == 422
+
+    async def test_external_submit_rejects_negative_score(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_external_activity(db)
+        await register(client, email="student@example.edu")
+
+        attempt = await _start_attempt(client, activity.id)
+        r = await client.post(
+            f"/api/v1/attempts/{attempt['id']}/submit",
+            headers={"Idempotency-Key": "k1"},
+            json={"score": -5},
+        )
+        assert r.status_code == 422
+
     async def test_scored_external_still_requires_payload(
         self, client: AsyncClient, db: AsyncSession
     ) -> None:

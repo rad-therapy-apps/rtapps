@@ -100,12 +100,13 @@ describe('ExternalPlayer', () => {
 	// Invariant: submit is posted with exactly {score}, and the result panel shows the returned
 	// percent with no pass/fail badge (practice semantics for games in 4a).
 	it('submits the reported score on a same-origin result message and shows the percent with no badge', async () => {
+		let submitBody: unknown;
 		const post: Post = vi.fn(async (path: string, init?: { body?: { score: number } }) => {
 			if (path === '/api/v1/activities/{activity_id}/attempts') {
 				return { data: { ...baseAttempt, items: [] }, error: undefined };
 			}
 			if (path === '/api/v1/attempts/{attempt_id}/submit') {
-				expect(init?.body).toEqual({ score: 1200 });
+				submitBody = init?.body;
 				return {
 					data: { ...baseAttempt, status: 'submitted', percent: 24, passed: null },
 					error: undefined
@@ -121,6 +122,7 @@ describe('ExternalPlayer', () => {
 
 		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
 		await expect.element(page.getByText('24%', { exact: false })).toBeInTheDocument();
+		expect(submitBody).toEqual({ score: 1200 });
 		// Codebase badge idiom is <p class="badge" data-testid="quiz-badge">🏅 Badge earned!</p>;
 		// games show no badge (practice semantics in 4a), so both must be absent.
 		expect(page.getByTestId('quiz-badge').elements().length).toBe(0);
@@ -283,6 +285,7 @@ describe('ExternalPlayer', () => {
 	it('shows an error and Retry button on submit failure, and retries with the same score', async () => {
 		let submitCalls = 0;
 		const idempotencyKeys: string[] = [];
+		const submitBodies: unknown[] = [];
 		const post: Post = vi.fn(
 			async (
 				path: string,
@@ -294,7 +297,7 @@ describe('ExternalPlayer', () => {
 				if (path === '/api/v1/attempts/{attempt_id}/submit') {
 					submitCalls += 1;
 					idempotencyKeys.push(init?.headers?.['Idempotency-Key'] ?? '');
-					expect(init?.body).toEqual({ score: 1200 });
+					submitBodies.push(init?.body);
 					if (submitCalls === 1) {
 						return { data: undefined, error: { title: 'Attempt already submitted' } };
 					}
@@ -318,18 +321,20 @@ describe('ExternalPlayer', () => {
 		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
 		expect(submitCalls).toBe(2);
 		expect(idempotencyKeys[0]).not.toBe(idempotencyKeys[1]);
+		expect(submitBodies).toEqual([{ score: 1200 }, { score: 1200 }]);
 	});
 
 	// Scenario: a completion-only activity's game reports completion (no score).
 	// Invariant: submit is posted with no body (plan 4b's completion-only contract), and the
 	// result panel shows "Completed" with no percent text.
 	it('submits an empty-body submit on a completion message for a completion-only activity', async () => {
+		let submitBody: unknown;
 		const post: Post = vi.fn(async (path: string, init?: { body?: unknown }) => {
 			if (path === '/api/v1/activities/{activity_id}/attempts') {
 				return { data: { ...baseAttempt, items: [] }, error: undefined };
 			}
 			if (path === '/api/v1/attempts/{attempt_id}/submit') {
-				expect(init?.body).toBeUndefined();
+				submitBody = init?.body;
 				return {
 					data: { ...baseAttempt, status: 'submitted', percent: null, passed: null },
 					error: undefined
@@ -345,6 +350,7 @@ describe('ExternalPlayer', () => {
 
 		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
 		await expect.element(page.getByText('Completed')).toBeInTheDocument();
+		expect(submitBody).toBeUndefined();
 		expect(page.getByText(/score recorded/i).elements().length).toBe(0);
 		expect(post).toHaveBeenCalledWith('/api/v1/attempts/{attempt_id}/submit', {
 			params: { path: { attempt_id: 'attempt-1' } },

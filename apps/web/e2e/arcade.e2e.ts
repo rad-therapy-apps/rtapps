@@ -54,12 +54,15 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 	// playing the canvas game — this exercises shim -> bridge -> submit (per the task brief).
 	const frame = page.frameLocator('iframe[title="Cell Defender"]');
 	await expect(frame.locator('#gameOverScreen')).toBeAttached();
-	await page
-		.frames()
-		.find((f) => f.url().includes('/arcade/cell-defender'))!
-		.evaluate(() =>
-			(window as unknown as { RTApps: { reportResult(s: number): void } }).RTApps.reportResult(1200)
-		);
+	const gameFrame = page.frames().find((f) => f.url().includes('/arcade/cell-defender'))!;
+	// The shim attaches window.RTApps asynchronously; wait for it before calling into it so this
+	// doesn't race the frame's own script execution.
+	await gameFrame.waitForFunction(
+		() => (window as unknown as { RTApps?: unknown }).RTApps !== undefined
+	);
+	await gameFrame.evaluate(() =>
+		(window as unknown as { RTApps: { reportResult(s: number): void } }).RTApps.reportResult(1200)
+	);
 
 	// 1200 / the seeded max_score of 5000 = 24%.
 	await expect(page.getByText('Score recorded: 24%')).toBeVisible();
