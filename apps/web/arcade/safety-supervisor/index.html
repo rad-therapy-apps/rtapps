@@ -426,8 +426,8 @@ function endGame(won, message) {
     } else {
         restartButton.textContent = "Start New Inspection";
     }
-    // RTApps platform integration: report the run's score to the embedding page.
-    if (window.RTApps) window.RTApps.reportResult(score);
+    // report only at terminal events — the shim latch is once per page load: a failed level or full mastery
+    if ((!won || currentLevelIndex >= gameLevels.length - 1) && window.RTApps) window.RTApps.reportResult(score);
 }
 
 function handleClick(e) {

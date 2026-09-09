@@ -558,10 +558,12 @@ function endGame(won, message) {
     clearInterval(gameInterval);
     const endTitleEl = document.getElementById('endTitle');
     const endMessageEl = document.getElementById('endMessage');
-    
-    if (won || score >= levels[currentLevel].targetScore) {
+    const levelConf = levels[currentLevel];
+    const levelPassed = won || (levelConf && score >= levelConf.targetScore);
+
+    if (levelPassed) {
         endTitleEl.textContent = "Level Complete!";
-        endMessageEl.textContent = message || `You've met the QA standard for Level ${levels[currentLevel].level}!`;
+        endMessageEl.textContent = message || `You've met the QA standard for Level ${levelConf.level}!`;
         currentLevel++;
         restartButton.textContent = "Next Level";
     } else {
@@ -571,8 +573,8 @@ function endGame(won, message) {
     }
     finalScoreEl.textContent = score;
     endScreen.classList.remove('hidden');
-    // RTApps platform integration: report the run's score to the embedding page.
-    if (window.RTApps) window.RTApps.reportResult(score);
+    // report only at terminal events — the shim latch is once per page load: a failed level or full mastery
+    if ((!levelPassed || !levelConf) && window.RTApps) window.RTApps.reportResult(score);
 }
 
 

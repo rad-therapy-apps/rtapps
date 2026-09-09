@@ -473,8 +473,8 @@
             resultsDisplay.textContent = `Final Score: ${score}. Total Attempts: ${totalAttempts}.`;
 
             modal.style.display = 'flex';
-            // RTApps platform integration (plan 4b): report the run's score to the embedding page.
-            if (window.RTApps) window.RTApps.reportResult(score);
+            // report the win streak, not cumulative score — score never resets on a miss, so it would outrank a perfect run
+            if (window.RTApps) window.RTApps.reportResult(consecutiveCorrectAnswers);
         }
 
         window.clearBeamsAndResetGantry = function() {

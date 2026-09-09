@@ -344,8 +344,8 @@ function endGame(won, customMessage = "") {
     }
     
     endScreen.classList.remove('hidden');
-    // RTApps platform integration: report the run's score to the embedding page.
-    if (window.RTApps) window.RTApps.reportResult(score);
+    // report only at terminal events — the shim latch is once per page load: a failed case or the mastery gate
+    if ((!won || (totalCasesCompleted >= 25 && currentLevelIndex >= gameLevels.length - 2)) && window.RTApps) window.RTApps.reportResult(score);
 }
 
 // --- Event Listeners ---
