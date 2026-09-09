@@ -1,8 +1,8 @@
 <!--
 	What this file does: Activity stats page at
 	`(app)/educator/cohorts/[id]/activities/[aid]`. Shows one activity's attempt/pass-rate summary,
-	its score distribution, and a per-item table (answered/correct/% correct/top wrong answers),
-	plus a CSV download link.
+	its score distribution, a per-item table (answered/correct/% correct/top wrong answers), and
+	(plan 4b #53) a per-attempt table for `external` (game) activities, plus a CSV download link.
 
 	Used here and why: `resolve()` for the back-to-cohort link, per
 	`svelte/no-navigation-without-resolve`; the CSV link is a plain same-origin `<a>` to an API URL
@@ -63,6 +63,28 @@
 		{/each}
 	</tbody>
 </table>
+
+{#if data.stats.attempt_rows.length > 0}
+	<h2>Attempts</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Student</th>
+				<th>Score</th>
+				<th>Percent</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each data.stats.attempt_rows as row (row.submitted_at + row.display_name)}
+				<tr>
+					<td>{row.display_name}</td>
+					<td>{row.score === null ? '—' : `${row.score} / ${row.max_score}`}</td>
+					<td>{row.percent === null ? 'Completed' : formatPercent(row.percent)}</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+{/if}
 
 <h2>Items</h2>
 <table>
