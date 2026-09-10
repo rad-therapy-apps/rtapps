@@ -37,10 +37,16 @@ export const load: PageServerLoad = async (event) => {
 	// params (not a built URL) are returned so `+page.svelte` can build the href with `resolve()`,
 	// same as the Games links.
 	let simulatorUrl: { slug: string; id: string } | null = null;
-	const sim = await apiFetch(event, '/activities/by-sdk-slug/sim-hub-qa');
-	if (sim.ok) {
-		const info: components['schemas']['SdkSlugOut'] = await sim.json();
-		simulatorUrl = { slug: info.subject_slug, id: info.activity_id };
+	try {
+		const sim = await apiFetch(event, '/activities/by-sdk-slug/sim-hub-qa');
+		if (sim.ok) {
+			const info: components['schemas']['SdkSlugOut'] = await sim.json();
+			simulatorUrl = { slug: info.subject_slug, id: info.activity_id };
+		}
+	} catch {
+		// Best-effort by contract: a network-level failure on this one call must degrade to
+		// the placeholder, not take down the whole subject page (the subject fetch above is
+		// the only load-fatal call).
 	}
 	return { subject, simulatorUrl };
 };
