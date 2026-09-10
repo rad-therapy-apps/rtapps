@@ -17,11 +17,22 @@ export interface paths {
      *     config (not a snapshot): the slug is an addressing convention, and only published
      *     external activities resolve.
      *
+     *     ADR-0006: only `access == "practice"` activities resolve here — simulators are
+     *     practice-only per plan 4c, and unlike `get_activity` this route 404s uniformly
+     *     regardless of the caller's role, so the guard belongs in the query filter itself
+     *     rather than a post-fetch role check.
+     *
      *     Filters in Python rather than with a JSONB `->>` SQL comparison: there is no existing
      *     precedent in this codebase for querying `Activity.config` on the SQL side (every other
      *     call site reads it as a plain Python dict after fetching the row), and external
-     *     activities number in the dozens at most, so a Python-side filter over that small,
-     *     already-indexed-by-kind-and-status set is simpler than introducing a new query idiom.
+     *     activities number in the dozens at most, so a Python-side filter over that small set —
+     *     bounded in SQL by `kind` and `status` before ever touching `config` — is simpler than
+     *     introducing a new query idiom.
+     *
+     *     Duplicate-`sdk_slug` contract: if two published externals share a slug, whichever
+     *     row the query returns first wins (no `ORDER BY`, so this is arbitrary, not
+     *     deterministic); uniqueness across `sdk_slug` is asserted by a later task's seed
+     *     test, not enforced here.
      */
     get: operations["resolve_sdk_slug_api_v1_activities_by_sdk_slug__slug__get"];
     put?: never;
