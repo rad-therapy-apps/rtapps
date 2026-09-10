@@ -1,6 +1,6 @@
 <!--
 	What this file does: Subject detail page at `(app)/subjects/[slug]`. Shows the subject's
-	summary, links to each of its lessons, links to its practice activities grouped by kind, and the Games + Simulator shelf.
+	summary, links to each of its lessons, links to its practice activities grouped by kind, and the Games + Simulator shelf (plan 4c: a live entry link when `load` resolves the simulator hub, else a disabled placeholder).
 
 	Used here and why: `resolve()` with route params to build each lesson/activity href, per
 	`svelte/no-navigation-without-resolve`; Svelte 5 runes (`$props()`, `$derived()` for grouping
@@ -75,9 +75,17 @@
 	</ul>
 {/each}
 
-<!-- Phase-4 shelf (plan 4a): the Simulator section's entry is a placeholder until plan 4c
-     replaces it with the real simulator application entry. Static on every subject page. -->
+<!-- Phase-4 shelf (plan 4a/4c): the Simulator section links to the simulator hub's player when
+     `load` resolves it (`sim-hub-qa` seeded and published); otherwise it degrades to the
+     disabled placeholder. -->
 <h2>Simulator</h2>
-<button disabled title="The RT simulator arrives in a future update"
-	>Enter the simulator — coming soon</button
->
+{#if data.simulatorUrl}
+	<a
+		href={resolve('/(app)/subjects/[slug]/activities/[id]', data.simulatorUrl)}
+		data-testid="simulator-entry">Enter the radiation oncology center</a
+	>
+{:else}
+	<button disabled title="The RT simulator arrives in a future update"
+		>Enter the simulator — coming soon</button
+	>
+{/if}
