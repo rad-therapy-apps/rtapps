@@ -514,7 +514,10 @@
                 gameCorrectAngle = selectedCategory.angle;
             } else if (selectedCategory.type === "obliqueRange") {
                 const min = selectedCategory.range[0];
-                const max = selected.range[1];
+                // RTApps fix (#59): legacy typo `selected.range[1]` (undefined variable) threw a
+                // ReferenceError here, crashing question generation for all four oblique
+                // categories. First sanctioned content fix to a game copy.
+                const max = selectedCategory.range[1];
                 gameCorrectAngle = Math.floor(Math.random() * (max - min + 1)) + min;
             }
 
