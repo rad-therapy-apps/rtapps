@@ -55,6 +55,24 @@ async def _publish_external_activity(db: AsyncSession, max_score: int = 5000) ->
     return activity
 
 
+async def _publish_sdk_slug_activity(db: AsyncSession, *, status: str = "published") -> Activity:
+    subject = await _ensure_subject(db)
+    activity = Activity(
+        kind="external",
+        ref_id=new_id(),
+        title="Cell Defender",
+        subject_id=subject.id,
+        status="draft",
+        access="practice",
+        config={"arcade_slug": "cell-defender", "sdk_slug": "test-sim", "max_score": 5000},
+    )
+    db.add(activity)
+    await db.flush()
+    if status == "published":
+        await publish_activity(db, activity, author=None, change_note="test")
+    return activity
+
+
 async def _publish_completion_only_activity(db: AsyncSession) -> Activity:
     subject = await _ensure_subject(db)
     activity = Activity(
@@ -291,3 +309,46 @@ class TestExternalActivitySubmit:
             f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
         )
         assert r.status_code == 422
+
+
+class TestSdkSlugResolver:
+    """Plan 4c: `GET /activities/by-sdk-slug/{slug}` — the simulator SDK addresses
+    activities by config-declared `sdk_slug`, never by embedded UUID.
+    """
+
+    async def test_sdk_slug_resolves_published_external(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_sdk_slug_activity(db)
+        subject = await db.get(Subject, activity.subject_id)
+        assert subject is not None
+        await register(client, email="student@example.edu")
+
+        r = await client.get("/api/v1/activities/by-sdk-slug/test-sim")
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body == {
+            "activity_id": str(activity.id),
+            "subject_slug": subject.slug,
+            "completion_only": False,
+            "max_score": 5000,
+        }
+
+    async def test_sdk_slug_resolver_404s(self, client: AsyncClient, db: AsyncSession) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        await register(client, email="student@example.edu")
+
+        # unknown slug
+        r = await client.get("/api/v1/activities/by-sdk-slug/no-such-slug")
+        assert r.status_code == 404
+
+        # a DRAFT external activity's slug
+        await _publish_sdk_slug_activity(db, status="draft")
+        r = await client.get("/api/v1/activities/by-sdk-slug/test-sim")
+        assert r.status_code == 404
+
+        # a published QUIZ (no sdk_slug ever matches, but also kind-guarded)
+        await import_any(db, QUIZ_DOC)
+        r = await client.get("/api/v1/activities/by-sdk-slug/test-sim")
+        assert r.status_code == 404

@@ -52,6 +52,18 @@ class ActivityRefOut(BaseModel):
     title: str
 
 
+class SdkSlugOut(BaseModel):
+    """Resolution of an external activity's config `sdk_slug` (plan 4c): simulator apps
+    address activities by stable name — never by embedded UUID — and learn whether to
+    submit a score or a completion. 404 for anything not a PUBLISHED external activity.
+    """
+
+    activity_id: uuid.UUID
+    subject_slug: str
+    completion_only: bool
+    max_score: float | None
+
+
 class SubjectDetailOut(BaseModel):
     """Response for `GET /subjects/{slug}`: one subject with its published lessons and practice
     non-lesson activities.

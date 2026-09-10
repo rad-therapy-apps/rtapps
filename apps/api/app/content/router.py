@@ -39,6 +39,7 @@ from app.content.schemas import (
     ActivityRefOut,
     LessonOut,
     LessonRefOut,
+    SdkSlugOut,
     SubjectDetailOut,
     SubjectOut,
 )
@@ -120,6 +121,40 @@ async def get_subject(slug: str, db: AsyncSession = Depends(get_session)) -> Sub
             ActivityRefOut(id=activity.id, kind=activity.kind, title=activity.title)
             for activity in activities
         ],
+    )
+
+
+@router.get("/activities/by-sdk-slug/{slug}", response_model=SdkSlugOut)
+async def resolve_sdk_slug(
+    slug: str,
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> SdkSlugOut:
+    """Plan 4c: name → activity for the simulator SDK. Matches on the LIVE activity
+    config (not a snapshot): the slug is an addressing convention, and only published
+    external activities resolve.
+
+    Filters in Python rather than with a JSONB `->>` SQL comparison: there is no existing
+    precedent in this codebase for querying `Activity.config` on the SQL side (every other
+    call site reads it as a plain Python dict after fetching the row), and external
+    activities number in the dozens at most, so a Python-side filter over that small,
+    already-indexed-by-kind-and-status set is simpler than introducing a new query idiom.
+    """
+    activities = (
+        await db.scalars(
+            select(Activity).where(Activity.kind == "external", Activity.status == "published")
+        )
+    ).all()
+    activity = next((a for a in activities if a.config.get("sdk_slug") == slug), None)
+    if activity is None:
+        raise Problem(404, "No published activity with that sdk_slug")
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None
+    return SdkSlugOut(
+        activity_id=activity.id,
+        subject_slug=subject.slug,
+        completion_only=bool(activity.config.get("completion_only")),
+        max_score=activity.config.get("max_score"),
     )
 
 

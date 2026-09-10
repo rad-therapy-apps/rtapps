@@ -2634,6 +2634,43 @@
         "title": "SavedItemOut",
         "type": "object"
       },
+      "SdkSlugOut": {
+        "description": "Resolution of an external activity's config `sdk_slug` (plan 4c): simulator apps\naddress activities by stable name \u2014 never by embedded UUID \u2014 and learn whether to\nsubmit a score or a completion. 404 for anything not a PUBLISHED external activity.",
+        "properties": {
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "completion_only": {
+            "title": "Completion Only",
+            "type": "boolean"
+          },
+          "max_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Score"
+          },
+          "subject_slug": {
+            "title": "Subject Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "activity_id",
+          "subject_slug",
+          "completion_only",
+          "max_score"
+        ],
+        "title": "SdkSlugOut",
+        "type": "object"
+      },
       "SequencingAuthorOut": {
         "properties": {
           "access": {
@@ -3269,6 +3306,49 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/activities/by-sdk-slug/{slug}": {
+      "get": {
+        "description": "Plan 4c: name \u2192 activity for the simulator SDK. Matches on the LIVE activity\nconfig (not a snapshot): the slug is an addressing convention, and only published\nexternal activities resolve.\n\nFilters in Python rather than with a JSONB `->>` SQL comparison: there is no existing\nprecedent in this codebase for querying `Activity.config` on the SQL side (every other\ncall site reads it as a plain Python dict after fetching the row), and external\nactivities number in the dozens at most, so a Python-side filter over that small,\nalready-indexed-by-kind-and-status set is simpler than introducing a new query idiom.",
+        "operationId": "resolve_sdk_slug_api_v1_activities_by_sdk_slug__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdkSlugOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Sdk Slug",
+        "tags": [
+          "content"
+        ]
+      }
+    },
     "/api/v1/activities/{activity_id}": {
       "get": {
         "description": "One activity's current published snapshot, answers stripped.\n\nADR-0006: students never see assessment activities \u2014 same 404 as a missing id.",
