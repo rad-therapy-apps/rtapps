@@ -9,7 +9,7 @@ Radiation-therapy education platform — the ground-up rebuild of the RTApps e-w
 - `tools/migrate-legacy` — imports content from the legacy `rtt_e_workbook` repository
 - `infra/` — Docker Compose (dev + prod), Caddy/Cloudflare Tunnel config, backup container, deploy script
 
-Status: **v0.6.0** (M6) — arcade spine + Cell Defender pilot (games behind auth, scores in the attempt spine); next: 4b games at scale.
+Status: **v0.7.0** (M7) — game library on the arcade spine (23 games, per-attempt educator rows); next: 4c simulator world.
 
 Getting started: `docs/05-setup.md`; deploying: `docs/06-operations.md`.
 

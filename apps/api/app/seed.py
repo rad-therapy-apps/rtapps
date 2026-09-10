@@ -106,14 +106,153 @@ SEED_CALCULATORS: list[tuple[str, str, str]] = [
     ("ALARA: Inverse Square in Practice", "inverse_square", "radiation-protection"),
 ]
 
-# Plan 4a pilot game (get-or-created by title, like the practice calculators). max_score
-# 5000 ≈ a strong full run of Cell Defender (per-enemy 50-100 + per-level 250 bonuses);
-# percent is clamped server-side, and a per-game tuning pass is plan 4b audit scope.
-SEED_ARCADE_GAME = {
-    "title": "Cell Defender",
-    "subject_slug": "radiation-biology",
-    "config": {"arcade_slug": "cell-defender", "max_score": 5000},
-}
+# Arcade games (plans 4a/4b), get-or-created by title like the practice calculators.
+# max_score derivations live in each plan-4b batch's evidence table
+# (.superpowers/sdd/task-N-report.md) and the audit; unbounded games carry heuristic
+# caps (server clamps; percent ≤ 100). completion_only games have no max_score.
+SEED_ARCADE_GAMES = [
+    {
+        "title": "Cell Defender",
+        "subject_slug": "radiation-biology",
+        "config": {"arcade_slug": "cell-defender", "max_score": 5000},
+    },
+    {
+        "title": "Anatomy Atlas Adventure",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "anatomy-atlas", "max_score": 500},
+    },
+    {
+        "title": "Dose Calc Dash",
+        "subject_slug": "treatment-planning",
+        "config": {"arcade_slug": "dose-calc-dash", "max_score": 400},
+    },
+    {
+        "title": "Adaptive Consultation Assessment",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "adaptive-consultation", "max_score": 239},
+    },
+    {
+        "title": "Adaptive Ethical Decision-Making Simulator",
+        "subject_slug": "ethics",
+        "config": {"arcade_slug": "ethical-decisions", "max_score": 50},
+    },
+    {
+        "title": "Legal Eagle Lineup",
+        "subject_slug": "ethics",
+        "config": {"arcade_slug": "legal-eagle", "max_score": 900},
+    },
+    {
+        "title": "Vital Signs Challenge",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "vital-signs", "max_score": 60},
+    },
+    {
+        "title": "Care Commander",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "care-commander", "max_score": 3000},
+    },
+    {
+        # 10825 = heuristic cap for a perfect "MASTERY ACHIEVED" playthrough (25 cases,
+        # score/XP never reset mid-session): 3 Intern cases @275 + 4 Junior @375 +
+        # 5 Staff @400 + 10 Senior @500 + 3 QA Supervisor @500 = 10825. This is the score
+        # at the exact endGame() call where reportResult fires and the game itself forces
+        # a full reset (only "Play Again From Start" is offered after); not a hard limit
+        # against deliberate grinding, but a defensible strong-session cap (Cell Defender
+        # precedent) — not a single case's ceiling like the previous 500.
+        "title": "Error Reporter",
+        "subject_slug": "quality-management-and-safety",
+        "config": {"arcade_slug": "error-reporter", "max_score": 10825},
+    },
+    {
+        # 10000 = Level 3's own win floor (score >= 8000, the highest `targetScore`) plus a
+        # bounded overshoot allowance (2000, ~4 more tolerance-bomb bonuses at 500 each).
+        # score resets to 0 each level and reportResult fires once per level at time-up
+        # (not the instant the target is crossed), so a legitimate Level 3 win can exceed
+        # 8000 by whatever's scored in the remaining seconds; 10000 covers a strong final-
+        # level clear without treating the number as unbounded (Cell Defender precedent).
+        "title": "QA Crusader",
+        "subject_slug": "quality-management-and-safety",
+        "config": {"arcade_slug": "qa-crusader", "max_score": 10000},
+    },
+    {
+        "title": "Safety Supervisor",
+        "subject_slug": "radiation-protection",
+        "config": {"arcade_slug": "safety-supervisor", "max_score": 1900},
+    },
+    {
+        "title": "Procedure Pursuit",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "procedure-pursuit", "max_score": 1650},
+    },
+    {
+        "title": "Anatomy Angler",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "anatomy-angler", "max_score": 2000},
+    },
+    {
+        "title": "Side Effect Sorcerer",
+        "subject_slug": "radiation-biology",
+        "config": {"arcade_slug": "side-effect-sorcerer", "max_score": 859},
+    },
+    {
+        "title": "Gantry Position Guessing Game",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "gantry-game", "max_score": 10},
+    },
+    {
+        "title": "LINAC Component Identification",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "linac-parts", "max_score": 10},
+    },
+    {
+        "title": "SSD Practice - BEV",
+        "subject_slug": "treatment-planning",
+        "config": {"arcade_slug": "ssd-practice", "max_score": 20},
+    },
+    {
+        # 10 = MAX_CORRECT, the fixed win condition (game also ends early at
+        # MAX_INCORRECT = 5 wrong, or when the question bank runs out).
+        "title": "CT Simulation Border Challenge",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "ct-borders", "max_score": 10},
+    },
+    {
+        # 22 = vocabulary.length (fixed term bank), shared by the multiple-choice,
+        # matching, and audio-quiz modes; flashcards mode has no score mechanic.
+        "title": "Dosimetry Vocabulary Game",
+        "subject_slug": "radiation-physics",
+        "config": {"arcade_slug": "dosimetry-vocabulary", "max_score": 22},
+    },
+    {
+        # 20 = radUnitsQuestions.length, identical across all 3 scored modes
+        # (choice/matching/audio); flashcards mode has no score mechanic.
+        "title": "Rad Units Challenge",
+        "subject_slug": "radiation-physics",
+        "config": {"arcade_slug": "rad-units", "max_score": 20},
+    },
+    {
+        # 20 = the largest mode's question count (comprehensive = 8 imaging-plane +
+        # 12 terminology questions); planes-only and terminology-only modes are
+        # smaller (8, 12) and score lower against this same denominator.
+        "title": "Sectional Anatomy Quiz",
+        "subject_slug": "sectional-anatomy",
+        "config": {"arcade_slug": "sectional-anatomy-quiz", "max_score": 20},
+    },
+    {
+        # Completion-only (plan 4b batch 5): no numeric score, a binary approved/rejected
+        # verdict at endGame(won, message) — both outcomes are terminal.
+        "title": "Beam Sculptor",
+        "subject_slug": "treatment-planning",
+        "config": {"arcade_slug": "beam-sculptor", "completion_only": True},
+    },
+    {
+        # Completion-only (plan 4b batch 5): turn-based card game, win/lose at
+        # endGame(playerWon) when either hand empties — no numeric score.
+        "title": "OncoLife UNO: The Clinical Shift",
+        "subject_slug": "patient-care",
+        "config": {"arcade_slug": "onco-uno", "completion_only": True},
+    },
+]
 
 
 @dataclass
@@ -378,34 +517,33 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
         if activity.status != "published":
             await publish_activity(db, activity, educator, change_note="Initial publish")
 
-    # --- Cell Defender arcade game (Plan 4a pilot): get-or-create by title, same pattern
-    # as the practice calculators above. ---
-    arcade_subject = await db.scalar(
-        select(Subject).where(Subject.slug == SEED_ARCADE_GAME["subject_slug"])
-    )
-    if arcade_subject is None:
-        raise RuntimeError(
-            f"seed subject missing: {SEED_ARCADE_GAME['subject_slug']!r} (expected from demo-quiz)"
+    # --- Arcade games (plans 4a/4b): get-or-create by title, same pattern as the practice
+    # calculators above. ---
+    for game in SEED_ARCADE_GAMES:
+        arcade_subject = await db.scalar(
+            select(Subject).where(Subject.slug == game["subject_slug"])
         )
-    arcade_activity = await db.scalar(
-        select(Activity).where(
-            Activity.kind == "external", Activity.title == SEED_ARCADE_GAME["title"]
+        if arcade_subject is None:
+            raise RuntimeError(
+                f"seed subject missing: {game['subject_slug']!r} (expected from demo-quiz)"
+            )
+        arcade_activity = await db.scalar(
+            select(Activity).where(Activity.kind == "external", Activity.title == game["title"])
         )
-    )
-    if arcade_activity is None:
-        arcade_activity = Activity(
-            kind="external",
-            ref_id=new_id(),
-            title=SEED_ARCADE_GAME["title"],
-            subject_id=arcade_subject.id,
-            access="practice",
-            config=SEED_ARCADE_GAME["config"],
-            status="draft",
-        )
-        db.add(arcade_activity)
-        await db.flush()
-    if arcade_activity.status != "published":
-        await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
+        if arcade_activity is None:
+            arcade_activity = Activity(
+                kind="external",
+                ref_id=new_id(),
+                title=game["title"],
+                subject_id=arcade_subject.id,
+                access="practice",
+                config=game["config"],
+                status="draft",
+            )
+            db.add(arcade_activity)
+            await db.flush()
+        if arcade_activity.status != "published":
+            await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
 
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
     cohort_created = cohort is None

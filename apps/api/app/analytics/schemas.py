@@ -5,7 +5,8 @@ What this file does: `ActivityRowOut`/`StudentRowOut` are the two overview table
 (per-activity and per-student aggregates); `CohortOverviewOut` wraps both plus the cohort
 itself. `StudentResultOut`/`AttemptItemOut`/`AttemptDetailOut` are the per-student detail
 rows; `StudentDetailOut` wraps them plus the student's identity. `BucketOut`/`WrongOut`/
-`ItemStatOut`/`ActivityStatsOut` are the per-activity stats view (FR-E-06);
+`ItemStatOut`/`AttemptRowOut`/`ActivityStatsOut` are the per-activity stats view (FR-E-06;
+`AttemptRowOut` is plan 4b #53's per-attempt rows for `external` activities);
 `OutcomeStudentOut`/`OutcomeRowOut`/`OutcomeMasteryOut` are the per-outcome mastery view
 (FR-E-07).
 Used here and why: plain Pydantic models (no validators) since these are response-only
@@ -121,6 +122,16 @@ class ItemStatOut(BaseModel):
     top_wrong: list[WrongOut]
 
 
+class AttemptRowOut(BaseModel):
+    # One submitted attempt on an EXTERNAL activity (plan 4b #53): games have no per-item
+    # stats, so educators get the per-attempt scores instead. Empty for other kinds.
+    display_name: str
+    score: float | None
+    max_score: float | None
+    percent: float | None
+    submitted_at: datetime
+
+
 class ActivityStatsOut(BaseModel):
     # The whole per-activity stats response (FR-E-06): attempts/pass rate/distribution
     # over this cohort's submitted attempts, plus per-item correctness.
@@ -132,6 +143,7 @@ class ActivityStatsOut(BaseModel):
     pass_rate: float | None
     distribution: list[BucketOut]
     items: list[ItemStatOut]
+    attempt_rows: list[AttemptRowOut]
 
 
 class OutcomeStudentOut(BaseModel):

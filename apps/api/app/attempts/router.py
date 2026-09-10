@@ -200,18 +200,27 @@ async def submit_attempt(
     if kind != "external" and payload is not None:
         raise Problem(422, "A score payload is only valid for external activities")
     if kind == "external":
-        # Plan 4a: the game's client-reported score. Server-authoritative max from the
-        # PINNED snapshot config; clamp so a tampered client caps out at 100%.
-        if payload is None:
-            raise Problem(422, "External activities require a score payload")
-        max_score = float(version.snapshot["activity"]["config"].get("max_score") or 0)
-        if max_score <= 0:
-            raise Problem(422, "Activity has no max_score configured")
-        score = min(payload.score, max_score)
-        attempt.score = score
-        attempt.max_score = max_score
-        attempt.percent = round(100.0 * score / max_score, 2)
-        attempt.passed = None  # practice: no pass mark for games in 4a
+        config = version.snapshot["activity"]["config"]
+        if config.get("completion_only"):
+            # Plan 4b: completion-only games (no meaningful numeric score). Same contract
+            # as flashcards — recording that the game was played, no score fields at all.
+            if payload is not None:
+                raise Problem(422, "Completion-only activities do not take a score")
+            attempt.score = attempt.max_score = attempt.percent = None
+            attempt.passed = None
+        else:
+            # Plan 4a: the game's client-reported score. Server-authoritative max from the
+            # PINNED snapshot config; clamp so a tampered client caps out at 100%.
+            if payload is None:
+                raise Problem(422, "External activities require a score payload")
+            max_score = float(config.get("max_score") or 0)
+            if max_score <= 0:
+                raise Problem(422, "Activity has no max_score configured")
+            score = min(payload.score, max_score)
+            attempt.score = score
+            attempt.max_score = max_score
+            attempt.percent = round(100.0 * score / max_score, 2)
+            attempt.passed = None  # practice: no pass mark for games
     elif kind == "flashcards":
         # Completion-only: no score fields at all (max_score 0 must not fake percent=100).
         attempt.score = attempt.max_score = attempt.percent = None

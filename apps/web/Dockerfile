@@ -4,8 +4,9 @@
 # of the source, so Docker's layer cache keeps the (slow) install layer warm across source-only
 # changes; `pnpm --prod deploy /out --legacy` (the `--legacy` flag pnpm needs for `deploy` at this
 # pnpm/workspace version) assembles just `apps/web` plus its production deps into a self-contained
-# `/out` directory — the `build` output (per `package.json`'s `"files": ["build"]`) plus pruned
-# `node_modules` — so the runtime stage doesn't need the whole monorepo or workspace symlinks.
+# `/out` directory — the `build` output and `arcade/` game files (per `package.json`'s
+# `"files": ["arcade", "build"]`) plus pruned `node_modules` — so the runtime stage doesn't need
+# the whole monorepo or workspace symlinks.
 # How it fits the project: this image is the `web` service in the docker-compose stack behind the
 # same-origin proxy (ADR-0002/ADR-0005); it only ever talks to `api:8000` over the compose network.
 # Depends on: `package.json`, `pnpm-workspace.yaml`, `.npmrc`, `pnpm-lock.yaml`,

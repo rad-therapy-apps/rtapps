@@ -34,6 +34,7 @@ from app.analytics.schemas import (
     ActivityStatsOut,
     AttemptDetailOut,
     AttemptItemOut,
+    AttemptRowOut,
     BucketOut,
     ItemStatOut,
     OutcomeRowOut,
@@ -297,6 +298,30 @@ async def activity_stats(db: AsyncSession, cohort: Cohort, activity: Activity) -
                 top_wrong=top_wrong,
             )
         )
+    # `external` (games, plan 4b #53) activities have no per-item stats, so educators get
+    # the raw per-attempt scores instead; other kinds already have `items` above.
+    attempt_rows = []
+    if activity.kind == "external":
+        rows = await db.execute(
+            select(Attempt, User.display_name)
+            .join(User, User.id == Attempt.user_id)
+            .where(
+                Attempt.activity_id == activity.id,
+                Attempt.status == "submitted",
+                Attempt.user_id.in_(_cohort_students(cohort.id)),
+            )
+            .order_by(Attempt.submitted_at.desc())
+        )
+        attempt_rows = [
+            AttemptRowOut(
+                display_name=display_name,
+                score=a.score,
+                max_score=a.max_score,
+                percent=a.percent,
+                submitted_at=a.submitted_at,
+            )
+            for a, display_name in rows.all()
+        ]
     return ActivityStatsOut(
         activity_id=activity.id,
         title=activity.title,
@@ -306,6 +331,7 @@ async def activity_stats(db: AsyncSession, cohort: Cohort, activity: Activity) -
         pass_rate=pass_rate,
         distribution=distribution,
         items=items,
+        attempt_rows=attempt_rows,
     )
 
 

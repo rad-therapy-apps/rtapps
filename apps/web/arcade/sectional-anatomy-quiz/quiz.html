@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sectional Anatomy Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="progress"></div>
+        <div class="timer" style="display:none;"></div>
+        <div class="score" style="float:right;">Score: <span class="score-value">0</span></div>
+        <div class="question-container">
+            <!-- The image, if any, will be inserted above .question via JS -->
+            <div class="question"></div>
+        </div>
+        <div class="options-container"></div>
+        <div class="feedback"></div>
+        <div class="controls" style="margin-top:18px;">
+            <button class="next-button" disabled>Next</button>
+            <button class="restart-button" style="display:none;">Restart</button>
+            <button class="menu-button" style="display:none;">Menu</button>
+            <button id="mic-btn" title="Speak your answer" style="margin-left:auto; background:#FFF; color:#007bff; border:1.5px solid #007bff;">
+                <span id="mic-icon">🎤</span>
+            </button>
+        </div>
+        <div class="badge-container"></div>
+    </div>
+    <script src="/arcade/rtapps-shim.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

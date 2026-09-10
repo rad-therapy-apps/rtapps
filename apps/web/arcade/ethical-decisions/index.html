@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adaptive Ethical Decision-Making Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body { background-color: #fff; height: auto; }
+      #assessment-board, #start-section, #report-actions button:last-child { display: none; }
+      .modal { position: static; box-shadow: none; border: 1px solid #ccc; }
+      .modal-content { box-shadow: none; border-radius: 0; width: 100%; max-width: 100%; border: none; }
+      #reportScreen { display: flex !important; }
+      #report-body { max-height: none; overflow-y: visible; padding-right: 0; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="start-section" class="max-w-4xl mx-auto p-6 text-center">
+    <h1 class="text-4xl font-bold mb-4 text-blue-800">Ethical Decision-Making Simulator</h1>
+    
+    <div id="avatar-section">
+      <p class="text-lg font-semibold mb-2">Choose Your Avatar:</p>
+      <div class="flex justify-center space-x-4">
+        <img src="https://i.pravatar.cc/100?img=12" class="w-16 h-16 rounded-full cursor-pointer border-4 border-transparent hover:border-blue-500" onclick="startAssessment(this.src)">
+        <img src="https://i.pravatar.cc/100?img=32" class="w-16 h-16 rounded-full cursor-pointer border-4 border-transparent hover:border-blue-500" onclick="startAssessment(this.src)">
+        <img src="https://i.pravatar.cc/100?img=49" class="w-16 h-16 rounded-full cursor-pointer border-4 border-transparent hover:border-blue-500" onclick="startAssessment(this.src)">
+      </div>
+    </div>
+  </div>
+
+  <div id="assessment-board" class="max-w-4xl mx-auto p-6 hidden">
+    <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+        <div id="progress" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+    </div>
+    <div id="scenario-box" class="bg-white p-6 rounded shadow-md">
+      <div class="flex items-center space-x-4 mb-4">
+        <img id="avatarDisplay" src="" class="w-12 h-12 rounded-full" />
+        <h2 id="scenario-title" class="text-xl font-semibold">Scenario:</h2>
+      </div>
+      <p id="scenario-text" class="mb-4 text-gray-700"></p>
+      <div id="options" class="grid gap-4"></div>
+    </div>
+  </div>
+
+    <div id="reportScreen" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-xl w-full max-w-3xl">
+            <div id="report-body">
+                <h2 class="text-3xl font-bold mb-4 text-center text-blue-800">Assessment Report</h2>
+                <div id="report-summary" class="mb-6">
+                    <h3 class="text-xl font-semibold border-b pb-2 mb-3">Performance Summary</h3>
+                    <p><strong>Final Score:</strong> <span id="finalScore" class="font-bold text-lg"></span></p>
+                    <p><strong>Performance Level:</strong> <span id="performance-level" class="font-bold"></span></p>
+                </div>
+                <div id="report-feedback">
+                    <h3 class="text-xl font-semibold border-b pb-2 mb-3">Detailed Feedback</h3>
+                    <p id="feedback-main" class="mb-3"></p>
+                    <p id="feedback-principles" class="text-sm"></p>
+                </div>
+            </div>
+            <div id="report-actions" class="text-center mt-6">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Print / Save Report</button>
+                <button onclick="init()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Restart Assessment</button>
+            </div>
+        </div>
+    </div>
+
+  <script src="/arcade/rtapps-shim.js"></script>
+  <script>
+    let currentScenarioIndex = 0;
+    let score = {};
+    let performanceHistory = [];
+    let trackedPrinciples = {};
+    let usedScenarios = new Set();
+    const totalScenarios = 5;
+
+    const scenarios = [
+      { difficulty: 'medium', principle: 'Scope of Practice', text: "An anxious patient asks if their tumor is shrinking. You saw the oncologist’s note in the chart.", options: [ { text: "Tell them the tumor is shrinking.", points: -10, result: "Violation: Interpreting data is outside a therapist's scope of practice." }, { text: "Tell them to speak with their doctor.", points: 10, result: "Correct: This response preserves professional boundaries and directs the patient to the correct source." }, { text: "Guess based on chart details.", points: -10, result: "Violation: Misleading the patient is unethical and dangerous." } ] },
+      { difficulty: 'hard', principle: 'Fraud & Reporting', text: "You witness a senior therapist consistently billing for complex treatments that were not performed.", options: [ { text: "Report the incident to the compliance officer.", points: 10, result: "Correct: You have an ethical and legal duty to report suspected fraud." }, { text: "Ignore it, they are senior staff.", points: -10, result: "Violation: Neglecting a duty to report fraud has serious consequences for you and the clinic." }, { text: "Ask them about it but don’t report yet.", points: -5, result: "Violation: Confronting directly can lead to conflict and fails to meet the ethical obligation to report through proper channels." } ] },
+      { difficulty: 'hard', principle: 'Patient Safety & Misconduct', text: "A patient reveals that another staff member has made inappropriate, sexually suggestive comments to them.", options: [ { text: "Document the patient's statement and report it to your supervisor and HR immediately.", points: 10, result: "Correct: This protects the patient, follows legal mandates, and ensures a proper investigation." }, { text: "Tell the patient to file a formal complaint on their own.", points: -10, result: "Violation: This is a failure of your duty to act to ensure patient safety." }, { text: "Advise the patient it was likely a misunderstanding.", points: -10, result: "Violation: This invalidates the patient's experience and is complicit in covering up potential misconduct." } ] },
+      { difficulty: 'medium', principle: 'Record Integrity', text: "A doctor asks you to document a procedure that wasn’t fully completed because the machine malfunctioned.", options: [ { text: "Refuse and document exactly what occurred, including the malfunction.", points: 10, result: "Correct: Records must be accurate. Falsification for any reason is unethical." }, { text: "Comply, as the doctor instructed you to.", points: -10, result: "Violation: You are personally responsible for the accuracy of records you sign." }, { text: "Document it as complete but make a private note.", points: -5, result: "Violation: The official record is what matters; private notes do not correct a falsified entry." } ] },
+      { difficulty: 'hard', principle: 'Impaired Colleague', text: "You strongly suspect a coworker is under the influence of alcohol while on duty. You can smell it on their breath.", options: [ { text: "Notify your supervisor immediately and privately.", points: 10, result: "Correct: This is the most direct way to ensure patient safety and follow protocol." }, { text: "Confront your coworker and threaten to report them.", points: -5, result: "Violation: This could escalate the situation and doesn't guarantee patient safety." }, { text: "Wait to see if they make a mistake before acting.", points: -10, result: "Violation: Delaying action when patient safety is at risk is a major ethical breach." } ] },
+      { difficulty: 'easy', principle: 'Patient Confidentiality', text: "You're in a public cafeteria and overhear two colleagues discussing a patient's case by name.", options: [ { text: "Quietly remind them about patient privacy.", points: 10, result: "Correct: A discreet intervention upholds confidentiality without public embarrassment." }, { text: "Join the conversation and add details.", points: -10, result: "Violation: This is a clear breach of HIPAA and patient trust." }, { text: "Ignore them; it's not your conversation.", points: -5, result: "Violation: All staff have a duty to protect patient information, even when it's inconvenient." } ] },
+      { difficulty: 'medium', principle: 'Professional Boundaries', text: "A wealthy patient offers you a large cash gift as a 'thank you' for your excellent care.", options: [ { text: "Politely decline and explain the hospital's policy against accepting such gifts.", points: 10, result: "Correct: This maintains professional boundaries and avoids conflicts of interest." }, { text: "Accept it, but don't tell anyone.", points: -10, result: "Violation: Accepting large gifts can compromise your objectivity and is against policy." }, { text: "Suggest they donate to the hospital's foundation instead.", points: 5, result: "Good: This redirects the patient's gratitude appropriately, though a direct refusal is also fully correct." } ] }
+    ];
+
+    function getChoicePoints(outcome) { return outcome.points || 0; }
+
+    function prepareScenarios() {
+        scenarios.forEach(scenario => {
+            const points = scenario.options.map(choice => getChoicePoints(choice));
+            scenario.maxPoints = Math.max(...points);
+        });
+    }
+
+    function init() {
+        document.getElementById('start-section').classList.remove('hidden');
+        document.getElementById('assessment-board').classList.add('hidden');
+        document.getElementById('reportScreen').classList.add('hidden');
+        currentScenarioIndex = 0;
+        score = { user: 0, max: 0 };
+        performanceHistory = [];
+        trackedPrinciples = {};
+        usedScenarios.clear();
+    }
+
+    function startAssessment(avatarSrc) {
+        document.getElementById('avatarDisplay').src = avatarSrc;
+        document.getElementById('start-section').classList.add('hidden');
+        document.getElementById('assessment-board').classList.remove('hidden');
+        loadNextScenario();
+    }
+
+    function loadNextScenario() {
+        if (currentScenarioIndex >= totalScenarios) {
+            generateReport();
+            return;
+        }
+
+        const progressPercent = (currentScenarioIndex / totalScenarios) * 100;
+        document.getElementById('progress').style.width = `${progressPercent}%`;
+
+        let averagePerf = performanceHistory.length > 0 ? performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length : 75;
+        let desiredDifficulty = averagePerf > 85 ? 'hard' : averagePerf < 65 ? 'easy' : 'medium';
+
+        let pool = scenarios.filter(s => s.difficulty === desiredDifficulty && !usedScenarios.has(s));
+        if (pool.length === 0) pool = scenarios.filter(s => s.difficulty === 'medium' && !usedScenarios.has(s));
+        if (pool.length === 0) pool = scenarios.filter(s => !usedScenarios.has(s));
+        
+        const scenario = pool[Math.floor(Math.random() * pool.length)];
+        usedScenarios.add(scenario);
+
+        score.max += scenario.maxPoints;
+
+        document.getElementById("scenario-title").textContent = `Scenario ${currentScenarioIndex + 1}: ${scenario.principle}`;
+        document.getElementById("scenario-text").textContent = scenario.text;
+        const optionsDiv = document.getElementById("options");
+        optionsDiv.innerHTML = "";
+
+        scenario.options.forEach(opt => {
+            const card = document.createElement("div");
+            card.className = "p-4 bg-blue-50 rounded shadow hover:bg-blue-100 cursor-pointer transition";
+            card.textContent = opt.text;
+            card.onclick = () => selectOption(opt, scenario.principle, scenario.maxPoints);
+            optionsDiv.appendChild(card);
+        });
+        
+        currentScenarioIndex++;
+    }
+
+    function selectOption(option, principle, questionMaxPoints) {
+        const points = getChoicePoints(option);
+        score.user += points;
+        
+        const questionPerf = (points / questionMaxPoints) * 100;
+        performanceHistory.push(questionPerf);
+        if (performanceHistory.length > 3) performanceHistory.shift();
+        
+        if (!trackedPrinciples[principle]) trackedPrinciples[principle] = { correct: 0, incorrect: 0 };
+        if (points > 0) trackedPrinciples[principle].correct++;
+        else trackedPrinciples[principle].incorrect++;
+
+        const optionsDiv = document.getElementById("options");
+        optionsDiv.innerHTML = `
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded">
+              <p class="font-semibold">Result:</p>
+              <p>${option.result}</p>
+            </div>
+            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="loadNextScenario()">Next Scenario</button>`;
+    }
+
+    function generateReport() {
+        document.getElementById('progress').style.width = `100%`;
+        const finalPercentage = score.max > 0 ? Math.max(0, Math.round((score.user / score.max) * 100)) : 0;
+        let performanceLevel, mainFeedback;
+
+        if (finalPercentage >= 96) {
+            performanceLevel = "Excellent";
+            mainFeedback = "Exceptional performance. Your choices consistently reflected the highest ethical standards and a deep understanding of professional conduct.";
+        } else if (finalPercentage >= 80) {
+            performanceLevel = "Competent";
+            mainFeedback = "You demonstrated a solid and reliable understanding of core ethical principles. Your decision-making was consistently appropriate for a competent professional.";
+        } else {
+            performanceLevel = "Needs Improvement";
+            mainFeedback = "This assessment indicates a need for further review of ethical guidelines. While you made some correct choices, there were notable lapses in key areas.";
+        }
+        
+        let principleFeedback = "Key takeaways: ";
+        let struggles = [];
+        for (const principle in trackedPrinciples) {
+            if (trackedPrinciples[principle].incorrect > 0) {
+                struggles.push(principle);
+            }
+        }
+        principleFeedback += struggles.length > 0 ? `Pay special attention to scenarios involving ${struggles.join(', ')}.` : "You showed a consistent grasp of all ethical principles presented.";
+
+        document.getElementById('finalScore').textContent = `${finalPercentage}%`;
+        // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+        if (window.RTApps) window.RTApps.reportResult(score.user);
+        document.getElementById('performance-level').textContent = performanceLevel;
+        document.getElementById('feedback-main').textContent = mainFeedback;
+        document.getElementById('feedback-principles').textContent = principleFeedback;
+
+        document.getElementById('assessment-board').classList.add('hidden');
+        document.getElementById('reportScreen').classList.remove('hidden');
+    }
+
+    prepareScenarios();
+    init();
+  </script>
+</body>
+</html>

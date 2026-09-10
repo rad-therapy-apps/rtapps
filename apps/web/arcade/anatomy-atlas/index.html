@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy Atlas Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0a23;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        #canvas-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+        }
+        canvas {
+            background-color: transparent; 
+            border: 2px solid #00ffdd;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffdd;
+            cursor: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 800px;
+            background: #001f3f;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00ffdd;
+        }
+        .ui-element { text-align: center; }
+        .ui-element h3 { color: #00ffdd; font-size: 1em; margin-bottom: 5px; }
+        .ui-element p { font-size: 1.5em; }
+        #target-node-display {
+            background-color: #f9e79f;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #00ffdd;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px #00ffdd;
+            z-index: 100;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal h2 { font-size: 2em; color: #00ffdd; margin-bottom: 20px; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button {
+            background: linear-gradient(145deg, #0d7377, #14ffec);
+            color: #0a0a23;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        #body-silhouette-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #1a0024;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        #body-silhouette {
+            fill: #ffffff;
+            opacity: 0.1;
+            height: 180%; /* Start zoomed out */
+            transition: transform 1.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div class="ui-panel">
+            <div class="ui-element">
+                <h3>Case</h3>
+                <p id="case-display">Tonsil</p>
+            </div>
+            <div class="ui-element">
+                <h3>Next Node to Collect</h3>
+                <p id="target-node-display">Level II</p>
+            </div>
+            <div class="ui-element">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+        </div>
+        <div id="canvas-container">
+            <div id="body-silhouette-container">
+                <!-- SVG Human Body Silhouette -->
+                <svg id="body-silhouette" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M256 0c-33 0-59.8 26.8-59.8 59.8s26.8 59.8 59.8 59.8 59.8-26.8 59.8-59.8S289 0 256 0zm-90.4 142.3c-22.3 0-40.3 18-40.3 40.3s18 40.3 40.3 40.3c1.9 0 3.7-.1 5.5-.4 10.4-1.5 29.8-10.3 44.2-24.8 1-1 1.8-2.2 2.3-3.5 0-.1.1-.2.1-.3 4.2-12.2 6.5-25.6 6.5-39.7 0-1.8-.1-3.6-.2-5.5-2.2-22-20.2-39.7-42.3-39.7-1.8 0-3.5.1-5.3.3zm180.8 0c-1.8-.2-3.5-.3-5.3-.3-22.1 0-40.1 17.7-42.3 39.7-.1 1.8-.2 3.6-.2 5.5 0 14.1 2.3 27.5 6.5 39.7 0 .1.1.2.1.3.5 1.3 1.3 2.5 2.3 3.5 14.4 14.5 33.8 23.3 44.2 24.8 1.8.3 3.6.4 5.5.4 22.3 0 40.3-18 40.3-40.3s-18-40.3-40.3-40.3zm-90.4 103.5c-37.5 0-68.5 29.5-70.2 66.5H80.5v120.2h16.7v-40.1h16.7v40.1h16.7v-40.1h16.7v40.1h16.7v-40.1h16.7v40.1h16.7V312.3h16.7v99.5h16.7v-99.5h16.7v99.5h16.7v-99.5h16.7v99.5h16.7v-99.5H326c-1.8-37-32.8-66.5-70.2-66.5zm-53.5 83.2h-16.7v-16.7h16.7v16.7zm33.4 0h-16.7v-16.7h16.7v16.7zm33.4 0h-16.7v-16.7h16.7v16.7zm33.4 0h-16.7v-16.7h16.7v16.7zm-117-66.5c0-27.6 22.4-50 50-50s50 22.4 50 50h-100z"/>
+                </svg>
+            </div>
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>Anatomy Atlas Adventure</h2>
+        <p>A primary cancer site will be given. Your mission is to collect the falling lymph nodes in the correct order of drainage for that site. Use the LEFT and RIGHT arrow keys to move your Nanobot. Collect the "Next Node" shown at the top. Avoid collecting nodes out of sequence!</p>
+        <button id="startButton">Begin Adventure</button>
+    </div>
+
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Next Case</button>
+    </div>
+
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const scoreEl = document.getElementById('score');
+const caseDisplayEl = document.getElementById('case-display');
+const targetNodeDisplayEl = document.getElementById('target-node-display');
+const finalScoreEl = document.getElementById('finalScore');
+const bodySilhouette = document.getElementById('body-silhouette');
+
+// --- Game State ---
+let score = 0;
+let gameRunning = false;
+let animationFrameId;
+let player, nodes, particles, currentCase, spawnInterval;
+let keys = {};
+
+// --- Game Data with location for silhouette zooming ---
+const cases = [
+    {
+        name: "Nasopharynx",
+        path: ["Retropharyngeal", "Level II", "Level V", "Supraclavicular"],
+        decoys: ["Inguinal", "Axillary", "Para-aortic"],
+        location: { scale: 4, y: '-75%' }
+    },
+    {
+        name: "Breast (Outer Q)",
+        path: ["Axillary I", "Axillary II", "Axillary III", "Supraclavicular"],
+        decoys: ["Internal Mammary", "Inguinal", "Pelvic"],
+        location: { scale: 3.5, y: '-55%' }
+    },
+    {
+        name: "Testis (Seminoma)",
+        path: ["Para-aortic", "Paracaval", "Mediastinal", "Supraclavicular"],
+        decoys: ["Inguinal", "Pelvic", "Axillary"],
+        location: { scale: 2, y: '0%' }
+    },
+    {
+        name: "Cervix",
+        path: ["Parametrial", "Obturator", "Internal Iliac", "Common Iliac", "Para-aortic"],
+        decoys: ["Inguinal", "Axillary", "Supraclavicular"],
+        location: { scale: 3, y: '30%' }
+    },
+    {
+        name: "Anal Canal",
+        path: ["Perirectal", "Inguinal", "Internal Iliac"],
+        decoys: ["Axillary", "Supraclavicular", "Para-aortic"],
+        location: { scale: 4, y: '50%' }
+    }
+];
+
+// --- Game Objects ---
+class Player {
+    constructor() {
+        this.w = 60;
+        this.h = 30;
+        this.x = canvas.width / 2 - this.w / 2;
+        this.y = canvas.height - 50;
+        this.speed = 8;
+    }
+
+    draw() {
+        ctx.fillStyle = '#00ffdd';
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y + this.h);
+        ctx.lineTo(this.x + this.w / 2, this.y);
+        ctx.lineTo(this.x + this.w, this.y + this.h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowColor = '#00ffdd';
+        ctx.shadowBlur = 15;
+    }
+
+    update() {
+        if (keys['ArrowLeft'] && this.x > 0) {
+            this.x -= this.speed;
+        }
+        if (keys['ArrowRight'] && this.x < canvas.width - this.w) {
+            this.x += this.speed;
+        }
+        this.draw();
+        ctx.shadowBlur = 0;
+    }
+}
+
+class LymphNode {
+    constructor(name, isTarget) {
+        this.x = Math.random() * (canvas.width - 60);
+        this.y = -50;
+        this.name = name;
+        this.isTarget = isTarget;
+        this.radius = 30;
+        this.speed = Math.random() * 1.5 + 1;
+        this.color = isTarget ? '#f1c40f' : '#9b59b6';
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x + this.radius, this.y + this.radius, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.name, this.x + this.radius, this.y + this.radius);
+    }
+
+    update() {
+        this.y += this.speed;
+        this.draw();
+    }
+}
+
+class Particle {
+    constructor(x, y, text, color) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.color = color;
+        this.alpha = 1.0;
+        this.speedY = -2;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.font = 'bold 30px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.text, this.x, this.y);
+        ctx.restore();
+    }
+
+    update() {
+        this.y += this.speedY;
+        this.alpha -= 0.03;
+        this.draw();
+    }
+}
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    
+    score = 0;
+    
+    currentCase = cases[Math.floor(Math.random() * cases.length)];
+    currentCase.targetIndex = 0;
+
+    // Set silhouette position based on case
+    bodySilhouette.style.transform = `scale(${currentCase.location.scale}) translateY(${currentCase.location.y})`;
+
+    player = new Player();
+    nodes = [];
+    particles = [];
+    
+    updateUI();
+    
+    gameRunning = true;
+    if(animationFrameId) cancelAnimationFrame(animationFrameId);
+    gameLoop();
+    
+    if(spawnInterval) clearInterval(spawnInterval);
+    spawnInterval = setInterval(spawnNode, 2000);
+}
+
+function spawnNode() {
+    if (!gameRunning) return;
+
+    const shouldSpawnTarget = Math.random() < 0.4;
+    let name, isTarget;
+
+    const currentTargetName = currentCase.path[currentCase.targetIndex];
+    if (shouldSpawnTarget && currentTargetName) {
+        name = currentTargetName;
+        isTarget = true;
+    } else {
+        const allNodes = [...currentCase.path, ...currentCase.decoys];
+        const availableDecoys = allNodes.filter(n => n !== currentTargetName);
+        name = availableDecoys[Math.floor(Math.random() * availableDecoys.length)];
+        isTarget = false;
+    }
+    nodes.push(new LymphNode(name, isTarget));
+}
+
+function updateUI() {
+    scoreEl.textContent = score;
+    caseDisplayEl.textContent = currentCase.name;
+    if (currentCase.targetIndex < currentCase.path.length) {
+        targetNodeDisplayEl.textContent = currentCase.path[currentCase.targetIndex];
+    } else {
+        targetNodeDisplayEl.textContent = "DONE!";
+    }
+}
+
+function checkCollisions() {
+    for (let i = nodes.length - 1; i >= 0; i--) {
+        const node = nodes[i];
+        if (
+            node.x < player.x + player.w &&
+            node.x + node.radius * 2 > player.x &&
+            node.y < player.y + player.h &&
+            node.y + node.radius * 2 > player.y
+        ) {
+            if (node.isTarget) {
+                score += 100;
+                particles.push(new Particle(node.x, node.y, 'Correct!', '#2ecc71'));
+                currentCase.targetIndex++;
+                if (currentCase.targetIndex >= currentCase.path.length) {
+                    endGame(true, "Lymphatic pathway successfully traced!");
+                }
+            } else {
+                score -= 50;
+                if (score < 0) score = 0;
+                particles.push(new Particle(node.x, node.y, 'Wrong Node!', '#e74c3c'));
+            }
+            nodes.splice(i, 1);
+            updateUI();
+        }
+    }
+}
+
+function endGame(won, message) {
+    gameRunning = false;
+    if(animationFrameId) cancelAnimationFrame(animationFrameId);
+    if(spawnInterval) clearInterval(spawnInterval);
+    
+    document.getElementById('endTitle').textContent = won ? "Case Complete!" : "Pathway Incomplete";
+    document.getElementById('endMessage').textContent = message;
+    finalScoreEl.textContent = score;
+    // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+
+    endScreen.classList.remove('hidden');
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    player.update();
+    
+    for (let i = nodes.length - 1; i >= 0; i--) {
+        nodes[i].update();
+        if (nodes[i].y > canvas.height) {
+            nodes.splice(i, 1);
+        }
+    }
+    
+    checkCollisions();
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        if (particles[i].alpha <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+
+    if (gameRunning) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+}
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', () => init());
+
+window.addEventListener('keydown', (e) => {
+    keys[e.code] = true;
+});
+
+window.addEventListener('keyup', (e) => {
+    keys[e.code] = false;
+});
+
+</script>
+</body>
+</html>

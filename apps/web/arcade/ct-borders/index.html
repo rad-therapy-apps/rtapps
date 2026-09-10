@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CT Simulation Border Challenge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles from index (9).html */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-banner {
+            background: linear-gradient(to right, #667eea, #764ba2);
+        }
+
+        /* Adjusted styles from index (10).html, integrated with new theme */
+        :root {
+            --color-primary: #764ba2; /* Purple from hero-banner */
+            --color-primary-dark: #667eea; /* Lighter purple from hero-banner */
+            --color-secondary: #5a4fcf;
+            --color-secondary-dark: #483d9e;
+            --color-admin-toggle: #6c757d;
+            --color-admin-toggle-dark: #5a6268;
+            --color-success: #16a34a;
+            --color-error: #dc2626;
+            --color-warning-bg: #fefce8;
+            --color-border-draggable: rgba(150, 50, 50, 0.6); /* Adjusted red for user's lines */
+            --color-border-draggable-hover: rgba(150, 50, 50, 0.8);
+            --color-border-correct: rgba(22, 163, 74, 0.7); /* Green for correct lines */
+        }
+
+        /* Specific overrides/integrations for 10.html functionality */
+        h1, h2, h3, h4 { color: var(--color-primary); } /* Apply primary color */
+        h1 { text-align: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 6px; margin-bottom: 15px; font-size: 1.8em;}
+        .content-container { max-width: 800px; margin: 0 auto; padding: 15px; border-radius: 8px; } /* Removed background, let card styles apply */
+        .activity-section { background-color: #fff; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        
+        /* Apply card styling for sections */
+        .game-section-card {
+            background-color: #fff;
+            padding: 24px; /* Increased padding */
+            border-radius: 12px; /* More rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+            transition: box-shadow 0.3s ease-in-out;
+            margin-bottom: 24px; /* Space between sections */
+        }
+        .game-section-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15); /* Hover effect */
+        }
+
+        /* Keep existing button styles */
+        button#next-button, button#playAgainBtn, button#check-visual-button, button.admin-button, button#toggle-admin-tool {
+            background-color: var(--color-primary); color: white; padding: 9px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 1.0em; margin-top: 8px; display: inline-block; width: auto; margin-bottom: 8px; transition: background-color 0.15s ease-in-out;
+        }
+        button#playAgainBtn { background-color: var(--color-secondary);}
+        button#toggle-admin-tool { background-color: var(--color-admin-toggle); float: right;}
+        button:hover:not(:disabled) { background-color: var(--color-primary-dark); }
+        button#playAgainBtn:hover:not(:disabled) { background-color: var(--color-secondary-dark); }
+        button#toggle-admin-tool:hover:not(:disabled) { background-color: var(--color-admin-toggle-dark); }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+        /* Other specific styles from 10.html */
+        #problem-area { background-color: var(--color-warning-bg); }
+        #problem-text { font-weight: 500;}
+        #problem-text strong { color: var(--color-primary-dark); }
+        .feedback-correct { color: var(--color-success); }
+        .feedback-incorrect { color: var(--color-error); }
+        .answer-button {
+            border: 1px solid #cbd5e1; background-color: #f8fafc; transition: background-color 0.15s ease-in-out;
+            width: 95%; margin: 0.25rem auto; display: block; text-align: left;
+            padding: 0.6rem 1rem; line-height: 1.4; font-size: 0.95em; border-radius: 6px; cursor: pointer;
+        }
+        .answer-button:hover:not(:disabled) { background-color: #e2e8f0; }
+        .answer-button:disabled { opacity: 0.6; cursor: not-allowed; background-color: #e2e8f0;}
+        .answer-button.selected-correct { background-color: #dcfce7; border-color: #4ade80; font-weight: bold; }
+        .answer-button.selected-incorrect { background-color: #fee2e2; border-color: #f87171; }
+        .answer-button.reveal-correct { background-color: #dcfce7; border-color: #4ade80; font-weight: bold; }
+        #score-area { font-size: 1.0em;}
+        #feedback-area { font-size: 1.0em; font-weight: bold;}
+        #instructions-area ol { padding-left: 20px; font-size: 0.9em; list-style: decimal; }
+        #instructions-area li { margin-bottom: 2px; }
+
+        #visual-input-area { display: flex; align-items: flex-start; gap: 15px; }
+        #image-container {
+            position: relative;
+            width: 70%;
+            height: 400px;
+            background-color: #ccc;
+            border: 1px solid #999;
+            overflow: hidden;
+            user-select: none;
+        }
+        #sim-image { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+        #border-values-container { width: 30%; display: flex; flex-direction: column; align-items: center; justify-content: space-around; height: 400px; }
+        #border-values-container label { font-size: 0.8em; margin-bottom: 2px; }
+        #border-values-container span { font-size: 1.1em; font-weight: 600; margin-bottom: 8px; color: var(--color-error); }
+
+        .draggable-border-line {
+            position: absolute; left: 0; width: 100%; height: 10px; background-color: var(--color-border-draggable);
+            z-index: 10; cursor: ns-resize; transition: background-color 0.15s ease-in-out;
+        }
+        .draggable-border-line:hover { background-color: var(--color-border-draggable-hover); }
+        .draggable-border-line.disabled { cursor: default; pointer-events: none; opacity: 0.7;}
+
+        #sup-border-line { top: 10%; }
+        #inf-border-line { top: 90%; }
+
+        .correct-visual-border-line {
+            position: absolute; left: 0; width: 100%; height: 4px; background-color: var(--color-border-correct);
+            z-index: 9; pointer-events: none; display: none;
+        }
+        #correct-sup-line { top: 0%; }
+        #correct-inf-line { top: 0%; }
+
+        #check-visual-button { background-color: #28a745; width: auto; padding: 8px 15px;}
+
+        /* Admin Tool Styles */
+        #admin-tool-container { border: 2px dashed var(--color-admin-toggle); margin-top: 20px; padding: 15px; background-color: #e9ecef; }
+        #admin-image-container { position: relative; width: 100%; max-width: 500px; height: 350px; background-color: #555; border: 1px solid #333; margin: 10px auto; cursor: crosshair; overflow: hidden; }
+        #admin-image { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+        #selection-box { position: absolute; border: 2px dashed #ffc107; background-color: rgba(255, 193, 7, 0.2); pointer-events: none; display: none; z-index: 20; }
+        #admin-output { margin-top: 10px; font-family: monospace; background: #fff; padding: 8px; border: 1px solid #ccc; white-space: pre-wrap; overflow-x: auto; }
+        #admin-coords-to-copy { background-color: #e0e0e0; padding: 4px; display: inline-block; border-radius: 3px;}
+        .admin-controls label, .admin-controls input { margin-right: 5px;}
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a class="flex items-center text-purple-700 hover:text-purple-900 transition-colors duration-300">
+                <span class="text-2xl font-bold">RT Games Menu</span>
+            </a>
+            <h1 class="text-2xl font-bold text-purple-700">CT Simulation Border Challenge</h1>
+            </div>
+    </header>
+
+    <section class="hero-banner text-white py-16 px-6 text-center">
+        <div class="container mx-auto">
+            <h2 class="text-4xl font-bold mb-4">Master Your Scan Ranges</h2>
+            <p class="text-lg mb-8">Practice identifying anatomical borders for accurate CT simulations.</p>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="content-container bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+            <div id="game-content">
+                <div class="game-section-card">
+                    <h2 class="text-xl font-semibold mb-4">Instructions</h2>
+                    <div id="instructions-area">
+                        <ol>
+                            <li>Read the question or patient scenario, paying attention to any specified anatomical landmarks.</li>
+                            <li>For multiple-choice questions, select the best answer.</li>
+                            <li id="instruction-visual">For visual questions, review the scenario and image. Drag the <strong>Superior</strong> and <strong>Inferior</strong> borders on the image to match the described anatomical scan range. Click "Check Borders".</li>
+                            <li>The game ends when you achieve 10 correct answers OR 5 incorrect answers.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div id="score-area" class="text-center font-semibold mb-3 p-4 bg-blue-50 rounded-xl border border-blue-200 game-section-card">
+                    Correct: <span id="correct-count">0</span> | Incorrect: <span id="incorrect-count">0</span> | Question: <span id="question-number">0</span>
+                </div>
+
+                <div id="problem-area" class="text-base text-left text-gray-800 mb-4 p-4 border border-yellow-300 rounded-md min-h-[60px] game-section-card">
+                    <p id="problem-text">Loading question...</p>
+                </div>
+
+                <div id="answer-area" class="mt-4 mb-4 min-h-[420px] game-section-card">
+                    <div id="mc-input" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
+                        <button class="answer-button py-2 px-4 rounded-lg shadow-sm">Option 1</button>
+                        <button class="answer-button py-2 px-4 rounded-lg shadow-sm">Option 2</button>
+                        <button class="answer-button py-2 px-4 rounded-lg shadow-sm">Option 3</button>
+                        <button class="answer-button py-2 px-4 rounded-lg shadow-sm">Option 4</button>
+                    </div>
+
+                    <div id="visual-input-area" class="hidden">
+                        <div id="image-container">
+                            <img id="sim-image" src="https://via.placeholder.com/400x600.png?text=Placeholder+Scout+Image" alt="Simulation Anatomy Reference">
+                            <div id="sup-border-line" class="draggable-border-line"></div>
+                            <div id="inf-border-line" class="draggable-border-line"></div>
+                            <div id="correct-sup-line" class="correct-visual-border-line"></div>
+                            <div id="correct-inf-line" class="correct-visual-border-line"></div>
+                        </div>
+                        <div id="border-values-container">
+                            <div class="text-center">
+                                <label for="sup-border-val-display">Superior Border</label>
+                                <span id="sup-border-val-display">10%</span>
+                            </div>
+                            <button id="check-visual-button">Check Borders</button>
+                            <div class="text-center">
+                                <label for="inf-border-val-display">Inferior Border</label>
+                                <span id="inf-border-val-display">90%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedback-area" class="text-center font-medium mt-3 mb-3 min-h-[2em]">
+                </div>
+
+                <div class="flex justify-center mt-4 space-x-4">
+                    <button id="next-button">Next Question</button>
+                    <button id="playAgainBtn" class="hidden">Play Again</button>
+                </div>
+            </div> <hr class="my-8 border-gray-400">
+
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold text-gray-700">Admin Section</h2>
+                <button id="toggle-admin-tool">Show/Hide Border Tool</button>
+            </div>
+
+            <div id="admin-tool-container" class="game-section-card hidden">
+                <h3 class="text-md font-semibold mb-2">Define Visual Borders</h3>
+                 <p class="text-sm text-gray-600 mb-1">For visual questions, describe target anatomical landmarks in the 'scenarioText'. Then, use this tool to define the percentage-based `correctRange` that corresponds to those landmarks on the chosen image.</p>
+                <div class="admin-controls my-3">
+                    <label for="admin-image-url">Image URL:</label>
+                    <input type="text" id="admin-image-url" class="border p-1 rounded w-3/4" placeholder="Paste image URL here">
+                    <button id="admin-load-image" class="admin-button">Load Image</button>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">Click and drag on the image below to define the scan area rectangle. The percentage coordinates will be generated.</p>
+                <div id="admin-image-container">
+                    <img id="admin-image" src="https://via.placeholder.com/500x350.png?text=Load+Image+URL" alt="Admin Scout Image">
+                    <div id="selection-box"></div>
+                </div>
+                <div id="admin-output">Coordinates will appear here...</div>
+                <button id="copy-coords-button" class="admin-button bg-green-600 hover:bg-green-700 mt-2">Copy Coordinates</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8 mt-12 text-center">
+        <div class="container mx-auto px-6">
+            <p>&copy; <span id="currentYear"></span> Radiation Therapy E-Workbook. All Rights Reserved.</p>
+            <p class="text-sm mt-1">Designed to support your educational journey in radiation therapy.</p>
+        </div>
+    </footer>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+    <script>
+        // --- DOM Elements (Game) ---
+        const gameContent = document.getElementById('game-content');
+        const problemTextEl = document.getElementById('problem-text');
+        const scoreArea = document.getElementById('score-area');
+        const correctCountDisplay = document.getElementById('correct-count');
+        const incorrectCountDisplay = document.getElementById('incorrect-count');
+        const questionNumberDisplay = document.getElementById('question-number');
+        const answerArea = document.getElementById('answer-area');
+        const mcInputArea = document.getElementById('mc-input');
+        const visualInputArea = document.getElementById('visual-input-area');
+        const imageContainer = document.getElementById('image-container'); // For draggable bounds
+        const simImage = document.getElementById('sim-image');
+        const supBorderLine = document.getElementById('sup-border-line');
+        const infBorderLine = document.getElementById('inf-border-line');
+        const supBorderValDisplay = document.getElementById('sup-border-val-display');
+        const infBorderValDisplay = document.getElementById('inf-border-val-display');
+        const checkVisualButton = document.getElementById('check-visual-button');
+        const feedbackArea = document.getElementById('feedback-area');
+        const nextButton = document.getElementById('next-button');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const instructionVisualEl = document.getElementById('instruction-visual');
+        const placeholderImageUrl = "https://via.placeholder.com/400x600.png?text=Image+Error";
+
+        const correctSupLine = document.getElementById('correct-sup-line');
+        const correctInfLine = document.getElementById('correct-inf-line');
+
+
+        // --- DOM Elements (Admin Tool) ---
+        const adminToolContainer = document.getElementById('admin-tool-container');
+        const adminImageUrlInput = document.getElementById('admin-image-url');
+        const adminLoadImageButton = document.getElementById('admin-load-image');
+        const adminImageContainer = document.getElementById('admin-image-container');
+        const adminImage = document.getElementById('admin-image');
+        const selectionBox = document.getElementById('selection-box');
+        const adminOutput = document.getElementById('admin-output');
+        const toggleAdminButton = document.getElementById('toggle-admin-tool');
+        const copyCoordsButton = document.getElementById('copy-coords-button');
+        const hrSeparator = document.querySelector('hr');
+
+        // --- Game State ---
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        const MAX_CORRECT = 10;
+        const MAX_INCORRECT = 5;
+        let currentQuestionIndex = -1;
+        let shuffledQuestions = [];
+        let isQuestionActive = false;
+        let answerButtons = [];
+
+        // --- Draggable Border State ---
+        let draggingElement = null;
+        let initialMouseY = 0;
+        let initialElementTop = 0;
+
+        // --- Admin Tool State ---
+        let isAdminDrawing = false; // Renamed to avoid conflict
+        let adminStartX, adminStartY, adminCurrentX, adminCurrentY;
+        let adminRect = { x: 0, y: 0, w: 0, h: 0 };
+
+        // --- Question Data (Visual questions updated with landmark descriptions) ---
+        const allQuestions = [
+            // MC Questions...
+            { type: 'mc', questionText: "For a standard Whole Brain CT Simulation, the inferior border is typically placed near the:", options: ["Vertex of Skull", "C1/C2 Vertebrae", "Mastoid Tip", "Clavicles"], correctAnswer: "C1/C2 Vertebrae" },
+            { type: 'mc', questionText: "When simulating the Pelvis for prostate treatment, the superior border is commonly set at:", options: ["Top of Iliac Crest", "L5/S1 Interspace", "Umbilicus", "Bottom of Femoral Heads"], correctAnswer: "Top of Iliac Crest" },
+            { type: 'mc', questionText: "To minimize dose to the lenses when simulating for a brain tumor NOT involving the orbits, the inferior border should ideally be:", options: ["Above the orbits", "Through the middle of the orbits", "At the base of skull", "Below the mandible"], correctAnswer: "Above the orbits" },
+            // ... (other MC questions remain the same)
+            { type: 'mc', questionText: "For a tangential breast simulation, the superior border is often defined by the:", options: ["Mandible", "Inferior edge of clavicle", "Angle of Louis (Sternal Angle)", "Xiphoid process"], correctAnswer: "Angle of Louis (Sternal Angle)" },
+            { type: 'mc', questionText: "For palliative treatment of the entire thoracic spine (e.g., T1-T12), the scan should extend from:", options: ["Skull base to L1", "C7 to L1", "T1 to L2", "C7 to L2/L3"], correctAnswer: "C7 to L2/L3" },
+            { type: 'mc', questionText: "Scanning significantly beyond the required anatomical region during CT simulation violates which radiation protection principle?", options: ["Time", "Distance", "Shielding", "ALARA (Optimization)"], correctAnswer: "ALARA (Optimization)" },
+            { type: 'mc', questionText: "For a CT simulation of the abdomen for pancreatic cancer, the superior border should typically include:", options: ["Top of the lungs", "Diaphragm/Lung bases", "Clavicles", "Top of the liver only"], correctAnswer: "Diaphragm/Lung bases" },
+            { type: 'mc', questionText: "For a lower extremity sarcoma simulation (e.g., mid-femur), scan borders should include:", options: ["Only the visible tumor", "The entire femur", "The entire leg from hip to ankle", "Sufficient margin superior and inferior to the target volume"], correctAnswer: "Sufficient margin superior and inferior to the target volume" },
+
+            // Visual Questions with updated scenarioText and some with feedbackAid
+            {
+                type: 'visual',
+                scenarioText: "Palliative Whole Brain: Set borders from the <strong>vertex of the skull</strong> (top) to the <strong>C1/C2 vertebral level</strong> (base of skull / top of neck).",
+                imageUrl: "https://epos.myesr.org/posterimage/esr/ecr2017/137860/media/702286",
+                correctRange: { supMin: 0.10, supMax: 0.16, infMin: 0.51, infMax: 0.57 }, // Adjusted slightly for example
+                feedbackAid: {
+                    correct: "Excellent! Your borders correctly span from the vertex to approximately C1/C2.",
+                    supTooSuperior: "The superior border is too high (superior to vertex). Aim for the top of the skull.",
+                    supTooInferior: "The superior border is too low (inferior to vertex). It should typically reach the vertex of the skull for whole brain coverage.",
+                    infTooSuperior: "The inferior border is too high (superior to C1/C2). It needs to extend down to the C1/C2 level (base of skull) for adequate coverage.",
+                    infTooInferior: "The inferior border is too low (inferior to C1/C2). C1/C2 is generally sufficient for palliative whole brain.",
+                    incorrectGeneral: "Review the typical anatomical coverage for Whole Brain Radiation Therapy."
+                }
+            },
+            {
+                type: 'visual',
+                scenarioText: "Palliative Whole Brain (alternate view): Define borders from the <strong>skull vertex</strong> down to the <strong>base of skull (C1/C2)</strong>.",
+                imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIDya35p7hMi-gDCHV7mdfPfjKh0RYgRp15MPDOwuWWQ-ppeo58nP2sEnw4o9CbDp_oTs&usqp=CA",
+                correctRange: { supMin: 0.00, supMax: 0.04, infMin: 0.81, infMax: 0.85 }
+                // feedbackAid could be added here too
+            },
+            {
+                type: 'visual',
+                scenarioText: "Pelvis Simulation (Prostate): Superior border typically at <strong>L5/S1 interspace or top of iliac crest</strong>. Inferior border should include <strong>below the ischial tuberosities or bottom of symphysis pubis</strong>.",
+                imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYhSHlQP1-sp4sVigLjDpPITryYWNVnM6rMw&s",
+                correctRange: { supMin: 0.38, supMax: 0.42, infMin: 0.55, infMax: 0.59 },
+                feedbackAid: {
+                    correct: "Good coverage for a prostate simulation, including L5/S1 down to below the ischium.",
+                    supTooSuperior: "Superior border is higher than needed (above L5/S1 or iliac crest).",
+                    supTooInferior: "Superior border is too low, potentially missing upper seminal vesicles or lymph nodes if L5/S1 is the target.",
+                    infTooSuperior: "Inferior border is too high, potentially cutting off the inferior aspect of the prostate or ischium.",
+                    infTooInferior: "Inferior border is lower than typically required, increasing dose to uninvolved tissues.",
+                    incorrectGeneral: "Ensure superior coverage at L5/S1 or iliac crest and inferior coverage below the ischial tuberosities for prostate."
+                }
+            },
+            {
+                type: 'visual',
+                scenarioText: "Pelvis Simulation (Endometrium/Cervix): Superior border typically at <strong>L4/L5 or common iliac bifurcation</strong>. Inferior border should include the <strong>entire vagina, often to the introitus or mid-thigh for nodal coverage</strong>.",
+                imageUrl: "https://onlinelibrary.wiley.com/cms/asset/60dccf85-c8ff-4288-86dc-9c8e34369bef/jmiro_1715_f7.gif",
+                correctRange: { supMin: 0.41, supMax: 0.45, infMin: 0.86, infMax: 0.90 }
+            },
+            {
+                type: 'visual',
+                scenarioText: "Thorax Simulation (Lung): Superior border to include <strong>lung apices (often supraclavicular fossa for locally advanced)</strong>. Inferior border to include <strong>entire lungs, often to L1 or below costophrenic angles during full exhalation</strong>.",
+                imageUrl: "https://prod-images-static.radiopaedia.org/images/17484000/e9bcb98e83a7c84e5f2a1cf890dbf6_big_gallery.jpeg",
+                correctRange: { supMin: 0.03, supMax: 0.07, infMin: 0.85, infMax: 0.89 }
+            },
+            {
+                type: 'visual',
+                scenarioText: "Head & Neck (Nasopharynx): Superior border often at <strong>base of skull, including sphenoid sinus</strong>. Inferior border typically to <strong>hyoid bone or cricoid cartilage</strong>, depending on nodal involvement.",
+                imageUrl: "https://prod-images-static.radiopaedia.org/images/59440709/a5c7effd2b69fddf4e886a587de7eb66194a1a6ee4dc6198459d5f034524b858.jpeg",
+                correctRange: { supMin: 0.29, supMax: 0.33, infMin: 0.73, infMax: 0.77 }
+            },
+            {
+                type: 'visual',
+                scenarioText: "Palliative Thoracic Spine (e.g., T4-T8): Ensure borders include <strong>one vertebral body above and below the target levels (e.g., T3 to T9 for T4-T8 involvement)</strong>.",
+                imageUrl: "https://prod-images-static.radiopaedia.org/images/17484000/e9bcb98e83a7c84e5f2a1cf890dbf6_big_gallery.jpeg",
+                correctRange: { supMin: 0.14, supMax: 0.18, infMin: 0.51, infMax: 0.55 } // Example for T4-T8 target (T3-T9 scan)
+            },
+            {
+                type: 'visual',
+                scenarioText: "Tangential Breast Simulation: Superior border often at the <strong>inferior edge of the clavicular head or 1st intercostal space</strong>. Inferior border approx. <strong>2 cm below the inframammary fold</strong>.",
+                imageUrl: "https://epos.myesr.org/posterimage/esr/ecr2020/154420/media/852381",
+                correctRange: { supMin: 0.13, supMax: 0.17, infMin: 0.45, infMax: 0.49 }
+            },
+        ];
+
+        // --- Functions (Game Logic) ---
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function updateScoreDisplay() {
+            correctCountDisplay.textContent = correctAnswers;
+            incorrectCountDisplay.textContent = incorrectAnswers;
+            questionNumberDisplay.textContent = Math.min(shuffledQuestions.length, currentQuestionIndex + 1);
+        }
+
+        function selectGameQuestions() { return shuffleArray([...allQuestions]); }
+
+        function checkGameEndState() {
+            if (correctAnswers >= MAX_CORRECT) return `Congratulations! You reached ${MAX_CORRECT} correct answers!`;
+            if (incorrectAnswers >= MAX_INCORRECT) return `Game Over - You reached ${MAX_INCORRECT} incorrect answers.`;
+            if (currentQuestionIndex >= shuffledQuestions.length - 1 && !isQuestionActive) return "You've answered all available questions!";
+            return null;
+        }
+
+        function loadNextQuestion() {
+            let gameEndMessage = checkGameEndState();
+            if (gameEndMessage && (correctAnswers >= MAX_CORRECT || incorrectAnswers >= MAX_INCORRECT)) {
+                endGame(gameEndMessage);
+                return;
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                endGame(checkGameEndState() || "You've answered all available questions!");
+                return;
+            }
+
+            updateScoreDisplay();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            if (!currentQuestion) {
+                console.error("Error: Invalid question data at index", currentQuestionIndex);
+                feedbackArea.textContent = "Error loading question, attempting to skip...";
+                setTimeout(loadNextQuestion, 500);
+                return;
+            }
+
+            problemTextEl.innerHTML = currentQuestion.type === 'mc' ? currentQuestion.questionText : currentQuestion.scenarioText; // Use innerHTML for strong tags
+            feedbackArea.textContent = '';
+            feedbackArea.className = 'text-center font-medium mt-3 mb-3 min-h-[2em]';
+            correctSupLine.style.display = 'none';
+            correctInfLine.style.display = 'none';
+
+            const instructionDefaultMC = "For multiple-choice questions, select the best answer.";
+            const instructionDefaultVisual = `For visual questions, review the scenario and image. Drag the <strong>Superior</strong> and <strong>Inferior</strong> borders on the image to match the described anatomical scan range. Click "Check Borders".`;
+
+
+            if (currentQuestion.type === 'mc') {
+                mcInputArea.classList.remove('hidden');
+                visualInputArea.classList.add('hidden');
+                instructionVisualEl.innerHTML = instructionDefaultMC;
+                loadMcOptions(currentQuestion);
+            } else { // visual
+                mcInputArea.classList.add('hidden');
+                visualInputArea.classList.remove('hidden');
+                instructionVisualEl.innerHTML = instructionDefaultVisual;
+                loadVisualQuestion(currentQuestion);
+            }
+
+            nextButton.disabled = true;
+            playAgainBtn.classList.add('hidden');
+            isQuestionActive = true;
+        }
+
+        function loadMcOptions(question) {
+            if (!question.options || question.options.length === 0) {
+                console.error("MC Question missing options:", question);
+                feedbackArea.textContent = "Error loading options, skipping...";
+                setTimeout(loadNextQuestion, 500); return;
+            }
+            const displayOptions = shuffleArray([...question.options]);
+            if (answerButtons.length === 0) {
+                mcInputArea.innerHTML = '';
+                for (let i = 0; i < 4; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'answer-button py-2 px-4 rounded-lg shadow-sm';
+                    button.addEventListener('click', () => handleAnswerClick(button));
+                    mcInputArea.appendChild(button);
+                    answerButtons.push(button);
+                }
+            }
+            answerButtons.forEach((button, index) => {
+                if (index < displayOptions.length) {
+                    button.textContent = displayOptions[index];
+                    button.dataset.answer = displayOptions[index];
+                    button.disabled = false;
+                    button.className = 'answer-button py-2 px-4 rounded-lg shadow-sm';
+                    button.style.display = 'block';
+                } else {
+                    button.style.display = 'none'; button.disabled = true;
+                }
+            });
+        }
+
+        function loadVisualQuestion(question) {
+            simImage.src = question.imageUrl || placeholderImageUrl;
+            simImage.onerror = () => { simImage.src = placeholderImageUrl; console.warn("Failed to load visual question image:", question.imageUrl);};
+
+            supBorderLine.style.top = '10%';
+            infBorderLine.style.top = '90%';
+            updateDraggableBorderDisplays();
+
+            supBorderLine.classList.remove('disabled');
+            infBorderLine.classList.remove('disabled');
+            checkVisualButton.disabled = false;
+        }
+
+        function updateDraggableBorderDisplays() {
+            const supPct = parseFloat(supBorderLine.style.top);
+            const infPct = parseFloat(infBorderLine.style.top);
+            supBorderValDisplay.textContent = `${Math.round(supPct)}%`;
+            infBorderValDisplay.textContent = `${Math.round(infPct)}%`;
+        }
+
+
+        function handleAnswerClick(button) {
+            if (!isQuestionActive || !shuffledQuestions[currentQuestionIndex] || shuffledQuestions[currentQuestionIndex].type !== 'mc') return;
+            isQuestionActive = false;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+
+            if (!currentQuestion || typeof currentQuestion.correctAnswer === 'undefined') {
+                console.error("Missing or invalid data for MC question:", currentQuestion);
+                feedbackArea.textContent = "Error: Question data missing.";
+                feedbackArea.className += ' feedback-incorrect';
+                answerButtons.forEach(b => b.disabled = true);
+                nextButton.disabled = false;
+                return;
+            }
+
+            const selectedAnswer = button.dataset.answer;
+            const correctAnswer = currentQuestion.correctAnswer;
+            let isCorrect = (selectedAnswer === correctAnswer);
+
+            answerButtons.forEach(b => {
+                b.disabled = true;
+                b.classList.remove('selected-correct', 'selected-incorrect', 'reveal-correct');
+                if (b.style.display !== 'none') {
+                    if (b === button) { b.classList.add(isCorrect ? 'selected-correct' : 'selected-incorrect'); }
+                    if (!isCorrect && b.dataset.answer === correctAnswer) { b.classList.add('reveal-correct'); }
+                }
+            });
+
+            if (isCorrect) {
+                correctAnswers++;
+                feedbackArea.textContent = 'Correct!';
+                feedbackArea.className += ' feedback-correct';
+            } else {
+                incorrectAnswers++;
+                feedbackArea.textContent = `Incorrect. The correct answer was: ${correctAnswer}`;
+                feedbackArea.className += ' feedback-incorrect';
+            }
+            updateScoreDisplay();
+            const gameEndMessage = checkGameEndState();
+            if (gameEndMessage) { endGame(gameEndMessage); } else { nextButton.disabled = false; }
+        }
+
+        function checkVisualAnswer() {
+            if (!isQuestionActive || !shuffledQuestions[currentQuestionIndex] || shuffledQuestions[currentQuestionIndex].type !== 'visual') return;
+            isQuestionActive = false;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+
+            const supValue = parseFloat(supBorderLine.style.top) / 100.0;
+            const infValue = parseFloat(infBorderLine.style.top) / 100.0;
+            const correctRange = currentQuestion.correctRange;
+
+            if (!correctRange || typeof correctRange.supMin === 'undefined') {
+                console.error("Missing or invalid correctRange for visual question:", currentQuestion);
+                feedbackArea.textContent = "Error: Answer data missing for this question.";
+                feedbackArea.className += ' feedback-incorrect';
+                checkVisualButton.disabled = true;
+                supBorderLine.classList.add('disabled'); infBorderLine.classList.add('disabled');
+                nextButton.disabled = false;
+                return;
+            }
+
+            let isSupCorrect = (supValue >= correctRange.supMin && supValue <= correctRange.supMax);
+            let isInfCorrect = (infValue >= correctRange.infMin && infValue <= correctRange.infMax);
+            let isCorrect = isSupCorrect && isInfCorrect;
+
+            if (isCorrect) {
+                correctAnswers++;
+                feedbackArea.textContent = currentQuestion.feedbackAid?.correct || 'Correct Borders!';
+                feedbackArea.className += ' feedback-correct';
+            } else {
+                incorrectAnswers++;
+                let feedbackMessage = "Incorrect Borders."; // Default
+
+                if (currentQuestion.feedbackAid) {
+                    let specificFeedback = [];
+                    if (!isSupCorrect) {
+                        if (supValue < correctRange.supMin) { // User's line is anatomically too superior (higher on image)
+                            specificFeedback.push(currentQuestion.feedbackAid.supTooSuperior || `Superior border is too high (superior).`);
+                        } else if (supValue > correctRange.supMax) { // User's line is anatomically too inferior (lower on image)
+                            specificFeedback.push(currentQuestion.feedbackAid.supTooInferior || `Superior border is too low (inferior).`);
+                        }
+                    }
+                    if (!isInfCorrect) {
+                        if (infValue < correctRange.infMin) { // User's line is anatomically too superior
+                            specificFeedback.push(currentQuestion.feedbackAid.infTooSuperior || `Inferior border is too high (superior).`);
+                        } else if (infValue > correctRange.infMax) { // User's line is anatomically too inferior
+                            specificFeedback.push(currentQuestion.feedbackAid.infTooInferior || `Inferior border is too low (inferior).`);
+                        }
+                    }
+                    if (specificFeedback.length > 0) {
+                        feedbackMessage = specificFeedback.join(' ');
+                    } else {
+                         feedbackMessage = currentQuestion.feedbackAid.incorrectGeneral || "Incorrect. Double check the required anatomical coverage.";
+                    }
+                } else {
+                    // Original generic feedback if no feedbackAid
+                    if (!isSupCorrect) feedbackMessage += ` Superior border out of range (expected ${Math.round(correctRange.supMin*100)}-${Math.round(correctRange.supMax*100)}%).`;
+                    if (!isInfCorrect) feedbackMessage += ` Inferior border out of range (expected ${Math.round(correctRange.infMin*100)}-${Math.round(correctRange.infMax*100)}%).`;
+                }
+                feedbackArea.textContent = feedbackMessage;
+                feedbackArea.className += ' feedback-incorrect';
+
+                correctSupLine.style.top = `${(correctRange.supMin + correctRange.supMax) / 2 * 100}%`;
+                correctInfLine.style.top = `${(correctRange.infMin + correctRange.infMax) / 2 * 100}%`;
+                correctSupLine.style.display = 'block';
+                correctInfLine.style.display = 'block';
+            }
+
+            checkVisualButton.disabled = true;
+            supBorderLine.classList.add('disabled');
+            infBorderLine.classList.add('disabled');
+            updateScoreDisplay();
+            const gameEndMessage = checkGameEndState();
+            if (gameEndMessage) { endGame(gameEndMessage); } else { nextButton.disabled = false; }
+        }
+
+
+        function endGame(message) {
+            problemTextEl.innerHTML = message; // Use innerHTML in case message has formatting
+            mcInputArea.classList.add('hidden');
+            visualInputArea.classList.add('hidden');
+            feedbackArea.textContent = `Final Score: ${correctAnswers} Correct, ${incorrectAnswers} Incorrect.`;
+            feedbackArea.className = 'text-center text-lg font-medium mt-4 mb-4 min-h-[2em]';
+            nextButton.classList.add('hidden');
+            nextButton.disabled = true;
+            playAgainBtn.classList.remove('hidden');
+            isQuestionActive = false;
+            // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+            if (window.RTApps) window.RTApps.reportResult(correctAnswers);
+        }
+
+        function startGame() {
+            correctAnswers = 0; incorrectAnswers = 0; currentQuestionIndex = -1;
+            shuffledQuestions = selectGameQuestions();
+            gameContent.style.display = 'block';
+            adminToolContainer.classList.add('hidden');
+            hrSeparator.style.display = 'block';
+            nextButton.classList.remove('hidden'); nextButton.disabled = true;
+            playAgainBtn.classList.add('hidden');
+            answerButtons.forEach(b => { b.style.display = 'block'; b.disabled = true; b.classList.remove('selected-correct', 'selected-incorrect', 'reveal-correct'); });
+
+            supBorderLine.classList.remove('disabled');
+            infBorderLine.classList.remove('disabled');
+            checkVisualButton.disabled = true;
+            correctSupLine.style.display = 'none';
+            correctInfLine.style.display = 'none';
+
+            updateScoreDisplay();
+            loadNextQuestion();
+        }
+
+        // --- Draggable Border Logic ---
+        function startDrag(e, element) {
+            e.preventDefault();
+            if (element.classList.contains('disabled')) return;
+            draggingElement = element;
+            const eventY = e.touches ? e.touches[0].clientY : e.clientY;
+            initialMouseY = eventY;
+            initialElementTop = element.offsetTop;
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function drag(e) {
+            if (!draggingElement) return;
+            e.preventDefault();
+
+            const eventY = e.touches ? e.touches[0].clientY : e.clientY;
+            let deltaY = eventY - initialMouseY;
+            let newTop = initialElementTop + deltaY;
+
+            const containerHeight = imageContainer.clientHeight;
+            const elementHeight = draggingElement.offsetHeight;
+
+            newTop = Math.max(0, Math.min(newTop, containerHeight - elementHeight));
+
+            if (draggingElement === supBorderLine) {
+                const infBorderTop = infBorderLine.offsetTop;
+                if (newTop + elementHeight > infBorderTop) {
+                    newTop = infBorderTop - elementHeight;
+                }
+            } else {
+                const supBorderBottom = supBorderLine.offsetTop + supBorderLine.offsetHeight;
+                if (newTop < supBorderBottom) {
+                    newTop = supBorderBottom;
+                }
+            }
+
+            draggingElement.style.top = `${newTop}px`;
+            const percentage = (newTop / containerHeight) * 100;
+            if (draggingElement === supBorderLine) {
+                supBorderValDisplay.textContent = `${Math.round(percentage)}%`;
+            } else {
+                infBorderValDisplay.textContent = `${Math.round(percentage)}%`;
+            }
+        }
+
+        function stopDrag() {
+            if (!draggingElement) return;
+            draggingElement = null;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+
+        // --- Functions (Admin Tool) ---
+        function loadAdminImage() {
+            const url = adminImageUrlInput.value.trim();
+            if (url) {
+                adminImage.src = url;
+                adminImage.onerror = () => {
+                    adminOutput.textContent = 'Error loading image. Check URL or CORS policy.';
+                    adminImage.src = 'https://via.placeholder.com/500x350.png?text=Error+Loading+Image';
+                };
+                adminImage.onload = () => { adminOutput.textContent = 'Image loaded. Click and drag to define borders.'; };
+                selectionBox.style.display = 'none';
+                adminRect = { x: 0, y: 0, w: 0, h: 0 };
+            } else {
+                adminOutput.textContent = 'Please enter a valid image URL.';
+            }
+        }
+
+        function startAdminDrawing(e) {
+            e.preventDefault(); isAdminDrawing = true;
+            const bounds = adminImageContainer.getBoundingClientRect();
+            adminStartX = e.clientX - bounds.left; adminStartY = e.clientY - bounds.top;
+            adminStartX = Math.max(0, Math.min(adminStartX, bounds.width));
+            adminStartY = Math.max(0, Math.min(adminStartY, bounds.height));
+            selectionBox.style.left = `${adminStartX}px`; selectionBox.style.top = `${adminStartY}px`;
+            selectionBox.style.width = '0px'; selectionBox.style.height = '0px';
+            selectionBox.style.display = 'block';
+            adminOutput.textContent = 'Drawing... Release mouse to set borders.';
+        }
+
+        function adminDraw(e) {
+            if (!isAdminDrawing) return; e.preventDefault();
+            const bounds = adminImageContainer.getBoundingClientRect();
+            adminCurrentX = e.clientX - bounds.left; adminCurrentY = e.clientY - bounds.top;
+            adminCurrentX = Math.max(0, Math.min(adminCurrentX, bounds.width));
+            adminCurrentY = Math.max(0, Math.min(adminCurrentY, bounds.height));
+            adminRect.w = Math.abs(adminCurrentX - adminStartX); adminRect.h = Math.abs(adminCurrentY - adminStartY);
+            adminRect.x = Math.min(adminStartX, adminCurrentX); adminRect.y = Math.min(adminStartY, adminCurrentY);
+            selectionBox.style.left = `${adminRect.x}px`; selectionBox.style.top = `${adminRect.y}px`;
+            selectionBox.style.width = `${adminRect.w}px`; selectionBox.style.height = `${adminRect.h}px`;
+        }
+
+        function stopAdminDrawing(e) {
+            if (!isAdminDrawing) return; e.preventDefault(); isAdminDrawing = false;
+            const containerWidth = adminImageContainer.offsetWidth;
+            const containerHeight = adminImageContainer.offsetHeight;
+
+            if (containerWidth > 0 && containerHeight > 0 && adminRect.w > 1 && adminRect.h > 1) {
+                const topPct = (adminRect.y / containerHeight);
+                const bottomPct = ((adminRect.y + adminRect.h) / containerHeight);
+                const leftPct = (adminRect.x / containerWidth);
+                const rightPct = ((adminRect.x + adminRect.w) / containerWidth);
+                const tolerance = 0.02; // Admin tool defines a suggested tolerance.
+                const supMin = Math.max(0, topPct - tolerance).toFixed(2);
+                const supMax = Math.min(1, topPct + tolerance).toFixed(2);
+                const infMin = Math.max(0, bottomPct - tolerance).toFixed(2);
+                const infMax = Math.min(1, bottomPct + tolerance).toFixed(2);
+
+                const correctRangeString = `correctRange: { supMin: ${supMin}, supMax: ${supMax}, infMin: ${infMin}, infMax: ${infMax} }`;
+                adminOutput.innerHTML =
+`Pixel Coords: { x: ${Math.round(adminRect.x)}, y: ${Math.round(adminRect.y)}, w: ${Math.round(adminRect.w)}, h: ${Math.round(adminRect.h)} }<br>
+Percent Coords (Top, Bottom, Left, Right):<br>
+  top: ${topPct.toFixed(3)}, bottom: ${bottomPct.toFixed(3)}, left: ${leftPct.toFixed(3)}, right: ${rightPct.toFixed(3)}<br><br>
+Suggested correctRange object (Sup/Inf with +/- ${tolerance*100}% tolerance):<br>
+<span id="admin-coords-to-copy">${correctRangeString}</span>`;
+            } else {
+                adminOutput.textContent = 'Rectangle size too small or invalid. Please redraw.';
+                selectionBox.style.display = 'none';
+            }
+        }
+
+        function copyAdminCoords() {
+            const coordsTextElement = document.getElementById('admin-coords-to-copy');
+            if (coordsTextElement && coordsTextElement.textContent) {
+                navigator.clipboard.writeText(coordsTextElement.textContent)
+                    .then(() => { alert("correctRange object copied to clipboard!"); })
+                    .catch(err => { console.error('Failed to copy text: ', err); alert("Failed to copy. See console."); });
+            } else {
+                alert("No 'correctRange' data found to copy.");
+            }
+        }
+
+        // --- Event Listeners (Game) ---
+        nextButton.addEventListener('click', loadNextQuestion);
+        playAgainBtn.addEventListener('click', startGame);
+        checkVisualButton.addEventListener('click', checkVisualAnswer);
+
+        supBorderLine.addEventListener('mousedown', (e) => startDrag(e, supBorderLine));
+        infBorderLine.addEventListener('mousedown', (e) => startDrag(e, infBorderLine));
+        supBorderLine.addEventListener('touchstart', (e) => startDrag(e, supBorderLine), { passive: false });
+        infBorderLine.addEventListener('touchstart', (e) => startDrag(e, infBorderLine), { passive: false });
+
+
+        // --- Event Listeners (Admin Tool) ---
+        adminLoadImageButton.addEventListener('click', loadAdminImage);
+        adminImageContainer.addEventListener('mousedown', startAdminDrawing);
+        adminImageContainer.addEventListener('mousemove', adminDraw);
+        adminImageContainer.addEventListener('mouseup', stopAdminDrawing);
+        adminImageContainer.addEventListener('mouseleave', (e) => { if (isAdminDrawing) { stopAdminDrawing(e); } });
+        toggleAdminButton.addEventListener('click', () => {
+            if (adminToolContainer.classList.contains('hidden')) {
+                adminToolContainer.classList.remove('hidden');
+                gameContent.style.display = 'none'; hrSeparator.style.display = 'none';
+            } else {
+                adminToolContainer.classList.add('hidden');
+                gameContent.style.display = 'block'; hrSeparator.style.display = 'block';
+            }
+        });
+        copyCoordsButton.addEventListener('click', copyAdminCoords);
+
+        // --- Initial Setup ---
+        window.addEventListener('load', () => {
+            adminToolContainer.classList.add('hidden');
+            startGame();
+        });
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

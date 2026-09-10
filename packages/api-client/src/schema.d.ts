@@ -1222,6 +1222,8 @@ export interface components {
        * Format: uuid
        */
       activity_id: string;
+      /** Attempt Rows */
+      attempt_rows: components["schemas"]["AttemptRowOut"][];
       /** Attempts */
       attempts: number;
       /** Distribution */
@@ -1343,6 +1345,22 @@ export interface components {
       status: string;
       /** Submitted At */
       submitted_at: string | null;
+    };
+    /** AttemptRowOut */
+    AttemptRowOut: {
+      /** Display Name */
+      display_name: string;
+      /** Max Score */
+      max_score: number | null;
+      /** Percent */
+      percent: number | null;
+      /** Score */
+      score: number | null;
+      /**
+       * Submitted At
+       * Format: date-time
+       */
+      submitted_at: string;
     };
     /** AuditOut */
     AuditOut: {

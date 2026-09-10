@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Reporter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #1f2937;
+            color: #e5e7eb;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .ui-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            align-items: center;
+            width: 1000px;
+            background: #111827;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #4b5563;
+        }
+        .ui-element { text-align: center; }
+        .ui-element h3 { color: #38bdf8; font-size: 0.9em; margin-bottom: 5px; text-transform: uppercase; }
+        .ui-element p { font-size: 1.4em; font-family: 'Orbitron', sans-serif;}
+        .xp-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #374151;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .xp-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #f59e0b;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        #comparison-container { display: flex; gap: 1.5rem; }
+        .document-container { width: 480px; min-height: 450px; background-color: #374151; border: 1px solid #4b5563; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .document-header { font-family: 'Orbitron', sans-serif; font-size: 1.5em; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
+        .data-field { margin-bottom: 12px; padding: 8px; border-radius: 4px; transition: background-color 0.2s; }
+        .data-field .label { font-weight: bold; color: #9ca3af; display: inline-block; width: 120px; }
+        .data-field .value { color: #e5e7eb; font-weight: bold; }
+        .console .data-field .value { cursor: pointer; background-color: #4b5563; padding: 4px 8px; border-radius: 4px; }
+        .console .data-field .value:hover { background-color: #6b7280; }
+        .console .data-field .value.correct { background-color: #16a34a; color: white; cursor: default; }
+        .console .data-field .value.incorrect-flash { animation: flash-red 0.5s; }
+        @keyframes flash-red { 0%, 100% { background-color: #4b5563; } 50% { background-color: #ef4444; } }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(17, 24, 39, 0.95); border: 2px solid #38bdf8; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 30px #38bdf8; z-index: 100; width: 90%; max-width: 600px; }
+        .modal h2 { font-size: 2em; color: #38bdf8; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button { background-color: #38bdf8; color: #111827; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div class="ui-panel">
+             <div class="ui-element">
+                <h3>Level</h3>
+                <p id="level-display">Intern</p>
+            </div>
+            <div class="ui-element col-span-2">
+                <h3>XP Progress</h3>
+                <div class="xp-bar-container">
+                    <div id="xp-bar" class="xp-bar"></div>
+                </div>
+                <p id="xp-text" class="text-sm font-sans">0 / 200</p>
+            </div>
+            <div class="ui-element">
+                <h3>Total Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="ui-element col-start-2">
+                <h3>Errors Found</h3>
+                <p id="errors-found">0 / 0</p>
+            </div>
+            <div class="ui-element col-start-3">
+                <h3>Time Left</h3>
+                <p id="timer">120</p>
+            </div>
+        </div>
+        <div id="comparison-container">
+            <div class="document-container chart">
+                <h2 class="document-header">PATIENT PLAN</h2>
+                <div id="chart-content"></div>
+            </div>
+            <div class="document-container console">
+                <h2 class="document-header">CONSOLE SETUP</h2>
+                <div id="console-content"></div>
+            </div>
+        </div>
+    </div>
+    <div id="startScreen" class="modal">
+        <h2>Error Reporter</h2>
+        <p>Your mission is to perform a final safety check. Compare the Patient Plan with the Console Setup. Click on any data on the CONSOLE side that does NOT match the plan. Find all discrepancies before time runs out to earn XP and get promoted!</p>
+        <button id="startButton">Start Shift</button>
+    </div>
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <p>Total XP: <span id="finalScore">0</span></p>
+        <button id="restartButton">New Case</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const chartContentEl = document.getElementById('chart-content');
+const consoleContentEl = document.getElementById('console-content');
+const scoreEl = document.getElementById('score');
+const errorsFoundEl = document.getElementById('errors-found');
+const timerEl = document.getElementById('timer');
+const finalScoreEl = document.getElementById('finalScore');
+const levelDisplayEl = document.getElementById('level-display');
+const xpBarEl = document.getElementById('xp-bar');
+const xpTextEl = document.getElementById('xp-text');
+
+// --- Game State ---
+let score = 0, timeLeft = 120, gameRunning = false, gameInterval;
+let errors = [], totalErrors = 0, foundErrors = 0, incorrectClicks = 0;
+let totalXP = 0, currentLevelIndex = 0, totalCasesCompleted = 0;
+
+// --- Patient & Level Data ---
+const patientCases = [
+    { name: "John Smith", id: "44556", dob: "07/12/1970", site: "Brain (R Temporal)", dosePerFx: "200", totalDose: "6000", technique: "VMAT", field: "Arc 1", gantry: "181-179 CW", mu: "350", energy: "6 MV" },
+    { name: "Maria Garcia", id: "11223", dob: "05/03/1965", site: "Whole Brain", dosePerFx: "300", totalDose: "3000", technique: "3D-CRT", field: "R Lateral", gantry: "270", mu: "150", energy: "6 MV" },
+    { name: "Sarah Chen", id: "77889", dob: "11/20/1968", site: "H&N (L Tonsil)", dosePerFx: "200", totalDose: "7000", technique: "IMRT", field: "Field 3", gantry: "220", mu: "85", energy: "6 MV" },
+    { name: "David Garcia", id: "55667", dob: "06/10/1958", site: "Lung (RLL)", dosePerFx: "200", totalDose: "6600", technique: "3D-CRT", field: "RPO", gantry: "240", mu: "175", energy: "6 MV" },
+    { name: "Linda Jones", id: "33445", dob: "08/25/1962", site: "Thorax (L Hilum)", dosePerFx: "200", totalDose: "6000", technique: "VMAT", field: "Arc 1", gantry: "181-179 CW", mu: "380", energy: "6 MV" },
+    { name: "Robert Miller", id: "99112", dob: "03/15/1955", site: "Thorax (RUL SBRT)", dosePerFx: "1800", totalDose: "5400", technique: "SBRT", field: "Arc 2", gantry: "179-181 CCW", mu: "2500", energy: "10 FFF" },
+    { name: "Mary Peterson", id: "66778", dob: "05/01/1973", site: "Right Breast", dosePerFx: "266", totalDose: "4256", technique: "3D-CRT", field: "R Medial Tangent", gantry: "310", mu: "185", energy: "6 MV" },
+    { name: "Anna Bellwether", id: "55443", dob: "06/18/1965", site: "R Breast Boost", dosePerFx: "200", totalDose: "1000", technique: "Electrons", field: "Direct", gantry: "0", mu: "250", energy: "9 MeV" },
+    { name: "Susan Miller", id: "88776", dob: "10/05/1958", site: "Left Breast (Prone)", dosePerFx: "266", totalDose: "4256", technique: "3D-CRT", field: "L Lateral Tangent", gantry: "135", mu: "210", energy: "6 MV" },
+    { name: "David Garcia (Panc)", id: "22334", dob: "04/11/1959", site: "Pancreas Head", dosePerFx: "180", totalDose: "5040", technique: "IMRT", field: "Field 5", gantry: "180", mu: "115", energy: "10 MV" },
+    { name: "James Wilson", id: "44556", dob: "07/15/1950", site: "Prostate", dosePerFx: "180", totalDose: "7920", technique: "VMAT", field: "Arc 2", gantry: "179-181 CCW", mu: "410", energy: "10 MV" },
+    { name: "Elizabeth Green", id: "77665", dob: "11/02/1960", site: "Pelvis (Endo)", dosePerFx: "180", totalDose: "4500", technique: "IMRT", field: "AP", gantry: "0", mu: "220", energy: "6 MV" },
+    { name: "Barbara Davis", id: "11223", dob: "09/10/1980", site: "L Breast + SCV", dosePerFx: "200", totalDose: "5000", technique: "3D-CRT", field: "Ant SCV", gantry: "15", mu: "190", energy: "6 MV" },
+    { name: "David Wilson (Anal)", id: "55667", dob: "06/18/1965", site: "Anal Canal", dosePerFx: "180", totalDose: "5400", technique: "VMAT", field: "Arc 1", gantry: "181-179 CW", mu: "550", energy: "6 MV" },
+    { name: "George Harris", id: "88991", dob: "10/05/1958", site: "Spine (L3)", dosePerFx: "300", totalDose: "3000", technique: "3D-CRT", field: "PA", gantry: "180", mu: "280", energy: "10 MV" },
+    { name: "Michael Rivera", id: "HL001", dob: "08/15/1998", site: "Mantle Field", dosePerFx: "200", totalDose: "2000", technique: "3D-CRT", field: "AP", gantry: "0", mu: "155", energy: "6 MV" }
+];
+
+const gameLevels = [
+    { name: "Intern", errorCount: 2, time: 120, mode: "New Start", xpToNext: 200, xpPerCase: 50 },
+    { name: "Junior Therapist", errorCount: 3, time: 100, mode: "New Start", xpToNext: 500, xpPerCase: 50 },
+    { name: "Staff Therapist", errorCount: 3, time: 90, mode: "Weekly Check", xpToNext: 1000, xpPerCase: 75 },
+    { name: "Senior Therapist", errorCount: 4, time: 75, mode: "Weekly Check", xpToNext: 2000, xpPerCase: 75 },
+    { name: "QA Supervisor", errorCount: 4, time: 60, mode: "Weekly Check", xpToNext: Infinity, xpPerCase: 75 }
+];
+
+const dataFields = ['name', 'id', 'dob', 'site', 'dosePerFx', 'fx', 'totalDose', 'technique', 'field', 'gantry', 'mu', 'energy'];
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    
+    currentLevelIndex = gameLevels.findIndex(level => totalXP < level.xpToNext);
+    if(currentLevelIndex === -1) currentLevelIndex = gameLevels.length - 1;
+
+    const levelConfig = gameLevels[currentLevelIndex];
+    timeLeft = levelConfig.time;
+    foundErrors = 0;
+    incorrectClicks = 0;
+    errors = [];
+    
+    let currentCase = patientCases[Math.floor(Math.random() * patientCases.length)];
+    
+    if(levelConfig.mode === "Weekly Check") {
+        let totalFx = parseInt(currentCase.totalDose) / parseInt(currentCase.dosePerFx);
+        let currentFx = Math.floor(totalFx / 2) + Math.floor(Math.random() * 5 - 2);
+        currentCase = {...currentCase, fx: `${Math.max(1, currentFx)} of ${totalFx}`};
+    } else {
+        currentCase = {...currentCase, fx: `1 of ${parseInt(currentCase.totalDose) / parseInt(currentCase.dosePerFx)}`};
+    }
+
+    generateCaseData(currentCase, levelConfig.errorCount);
+    
+    updateUI();
+    gameRunning = true;
+    if (gameInterval) clearInterval(gameInterval);
+    gameInterval = setInterval(gameTick, 1000);
+}
+
+function generateCaseData(caseData, errorCount) {
+    chartContentEl.innerHTML = '';
+    consoleContentEl.innerHTML = '';
+    const consoleData = { ...caseData };
+    
+    const fieldsToCorrupt = [...dataFields].sort(() => 0.5 - Math.random()).slice(0, errorCount);
+    
+    fieldsToCorrupt.forEach(field => {
+        errors.push(field);
+        let originalValue = String(consoleData[field]);
+        let corruptedValue = "";
+        if (['id', 'mu', 'dosePerFx', 'totalDose'].includes(field)) {
+            let chars = originalValue.split('');
+            if(chars.length > 2) {
+               let i = Math.floor(Math.random() * (chars.length - 1));
+               let j = (i + 1) % chars.length;
+               [chars[i], chars[j]] = [chars[j], chars[i]];
+               corruptedValue = chars.join('');
+            } else {
+                corruptedValue = parseInt(originalValue) + 10;
+            }
+        } else if (field === 'gantry') {
+            corruptedValue = `${Math.round(Math.random() * 359)}`;
+        } else {
+             const otherCases = patientCases.filter(p => p[field] !== originalValue);
+             corruptedValue = otherCases.length > 0 ? otherCases[Math.floor(Math.random() * otherCases.length)][field] : "N/A";
+        }
+        consoleData[field] = corruptedValue;
+    });
+    totalErrors = errors.length;
+
+    dataFields.forEach(field => {
+        chartContentEl.innerHTML += createFieldHTML(field, caseData[field]);
+        consoleContentEl.innerHTML += createFieldHTML(field, consoleData[field]);
+    });
+
+    document.querySelectorAll('.console .value').forEach(el => {
+        el.addEventListener('click', handleConsoleClick);
+    });
+}
+
+function createFieldHTML(field, value) {
+    const label = field.replace(/([A-Z])/g, ' $1').toUpperCase();
+    return `<div class="data-field"><span class="label">${label}:</span><span class="value" data-field="${field}">${value}</span></div>`;
+}
+
+function handleConsoleClick(e) {
+    if (!gameRunning) return;
+    
+    const clickedField = e.target.dataset.field;
+    const clickedValueEl = e.target;
+
+    if(errors.includes(clickedField)) {
+        if (!clickedValueEl.classList.contains('correct')) {
+            score += 100;
+            foundErrors++;
+            clickedValueEl.classList.add('correct');
+            errors = errors.filter(err => err !== clickedField); 
+            if (foundErrors === totalErrors) {
+                gameRunning = false; // Stop timer immediately on win
+                setTimeout(() => endGame(true), 500); // Short delay to show final correct selection
+            }
+        }
+    } else {
+        incorrectClicks++;
+        score -= 25;
+        if(score < 0) score = 0;
+        clickedValueEl.classList.add('incorrect-flash');
+        setTimeout(() => {
+            clickedValueEl.classList.remove('incorrect-flash');
+        }, 500);
+    }
+    updateUI();
+}
+
+function gameTick() {
+    if (!gameRunning) return;
+    timeLeft--;
+    updateUI();
+    if (timeLeft <= 0) {
+        endGame(false, "Time's up! Some errors were missed.");
+    }
+}
+
+function updateUI() {
+    const levelConf = gameLevels[currentLevelIndex];
+    levelDisplayEl.textContent = levelConf.name;
+    scoreEl.textContent = score;
+    errorsFoundEl.textContent = `${foundErrors} / ${totalErrors}`;
+    timerEl.textContent = timeLeft;
+
+    const xpForCurrentLevel = levelConf.xpRequired;
+    const xpForNextLevel = levelConf.xpToNext;
+    const currentProgress = totalXP - xpForCurrentLevel;
+    const levelXPGoal = xpForNextLevel - xpForCurrentLevel;
+    const xpPercentage = levelXPGoal > 0 ? (currentProgress / levelXPGoal) * 100 : 100;
+
+    xpBarEl.style.width = `${Math.min(xpPercentage, 100)}%`;
+    xpTextEl.textContent = levelXPGoal === Infinity ? "MAX LEVEL" : `${currentProgress} / ${levelXPGoal} XP`;
+}
+
+function endGame(won, customMessage = "") {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    
+    let title = won ? "Check Complete!" : "Check Failed!";
+    let finalMessage = customMessage;
+
+    if (won) {
+        totalCasesCompleted++;
+        let xpGained = gameLevels[currentLevelIndex].xpPerCase;
+        if (incorrectClicks === 0) {
+            xpGained += 25; // Perfect Check Bonus
+            finalMessage += " PERFECT CHECK! +25 XP Bonus!";
+        }
+        totalXP += xpGained;
+        score += xpGained; // Add XP to session score as well
+
+        let oldLevel = currentLevelIndex;
+        currentLevelIndex = gameLevels.findIndex(level => totalXP < level.xpToNext);
+        if(currentLevelIndex === -1) currentLevelIndex = gameLevels.length - 1;
+
+        if (currentLevelIndex > oldLevel) {
+            title = "LEVEL UP!";
+            finalMessage += ` Congratulations, you've been promoted to ${gameLevels[currentLevelIndex].name}!`;
+        }
+    }
+    
+    document.getElementById('endTitle').textContent = title;
+    document.getElementById('endMessage').textContent = finalMessage;
+    finalScoreEl.textContent = score;
+    
+    if (totalCasesCompleted >= 25 && currentLevelIndex >= gameLevels.length - 2) {
+        document.getElementById('endTitle').textContent = "MASTERY ACHIEVED!";
+        document.getElementById('endMessage').textContent = "You've successfully completed 25 chart checks and reached the highest rank. You are a true Safety Supervisor!";
+        restartButton.textContent = "Play Again From Start";
+    } else {
+        restartButton.textContent = "Next Case";
+    }
+    
+    endScreen.classList.remove('hidden');
+    // report only at terminal events — the shim latch is once per page load: a failed case or the mastery gate
+    if ((!won || (totalCasesCompleted >= 25 && currentLevelIndex >= gameLevels.length - 2)) && window.RTApps) window.RTApps.reportResult(score);
+}
+
+// --- Event Listeners ---
+startButton.addEventListener('click', () => {
+    totalXP = 0;
+    score = 0;
+    totalCasesCompleted = 0;
+    currentLevelIndex = 0;
+    init();
+});
+restartButton.addEventListener('click', () => {
+    if (restartButton.textContent === "Play Again From Start") {
+        totalXP = 0;
+        score = 0;
+        totalCasesCompleted = 0;
+        currentLevelIndex = 0;
+    }
+    init();
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sectional Anatomy Quiz Menu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu-container">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhjCsQgBCVsghxKxrXrmMu9WmlSBXr3Ba-Zg&s" alt="Body Planes" class="menu-logo"/>
+        <div class="menu-title">Sectional Anatomy Quiz</div>
+        <div class="menu-instructions">
+            Welcome! Test your knowledge of imaging planes and medical terminology.<br>
+            <strong>Instructions:</strong>
+            <ul style="text-align:left;max-width:90%;margin:12px auto 0 auto;">
+                <li>Select a topic below or choose a comprehensive review.</li>
+                <li>For each question, pick the best answer. Some imaging questions will show a diagram.</li>
+                <li>Try to score high and earn a badge!</li>
+            </ul>
+        </div>
+        <div class="menu-section">
+            <button class="menu-btn" onclick="startQuiz('planes')">🧭 Imaging Planes Only</button>
+            <button class="menu-btn" onclick="startQuiz('terminology')">🩺 Medical Terminology Only</button>
+            <button class="menu-btn" onclick="startQuiz('comprehensive')">🌟 Comprehensive Review</button>
+        </div>
+        <div class="menu-footer">
+            Powered by RTApps79 &middot; v1.0
+        </div>
+    </div>
+    <script>
+        function startQuiz(mode) {
+            window.location.href = `quiz.html?mode=${mode}`;
+        }
+    </script>
+</body>
+</html>

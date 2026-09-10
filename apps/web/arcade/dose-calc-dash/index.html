@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dose Calc Dash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0a0a23;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        canvas {
+            background-color: #1e293b;
+            border: 2px solid #00ffdd;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffdd;
+            cursor: none;
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 800px;
+            background: #001f3f;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00ffdd;
+        }
+        .ui-element { text-align: center; }
+        .ui-element h3 { color: #00ffdd; font-size: 1em; margin-bottom: 5px; text-transform: uppercase; }
+        .ui-element p { font-size: 1.5em; font-family: 'Orbitron', sans-serif;}
+        #formula-bar {
+            width: 800px;
+            background: #111827;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #4b5563;
+            text-align: center;
+            font-size: 1.5em;
+            min-height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .formula-text {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(10, 10, 35, 0.95); border: 2px solid #00ffdd; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 30px #00ffdd; z-index: 100; width: 90%; max-width: 600px; }
+        .modal h2 { font-size: 2em; color: #00ffdd; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button { background: linear-gradient(145deg, #0d7377, #14ffec); color: #0a0a23; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div class="ui-panel">
+            <div class="ui-element">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="ui-element">
+                <h3>Case</h3>
+                <p id="case-display">SAD Setup</p>
+            </div>
+             <div class="ui-element">
+                <h3>Time Left</h3>
+                <p id="timer">60</p>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div id="formula-bar">
+            <span class="formula-text">MU = </span>
+            <span id="formula-numerator" class="formula-text">Dose</span>
+            <span class="formula-text"> / (</span>
+            <span id="formula-denominator" class="formula-text">...factors</span>
+            <span class="formula-text">)</span>
+        </div>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>Dose Calc Dash</h2>
+        <p>A patient setup will be presented. Your goal is to build the correct Monitor Unit (MU) formula. Use the LEFT and RIGHT arrow keys to move the collector. Catch the correct falling components for the formula. Catching the wrong component will result in a penalty. Complete the formula before time runs out!</p>
+        <button id="startButton">Start Calculating</button>
+    </div>
+    
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">New Case</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('startScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const scoreEl = document.getElementById('score');
+const caseDisplayEl = document.getElementById('case-display');
+const timerEl = document.getElementById('timer');
+const finalScoreEl = document.getElementById('finalScore');
+const formulaNumeratorEl = document.getElementById('formula-numerator');
+const formulaDenominatorEl = document.getElementById('formula-denominator');
+
+
+// --- Game State ---
+let score = 0;
+let timeLeft = 60;
+let gameRunning = false;
+let animationFrameId;
+let player, components, currentCase;
+let keys = {};
+let gameInterval, spawnInterval;
+
+// --- Game Data ---
+const componentData = {
+    'TMR': { color: '#2ecc71', type: 'SAD' },
+    'PDD': { color: '#e74c3c', type: 'SSD' },
+    'Output': { color: '#3498db', type: 'BOTH' },
+    'Sc': { color: '#f1c40f', type: 'SAD' },
+    'Sp': { color: '#9b59b6', type: 'SAD' },
+    'InvSq': { color: '#e67e22', type: 'SSD' },
+    'WF': { color: '#1abc9c', type: 'BOTH' },
+    'TF': { color: '#e74c3c', type: 'SSD' } // Tray factor is more of an SSD concept
+};
+
+const cases = [
+    {
+        name: "SAD Setup",
+        type: "SAD",
+        required: ['Output', 'TMR', 'Sc', 'Sp']
+    },
+    {
+        name: "SSD Setup",
+        type: "SSD",
+        required: ['Output', 'PDD', 'InvSq']
+    },
+    {
+        name: "SAD Wedge",
+        type: "SAD",
+        required: ['Output', 'TMR', 'Sc', 'Sp', 'WF']
+    },
+     {
+        name: "SSD Block Tray",
+        type: "SSD",
+        required: ['Output', 'PDD', 'InvSq', 'TF']
+    }
+];
+
+// --- Game Objects ---
+class Player {
+    constructor() {
+        this.w = 120;
+        this.h = 20;
+        this.x = canvas.width / 2 - this.w / 2;
+        this.y = canvas.height - 40;
+        this.speed = 10;
+        this.collected = [];
+    }
+    draw() {
+        ctx.fillStyle = '#00ffdd';
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.strokeStyle = '#fff';
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+    }
+    update() {
+        if (keys['ArrowLeft'] && this.x > 0) this.x -= this.speed;
+        if (keys['ArrowRight'] && this.x < canvas.width - this.w) this.x += this.speed;
+        this.draw();
+    }
+}
+
+class Component {
+    constructor() {
+        this.name = Object.keys(componentData)[Math.floor(Math.random() * Object.keys(componentData).length)];
+        const data = componentData[this.name];
+        this.x = Math.random() * (canvas.width - 60) + 30;
+        this.y = -30;
+        this.w = 80;
+        this.h = 40;
+        this.speed = Math.random() * 2 + 1.5;
+        this.color = data.color;
+    }
+    draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 20px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.name, this.x + this.w / 2, this.y + this.h / 2);
+    }
+    update() {
+        this.y += this.speed;
+        this.draw();
+    }
+}
+
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    score = 0;
+    timeLeft = 60;
+    
+    currentCase = cases[Math.floor(Math.random() * cases.length)];
+    player = new Player();
+    components = [];
+
+    updateUI();
+    
+    gameRunning = true;
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    gameLoop();
+    
+    if (gameInterval) clearInterval(gameInterval);
+    if (spawnInterval) clearInterval(spawnInterval);
+    gameInterval = setInterval(gameTick, 1000);
+    spawnInterval = setInterval(spawnComponent, 1800);
+}
+
+function gameTick() {
+    if (!gameRunning) return;
+    timeLeft--;
+    if (timeLeft <= 0) {
+        endGame(false, "Time's up! Calculation incomplete.");
+    }
+}
+
+function spawnComponent() {
+    if (gameRunning) {
+        components.push(new Component());
+    }
+}
+
+function updateUI() {
+    scoreEl.textContent = score;
+    timerEl.textContent = timeLeft;
+    caseDisplayEl.textContent = currentCase.name;
+
+    const collectedString = player.collected.join(' * ');
+    formulaDenominatorEl.textContent = collectedString || "...factors";
+}
+
+function checkCollisions() {
+    for (let i = components.length - 1; i >= 0; i--) {
+        const comp = components[i];
+        if (
+            comp.x < player.x + player.w &&
+            comp.x + comp.w > player.x &&
+            comp.y < player.y + player.h &&
+            comp.y + comp.h > player.y
+        ) {
+            // Check if component is valid for this case type
+            const compType = componentData[comp.name].type;
+            if (compType === 'BOTH' || compType === currentCase.type) {
+                // Check if it's needed and not already collected
+                if (currentCase.required.includes(comp.name) && !player.collected.includes(comp.name)) {
+                    score += 100;
+                    player.collected.push(comp.name);
+                } else {
+                    // Already collected or not needed
+                    score -= 25;
+                }
+            } else {
+                // Wrong type for this setup (e.g. PDD in SAD)
+                score -= 50;
+            }
+            if (score < 0) score = 0;
+            components.splice(i, 1);
+            updateUI();
+            checkWinCondition();
+        }
+    }
+}
+
+function checkWinCondition() {
+    const required = new Set(currentCase.required);
+    const collected = new Set(player.collected);
+    if (required.size === collected.size && [...required].every(val => collected.has(val))) {
+        endGame(true, "Formula correct! MU calculation successful.");
+    }
+}
+
+function endGame(won, message) {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    clearInterval(spawnInterval);
+    
+    document.getElementById('endTitle').textContent = won ? "Calculation Complete!" : "Calculation Failed!";
+    document.getElementById('endMessage').textContent = message;
+    finalScoreEl.textContent = score;
+    // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+
+    endScreen.classList.remove('hidden');
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    player.update();
+    
+    for (let i = components.length - 1; i >= 0; i--) {
+        components[i].update();
+        if (components[i].y > canvas.height) {
+            components.splice(i, 1);
+        }
+    }
+    
+    checkCollisions();
+    updateUI();
+
+    if (gameRunning) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+}
+
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', init);
+
+window.addEventListener('keydown', (e) => {
+    keys[e.code] = true;
+});
+
+window.addEventListener('keyup', (e) => {
+    keys[e.code] = false;
+});
+
+</script>
+</body>
+</html>

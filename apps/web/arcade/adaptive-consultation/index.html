@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Consultation Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f0f4f8;
+            --container-bg: #ffffff;
+            --text-main: #333;
+            --text-light: #4b5563;
+            --border-color: #e5e7eb;
+            --accent-blue: #3b82f6;
+            --empathy-color: #34d399;
+            --knowledge-color: #60a5fa;
+            --stress-color: #f87171;
+        }
+
+        body {
+            font-family: 'Roboto Slab', serif;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #assessment-board {
+            width: 900px;
+            height: 700px;
+            background: var(--container-bg);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+        .ui-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+        .ui-element { text-align: center; }
+        .ui-element h3 { color: var(--text-light); font-size: 1em; text-transform: uppercase; letter-spacing: 1px; }
+        .ui-element p { font-size: 1.8em; font-family: 'Orbitron', sans-serif; color: #1f2937; }
+        .stat-bar-container { width: 100%; height: 10px; background-color: var(--border-color); border-radius: 5px; overflow: hidden; }
+        .stat-bar { height: 100%; width: 50%; border-radius: 5px; transition: width 0.5s ease; }
+        #empathy-bar { background-color: var(--empathy-color); }
+        #knowledge-bar { background-color: var(--knowledge-color); }
+        #stress-bar { background-color: var(--stress-color); }
+        
+        #dialogue-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #character-role {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        #character-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            margin-bottom: 1rem;
+        }
+        .speech-bubble {
+            position: relative;
+            background: #e5e7eb;
+            border-radius: .4em;
+            padding: 1.5rem;
+            max-width: 80%;
+            font-size: 1.2em;
+            line-height: 1.5;
+        }
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #e5e7eb;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -10px;
+            margin-bottom: -20px;
+        }
+        #feedback-text {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1em;
+            min-height: 50px;
+            color: var(--text-light);
+        }
+        .feedback-correct { background-color: #d1fae5; color: #065f46; }
+        .feedback-neutral { background-color: #feefc3; color: #92400e; }
+        .feedback-incorrect { background-color: #fee2e2; color: #991b1b; }
+
+        #choice-area {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .choice-button {
+            background: var(--container-bg);
+            border: 2px solid var(--border-color);
+            color: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .choice-button:hover {
+            border-color: var(--accent-blue);
+            background-color: #eff6ff;
+            transform: scale(1.02);
+        }
+        .choice-button.disabled { pointer-events: none; opacity: 0.6; }
+        
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 1; transition: opacity 0.3s ease; }
+        .modal.hidden { opacity: 0; pointer-events: none; }
+        .modal-content { background: var(--container-bg); border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 90%; max-width: 600px; }
+        .modal-content h2 { font-size: 2em; color: #1e3a8a; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; }
+        .modal-content p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal-content button { background-color: var(--accent-blue); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.2em; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+
+        #reportScreen .modal-content { max-width: 800px; text-align: left; }
+        #reportScreen h2 { text-align: center; }
+        #report-body { max-height: 60vh; overflow-y: auto; padding-right: 15px; }
+        #report-summary, #report-feedback { margin-bottom: 25px; }
+        #report-summary h3, #report-feedback h3 { font-family: 'Orbitron', sans-serif; color: #1e3a8a; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; margin-bottom: 15px; font-size: 1.4em; }
+        #report-summary p, #report-feedback p { font-size: 1.1em; line-height: 1.7; margin-bottom: 10px; }
+        #finalScore { font-weight: bold; font-size: 1.2em; }
+        #performance-level { font-weight: bold; }
+        #report-actions { text-align: center; margin-top: 20px; }
+
+        @media print {
+            body { background-color: #fff; height: auto; }
+            #assessment-board, #startScreen, #report-actions button:last-child { display: none; }
+            .modal { position: static; box-shadow: none; border: 1px solid #ccc; }
+            .modal-content { box-shadow: none; border-radius: 0; width: 100%; max-width: 100%; border: none; }
+            #reportScreen { display: block !important; }
+            #report-body { max-height: none; overflow-y: visible; padding-right: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="assessment-board">
+        <div class="ui-panel">
+            <div class="ui-element"><h3>Conversation</h3><p id="conversation-counter">1 / 10</p></div>
+            <div class="ui-element"><h3>Empathy</h3><div class="stat-bar-container"><div id="empathy-bar" class="stat-bar"></div></div></div>
+            <div class="ui-element"><h3>Knowledge</h3><div class="stat-bar-container"><div id="knowledge-bar" class="stat-bar"></div></div></div>
+            <div class="ui-element"><h3>Stress</h3><div class="stat-bar-container"><div id="stress-bar" class="stat-bar"></div></div></div>
+        </div>
+
+        <div id="dialogue-area">
+            <div id="character-role"></div>
+            <div id="character-avatar"><span></span></div>
+            <div class="speech-bubble">
+                <p id="dialogue-text">...</p>
+            </div>
+            <p id="feedback-text"></p>
+        </div>
+
+        <div id="choice-area"></div>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <div class="modal-content">
+            <h2>Adaptive Consultation Assessment</h2>
+            <p>Welcome! This is an adaptive clinical assessment. You will face 10 conversations. The difficulty will adjust based on your responses. Choose wisely to build Empathy and Knowledge while managing your Stress. Good luck.</p>
+            <button id="startButton">Begin Assessment</button>
+        </div>
+    </div>
+    
+    <div id="reportScreen" class="modal hidden">
+        <div class="modal-content">
+            <div id="report-body">
+                <h2>Assessment Report</h2>
+                <div id="report-summary">
+                    <h3>Performance Summary</h3>
+                    <p><strong>Final Score:</strong> <span id="finalScore"></span></p>
+                    <p><strong>Performance Level:</strong> <span id="performance-level"></span></p>
+                    <hr class="my-4">
+                    <p><strong>Final Empathy:</strong> <span id="finalEmpathy"></span> / 100</p>
+                    <p><strong>Final Knowledge:</strong> <span id="finalKnowledge"></span> / 100</p>
+                    <p><strong>Final Stress:</strong> <span id="finalStress"></span> / 100</p>
+                </div>
+                <div id="report-feedback">
+                    <h3>Detailed Feedback</h3>
+                    <p id="feedback-main"></p>
+                    <p id="feedback-empathy"></p>
+                    <p id="feedback-knowledge"></p>
+                    <p id="feedback-stress"></p>
+                </div>
+            </div>
+            <div id="report-actions">
+                <button id="printReportButton">Print / Save Report</button>
+                <button id="restartButton">Start New Assessment</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const printReportButton = document.getElementById('printReportButton');
+const startScreen = document.getElementById('startScreen');
+const reportScreen = document.getElementById('reportScreen');
+const dialogueEl = document.getElementById('dialogue-text');
+const choiceAreaEl = document.getElementById('choice-area');
+const feedbackTextEl = document.getElementById('feedback-text');
+const empathyBar = document.getElementById('empathy-bar');
+const knowledgeBar = document.getElementById('knowledge-bar');
+const stressBar = document.getElementById('stress-bar');
+const conversationCounterEl = document.getElementById('conversation-counter');
+const avatarEl = document.getElementById('character-avatar');
+const roleEl = document.getElementById('character-role');
+
+// --- Game State ---
+let assessmentRunning = false;
+let conversationCounter = 0;
+const totalConversations = 10;
+let usedScenarios = new Set();
+let stats = {};
+let score = {};
+let performanceHistory = []; // NEW: Tracks recent performance
+
+// --- Scenario Data with Difficulty Tags ---
+const allScenarios = [
+    { difficulty: 'medium', role: 'Anxious Patient', avatar: '😟', dialogue: "Will this radiation treatment hurt? I'm really scared of the pain.", choices: [ { text: "You won't feel anything during the treatment itself. It's much like getting a regular X-ray.", outcome: { E: 10, K: 5, S: -5 }, feedback: "Excellent. This is reassuring, accurate, and uses a familiar analogy." }, { text: "That's a very common question. The radiation itself is painless, but some people develop skin soreness over time. We'll watch that closely together.", outcome: { E: 5, K: 10, S: -2 }, feedback: "Good. This is honest and sets realistic expectations while still being reassuring." }, { text: "It's a painless process, so there's nothing to be scared of.", outcome: { E: -5, S: 2 }, feedback: "While true, this dismisses the patient's feeling of being scared. Acknowledging their emotion is important." } ] },
+    { difficulty: 'medium', role: 'Irritated Patient', avatar: '😠', dialogue: "My skin is getting really red and sore! Are you sure you're not burning me?", choices: [ { text: "This skin reaction is a very common and expected side effect. Let's take a look and I'll get the nurse to see if you need some cream.", outcome: { E: 10, K: 5, S: -5 }, feedback: "Perfect. You validated their concern, provided a correct explanation, and outlined an action plan." }, { text: "The oncologist said this would happen. You should have been expecting it.", outcome: { E: -15, S: 10 }, feedback: "This response is blaming and lacks empathy, which can damage trust." }, { text: "Let's check it. I'll also make sure the doctor sees it during your weekly visit. In the meantime, are you using the moisturizer as recommended?", outcome: { E: 5, K: 5, S: -3 }, feedback: "Good. This is proactive and reinforces prior education without being dismissive." } ] },
+    { difficulty: 'easy', role: 'Preceptor', avatar: '🧐', dialogue: "I see you're taking notes. Do you have any questions about what you're observing?", choices: [ { text: "Yes, I'm a bit confused about why this specific immobilization device was chosen over a standard wingboard.", outcome: { K: 10, S: -5 }, feedback: "Good! Asking specific, relevant questions shows you are engaged and thinking critically." }, { text: "No, everything is clear right now.", outcome: { K: -5, S: 2 }, feedback: "This is a missed opportunity. Preceptors expect questions; not asking any may seem like a lack of interest." }, { text: "Why do we have to use this one? It seems to take longer to set up.", outcome: { E: -5, S: 10 }, feedback: "This question's tone sounds critical rather than curious. Frame questions positively to foster a good relationship." } ] },
+    { difficulty: 'medium', role: 'Oncologist', avatar: '👩‍⚕️', dialogue: "The patient is ready for their boost. What's the standard total dose for a breast boost after WBRT?", choices: [ { text: "Usually it's an additional 10 Gy in 5 fractions, bringing the total to the tumor bed to around 60 Gy.", outcome: { K: 10, S: -5 }, feedback: "Excellent. A confident and correct answer." }, { text: "I believe it's 10 Gy, but I would always verify in the written prescription before setting up the plan.", outcome: { E: 2, K: 8, S: -8 }, feedback: "Very professional. You answered correctly while also vocalizing a critical safety check." }, { text: "I'm not sure, I would have to look it up.", outcome: { K: -5, S: 5 }, feedback: "While honest, a stronger answer includes how you would find the information and demonstrates some baseline knowledge." } ] },
+    { difficulty: 'easy', role: 'Claustrophobic Patient', avatar: '😨', dialogue: "I'm so nervous about being in that big room all by myself.", choices: [ { text: "That's a very common feeling. Remember, we'll be watching you on camera and can talk to you on the intercom. We're right here.", outcome: { E: 15, S: -10 }, feedback: "Excellent. You've normalized their fear, reminded them of safety systems, and provided strong reassurance." }, { text: "The treatment only takes a few minutes, you'll be out before you know it.", outcome: { E: -5, S: 2 }, feedback: "This minimizes the patient's feelings. While trying to be reassuring, it doesn't directly address their fear of being alone." }, { text: "I understand. Would you like to listen to some music during your treatment? We can put on a favorite radio station or CD for you.", outcome: { E: 10, S: -8 }, feedback: "A great therapeutic response. You've validated their feeling and offered a positive coping mechanism." } ] },
+    { difficulty: 'hard', role: 'Discouraged Patient', avatar: '😒', dialogue: "I really don't want to do this today. I don't think it's working anyway.", choices: [ { text: "I understand you're feeling discouraged. It's okay to feel that way. Why don't we have you speak with the doctor before we make any decisions?", outcome: { E: 15, K: 5, S: -10 }, feedback: "Perfect. You acknowledged their feelings, respected their autonomy, and followed the correct protocol by involving the physician." }, { text: "You have to have the treatment, it's on the schedule. We can't get behind.", outcome: { E: -15, S: 10 }, feedback: "This violates patient autonomy and focuses on logistics over patient care, causing stress and damaging trust." }, { text: "I hear you, but it's really important to stick with the plan. Let's just get today over with.", outcome: { E: -5, S: 5 }, feedback: "While well-intentioned, this response pressures the patient instead of exploring their concern. Deferring to the physician is the best course of action." } ] },
+    { difficulty: 'easy', role: 'Peer Therapist', avatar: '🤔', dialogue: "Hey, I'm having trouble understanding the isocenter calculation for this oblique setup. Could you explain it?", choices: [ { text: "Sure! It's all about the triangulation from the lasers to the tattoos. Let me walk you through how I think about it.", outcome: { K: 10, E: 5, S: -5 }, feedback: "Great teamwork. Explaining a concept solidifies your own knowledge and builds rapport." }, { text: "I'm a little busy right now, maybe ask the preceptor.", outcome: { E: -5, S: 5 }, feedback: "This comes across as unhelpful. Teamwork is essential in a clinical setting." }, { text: "Honestly, I'm a bit shaky on it too. Let's ask the preceptor together so we both get it right.", outcome: { K: 5, E: 10, S: -8 }, feedback: "Excellent response. It's okay not to know everything, and seeking correct information together is a professional and safe way to learn." } ] },
+    { difficulty: 'medium', role: 'Patient with Family Issue', avatar: '😩', dialogue: "I have to reschedule my appointment for tomorrow, my daughter is sick. Is that going to mess everything up?", choices: [ { text: "We strongly advise against breaking the treatment schedule. It can compromise the effectiveness.", outcome: { E: -10, S: 5 }, feedback: "While true, this response lacks empathy for the patient's difficult situation and may increase their anxiety." }, { text: "Family comes first. I completely understand. Let's talk to the front desk and find the best possible new time. We'll manage this.", outcome: { E: 15, S: -10 }, feedback: "Perfect. You showed empathy, reassured the patient, and directed them to the correct resource for a solution." }, { text: "You'll have to call the schedulers for that. I don't handle the appointments.", outcome: { E: -5, K: -2, S: 2 }, feedback: "This is dismissive. A better response would show more willingness to help, even if you're just pointing them in the right direction." } ] },
+    { difficulty: 'easy', role: 'Patient (Variant)', avatar: '😩', dialogue: "I need to reschedule my treatment this Friday. It's my chemo day and the oncologist wants them on separate days.", choices: [ { text: "Of course, that's a very common scheduling requirement. Let's get the schedulers to find a new spot for you right away. No problem.", outcome: { E: 10, K: 5, S: -8 }, feedback: "Excellent. You showed immediate understanding of a common clinical constraint and took action." }, { text: "Are you sure? We often do them on the same day.", outcome: { E: -5, K: -5, S: 5 }, feedback: "This questions the patient and the oncologist's directive, undermining trust. It's better to accept and act." }, { text: "Okay, but you need to make sure you call scheduling to sort it out.", outcome: { E: 0, S: 0 }, feedback: "This is a passive response. A more proactive and reassuring approach would be better." } ] },
+    { difficulty: 'medium', role: 'Patient with Misinformation', avatar: '🤨', dialogue: "I read online that I should be taking these special supplements to 'boost' the radiation's power. Should I start?", choices: [ { text: "That's an excellent question. It's really important to discuss any new medications or supplements with the doctor first, because some can interfere with treatment.", outcome: { E: 10, K: 10, S: -5 }, feedback: "Perfect. You empowered the patient to ask questions while giving a safe, correct answer and reinforcing the doctor's role." }, { text: "Whatever you read online is probably wrong. Just stick to what we tell you here.", outcome: { E: -10, S: 5 }, feedback: "This response is condescending and discourages the patient from bringing up valid concerns in the future." }, { text: "Absolutely not. You should never take any supplements during treatment without clearing it with the oncologist first.", outcome: { K: 8, S: -2 }, feedback: "While technically correct, the tone is a bit harsh. A more collaborative approach is better for patient trust." } ] },
+    { difficulty: 'medium', role: 'Dosimetrist', avatar: '💻', dialogue: "We have to re-plan Mrs. Gable's treatment. Can you confirm the prescription and what you've treated so far?", choices: [ { text: "Let me pull up her chart right now. She was prescribed 50 Gy in 25 fractions and has completed 10 so far. One moment while I verify that.", outcome: { K: 10, S: -5 }, feedback: "Excellent. You are prepared, professional, and understand the importance of verification." }, { text: "I'm pretty sure she's had 10 treatments.", outcome: { K: -5, S: 5 }, feedback: "Never rely on memory for critical information. Always state that you will verify with the patient's official chart." }, { text: "Oh, is there a problem with her plan? What's wrong?", outcome: { E: -2, S: 8 }, feedback: "This response can create unnecessary drama or anxiety. Stick to providing the requested information professionally." } ] },
+    { difficulty: 'hard', role: 'Harsh Preceptor', avatar: '😠', dialogue: "That was a sloppy setup. Your table angles were off and you were slow. You need to be better.", choices: [ { text: "You're right. I was struggling with the angles. Can you show me the technique you prefer so I can improve?", outcome: { K: 10, E: 5, S: 0 }, feedback: "Excellent response. You accepted the criticism, didn't make excuses, and proactively asked for help. This shows maturity." }, { text: "I was trying my best. There's no need to be so harsh.", outcome: { E: -10, S: 15 }, feedback: "This is a defensive reaction that will damage your relationship with your preceptor. Focus on the substance of the feedback, not the tone." }, { text: "I'm sorry. I'll be faster next time.", outcome: { E: 0, S: 5 }, feedback: "This is an apology, but it's weak. It doesn't address how you will improve, which is the goal of the feedback." } ] },
+    { difficulty: 'medium', role: 'Patient Family Member', avatar: '👨‍👧', dialogue: "My father seems so tired all the time. Is this normal? He won't tell me if he's in pain.", choices: [ { text: "Fatigue is the most common side effect of radiation. It's tough, but it is normal. We always encourage patients to be open. Have you tried asking him in a different way?", outcome: { E: 15, K: 5, S: -8 }, feedback: "A great response. You educated the family member, normalized the experience, and offered a communication tip." }, { text: "I can't discuss another patient's condition, even with family.", outcome: { K: -5, S: 5 }, feedback: "While HIPAA is important, you can speak about general side effects without revealing personal information. This was a missed opportunity to provide support." }, { text: "He should be fine. It's just part of the process.", outcome: { E: -10, S: 2 }, feedback: "This is dismissive of the family member's valid concerns and doesn't offer any helpful information." } ] },
+    { difficulty: 'easy', role: 'Confused Patient', avatar: '🤔', dialogue: "The doctor mentioned something about 'cone-beam CT' but I don't get it. Isn't this a radiation machine, not a CT scanner?", choices: [ { text: "That's a great question! This machine can do both. The 'cone-beam CT' is a low-dose scan we do before treatment to make sure you're in the perfect position. It helps us be incredibly precise.", outcome: { K: 10, E: 5, S: -5 }, feedback: "Perfect. You explained a complex topic using simple, reassuring language." }, { text: "It's a type of image guidance. We use it for verification.", outcome: { K: 5 }, feedback: "This is correct, but it's full of jargon. A better explanation would be more patient-friendly." }, { text: "Don't worry about the technical terms. Just know that we're making sure everything is lined up correctly.", outcome: { E: -5, K: -5, S: 2 }, feedback: "This avoids the question and can make the patient feel like their question wasn't important." } ] }
+];
+
+// --- Assessment Logic ---
+
+const getChoicePoints = (outcome) => (outcome.E || 0) + (outcome.K || 0) - (outcome.S || 0);
+
+function prepareScenarios() {
+    allScenarios.forEach(scenario => {
+        const points = scenario.choices.map(choice => getChoicePoints(choice.outcome));
+        scenario.maxPoints = Math.max(...points);
+    });
+}
+
+function init() {
+    startScreen.classList.remove('hidden');
+    reportScreen.classList.add('hidden');
+    
+    stats = { empathy: 50, knowledge: 50, stress: 20 };
+    score = { user: 0, max: 0 };
+    conversationCounter = 0;
+    usedScenarios.clear();
+    performanceHistory = [];
+    
+    updateUI();
+    assessmentRunning = true;
+}
+
+function startAssessment() {
+    startScreen.classList.add('hidden');
+    loadScenario();
+}
+
+function getNextScenario() {
+    // 1. Calculate recent performance
+    let averagePerf = 0;
+    if (performanceHistory.length > 0) {
+        averagePerf = performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length;
+    } else {
+        averagePerf = 75; // Default to medium difficulty at the start
+    }
+    
+    // 2. Determine desired difficulty
+    let desiredDifficulty;
+    if (averagePerf > 85) desiredDifficulty = 'hard';
+    else if (averagePerf < 65) desiredDifficulty = 'easy';
+    else desiredDifficulty = 'medium';
+
+    // 3. Find a scenario of the desired difficulty
+    let pool = allScenarios.filter(s => s.difficulty === desiredDifficulty && !usedScenarios.has(s));
+
+    // 4. Fallback if no scenarios of desired difficulty are available
+    if (pool.length === 0) pool = allScenarios.filter(s => s.difficulty === 'medium' && !usedScenarios.has(s));
+    if (pool.length === 0) pool = allScenarios.filter(s => s.difficulty === 'easy' && !usedScenarios.has(s));
+    if (pool.length === 0) pool = allScenarios.filter(s => !usedScenarios.has(s)); // Get any remaining scenario
+    
+    const scenario = pool[Math.floor(Math.random() * pool.length)];
+    usedScenarios.add(scenario);
+    return scenario;
+}
+
+function loadScenario() {
+    if (conversationCounter >= totalConversations) {
+        generateReport();
+        return;
+    }
+    conversationCounter++;
+    
+    const scenario = getNextScenario();
+    if (!scenario) { // Should not happen with fallback, but good practice
+        generateReport();
+        return;
+    }
+
+    score.max += scenario.maxPoints;
+
+    roleEl.textContent = scenario.role;
+    avatarEl.textContent = scenario.avatar;
+    dialogueEl.textContent = scenario.dialogue;
+    feedbackTextEl.textContent = '';
+    feedbackTextEl.className = 'feedback-text';
+    choiceAreaEl.innerHTML = '';
+
+    const shuffledChoices = [...scenario.choices].sort(() => Math.random() - 0.5);
+
+    shuffledChoices.forEach(choice => {
+        const button = document.createElement('button');
+        button.className = 'choice-button';
+        button.textContent = choice.text;
+        button.onclick = () => selectChoice(choice, scenario.maxPoints); // Pass max points for this question
+        choiceAreaEl.appendChild(button);
+    });
+
+    updateUI();
+}
+
+function selectChoice(choice, questionMaxPoints) {
+    if (!assessmentRunning) return;
+    
+    document.querySelectorAll('.choice-button').forEach(btn => btn.classList.add('disabled'));
+
+    const points = getChoicePoints(choice.outcome);
+    score.user += points;
+
+    // Update performance history
+    const questionPerf = (points / questionMaxPoints) * 100;
+    performanceHistory.push(questionPerf);
+    if (performanceHistory.length > 3) {
+        performanceHistory.shift(); // Keep only the last 3 scores
+    }
+
+    stats.empathy = Math.max(0, Math.min(100, stats.empathy + (choice.outcome.E || 0)));
+    stats.knowledge = Math.max(0, Math.min(100, stats.knowledge + (choice.outcome.K || 0)));
+    stats.stress = Math.max(0, Math.min(100, stats.stress + (choice.outcome.S || 0)));
+
+    feedbackTextEl.textContent = choice.feedback;
+    const totalScore = (choice.outcome.E || 0) + (choice.outcome.K || 0) + (-(choice.outcome.S || 0) / 2);
+    if (totalScore >= 10) {
+        feedbackTextEl.classList.add('feedback-correct');
+    } else if (totalScore < 0) {
+        feedbackTextEl.classList.add('feedback-incorrect');
+    } else {
+        feedbackTextEl.classList.add('feedback-neutral');
+    }
+    
+    updateUI();
+    setTimeout(loadScenario, 3500);
+}
+
+function updateUI() {
+    empathyBar.style.width = `${stats.empathy}%`;
+    knowledgeBar.style.width = `${stats.knowledge}%`;
+    stressBar.style.width = `${stats.stress}%`;
+    conversationCounterEl.textContent = `${conversationCounter} / ${totalConversations}`;
+}
+
+function generateReport() {
+    assessmentRunning = false;
+    
+    const finalPercentage = score.max > 0 ? Math.max(0, Math.round((score.user / score.max) * 100)) : 0;
+    let performanceLevel, mainFeedback;
+
+    if (finalPercentage >= 96) {
+        performanceLevel = "Excellent";
+        mainFeedback = "Exceptional performance. You have demonstrated a masterful balance of clinical knowledge, patient empathy, and personal resilience, achieving the highest standard of professional communication.";
+    } else if (finalPercentage >= 80) {
+        performanceLevel = "Competent";
+        mainFeedback = "Strong, competent performance. You have shown that you are a capable and thoughtful practitioner. Your choices were consistently professional and effective, meeting all core competencies for your role.";
+    } else {
+        performanceLevel = "Needs Improvement";
+        mainFeedback = "This assessment indicates a need for improvement. While you navigated the conversations, there are clear opportunities for development in key areas. Review the specific feedback below to create a targeted learning plan.";
+    }
+    
+    document.getElementById('finalScore').textContent = `${finalPercentage}%`;
+    // RTApps platform integration (plan 4b): report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score.user);
+    document.getElementById('performance-level').textContent = performanceLevel;
+    document.getElementById('finalEmpathy').textContent = stats.empathy;
+    document.getElementById('finalKnowledge').textContent = stats.knowledge;
+    document.getElementById('finalStress').textContent = stats.stress;
+
+    let empathyFeedback, knowledgeFeedback, stressFeedback;
+    if (stats.empathy > 75) {
+        empathyFeedback = "Your empathetic responses are a key strength. You consistently validate feelings, build trust, and treat patients with dignity. This ability to connect is invaluable.";
+    } else if (stats.empathy < 45) {
+        empathyFeedback = "Area for development: Empathy. At times, your responses were dismissive or focused on logistics over the patient's emotional state. Practice active listening and explicitly acknowledging the other person's feelings before responding.";
+    } else {
+        empathyFeedback = "You show a good baseline of empathy, understanding when to be reassuring. To improve, focus on consistently making empathy the first step in your response, especially in tense situations.";
+    }
+
+    if (stats.knowledge > 75) {
+        knowledgeFeedback = "Your technical and procedural knowledge is excellent. You provide accurate information, understand safety protocols, and communicate effectively with colleagues.";
+    } else if (stats.knowledge < 45) {
+        knowledgeFeedback = "Area for development: Clinical Knowledge. You seemed unsure of some technical details or professional protocols. Continuous study and asking questions of preceptors are crucial for building the confidence that comes from knowing your material.";
+    } else {
+        knowledgeFeedback = "You have a solid working knowledge of the clinical environment. To advance, push yourself to understand the 'why' behind procedures, not just the 'how'. This will improve your ability to educate patients and problem-solve.";
+    }
+    
+    if (stats.stress > 60) {
+        stressFeedback = "Area for development: Stress Management. You allowed stressful situations, like harsh feedback or patient frustration, to significantly impact you. Developing resilience and professional detachment is key to long-term success and avoiding burnout.";
+    } else if (stats.stress < 30) {
+        stressFeedback = "You managed your stress levels exceptionally well, remaining calm and professional even when faced with challenging interactions. This resilience is a critical asset.";
+    } else {
+        stressFeedback = "You handle the day-to-day pressures of the job well. Be mindful of situations that do cause your stress to rise and have coping strategies ready, but overall you are on a good track.";
+    }
+
+    document.getElementById('feedback-main').textContent = mainFeedback;
+    document.getElementById('feedback-empathy').textContent = empathyFeedback;
+    document.getElementById('feedback-knowledge').textContent = knowledgeFeedback;
+    document.getElementById('feedback-stress').textContent = stressFeedback;
+
+    reportScreen.classList.remove('hidden');
+}
+
+// --- Event Listeners ---
+startButton.addEventListener('click', startAssessment);
+restartButton.addEventListener('click', init);
+printReportButton.addEventListener('click', () => {
+    window.print();
+});
+
+// --- Initial Call ---
+prepareScenarios();
+init();
+
+</script>
+</body>
+</html>

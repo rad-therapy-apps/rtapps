@@ -1,7 +1,7 @@
-"""What this file does: builds snapshots for quiz, flashcards, matching, sequencing, and
-calculator activities; strips answers from them; extracts gradeable items and human labels;
-provides a generalized interface for all activity kinds that the publish service then
-extends.
+"""What this file does: builds snapshots for quiz, flashcards, matching, sequencing,
+calculator, and external activities; strips answers from them; extracts gradeable items and
+human labels; provides a generalized interface for all activity kinds that the publish
+service then extends.
 
 Used here and why: these functions are the generalization of the lesson pipeline
 (`app.content.snapshot.build_snapshot` et al) to cover the new activity kinds added in
@@ -207,6 +207,7 @@ async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[
             "external": {
                 "arcade_slug": activity.config.get("arcade_slug"),
                 "max_score": activity.config.get("max_score"),
+                "completion_only": activity.config.get("completion_only", False),
                 "subject": subject,
             },
         }

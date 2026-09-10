@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Care Commander</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0a23;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        canvas {
+            background-color: #e8f4f8; /* Lighter clinic background */
+            border: 2px solid #00ffdd;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffdd;
+            cursor: pointer;
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 1000px;
+            background: #001f3f;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00ffdd;
+        }
+        .ui-element {
+            text-align: center;
+        }
+        .ui-element h3 {
+            color: #00ffdd;
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+        .ui-element p, .ui-element div {
+            font-size: 1.5em;
+        }
+        .progress-bar-container {
+            width: 200px;
+            background-color: #2a2a57;
+            border-radius: 5px;
+            border: 1px solid #00ffdd;
+            overflow: hidden;
+            height: 30px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #4caf50;
+            border-radius: 3px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #00ffdd;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px #00ffdd;
+            z-index: 100;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal h2 {
+            font-size: 2em;
+            color: #00ffdd;
+            margin-bottom: 20px;
+        }
+        .modal p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .modal button, .quiz-option {
+            background: linear-gradient(145deg, #0d7377, #14ffec);
+            color: #0a0a23;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(20, 255, 236, 0.4);
+            margin-top: 10px;
+        }
+        .modal button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 255, 236, 0.6);
+        }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 1em;
+            padding: 12px 20px;
+        }
+        .quiz-option.correct {
+             background: linear-gradient(145deg, #4caf50, #81c784);
+        }
+        .quiz-option.incorrect {
+             background: linear-gradient(145deg, #f44336, #e57373);
+        }
+        .feedback {
+            margin-top: 15px;
+            font-size: 1em;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .feedback.correct {
+            background-color: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4caf50;
+        }
+        .feedback.incorrect {
+            background-color: rgba(244, 67, 54, 0.3);
+            border: 1px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div class="ui-panel">
+            <div class="ui-element">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="ui-element">
+                <h3>Clinic Performance</h3>
+                <div class="progress-bar-container">
+                    <div id="performanceBar" class="progress-bar"></div>
+                </div>
+            </div>
+            <div class="ui-element">
+                <h3>Patients Served (Good/Bad)</h3>
+                <p id="patientCounter">0 / 0</p>
+            </div>
+            <div class="ui-element">
+                <h3>Day Timer</h3>
+                <p id="timer">120</p>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>Care Commander</h2>
+        <p>Welcome to the clinic! Patients are arriving with various needs. Click a patient, then click the correct station to address their need. Prioritize STAT patients (🚨) as they are urgent! Manage your time and clinic performance to win.</p>
+        <button id="startButton">Start Day</button>
+    </div>
+    
+    <div id="quizScreen" class="modal hidden">
+        <h2 id="quizTitle">Patient Question</h2>
+        <p id="quizQuestion"></p>
+        <div id="quizOptions"></div>
+        <div id="quizFeedback" class="hidden"></div>
+    </div>
+
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle">End of Day!</h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Start New Day</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Canvas and Context ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// --- Modals and UI ---
+const startScreen = document.getElementById('startScreen');
+const quizScreen = document.getElementById('quizScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const scoreEl = document.getElementById('score');
+const performanceBar = document.getElementById('performanceBar');
+const timerEl = document.getElementById('timer');
+const finalScoreEl = document.getElementById('finalScore');
+const patientCounterEl = document.getElementById('patientCounter');
+
+// --- Game State ---
+let gameRunning = false;
+let score = 0;
+let clinicPerformance = 100;
+let gameTimer = 120;
+let patients = [];
+let selectedPatient = null;
+let gameInterval;
+let spawnInterval;
+let activeQuizCallback = null;
+let animationFrameId;
+let patientsCorrect = 0;
+let patientsIncorrect = 0;
+
+// --- Question Data ---
+const questions = {
+  vitals: [ { question: "A patient reports dizziness. What is the first vital sign you should check?", options: ["Blood Pressure", "Temperature", "Weight", "Height"], correctAnswer: 0, feedback: "Correct! Dizziness can be a sign of hypotension (low blood pressure)." } ],
+  sideEffect: [ { question: "What is a key instruction for general skin care during radiation therapy?", options: ["Wash gently with lukewarm water and mild soap", "Scrub the area vigorously", "Apply any lotion you like", "Expose the area to sunlight"], correctAnswer: 0, feedback: "Correct! Gentle washing helps protect sensitive skin." } ],
+  nutrition: [ { question: "Who can patients be referred to for nutritional support during therapy?", options: ["Dietitian", "Pharmacist", "Radiation physicist", "Billing specialist"], correctAnswer: 0, feedback: "Correct! Dietitians provide nutritional support." } ],
+  consent: [ { question: "What does a DNR order mean?", options: ["Do Not Resuscitate", "Do Not Remove", "Doctor Needs Review", "Direct Nurse Response"], correctAnswer: 0, feedback: "Correct! DNR stands for Do Not Resuscitate." } ],
+  positioning: [ { question: "What is the purpose of indexing immobilization devices?", options: ["To ensure consistent placement on the treatment couch", "To label the device", "To increase weight", "To improve billing"], correctAnswer: 0, feedback: "Correct! Indexing ensures reproducibility."} ],
+  verification: [ { question: "What does IGRT stand for?", options: ["Image Guided Radiation Therapy", "Immediate Gamma Radiation Treatment", "Integrated Gamma Ray Therapy", "Image Gated Radio Therapy"], correctAnswer: 0, feedback: "Correct! IGRT uses imaging to guide treatment." } ],
+  scheduling: [ { question: "How should errors in the treatment record be corrected?", options: ["Draw a single line through the error, initial, and date", "Erase the error", "Use white-out", "Leave it uncorrected"], correctAnswer: 0, feedback: "Correct! Proper correction maintains record integrity." } ],
+  medOnc: [ { question: "What is a common acute side effect of many chemotherapy agents?", options: ["Myelosuppression (low blood counts)", "Improved hearing", "Weight gain", "Thicker hair"], correctAnswer: 0, feedback: "Correct! Chemotherapy often affects rapidly dividing cells, including those in the bone marrow." } ],
+  socialWork: [ { question: "A patient expresses significant anxiety about their diagnosis. Who is the most appropriate professional to refer them to?", options: ["Social Worker or Psychologist", "Billing department", "Another patient", "The security guard"], correctAnswer: 0, feedback: "Correct! Social workers are trained to provide psychosocial support and connect patients with resources." } ],
+  radiology: [ { question: "Which imaging modality provides the best soft-tissue contrast for treatment planning?", options: ["MRI", "CT", "Plain X-ray", "Ultrasound"], correctAnswer: 0, feedback: "Correct! MRI excels at differentiating soft tissues." } ],
+  stat: [ { question: "A patient develops sudden shortness of breath and facial swelling. This is likely a:", options: ["Severe allergic reaction", "Mild side effect", "Normal response", "Sign of hunger"], correctAnswer: 0, feedback: "Correct! This is a medical emergency. Activate emergency protocols." } ]
+};
+
+const needTypes = [
+    { type: 'vitals', station: 'Nurse Station', icon: '🌡️' },
+    { type: 'sideEffect', station: 'Nurse Station', icon: '🩹' },
+    { type: 'nutrition', station: 'Dietitian', icon: '🍎' },
+    { type: 'consent', station: 'Doctor\'s Office', icon: '✍️' },
+    { type: 'positioning', station: 'Treatment Room', icon: '🎯' },
+    { type: 'verification', station: 'Treatment Room', icon: '📷' },
+    { type: 'scheduling', station: 'Front Desk', icon: '📅' },
+    { type: 'medOnc', station: 'Medical Oncology', icon: '💊' },
+    { type: 'socialWork', station: 'Social Worker', icon: '🤝' },
+    { type: 'radiology', station: 'Radiology/Imaging', icon: '🩻' },
+    // New STAT type
+    { type: 'stat', station: 'Doctor\'s Office', icon: '🚨'}
+];
+
+const stations = [
+    { name: 'Nurse Station', x: 25, y: 50, w: 175, h: 100, color: '#f5b7b1' },
+    { name: 'Doctor\'s Office', x: 25, y: 175, w: 175, h: 100, color: '#aed6f1' },
+    { name: 'Dietitian', x: 25, y: 300, w: 175, h: 100, color: '#d5f5e3' },
+    { name: 'Social Worker', x: 25, y: 425, w: 175, h: 100, color: '#e5e7eb' },
+    { name: 'Front Desk', x: 800, y: 50, w: 175, h: 100, color: '#f9e79f' },
+    { name: 'Medical Oncology', x: 800, y: 175, w: 175, h: 100, color: '#f5cba7' },
+    { name: 'Radiology/Imaging', x: 800, y: 300, w: 175, h: 100, color: '#d7dbdd' },
+    { name: 'Treatment Room', x: 225, y: 425, w: 550, h: 150, color: '#d2b4de' }
+];
+
+const waitingRoom = { x: 300, y: 50, w: 400, h: 350 };
+
+class Patient {
+    constructor(id, isStat = false) {
+        this.id = id;
+        this.x = waitingRoom.x + waitingRoom.w / 2;
+        this.y = waitingRoom.y + waitingRoom.h;
+        this.targetX = this.x;
+        this.targetY = this.y - (Math.random() * waitingRoom.h * 0.8) - 30;
+        this.radius = 20;
+        this.speed = 2;
+        this.isStat = isStat;
+        this.need = isStat ? needTypes.find(n => n.type === 'stat') : needTypes[Math.floor(Math.random() * (needTypes.length - 1))]; // Exclude STAT for regular patients
+        this.satisfaction = 100;
+        this.state = 'entering'; 
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = selectedPatient === this ? '#00ffdd' : this.isStat ? '#e74c3c' : '#3498db';
+        ctx.fill();
+        ctx.strokeStyle = this.isStat ? '#fff' : '#fff';
+        ctx.lineWidth = this.isStat ? 3 : 2;
+        ctx.stroke();
+
+        ctx.font = '30px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.need.icon, this.x, this.y - this.radius - 15);
+        
+        ctx.fillStyle = '#ccc';
+        ctx.fillRect(this.x - this.radius, this.y + this.radius + 5, this.radius * 2, 5);
+        ctx.fillStyle = this.satisfaction > 50 ? '#2ecc71' : this.satisfaction > 20 ? '#f1c40f' : '#e74c3c';
+        ctx.fillRect(this.x - this.radius, this.y + this.radius + 5, (this.radius * 2) * (this.satisfaction / 100), 5);
+    }
+
+    update() {
+        if (this.state !== 'atStation') {
+            const dx = this.targetX - this.x;
+            const dy = this.targetY - this.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist > this.speed) {
+                this.x += (dx / dist) * this.speed;
+                this.y += (dy / dist) * this.speed;
+            } else {
+                this.x = this.targetX;
+                this.y = this.targetY;
+                if (this.state === 'entering') {
+                    this.state = 'waiting';
+                } else if (this.state === 'moving') {
+                    this.state = 'atStation';
+                    handleStationArrival(this);
+                } else if (this.state === 'leaving') {
+                    patients = patients.filter(p => p.id !== this.id);
+                }
+            }
+        }
+        
+        if (this.state === 'waiting') {
+            const satisfactionDrain = this.isStat ? 0.2 : 0.05; // STAT patients lose satisfaction faster
+            this.satisfaction -= satisfactionDrain;
+            if (this.satisfaction <= 0) {
+                patientsIncorrect++;
+                this.leave(false); 
+                clinicPerformance -= 15; // Higher penalty for losing a patient
+            }
+        }
+        
+        this.draw();
+    }
+    
+    goToStation(station) {
+        this.state = 'moving';
+        this.targetX = station.x + station.w / 2;
+        this.targetY = station.y + station.h / 2;
+    }
+
+    leave(happy) {
+        this.state = 'leaving';
+        this.targetX = waitingRoom.x + waitingRoom.w / 2;
+        this.targetY = canvas.height + 50;
+        if(happy) score += this.isStat ? 200 : 100; // Bonus for STAT
+    }
+}
+
+
+// --- Game Logic ---
+function init() {
+    startScreen.classList.add('hidden');
+    score = 0;
+    clinicPerformance = 100;
+    gameTimer = 120;
+    patients = [];
+    patientsCorrect = 0;
+    patientsIncorrect = 0;
+    selectedPatient = null;
+    gameRunning = true;
+    
+    spawnPatient();
+    spawnInterval = setInterval(spawnPatient, 8000);
+    gameInterval = setInterval(gameTick, 1000);
+    
+    if(animationFrameId) cancelAnimationFrame(animationFrameId);
+    gameLoop();
+}
+
+function gameTick() {
+    if (!gameRunning) return;
+    gameTimer--;
+    updateUI();
+    if (gameTimer <= 0) {
+        endGame(true);
+    }
+}
+
+function spawnPatient() {
+    if (!gameRunning) return;
+    if (patients.length < 7) {
+        const isStat = Math.random() < 0.2; // 20% chance of being a STAT patient
+        patients.push(new Patient(Date.now(), isStat));
+    }
+}
+
+function updateUI() {
+    scoreEl.textContent = score;
+    timerEl.textContent = gameTimer;
+    patientCounterEl.textContent = `${patientsCorrect} / ${patientsIncorrect}`;
+    performanceBar.style.width = clinicPerformance + '%';
+    if (clinicPerformance < 30) {
+        performanceBar.style.backgroundColor = '#e74c3c';
+    } else if (clinicPerformance < 60) {
+        performanceBar.style.backgroundColor = '#f1c40f';
+    } else {
+        performanceBar.style.backgroundColor = '#2ecc71';
+    }
+    
+    if (clinicPerformance <= 0) {
+        endGame(false);
+    }
+}
+
+function handleStationArrival(patient) {
+    const stationName = stations.find(s => 
+        patient.x > s.x && patient.x < s.x + s.w &&
+        patient.y > s.y && patient.y < s.y + s.h
+    )?.name;
+
+    if (stationName === patient.need.station) {
+        activeQuizCallback = (correct) => {
+            if (correct) {
+                patientsCorrect++;
+                patient.leave(true);
+                clinicPerformance = Math.min(100, clinicPerformance + 5);
+            } else {
+                patientsIncorrect++;
+                patient.state = 'waiting';
+                patient.targetX = waitingRoom.x + Math.random() * (waitingRoom.w - 40) + 20;
+                patient.targetY = waitingRoom.y + Math.random() * (waitingRoom.h - 40) + 20;
+                clinicPerformance -= 5;
+            }
+            activeQuizCallback = null;
+            selectedPatient = null;
+        };
+        showQuiz(patient.need.type);
+    } else {
+        patientsIncorrect++;
+        patient.state = 'waiting';
+        patient.targetX = waitingRoom.x + Math.random() * (waitingRoom.w - 40) + 20;
+        patient.targetY = waitingRoom.y + Math.random() * (waitingRoom.h - 40) + 20;
+        clinicPerformance -= 10;
+        score -= 25;
+        if (score < 0) score = 0;
+        selectedPatient = null;
+    }
+}
+
+function showQuiz(category) {
+    gameRunning = false; 
+    const questionPool = questions[category];
+    const question = questionPool[Math.floor(Math.random() * questionPool.length)];
+    
+    document.getElementById('quizQuestion').textContent = question.question;
+    const optionsContainer = document.getElementById('quizOptions');
+    optionsContainer.innerHTML = '';
+    
+    question.options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.classList.add('quiz-option');
+        button.onclick = () => handleAnswer(index === question.correctAnswer, question.feedback);
+        optionsContainer.appendChild(button);
+    });
+
+    document.getElementById('quizFeedback').classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+}
+
+function handleAnswer(isCorrect, feedback) {
+    const feedbackEl = document.getElementById('quizFeedback');
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach(button => button.disabled = true);
+
+    feedbackEl.innerHTML = `<p class="feedback ${isCorrect ? 'correct' : 'incorrect'}">${feedback}</p>`;
+    feedbackEl.classList.remove('hidden');
+    
+    setTimeout(() => {
+        quizScreen.classList.add('hidden');
+        if (activeQuizCallback) {
+            activeQuizCallback(isCorrect);
+        }
+        gameRunning = true; 
+        if(!animationFrameId) {
+             gameLoop();
+        }
+    }, 2000);
+}
+
+function endGame(won) {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    clearInterval(spawnInterval);
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+    
+    const endTitleEl = document.getElementById('endTitle');
+    const endMessageEl = document.getElementById('endMessage');
+
+    if (won) {
+        if (clinicPerformance >= 100 && patientsIncorrect === 0) {
+            endTitleEl.textContent = "PERFECT DAY!";
+            endMessageEl.textContent = "Incredible! You managed the clinic perfectly with zero errors. Exceptional work!";
+        } else {
+            endTitleEl.textContent = "End of Day!";
+            endMessageEl.textContent = "Great job managing the clinic today!";
+        }
+    } else {
+        endTitleEl.textContent = "Clinic Overwhelmed!";
+        endMessageEl.textContent = "The clinic was overwhelmed by patient needs. Try again!";
+    }
+    
+    finalScoreEl.textContent = score;
+    endScreen.classList.remove('hidden');
+    // RTApps platform integration: report the run's score to the embedding page.
+    if (window.RTApps) window.RTApps.reportResult(score);
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#dcfce7';
+    ctx.fillRect(waitingRoom.x, waitingRoom.y, waitingRoom.w, waitingRoom.h);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.font = '24px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillText("Waiting Room", waitingRoom.x + waitingRoom.w / 2, waitingRoom.y + 30);
+
+    stations.forEach(s => {
+        ctx.fillStyle = s.color;
+        ctx.fillRect(s.x, s.y, s.w, s.h);
+        ctx.fillStyle = '#333';
+        ctx.font = '16px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(s.name, s.x + s.w / 2, s.y + s.h / 2);
+    });
+
+    if(gameRunning) {
+        patients.forEach(p => p.update());
+    } else {
+        patients.forEach(p => p.draw());
+    }
+    
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+function handleClick(event) {
+    if (!gameRunning) return;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    if (selectedPatient) {
+        const stationClicked = stations.find(s => mouseX > s.x && mouseX < s.x + s.w && mouseY > s.y && mouseY < s.y + s.h);
+        if (stationClicked) {
+            selectedPatient.goToStation(stationClicked);
+        } else {
+             selectedPatient = null;
+        }
+    } else {
+        let clickedPatient = null;
+        for (let i = patients.length - 1; i >= 0; i--) {
+            const p = patients[i];
+            if (p.state === 'waiting' && Math.hypot(mouseX - p.x, mouseY - p.y) < p.radius) {
+                clickedPatient = p;
+                break;
+            }
+        }
+        if (clickedPatient) {
+            selectedPatient = clickedPatient;
+        }
+    }
+}
+
+// --- Event Listeners ---
+startButton.addEventListener('click', init);
+restartButton.addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    init();
+});
+canvas.addEventListener('click', handleClick);
+
+</script>
+</body>
+</html>

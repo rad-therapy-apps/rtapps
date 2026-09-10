@@ -44,6 +44,10 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
     there, and creates 0 new users; the migrated-content + activity import counts (upserts,
     not get-or-create) stay identical across both calls."""
     first = await seed(db, settings)
+    # Captured BETWEEN the two calls: the "before the second call" activity total, so the
+    # comparison below actually exercises idempotency instead of comparing a count against
+    # itself (both reads would otherwise happen after both calls completed).
+    total_activities_first = await db.scalar(select(func.count()).select_from(Activity))
     second = await seed(db, settings)
     assert first.users_created == 13 and second.users_created == 0
     # Confirms the get-or-create check actually matched existing rows by email, rather
@@ -64,7 +68,6 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
     assert first.activities_imported == second.activities_imported == 93
     # Seeded get-or-create activities (calculators, arcade games) increase the total but
     # are created only once; one more activity now (Cell Defender).
-    total_activities_first = await db.scalar(select(func.count()).select_from(Activity))
     total_activities_second = await db.scalar(select(func.count()).select_from(Activity))
     assert total_activities_first == total_activities_second
 
@@ -351,6 +354,149 @@ async def test_seed_creates_cell_defender(db: AsyncSession, settings: Settings) 
     assert count == 1
 
 
+async def test_seed_creates_anatomy_atlas_adventure(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 1: Anatomy Atlas Adventure — published, kind external, access
+    practice, config with arcade_slug and max_score (5 cases x 100); subject is
+    sectional-anatomy; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Anatomy Atlas Adventure"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "anatomy-atlas", "max_score": 500}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Anatomy Atlas Adventure")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_dose_calc_dash(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 1: Dose Calc Dash — published, kind external, access practice,
+    config with arcade_slug and max_score (4 cases x 100); subject is
+    treatment-planning; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Dose Calc Dash"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "dose-calc-dash", "max_score": 400}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-planning"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Dose Calc Dash")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_adaptive_consultation_assessment(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4b batch 1: Adaptive Consultation Assessment — published, kind external,
+    access practice, config with arcade_slug and max_score (239, the sum of the 10
+    largest per-scenario maxPoints among its 14 scenarios — the true achievable ceiling
+    for a 10-round adaptive run); subject is patient-care; re-seeding creates it only
+    once."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.title == "Adaptive Consultation Assessment")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "adaptive-consultation", "max_score": 239}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "patient-care"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Adaptive Consultation Assessment")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_ethical_decision_making_simulator(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4b batch 1: Adaptive Ethical Decision-Making Simulator — published, kind
+    external, access practice, config with arcade_slug and max_score (50: 5 scenarios
+    played per run x 10 points, the uniform max across all 7 defined scenarios); subject
+    is ethics; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.title == "Adaptive Ethical Decision-Making Simulator")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "ethical-decisions", "max_score": 50}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "ethics"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Adaptive Ethical Decision-Making Simulator")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_legal_eagle_lineup(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 1: Legal Eagle Lineup — published, kind external, access practice,
+    config with arcade_slug and max_score (9 cases x 100); subject is ethics; re-seeding
+    creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Legal Eagle Lineup"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "legal-eagle", "max_score": 900}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "ethics"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Legal Eagle Lineup")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_vital_signs_challenge(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 1: Vital Signs Challenge — published, kind external, access
+    practice, config with arcade_slug and max_score (10 patients x 6 points/patient);
+    subject is patient-care; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Vital Signs Challenge"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "vital-signs", "max_score": 60}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "patient-care"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Vital Signs Challenge")
+    )
+    assert count == 1
+
+
 async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Settings) -> None:
     """At least one seeded activity still carries `import_notes` (the migrated legacy corpus
     re-scanned in Task 5 always flags some pages for a human pass), so the authoring
@@ -359,6 +505,402 @@ async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Set
     activities = (await db.scalars(select(Activity))).all()
     flagged = [a for a in activities if a.config.get("import_notes")]
     assert len(flagged) > 0
+
+
+async def test_seed_creates_care_commander(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 2: Care Commander — published, kind external, access practice,
+    config with arcade_slug and max_score (3000: 15 patients x 200 points max);
+    subject is patient-care; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Care Commander"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "care-commander", "max_score": 3000}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "patient-care"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Care Commander")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 2: Error Reporter — published, kind external, access practice,
+    config with arcade_slug and max_score (10825: perfect 25-case MASTERY ACHIEVED
+    playthrough, score/XP accumulate across cases and only reset on full restart);
+    subject is quality-management-and-safety; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Error Reporter"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "error-reporter", "max_score": 10825}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "quality-management-and-safety"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Error Reporter")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 2: QA Crusader — published, kind external, access practice,
+    config with arcade_slug and max_score (10000: Level 3's win floor of 8000 plus a
+    bounded overshoot allowance, since reportResult fires once per level at time-up,
+    not the instant the target score is crossed); subject is quality-management-and-safety;
+    re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "QA Crusader"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "qa-crusader", "max_score": 10000}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "quality-management-and-safety"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "QA Crusader")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 2: Safety Supervisor — published, kind external, access practice,
+    config with arcade_slug and max_score (1900: 19 hazards x 100 points);
+    subject is radiation-protection; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Safety Supervisor"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "safety-supervisor", "max_score": 1900}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-protection"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Safety Supervisor")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_procedure_pursuit(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 2: Procedure Pursuit — published, kind external, access practice,
+    config with arcade_slug and max_score (1650: 9 checkpoints x 100 + 5 timed x 150);
+    subject is treatment-delivery-procedures; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Procedure Pursuit"))
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "procedure-pursuit", "max_score": 1650}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Procedure Pursuit")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_anatomy_angler(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 3: Anatomy Angler — published, kind external, access practice,
+    config with arcade_slug and max_score (2000: unbounded heuristic cap, strong-session
+    estimate per audit); subject is sectional-anatomy; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Anatomy Angler")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "anatomy-angler", "max_score": 2000}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Anatomy Angler")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_side_effect_sorcerer(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 3: Side Effect Sorcerer — published, kind external, access practice,
+    config with arcade_slug and max_score (859: fixed enemy count 6 waves, sum derived);
+    subject is radiation-biology; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Side Effect Sorcerer"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "side-effect-sorcerer", "max_score": 859}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-biology"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Side Effect Sorcerer")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_gantry_position_guessing_game(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4b batch 3: Gantry Position Guessing Game — published, kind external, access
+    practice, config with arcade_slug and max_score (10: perfect streak of 10 correct);
+    subject is treatment-delivery-procedures; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Gantry Position Guessing Game"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "gantry-game", "max_score": 10}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Gantry Position Guessing Game")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_linac_component_identification(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4b batch 3: LINAC Component Identification — published, kind external, access
+    practice, config with arcade_slug and max_score (10: 10 components to identify);
+    subject is treatment-delivery-procedures; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "LINAC Component Identification"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "linac-parts", "max_score": 10}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "LINAC Component Identification")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_3_ssd_practice(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 3: SSD Practice - BEV — published, kind external, access practice,
+    config with arcade_slug and max_score (20: max user-configurable problems); subject is
+    treatment-planning; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "SSD Practice - BEV")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "ssd-practice", "max_score": 20}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-planning"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "SSD Practice - BEV")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_ct_borders(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: CT Simulation Border Challenge — published, kind external, access
+    practice, config with arcade_slug and max_score (10: MAX_CORRECT, the fixed win
+    condition); subject is sectional-anatomy; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "CT Simulation Border Challenge"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "ct-borders", "max_score": 10}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "CT Simulation Border Challenge")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_dosimetry_vocabulary(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: Dosimetry Vocabulary Game — published, kind external, access
+    practice, config with arcade_slug and max_score (22: vocabulary.length, the fixed
+    term bank shared by the multiple-choice/matching/audio-quiz modes); subject is
+    radiation-physics; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Dosimetry Vocabulary Game"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "dosimetry-vocabulary", "max_score": 22}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-physics"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Dosimetry Vocabulary Game")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_rad_units(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: Rad Units Challenge — published, kind external, access practice,
+    config with arcade_slug and max_score (20: radUnitsQuestions.length, identical across
+    the choice/matching/audio-quiz modes); subject is radiation-physics; re-seeding
+    creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Rad Units Challenge")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "rad-units", "max_score": 20}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "radiation-physics"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Rad Units Challenge")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_4_sectional_anatomy_quiz(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 4: Sectional Anatomy Quiz — published, kind external, access
+    practice, config with arcade_slug and max_score (20: the largest mode's question
+    count, the comprehensive mode's 8 imaging-plane + 12 terminology questions); subject
+    is sectional-anatomy; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Sectional Anatomy Quiz"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "sectional-anatomy-quiz", "max_score": 20}
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "sectional-anatomy"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Sectional Anatomy Quiz")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_5_beam_sculptor(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 5: Beam Sculptor — published, kind external, access practice,
+    completion-only (no numeric score, binary approved/rejected verdict), config
+    carries completion_only: True and no max_score key; subject is treatment-planning;
+    re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Beam Sculptor")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "beam-sculptor", "completion_only": True}
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-planning"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Beam Sculptor")
+    )
+    assert count == 1
+
+
+async def test_seed_batch_5_onco_uno(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4b batch 5: OncoLife UNO: The Clinical Shift — published, kind external,
+    access practice, completion-only (turn-based card game, win/lose at hand-empty, no
+    numeric score), config carries completion_only: True and no max_score key; subject
+    is patient-care; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "OncoLife UNO: The Clinical Shift"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "onco-uno", "completion_only": True}
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "patient-care"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "OncoLife UNO: The Clinical Shift")
+    )
+    assert count == 1
 
 
 async def test_seed_refuses_prod(db: AsyncSession) -> None:

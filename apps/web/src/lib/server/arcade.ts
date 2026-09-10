@@ -7,7 +7,8 @@
  * How it fits the project: security foundation for the `/arcade/<slug>/[...file]` route that
  * serves legacy browser games — validates slugs, prevents `..` escape sequences, and blocks
  * unlisted file types (e.g., `.exe`, `.sh`).
- * Depends on: `node:path` (for POSIX/Windows path resolution and normalization).
+ * Depends on: `node:path` (for POSIX/Windows path resolution and normalization), `node:fs`
+ * (statSync/readFileSync for `readArcadeFile`).
  * Used by: `apps/web/src/routes/(app)/arcade/[slug]/[...file]/+server.ts`.
  */
 import fs from 'node:fs';

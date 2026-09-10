@@ -22,7 +22,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { api } from '$lib/lesson/api';
-	import { startAttempt, submitExternalAttempt, type PostFn } from '$lib/activity/attempts';
+	import {
+		startAttempt,
+		submitAttempt,
+		submitExternalAttempt,
+		type PostFn
+	} from '$lib/activity/attempts';
 	import type { ExternalSnapshot } from '$lib/activity/types';
 
 	let {
@@ -63,11 +68,33 @@
 		}
 	}
 
+	async function submitCompletion() {
+		if (attemptId === null) return;
+		status = 'submitting';
+		try {
+			await submitAttempt(post, attemptId);
+			percent = null;
+			status = 'done';
+		} catch (event) {
+			errorMessage = event instanceof Error ? event.message : 'Submit failed';
+			status = 'error';
+		}
+	}
+
 	function onMessage(event: MessageEvent) {
 		// Same-origin, right shape, numeric score, once, and only while the game is running.
 		if (event.origin !== window.location.origin) return;
 		const data = event.data as { type?: string; score?: unknown };
 		if (data?.type !== 'rtapps:result') return;
+		const completionOnly = snapshot.external.completion_only === true;
+		const isCompletion = (data as { completion?: unknown }).completion === true;
+		if (completionOnly !== isCompletion) return; // score↔completion cross-messages ignored
+		if (isCompletion) {
+			if (reportedScore !== null || status !== 'playing') return;
+			reportedScore = 0; // latch (value unused for completions)
+			void submitCompletion();
+			return;
+		}
 		// Contract: score must arrive as a finite number — no coercion of strings/null/booleans
 		// (Number() would turn null into 0 and "1200" into 1200; both must be ignored).
 		const score = data.score;
@@ -87,16 +114,28 @@
 {#if status === 'error'}
 	<p role="alert">{errorMessage}</p>
 	{#if reportedScore !== null}
-		<button onclick={() => void submitScore(reportedScore as number)}>Retry</button>
+		{#if snapshot.external.completion_only}
+			<button onclick={() => void submitCompletion()}>Retry</button>
+		{:else}
+			<button onclick={() => void submitScore(reportedScore as number)}>Retry</button>
+		{/if}
 	{/if}
 {:else if status === 'done'}
 	<section aria-label="result">
-		<p>Score recorded: {percent}%</p>
+		{#if percent === null}
+			<p>Completed</p>
+		{:else}
+			<p>Score recorded: {percent}%</p>
+		{/if}
 		<!-- Practice semantics: no pass/fail badge for games in 4a. -->
 	</section>
 {:else}
+	<!-- #52: src is the explicit /index.html, never the bare directory URL — SvelteKit
+	     308-strips a trailing slash regardless of route trailingSlash options (verified
+	     empirically), and a stripped URL breaks relative script/style refs in multi-file
+	     games. -->
 	<iframe
-		src={`/arcade/${snapshot.external.arcade_slug}/`}
+		src={`/arcade/${snapshot.external.arcade_slug}/index.html`}
 		title={snapshot.activity.title}
 		class="arcade-frame"
 	></iframe>

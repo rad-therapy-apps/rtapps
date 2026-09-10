@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Crusader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0a23;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+        canvas {
+            background-color: #001f3f;
+            border: 2px solid #00ffdd;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffdd;
+            cursor: pointer;
+        }
+        .ui-panel {
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+            gap: 1.5rem;
+            background: rgba(10, 10, 35, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ffdd;
+        }
+        .ui-element {
+            text-align: center;
+        }
+        .ui-element h3 {
+            color: #00ffdd;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px #00ffdd;
+        }
+        .ui-element p {
+            font-size: 1.8em;
+        }
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #00ffdd;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px #00ffdd;
+            z-index: 100;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal h2 { font-size: 2em; color: #00ffdd; margin-bottom: 20px; }
+        .modal p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }
+        .modal button, .quiz-option {
+            background: linear-gradient(145deg, #0d7377, #14ffec);
+            color: #0a0a23;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(20, 255, 236, 0.4);
+            margin-top: 10px;
+        }
+        .quiz-option { display: block; width: 100%; text-align: left; margin-bottom: 10px; font-size: 1em; padding: 12px 20px; }
+        .quiz-option.correct { background: linear-gradient(145deg, #4caf50, #81c784); }
+        .quiz-option.incorrect { background: linear-gradient(145deg, #f44336, #e57373); }
+        .feedback { margin-top: 15px; font-size: 1em; padding: 10px; border-radius: 5px; }
+        .feedback.correct { background-color: rgba(76, 175, 80, 0.3); border: 1px solid #4caf50; }
+        .feedback.incorrect { background-color: rgba(244, 67, 54, 0.3); border: 1px solid #f44336; }
+        #timerContainer { width: 100%; height: 10px; background-color: #2a2a57; border-radius: 5px; margin-top: 20px; border: 1px solid #00ffdd; }
+        #timerBar { height: 100%; width: 100%; background-color: #ffc107; border-radius: 5px; transition: width 0.1s linear; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+        <div class="ui-panel">
+            <div class="ui-element">
+                <h3>Level</h3>
+                <p id="level">1</p>
+            </div>
+            <div class="ui-element">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="ui-element">
+                <h3>Target</h3>
+                <p id="targetScore">2000</p>
+            </div>
+             <div class="ui-element">
+                <h3>Time Left</h3>
+                <p id="timer">90</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="startScreen" class="modal">
+        <h2>QA Crusader</h2>
+        <p>Welcome to the Quality Assurance challenge! Match 3 or more identical QA icons to clear them and earn points. Special "Tolerance Bombs" will appear—click them and answer the question correctly before their timer runs out to defuse them and get bonus points! Reach the target score before time runs out to advance.</p>
+        <button id="startButton">Start QA Check</button>
+    </div>
+    
+    <div id="quizScreen" class="modal hidden">
+        <h2 id="quizTitle">Tolerance Check!</h2>
+        <p id="quizQuestion"></p>
+        <div id="quizOptions"></div>
+        <div id="quizFeedback" class="hidden"></div>
+        <div id="timerContainer">
+            <div id="timerBar"></div>
+        </div>
+    </div>
+
+    <div id="endScreen" class="modal hidden">
+        <h2 id="endTitle"></h2>
+        <p id="endMessage"></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button id="restartButton">Try Again</button>
+    </div>
+
+    <script src="/arcade/rtapps-shim.js"></script>
+<script>
+// --- Setup ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('startScreen');
+const quizScreen = document.getElementById('quizScreen');
+const endScreen = document.getElementById('endScreen');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const scoreEl = document.getElementById('score');
+const levelEl = document.getElementById('level');
+const targetScoreEl = document.getElementById('targetScore');
+const timerEl = document.getElementById('timer');
+const finalScoreEl = document.getElementById('finalScore');
+
+// --- Game Constants ---
+const COLS = 8;
+const ROWS = 8;
+const TILE_SIZE = 75;
+canvas.width = COLS * TILE_SIZE;
+canvas.height = ROWS * TILE_SIZE;
+
+const ICONS = {
+    laser: '✨',
+    output: '📊',
+    door: '🚪',
+    audio: '🔊',
+    emergency: '🛑',
+    imaging: '📷'
+};
+
+const BOMB_ICON = '💣';
+
+const TILE_TYPES = Object.keys(ICONS);
+
+const questions = {
+    laser: { question: "What is the daily tolerance for laser alignment to the isocenter?", options: ["± 1 mm", "± 2 mm", "± 3 mm", "± 5 mm"], correctAnswer: 1, feedback: "Correct! Daily laser alignment tolerance is typically ±2 mm. Stricter tolerances (e.g., ±1 mm) apply for SRS/SBRT." },
+    output: { question: "What is the daily tolerance for radiation output constancy?", options: ["± 1%", "± 2%", "± 3%", "± 5%"], correctAnswer: 2, feedback: "Correct! Daily output constancy should be within ±3% of the baseline." },
+    door: { question: "What should happen when the treatment room door is opened during beam-on?", options: ["The beam terminates", "A warning sounds", "The dose rate is reduced", "Nothing happens"], correctAnswer: 0, feedback: "Correct! The door interlock must terminate the beam immediately for safety." },
+    audio: { question: "What is the primary purpose of the audio/visual system in the treatment room?", options: ["Patient entertainment", "Continuous patient monitoring", "Recording procedures for legal use", "Staff communication"], correctAnswer: 1, feedback: "Correct! It's for continuous monitoring of the patient's safety and well-being." },
+    emergency: { question: "Where are emergency beam-off switches typically located?", options: ["Only on the console", "Only inside the treatment room", "At the console, on the treatment unit, and near the room entrance", "In the physicist's office"], correctAnswer: 2, feedback: "Correct! E-stops must be accessible at multiple key locations." },
+    imaging: { question: "For IGRT, what is a typical tolerance for the coincidence of imaging and treatment isocenters?", options: ["< 1 mm", "< 3 mm", "< 5 mm", "< 1 cm"], correctAnswer: 0, feedback: "Correct! For high-precision techniques like SRS/SBRT, the tolerance is very tight, typically less than 1 mm."}
+};
+
+const levels = [
+    { level: 1, targetScore: 2000, time: 90, bombChance: 0.05 },
+    { level: 2, targetScore: 5000, time: 75, bombChance: 0.08 },
+    { level: 3, targetScore: 8000, time: 60, bombChance: 0.12 }
+];
+
+// --- Game State ---
+let board = [];
+let score = 0;
+let currentLevel = 0;
+let timeLeft = 0;
+let selectedTile = null;
+let gameRunning = false;
+let gameInterval;
+let activeBomb = null;
+let bombTimerInterval;
+let isCheckingMatches = false; // To prevent concurrent checks
+
+// --- Game Logic ---
+function createTile(row, col, type = null) {
+    const tileType = type || TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
+    return {
+        row,
+        col,
+        x: col * TILE_SIZE,
+        y: row * TILE_SIZE,
+        type: tileType,
+        isBomb: false,
+        bombTimer: 10,
+        isMatched: false,
+        scale: 1,
+        alpha: 1
+    };
+}
+
+function createBomb(row, col) {
+    const tile = createTile(row, col);
+    tile.isBomb = true;
+    tile.type = TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
+    return tile;
+}
+
+function initBoard() {
+    board = [];
+    for (let r = 0; r < ROWS; r++) {
+        board[r] = [];
+        for (let c = 0; c < COLS; c++) {
+            board[r][c] = createTile(r, c);
+        }
+    }
+    
+    let hasMatches = true;
+    while(hasMatches) {
+        let matches = findMatches();
+        if (matches.length > 0) {
+            matches.forEach(tile => {
+                board[tile.row][tile.col] = createTile(tile.row, tile.col);
+            });
+        } else {
+            hasMatches = false;
+        }
+    }
+}
+
+function drawTile(tile) {
+    ctx.save();
+    ctx.translate(tile.x + TILE_SIZE / 2, tile.y + TILE_SIZE / 2);
+    ctx.scale(tile.scale, tile.scale);
+    ctx.globalAlpha = tile.alpha;
+    
+    ctx.fillStyle = selectedTile && selectedTile.row === tile.row && selectedTile.col === tile.col ? '#00ffdd' : '#003366';
+    ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+    ctx.strokeStyle = '#005f73';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+
+    ctx.font = `${TILE_SIZE * 0.5}px Orbitron`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(ICONS[tile.type], 0, 0);
+
+    if (tile.isBomb) {
+        ctx.font = `${TILE_SIZE * 0.6}px Orbitron`;
+        ctx.fillText(BOMB_ICON, 0, 0);
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${TILE_SIZE * 0.3}px Orbitron`;
+        ctx.fillText(Math.ceil(tile.bombTimer), 0, TILE_SIZE * 0.3);
+    }
+    
+    ctx.restore();
+}
+
+function drawBoard() {
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (board[r][c]) {
+                drawTile(board[r][c]);
+            }
+        }
+    }
+}
+
+function findMatches() {
+    const matches = [];
+    // Horizontal
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS - 2; c++) {
+            if (board[r][c] && board[r][c+1] && board[r][c+2]) {
+                if (!board[r][c].isBomb && !board[r][c+1].isBomb && !board[r][c+2].isBomb && board[r][c].type === board[r][c+1].type && board[r][c+1].type === board[r][c+2].type) {
+                    for(let i=0; i<3; i++) matches.push(board[r][c+i]);
+                }
+            }
+        }
+    }
+    // Vertical
+    for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS - 2; r++) {
+            if (board[r][c] && board[r+1][c] && board[r+2][c]) {
+                 if (!board[r][c].isBomb && !board[r+1][c].isBomb && !board[r+2][c].isBomb && board[r][c].type === board[r+1][c].type && board[r+1][c].type === board[r+2][c].type) {
+                     for(let i=0; i<3; i++) matches.push(board[r+i][c]);
+                }
+            }
+        }
+    }
+    return [...new Set(matches)];
+}
+
+function markMatches(matches) {
+    if (matches.length === 0) return;
+    score += matches.length * 10;
+    matches.forEach(tile => {
+        tile.isMatched = true;
+    });
+}
+
+function shiftTiles() {
+    for (let c = 0; c < COLS; c++) {
+        let emptyRow = ROWS - 1;
+        for (let r = ROWS - 1; r >= 0; r--) {
+            if (board[r][c] && !board[r][c].isMatched) {
+                if (r !== emptyRow) {
+                    board[emptyRow][c] = board[r][c];
+                    board[emptyRow][c].row = emptyRow;
+                    board[emptyRow][c].y = emptyRow * TILE_SIZE;
+                }
+                emptyRow--;
+            }
+        }
+        for (let r = emptyRow; r >= 0; r--) {
+            board[r][c] = null;
+        }
+    }
+}
+
+function fillEmptyTiles() {
+    const levelConf = levels[currentLevel];
+    for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+            if (!board[r][c]) {
+                const isBomb = Math.random() < levelConf.bombChance;
+                board[r][c] = isBomb ? createBomb(r,c) : createTile(r, c);
+            }
+        }
+    }
+}
+
+async function handleTurn() {
+    if(isCheckingMatches) return;
+    isCheckingMatches = true;
+
+    let matches = findMatches();
+    while (matches.length > 0) {
+        markMatches(matches);
+        await animateMatches();
+        shiftTiles();
+        fillEmptyTiles();
+        await new Promise(res => setTimeout(res, 300));
+        matches = findMatches();
+    }
+
+    isCheckingMatches = false;
+}
+
+function animateMatches() {
+    return new Promise(resolve => {
+        const interval = setInterval(() => {
+            let stillAnimating = false;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const tile = board[r][c];
+                    if (tile && tile.isMatched) {
+                        tile.scale -= 0.1;
+                        if (tile.scale <= 0) {
+                            tile.scale = 0;
+                            board[r][c] = null;
+                        } else {
+                            stillAnimating = true;
+                        }
+                    }
+                }
+            }
+            if (!stillAnimating) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 30);
+    });
+}
+
+
+async function tileClick(e) {
+    if (!gameRunning || isCheckingMatches) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const col = Math.floor(x / TILE_SIZE);
+    const row = Math.floor(y / TILE_SIZE);
+    
+    const clickedTile = board[row][col];
+    if (!clickedTile) return;
+
+    if (clickedTile.isBomb) {
+        activeBomb = clickedTile;
+        showBombQuiz();
+        return;
+    }
+
+    if (selectedTile) {
+        const distRow = Math.abs(selectedTile.row - row);
+        const distCol = Math.abs(selectedTile.col - col);
+        if ((distRow === 1 && distCol === 0) || (distRow === 0 && distCol === 1)) {
+            // Swap tiles
+            [board[row][col], board[selectedTile.row][selectedTile.col]] = [board[selectedTile.row][selectedTile.col], board[row][col]];
+            
+            // Update positions
+            board[row][col].row = row; board[row][col].col = col;
+            board[selectedTile.row][selectedTile.col].row = selectedTile.row; board[selectedTile.row][selectedTile.col].col = selectedTile.col;
+            
+            await handleTurn();
+
+            // If no matches, swap back
+            if (!isCheckingMatches && board[row][col] && board[selectedTile.row][selectedTile.col] && findMatches().length === 0) {
+                [board[row][col], board[selectedTile.row][selectedTile.col]] = [board[selectedTile.row][selectedTile.col], board[row][col]];
+                 board[row][col].row = row; board[row][col].col = col;
+                 board[selectedTile.row][selectedTile.col].row = selectedTile.row; board[selectedTile.row][selectedTile.col].col = selectedTile.col;
+            }
+
+            selectedTile = null;
+        } else {
+            selectedTile = { row, col };
+        }
+    } else {
+        selectedTile = { row, col };
+    }
+}
+
+function showBombQuiz() {
+    gameRunning = false;
+    const questionData = questions[activeBomb.type];
+    const quizTitle = document.getElementById('quizTitle');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizOptions = document.getElementById('quizOptions');
+    const feedbackEl = document.getElementById('quizFeedback');
+    
+    quizTitle.textContent = "Tolerance Bomb!";
+    quizQuestion.textContent = questionData.question;
+    feedbackEl.classList.add('hidden');
+    quizOptions.innerHTML = '';
+    
+    questionData.options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.classList.add('quiz-option');
+        button.onclick = () => handleBombAnswer(index === questionData.correctAnswer, questionData.feedback);
+        quizOptions.appendChild(button);
+    });
+    
+    quizScreen.classList.remove('hidden');
+    startBombTimer();
+}
+
+function startBombTimer() {
+    clearInterval(bombTimerInterval);
+    const timerBar = document.getElementById('timerBar');
+    timerBar.style.width = '100%';
+    
+    bombTimerInterval = setInterval(() => {
+        if (activeBomb) {
+            activeBomb.bombTimer -= 0.1;
+            timerBar.style.width = (activeBomb.bombTimer / 10) * 100 + '%';
+            if (activeBomb.bombTimer <= 0) {
+                handleBombAnswer(false, "Bomb detonated! Too slow.");
+            }
+        }
+    }, 100);
+}
+
+function handleBombAnswer(isCorrect, feedback) {
+    clearInterval(bombTimerInterval);
+    const feedbackEl = document.getElementById('quizFeedback');
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach(button => button.disabled = true);
+
+    feedbackEl.innerHTML = `<p class="feedback ${isCorrect ? 'correct' : 'incorrect'}">${feedback}</p>`;
+    feedbackEl.classList.remove('hidden');
+
+    if (isCorrect) {
+        score += 500;
+        activeBomb.isBomb = false;
+        activeBomb.bombTimer = 10;
+    } else {
+        score -= 100;
+        if(score < 0) score = 0;
+        activeBomb.isMatched = true;
+    }
+    
+    // *** BUG FIX: Call handleTurn() after quiz is resolved ***
+    setTimeout(async () => {
+        quizScreen.classList.add('hidden');
+        activeBomb = null;
+        gameRunning = true;
+        await handleTurn(); // This will process the removed bomb and any resulting cascades.
+        gameLoop(); // Resume animation loop
+    }, 2000);
+}
+
+
+function gameLoop() {
+    if (!gameRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBoard();
+    updateUI();
+    requestAnimationFrame(gameLoop);
+}
+
+function updateUI() {
+    const levelConf = levels[currentLevel];
+    scoreEl.textContent = score;
+    levelEl.textContent = levelConf.level;
+    targetScoreEl.textContent = levelConf.targetScore;
+    timerEl.textContent = Math.ceil(timeLeft);
+}
+
+function startLevel() {
+    const levelConf = levels[currentLevel];
+    if (!levelConf) {
+        endGame(true, "You've mastered all QA procedures!");
+        return;
+    }
+    score = 0;
+    timeLeft = levelConf.time;
+    initBoard();
+    updateUI();
+    
+    clearInterval(gameInterval); // Clear any old interval
+    gameInterval = setInterval(() => {
+        if(gameRunning) {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                endGame(false, "Time's up!");
+            }
+        }
+    }, 1000);
+    
+    gameRunning = true;
+    gameLoop();
+}
+
+function endGame(won, message) {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    const endTitleEl = document.getElementById('endTitle');
+    const endMessageEl = document.getElementById('endMessage');
+    const levelConf = levels[currentLevel];
+    const levelPassed = won || (levelConf && score >= levelConf.targetScore);
+
+    if (levelPassed) {
+        endTitleEl.textContent = "Level Complete!";
+        endMessageEl.textContent = message || `You've met the QA standard for Level ${levelConf.level}!`;
+        currentLevel++;
+        restartButton.textContent = "Next Level";
+    } else {
+        endTitleEl.textContent = "QA Failed!";
+        endMessageEl.textContent = message || "You didn't meet the target score.";
+        restartButton.textContent = "Try Again";
+    }
+    finalScoreEl.textContent = score;
+    endScreen.classList.remove('hidden');
+    // report only at terminal events — the shim latch is once per page load: a failed level or full mastery
+    if ((!levelPassed || !levelConf) && window.RTApps) window.RTApps.reportResult(score);
+}
+
+
+// --- Event Listeners ---
+startButton.addEventListener('click', () => {
+    startScreen.classList.add('hidden');
+    startLevel();
+});
+restartButton.addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    startLevel();
+});
+canvas.addEventListener('click', tileClick);
+
+</script>
+</body>
+</html>

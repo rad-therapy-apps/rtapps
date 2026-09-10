@@ -196,6 +196,13 @@
             "title": "Activity Id",
             "type": "string"
           },
+          "attempt_rows": {
+            "items": {
+              "$ref": "#/components/schemas/AttemptRowOut"
+            },
+            "title": "Attempt Rows",
+            "type": "array"
+          },
           "attempts": {
             "title": "Attempts",
             "type": "integer"
@@ -246,7 +253,8 @@
           "students_attempted",
           "pass_rate",
           "distribution",
-          "items"
+          "items",
+          "attempt_rows"
         ],
         "title": "ActivityStatsOut",
         "type": "object"
@@ -550,6 +558,61 @@
           "passed"
         ],
         "title": "AttemptOut",
+        "type": "object"
+      },
+      "AttemptRowOut": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "max_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Score"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name",
+          "score",
+          "max_score",
+          "percent",
+          "submitted_at"
+        ],
+        "title": "AttemptRowOut",
         "type": "object"
       },
       "AuditOut": {
@@ -3202,7 +3265,7 @@
   },
   "info": {
     "title": "RTApps API",
-    "version": "0.6.0"
+    "version": "0.7.0"
   },
   "openapi": "3.1.0",
   "paths": {
