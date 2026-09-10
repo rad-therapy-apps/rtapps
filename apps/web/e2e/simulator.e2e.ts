@@ -75,7 +75,7 @@ test.describe
 	});
 
 	test('a student enters the simulator and a QA run reaches the educator', async () => {
-		test.setTimeout(90_000); // the sim-hub app is a heavy ~380KB inline three.js bundle
+		test.setTimeout(180_000); // the sim-hub app is a heavy ~380KB inline three.js bundle; CI's 2-core runner needs the headroom (a local run fits in half this)
 
 		// Student: register, join the demo cohort (required for the attempt to be visible to the
 		// educator's cohort-scoped stats page below — same reason as arcade.e2e.ts).
@@ -144,7 +144,7 @@ test.describe
 	});
 
 	test('room app completions record against the resolved slug, independent of the current player', async () => {
-		test.setTimeout(90_000); // linac-ct is a ~1.4MB three.js bundle with the extracted CT images
+		test.setTimeout(180_000); // linac-ct is a ~1.4MB three.js bundle with the extracted CT images; CI's 2-core runner timed out at 90s with the SDK chain proven complete server-side (PR #71 run 1)
 
 		// The student from the test above is still signed in (same Page/context, never signed
 		// out) — navigate straight to the Treatment delivery activity via its own subject page,
