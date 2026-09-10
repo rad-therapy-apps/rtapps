@@ -73,6 +73,23 @@ async def _publish_sdk_slug_activity(db: AsyncSession, *, status: str = "publish
     return activity
 
 
+async def _publish_assessment_sdk_slug_activity(db: AsyncSession) -> Activity:
+    subject = await _ensure_subject(db)
+    activity = Activity(
+        kind="external",
+        ref_id=new_id(),
+        title="Cell Defender",
+        subject_id=subject.id,
+        status="draft",
+        access="assessment",
+        config={"arcade_slug": "cell-defender", "sdk_slug": "test-sim", "max_score": 5000},
+    )
+    db.add(activity)
+    await db.flush()
+    await publish_activity(db, activity, author=None, change_note="test")
+    return activity
+
+
 async def _publish_completion_only_activity(db: AsyncSession) -> Activity:
     subject = await _ensure_subject(db)
     activity = Activity(
@@ -350,5 +367,18 @@ class TestSdkSlugResolver:
 
         # a published QUIZ (no sdk_slug ever matches, but also kind-guarded)
         await import_any(db, QUIZ_DOC)
+        r = await client.get("/api/v1/activities/by-sdk-slug/test-sim")
+        assert r.status_code == 404
+
+    async def test_sdk_slug_resolver_404s_for_assessment_access(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """ADR-0006: a published external activity with `access="assessment"` never
+        resolves here, mirroring `get_activity`'s enforcement of the same invariant.
+        """
+        await make_educator(client, db, "edu@example.edu")
+        await _publish_assessment_sdk_slug_activity(db)
+        await register(client, email="student@example.edu")
+
         r = await client.get("/api/v1/activities/by-sdk-slug/test-sim")
         assert r.status_code == 404
