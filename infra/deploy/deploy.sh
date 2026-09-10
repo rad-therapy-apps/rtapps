@@ -30,6 +30,10 @@ echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 # If this fails, `set -e` exits the script here — the rollback branch below is never reached,
 # but that's fine: `up -d` (line below) hasn't run yet, so the previously deployed containers
 # are untouched and still serving. There is nothing to roll back to; the old stack never stopped.
+# The db is started (or left running) first: `--no-deps` below assumes a previous deploy's db
+# is still up, which is false on a brand-new VM — the 2026-09-10 first test deploy failed on
+# exactly that (migration's getaddrinfo("db") had nothing to resolve).
+"${COMPOSE[@]}" up -d --wait db
 "${COMPOSE[@]}" run --rm --no-deps api alembic upgrade head
 if "${COMPOSE[@]}" up -d --remove-orphans --wait --wait-timeout 180; then
   echo "$TAG" > .deployed

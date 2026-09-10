@@ -119,8 +119,14 @@ green, so `main.yml` stays green before the VM exists. GHCR access on the VM use
 ### First deploy on `test`
 
 ```bash
-ssh deploy@YOUR_HOST 'cd /opt/rtapps && docker compose --env-file .env -f compose.prod.yaml run --rm api python -m app.seed'
+ssh deploy@YOUR_HOST 'cd /opt/rtapps && IMAGE_TAG=$(cat .deployed) docker compose --env-file .env -f compose.prod.yaml -f compose.tunnel.yaml run --rm -e ENV=test api python -m app.seed'
 ```
+
+(Three flags learned on the first real test deploy, 2026-09-10: manual `compose run`
+needs `IMAGE_TAG` passed explicitly — the deploy workflow injects it, `.env` leaves it
+blank; include the tunnel overlay when `USE_TUNNEL=1` so compose sees the same project;
+and `-e ENV=test` overrides the compose file's hardcoded `ENV: prod` — the seed's
+prod-guard refuses otherwise, by design.)
 
 The seed refuses to run when `ENV=prod`. Sign in as `admin@example.com` (`rtapps-dev-password`),
 open **Admin → Users**, and promote the mentor's account to `educator` (audited). On `prod`, create
