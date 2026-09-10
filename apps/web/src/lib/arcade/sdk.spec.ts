@@ -139,9 +139,10 @@ describe('rtapps-sdk', () => {
 		expect(resolveCalls).toHaveLength(1);
 	});
 
-	it('retries the whole chain once when the attempt-start POST rejects, then succeeds', async () => {
+	it('retries only the start phase once when the attempt-start POST rejects, then succeeds, and submits once', async () => {
 		let attemptCalls = 0;
 		let resolveCalls = 0;
+		let submitCalls = 0;
 		const fetchMock = vi.fn(async (url: string) => {
 			if (url === '/api/v1/activities/by-sdk-slug/s') {
 				resolveCalls += 1;
@@ -152,7 +153,10 @@ describe('rtapps-sdk', () => {
 				if (attemptCalls === 1) throw new Error('network down');
 				return jsonResponse({ id: 'attempt-1' });
 			}
-			if (url === '/api/v1/attempts/attempt-1/submit') return jsonResponse({ percent: 30 });
+			if (url === '/api/v1/attempts/attempt-1/submit') {
+				submitCalls += 1;
+				return jsonResponse({ percent: 30 });
+			}
 			throw new Error('unexpected fetch: ' + url);
 		});
 		window.fetch = fetchMock as unknown as typeof fetch;
@@ -163,6 +167,81 @@ describe('rtapps-sdk', () => {
 		expect(result).toEqual({ percent: 30 });
 		expect(resolveCalls).toBe(1);
 		expect(attemptCalls).toBe(2);
+		expect(submitCalls).toBe(1);
+	});
+
+	it('retries only the submit once (same Idempotency-Key) when the submit POST rejects, then succeeds, and starts only one attempt', async () => {
+		let attemptCalls = 0;
+		let submitCalls = 0;
+		const submitKeys: string[] = [];
+		const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+			if (url === '/api/v1/activities/by-sdk-slug/s') return jsonResponse(RESOLVER_INFO);
+			if (url === '/api/v1/activities/activity-1/attempts') {
+				attemptCalls += 1;
+				return jsonResponse({ id: 'attempt-1' });
+			}
+			if (url === '/api/v1/attempts/attempt-1/submit') {
+				submitCalls += 1;
+				submitKeys.push((init as { headers: Record<string, string> }).headers['Idempotency-Key']);
+				if (submitCalls === 1) throw new Error('response lost');
+				return jsonResponse({ percent: 30 });
+			}
+			throw new Error('unexpected fetch: ' + url);
+		});
+		window.fetch = fetchMock as unknown as typeof fetch;
+		loadSdk();
+
+		const result = await window.RTApps.recordResult('s', { score: 3 });
+
+		expect(result).toEqual({ percent: 30 });
+		expect(attemptCalls).toBe(1);
+		expect(submitCalls).toBe(2);
+		expect(submitKeys).toHaveLength(2);
+		expect(submitKeys[0]).toEqual(expect.any(String));
+		expect(submitKeys[1]).toBe(submitKeys[0]);
+	});
+
+	it('rejects a scored activity called without a numeric score, with zero attempt/submit POSTs', async () => {
+		let attemptOrSubmitCalls = 0;
+		const fetchMock = vi.fn(async (url: string) => {
+			if (url === '/api/v1/activities/by-sdk-slug/s') return jsonResponse(RESOLVER_INFO);
+			if (url === '/api/v1/activities/activity-1/attempts' || url.startsWith('/api/v1/attempts/')) {
+				attemptOrSubmitCalls += 1;
+				return jsonResponse({});
+			}
+			throw new Error('unexpected fetch: ' + url);
+		});
+		window.fetch = fetchMock as unknown as typeof fetch;
+		loadSdk();
+
+		await expect(window.RTApps.recordResult('s')).rejects.toThrow(
+			'RTApps: a numeric score is required for s'
+		);
+		await expect(window.RTApps.recordResult('s', {})).rejects.toThrow(
+			'RTApps: a numeric score is required for s'
+		);
+		expect(attemptOrSubmitCalls).toBe(0);
+	});
+
+	it('completion-only activity with a stray opts.score still submits with no body (unchanged)', async () => {
+		const fetchMock = vi.fn<FetchImpl>(async (url) => {
+			if (url === '/api/v1/activities/by-sdk-slug/s')
+				return jsonResponse({ ...RESOLVER_INFO, completion_only: true });
+			if (url === '/api/v1/activities/activity-1/attempts')
+				return jsonResponse({ id: 'attempt-1' });
+			if (url === '/api/v1/attempts/attempt-1/submit') return jsonResponse({ percent: null });
+			throw new Error('unexpected fetch: ' + url);
+		});
+		window.fetch = fetchMock as unknown as typeof fetch;
+		loadSdk();
+
+		const result = await window.RTApps.recordResult('s', { score: 3 });
+
+		expect(result).toEqual({ percent: null });
+		const submitCall = fetchMock.mock.calls[2];
+		const submitInit = submitCall[1] as { body?: string; headers: Record<string, string> };
+		expect(submitInit.body).toBeUndefined();
+		expect(submitInit.headers['Content-Type']).toBeUndefined();
 	});
 
 	it('rejects when a second consecutive attempt-start POST also fails', async () => {

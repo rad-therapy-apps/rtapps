@@ -22,11 +22,11 @@
 		return resolved[slug];
 	}
 
-	async function post(url, body) {
+	async function post(url, idempotencyKey, body) {
 		var init = {
 			method: 'POST',
 			credentials: 'same-origin',
-			headers: { 'Idempotency-Key': crypto.randomUUID() }
+			headers: { 'Idempotency-Key': idempotencyKey }
 		};
 		if (body !== undefined) {
 			init.headers['Content-Type'] = 'application/json';
@@ -37,23 +37,58 @@
 		return res.json();
 	}
 
-	async function recordOnce(slug, opts) {
+	// Resolve + attempt-start: resume-safe against the API's own in-progress lookup, so
+	// retrying this whole phase on failure is safe — a lost-response retry lands on the same
+	// in-progress attempt (or the resolver cache) rather than creating a duplicate. Scored
+	// activities must be given a real score before an attempt is even opened.
+	async function startPhase(slug, opts) {
 		var info = await resolve(slug);
-		var attempt = await post('/api/v1/activities/' + info.activity_id + '/attempts');
-		var submitted = await post(
-			'/api/v1/attempts/' + attempt.id + '/submit',
-			info.completion_only ? undefined : { score: Number((opts && opts.score) || 0) }
+		if (
+			!info.completion_only &&
+			(opts == null || typeof opts.score !== 'number' || !isFinite(opts.score))
+		) {
+			throw new Error('RTApps: a numeric score is required for ' + slug);
+		}
+		var attempt = await post(
+			'/api/v1/activities/' + info.activity_id + '/attempts',
+			crypto.randomUUID()
 		);
+		return { info: info, attempt: attempt };
+	}
+
+	// Submit is NOT resume-safe the same way: once a submit request has actually reached the
+	// server, retrying with a fresh key would open a second submitted attempt for the same
+	// event. Reusing the same Idempotency-Key means a lost-response retry replays the original
+	// result instead (submit_attempt's same-key branch), making this exactly-once rather than
+	// at-least-once.
+	async function submitWithRetry(attemptId, submitKey, body) {
+		try {
+			return await post('/api/v1/attempts/' + attemptId + '/submit', submitKey, body);
+		} catch {
+			// One retry for flaky-wifi resilience; never re-enter attempt-start from here.
+			return post('/api/v1/attempts/' + attemptId + '/submit', submitKey, body);
+		}
+	}
+
+	async function recordOnce(slug, opts) {
+		var started;
+		try {
+			started = await startPhase(slug, opts);
+		} catch {
+			// One retry for flaky-wifi resilience; resume-safe since no submit has been sent yet.
+			started = await startPhase(slug, opts);
+		}
+		var info = started.info;
+		var submitKey = crypto.randomUUID();
+		var body = info.completion_only ? undefined : { score: opts.score };
+		var submitted = await submitWithRetry(started.attempt.id, submitKey, body);
 		return { percent: submitted.percent };
 	}
 
 	window.RTApps = window.RTApps || {};
 	// One attempt per completed event; call as many times per session as events complete.
 	window.RTApps.recordResult = function (slug, opts) {
-		return recordOnce(slug, opts).catch(function () {
-			// One retry for flaky-wifi resilience; a second failure surfaces to the caller.
-			return recordOnce(slug, opts);
-		});
+		return recordOnce(slug, opts);
 	};
 	// Player URL for an activity, for door/back navigation (no UUIDs in app code).
 	window.RTApps.activityUrl = function (slug) {
