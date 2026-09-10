@@ -596,11 +596,18 @@ function registerInteractable(object,label,detail='',range=2.5,guideKey=null,act
 function nearestInteractable(maxD=2.8){let best=null,bd=maxD;const wp=new THREE.Vector3();for(const it of interactables){it.object.getWorldPosition(wp);const d=player.pos.distanceTo(wp),limit=Math.min(maxD,it.range||maxD);if(d<bd&&d<=limit){bd=d;best={...it,d,pos:wp.clone()}}}return best}
 function nearestDoor(maxD=2.6){let best=null,bd=maxD;ROOMS.filter(r=>!r.hub).forEach(r=>{const p=doorPoint(r),d=player.pos.distanceTo(p);if(d<bd){bd=d;best={room:r,d}}});return best}
 const ROOM_APP_DOORS=new Set(['LINAC Control Area','CT Control Room','CT Simulator Room']);
-function performInteraction(){if(mode!=='walk')return;const it=nearestInteractable();const dr=nearestDoor();if(it&&(!dr||it.d<=dr.d+.25)){if(it.guideKey&&STAFF_GUIDES[it.guideKey]){openStaffDialogue(it.guideKey);return}if(typeof it.action==='function'){it.action(it);return}toast(`<b>${it.label}</b><br>${it.detail||'Interactive object'}`);return}if(dr){if(window.RTApps&&ROOM_APP_DOORS.has(dr.room.name)){
-    // RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
+// RTApps (plan 4c): prefetch the room app's player URL once; if it can't resolve
+// (activity unseeded/unpublished, or offline), ROOM_APP_URL stays null and the three
+// wired doors keep their legacy in-hub behavior instead of going dead.
+var ROOM_APP_URL = null;
+if (window.RTApps) {
     window.RTApps.activityUrl('sim-linac-fraction').then(function (url) {
-        window.top.location.href = url;
-    });
+        ROOM_APP_URL = url;
+    }).catch(function () {});
+}
+function performInteraction(){if(mode!=='walk')return;const it=nearestInteractable();const dr=nearestDoor();if(it&&(!dr||it.d<=dr.d+.25)){if(it.guideKey&&STAFF_GUIDES[it.guideKey]){openStaffDialogue(it.guideKey);return}if(typeof it.action==='function'){it.action(it);return}toast(`<b>${it.label}</b><br>${it.detail||'Interactive object'}`);return}if(dr){if(ROOM_APP_URL&&ROOM_APP_DOORS.has(dr.room.name)){
+    // RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
+    window.top.location.href = ROOM_APP_URL;
     return;
 }const d=doors.get(dr.room.id);if(d)setDoorTarget(dr.room.id,d.target<.5);toast(`<b>${dr.room.name}</b> · ${d?.target>.5?'opening':'closing'} door`)}}
 function updateInteractionUI(){const ret=document.getElementById('walkReticle'),p=document.getElementById('interactPrompt'),txt=document.getElementById('interactText');if(mode!=='walk'||travel){ret.classList.remove('show');p.classList.remove('show');return}ret.classList.add('show');const it=nearestInteractable(),dr=nearestDoor();if(it&&(!dr||it.d<=dr.d+.25)){txt.textContent=`Interact · ${it.label}`;p.classList.add('show')}else if(dr){txt.textContent=`Door · ${dr.room.name}`;p.classList.add('show')}else p.classList.remove('show')}
