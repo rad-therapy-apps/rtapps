@@ -22,6 +22,8 @@ Outcome, QuestionOutcome).
 Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 """
 
+from pathlib import Path
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import delete, func, select
@@ -901,6 +903,124 @@ async def test_seed_batch_5_onco_uno(db: AsyncSession, settings: Settings) -> No
         .where(Activity.title == "OncoLife UNO: The Clinical Shift")
     )
     assert count == 1
+
+
+async def test_seed_creates_center_qa_walkthrough(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4c: Center QA walkthrough — the sim-hub app IS this activity's player
+    (the walkable hub); published, kind external, access practice, scored (max_score 4),
+    config carries sdk_slug sim-hub-qa for the simulator SDK resolver; subject is
+    quality-management-and-safety; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Center QA walkthrough"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {
+        "arcade_slug": "sim-hub",
+        "sdk_slug": "sim-hub-qa",
+        "max_score": 4,
+    }
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "quality-management-and-safety"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Center QA walkthrough")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_treatment_delivery(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4c: Treatment delivery — one of the two completion-only room activities
+    served by the linac-ct app; published, kind external, access practice, no numeric
+    score, config carries sdk_slug sim-linac-fraction and no max_score key; subject is
+    treatment-delivery-procedures; re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Treatment delivery")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {
+        "arcade_slug": "linac-ct",
+        "sdk_slug": "sim-linac-fraction",
+        "completion_only": True,
+    }
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Treatment delivery")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_ct_simulation(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4c: CT simulation — the other completion-only room activity served by the
+    same linac-ct app (both share arcade_slug: entering either activity's player shows
+    the same served app; only sdk_slug distinguishes their result streams); published,
+    kind external, access practice, no numeric score, config carries sdk_slug
+    sim-ct-scan and no max_score key; subject is treatment-delivery-procedures;
+    re-seeding creates 0."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "CT simulation")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {
+        "arcade_slug": "linac-ct",
+        "sdk_slug": "sim-ct-scan",
+        "completion_only": True,
+    }
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "CT simulation")
+    )
+    assert count == 1
+
+
+async def test_seed_sdk_slug_unique_across_published_externals(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """The simulator SDK resolver (`GET /activities/by-sdk-slug/{slug}`) picks whichever
+    published external activity matches first when a slug repeats, so seed data must
+    never let that happen: every non-null `config["sdk_slug"]` across all published
+    external activities must be unique."""
+    await seed(db, settings)
+    activities = (
+        await db.scalars(
+            select(Activity).where(Activity.kind == "external", Activity.status == "published")
+        )
+    ).all()
+    sdk_slugs = [a.config["sdk_slug"] for a in activities if a.config.get("sdk_slug")]
+    assert len(sdk_slugs) == len(set(sdk_slugs))
+    assert {"sim-hub-qa", "sim-linac-fraction", "sim-ct-scan"} <= set(sdk_slugs)
+
+
+def test_seed_simulator_arcade_directories_exist_on_disk() -> None:
+    """The sim-hub and linac-ct arcade apps referenced by the three simulator
+    activities' `arcade_slug` must actually be built and present on disk (Task 3/4's
+    deliverables), not just referenced by a seed row. A plain repo-relative file check,
+    not seed data, so no `db`/`settings` fixtures are needed."""
+    repo_root = Path(__file__).resolve().parents[3]
+    assert (repo_root / "apps/web/arcade/sim-hub/index.html").is_file()
+    assert (repo_root / "apps/web/arcade/linac-ct/index.html").is_file()
 
 
 async def test_seed_refuses_prod(db: AsyncSession) -> None:
