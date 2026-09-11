@@ -201,6 +201,36 @@ describe('rtapps-sdk', () => {
 		expect(submitKeys[1]).toBe(submitKeys[0]);
 	});
 
+	it('rejects when the submit and its single retry both fail, without re-entering resolve/start', async () => {
+		let attemptCalls = 0;
+		let resolveCalls = 0;
+		let submitCalls = 0;
+		const fetchMock = vi.fn(async (url: string) => {
+			if (url === '/api/v1/activities/by-sdk-slug/s') {
+				resolveCalls += 1;
+				return jsonResponse(RESOLVER_INFO);
+			}
+			if (url === '/api/v1/activities/activity-1/attempts') {
+				attemptCalls += 1;
+				return jsonResponse({ id: 'attempt-1' });
+			}
+			if (url === '/api/v1/attempts/attempt-1/submit') {
+				submitCalls += 1;
+				throw new Error('submit failed again');
+			}
+			throw new Error('unexpected fetch: ' + url);
+		});
+		window.fetch = fetchMock as unknown as typeof fetch;
+		loadSdk();
+
+		await expect(window.RTApps.recordResult('s', { score: 3 })).rejects.toThrow(
+			'submit failed again'
+		);
+		expect(resolveCalls).toBe(1);
+		expect(attemptCalls).toBe(1);
+		expect(submitCalls).toBe(2);
+	});
+
 	it('rejects a scored activity called without a numeric score, with zero attempt/submit POSTs', async () => {
 		let attemptOrSubmitCalls = 0;
 		const fetchMock = vi.fn(async (url: string) => {

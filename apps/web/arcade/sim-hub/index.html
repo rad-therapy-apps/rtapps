@@ -1399,6 +1399,9 @@ function procRenderSite(){
  const host=document.getElementById('siteChoices');if(host)host.innerHTML=PROC_CHOICES.map(([id,label])=>`<label><input type="checkbox" value="${id}" name="siteChoice"> ${label}</label>`).join('');
 }
 function procResetAll(){
+ window.__rtappsVerdictLocked=false;          // #73: fresh scenario re-arms the verdict buttons
+ const rcBtn=document.getElementById('releaseClinical');if(rcBtn)rcBtn.disabled=false;
+ const hcBtn=document.getElementById('holdClinical');if(hcBtn)hcBtn.disabled=false;
  Object.assign(PROC_STATE,{startup:false,laser:null,water:null,site:false,released:false,laserValues:null,waterValues:null});
  document.querySelectorAll('[data-startup]').forEach(x=>x.checked=false);
  ['procStartupResult','laserResult','waterResult','siteResult','releaseResult'].forEach(id=>procSetResult(id,'Reset. Complete the procedure station.',null));
@@ -1632,6 +1635,10 @@ document.getElementById('siteValidate')?.addEventListener('click',()=>{
 });
 
 document.getElementById('releaseClinical')?.addEventListener('click',()=>{
+ if(window.__rtappsVerdictLocked)return;      // #73: one verdict per scenario
+ window.__rtappsVerdictLocked=true;           // reset path sets this back to false
+ const rcBtn=document.getElementById('releaseClinical');if(rcBtn)rcBtn.disabled=true;
+ const hcBtn=document.getElementById('holdClinical');if(hcBtn)hcBtn.disabled=true;
  const all=PROC_STATE.startup&&PROC_STATE.laser===true&&PROC_STATE.water===true;
  PROC_STATE.released=all;
  procSetResult('releaseResult',all?'<b>CT RELEASED.</b> Morning start-up and required QC support clinical use in this simulation. The CT patient workflow may proceed.':'<b>Release denied.</b> Required start-up/QC is incomplete or a QC result is outside tolerance. Keep the scanner on HOLD and escalate.',all);
@@ -1646,6 +1653,10 @@ document.getElementById('releaseClinical')?.addEventListener('click',()=>{
  }
 });
 document.getElementById('holdClinical')?.addEventListener('click',()=>{
+ if(window.__rtappsVerdictLocked)return;      // #73: one verdict per scenario
+ window.__rtappsVerdictLocked=true;           // reset path sets this back to false
+ const rcBtn=document.getElementById('releaseClinical');if(rcBtn)rcBtn.disabled=true;
+ const hcBtn=document.getElementById('holdClinical');if(hcBtn)hcBtn.disabled=true;
  PROC_STATE.released=false;procSetResult('releaseResult','<b>CT ON HOLD.</b> Clinical scanning is suspended pending review / corrective action.',true);procRefreshRelease();toast('<b>CT Simulator HOLD</b> · QC review required');
  // RTApps (plan 4c): score = QA checks passed (startup, laser, water, released), of 4.
  if(window.RTApps){
