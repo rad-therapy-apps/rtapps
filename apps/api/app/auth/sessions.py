@@ -2,21 +2,22 @@
 
 What this file does: `create_session` issues a new opaque token and stores its hash;
 `resolve_session` looks a token up, checks it's still valid, and slides its expiry forward
-if it's more than half-expired; `revoke_session`/`revoke_all_for_user` invalidate one or
-all of a user's sessions; `user_by_email` is a small shared lookup helper.
+if it's more than half-expired; `revoke_session`/`revoke_all_for_user`/`revoke_others_for_user`
+invalidate one, all, or all-but-one of a user's sessions; `user_by_email` is a small shared
+lookup helper.
 
 Used here and why: `secrets.token_urlsafe` for a cryptographically random opaque token
 (not a JWT — nothing about the session is meant to be decodable client-side);
 `hashlib.sha256` so the database only ever holds a hash, never the raw token, per ADR-0002.
 
 How it fits the project: this is the token-handling core of ADR-0002's session design;
-`app.auth.router` calls `create_session`/`revoke_session` on login/register/logout, and
-`app.auth.deps.current_user` calls `resolve_session` on every request that carries the
-`rt_session` cookie.
+`app.auth.router` calls `create_session`/`revoke_session` on login/register/logout and
+`revoke_others_for_user` on change-password, and `app.auth.deps.current_user` calls
+`resolve_session` on every request that carries the `rt_session` cookie.
 
 Depends on: `app.auth.models` (Session, User).
 Used by: `app/auth/deps.py` (resolve_session), `app/auth/router.py` (create_session,
-revoke_session, user_by_email), `tests/test_sessions.py`.
+revoke_session, revoke_others_for_user, user_by_email), `tests/test_sessions.py`.
 """
 
 import hashlib
@@ -94,6 +95,23 @@ async def revoke_all_for_user(db: AsyncSession, user_id: uuid.UUID) -> int:
     result = await db.execute(
         update(Session)
         .where(Session.user_id == user_id, Session.revoked_at.is_(None))
+        .values(revoked_at=datetime.now(UTC))
+    )
+    await db.flush()
+    return cast(CursorResult[Any], result).rowcount or 0
+
+
+async def revoke_others_for_user(db: AsyncSession, user_id: uuid.UUID, keep_session_id: str) -> int:
+    """Revoke every non-expired session of the user EXCEPT keep_session_id (the caller's own).
+    Used by change-password: a password change proves possession, so the current session
+    survives while any other device is signed out."""
+    result = await db.execute(
+        update(Session)
+        .where(
+            Session.user_id == user_id,
+            Session.revoked_at.is_(None),
+            Session.id != keep_session_id,
+        )
         .values(revoked_at=datetime.now(UTC))
     )
     await db.flush()
