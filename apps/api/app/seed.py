@@ -252,6 +252,27 @@ SEED_ARCADE_GAMES = [
         "subject_slug": "patient-care",
         "config": {"arcade_slug": "onco-uno", "completion_only": True},
     },
+    # Plan 4c: the simulator world. sim-hub-qa IS the hub activity (its player embeds
+    # the walkable hub); the two completion activities live in the room app.
+    {
+        "title": "Center QA walkthrough",
+        "subject_slug": "quality-management-and-safety",
+        "config": {"arcade_slug": "sim-hub", "sdk_slug": "sim-hub-qa", "max_score": 4},
+    },
+    {
+        "title": "Treatment delivery",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {
+            "arcade_slug": "linac-ct",
+            "sdk_slug": "sim-linac-fraction",
+            "completion_only": True,
+        },
+    },
+    {
+        "title": "CT simulation",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "linac-ct", "sdk_slug": "sim-ct-scan", "completion_only": True},
+    },
 ]
 
 

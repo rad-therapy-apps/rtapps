@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { readArcadeFile, resolveArcadeFile } from './arcade';
+import { cacheControlFor, readArcadeFile, resolveArcadeFile } from './arcade';
 
 const root = '/srv/arcade';
 
@@ -35,6 +35,12 @@ describe('resolveArcadeFile', () => {
 		expect(resolveArcadeFile(root, 'G!', '')).toBeNull();
 		expect(resolveArcadeFile(root, 'g', 'x.exe')).toBeNull();
 		expect(resolveArcadeFile(root, 'g', '/etc/passwd')).toBeNull();
+	});
+	it('marks non-HTML files cacheable and HTML uncacheable', () => {
+		expect(cacheControlFor('.png')).toBe('private, max-age=3600');
+		expect(cacheControlFor('.mp3')).toBe('private, max-age=3600');
+		expect(cacheControlFor('.html')).toBe('no-cache');
+		expect(cacheControlFor('.js')).toBe('no-cache');
 	});
 });
 

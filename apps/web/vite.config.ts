@@ -44,6 +44,9 @@ export default defineConfig({
 				extends: './vite.config.ts',
 				// Browser project: *.svelte.spec.ts run inside headless Chromium via Playwright, so
 				// component tests exercise real DOM/a11y behaviour; server-only modules are excluded.
+				// src/lib/arcade/*.spec.ts (plan 4c SDK spec) also belongs here: it evaluates the real
+				// rtapps-sdk.js IIFE, which reads window/crypto.randomUUID as unqualified globals only
+				// a real browser provides.
 				test: {
 					name: 'client',
 					browser: {
@@ -51,7 +54,7 @@ export default defineConfig({
 						provider: playwright(),
 						instances: [{ browser: 'chromium', headless: true }]
 					},
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+					include: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/arcade/**/*.spec.ts'],
 					exclude: ['src/lib/server/**']
 				}
 			},
@@ -63,7 +66,7 @@ export default defineConfig({
 					name: 'server',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/arcade/**/*.spec.ts']
 				}
 			}
 		]

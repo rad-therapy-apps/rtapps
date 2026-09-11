@@ -189,6 +189,10 @@ describe('ExternalPlayer', () => {
 		dispatchResult({ type: 'other', score: 1200 });
 		dispatchResult({ type: 'rtapps:result' });
 		dispatchResult({ type: 'rtapps:result', score: 1200 }, 'https://evil.example');
+		// Plan 4c: the LINAC/CT room app's INTERNAL shell↔suite protocol uses
+		// rtapps-ct-* message types — same-origin, but not the bridge's result shape.
+		dispatchResult({ type: 'rtapps-ct-complete', key: 'case-1', images: 12 });
+		dispatchResult({ type: 'rtapps-ct-ready' });
 
 		// Give any (wrongly) triggered submit a tick to fire before asserting it didn't.
 		await new Promise((resolve) => setTimeout(resolve, 50));

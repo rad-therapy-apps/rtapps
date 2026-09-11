@@ -13,7 +13,7 @@
  */
 import path from 'node:path';
 import { error } from '@sveltejs/kit';
-import { readArcadeFile, resolveArcadeFile } from '$lib/server/arcade';
+import { cacheControlFor, readArcadeFile, resolveArcadeFile } from '$lib/server/arcade';
 import type { RequestHandler } from './$types';
 
 // cwd is apps/web in dev/tests and /app in the production image (Dockerfile WORKDIR),
@@ -31,6 +31,9 @@ export const GET: RequestHandler = ({ params, locals }) => {
 	// Copy into a plain-ArrayBuffer-backed Uint8Array: Response's BodyInit rejects Buffer's
 	// ArrayBufferLike typing. Game files are small; a per-request copy is fine at this scale.
 	return new Response(new Uint8Array(body), {
-		headers: { 'Content-Type': resolved.contentType }
+		headers: {
+			'Content-Type': resolved.contentType,
+			'Cache-Control': cacheControlFor(path.extname(resolved.filePath).toLowerCase())
+		}
 	});
 };

@@ -4,6 +4,45 @@
  */
 
 export interface paths {
+  "/api/v1/activities/by-sdk-slug/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Resolve Sdk Slug
+     * @description Plan 4c: name → activity for the simulator SDK. Matches on the LIVE activity
+     *     config (not a snapshot): the slug is an addressing convention, and only published
+     *     external activities resolve.
+     *
+     *     ADR-0006: only `access == "practice"` activities resolve here — simulators are
+     *     practice-only per plan 4c, and unlike `get_activity` this route 404s uniformly
+     *     regardless of the caller's role, so the guard belongs in the query filter itself
+     *     rather than a post-fetch role check.
+     *
+     *     Filters in Python rather than with a JSONB `->>` SQL comparison: there is no existing
+     *     precedent in this codebase for querying `Activity.config` on the SQL side (every other
+     *     call site reads it as a plain Python dict after fetching the row), and external
+     *     activities number in the dozens at most, so a Python-side filter over that small set —
+     *     bounded in SQL by `kind` and `status` before ever touching `config` — is simpler than
+     *     introducing a new query idiom.
+     *
+     *     Duplicate-`sdk_slug` contract: if two published externals share a slug, whichever
+     *     row the query returns first wins (no `ORDER BY`, so this is arbitrary, not
+     *     deterministic); uniqueness across `sdk_slug` is asserted by a later task's seed
+     *     test, not enforced here.
+     */
+    get: operations["resolve_sdk_slug_api_v1_activities_by_sdk_slug__slug__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/activities/{activity_id}": {
     parameters: {
       query?: never;
@@ -2221,6 +2260,25 @@ export interface components {
       /** Score */
       score: number | null;
     };
+    /**
+     * SdkSlugOut
+     * @description Resolution of an external activity's config `sdk_slug` (plan 4c): simulator apps
+     *     address activities by stable name — never by embedded UUID — and learn whether to
+     *     submit a score or a completion. 404 for anything not a PUBLISHED external activity.
+     */
+    SdkSlugOut: {
+      /**
+       * Activity Id
+       * Format: uuid
+       */
+      activity_id: string;
+      /** Completion Only */
+      completion_only: boolean;
+      /** Max Score */
+      max_score: number | null;
+      /** Subject Slug */
+      subject_slug: string;
+    };
     /** SequencingAuthorOut */
     SequencingAuthorOut: {
       /** Access */
@@ -2488,6 +2546,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  resolve_sdk_slug_api_v1_activities_by_sdk_slug__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SdkSlugOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_activity_api_v1_activities__activity_id__get: {
     parameters: {
       query?: never;

@@ -39,6 +39,7 @@ from app.content.schemas import (
     ActivityRefOut,
     LessonOut,
     LessonRefOut,
+    SdkSlugOut,
     SubjectDetailOut,
     SubjectOut,
 )
@@ -120,6 +121,55 @@ async def get_subject(slug: str, db: AsyncSession = Depends(get_session)) -> Sub
             ActivityRefOut(id=activity.id, kind=activity.kind, title=activity.title)
             for activity in activities
         ],
+    )
+
+
+@router.get("/activities/by-sdk-slug/{slug}", response_model=SdkSlugOut)
+async def resolve_sdk_slug(
+    slug: str,
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> SdkSlugOut:
+    """Plan 4c: name → activity for the simulator SDK. Matches on the LIVE activity
+    config (not a snapshot): the slug is an addressing convention, and only published
+    external activities resolve.
+
+    ADR-0006: only `access == "practice"` activities resolve here — simulators are
+    practice-only per plan 4c, and unlike `get_activity` this route 404s uniformly
+    regardless of the caller's role, so the guard belongs in the query filter itself
+    rather than a post-fetch role check.
+
+    Filters in Python rather than with a JSONB `->>` SQL comparison: there is no existing
+    precedent in this codebase for querying `Activity.config` on the SQL side (every other
+    call site reads it as a plain Python dict after fetching the row), and external
+    activities number in the dozens at most, so a Python-side filter over that small set —
+    bounded in SQL by `kind` and `status` before ever touching `config` — is simpler than
+    introducing a new query idiom.
+
+    Duplicate-`sdk_slug` contract: if two published externals share a slug, whichever
+    row the query returns first wins (no `ORDER BY`, so this is arbitrary, not
+    deterministic); uniqueness across `sdk_slug` is asserted by a later task's seed
+    test, not enforced here.
+    """
+    activities = (
+        await db.scalars(
+            select(Activity).where(
+                Activity.kind == "external",
+                Activity.status == "published",
+                Activity.access == "practice",
+            )
+        )
+    ).all()
+    activity = next((a for a in activities if a.config.get("sdk_slug") == slug), None)
+    if activity is None:
+        raise Problem(404, "No published activity with that sdk_slug")
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None
+    return SdkSlugOut(
+        activity_id=activity.id,
+        subject_slug=subject.slug,
+        completion_only=bool(activity.config.get("completion_only")),
+        max_score=activity.config.get("max_score"),
     )
 
 
