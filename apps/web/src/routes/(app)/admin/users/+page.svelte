@@ -2,14 +2,17 @@
 	What this file does: Admin users page at `(app)/admin/users`. Search by email/name, and per-row
 	change a user's role or deactivate them.
 
-	Used here and why: `use:enhance` on the role/deactivate forms for progressive enhancement; a
-	plain `GET` form for search so it's a shareable/bookmarkable URL; `resolve()` for the "Next
-	page" link, per `svelte/no-navigation-without-resolve`; Svelte 5 runes (`$props()`).
+	Used here and why: `use:enhance` on the role/deactivate/reset forms for progressive
+	enhancement; a plain `GET` form for search so it's a shareable/bookmarkable URL; `resolve()`
+	for the "Next page" link, per `svelte/no-navigation-without-resolve`; Svelte 5 runes
+	(`$props()`).
 
 	How it fits the project: `data.page`/`data.q` come from this route's `load`
-	(`GET /admin/users?q=&cursor=`); the role/deactivate forms post to the `role`/`deactivate`
-	actions (`PATCH /admin/users/{id}/role`, `POST /admin/users/{id}/deactivate`); `guard.ts`
-	already restricts `/admin/*` to the admin role.
+	(`GET /admin/users?q=&cursor=`); the role/deactivate/reset forms post to the
+	`role`/`deactivate`/`reset` actions (`PATCH /admin/users/{id}/role`,
+	`POST /admin/users/{id}/deactivate`, `POST /admin/users/{id}/reset-password`); `guard.ts`
+	already restricts `/admin/*` to the admin role. The reset action's temporary password is
+	rendered once, from the action result — it is never put in a URL, cookie, or console.log.
 
 	Works with: `$app/forms`, `$app/paths`. Used by: reached from the nav's "Admin" link.
 -->
@@ -43,9 +46,17 @@
 	<button>Search</button>
 </form>
 
-<!-- Server-rendered error from the last failed role-change/deactivate action. -->
+<!-- Server-rendered error from the last failed role-change/deactivate/reset action. -->
 {#if form?.error}
 	<p role="alert">{form.error}</p>
+{/if}
+
+<!-- Shown once, right after a successful reset: the temporary password never persists past this
+     render (not stored in a URL, cookie, or log). -->
+{#if form?.temporaryPassword}
+	<p role="status">
+		Temporary password: <code>{form.temporaryPassword}</code>. They must change it at next sign-in.
+	</p>
 {/if}
 
 {#if data.error}
@@ -60,6 +71,7 @@
 				<th>Name</th>
 				<th>Role</th>
 				<th>Deactivated</th>
+				<th></th>
 				<th></th>
 			</tr>
 		</thead>
@@ -84,6 +96,12 @@
 						<form method="POST" action="?/deactivate" use:enhance>
 							<input type="hidden" name="user_id" value={u.id} />
 							<button>Deactivate</button>
+						</form>
+					</td>
+					<td>
+						<form method="POST" action="?/reset" use:enhance>
+							<input type="hidden" name="user_id" value={u.id} />
+							<button>Reset password</button>
 						</form>
 					</td>
 				</tr>

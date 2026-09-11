@@ -42,6 +42,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 	const decision = decideAccess(event.url.pathname, event.locals.user);
 	if ('redirect' in decision) throw redirect(303, decision.redirect);
+	// Forced password change (set by an admin reset, cleared by a successful change-password
+	// call): send the user to /account/password from anywhere else, but leave that route and
+	// /logout reachable so the redirect can't loop and a stuck user can always sign out.
+	if (
+		event.locals.user?.must_change_password &&
+		event.url.pathname !== '/account/password' &&
+		event.url.pathname !== '/logout'
+	) {
+		throw redirect(303, '/account/password');
+	}
 	return resolve(event);
 };
 
