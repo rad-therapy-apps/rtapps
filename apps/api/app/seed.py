@@ -44,6 +44,7 @@ import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -110,7 +111,7 @@ SEED_CALCULATORS: list[tuple[str, str, str]] = [
 # max_score derivations live in each plan-4b batch's evidence table
 # (.superpowers/sdd/task-N-report.md) and the audit; unbounded games carry heuristic
 # caps (server clamps; percent ≤ 100). completion_only games have no max_score.
-SEED_ARCADE_GAMES = [
+SEED_ARCADE_GAMES: list[dict[str, Any]] = [
     {
         "title": "Cell Defender",
         "subject_slug": "radiation-biology",
@@ -175,9 +176,14 @@ SEED_ARCADE_GAMES = [
         "config": {"arcade_slug": "qa-crusader", "max_score": 10000},
     },
     {
+        # 1700 = 19 hazards x 100 (1900) minus the two isFatal hazards' points (they never
+        # score), CONTINGENT on the Level 4 completion gate fix shipped alongside this seed
+        # change (safety-supervisor/index.html: totalHazards now excludes isFatal hazards,
+        # making Levels 4-5 reachable) — audit §4.3/4.4 (.superpowers/sdd/4d-long-tail-audit.md).
+        # Without that gate fix the correct value would be 1300, not 1700.
         "title": "Safety Supervisor",
         "subject_slug": "radiation-protection",
-        "config": {"arcade_slug": "safety-supervisor", "max_score": 1900},
+        "config": {"arcade_slug": "safety-supervisor", "max_score": 1700},
     },
     {
         "title": "Procedure Pursuit",
@@ -272,6 +278,32 @@ SEED_ARCADE_GAMES = [
         "title": "CT simulation",
         "subject_slug": "treatment-delivery-procedures",
         "config": {"arcade_slug": "linac-ct", "sdk_slug": "sim-ct-scan", "completion_only": True},
+    },
+    # Plan 4d: the three alignment-set shim games (completion-only, no numeric score) plus
+    # the console emulator (scored via the sim SDK, like the plan 4c simulator activities).
+    {
+        "title": "Three-point setup",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "three-point-setup", "completion_only": True},
+    },
+    {
+        "title": "LINAC training — beginner",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "linac-training-beginner", "completion_only": True},
+    },
+    {
+        "title": "LINAC training — intermediate",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {"arcade_slug": "linac-training-intermediate", "completion_only": True},
+    },
+    {
+        "title": "Treatment console",
+        "subject_slug": "treatment-delivery-procedures",
+        "config": {
+            "arcade_slug": "linac-console",
+            "sdk_slug": "sim-console",
+            "completion_only": True,
+        },
     },
 ]
 
@@ -551,6 +583,10 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
         arcade_activity = await db.scalar(
             select(Activity).where(Activity.kind == "external", Activity.title == game["title"])
         )
+        # Tracks whether this run needs a (re-)publish: a brand-new activity always does; an
+        # existing one only when its config just changed underneath it (e.g. Safety
+        # Supervisor's corrected max_score) — same branch as the MU calculator above.
+        config_changed = False
         if arcade_activity is None:
             arcade_activity = Activity(
                 kind="external",
@@ -563,7 +599,10 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
             )
             db.add(arcade_activity)
             await db.flush()
-        if arcade_activity.status != "published":
+        elif arcade_activity.config != game["config"]:
+            arcade_activity.config = game["config"]
+            config_changed = True
+        if arcade_activity.status != "published" or config_changed:
             await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
 
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
