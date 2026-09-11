@@ -47,3 +47,4 @@ class UserOut(BaseModel):
     email: str
     display_name: str
     role: UserRole
+    must_change_password: bool

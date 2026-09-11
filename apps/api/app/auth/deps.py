@@ -74,11 +74,21 @@ async def current_user(
     return await resolve_session(db, token, now=datetime.now(UTC), days=settings.session_days)
 
 
-async def require_user(user: User | None = Depends(current_user)) -> User:
+async def require_user(request: Request, user: User | None = Depends(current_user)) -> User:
     # The 401-raising variant of current_user; use this as the dependency on any route that
     # must have a signed-in caller.
     if user is None:
         raise Problem(401, "Not signed in")
+    # A temp-password reset (app.admin.router) sets this; block everything except the
+    # `/auth/*` routes (login/logout/me/change-password) until change-password clears it,
+    # so a forced-reset user can only sign in and change their password, nothing else.
+    if user.must_change_password and not request.url.path.startswith("/api/v1/auth/"):
+        raise Problem(
+            403,
+            "Password change required",
+            "Password change required before continuing",
+            type="/problems/password-change-required",
+        )
     return user
 
 

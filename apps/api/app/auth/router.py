@@ -165,6 +165,10 @@ async def change_password(
         raise Problem(403, "Incorrect current password")
     validate_password_strength(body.new_password)
     user.password_hash = hash_password(body.new_password)
+    # Clears the admin temp-password-reset flag (app.admin.router.reset_password /
+    # app.auth.deps.require_user), whether or not it was set — a normal change-password
+    # while the flag is already false is a no-op write, not a special case.
+    user.must_change_password = False
     # Proving the current password is proof of possession, so the caller's own session
     # survives; every other session (other devices/browsers) is signed out. require_user
     # already guarantees this cookie resolved to `user`, so it's always present here.

@@ -40,6 +40,9 @@ async def test_change_password_happy_path(client: AsyncClient, db: AsyncSession)
     assert bad.status_code == 401
     ok = await client.post("/api/v1/auth/login", json={"email": EMAIL, "password": NEW})
     assert ok.status_code == 200
+    # Regression: change-password always clears must_change_password, even when it was
+    # already false (this test never set it) — a no-op write, not a special case.
+    assert (await client.get("/api/v1/auth/me")).json()["must_change_password"] is False
 
 
 async def test_change_password_wrong_current_is_403_and_changes_nothing(

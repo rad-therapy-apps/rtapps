@@ -29,12 +29,18 @@ PROBLEM = "application/problem+json"  # RFC 9457 media type used on every error 
 
 class Problem(Exception):
     # Raise this anywhere a route needs to fail with a specific HTTP status and message;
-    # the handler registered below turns it into a problem+json response.
-    def __init__(self, status: int, title: str, detail: str | None = None) -> None:
+    # the handler registered below turns it into a problem+json response. `type` overrides
+    # the default "about:blank" `type` field for the rare error a client needs to match
+    # programmatically (e.g. app.auth.deps's password-change-required gate) rather than by
+    # status/title text.
+    def __init__(
+        self, status: int, title: str, detail: str | None = None, type: str | None = None
+    ) -> None:
         super().__init__(title)
         self.status = status
         self.title = title
         self.detail = detail
+        self.type = type
 
 
 def problem_response(
@@ -53,7 +59,8 @@ def install_error_handlers(app: FastAPI) -> None:
     # Registered once, in app/main.py's create_app(), so every route in the app benefits.
     @app.exception_handler(Problem)
     async def _problem(_: Request, exc: Problem) -> JSONResponse:
-        return problem_response(exc.status, exc.title, exc.detail)
+        extra = {"type": exc.type} if exc.type else {}
+        return problem_response(exc.status, exc.title, exc.detail, **extra)
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(_: Request, exc: StarletteHTTPException) -> JSONResponse:

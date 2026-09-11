@@ -150,6 +150,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/admin/users/{user_id}/reset-password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reset Password */
+    post: operations["reset_password_api_v1_admin_users__user_id__reset_password_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/admin/users/{user_id}/role": {
     parameters: {
       query?: never;
@@ -2229,6 +2246,11 @@ export interface components {
       /** Password */
       password: string;
     };
+    /** ResetPasswordOut */
+    ResetPasswordOut: {
+      /** Temporary Password */
+      temporary_password: string;
+    };
     /** ResultOut */
     ResultOut: {
       /**
@@ -2510,6 +2532,8 @@ export interface components {
        * Format: uuid
        */
       id: string;
+      /** Must Change Password */
+      must_change_password: boolean;
       role: components["schemas"]["UserRole"];
     };
     /** UserPage */
@@ -2787,6 +2811,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AdminUserOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reset_password_api_v1_admin_users__user_id__reset_password_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResetPasswordOut"];
         };
       };
       /** @description Validation Error */

@@ -2469,6 +2469,19 @@
         "title": "RegisterIn",
         "type": "object"
       },
+      "ResetPasswordOut": {
+        "properties": {
+          "temporary_password": {
+            "title": "Temporary Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "temporary_password"
+        ],
+        "title": "ResetPasswordOut",
+        "type": "object"
+      },
       "ResultOut": {
         "properties": {
           "activity_id": {
@@ -3161,6 +3174,10 @@
             "title": "Id",
             "type": "string"
           },
+          "must_change_password": {
+            "title": "Must Change Password",
+            "type": "boolean"
+          },
           "role": {
             "$ref": "#/components/schemas/UserRole"
           }
@@ -3169,7 +3186,8 @@
           "id",
           "email",
           "display_name",
-          "role"
+          "role",
+          "must_change_password"
         ],
         "title": "UserOut",
         "type": "object"
@@ -3751,6 +3769,49 @@
           }
         },
         "summary": "Erase User",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{user_id}/reset-password": {
+      "post": {
+        "operationId": "reset_password_api_v1_admin_users__user_id__reset_password_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reset Password",
         "tags": [
           "admin"
         ]

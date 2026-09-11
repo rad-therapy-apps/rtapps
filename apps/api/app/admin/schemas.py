@@ -1,8 +1,8 @@
 """Pydantic response/request shapes for the admin API.
 
 What this file does: `AdminUserOut` (one user row, admin view), `UserPage` (cursor-paginated
-list of them), `RoleIn` (the PATCH role-change body), and `AuditOut` (one audit-log row with
-the actor's email joined in).
+list of them), `RoleIn` (the PATCH role-change body), `ResetPasswordOut` (the temp-password
+reset response), and `AuditOut` (one audit-log row with the actor's email joined in).
 
 Used here and why: `AdminUserOut.model_config = ConfigDict(from_attributes=True)` so
 `app.admin.router` can build it straight from a `User` ORM instance, same pattern as
@@ -44,6 +44,12 @@ class UserPage(BaseModel):
 # PATCH /users/{id}/role body; an unrecognised role value 422s via Pydantic's enum check.
 class RoleIn(BaseModel):
     role: UserRole
+
+
+# POST /users/{id}/reset-password response; the temp password is returned exactly once
+# (never stored or logged in plaintext) so the admin can hand it to the user out-of-band.
+class ResetPasswordOut(BaseModel):
+    temporary_password: str
 
 
 # One audit-log row, with the actor's email joined in (None if the actor account is gone).
