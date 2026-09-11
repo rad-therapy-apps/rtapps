@@ -605,9 +605,25 @@ if (window.RTApps) {
         ROOM_APP_URL = url;
     }).catch(function () {});
 }
+// RTApps (plan 4d): prefetch the console emulator's player URL once; if it can't resolve
+// (activity unseeded/unpublished, or offline), CONSOLE_APP_URL stays null and the
+// Learning Commons door keeps its legacy in-hub behavior instead of going dead. A
+// parallel, independent pair alongside ROOM_APP_URL/ROOM_APP_DOORS (not merged into it) —
+// that set's semantics are "leads to sim-linac-fraction" and this leads elsewhere.
+var CONSOLE_APP_URL = null;
+if (window.RTApps && window.RTApps.activityUrl) {
+    window.RTApps.activityUrl('sim-console').then(function (url) {
+        CONSOLE_APP_URL = url;
+    }).catch(function () {});
+}
+var CONSOLE_APP_DOORS = new Set(['Learning Commons / Staff Education']);
 function performInteraction(){if(mode!=='walk')return;const it=nearestInteractable();const dr=nearestDoor();if(it&&(!dr||it.d<=dr.d+.25)){if(it.guideKey&&STAFF_GUIDES[it.guideKey]){openStaffDialogue(it.guideKey);return}if(typeof it.action==='function'){it.action(it);return}toast(`<b>${it.label}</b><br>${it.detail||'Interactive object'}`);return}if(dr){if(ROOM_APP_URL&&ROOM_APP_DOORS.has(dr.room.name)){
     // RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
     window.top.location.href = ROOM_APP_URL;
+    return;
+}if(CONSOLE_APP_URL&&CONSOLE_APP_DOORS.has(dr.room.name)){
+    // RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
+    window.top.location.href = CONSOLE_APP_URL;
     return;
 }const d=doors.get(dr.room.id);if(d)setDoorTarget(dr.room.id,d.target<.5);toast(`<b>${dr.room.name}</b> · ${d?.target>.5?'opening':'closing'} door`)}}
 function updateInteractionUI(){const ret=document.getElementById('walkReticle'),p=document.getElementById('interactPrompt'),txt=document.getElementById('interactText');if(mode!=='walk'||travel){ret.classList.remove('show');p.classList.remove('show');return}ret.classList.add('show');const it=nearestInteractable(),dr=nearestDoor();if(it&&(!dr||it.d<=dr.d+.25)){txt.textContent=`Interact · ${it.label}`;p.classList.add('show')}else if(dr){txt.textContent=`Door · ${dr.room.name}`;p.classList.add('show')}else p.classList.remove('show')}

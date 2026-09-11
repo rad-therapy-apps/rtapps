@@ -1,0 +1,523 @@
+/* ============================
+   LINAC Console Emulator - High Contrast + Section Labels
+   ============================ */
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #202737;
+  color: #f9f9f9;
+}
+header {
+  background: #003366;
+  color: #fff;
+  padding: 0.4rem 0;
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 6px #0007;
+  border-bottom: 3px solid #ffe066;
+}
+
+/* Three Monitor Container Layout */
+.container.three-monitors {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 48px);
+  min-height: 680px;
+  max-width: 1920px;
+  margin: 12px auto 0 auto;
+  border-radius: 14px;
+  box-shadow: 0 10px 32px #001a, 0 2px 6px #0024;
+  overflow: hidden;
+  background: #202737;
+}
+
+/* EMR Panel */
+.panel.emr-panel {
+  width: 320px;
+  min-width: 285px;
+  background: #232d3f;
+  border-right: 2.5px solid #ffe066;
+  box-shadow: 2px 0 6px #0005 inset;
+  padding: 0.7em 1.2em 0.7em 1.2em;
+  overflow-y: auto;
+  color: #ffe066;
+}
+
+.panel.emr-panel h3 {
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 10px #00336655;
+}
+
+/* Main Panel: 3-screen grid + controls below */
+.main-panel.three-screen-panel {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 1200px;
+  max-width: 1600px;
+  padding: 0.6em 1.2em 0.8em 1.2em;
+}
+
+/* Section Labels */
+.section-label {
+  font-size: 1.09em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ffe066;
+  letter-spacing: 1.3px;
+  background: #243b5a;
+  margin: 0.2em 0 0.6em 0;
+  padding: 2px 14px;
+  border-radius: 8px;
+  box-shadow: 0 1.5px 8px #0015;
+  display: inline-block;
+  border: 1.5px solid #ffe06677;
+}
+
+.monitors-row.three-screens-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2vw;
+  margin-bottom: 1.1em;
+  min-height: 410px;
+  max-height: 500px;
+}
+
+.monitor-screen {
+  min-width: 320px;
+  max-width: 500px;
+  padding: 0.7em 0.7em 0.7em 0.7em;
+  overflow-y: auto;
+  overflow-x: visible;
+  min-height: 410px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: radial-gradient(ellipse at 50% 60%, #233a5f 82%, #0a1a28 100%);
+  border: 3.5px solid #ffe066;
+  border-radius: 17px;
+  box-shadow: 0 0 30px #1b2f54, 0 0 7px #ffe06644 inset;
+  color: #fffbe8;
+}
+
+.monitor-screen h2, .monitor-screen h3 {
+  text-align: center;
+  color: #ffe066;
+  margin-bottom: 0.7em;
+  font-size: 1.18em;
+  letter-spacing: 1.6px;
+  text-shadow: 0 1px 7px #1b2f54;
+  font-weight: 600;
+  margin-top: 0;
+}
+
+.machine-param-box-group, .field-dims-group, .jaws-group {
+  display: flex;
+  justify-content: center;
+  gap: 0.6em;
+  margin: 0.24em 0;
+  flex-wrap: wrap;
+}
+.machine-param-box {
+  background: #1e3355;
+  border: 1.5px solid #ffe066;
+  border-radius: 7px;
+  color: #ffe066;
+  min-width: 66px;
+  padding: 0.4em 0.7em;
+  text-align: center;
+  font-size: 1em;
+  margin-bottom: 0.15em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 10px #00336622;
+}
+.machine-param-box .param-label {
+  font-size: 0.97em;
+  color: #72e1ff;
+  margin-bottom: 0.15em;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 3px #00336622;
+}
+#console-display {
+  margin-top: 8px;
+  border: 1.5px solid #ffe066;
+  padding: 6px 7px 3px 7px;
+  background: #2a3d5c;
+  border-radius: 7px;
+  box-shadow: 0 2px 7px #ffe06633;
+  color: #ffe066;
+}
+#console-parameters {
+  font-size: 1.06em;
+  color: #fff6c4;
+  margin-bottom: 4px;
+  white-space: pre;
+  font-family: 'Roboto Mono', monospace;
+  text-shadow: 0 1px 6px #1b2f5499;
+}
+#console-status {
+  font-size: 1em;
+  color: #ffe066;
+  font-weight: bold;
+  min-height: 1.2em;
+  margin-bottom: 2px;
+}
+#console-status.interlock {
+  background-color: #e33f2e;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px #0005;
+}
+#console-reading {
+  font-size: 1.08em;
+  text-align: right;
+  white-space: pre;
+  font-family: 'Roboto Mono', monospace;
+  margin-top: 2px;
+  color: #b2ffb6;
+}
+
+/* Field/MLC Visualizer */
+.monitor-mlc-visualizer #fieldDisplayContainer {
+  width: 320px;
+  height: 320px;
+  border: 2px solid #ffe066;
+  margin: 0 auto 18px auto;
+  background-color: #191f31;
+  overflow: hidden;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+  box-shadow: 0 4px 20px #00336644;
+}
+#rotatingElementsContainer {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  transform-origin: center center;
+  transition: transform 0.22s cubic-bezier(0.5,0.7,0.75,1.1), left 0.12s, top 0.12s;
+  z-index: 5;
+  cursor: grab;
+}
+#rotatingElementsContainer.dragging { cursor: grabbing; }
+#fieldDisplayContainer::before, #fieldDisplayContainer::after {
+  content: ''; position: absolute; background-color: rgba(252, 252, 198, 0.3); z-index: 9; pointer-events: none;
+}
+#fieldDisplayContainer::before { width: 1px; height: 100%; top: 0; left: 50%; transform: translateX(-50%); }
+#fieldDisplayContainer::after { width: 100%; height: 1px; top: 50%; left: 0; transform: translateY(-50%); }
+#fieldDisplayRect {
+  position: absolute; background-color: rgba(255, 255, 180, 0.27); z-index: 2; pointer-events: none; box-sizing: border-box;
+  border: 2px solid #ffe066; border-radius: 2.5px;
+}
+.leaf-pair-container {
+  position: absolute; width: 100%; left: 0; box-sizing: border-box; z-index: 4;
+}
+.leaf-section { position: absolute; height: 100%; box-sizing: border-box; background-color: rgba(170, 200, 220, 0.82); border: 1px solid rgba(100, 105, 120, 0.82); z-index: 2; }
+.leaf-section.outer { background-color: rgba(220, 220, 200, 0.7); border-color: #ffe06688; z-index: 1; transition: width 0.1s linear, left 0.1s linear, right 0.1s linear; }
+.leaf-section.inner { transition: width 1s ease-in-out, left 1s ease-in-out; border-left:none; border-right:none; }
+.leaf-section.left { left: 0; border-left:none; border-right:none;}
+.leaf-section.right { right: 0; left: auto; border-right:none; border-left:none;}
+
+.summary-text {
+  text-align: center;
+  font-family: monospace;
+  font-size: 1rem;
+  color: #ffe066;
+  margin-top: 5px;
+}
+
+.overlay-container.focal {
+  position: relative;
+  width: 98%;
+  height: 240px;
+  background: #1b2334;
+  overflow: hidden;
+  border: 2px solid #ffe066;
+  border-radius: 9px;
+  margin-bottom: 0.4em;
+  box-shadow: 0 2px 8px #001b inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.overlay-container.focal img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #111;
+  left: 0;
+  top: 0;
+  border-radius: 6px;
+}
+
+.console-panel-group {
+  background: #27344c;
+  border-radius: 9px;
+  margin: 1.2em auto 0 auto;
+  box-shadow: 0 2px 12px #0015 inset;
+  padding: 1em 1.2em 1.2em 1.2em;
+  max-width: 1700px;
+  width: 99%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.console-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem 0.8rem;
+  margin-bottom: 7px;
+  background: #243b5a;
+  border-radius: 7px;
+  padding: 0.5rem 0.7rem 0.1rem 0.8rem;
+  box-shadow: 0 1.5px 9px #ffe06633 inset;
+  min-height: 48px;
+  color: #fff;
+}
+.console-buttons.machine-controls {
+  font-size: 0.97em;
+  gap: 0.3rem 0.4rem;
+  flex-wrap: wrap;
+}
+.console-buttons.image-alignment-controls {
+  font-size: 1em;
+  background: #1d2c45;
+  box-shadow: 0 1px 6px #ffe06644 inset;
+  border-radius: 7px;
+  margin-bottom: 3px;
+  min-height: 44px;
+  align-items: center;
+}
+
+.console-button {
+  min-width: 64px;
+  flex: 1 1 70px;
+  margin: 2.5px 1px;
+  padding: 7px 7px 6px 7px;
+  font-size: 1em;
+  background: linear-gradient(180deg, #ffe066 80%, #ffe066 100%);
+  color: #232d3f;
+  border: 2px solid #ffe066;
+  border-radius: 9px;
+  box-shadow: 0 2.5px 6px #0006 inset, 0 2px 8px #ffe06644;
+  cursor: pointer;
+  text-align: center;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, box-shadow 0.15s, border 0.12s, color 0.13s;
+  outline: none;
+}
+.console-button:hover:not(.disabled) {
+  background: linear-gradient(180deg, #fffbe8 60%, #ffe066 100%);
+  border-color: #ffe066;
+  color: #003366;
+}
+.console-button:active:not(.disabled) {
+  background: #ffe066;
+  color: #2a3d5c;
+  box-shadow: 0 1.5px 2.5px #0009 inset;
+  border-color: #ffd700;
+}
+.console-button.beam-on {
+  background: linear-gradient(180deg, #ffc107 80%, #ffe066 100%);
+  color: #232d3f;
+  border-color: #ffe066;
+}
+.console-button.beam-on:hover {
+  background: linear-gradient(180deg, #ffe165, #ffd700 100%);
+  color: #232d3f;
+}
+.console-button.beam-active {
+  background: linear-gradient(180deg, #e33f2e 80%, #7a1818);
+  color: #fff;
+  border-color: #ffaba2;
+}
+.console-button.beam-off {
+  background: linear-gradient(180deg, #e33f2e 80%, #7a1818);
+  color: #fff;
+  border-color: #ffaba2;
+}
+.console-button.beam-off:hover {
+  background: linear-gradient(180deg, #ff6565, #c82333 100%);
+}
+.console-button.door-control.open {
+  background: linear-gradient(180deg, #fd7e14 80%, #ffe066 100%);
+  color: #232d3f;
+  border-color: #ffe066;
+}
+.console-button.door-control.open:hover {
+  background: linear-gradient(180deg, #ffdca6 80%, #ffe066 100%);
+}
+.console-button.disabled {
+  background: #4e5366;
+  color: #fffbe877;
+  cursor: not-allowed;
+  border-style: inset;
+  opacity: 0.67;
+  pointer-events: none;
+}
+
+.compact-image-controls,
+.console-buttons.image-alignment-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 1em;
+}
+
+.compact-image-controls button,
+.console-buttons.image-alignment-controls button {
+  padding: 2px 7px;
+  font-size: 1em;
+  border-radius: 4px;
+  background: #ffe066;
+  color: #232d3f;
+  border: 1.5px solid #ffe066;
+  transition: background 0.13s, color 0.13s;
+}
+.compact-image-controls button:hover,
+.console-buttons.image-alignment-controls button:hover {
+  background: #fffbe8;
+  color: #003366;
+}
+.compact-image-controls input[type="range"],
+.console-buttons.image-alignment-controls input[type="range"] {
+  width: 55px;
+  height: 4px;
+  margin: 0 1px;
+  vertical-align: middle;
+}
+
+.mini-label {
+  min-width: 32px;
+  display: inline-block;
+  color: #ffe066;
+  font-size: 1.02em;
+  text-align: center;
+}
+
+.motion-readout {
+  background: #1c2c3c;
+  color: #ffe066;
+  text-align: center;
+  border-radius: 8px;
+  padding: 3px 0 3px 0;
+  margin: 6px auto 0 auto;
+  font-size: 0.99em;
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: .03em;
+  box-shadow: 0 1px 6px #ffe06633 inset;
+  width: 95%;
+}
+
+/* EMR Tabs and modal */
+.emr-tabs .tab-button {
+  padding: 3px 7px;
+  background: #32405a;
+  margin: 1.5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #ffe066;
+  font-size: 0.93em;
+  transition: background 0.13s, color 0.13s;
+}
+.emr-tabs .tab-button.active {
+  background: #ffe066;
+  color: #243b5a;
+}
+.tab-content {
+  display: none;
+  padding-top: 7px;
+}
+.tab-content.active {
+  display: block;
+}
+
+.treatment-field {
+  border: 1.5px solid #ffe066;
+  padding: 5px 7px;
+  margin-bottom: 7px;
+  background-color: #233a5f;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.14s, border 0.13s, color 0.13s;
+  box-shadow: 0 1.5px 6px #ffe06644;
+  color: #fffbe8;
+}
+.treatment-field:hover {
+  background-color: #ffe06633;
+  border: 2px solid #ffe066;
+  color: #ffe066;
+}
+.treatment-field h5 {
+  margin: 0 0 3px 0;
+  color: #ffe066;
+  font-size: 1em;
+}
+.treatment-field p {
+  margin: 2px 0;
+  font-size: 0.92em;
+  color: #fffbe8;
+}
+
+.qa-status-bar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: stretch;
+  margin-bottom: 0.5em;
+}
+.qa-interlocks-panel.horizontal {
+  display: flex;
+  align-items: center;
+  gap: 2em;
+  background: #142035;
+  border-radius: 8px 8px 0 0;
+  padding: 0.5em 1.2em 0.5em 0.9em;
+  color: #ffe066;
+  border-bottom: 1.5px solid #234;
+  box-shadow: 0 1.5px 8px #ffe06622;
+  font-size: 1em;
+}
+.qa-interlocks-panel.horizontal .qa-checklist label {
+  display: inline-block;
+  margin: 0 0.6em 0 0;
+  font-size: 0.98em;
+}
+.status-bar-local {
+  width: 100%;
+  margin: 0;
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  font-size: 1.09em;
+  background: #0a2244;
+  color: #ffe066;
+  text-align: center;
+  padding: 6px 0 4px 0;
+  letter-spacing: 0.5px;
+  border: 1px solid #ffe066;
+  min-height: 1.1em;
+}
+
+/* Hide scrollbars for all panels */
+.panel::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
