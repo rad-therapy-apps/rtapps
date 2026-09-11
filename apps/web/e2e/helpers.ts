@@ -37,8 +37,13 @@ export async function signIn(page: Page, email: string, password: string): Promi
 	await expect(page).toHaveURL(/\/home$/);
 }
 
-/** Signs out via the root layout's sign-out form and waits for the login page. */
-export async function signOut(page: Page): Promise<void> {
+/**
+ * Signs out via the root layout's sign-out form and waits for the login page. `timeout` widens
+ * the default wait — needed right after a heavy three.js page (long-tail.e2e.ts's hub visits),
+ * where the client-side navigation to /login can take longer than the default 5s while the
+ * browser tears down the outgoing WebGL context.
+ */
+export async function signOut(page: Page, options?: { timeout?: number }): Promise<void> {
 	await page.getByRole('button', { name: 'Sign out' }).click(); // root layout form → POST /logout
-	await expect(page).toHaveURL(/\/login$/);
+	await expect(page).toHaveURL(/\/login$/, { timeout: options?.timeout });
 }

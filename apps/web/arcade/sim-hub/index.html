@@ -611,9 +611,11 @@ if (window.RTApps) {
 // parallel, independent pair alongside ROOM_APP_URL/ROOM_APP_DOORS (not merged into it) —
 // that set's semantics are "leads to sim-linac-fraction" and this leads elsewhere.
 var CONSOLE_APP_URL = null;
+window.CONSOLE_APP_URL = null; // also mirrored onto `window` (module scripts don't leak top-level vars there) so e2e can read the prefetch gate via frame.evaluate
 if (window.RTApps && window.RTApps.activityUrl) {
     window.RTApps.activityUrl('sim-console').then(function (url) {
         CONSOLE_APP_URL = url;
+        window.CONSOLE_APP_URL = url;
     }).catch(function () {});
 }
 var CONSOLE_APP_DOORS = new Set(['Learning Commons / Staff Education']);
