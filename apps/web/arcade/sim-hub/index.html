@@ -1525,6 +1525,9 @@ async function ctQaAnimateWater(){
 }
 async function runCtQaSequence(){
   if(activeRoom?.id!=='ctsim'){ qaToast('Enter the CT Simulation Room first'); return; }
+  window.__rtappsVerdictLocked=false;          // #73: every QA launch is a new scenario, entitled to one fresh verdict
+  const rcBtn=document.getElementById('releaseClinical');if(rcBtn)rcBtn.disabled=false;
+  const hcBtn=document.getElementById('holdClinical');if(hcBtn)hcBtn.disabled=false;
   showCtQaDock(true);
   await ctQaAnimateStartup();
   await new Promise(r=>setTimeout(r,500));
