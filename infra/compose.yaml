@@ -33,9 +33,10 @@ services:
       retries: 10
 
   # MinIO stands in for S3/R2 locally (ADR-0005); the API only ever speaks the S3 API to it.
-  # :9000 = S3 API, :9001 = web console.
+  # :9000 = S3 API, :9001 = web console. quay.io, not Docker Hub: MinIO removed its Docker
+  # Hub repositories (discovered 2026-09-12); quay.io/minio publishes the same images.
   storage:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -55,7 +56,7 @@ services:
   # it, which is why the CI e2e job waits only on proxy/web/api (an exited one-shot would
   # otherwise make `compose up --wait` report a failure).
   storage-init:
-    image: minio/mc:latest
+    image: quay.io/minio/mc:latest # quay.io: see the storage service's comment
     depends_on:
       storage:
         condition: service_healthy
