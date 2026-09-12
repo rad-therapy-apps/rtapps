@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Integrated LINAC Alignment Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { margin: 0; overflow: hidden; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    canvas { display: block; }
+
+    /* --- UI Panels --- */
+    .ui-panel {
+      position: absolute; top: 20px; width: 340px; background: rgba(247,247,247,0.9);
+      border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      z-index: 100; display: flex; flex-direction: column; backdrop-filter: blur(2px);
+      transition: transform 0.4s ease-in-out;
+    }
+    .ui-header { padding: 10px; background: #ececec; font-weight: 700; cursor: move;
+      border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom: 1px solid #dcdcdc; text-align: center; }
+    .ui-content { padding: 12px; max-height: 80vh; overflow-y: auto; }
+    .ui-content button { display: block; width: 100%; margin: 6px 0; padding: 8px 12px; font-size: 14px; cursor: pointer; }
+    .ui-content strong { display: block; margin-top: 10px; margin-bottom: 6px; }
+
+    /* Console Specifics */
+    #console-window { right: 20px; }
+    #console-window.hidden { transform: translateX(calc(100% + 40px)); }
+    
+    /* Alignment Specifics */
+    #align-window { left: 20px; }
+    #align-window.hidden { transform: translateX(calc(-100% - 40px)); }
+    
+    #align-content .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+    #align-content .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+    #align-content .row-iso { display: grid; grid-template-columns: 20px 1fr 50px; gap: 5px; align-items: center; margin-bottom: 4px; }
+    #align-content .row-iso label { font-weight: bold; }
+    #align-content .row-iso input { width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
+    #align-content button { width: 100%; padding: 8px 12px; font-size: 13px; cursor: pointer; }
+    #alignmentMessage { font-weight: 600; min-height: 2.2em; margin-top: 8px; }
+
+    /* --- Digital Readouts --- */
+    .readout-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 4px 10px;
+        background: #e9e9e9;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    .readout-label { font-weight: bold; text-align: right; }
+    .readout-value { background: #fff; padding: 2px 5px; border-radius: 3px; border: 1px solid #ddd; }
+
+    /* --- Console Toggle Button --- */
+    #console-toggle-button {
+        position: absolute;
+        top: 20px;
+        right: 360px; /* Initial position next to the visible console */
+        width: 40px;
+        height: 40px;
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 10px 0 0 10px;
+        cursor: pointer;
+        z-index: 101;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: right 0.4s ease-in-out, background-color 0.2s;
+    }
+    #console-toggle-button:hover { background: #555; }
+
+    /* Floating labels for parts */
+    .component-label { position: absolute; background: rgba(0,0,0,0.7); color: #fff; padding: 3px 7px; border-radius: 4px;
+      font-size: 12px; pointer-events: none; transform: translate(-50%, -110%); white-space: nowrap; z-index: 5; visibility: hidden; }
+    #label-axisX { color: #FF7777; }
+    #label-axisY { color: #77FF77; }
+    #label-axisZ { color: #7777FF; }
+
+    /* Legend pill */
+    #legend {
+      position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 999px; padding: 6px 12px; font-size: 13px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12); z-index: 50;
+    }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+        "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- UI Toggle Button -->
+  <button id="console-toggle-button">«</button>
+
+  <!-- LINAC Console -->
+  <div id="console-window" class="ui-panel">
+    <div id="console-header" class="ui-header">LINAC Console</div>
+    <div id="console-content" class="ui-content">
+      <strong>Digital Readouts</strong>
+      <div class="readout-grid">
+        <div class="readout-label">Gantry:</div><div id="readout-gantry" class="readout-value">0.0°</div>
+        <div class="readout-label">FS X:</div><div id="readout-jawX" class="readout-value">0.0 cm</div>
+        <div class="readout-label">FS Y:</div><div id="readout-jawY" class="readout-value">0.0 cm</div>
+        <div class="readout-label">Couch Vrt:</div><div id="readout-couchY" class="readout-value">0.0 cm</div>
+        <div class="readout-label">Couch Lng:</div><div id="readout-couchZ" class="readout-value">0.0 cm</div>
+        <div class="readout-label">Couch Lat:</div><div id="readout-couchX" class="readout-value">0.0 cm</div>
+      </div>
+      <hr>
+      <strong>Gantry</strong>
+      <button onclick="rotateGantry(true)">Rotate Gantry → (CW)</button>
+      <button onclick="rotateGantry(false)">Rotate Gantry ← (CCW)</button>
+      <hr>
+      <strong>Collimator</strong>
+      <button onclick="adjustJaws(true)">Open Jaws</button>
+      <button onclick="adjustJaws(false)">Close Jaws</button>
+      <hr>
+      <strong>Couch</strong>
+      <button onclick="moveCouch(true)">Couch ↑ (+Y)</button>
+      <button onclick="moveCouch(false)">Couch ↓ (-Y)</button>
+      <button onclick="moveCouchLongitudinal(true)">Couch In (+Z)</button>
+      <button onclick="moveCouchLongitudinal(false)">Couch Out (-Z)</button>
+      <button onclick="moveCouchLateral(false)">Couch &larr; (−X)</button>
+      <button onclick="moveCouchLateral(true)">Couch &rarr; (+X)</button>
+      <hr>
+      <strong>Imaging</strong>
+      <button id="detectorToggleButton" onclick="toggleDetector()">Extend MV Imager</button>
+      <button id="sideDetectorToggleButton" onclick="toggleSideDetector()">Extend kV Imagers</button>
+      <hr>
+      <strong>Accessories</strong>
+      <button id="coneToggleButton" onclick="toggleElectronCone()">Attach Electron Cone</button>
+      <hr>
+      <button onclick="toggleLabels()">Toggle Labels</button>
+    </div>
+  </div>
+
+  <!-- Alignment Console -->
+  <div id="align-window" class="ui-panel">
+    <div id="align-header" class="ui-header">Patient Alignment</div>
+    <div id="align-content" class="ui-content">
+      <div style="font-size:12px; opacity:.9; margin-bottom:6px;">Goal: Align patient tattoos to room lasers at isocenter.</div>
+      <div class="row3">
+        <button onclick="nudgePatient(-1,0,0)">X− (Lat)</button>
+        <button onclick="nudgePatient(0,1,0)">Y+ (Up)</button>
+        <button onclick="nudgePatient(1,0,0)">X+ (Lat)</button>
+      </div>
+      <div class="row3">
+        <button onclick="nudgePatient(0,0,-1)">Z− (In)</button>
+        <button onclick="checkAlignment()">Check Alignment</button>
+        <button onclick="nudgePatient(0,0,1)">Z+ (Out)</button>
+      </div>
+       <hr style="margin: 10px 0;">
+       <div style="font-size:12px; opacity:.9; margin-bottom:6px;">Isocenter/Laser Adjustment (cm):</div>
+       <div class="row-iso">
+         <label for="isoOffsetX">X:</label>
+         <input type="number" id="isoOffsetX" value="0" step="0.1" onchange="updateIsocenterOffset()">
+         <span>cm</span>
+       </div>
+       <div class="row-iso">
+         <label for="isoOffsetY">Y:</label>
+         <input type="number" id="isoOffsetY" value="0" step="0.1" onchange="updateIsocenterOffset()">
+         <span>cm</span>
+       </div>
+       <div class="row-iso">
+         <label for="isoOffsetZ">Z:</label>
+         <input type="number" id="isoOffsetZ" value="0" step="0.1" onchange="updateIsocenterOffset()">
+         <span>cm</span>
+       </div>
+       <hr style="margin: 10px 0;">
+      <div class="row">
+        <button onclick="newCase()">New Random Case</button>
+        <button onclick="centerCouch()"><span>Auto‑Center Couch</span></button>
+      </div>
+      <div id="alignmentMessage">Use couch/nudge controls to bring tattoos to laser lines.</div>
+    </div>
+  </div>
+
+  <!-- On-screen labels -->
+  <div id="label-drivestand" class="component-label">Drivestand</div>
+  <div id="label-connectingArm" class="component-label">Connecting Arm</div>
+  <div id="label-acceleratorHousing" class="component-label">Accelerator Housing</div>
+  <div id="label-verticalArmL" class="component-label">Vertical Arm</div>
+  <div id="label-head" class="component-label">Head</div>
+  <div id="label-couchBase" class="component-label">Couch Base</div>
+  <div id="label-couchTop" class="component-label">Couch Top</div>
+  <div id="label-couchAccordion" class="component-label">Accordion</div>
+  <div id="label-detectorPanel" class="component-label">MV Detector Panel</div>
+  <div id="label-sideDetectorPanel" class="component-label">kV Detector Panel</div>
+  <div id="label-kvTube" class="component-label">kV X-Ray Tube</div>
+  <div id="label-electronCone" class="component-label">Electron Cone</div>
+  <div id="label-axisX" class="component-label">X</div>
+  <div id="label-axisY" class="component-label">Y</div>
+  <div id="label-axisZ" class="component-label">Z</div>
+  <div id="label-electronGun" class="component-label">Electron Gun</div>
+  <div id="label-waveguide" class="component-label">Waveguide (Acc.)</div>
+  <div id="label-target" class="component-label">Target</div>
+  <div id="label-klystron" class="component-label">Klystron</div>
+  <div id="label-klystronWaveguide" class="component-label">Waveguide (Klystron)</div>
+
+  <!-- Small legend -->
+  <div id="legend">
+    <span class="dot" style="background:#ff0000"></span>Room Lasers (Red)
+    &nbsp;&nbsp; <span class="dot" style="background:#00ff00"></span>Tattoos (Green)
+    &nbsp;&nbsp; <span class="dot" style="background:#8B0000"></span>Tumor (Maroon)
+  </div>
+
+  <script src="/arcade/rtapps-shim.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+    // ===== Core Scene =====
+    let camera, scene, renderer, controls;
+
+    // LINAC & Couch
+    let gantryRotatingAssembly;
+    let drivestand, connectingArm, acceleratorHousing, verticalArmL, head;
+    let couchGroup, couchSupportBase, couchAccordion, couchAccordionVisual, couchTopGroup, couchPlatform;
+    let initialCouchY; // For readout calculation
+
+    // Imaging
+    let detectorPanel, detectorArm, detectorExtended = false;
+    let sideDetectorPanel, sideDetectorArm, sideDetectorShortArm, sideDetectorExtended = false;
+    let kvTubeGroup, kvTubeHousing, kvTubeHead, kvTubeArm, kvTubeShortArm;
+
+    // Beam shaping & accessories
+    let jawXN, jawXP, jawYN, jawYP, headSize = 0.6, jawOffset = 0.1;
+    let electronCone, isConeAttached = false;
+
+    // Power & RF
+    let electronGun, waveguide, target, klystron;
+    let wgStaticVert, wgStaticHoriz, wgRotatingVert, wgRotatingHoriz;
+    
+    // Patient model & alignment
+    let patientModel, tumor, tattooAnterior, tattooLeft, tattooRight;
+    const patientMat = new THREE.MeshStandardMaterial({ color: 0xAD8C74, transparent: false, opacity: 1 });
+    const tattooMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, depthTest: false });
+    const tumorMat  = new THREE.MeshStandardMaterial({ color: 0x8B0000, depthTest: false, transparent: true, opacity: 0.85 });
+
+    // Lasers
+    let laserX, laserY, laserZ;
+
+    // UI & Readouts
+    const alignmentMessageElement = document.getElementById('alignmentMessage');
+    let readoutGantry, readoutJawX, readoutJawY, readoutCouchX, readoutCouchY, readoutCouchZ;
+
+    // Labels
+    const labels = {};
+    const labeledObjects = [];
+    let labelsVisible = false;
+
+    // Geometry/layout constants
+    const isocenterYTarget = 1.5;
+    const gantryPlaneZTarget = -1.0;
+    const couchSeparationOffset = 3.5;
+    const couchWidth = 0.8;
+    const couchPlatformHeight = 0.15;
+    const couchLength = 3.2; 
+    const couchBaseHeight = 0.7;
+    const groundY = -0.05;
+    const newVerticalArmTotalLength = 1.6;
+    const verticalArmLSize = 0.4;
+    const acceleratorHousingLength = 2.0;
+    const detectorPanelWidth = 0.7, detectorPanelHeight = 0.6, detectorPanelThickness = 0.05, detectorArmRadius = 0.03;
+    const accordionGeometricHeight = 1.0;
+
+    // Alignment state
+    const MOVE_STEP = 0.001; // meters for fine nudge
+    const ALIGNMENT_TOLERANCE = 0.01; // 1 cm
+    let tumorLocalOffset = new THREE.Vector3();
+
+    // Isocenter vectors
+    let machineIsocenter = new THREE.Vector3(); // The "true" isocenter of the machine
+    let laserIsocenter = new THREE.Vector3();   // The position of the lasers, adjustable by user
+    let isocenterOffset = new THREE.Vector3();  // User-defined offset in meters
+
+    // Materials
+    const lightGrayMat = new THREE.MeshStandardMaterial({ color: 0xd3d3d3 });
+    const lightBlueMat = new THREE.MeshStandardMaterial({ color: 0xadd8e6, transparent: true, opacity: 0.5 });
+    const brightOrangeMat = new THREE.MeshStandardMaterial({ color: 0xffa500 });
+    const brightCyanMat = new THREE.MeshStandardMaterial({ color: 0x00ffff });
+    const transparentLightGrayMat = new THREE.MeshStandardMaterial({ color: 0xc0c0c0, transparent: true, opacity: 0.55 });
+    const lightBeigeMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc });
+    const mediumGrayMat = new THREE.MeshStandardMaterial({ color: 0x909090 });
+    const darkGrayMatMaterial = new THREE.MeshStandardMaterial({ color: 0x505050 });
+    const metallicGrayMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.5, roughness: 0.5 });
+    const targetMat = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.8, roughness: 0.3 });
+    const klystronMat = new THREE.MeshStandardMaterial({ color: 0x778899, metalness: 0.3, roughness: 0.6 });
+    const klystronWaveguideMat = new THREE.MeshStandardMaterial({ color: 0xb8860b, metalness: 0.7, roughness: 0.4 });
+    const drivestandMaterial = new THREE.MeshStandardMaterial({ color: 0xeee8aa, transparent: true, opacity: 0.35, depthWrite: false });
+
+    // ===== Init =====
+    init();
+    animate();
+
+    function init() {
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f0f0);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 120);
+      
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.body.appendChild(renderer.domElement);
+
+      // Controls
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true; controls.dampingFactor = 0.08;
+      // Prevent panning below the floor
+      controls.maxPolarAngle = Math.PI / 2;
+      
+      // Lights
+      scene.add(new THREE.AmbientLight(0x808080));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+      dir.position.set(15, 20, 15);
+      dir.castShadow = true; dir.shadow.mapSize.set(2048,2048); scene.add(dir);
+
+      // Ground
+      const groundPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(40, 40),
+        new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
+      );
+      groundPlane.rotation.x = -Math.PI / 2;
+      groundPlane.position.y = groundY;
+      groundPlane.receiveShadow = true;
+      scene.add(groundPlane);
+
+      // Axes (thin lines)
+      const axisLen = 3; const origin = new THREE.Vector3();
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([origin, new THREE.Vector3(axisLen,0,0)]), new THREE.LineBasicMaterial({ color: 0xff0000 })));
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([origin, new THREE.Vector3(0,axisLen,0)]), new THREE.LineBasicMaterial({ color: 0x00ff00 })));
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([origin, new THREE.Vector3(0,0,axisLen)]), new THREE.LineBasicMaterial({ color: 0x0000ff })));
+
+      // Gantry assembly
+      buildGantry();
+
+      // Couch
+      buildCouch();
+
+      // Patient (head-first supine on couch top)
+      buildPatient();
+
+      // Room lasers at ISO (crosshair)
+      buildLasers();
+      updateIsocenterOffset(); // Initial calculation
+
+      // Set camera and controls target
+      camera.position.set(8, isocenterYTarget + 3, machineIsocenter.z + 9);
+      camera.lookAt(0, isocenterYTarget, machineIsocenter.z);
+      controls.target.set(0, isocenterYTarget, machineIsocenter.z);
+      controls.update();
+
+      // Labels hookup
+      hookLabels();
+
+      // UI Hookups
+      setupUI();
+
+      // Window events
+      window.addEventListener('resize', onWindowResize);
+
+      // First case
+      newCase();
+    }
+
+    // ---- Build Gantry/LINAC ----
+    function buildGantry() {
+      const gantrySetupGroup = new THREE.Group();
+      gantrySetupGroup.position.set(0, 0, gantryPlaneZTarget);
+      scene.add(gantrySetupGroup);
+
+      const drivestandHeight = isocenterYTarget + 0.3;
+      const drivestandDepth = 0.8;
+      drivestand = new THREE.Mesh(new THREE.BoxGeometry(0.8, drivestandHeight, drivestandDepth), drivestandMaterial);
+      const visualGap = 0.4;
+      drivestand.position.set(0, (drivestandHeight / 2) + groundY, -(visualGap + drivestandDepth / 2));
+      gantrySetupGroup.add(drivestand);
+      enableShadows(drivestand);
+
+      connectingArm = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, visualGap), lightGrayMat);
+      connectingArm.position.set(0, isocenterYTarget, -visualGap / 2);
+      gantrySetupGroup.add(connectingArm);
+      enableShadows(connectingArm);
+
+      gantryRotatingAssembly = new THREE.Group();
+      gantryRotatingAssembly.position.set(0, isocenterYTarget, 0);
+      gantrySetupGroup.add(gantryRotatingAssembly);
+      enableShadows(gantryRotatingAssembly);
+      window.gantryRotatingAssembly = gantryRotatingAssembly;
+
+      verticalArmL = new THREE.Mesh(new THREE.BoxGeometry(verticalArmLSize, newVerticalArmTotalLength, verticalArmLSize), lightBlueMat);
+      gantryRotatingAssembly.add(verticalArmL);
+
+      acceleratorHousing = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, acceleratorHousingLength), lightBlueMat);
+      acceleratorHousing.position.set(0, newVerticalArmTotalLength / 2, acceleratorHousingLength / 2);
+      gantryRotatingAssembly.add(acceleratorHousing);
+
+      head = new THREE.Mesh(new THREE.BoxGeometry(headSize, headSize, headSize), transparentLightGrayMat);
+      head.position.set(0, newVerticalArmTotalLength / 2, acceleratorHousingLength);
+      gantryRotatingAssembly.add(head);
+
+      // Calculate the machine isocenter based on head position
+      head.updateWorldMatrix(true, false);
+      machineIsocenter = head.getWorldPosition(new THREE.Vector3());
+      machineIsocenter.y -= newVerticalArmTotalLength / 2; // Adjust to rotation center
+
+      // Beamline internals
+      const gunLength = 0.3, gunRadius = 0.15;
+      electronGun = new THREE.Mesh(new THREE.CylinderGeometry(gunRadius, gunRadius * 0.8, gunLength, 16), metallicGrayMat);
+      electronGun.rotation.x = Math.PI / 2;
+      electronGun.position.set(0, 0, -acceleratorHousingLength / 2 - gunLength / 2);
+      acceleratorHousing.add(electronGun);
+      enableShadows(electronGun);
+
+      const waveguideRadius = 0.05;
+      const waveguideLength = acceleratorHousingLength - gunLength - 0.1;
+      waveguide = new THREE.Mesh(new THREE.CylinderGeometry(waveguideRadius, waveguideRadius, waveguideLength, 16), metallicGrayMat);
+      waveguide.rotation.x = Math.PI / 2;
+      waveguide.position.set(0, 0, electronGun.position.z + gunLength / 2 + waveguideLength / 2);
+      acceleratorHousing.add(waveguide);
+      enableShadows(waveguide);
+
+      const targetRadius = 0.08, targetThickness = 0.02;
+      target = new THREE.Mesh(new THREE.CylinderGeometry(targetRadius, targetRadius, targetThickness, 16), targetMat);
+      target.rotation.x = Math.PI / 2;
+      target.position.set(0, 0, 0.1);
+      head.add(target);
+      enableShadows(target);
+
+      // Jaws (X and Y pairs)
+      const jawsGroup = new THREE.Group();
+      head.add(jawsGroup);
+      const jawThickness = 0.06;
+      const jawDepth = 0.3;
+      const jawSpan = headSize * 0.8;
+      jawXN = new THREE.Mesh(new THREE.BoxGeometry(jawThickness, jawSpan, jawDepth), brightOrangeMat);
+      jawXP = new THREE.Mesh(new THREE.BoxGeometry(jawThickness, jawSpan, jawDepth), brightOrangeMat);
+      jawYN = new THREE.Mesh(new THREE.BoxGeometry(jawSpan, jawThickness, jawDepth), brightCyanMat);
+      jawYP = new THREE.Mesh(new THREE.BoxGeometry(jawSpan, jawThickness, jawDepth), brightCyanMat);
+      jawsGroup.add(jawXN, jawXP, jawYN, jawYP);
+      setJawOffset(jawOffset);
+
+      // Detector (MV)
+      detectorArm = new THREE.Mesh(new THREE.CylinderGeometry(detectorArmRadius, detectorArmRadius, 1, 16), lightGrayMat);
+      detectorPanel = new THREE.Mesh(new THREE.BoxGeometry(detectorPanelWidth, detectorPanelHeight, detectorPanelThickness), lightGrayMat);
+      gantryRotatingAssembly.add(detectorArm, detectorPanel);
+      setDetectorState(false);
+
+      // Side imagers (kV)
+      const shortArmGeo = new THREE.BoxGeometry(0.15, 0.2, 0.15);
+      sideDetectorShortArm = new THREE.Mesh(shortArmGeo, mediumGrayMat);
+      kvTubeShortArm = new THREE.Mesh(shortArmGeo, mediumGrayMat);
+      const kvOffset = 0.45; // Increased offset from vertical arm
+      sideDetectorShortArm.position.set(-(verticalArmLSize / 2 + kvOffset), 0, 0);
+      kvTubeShortArm.position.set(verticalArmLSize / 2 + kvOffset, 0, 0);
+      gantryRotatingAssembly.add(sideDetectorShortArm, kvTubeShortArm);
+
+      sideDetectorPanel = new THREE.Mesh(new THREE.BoxGeometry(detectorPanelWidth, detectorPanelHeight, detectorPanelThickness), lightGrayMat);
+      sideDetectorArm = new THREE.Mesh(new THREE.CylinderGeometry(detectorArmRadius, detectorArmRadius, 1, 16), lightGrayMat);
+      gantryRotatingAssembly.add(sideDetectorPanel, sideDetectorArm);
+
+      kvTubeGroup = new THREE.Group();
+      kvTubeHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.5, 20), metallicGrayMat);
+      kvTubeHead = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.1, 20), mediumGrayMat);
+      kvTubeHead.position.y = 0.25;
+      kvTubeGroup.add(kvTubeHousing, kvTubeHead);
+      kvTubeArm = new THREE.Mesh(new THREE.CylinderGeometry(detectorArmRadius, detectorArmRadius, 1, 16), lightGrayMat);
+      gantryRotatingAssembly.add(kvTubeGroup, kvTubeArm);
+      setSideDetectorState(false);
+
+      // Electron cone (toggle)
+      const coneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, transparent: true, opacity: 0.6 });
+      const coneHeight = 0.8;
+      const coneSize = headSize * 0.7;
+      electronCone = new THREE.Mesh(new THREE.BoxGeometry(coneSize, coneHeight, coneSize), coneMaterial);
+      electronCone.position.set(0, -(headSize / 2) - (coneHeight / 2), 0);
+      head.add(electronCone);
+      electronCone.visible = false;
+
+      // Klystron & waveguides
+      const klystronHeight = 0.6;
+      klystron = new THREE.Mesh(new THREE.BoxGeometry(0.4, klystronHeight, 0.4), klystronMat);
+      klystron.position.set(drivestand.position.x, (drivestand.position.y - drivestandHeight / 2) + klystronHeight / 2, drivestand.position.z);
+      gantrySetupGroup.add(klystron);
+      enableShadows(klystron);
+      
+      const klystronWaveguideRadius = 0.04;
+      const wgStatic_Y_Start = klystron.position.y + klystronHeight / 2;
+      const wgStatic_Y_End = connectingArm.position.y;
+      const wgStatic_Vert_Length = Math.abs(wgStatic_Y_End - wgStatic_Y_Start);
+      wgStaticVert = new THREE.Mesh(new THREE.CylinderGeometry(klystronWaveguideRadius, klystronWaveguideRadius, wgStatic_Vert_Length > 0 ? wgStatic_Vert_Length : 0.01, 16), klystronWaveguideMat);
+      wgStaticVert.position.set(klystron.position.x, wgStatic_Y_Start + wgStatic_Vert_Length / 2, klystron.position.z);
+      gantrySetupGroup.add(wgStaticVert);
+
+      const wgStatic_Z_Start = klystron.position.z;
+      const wgStatic_Z_End = connectingArm.position.z + visualGap / 2;
+      const wgStatic_Horiz_Length = Math.abs(wgStatic_Z_End - wgStatic_Z_Start);
+      wgStaticHoriz = new THREE.Mesh(new THREE.CylinderGeometry(klystronWaveguideRadius, klystronWaveguideRadius, wgStatic_Horiz_Length > 0 ? wgStatic_Horiz_Length : 0.01, 16), klystronWaveguideMat);
+      wgStaticHoriz.rotation.x = Math.PI / 2;
+      wgStaticHoriz.position.set(klystron.position.x, wgStatic_Y_End, wgStatic_Z_Start + (wgStatic_Z_End - wgStatic_Z_Start) / 2);
+      gantrySetupGroup.add(wgStaticHoriz);
+
+      const eg_local_y = newVerticalArmTotalLength / 2;
+      const wgRotating_Vert_Length = eg_local_y;
+      wgRotatingVert = new THREE.Mesh(new THREE.CylinderGeometry(klystronWaveguideRadius, klystronWaveguideRadius, wgRotating_Vert_Length > 0 ? wgRotating_Vert_Length : 0.01, 16), klystronWaveguideMat);
+      wgRotatingVert.position.set(0, wgRotating_Vert_Length / 2, 0);
+      gantryRotatingAssembly.add(wgRotatingVert);
+
+      const electronGunWorldPos = new THREE.Vector3();
+      acceleratorHousing.updateMatrixWorld(true);
+      electronGun.getWorldPosition(electronGunWorldPos);
+      const electronGunLocalPosGRA = gantryRotatingAssembly.worldToLocal(electronGunWorldPos.clone());
+      const wgRotating_Horiz_Z_Start = 0;
+      const wgRotating_Horiz_Z_End = electronGunLocalPosGRA.z;
+      const wgRotating_Horiz_Length_Actual = Math.abs(wgRotating_Horiz_Z_End - wgRotating_Horiz_Z_Start);
+      wgRotatingHoriz = new THREE.Mesh(new THREE.CylinderGeometry(klystronWaveguideRadius, klystronWaveguideRadius, wgRotating_Horiz_Length_Actual > 0 ? wgRotating_Horiz_Length_Actual : 0.01, 16), klystronWaveguideMat);
+      wgRotatingHoriz.rotation.x = Math.PI / 2;
+      wgRotatingHoriz.position.set(0, eg_local_y, (wgRotating_Horiz_Z_Start + wgRotating_Horiz_Z_End) / 2);
+      gantryRotatingAssembly.add(wgRotatingHoriz);
+    }
+
+    // ---- Couch ----
+    function buildCouch() {
+      couchGroup = new THREE.Group(); window.couchGroup = couchGroup;
+      initialCouchY = (couchBaseHeight/2) + groundY; 
+      couchGroup.position.set(0, initialCouchY, gantryPlaneZTarget + couchSeparationOffset);
+      scene.add(couchGroup); enableShadows(couchGroup);
+
+      couchSupportBase = new THREE.Mesh(new THREE.BoxGeometry(couchWidth * 0.8, couchBaseHeight, couchLength * 0.5), lightBeigeMat);
+      couchSupportBase.position.y = 0; couchGroup.add(couchSupportBase);
+
+      couchTopGroup = new THREE.Group(); window.couchTopGroup = couchTopGroup;
+      couchTopGroup.position.y = (couchBaseHeight/2) + (couchPlatformHeight/2); couchTopGroup.position.z = 0; couchGroup.add(couchTopGroup);
+
+      couchPlatform = new THREE.Mesh(new THREE.BoxGeometry(couchWidth, couchPlatformHeight, couchLength), mediumGrayMat);
+      couchTopGroup.add(couchPlatform);
+
+      couchAccordion = new THREE.Group(); couchAccordion.position.set(couchGroup.position.x, groundY, couchGroup.position.z); scene.add(couchAccordion); enableShadows(couchAccordion);
+      couchAccordionVisual = new THREE.Mesh(new THREE.BoxGeometry(couchWidth * 0.7, accordionGeometricHeight, couchLength * 0.4), darkGrayMatMaterial);
+      couchAccordionVisual.position.y = accordionGeometricHeight/2; couchAccordion.add(couchAccordionVisual); updateAccordion();
+    }
+
+    // ---- Patient Model ----
+    function buildPatient() {
+      patientModel = new THREE.Group();
+      couchTopGroup.add(patientModel);
+
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.26, 0.75, 20), patientMat); torso.castShadow = true; patientModel.add(torso);
+      const neck  = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.12, 16), patientMat); neck.position.set(0, 0.75/2 + 0.08, 0); patientModel.add(neck);
+      const headS = new THREE.Mesh(new THREE.SphereGeometry(0.14, 20, 20), patientMat); headS.position.set(0, neck.position.y + 0.12, 0); headS.scale.set(0.8, 1, 1); patientModel.add(headS);
+      const armGeo = new THREE.CylinderGeometry(0.07, 0.06, 0.70, 12);
+      const leftArm = new THREE.Mesh(armGeo, patientMat); leftArm.position.set(-0.32, 0.0, 0); patientModel.add(leftArm);
+      const rightArm= new THREE.Mesh(armGeo, patientMat); rightArm.position.set( 0.32, 0.0, 0); patientModel.add(rightArm);
+      const legGeo = new THREE.CylinderGeometry(0.12, 0.09, 0.85, 12);
+      const leftLeg = new THREE.Mesh(legGeo, patientMat); leftLeg.position.set(-0.12, -0.85, 0); patientModel.add(leftLeg);
+      const rightLeg= new THREE.Mesh(legGeo, patientMat); rightLeg.position.set( 0.12, -0.85, 0); patientModel.add(rightLeg);
+
+      tumor = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 24), tumorMat); tumor.renderOrder = 2; patientModel.add(tumor);
+      const tatGeo = new THREE.SphereGeometry(0.012, 12, 12);
+      tattooAnterior = new THREE.Mesh(tatGeo, tattooMat); tattooLeft = new THREE.Mesh(tatGeo, tattooMat); tattooRight = new THREE.Mesh(tatGeo, tattooMat);
+      [tattooAnterior, tattooLeft, tattooRight].forEach(t => { t.renderOrder = 3; patientModel.add(t); });
+
+      patientModel.rotation.x = -Math.PI/2;
+      const patientOnCouchY = (couchPlatformHeight / 2) + 0.28 + 0.01;
+      patientModel.position.set(0, patientOnCouchY, -0.3);
+    }
+
+    // ---- Room Lasers ----
+    function buildLasers() {
+      const laserMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: false, transparent: true, opacity: 0.95 });
+      const laserLen = 30, laserRadius = 0.01;
+      const geo = new THREE.CylinderGeometry(laserRadius, laserRadius, laserLen, 8);
+
+      laserX = new THREE.Mesh(geo, laserMaterial); laserX.rotation.z = Math.PI/2; scene.add(laserX);
+      laserY = new THREE.Mesh(geo, laserMaterial); scene.add(laserY);
+      laserZ = new THREE.Mesh(geo, laserMaterial); laserZ.rotation.x = Math.PI/2; scene.add(laserZ);
+      [laserX, laserY, laserZ].forEach(l => { l.renderOrder = 10; });
+    }
+
+    // ---- Labels ----
+    function hookLabels() {
+      const ids = ['drivestand','connectingArm','acceleratorHousing','verticalArmL','head','couchBase','couchTop','couchAccordion','detectorPanel','sideDetectorPanel','kvTube','electronCone','axisX','axisY','axisZ','electronGun','waveguide','target','klystron','klystronWaveguide'];
+      ids.forEach(id => labels[id] = document.getElementById('label-'+id));
+
+      const xAxisLabelObj = new THREE.Object3D(); xAxisLabelObj.position.set(3.2,0,0); scene.add(xAxisLabelObj);
+      const yAxisLabelObj = new THREE.Object3D(); yAxisLabelObj.position.set(0,3.2,0); scene.add(yAxisLabelObj);
+      const zAxisLabelObj = new THREE.Object3D(); zAxisLabelObj.position.set(0,0,3.2); scene.add(zAxisLabelObj);
+
+      labeledObjects.push({ object: drivestand, label: labels.drivestand });
+      labeledObjects.push({ object: connectingArm, label: labels.connectingArm });
+      labeledObjects.push({ object: acceleratorHousing, label: labels.acceleratorHousing });
+      labeledObjects.push({ object: verticalArmL, label: labels.verticalArmL });
+      labeledObjects.push({ object: head, label: labels.head });
+      labeledObjects.push({ object: couchSupportBase, label: labels.couchBase });
+      labeledObjects.push({ object: couchPlatform, label: labels.couchTop });
+      labeledObjects.push({ object: couchAccordionVisual, label: labels.couchAccordion });
+      labeledObjects.push({ object: detectorPanel, label: labels.detectorPanel });
+      labeledObjects.push({ object: sideDetectorPanel, label: labels.sideDetectorPanel });
+      labeledObjects.push({ object: kvTubeHousing, label: labels.kvTube });
+      labeledObjects.push({ object: electronCone, label: labels.electronCone });
+      labeledObjects.push({ object: xAxisLabelObj, label: labels.axisX });
+      labeledObjects.push({ object: yAxisLabelObj, label: labels.axisY });
+      labeledObjects.push({ object: zAxisLabelObj, label: labels.axisZ });
+      labeledObjects.push({ object: electronGun, label: labels.electronGun });
+      labeledObjects.push({ object: waveguide, label: labels.waveguide });
+      labeledObjects.push({ object: target, label: labels.target });
+      labeledObjects.push({ object: klystron, label: labels.klystron });
+      labeledObjects.push({ object: wgStaticHoriz, label: labels.klystronWaveguide });
+      
+      updateAllLabelVisibility();
+    }
+
+    // ===== Alignment logic =====
+    function newCase() {
+      tumorLocalOffset.set((Math.random()-0.5)*0.12, (Math.random()-0.2)*0.40, (Math.random()-0.5)*0.12);
+      tumor.position.copy(tumorLocalOffset);
+
+      const torsoParams = { height: 0.75, radiusTop: 0.28, radiusBottom: 0.26 };
+      const y_norm = (tumorLocalOffset.y + torsoParams.height/2) / torsoParams.height;
+      const radiusAtY = torsoParams.radiusBottom + (torsoParams.radiusTop - torsoParams.radiusBottom) * y_norm;
+      tattooAnterior.position.set(tumorLocalOffset.x, tumorLocalOffset.y, radiusAtY);
+      tattooLeft.position.set(-radiusAtY, tumorLocalOffset.y, tumorLocalOffset.z);
+      tattooRight.position.set(radiusAtY, tumorLocalOffset.y, tumorLocalOffset.z);
+
+      couchTopGroup.position.x = (Math.random()-0.5) * 0.20;
+      couchTopGroup.position.z = (Math.random()-0.5) * 0.30;
+      couchGroup.position.y    = (couchBaseHeight/2) + groundY + 0.20 + Math.random()*0.20;
+      constrainCouch();
+      updateReadouts();
+
+      alignmentMessageElement.style.color = '#333';
+      alignmentMessageElement.textContent = 'New case loaded. Align tattoos to lasers, then Check Alignment.';
+    }
+
+    function nudgePatient(dx, dy, dz) {
+      couchTopGroup.position.x += dx * MOVE_STEP;
+      couchGroup.position.y    += dy * MOVE_STEP;
+      couchTopGroup.position.z += dz * MOVE_STEP;
+      constrainCouch();
+      updateReadouts();
+    }
+
+    function centerCouch() {
+      couchTopGroup.position.x = 0;
+      couchTopGroup.position.z = 0;
+      
+      const patientSurfaceWorldY = new THREE.Vector3();
+      tattooAnterior.getWorldPosition(patientSurfaceWorldY);
+      
+      const requiredShiftY = laserIsocenter.y - patientSurfaceWorldY.y;
+      couchGroup.position.y += requiredShiftY;
+      
+      constrainCouch();
+      updateReadouts();
+    }
+
+    var rtappsReported = false;
+    function checkAlignment() {
+      const tumorWorld = new THREE.Vector3(); tumor.getWorldPosition(tumorWorld);
+      const dist = tumorWorld.distanceTo(laserIsocenter);
+
+      const shift = new THREE.Vector3().subVectors(laserIsocenter, tumorWorld);
+      const msg = (dist < ALIGNMENT_TOLERANCE)
+        ? `Alignment OK! Tumor at laser isocenter within ${(dist*1000).toFixed(1)} mm.`
+        : `Tumor is ${(dist*100).toFixed(1)} cm from laser ISO. Required Shifts → X: ${(shift.x*100).toFixed(1)} cm, Y: ${(shift.y*100).toFixed(1)} cm, Z: ${(shift.z*100).toFixed(1)} cm`;
+      alignmentMessageElement.innerHTML = msg;
+      alignmentMessageElement.style.color = (dist < ALIGNMENT_TOLERANCE) ? 'green' : 'crimson';
+      if (dist < ALIGNMENT_TOLERANCE && !rtappsReported) {
+        rtappsReported = true;
+        if (window.RTApps) window.RTApps.reportCompletion();
+      }
+    }
+    
+    function updateIsocenterOffset() {
+        const x = parseFloat(document.getElementById('isoOffsetX').value) / 100; // cm to meters
+        const y = parseFloat(document.getElementById('isoOffsetY').value) / 100;
+        const z = parseFloat(document.getElementById('isoOffsetZ').value) / 100;
+        isocenterOffset.set(x || 0, y || 0, z || 0);
+
+        laserIsocenter.copy(machineIsocenter).add(isocenterOffset);
+        
+        laserX.position.copy(laserIsocenter);
+        laserY.position.copy(laserIsocenter);
+        laserZ.position.copy(laserIsocenter);
+    }
+
+    // ===== LINAC Interactions =====
+    function toggleLabels() { labelsVisible = !labelsVisible; if (!labelsVisible) hideAllLabels(); else updateAllLabelVisibility(); };
+
+    function rotateGantry(clockwise = true) { 
+        const direction = clockwise ? -1 : 1; // Flipped for IEC convention
+        gantryRotatingAssembly.rotation.z += direction * 0.01; 
+        updateReadouts();
+    };
+
+    function adjustJaws(open = true) { 
+        const delta = open ? 0.02 : -0.02; 
+        setJawOffset(THREE.MathUtils.clamp(jawOffset + delta, 0.03, headSize*0.4)); 
+        updateReadouts();
+    };
+
+    function moveCouch(up = true) {
+      couchGroup.position.y += up ? 0.05 : -0.05;
+      constrainCouch();
+      updateReadouts();
+    };
+
+    function moveCouchLongitudinal(towardsGantry = true) {
+      const dir = towardsGantry ? -1 : 1; couchTopGroup.position.z += dir * 0.05;
+      constrainCouch();
+      updateReadouts();
+    };
+
+    function moveCouchLateral(left = true) {
+      const dir = left ? 1 : -1; couchTopGroup.position.x += dir * 0.05;
+      constrainCouch();
+      updateReadouts();
+    };
+
+    function toggleDetector() {
+        setDetectorState(!detectorExtended);
+    }
+
+    function setDetectorState(isExtended) {
+        detectorExtended = isExtended;
+        
+        if (isExtended) {
+            // Logic for EXTENDED state
+            const isoLocal = gantryRotatingAssembly.worldToLocal(machineIsocenter.clone());
+            const armStartPos = new THREE.Vector3(0, -newVerticalArmTotalLength / 2, 0);
+            
+            // The final position of the panel is at the isocenter's Z depth, but maintaining the Y offset of the arm mount
+            const panelPos = new THREE.Vector3(0, armStartPos.y, isoLocal.z);
+
+            const armVector = new THREE.Vector3().subVectors(panelPos, armStartPos);
+            const armLength = armVector.length();
+
+            detectorArm.visible = true;
+            detectorPanel.visible = true;
+            
+            detectorArm.geometry.dispose();
+            detectorArm.geometry = new THREE.CylinderGeometry(detectorArmRadius, detectorArmRadius, armLength, 16);
+            
+            detectorArm.position.copy(armStartPos).add(armVector.clone().multiplyScalar(0.5));
+            detectorArm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), armVector.clone().normalize());
+            
+            detectorPanel.position.copy(panelPos);
+            
+            // Use lookAt for robust orientation
+            const headWorldPos = head.getWorldPosition(new THREE.Vector3());
+            const gantryRight = new THREE.Vector3(1, 0, 0).applyQuaternion(gantryRotatingAssembly.quaternion);
+            detectorPanel.up.copy(gantryRight);
+            detectorPanel.lookAt(headWorldPos);
+
+        } else {
+            // Logic for RETRACTED state
+            detectorArm.visible = false;
+            detectorPanel.visible = true;
+            detectorPanel.rotation.set(0, 0, 0);
+            detectorPanel.position.set(0, -newVerticalArmTotalLength / 2, verticalArmLSize / 2 + detectorPanelThickness / 2);
+        }
+        document.getElementById('detectorToggleButton').textContent = detectorExtended ? 'Retract MV Imager' : 'Extend MV Imager';
+    }
+
+    function toggleSideDetector() {
+        setSideDetectorState(!sideDetectorExtended);
+    }
+
+    function setSideDetectorState(isExtended) {
+        sideDetectorExtended = isExtended;
+        const allImagerParts = [sideDetectorPanel, sideDetectorArm, kvTubeGroup, kvTubeArm];
+        
+        if (isExtended) {
+            allImagerParts.forEach(p => p.visible = true);
+            
+            const isoLocal = gantryRotatingAssembly.worldToLocal(machineIsocenter.clone());
+
+            // --- kV Detector Side (-X mount) ---
+            const detectorStartPos = sideDetectorShortArm.position.clone();
+            const detectorEndPos = new THREE.Vector3(detectorStartPos.x, detectorStartPos.y, isoLocal.z);
+            const detectorVector = new THREE.Vector3().subVectors(detectorEndPos, detectorStartPos);
+            const detectorArmLength = detectorVector.length();
+
+            sideDetectorArm.geometry.dispose();
+            sideDetectorArm.geometry = new THREE.CylinderGeometry(detectorArmRadius, detectorArmRadius, detectorArmLength, 16);
+            sideDetectorArm.position.copy(detectorStartPos).add(detectorVector.clone().multiplyScalar(0.5));
+            sideDetectorArm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), detectorVector.clone().normalize());
+            sideDetectorPanel.position.copy(detectorEndPos);
+            sideDetectorPanel.rotation.set(0, Math.PI / 2, 0); // Face +X
+
+            // --- kV Tube Side (+X mount) ---
+            const tubeStartPos = kvTubeShortArm.position.clone();
+            const tubeEndPos = new THREE.Vector3(tubeStartPos.x, tubeStartPos.y, isoLocal.z);
+            const tubeVector = new THREE.Vector3().subVectors(tubeEndPos, tubeStartPos);
+            const tubeArmLength = tubeVector.length();
+
+            kvTubeArm.geometry.dispose();
+            kvTubeArm.geometry = new THREE.CylinderGeometry(detectorArmRadius, detectorArmRadius, tubeArmLength, 16);
+            kvTubeArm.position.copy(tubeStartPos).add(tubeVector.clone().multiplyScalar(0.5));
+            kvTubeArm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tubeVector.clone().normalize());
+            kvTubeGroup.position.copy(tubeEndPos);
+            kvTubeGroup.rotation.set(Math.PI / 2, Math.PI, 0); // Pointing -X
+
+        } else {
+            allImagerParts.forEach(p => p.visible = false);
+        }
+        document.getElementById('sideDetectorToggleButton').textContent = sideDetectorExtended ? 'Retract kV Imagers' : 'Extend kV Imagers';
+    }
+
+    function toggleElectronCone() {
+      isConeAttached = !isConeAttached; electronCone.visible = isConeAttached;
+      document.getElementById('coneToggleButton').textContent = isConeAttached ? 'Remove Electron Cone' : 'Attach Electron Cone';
+    };
+
+    // ===== UI and Readouts =====
+    function setupUI() {
+        // Get readout elements
+        readoutGantry = document.getElementById('readout-gantry');
+        readoutJawX = document.getElementById('readout-jawX');
+        readoutJawY = document.getElementById('readout-jawY');
+        readoutCouchX = document.getElementById('readout-couchX');
+        readoutCouchY = document.getElementById('readout-couchY');
+        readoutCouchZ = document.getElementById('readout-couchZ');
+
+        // Setup console toggle
+        const toggleButton = document.getElementById('console-toggle-button');
+        const consoleWindow = document.getElementById('console-window');
+        const alignWindow = document.getElementById('align-window');
+        let panelsVisible = true;
+        
+        toggleButton.addEventListener('click', () => {
+            panelsVisible = !panelsVisible;
+            consoleWindow.classList.toggle('hidden', !panelsVisible);
+            alignWindow.classList.toggle('hidden', !panelsVisible);
+            toggleButton.innerHTML = panelsVisible ? '«' : '»';
+            toggleButton.style.right = panelsVisible ? '360px' : '20px'; // Adjust position based on console width
+        });
+        
+        // Initial readout update
+        updateReadouts();
+    }
+
+    function updateReadouts() {
+        // Gantry Angle (IEC Convention)
+        let gantryAngle = -(gantryRotatingAssembly.rotation.z * 180 / Math.PI);
+        gantryAngle = (gantryAngle % 360 + 360) % 360; // Normalize to 0-360
+        readoutGantry.textContent = `${gantryAngle.toFixed(1)}°`;
+
+        // Collimator Field Size
+        const fieldSizeX = (jawOffset * 2 * 100).toFixed(1);
+        const fieldSizeY = (jawOffset * 2 * 100).toFixed(1); // Assuming symmetric jaws for now
+        readoutJawX.textContent = `${fieldSizeX} cm`;
+        readoutJawY.textContent = `${fieldSizeY} cm`;
+
+        // Couch Position
+        const couchVrt = ((couchGroup.position.y - initialCouchY) * 100).toFixed(1);
+        const couchLng = (couchTopGroup.position.z * 100).toFixed(1);
+        const couchLat = (couchTopGroup.position.x * 100).toFixed(1);
+        readoutCouchY.textContent = `${couchVrt} cm`;
+        readoutCouchZ.textContent = `${couchLng} cm`;
+        readoutCouchX.textContent = `${couchLat} cm`;
+    }
+
+    // Helpers
+    function setJawOffset(val){ jawOffset = val; jawXN.position.x = -jawOffset; jawXP.position.x = jawOffset; jawYN.position.y = -jawOffset; jawYP.position.y = jawOffset; }
+    function updateAccordion(){ const baseBottomWorldY = couchGroup.position.y - (couchBaseHeight/2); const h = Math.max(0.01, baseBottomWorldY - groundY); couchAccordionVisual.scale.y = h / accordionGeometricHeight; couchAccordionVisual.position.y = h/2; couchAccordion.position.x = couchGroup.position.x; couchAccordion.position.z = couchGroup.position.z; }
+    function constrainCouch(){ 
+        const minY = (couchBaseHeight/2) + groundY; 
+        const maxY = isocenterYTarget + 0.5; 
+        couchGroup.position.y = THREE.MathUtils.clamp(couchGroup.position.y, minY, maxY); 
+        
+        const zExt = couchLength * 0.4; 
+        const xExt = couchWidth * 0.4; 
+        couchTopGroup.position.z = THREE.MathUtils.clamp(couchTopGroup.position.z, -zExt, zExt); 
+        couchTopGroup.position.x = THREE.MathUtils.clamp(couchTopGroup.position.x, -xExt, xExt); 
+        updateAccordion(); 
+    }
+    function enableShadows(o){ o.castShadow = true; o.receiveShadow = true; if (o.children) o.children.forEach(enableShadows); }
+
+    // Label math
+    function updateAllLabelVisibility(){ labeledObjects.forEach(({object,label})=>updateLabelPosition(label, object)); }
+    function hideAllLabels(){ labeledObjects.forEach(({label})=>{ if(label) label.style.visibility='hidden'; }); }
+    function updateLabelPosition(labelElement, object3D){ if(!labelElement || !object3D) return; if (!labelsVisible || !object3D.visible){ labelElement.style.visibility='hidden'; return; } const tempV = new THREE.Vector3(); scene.updateMatrixWorld(true); object3D.getWorldPosition(tempV); tempV.project(camera); const x = (tempV.x * .5 + .5) * renderer.domElement.clientWidth; const y = (tempV.y * -.5 + .5) * renderer.domElement.clientHeight; const objectWorldPosition = new THREE.Vector3(); object3D.getWorldPosition(objectWorldPosition); const cameraDirection = new THREE.Vector3(); camera.getWorldDirection(cameraDirection); const objectDirection = new THREE.Vector3().subVectors(objectWorldPosition, camera.position); if (objectDirection.dot(cameraDirection) > 0 && tempV.z < 1 && tempV.z > -1){ labelElement.style.transform = `translate(-50%, -110%) translate(${x}px,${y}px)`; labelElement.style.visibility = 'visible'; } else { labelElement.style.visibility = 'hidden'; } }
+
+    // Window & render loop
+    function onWindowResize(){ camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); updateAllLabelVisibility(); }
+    function animate(){ requestAnimationFrame(animate); controls.update(); if (labelsVisible) updateAllLabelVisibility(); renderer.render(scene, camera); }
+
+    // Drag utility for panels
+    function makeDraggable(element){ let pos1=0,pos2=0,pos3=0,pos4=0; const header=element.querySelector(".ui-header")||element; header.onmousedown=dragMouseDown; function dragMouseDown(e){ e=e||window.event; e.preventDefault(); pos3=e.clientX; pos4=e.clientY; document.onmouseup=closeDragElement; document.onmousemove=elementDrag; } function elementDrag(e){ e=e||window.event; e.preventDefault(); pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY; element.style.top=(element.offsetTop - pos2)+"px"; element.style.left=(element.offsetLeft - pos1)+"px"; } function closeDragElement(){ document.onmouseup=null; document.onmousemove=null; } }
+
+    // Expose functions to global scope for HTML onclick handlers
+    window.rotateGantry = rotateGantry;
+    window.adjustJaws = adjustJaws;
+    window.moveCouch = moveCouch;
+    window.moveCouchLongitudinal = moveCouchLongitudinal;
+    window.moveCouchLateral = moveCouchLateral;
+    window.toggleDetector = toggleDetector;
+    window.toggleSideDetector = toggleSideDetector;
+    window.toggleElectronCone = toggleElectronCone;
+    window.toggleLabels = toggleLabels;
+    window.newCase = newCase;
+    window.nudgePatient = nudgePatient;
+    window.centerCouch = centerCouch;
+    window.checkAlignment = checkAlignment;
+    window.updateIsocenterOffset = updateIsocenterOffset;
+  </script>
+</body>
+</html>

@@ -325,7 +325,10 @@ function init(levelIdx = 0) {
     timeLeft = levelConfig.time;
     
     hazards = JSON.parse(JSON.stringify(levelConfig.hazards));
-    totalHazards = hazards.length;
+    // isFatal hazards end the run instantly (showQuiz) and can never reach handleAnswer,
+    // so they must not count toward the find-them-all win gate below (4d audit §4.3/4.4) —
+    // otherwise Level 4's two isFatal hazards make foundHazards === totalHazards impossible.
+    totalHazards = hazards.filter(h => !h.isFatal).length;
     foundHazards = 0;
 
     gameRunning = true;

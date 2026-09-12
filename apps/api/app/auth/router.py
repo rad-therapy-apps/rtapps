@@ -1,9 +1,10 @@
 """The `/auth/*` routes: email+password register/login/logout, `/me`, and Google OAuth.
 
 What this file does: `register`/`login` create a session and set the cookie; `logout`
-revokes the session and clears the cookie; `me` returns the caller's own profile;
-`providers` tells the frontend whether Google sign-in is configured; `google/start` and
-`google/callback` are the two legs of the Google OAuth redirect flow.
+revokes the session and clears the cookie; `change_password` verifies the current
+password, sets a new one, and signs out every other session; `me` returns the caller's
+own profile; `providers` tells the frontend whether Google sign-in is configured;
+`google/start` and `google/callback` are the two legs of the Google OAuth redirect flow.
 
 Used here and why: a FastAPI `APIRouter` mounted under `/auth` by `app.main`; each route
 composes the building blocks from `app.auth.deps` (cookie set/clear, `require_user`),
@@ -37,9 +38,15 @@ from app.auth.google import (
     verify_state,
 )
 from app.auth.models import Identity, User, UserRole
-from app.auth.passwords import hash_password, verify_password
-from app.auth.schemas import LoginIn, RegisterIn, UserOut
-from app.auth.sessions import create_session, revoke_session, user_by_email
+from app.auth.passwords import hash_password, validate_password_strength, verify_password
+from app.auth.schemas import ChangePasswordIn, LoginIn, RegisterIn, UserOut
+from app.auth.sessions import (
+    create_session,
+    hash_token,
+    revoke_others_for_user,
+    revoke_session,
+    user_by_email,
+)
 from app.config import Settings, get_settings
 from app.db import get_session
 from app.errors import Problem
@@ -50,6 +57,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # Module-level singletons: per-IP rate limiters (ruff B008 pattern).
 _login_limit = rate_limit("login")
 _register_limit = rate_limit("register")
+# Own bucket, not a reuse of _login_limit: change-password takes a password guess too (same
+# brute-force surface as login), but it's authenticated, so sharing login's per-IP bucket
+# would let unrelated login attempts from the same IP throttle a legitimate signed-in user's
+# change-password calls (or vice versa). Same config as login, separate counter.
+_change_password_limit = rate_limit("change-password")
 
 
 @router.post(
@@ -128,6 +140,41 @@ async def logout(
         await revoke_session(db, token)
         await db.commit()
     clear_session_cookie(response, settings)
+
+
+@router.post(
+    "/change-password",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(_change_password_limit)],
+)
+async def change_password(
+    body: ChangePasswordIn,
+    request: Request,
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> None:
+    """Change the signed-in user's password, then sign out every other session.
+
+    Requires the current password (403 if wrong), rejects a new password that fails
+    strength validation, and 409s for a Google-only account with no password to change.
+    """
+    # A Google-only account has no password_hash to check against or replace.
+    if user.password_hash is None:
+        raise Problem(409, "This account signs in with Google and has no password")
+    if not verify_password(body.current_password, user.password_hash):
+        raise Problem(403, "Incorrect current password")
+    validate_password_strength(body.new_password)
+    user.password_hash = hash_password(body.new_password)
+    # Clears the admin temp-password-reset flag (app.admin.router.reset_password /
+    # app.auth.deps.require_user), whether or not it was set — a normal change-password
+    # while the flag is already false is a no-op write, not a special case.
+    user.must_change_password = False
+    # Proving the current password is proof of possession, so the caller's own session
+    # survives; every other session (other devices/browsers) is signed out. require_user
+    # already guarantees this cookie resolved to `user`, so it's always present here.
+    keep_session_id = hash_token(request.cookies.get(COOKIE) or "")
+    await revoke_others_for_user(db, user.id, keep_session_id)
+    await db.commit()
 
 
 @router.get("/me", response_model=UserOut)

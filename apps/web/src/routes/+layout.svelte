@@ -36,6 +36,7 @@
 			     role-gated nav below, added by (app)/+layout.svelte, to avoid duplicating it). -->
 		{#if data.user}
 			<span>{data.user.display_name}</span>
+			<a href={resolve('/(app)/account/password')}>Account</a>
 			<form method="POST" action="/logout" use:enhance>
 				<button type="submit">Sign out</button>
 			</form>

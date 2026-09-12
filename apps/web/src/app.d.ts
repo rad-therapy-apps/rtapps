@@ -27,6 +27,10 @@ declare global {
 			email: string;
 			display_name: string;
 			role: 'student' | 'educator' | 'admin';
+			// True after an admin password reset until the user changes it; drives hooks.server.ts's
+			// forced-change redirect. Optional so existing test fixtures (guard.test.ts) don't need
+			// updating for a flag they don't exercise.
+			must_change_password?: boolean;
 		}
 		// interface PageData {}
 		// interface PageState {}

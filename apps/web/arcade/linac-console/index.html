@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LINAC Console Emulator - Three Monitor Enhanced</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* RTApps (plan 4d): back-link to the simulator hub; mirrors linac-ct/index.html's
+       #rtappsBackBtn pattern exactly (disabled-by-default, fixed bottom-right). */
+    #rtappsBackBtn { position:fixed; bottom:12px; right:12px; z-index:9500; padding:6px 12px; font:700 11px/1 Consolas,monospace; letter-spacing:.04em; color:#eef3f8; background:rgba(16,22,29,.88); border:1px solid rgba(160,178,198,.28); border-radius:7px; cursor:pointer; backdrop-filter:blur(6px); }
+    #rtappsBackBtn:hover:not(:disabled) { background:#2a3542; }
+    #rtappsBackBtn:disabled { opacity:.4; cursor:default; pointer-events:none; }
+  </style>
+</head>
+<body>
+<!-- RTApps (plan 4d): back-link to the simulator hub; stays disabled until the hub URL resolves. -->
+<button id="rtappsBackBtn" type="button" disabled title="Back to the center">&larr; Back to the Center</button>
+<header>LINAC Control Console Emulator</header>
+<div class="container three-monitors">
+  <!-- EMR Panel (left monitor) -->
+  <div class="panel emr-panel">
+    <h3>Patient EMR</h3>
+    <div class="emr-tabs">
+        <button class="tab-button active" onclick="showTab('demographics')">Demographics</button>
+        <button class="tab-button" onclick="showTab('treatment')">Treatment</button>
+        <button class="tab-button" onclick="showTab('labs')">Labs</button>
+    </div>
+    <div class="tab-content active" id="demographics">
+        <p><strong>Name:</strong> <span id="patientName">---</span></p>
+        <p><strong>DOB:</strong> <span id="patientDOB">---</span></p>
+        <p><strong>Diagnosis:</strong> <span id="patientDiagnosis">---</span></p>
+        <p><strong>Patient Type:</strong> <span id="patientType">---</span></p>
+        <button id="generateCaseBtn" style="margin-top: 15px; padding: 8px;">Generate New Patient Case</button>
+    </div>
+    <div class="tab-content" id="treatment">
+        <p>Generate a new patient case to see the treatment plan.</p>
+    </div>
+    <div class="tab-content" id="labs">
+        <p><strong>Creatinine:</strong> <span id="labCreat">---</span></p>
+        <p><strong>WBC:</strong> <span id="labWBC">---</span></p>
+    </div>
+  </div>
+  <!-- Center: Machine Parameters & Status -->
+  <div class="main-panel three-screen-panel">
+    <div class="qa-status-bar">
+      <div class="qa-interlocks-panel horizontal">
+        <span class="interlock-status ok" id="interlock-door"><span class="interlock-dot" id="dot-door"></span>Door: <span id="doorStatus">Closed</span></span>
+        <span class="interlock-status ok" id="interlock-beam"><span class="interlock-dot" id="dot-beam"></span>Beam: <span id="beamStatus">Off</span></span>
+        <span class="interlock-status ok" id="interlock-override"><span class="interlock-dot" id="dot-override"></span>Override: <span id="overrideStatus">Inactive</span></span>
+        <span class="qa-checklist">
+          <label><input type="checkbox" disabled checked> Imaging</label>
+          <label><input type="checkbox" disabled> Field Verified</label>
+          <label><input type="checkbox" disabled> Rx Matched</label>
+        </span>
+      </div>
+      <div class="status-bar-local" id="local-status-bar">Emulator Ready. Generate a patient case.</div>
+    </div>
+    <div class="monitors-row three-screens-row">
+      <!-- Machine Parameters (center screen) -->
+      <div class="monitor-screen monitor-parameters">
+        <h2>Machine Parameters</h2>
+        <div class="machine-param-box-group">
+          <div class="machine-param-box"><span class="param-label">Beam</span><span id="mp-energy">6 MV</span></div>
+          <div class="machine-param-box"><span class="param-label">Collimator</span><span id="mp-collimator">0°</span></div>
+        </div>
+        <div class="machine-param-box-group field-dims-group">
+          <div class="machine-param-box"><span class="param-label">Gantry</span><span id="mp-gantry">0°</span></div>
+          <div class="machine-param-box"><span class="param-label">Couch</span><span id="mp-couch">0°</span></div>
+        </div>
+        <div class="machine-param-box-group jaws-group" style="margin-bottom:0.6em;">
+          <div class="machine-param-box"><span class="param-label">X1</span><span id="jawX1">5.0</span></div>
+          <div class="machine-param-box"><span class="param-label">X2</span><span id="jawX2">5.0</span></div>
+          <div class="machine-param-box"><span class="param-label">Y1</span><span id="jawY1">5.0</span></div>
+          <div class="machine-param-box"><span class="param-label">Y2</span><span id="jawY2">5.0</span></div>
+        </div>
+        <div id="console-display" style="margin: 0.7em 0 0 0;">
+          <div id="console-parameters">Energy: 6 MV | MU: 000 | Field: ---x--- </div>
+          <div id="console-status">Status: Idle</div>
+          <div id="console-reading">Delivered MU: 000 | Dose Rate: ---</div>
+        </div>
+      </div>
+      <!-- Image Alignment (left of center, in the three screen row) -->
+      <div class="monitor-screen monitor-alignment">
+        <h2>Image Alignment</h2>
+        <div class="overlay-container focal">
+          <img src="https://via.placeholder.com/400x320.png?text=Base+(Load+Case)" class="base-image" id="baseImage" alt="Base Patient Anatomy">
+          <img src="https://via.placeholder.com/400x320.png?text=Overlay+(Load+Case)" id="overlayImage" class="overlay-image" alt="Overlay Reference Image">
+        </div>
+        <p id="alignmentMessage" style="text-align: center;"></p>
+        <p id="shiftFeedback" style="color: orange; min-height: 1em; text-align: center;"></p>
+        <p id="alignmentCounterDisplay" style="text-align: center; font-weight: bold; margin-top: 5px;">Correct Case Alignments: 0</p>
+      </div>
+      <!-- Field/MLC Visualizer (rightmost screen) -->
+      <div class="monitor-screen monitor-mlc-visualizer">
+        <h2>Field/MLC Visualizer &amp; DRR</h2>
+        <div id="fieldDisplayContainer">
+          <div id="rotatingElementsContainer">
+            <div id="fieldDisplayRect"></div>
+          </div>
+        </div>
+        <div class="summary-text" style="margin-top:10px;">
+          Field: <span id="totalFieldX">10.0</span> x <span id="totalFieldY">10.0</span> cm |
+          Collimator: <span id="collimatorDisplay">0°</span>
+        </div>
+      </div>
+    </div>
+    <div class="console-panel-group">
+      <div class="section-label">Console Buttons</div>
+      <div class="console-buttons">
+        <button id="energyToggleButton" class="console-button">Set Energy</button>
+        <span class="field-size-display" id="currentEnergyDisplay" style="min-width: 80px; text-align: center;">6 MV</span>
+        <button class="console-button" id="btn-set-mu">Set MU</button>
+        <button id="btn-conesize" class="console-button disabled">Electron Cone</button>
+        <button class="console-button disabled" id="btn-prepare">Prepare</button>
+        <button class="console-button beam-on disabled" id="btn-beam-on">Beam On</button>
+        <button class="console-button beam-off disabled" id="btn-beam-off">Beam Off</button>
+        <button class="console-button" id="btn-reset">Reset State</button>
+        <button class="console-button door-control" id="btn-door-control">Open Door</button>
+        <button class="console-button disabled" id="btn-override">Override</button>
+      </div>
+      <div class="section-label">Image Alignment</div>
+      <div class="console-buttons image-alignment-controls">
+        <button onclick="moveOverlay(0,-1)" title="Up">↑</button>
+        <button onclick="moveOverlay(-1,0)" title="Left">←</button>
+        <button onclick="moveOverlay(1,0)" title="Right">→</button>
+        <button onclick="moveOverlay(0,1)" title="Down">↓</button>
+        <button onclick="rotateOverlay(-1)" title="Rotate Left">↺</button>
+        <span id="rotationDisplay" class="mini-label">0°</span>
+        <button onclick="rotateOverlay(1)" title="Rotate Right">↻</button>
+        <button onclick="scaleOverlay(false)" title="Zoom Out">-</button>
+        <span id="scaleDisplay" class="mini-label">1.00x</span>
+        <button onclick="scaleOverlay(true)" title="Zoom In">+</button>
+        <input type="range" id="opacitySlider" min="0" max="100" value="50" style="width:70px;vertical-align:middle;" title="Opacity"/>
+        <span id="opacityValue" class="mini-label">50%</span>
+        <strong style="margin-left:16px;">Couch Shift:</strong>
+        X: <span id="couchShiftX">0</span> px,
+        Y: <span id="couchShiftY">0</span> px,
+        <strong>Rotation:</strong>
+        <span id="couchRotation">0°</span>,
+        <strong>Zoom:</strong>
+        <span id="couchZoom">1.00x</span>
+        <button id="btn-check-alignment" class="console-button" style="margin-left:18px;">Check Alignment</button>
+      </div>
+      <div class="section-label">Machine &amp; Field Controls</div>
+      <div class="console-buttons machine-controls">
+        <label for="drrImageSelect" style="font-weight:bold;">DRR Image:</label>
+        <select id="drrImageSelect" style="width: 120px;">
+            <option value="">-- None --</option>
+            <option value="https://prod-images-static.radiopaedia.org/images/2089213/f12063879a29e672f675977fabdc89_gallery.jpeg">Chest AP</option>
+            <option value="https://prod-images-static.radiopaedia.org/images/13205453/221b52a9fd6ca1675dccde4728534d_big_gallery.jpg">Brain Lat</option>
+            <option value="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcK9oD-R3O3Nt7FQeUZ_jAjfws1z48JyKQcA&s">Pelvis AP</option>
+            <option value="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6AdTnLxJ_MVHgTFu27PNRV-P62fjSKoFvBQ&s">Spine AP</option>
+        </select>
+        <span style="margin-left:16px;">Jaws:</span>
+        X1:<button onclick="changeFieldSize('X1', -0.5)">–</button><span class="control-display" id="control-jawX1">5.0</span><button onclick="changeFieldSize('X1', 0.5)">+</button>
+        X2:<button onclick="changeFieldSize('X2', -0.5)">–</button><span class="control-display" id="control-jawX2">5.0</span><button onclick="changeFieldSize('X2', 0.5)">+</button>
+        Y1:<button onclick="changeFieldSize('Y1', -0.5)">–</button><span class="control-display" id="control-jawY1">5.0</span><button onclick="changeFieldSize('Y1', 0.5)">+</button>
+        Y2:<button onclick="changeFieldSize('Y2', -0.5)">–</button><span class="control-display" id="control-jawY2">5.0</span><button onclick="changeFieldSize('Y2', 0.5)">+</button>
+        <span style="margin-left:16px;">Collimator:</span>
+        <button id="collRotateNegBtn">– 5°</button><span class="control-display" id="collimatorDisplay2">0°</span><button id="collRotatePosBtn">+ 5°</button>
+        <span style="margin-left:16px;">MLC Presets:</span>
+        <button id="presetMatchJaw">Match Jaws</button>
+        <button id="presetMultiBlock">Multi-Block</button>
+        <button id="presetSquare">Square</button>
+        <button id="presetOffset">Offset</button>
+        <button id="presetBlock">Block</button>
+        <button id="presetCshape">C-Shape</button>
+        <button id="presetDiagonal">Diagonal</button>
+        <button id="presetDiagRev">Rev Diag</button>
+        <button id="presetDiagShallow">Shallow</button>
+        <button id="animateSquareRandBtn">Animate Square</button>
+        <button id="animateOffsetRandBtn">Animate Offset</button>
+        <button id="animateDiagonalRandBtn">Animate Diagonal</button>
+        <button id="slidingWindowBtn">Sliding Window</button>
+        <button id="imrtDemoBtn">IMRT Demo</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/arcade/rtapps-sdk.js"></script>
+<script src="script.js"></script>
+<script>
+    // RTApps (plan 4d): prefetch the hub's player URL once; the back-link control only
+    // renders/enables when it resolves (activity unseeded/unpublished, or offline leaves
+    // HUB_URL null and the button stays disabled instead of going dead). Same pattern as
+    // linac-ct/index.html's #rtappsBackBtn wiring.
+    var HUB_URL = null;
+    if (window.RTApps) {
+        window.RTApps.activityUrl('sim-hub-qa').then(function (url) {
+            HUB_URL = url;
+            var backBtn = document.getElementById('rtappsBackBtn');
+            if (backBtn) backBtn.disabled = false;
+        }).catch(function () {});
+    }
+    document.getElementById('rtappsBackBtn')?.addEventListener('click', function () {
+        if (HUB_URL) window.top.location.href = HUB_URL;
+    });
+</script>
+</body>
+</html>

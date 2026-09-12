@@ -576,20 +576,52 @@ async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) ->
 
 
 async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settings) -> None:
-    """Plan 4b batch 2: Safety Supervisor — published, kind external, access practice,
-    config with arcade_slug and max_score (1900: 19 hazards x 100 points);
-    subject is radiation-protection; re-seeding creates it only once."""
+    """Plan 4d: Safety Supervisor — published, kind external, access practice, config with
+    arcade_slug and max_score (1700: 19 hazards x 100 (1900) minus the two isFatal hazards'
+    points, now reachable because the game's Level 4 completion gate was fixed to exclude
+    isFatal hazards from totalHazards — audit §4.3/4.4); subject is radiation-protection;
+    re-seeding creates it only once."""
     await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Safety Supervisor"))
     assert activity is not None
     assert activity.kind == "external"
     assert activity.status == "published"
     assert activity.access == "practice"
-    assert activity.config == {"arcade_slug": "safety-supervisor", "max_score": 1900}
+    assert activity.config == {"arcade_slug": "safety-supervisor", "max_score": 1700}
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "radiation-protection"
 
     await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Safety Supervisor")
+    )
+    assert count == 1
+
+
+async def test_seed_republishes_safety_supervisor_on_config_change(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """The republish branch (3c MU-calculator precedent, now shared by the arcade games
+    loop): re-running seed() against a Safety Supervisor row whose config still holds the
+    old (pre-fix) max_score of 1900 — as if seeded before this task — must update its
+    config in place to 1700 and cut a new published ContentVersion whose snapshot reflects
+    it, not leave the stale config/snapshot in place or create a second row."""
+    await seed(db, settings)
+    activity = await db.scalar(select(Activity).where(Activity.title == "Safety Supervisor"))
+    assert activity is not None
+    old_version_id = activity.current_version_id
+    # Simulate a database seeded before this task, when max_score was still 1900.
+    activity.config = {"arcade_slug": "safety-supervisor", "max_score": 1900}
+    await db.flush()
+
+    await seed(db, settings)
+    await db.refresh(activity)
+    assert activity.config == {"arcade_slug": "safety-supervisor", "max_score": 1700}
+    assert activity.status == "published"
+    assert activity.current_version_id != old_version_id
+    version = await db.get(ContentVersion, activity.current_version_id)
+    assert version is not None and version.snapshot["external"]["max_score"] == 1700
+
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Safety Supervisor")
     )
@@ -995,6 +1027,124 @@ async def test_seed_creates_ct_simulation(db: AsyncSession, settings: Settings) 
     assert count == 1
 
 
+async def test_seed_creates_three_point_setup(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4d: Three-point setup — published, kind external, access practice,
+    completion-only (no numeric score) shim over the `3_point_setup` alignment trainer,
+    config carries completion_only: True and no sdk_slug; subject is
+    treatment-delivery-procedures; re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Three-point setup")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "three-point-setup", "completion_only": True}
+    assert "sdk_slug" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Three-point setup")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_linac_training_beginner(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4d: LINAC training — beginner — published, kind external, access practice,
+    completion-only shim over `3D_LINAC_beginner_activities`, config carries
+    completion_only: True and no sdk_slug; subject is treatment-delivery-procedures;
+    re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "LINAC training — beginner"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {"arcade_slug": "linac-training-beginner", "completion_only": True}
+    assert "sdk_slug" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "LINAC training — beginner")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_linac_training_intermediate(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """Plan 4d: LINAC training — intermediate — published, kind external, access practice,
+    completion-only shim over `3D_LINAC_intermediate_activities`, config carries
+    completion_only: True and no sdk_slug; subject is treatment-delivery-procedures;
+    re-seeding creates it only once."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "LINAC training — intermediate"
+        )
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {
+        "arcade_slug": "linac-training-intermediate",
+        "completion_only": True,
+    }
+    assert "sdk_slug" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "LINAC training — intermediate")
+    )
+    assert count == 1
+
+
+async def test_seed_creates_treatment_console(db: AsyncSession, settings: Settings) -> None:
+    """Plan 4d: Treatment console — the console-emulator shim, published, kind external,
+    access practice, completion-only, config carries sdk_slug sim-console for the
+    simulator SDK resolver (like the plan 4c simulator activities) plus no numeric
+    max_score; subject is treatment-delivery-procedures; re-seeding creates it only
+    once."""
+    await seed(db, settings)
+    activity = await db.scalar(
+        select(Activity).where(Activity.kind == "external", Activity.title == "Treatment console")
+    )
+    assert activity is not None
+    assert activity.kind == "external"
+    assert activity.status == "published"
+    assert activity.access == "practice"
+    assert activity.config == {
+        "arcade_slug": "linac-console",
+        "sdk_slug": "sim-console",
+        "completion_only": True,
+    }
+    assert "max_score" not in activity.config
+    subject = await db.get(Subject, activity.subject_id)
+    assert subject is not None and subject.slug == "treatment-delivery-procedures"
+
+    await seed(db, settings)
+    count = await db.scalar(
+        select(func.count()).select_from(Activity).where(Activity.title == "Treatment console")
+    )
+    assert count == 1
+
+
 async def test_seed_sdk_slug_unique_across_published_externals(
     db: AsyncSession, settings: Settings
 ) -> None:
@@ -1010,17 +1160,21 @@ async def test_seed_sdk_slug_unique_across_published_externals(
     ).all()
     sdk_slugs = [a.config["sdk_slug"] for a in activities if a.config.get("sdk_slug")]
     assert len(sdk_slugs) == len(set(sdk_slugs))
-    assert {"sim-hub-qa", "sim-linac-fraction", "sim-ct-scan"} <= set(sdk_slugs)
+    assert {"sim-hub-qa", "sim-linac-fraction", "sim-ct-scan", "sim-console"} <= set(sdk_slugs)
 
 
 def test_seed_simulator_arcade_directories_exist_on_disk() -> None:
-    """The sim-hub and linac-ct arcade apps referenced by the three simulator
-    activities' `arcade_slug` must actually be built and present on disk (Task 3/4's
-    deliverables), not just referenced by a seed row. A plain repo-relative file check,
-    not seed data, so no `db`/`settings` fixtures are needed."""
+    """The sim-hub and linac-ct arcade apps referenced by the three plan 4c simulator
+    activities' `arcade_slug`, plus the four plan 4d shim/console arcade apps, must
+    actually be built and present on disk, not just referenced by a seed row. A plain
+    repo-relative file check, not seed data, so no `db`/`settings` fixtures are needed."""
     repo_root = Path(__file__).resolve().parents[3]
     assert (repo_root / "apps/web/arcade/sim-hub/index.html").is_file()
     assert (repo_root / "apps/web/arcade/linac-ct/index.html").is_file()
+    assert (repo_root / "apps/web/arcade/three-point-setup/index.html").is_file()
+    assert (repo_root / "apps/web/arcade/linac-training-beginner/index.html").is_file()
+    assert (repo_root / "apps/web/arcade/linac-training-intermediate/index.html").is_file()
+    assert (repo_root / "apps/web/arcade/linac-console/index.html").is_file()
 
 
 async def test_seed_refuses_prod(db: AsyncSession) -> None:

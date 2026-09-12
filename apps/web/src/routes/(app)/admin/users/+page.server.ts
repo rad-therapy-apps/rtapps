@@ -1,8 +1,9 @@
 /**
  * What this file does: SSR `load` and form `actions` for `(app)/admin/users`. `load` lists users
  * (`GET /admin/users?q=&cursor=`), paginated by `next_cursor`; the `role` action changes a user's
- * role (`PATCH /admin/users/{id}/role`), and `deactivate` deactivates one
- * (`POST /admin/users/{id}/deactivate`).
+ * role (`PATCH /admin/users/{id}/role`), `deactivate` deactivates one
+ * (`POST /admin/users/{id}/deactivate`), and `reset` sets a temporary password
+ * (`POST /admin/users/{id}/reset-password`).
  *
  * Used here and why: `+page.server.ts` runs only on the server, so `apiFetch`/`apiJson(event, …)`
  * forward the session cookie and (for the mutating actions) set `Origin` for the API's CSRF
@@ -13,7 +14,8 @@
  * users`).
  *
  * Works with: `$lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
- * (`problemMessage`), `@rtapps/api-client` (`UserPage`). Used by: `+page.svelte` (this route).
+ * (`problemMessage`), `@rtapps/api-client` (`UserPage`, `ResetPasswordOut`). Used by:
+ * `+page.svelte` (this route).
  */
 import { fail } from '@sveltejs/kit';
 import { apiFetch, apiJson } from '$lib/server/api';
@@ -22,6 +24,7 @@ import type { components } from '@rtapps/api-client';
 import type { Actions, PageServerLoad } from './$types';
 
 type UserPage = components['schemas']['UserPage'];
+type ResetPasswordOut = components['schemas']['ResetPasswordOut'];
 
 export const load: PageServerLoad = async (event) => {
 	const q = event.url.searchParams.get('q') ?? '';
@@ -61,5 +64,16 @@ export const actions: Actions = {
 		const userId = String(form.get('user_id') ?? '');
 		const res = await apiJson(event, `/admin/users/${userId}/deactivate`);
 		return res.ok ? { deactivated: true } : problemOrNull(res);
+	},
+	// Sets a temporary password for a user from the roster's per-row button. The temporary
+	// password is returned to the page once, in the action result — never persisted client-side
+	// (no cookie, no URL param, no logging).
+	reset: async (event) => {
+		const form = await event.request.formData();
+		const userId = String(form.get('user_id') ?? '');
+		const res = await apiJson(event, `/admin/users/${userId}/reset-password`);
+		if (!res.ok) return problemOrNull(res);
+		const body: ResetPasswordOut = await res.json();
+		return { temporaryPassword: body.temporary_password };
 	}
 };

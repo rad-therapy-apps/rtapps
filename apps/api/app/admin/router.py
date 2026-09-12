@@ -3,23 +3,28 @@ view.
 
 What this file does: `GET /users` lists/searches users with cursor pagination; `PATCH
 /users/{id}/role` changes a user's role (audited); `POST /users/{id}/deactivate` soft-disables
-a user and revokes their sessions (audited); `POST /users/{id}/erase` tombstones a user's PII
-and deletes their sessions/identities (audited); `GET /audit-log` lists audit rows with filters.
+a user and revokes their sessions (audited); `POST /users/{id}/reset-password` sets a
+temporary password, flags the user as must-change-password, and revokes their sessions
+(audited); `POST /users/{id}/erase` tombstones a user's PII and deletes their
+sessions/identities (audited); `GET /audit-log` lists audit rows with filters.
 Every route requires `UserRole.admin`.
 Used here and why: `require_role(UserRole.admin)` as a router-level dependency (same
 "apply to the whole router" pattern as `app.content.router`); `_target` centralises the
 404 (unknown user) / 409 (last-active-admin guard, when the route asks for one) / 400
-(acting on your own account) checks shared by role-change, deactivate, and erase; UUIDv7 ids
+(acting on your own account) checks shared by role-change, deactivate, reset-password, and
+erase; UUIDv7 ids
 sort by creation time, so `User.id.desc()` plus `User.id < cursor` gives newest-first cursor
 pagination for free.
 How it fits the project: FR-M-01/02/04 — the admin surface the owner uses to promote/demote
 and deactivate accounts, and to read the audit trail those actions (and others) leave.
 Depends on: `app.admin.schemas`, `app.audit.models.AuditLog`, `app.audit.service.record_audit`,
 `app.auth.deps` (require_role, require_user), `app.auth.models` (User, UserRole),
-`app.auth.sessions.revoke_all_for_user`, `app.db.get_session`, `app.errors.Problem`.
-Used by: `app.main` (mounted); `tests/test_admin.py`.
+`app.auth.passwords.hash_password`, `app.auth.sessions.revoke_all_for_user`,
+`app.db.get_session`, `app.errors.Problem`.
+Used by: `app.main` (mounted); `tests/test_admin.py`, `tests/test_admin_reset_password.py`.
 """
 
+import secrets
 import uuid
 from datetime import UTC, datetime
 
@@ -27,11 +32,12 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.admin.schemas import AdminUserOut, AuditOut, RoleIn, UserPage
+from app.admin.schemas import AdminUserOut, AuditOut, ResetPasswordOut, RoleIn, UserPage
 from app.audit.models import AuditLog
 from app.audit.service import record_audit
 from app.auth.deps import require_role, require_user
 from app.auth.models import Identity, Session, User, UserRole
+from app.auth.passwords import hash_password
 from app.auth.sessions import revoke_all_for_user
 from app.db import get_session
 from app.errors import Problem
@@ -160,6 +166,37 @@ async def deactivate_user(
     )
     await db.commit()
     return target
+
+
+@router.post("/users/{user_id}/reset-password", response_model=ResetPasswordOut)
+async def reset_password(
+    user_id: uuid.UUID,
+    request: Request,
+    actor: User = Depends(require_user),
+    db: AsyncSession = Depends(get_session),
+) -> ResetPasswordOut:
+    # No last-active-admin guard here (unlike deactivate/erase): resetting an admin's own
+    # password doesn't demote or disable them, so there's nothing to protect against.
+    target = await _target(db, user_id, actor)
+    if target.deactivated_at is not None:
+        raise Problem(409, "Cannot reset a deactivated user's password")
+    # 12 chars of urlsafe base64 easily clears the 10-char strength floor
+    # (app.auth.passwords.MIN_PASSWORD_LENGTH); never logged or persisted in plaintext.
+    temporary_password = secrets.token_urlsafe(9)
+    target.password_hash = hash_password(temporary_password)
+    target.must_change_password = True
+    revoked = await revoke_all_for_user(db, target.id)
+    await record_audit(
+        db,
+        actor=actor,
+        action="reset_password",
+        target_type="user",
+        target_id=target.id,
+        request=request,
+        detail={"sessions_revoked": revoked},
+    )
+    await db.commit()
+    return ResetPasswordOut(temporary_password=temporary_password)
 
 
 @router.post("/users/{user_id}/erase", response_model=AdminUserOut)

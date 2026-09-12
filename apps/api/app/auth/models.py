@@ -29,7 +29,17 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Enum,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    false,
+    func,
+)
 from sqlalchemy.dialects.postgresql import CITEXT, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -73,6 +83,11 @@ class User(TimestampMixin, Base):
     # Soft-disable flag: set (not None) blocks both password login (app.auth.router.login)
     # and session resolution (app.auth.sessions.resolve_session), without deleting the row.
     deactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Set True by the admin temp-password reset; forces the user through change-password
+    # before anything else (app.auth.deps.require_user), then cleared by change_password.
+    must_change_password: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
 
     identities: Mapped[list["Identity"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
