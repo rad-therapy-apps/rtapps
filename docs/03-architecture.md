@@ -293,6 +293,8 @@ The room app is the first consumer of a second integration tier, alongside the �
 
 The room app's five embedded assets — originally inlined as ~1 MB base64 PNGs apiece — were extracted to `/arcade/linac-ct/assets/`, cutting the page from 25.88 MB to 1.40 MB; a `<base href="/arcade/linac-ct/">` tag was injected so the extracted references still resolve inside the blob-iframe suite the arcade route uses. Arcade image, audio, and font assets now carry `Cache-Control: private, max-age=3600`; everything else — HTML, JS, CSS, JSON — remains `no-cache` so a republished app is never served stale.
 
+v0.9.0 adds three LINAC alignment sets to the Games shelf (`three-point-setup`, `linac-training-beginner`, `linac-training-intermediate`), completion-only via the §6.5 shim; the sandbox anchors completion to alignment success, the two training menus to last-module completion. The console emulator becomes a second simulator-hub door — `arcade_slug` `linac-console`, `sdk_slug` `sim-console`, completion-only via the direct SDK — placed at the hub's Learning Commons / Staff Education room behind a parallel `CONSOLE_APP_URL` prefetch gate with the same legacy fallback as the room door's `LINAC_CT_APP_URL`; dead audio references were stripped and a back-link to the hub added. The hub's QA verdict buttons now latch — one verdict per scenario — re-arming on every new QA launch and on lab reset (#73).
+
 ---
 
 ## 7. API
@@ -301,13 +303,13 @@ Base path `/api/v1`. Resources are plural nouns; the API is documented by FastAP
 
 | Group | Endpoints | Who |
 |---|---|---|
-| auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/providers`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}` | anyone / signed-in |
+| auth | `POST auth/register`, `POST auth/login`, `POST auth/logout`, `GET auth/me`, `GET auth/providers`, `GET auth/google/start`, `GET auth/google/callback`, `POST auth/password-reset/{request,confirm}`, `POST auth/change-password` ✅ | anyone / signed-in |
 | cohorts | `POST cohorts` ✅, `GET cohorts` ✅, `GET cohorts/{id}` ✅, `PATCH cohorts/{id}` ✅, `POST cohorts/{id}/rotate-code` ✅, `POST cohorts/join {code}` ✅, `GET cohorts/{id}/members` ✅, `DELETE cohorts/{id}/members/{uid}` ✅ | educator (own), student (join) |
 | content (published) | `GET subjects` ✅, `GET subjects/{slug}` ✅, `GET lessons/{slug}` ✅, `GET activities/{id}` ✅ — returns the published snapshot with correct answers stripped; 404 to students for `access = assessment` (ADR-0006), `GET activities/by-sdk-slug/{slug}` ✅ — resolves an external activity's `sdk_slug` for the arcade SDK (§6.6, v0.8.0) | signed-in |
 | attempts | `POST activities/{id}/attempts` ✅, `POST attempts/{id}/items` ✅, `POST attempts/{id}/submit` ✅ (requires `Idempotency-Key`), `GET me/results` ✅, `GET me/attempts/{id}` | owner of the attempt |
 | analytics | `GET cohorts/{id}/overview` ✅, `GET cohorts/{id}/students/{uid}` ✅, `GET cohorts/{id}/activities/{aid}` ✅, `GET cohorts/{id}/outcomes` ✅ (v0.3.0 deviation: quiz items only — §7 note below), `GET cohorts/{id}/overview.csv` ✅, `GET cohorts/{id}/activities/{aid}.csv` ✅, `GET cohorts/{id}/outcomes.csv` ✅ — each read audited | educator (own cohort), admin |
 | authoring | `POST/PATCH lessons`, `PUT lessons/{id}/pages` (whole tree), `POST/PATCH questions`, `POST/PATCH activities`, `POST/PATCH data-tables`, `POST lessons|activities/{id}/publish`, `GET …/versions`, `POST …/versions/{n}/restore`, `POST media/presign`, `POST media/{id}/confirm` | educator, admin |
-| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST admin/users/{id}/erase` ✅, `GET admin/audit-log` ✅ | admin |
+| admin | `GET admin/users` ✅, `PATCH admin/users/{id}/role` ✅, `POST admin/users/{id}/deactivate` ✅, `POST admin/users/{id}/erase` ✅, `GET admin/audit-log` ✅, `POST admin/users/{id}/reset-password` ✅ | admin |
 | system | `GET health`, `GET openapi.json` | public |
 
 Outcome mastery (`GET cohorts/{id}/outcomes`, FR-E-07) is a v0.3.0 deviation from the original scope: `question_outcome` tags questions, and quiz `attempt_item.item_key` is the question id, so only quiz items roll up into outcome percentages — a lesson knowledge check's `item_key` is a content-block key, not a question id, so lesson items (and flashcards/matching/sequencing, untagged as of v0.3.0) don't appear in this view. Documented limitation, not a bug; broader outcome tagging (FR-A-14) is 3b.
