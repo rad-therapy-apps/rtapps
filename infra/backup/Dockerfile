@@ -11,7 +11,9 @@
 # Used by: infra/compose.prod.yaml (`backup` service, `build: ./backup`).
 
 # mc has no Alpine package; pull its binary from the official image instead of installing it.
-FROM minio/mc:RELEASE.2025-08-13T08-35-41Z AS mc
+# quay.io, not Docker Hub: MinIO removed the minio/mc repository from Docker Hub (discovered
+# 2026-09-12 when this build broke); quay.io/minio/mc publishes the same tags.
+FROM quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z AS mc
 
 FROM alpine:3.21
 # postgresql16-client: pg_dump/pg_restore/pg_isready; age: backup encryption; bash: scripts
