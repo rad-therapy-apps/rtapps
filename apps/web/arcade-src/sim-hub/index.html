@@ -1,0 +1,2880 @@
+<!doctype html>
+<!-- RTApps Radiation Oncology Center Master v43 · vault wall polish, hand hygiene, biohazard storage, changing-area visibility, and current-position NPC routing -->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>RTApps Radiation Oncology Center · Student Experience · v43 CT QA State Fixed</title>
+		<style>
+			:root {
+				--bg: #0b1015;
+				--panel: rgba(14, 21, 28, 0.91);
+				--panel2: #101821;
+				--stroke: rgba(129, 193, 214, 0.23);
+				--stroke2: rgba(129, 193, 214, 0.44);
+				--ink: #e8f1f4;
+				--dim: #91a6ae;
+				--teal: #42d5cf;
+				--green: #65dda0;
+				--amber: #ffbc63;
+				--red: #ff6a73;
+				--blue: #75b8ff;
+				--violet: #b59bff;
+				--radius: 15px;
+				--shadow: 0 18px 48px rgba(0, 0, 0, 0.48);
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				margin: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				background: var(--bg);
+				color: var(--ink);
+				font-family:
+					Inter,
+					Segoe UI,
+					Arial,
+					sans-serif;
+			}
+			button {
+				font: inherit;
+			}
+			canvas {
+				display: block;
+			}
+			#scene {
+				position: fixed;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+			}
+			#labels {
+				position: fixed;
+				inset: 0;
+				pointer-events: none;
+			}
+			#loader {
+				position: fixed;
+				inset: 0;
+				z-index: 300;
+				display: grid;
+				place-items: center;
+				background: radial-gradient(circle at 50% 40%, #14232d, #080c10 72%);
+				transition: opacity 0.55s;
+			}
+			#loader.hide {
+				opacity: 0;
+				pointer-events: none;
+			}
+			.loadbox {
+				text-align: center;
+			}
+			.rtmark {
+				font-size: 36px;
+				font-weight: 900;
+				letter-spacing: -1px;
+			}
+			.rtmark b {
+				color: var(--teal);
+			}
+			.loadsub {
+				margin-top: 7px;
+				color: var(--dim);
+				font-size: 15px;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+			}
+			.ring {
+				width: 52px;
+				height: 52px;
+				border-radius: 50%;
+				margin: 22px auto 0;
+				border: 4px solid rgba(66, 213, 207, 0.18);
+				border-top-color: var(--teal);
+				animation: spin 0.9s linear infinite;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			#topbar {
+				position: fixed;
+				z-index: 80;
+				top: 13px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				align-items: center;
+				gap: 9px;
+				padding: 7px 9px;
+				border: 1px solid var(--stroke);
+				border-radius: 999px;
+				background: var(--panel);
+				box-shadow: var(--shadow);
+				backdrop-filter: blur(12px);
+			}
+			.brand {
+				font-weight: 850;
+				font-size: 15px;
+				white-space: nowrap;
+				padding: 0 7px;
+			}
+			.brand b {
+				color: var(--teal);
+			}
+			.brand small {
+				display: block;
+				color: var(--dim);
+				font-weight: 500;
+				font-size: 15px;
+				letter-spacing: 0.09em;
+				text-transform: uppercase;
+				margin-top: -2px;
+			}
+			.seg {
+				display: flex;
+				gap: 3px;
+				padding: 3px;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.035);
+				border: 1px solid rgba(255, 255, 255, 0.05);
+			}
+			.seg button {
+				border: 0;
+				border-radius: 999px;
+				background: transparent;
+				color: var(--dim);
+				padding: 6px 13px;
+				font-size: 15px;
+				font-weight: 700;
+				cursor: pointer;
+			}
+			.seg button.active {
+				background: var(--teal);
+				color: #06231f;
+			}
+			.seg button:hover:not(.active) {
+				color: var(--ink);
+				background: rgba(255, 255, 255, 0.05);
+			}
+			.ambientBtn {
+				border: 1px solid rgba(129, 193, 214, 0.22);
+				background: rgba(255, 255, 255, 0.035);
+				color: #a9bac1;
+				border-radius: 999px;
+				padding: 6px 10px;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+				white-space: nowrap;
+			}
+			.ambientBtn.on {
+				background: rgba(66, 213, 207, 0.16);
+				border-color: rgba(66, 213, 207, 0.44);
+				color: #d6fbf7;
+			}
+			.ambientBtn:hover {
+				background: rgba(255, 255, 255, 0.07);
+			}
+			#roomRail {
+				position: fixed;
+				left: 14px;
+				top: 72px;
+				bottom: 54px;
+				width: 250px;
+				z-index: 70;
+				display: flex;
+				flex-direction: column;
+				gap: 9px;
+				pointer-events: none;
+				transition:
+					transform 0.32s ease,
+					opacity 0.22s ease;
+				transform: translateX(0);
+			}
+			#roomRail.collapsed {
+				transform: translateX(calc(-100% + 38px));
+			}
+			#roomRail.collapsed #roomList,
+			#roomRail.collapsed #journeyBox,
+			#roomRail.collapsed .zonechips {
+				opacity: 0;
+				pointer-events: none;
+			}
+			#roomRail.collapsed .railhead .t,
+			#roomRail.collapsed .railhead .k {
+				opacity: 0;
+			}
+			.railbox {
+				pointer-events: auto;
+				background: var(--panel);
+				border: 1px solid var(--stroke);
+				border-radius: var(--radius);
+				box-shadow: var(--shadow);
+				backdrop-filter: blur(12px);
+				overflow: hidden;
+			}
+			.railhead {
+				padding: 12px 13px 10px;
+				border-bottom: 1px solid var(--stroke);
+			}
+			.railhead .k {
+				font-size: 15px;
+				letter-spacing: 0.13em;
+				text-transform: uppercase;
+				color: var(--teal);
+				font-weight: 800;
+			}
+			.railhead .t {
+				font-size: 15px;
+				font-weight: 800;
+				margin-top: 2px;
+			}
+			.zonechips {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 4px;
+				margin-top: 9px;
+			}
+			.zonechips button {
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.035);
+				color: var(--dim);
+				border-radius: 7px;
+				padding: 5px 2px;
+				font-size: 15px;
+				font-weight: 750;
+				cursor: pointer;
+			}
+			.zonechips button.active {
+				background: rgba(66, 213, 207, 0.17);
+				border-color: rgba(66, 213, 207, 0.48);
+				color: #baf4ef;
+			}
+			#roomRail > .railbox:first-child {
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
+				flex: 1;
+			}
+			#roomRail > .railbox:first-child .railhead {
+				flex: 0 0 auto;
+			}
+			#roomList {
+				padding: 8px;
+				overflow: auto;
+				max-height: none;
+				min-height: 0;
+				flex: 1;
+			}
+			#journeyBox {
+				flex: 0 0 auto;
+				max-height: 245px;
+				overflow: auto;
+			}
+			#roomList::-webkit-scrollbar {
+				width: 6px;
+			}
+			#roomList::-webkit-scrollbar-thumb {
+				background: rgba(129, 193, 214, 0.2);
+				border-radius: 6px;
+			}
+			.roombtn {
+				width: 100%;
+				display: grid;
+				grid-template-columns: 8px 1fr 16px;
+				align-items: center;
+				gap: 8px;
+				text-align: left;
+				border: 1px solid transparent;
+				background: transparent;
+				color: var(--ink);
+				border-radius: 9px;
+				padding: 7px 8px;
+				margin-bottom: 3px;
+				cursor: pointer;
+			}
+			.roombtn:hover {
+				background: rgba(255, 255, 255, 0.045);
+				border-color: var(--stroke);
+			}
+			.roombtn.active {
+				background: rgba(66, 213, 207, 0.12);
+				border-color: rgba(66, 213, 207, 0.38);
+			}
+			.roombtn .dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--rc);
+				box-shadow: 0 0 9px var(--rc);
+			}
+			.roombtn .nm {
+				font-size: 15px;
+				font-weight: 730;
+				line-height: 1.12;
+			}
+			.roombtn .sb {
+				font-size: 15px;
+				color: var(--dim);
+				margin-top: 2px;
+			}
+			.roombtn .arr {
+				font-size: 15px;
+				color: var(--dim);
+			}
+			#journeyBox {
+				padding: 10px 12px;
+			}
+			.jrow {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.jrow button {
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.04);
+				color: var(--ink);
+				border-radius: 8px;
+				padding: 6px 8px;
+				cursor: pointer;
+				font-size: 15px;
+				font-weight: 700;
+			}
+			.jrow button:disabled {
+				opacity: 0.35;
+				cursor: not-allowed;
+			}
+			.jtxt {
+				font-size: 15px;
+				color: var(--dim);
+				line-height: 1.35;
+				flex: 1;
+			}
+			.journeyCtl {
+				margin-top: 9px;
+				padding-top: 9px;
+				border-top: 1px solid rgba(129, 193, 214, 0.14);
+			}
+			.journeyModes {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 5px;
+				margin-bottom: 8px;
+			}
+			.journeyModes button {
+				border: 1px solid rgba(129, 193, 214, 0.22);
+				background: rgba(255, 255, 255, 0.04);
+				color: #b8c9cf;
+				border-radius: 8px;
+				padding: 6px 6px;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+				line-height: 1.2;
+			}
+			.journeyModes button.active {
+				background: rgba(66, 213, 207, 0.17);
+				border-color: rgba(66, 213, 207, 0.45);
+				color: #dff9f6;
+			}
+			.journeyHead {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+			}
+			.journeyHead b {
+				font-size: 15px;
+				color: #e7f6f6;
+			}
+			.journeyHead span {
+				font-size: 15px;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+				color: var(--teal);
+				font-weight: 800;
+			}
+			.journeyStep {
+				margin-top: 5px;
+				font-size: 15px;
+				line-height: 1.4;
+				color: #b8c9cf;
+				min-height: 33px;
+			}
+			.journeyBar {
+				height: 4px;
+				border-radius: 5px;
+				background: rgba(255, 255, 255, 0.07);
+				overflow: hidden;
+				margin: 7px 0;
+			}
+			.journeyBar i {
+				display: block;
+				height: 100%;
+				width: 0;
+				background: linear-gradient(90deg, var(--teal), #7de6b5);
+				transition: width 0.3s ease;
+			}
+			.journeyButtons {
+				display: grid;
+				grid-template-columns: 1fr 1fr 30px;
+				gap: 5px;
+			}
+			.journeyButtons button {
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.045);
+				color: var(--ink);
+				border-radius: 8px;
+				padding: 6px 6px;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+			}
+			.journeyButtons button.primary {
+				background: rgba(66, 213, 207, 0.18);
+				border-color: rgba(66, 213, 207, 0.45);
+				color: #c9fbf7;
+			}
+			.journeyButtons button:disabled {
+				opacity: 0.35;
+				cursor: not-allowed;
+			}
+			#patientJourneyHUD {
+				position: fixed;
+				z-index: 74;
+				left: 50%;
+				bottom: 55px;
+				transform: translateX(-50%) translateY(12px);
+				opacity: 0;
+				pointer-events: none;
+				min-width: 370px;
+				max-width: 560px;
+				background: rgba(8, 17, 23, 0.93);
+				border: 1px solid rgba(66, 213, 207, 0.34);
+				border-radius: 12px;
+				padding: 9px 13px;
+				box-shadow: var(--shadow);
+				transition: 0.25s;
+				backdrop-filter: blur(10px);
+			}
+			#patientJourneyHUD.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+			#patientJourneyHUD .jhTop {
+				display: flex;
+				justify-content: space-between;
+				gap: 16px;
+				font-size: 15px;
+			}
+			#patientJourneyHUD .jhTop b {
+				color: var(--teal);
+			}
+			#patientJourneyHUD .jhSub {
+				font-size: 15px;
+				color: #aabdc5;
+				margin-top: 4px;
+				line-height: 1.35;
+			}
+			#dayTransition {
+				position: fixed;
+				z-index: 175;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -46%) scale(0.96);
+				min-width: 320px;
+				max-width: 520px;
+				padding: 18px 22px;
+				border-radius: 16px;
+				background: rgba(8, 17, 23, 0.96);
+				border: 1px solid rgba(66, 213, 207, 0.46);
+				box-shadow: 0 26px 80px rgba(0, 0, 0, 0.58);
+				text-align: center;
+				opacity: 0;
+				pointer-events: none;
+				transition:
+					opacity 0.28s ease,
+					transform 0.28s ease;
+				backdrop-filter: blur(14px);
+			}
+			#dayTransition.show {
+				opacity: 1;
+				transform: translate(-50%, -50%) scale(1);
+			}
+			#dayTransition b {
+				display: block;
+				color: var(--teal);
+				font-size: 18px;
+				letter-spacing: 0.02em;
+			}
+			#dayTransition span {
+				display: block;
+				color: #bdd0d7;
+				font-size: 15px;
+				line-height: 1.5;
+				margin-top: 6px;
+			}
+
+			#infoPanel {
+				position: fixed;
+				right: 14px;
+				top: 72px;
+				width: 300px;
+				max-height: calc(100vh - 126px);
+				z-index: 70;
+				background: var(--panel);
+				border: 1px solid var(--stroke);
+				border-radius: var(--radius);
+				box-shadow: var(--shadow);
+				backdrop-filter: blur(12px);
+				overflow: visible;
+				display: flex;
+				flex-direction: column;
+				transition:
+					transform 0.32s ease,
+					opacity 0.22s ease;
+				transform: translateX(0);
+			}
+			#infoPanel.collapsed {
+				transform: translateX(calc(100% - 20px));
+			}
+			#infoPanel.collapsed .ipbody,
+			#infoPanel.collapsed h2,
+			#infoPanel.collapsed .sub,
+			#infoPanel.collapsed .k {
+				opacity: 0;
+				pointer-events: none;
+			}
+			.iph {
+				padding: 13px 15px 11px;
+				border-bottom: 1px solid var(--stroke);
+				background: linear-gradient(180deg, rgba(66, 213, 207, 0.07), transparent);
+			}
+			.iph .k {
+				font-size: 15px;
+				color: var(--teal);
+				text-transform: uppercase;
+				letter-spacing: 0.13em;
+				font-weight: 800;
+			}
+			.iph h2 {
+				font-size: 18px;
+				margin: 3px 0 0;
+				line-height: 1.12;
+			}
+			.iph .sub {
+				font-size: 15px;
+				color: var(--dim);
+				margin-top: 4px;
+			}
+			.ipbody {
+				padding: 12px 14px 14px;
+				overflow: auto;
+			}
+			.ipbody::-webkit-scrollbar {
+				width: 6px;
+			}
+			.ipbody::-webkit-scrollbar-thumb {
+				background: rgba(129, 193, 214, 0.2);
+				border-radius: 6px;
+			}
+			.desc {
+				font-size: 15px;
+				color: #cbd7dc;
+				line-height: 1.55;
+			}
+			.meta {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 6px;
+				margin: 11px 0;
+			}
+			.mcell {
+				background: rgba(255, 255, 255, 0.035);
+				border: 1px solid rgba(129, 193, 214, 0.14);
+				border-radius: 9px;
+				padding: 7px 8px;
+			}
+			.mcell span {
+				display: block;
+				font-size: 15px;
+				color: var(--dim);
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+			.mcell b {
+				display: block;
+				font-size: 15px;
+				margin-top: 2px;
+			}
+			.phase {
+				padding: 9px 10px;
+				border-radius: 9px;
+				background: rgba(101, 221, 160, 0.08);
+				border: 1px solid rgba(101, 221, 160, 0.25);
+				font-size: 15px;
+				line-height: 1.45;
+				color: #c8f2dc;
+			}
+			.iactions {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 6px;
+				margin-top: 11px;
+			}
+			.iactions button {
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.05);
+				color: var(--ink);
+				border-radius: 9px;
+				padding: 8px 7px;
+				font-size: 15px;
+				font-weight: 750;
+				cursor: pointer;
+			}
+			.iactions button.primary {
+				background: var(--teal);
+				color: #06231f;
+				border-color: transparent;
+			}
+			.iactions button:hover {
+				filter: brightness(1.08);
+			}
+			#travelHUD {
+				position: fixed;
+				z-index: 90;
+				left: 50%;
+				bottom: 31px;
+				transform: translateX(-50%) translateY(18px);
+				opacity: 0;
+				pointer-events: none;
+				transition: 0.25s;
+				background: rgba(8, 15, 21, 0.92);
+				border: 1px solid rgba(66, 213, 207, 0.35);
+				border-radius: 13px;
+				padding: 9px 13px;
+				min-width: 300px;
+				box-shadow: var(--shadow);
+				backdrop-filter: blur(10px);
+			}
+			#travelHUD.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+			.thtop {
+				display: flex;
+				justify-content: space-between;
+				gap: 18px;
+				font-size: 15px;
+			}
+			.thtop b {
+				color: var(--teal);
+			}
+			.travelbar {
+				height: 4px;
+				background: rgba(255, 255, 255, 0.08);
+				border-radius: 4px;
+				overflow: hidden;
+				margin-top: 7px;
+			}
+			.travelbar i {
+				display: block;
+				width: 0;
+				height: 100%;
+				background: linear-gradient(90deg, var(--teal), #88efe7);
+			}
+			#walkHint {
+				position: fixed;
+				z-index: 75;
+				bottom: 28px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: none;
+				background: var(--panel);
+				border: 1px solid var(--stroke);
+				border-radius: 999px;
+				padding: 8px 15px;
+				color: var(--dim);
+				font-size: 15px;
+				box-shadow: var(--shadow);
+			}
+			#walkHint.show {
+				display: block;
+			}
+			#walkHint b {
+				color: var(--ink);
+				font-family: monospace;
+				background: rgba(255, 255, 255, 0.07);
+				padding: 1px 5px;
+				border-radius: 4px;
+			}
+			#roomLookHint {
+				position: fixed;
+				z-index: 76;
+				bottom: 28px;
+				left: 50%;
+				transform: translateX(-50%) translateY(12px);
+				opacity: 0;
+				pointer-events: none;
+				background: rgba(9, 18, 25, 0.93);
+				border: 1px solid rgba(66, 213, 207, 0.35);
+				border-radius: 999px;
+				padding: 8px 15px;
+				color: #b6c8cf;
+				font-size: 15px;
+				box-shadow: var(--shadow);
+				transition: 0.25s;
+				white-space: nowrap;
+			}
+			#roomLookHint.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+			#roomLookHint b {
+				color: #eaf6f6;
+			}
+			#overviewNote {
+				position: fixed;
+				z-index: 65;
+				bottom: 28px;
+				left: 280px;
+				background: var(--panel);
+				border: 1px solid var(--stroke);
+				border-radius: 10px;
+				padding: 8px 11px;
+				color: var(--dim);
+				font-size: 15px;
+				box-shadow: var(--shadow);
+			}
+			#overviewNote b {
+				color: var(--ink);
+			}
+			#copyright {
+				position: fixed;
+				z-index: 65;
+				bottom: 7px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: 15px;
+				color: rgba(191, 211, 219, 0.56);
+				letter-spacing: 0.04em;
+				pointer-events: none;
+			}
+			#copyright b {
+				color: rgba(66, 213, 207, 0.72);
+			}
+			#watermark {
+				position: fixed;
+				z-index: 2;
+				left: 50%;
+				top: 51%;
+				transform: translate(-50%, -50%) rotate(-11deg);
+				font-size: 8vw;
+				font-weight: 900;
+				letter-spacing: -0.05em;
+				color: rgba(255, 255, 255, 0.018);
+				pointer-events: none;
+				white-space: nowrap;
+			}
+			#toast {
+				position: fixed;
+				z-index: 120;
+				left: 50%;
+				top: 66px;
+				transform: translateX(-50%) translateY(-12px);
+				opacity: 0;
+				background: #101820;
+				border: 1px solid var(--stroke2);
+				border-radius: 10px;
+				padding: 9px 14px;
+				font-size: 15px;
+				box-shadow: var(--shadow);
+				transition: 0.25s;
+				pointer-events: none;
+			}
+			#toast.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+			#toast b {
+				color: var(--teal);
+			}
+			.panelToggle {
+				position: absolute;
+				top: 10px;
+				width: 26px;
+				height: 26px;
+				border-radius: 999px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.06);
+				color: var(--ink);
+				display: grid;
+				place-items: center;
+				cursor: pointer;
+				font-size: 15px;
+				font-weight: 800;
+				backdrop-filter: blur(10px);
+				box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+			}
+			.panelToggle:hover {
+				background: rgba(255, 255, 255, 0.11);
+			}
+			#roomRail .panelToggle {
+				right: 10px;
+				top: 10px;
+				pointer-events: auto;
+			}
+			#infoPanel .panelToggle {
+				right: 10px;
+				top: 10px;
+				z-index: 6;
+				pointer-events: auto;
+			}
+			#infoPanel.collapsed .panelToggle {
+				left: -13px;
+				right: auto;
+			}
+			.railbox,
+			.iph {
+				position: relative;
+			}
+
+			.room-label {
+				font-size: 15px;
+				font-weight: 800;
+				line-height: 1;
+				background: rgba(238, 245, 247, 0.88);
+				color: #101820;
+				padding: 4px 8px;
+				border-radius: 6px;
+				border: 1px solid rgba(10, 20, 26, 0.12);
+				box-shadow: 0 4px 13px rgba(0, 0, 0, 0.25);
+				white-space: nowrap;
+			}
+			.room-label small {
+				display: block;
+				font-size: 15px;
+				color: #50636b;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				margin-top: 2px;
+			}
+			.door-label {
+				font-size: 15px;
+				font-weight: 800;
+				letter-spacing: 0.11em;
+				text-transform: uppercase;
+				color: #c5d8de;
+				background: rgba(12, 20, 27, 0.86);
+				padding: 3px 6px;
+				border-radius: 5px;
+				border: 1px solid rgba(129, 193, 214, 0.22);
+				white-space: nowrap;
+			}
+			.door-name-badge {
+				font-size: 15px;
+				font-weight: 900;
+				letter-spacing: 0.065em;
+				text-transform: uppercase;
+				color: #f6fbfc;
+				background: rgba(14, 30, 38, 0.94);
+				padding: 6px 11px;
+				border-radius: 6px;
+				border: 1px solid rgba(130, 201, 220, 0.48);
+				box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+				white-space: nowrap;
+				transition: opacity 0.18s;
+			}
+			.door-name-badge.vault {
+				font-size: 15px;
+				border-color: rgba(255, 115, 123, 0.6);
+				background: rgba(54, 28, 32, 0.94);
+			}
+			.door-name-badge.ct {
+				border-color: rgba(63, 214, 207, 0.6);
+				background: rgba(14, 43, 44, 0.94);
+			}
+
+			.npc-role {
+				opacity: 0;
+				font-size: 15px;
+				font-weight: 800;
+				letter-spacing: 0.07em;
+				text-transform: uppercase;
+				color: #f2fbfc;
+				background: rgba(10, 23, 30, 0.83);
+				border: 1px solid rgba(66, 213, 207, 0.32);
+				border-radius: 999px;
+				padding: 3px 7px;
+				box-shadow: 0 5px 14px rgba(0, 0, 0, 0.28);
+				white-space: nowrap;
+				transition: opacity 0.18s;
+			}
+			.npc-role.patient {
+				border-color: rgba(117, 184, 255, 0.38);
+				color: #d9eaff;
+			}
+			.npc-role.support {
+				border-color: rgba(181, 155, 255, 0.38);
+				color: #e7defe;
+			}
+			.npc-role.physics {
+				border-color: rgba(255, 188, 99, 0.4);
+				color: #ffe0b2;
+			}
+			.npc-speech {
+				opacity: 0;
+				max-width: 310px;
+				background: rgba(248, 252, 252, 0.98);
+				color: #15272e;
+				border: 1px solid rgba(27, 95, 110, 0.32);
+				border-radius: 12px;
+				padding: 10px 13px;
+				font-size: 15px;
+				font-weight: 700;
+				line-height: 1.52;
+				box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+				text-align: center;
+				transition: opacity 0.24s;
+				pointer-events: none;
+			}
+			.npc-speech.staff {
+				border-color: rgba(42, 143, 137, 0.48);
+			}
+			.npc-speech.patient {
+				border-color: rgba(89, 135, 196, 0.48);
+				background: rgba(244, 249, 255, 0.96);
+			}
+			#walkReticle {
+				position: fixed;
+				z-index: 78;
+				left: 50%;
+				top: 50%;
+				width: 14px;
+				height: 14px;
+				transform: translate(-50%, -50%);
+				display: none;
+				pointer-events: none;
+			}
+			#walkReticle:before,
+			#walkReticle:after {
+				content: '';
+				position: absolute;
+				background: rgba(240, 250, 252, 0.72);
+				box-shadow: 0 0 5px rgba(66, 213, 207, 0.35);
+			}
+			#walkReticle:before {
+				left: 6px;
+				top: 1px;
+				width: 2px;
+				height: 12px;
+			}
+			#walkReticle:after {
+				left: 1px;
+				top: 6px;
+				width: 12px;
+				height: 2px;
+			}
+			#walkReticle.show {
+				display: block;
+			}
+			#interactPrompt {
+				position: fixed;
+				z-index: 82;
+				left: 50%;
+				bottom: 74px;
+				transform: translateX(-50%) translateY(8px);
+				opacity: 0;
+				pointer-events: none;
+				background: rgba(8, 17, 23, 0.94);
+				border: 1px solid rgba(66, 213, 207, 0.38);
+				border-radius: 11px;
+				padding: 8px 12px;
+				color: #c9d9df;
+				font-size: 15px;
+				box-shadow: var(--shadow);
+				transition: 0.16s;
+				white-space: nowrap;
+			}
+			#interactPrompt.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+			#interactPrompt b {
+				display: inline-grid;
+				place-items: center;
+				min-width: 22px;
+				height: 22px;
+				margin-right: 7px;
+				border-radius: 6px;
+				background: var(--teal);
+				color: #06231f;
+				font-size: 15px;
+			}
+
+			#studentHelp {
+				position: fixed;
+				inset: 0;
+				z-index: 220;
+				display: none;
+				align-items: center;
+				justify-content: center;
+				background: rgba(4, 9, 13, 0.72);
+				backdrop-filter: blur(8px);
+				padding: 24px;
+			}
+			#studentHelp.show {
+				display: flex;
+			}
+			.studentHelpCard {
+				width: min(620px, 94vw);
+				background: #101a22;
+				border: 1px solid rgba(129, 193, 214, 0.34);
+				border-radius: 18px;
+				box-shadow: 0 28px 90px rgba(0, 0, 0, 0.62);
+				padding: 22px;
+			}
+			.studentHelpCard .hk {
+				color: var(--teal);
+				font-weight: 900;
+				letter-spacing: 0.11em;
+				text-transform: uppercase;
+				font-size: 15px;
+			}
+			.studentHelpCard h2 {
+				font-size: 24px;
+				margin: 5px 0 12px;
+			}
+			.studentHelpCard p {
+				font-size: 15px;
+				line-height: 1.55;
+				color: #c6d4d9;
+				margin: 0 0 14px;
+			}
+			.studentHelpGrid {
+				display: grid;
+				gap: 8px;
+			}
+			.studentHelpStep {
+				border: 1px solid rgba(129, 193, 214, 0.18);
+				background: rgba(255, 255, 255, 0.035);
+				border-radius: 10px;
+				padding: 10px 12px;
+				font-size: 15px;
+				line-height: 1.45;
+				color: #d7e3e7;
+			}
+			.studentHelpStep b {
+				color: #fff;
+			}
+			.studentHelpActions {
+				display: flex;
+				justify-content: flex-end;
+				gap: 8px;
+				margin-top: 16px;
+			}
+			.studentHelpActions button {
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.05);
+				color: var(--ink);
+				border-radius: 9px;
+				padding: 8px 13px;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+			}
+			.studentHelpActions button.primary {
+				background: var(--teal);
+				border-color: transparent;
+				color: #06231f;
+			}
+			@media (max-width: 1080px) {
+				#roomRail {
+					width: 215px;
+				}
+				.roombtn .nm {
+					font-size: 15px;
+				}
+				#infoPanel {
+					width: 265px;
+				}
+				#overviewNote {
+					left: 238px;
+				}
+				.brand small {
+					display: none;
+				}
+			}
+			@media (max-width: 800px) {
+				#roomRail {
+					display: none;
+				}
+				#infoPanel {
+					width: 240px;
+				}
+				.brand {
+					display: none;
+				}
+				#overviewNote {
+					left: 14px;
+				}
+				.seg button {
+					padding: 6px 9px;
+				}
+			}
+
+			/* Department-orientation conversation UI */
+			#staffDialog {
+				position: fixed;
+				z-index: 180;
+				left: 50%;
+				bottom: 24px;
+				transform: translate(-50%, 24px);
+				width: min(680px, calc(100vw - 32px));
+				max-height: min(72vh, 650px);
+				display: flex;
+				flex-direction: column;
+				opacity: 0;
+				pointer-events: none;
+				background: rgba(9, 17, 23, 0.965);
+				border: 1px solid rgba(66, 213, 207, 0.38);
+				border-radius: 18px;
+				box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
+				backdrop-filter: blur(16px);
+				transition:
+					opacity 0.2s ease,
+					transform 0.25s ease;
+				overflow: hidden;
+			}
+			#staffDialog.show {
+				opacity: 1;
+				pointer-events: auto;
+				transform: translate(-50%, 0);
+			}
+			.sdHead {
+				display: grid;
+				grid-template-columns: 46px 1fr 34px;
+				gap: 10px;
+				align-items: center;
+				padding: 12px 14px;
+				border-bottom: 1px solid var(--stroke);
+				background: linear-gradient(100deg, rgba(66, 213, 207, 0.12), rgba(117, 184, 255, 0.04));
+			}
+			.sdAvatar {
+				width: 44px;
+				height: 44px;
+				border-radius: 14px;
+				display: grid;
+				place-items: center;
+				background: linear-gradient(145deg, #286b77, #1a3847);
+				border: 1px solid rgba(141, 224, 226, 0.35);
+				font-size: 15px;
+				font-weight: 900;
+				letter-spacing: 0.04em;
+				color: #eaffff;
+			}
+			.sdName {
+				font-size: 15px;
+				font-weight: 850;
+			}
+			.sdRole {
+				font-size: 15px;
+				color: #9cc4cb;
+				margin-top: 2px;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+			}
+			.sdClose {
+				width: 30px;
+				height: 30px;
+				border-radius: 999px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.05);
+				color: #dce9ed;
+				cursor: pointer;
+				font-size: 17px;
+			}
+			.sdClose:hover {
+				background: rgba(255, 255, 255, 0.12);
+			}
+			#staffTranscript {
+				padding: 13px 14px 4px;
+				overflow: auto;
+				min-height: 110px;
+				max-height: 300px;
+			}
+			.chatBubble {
+				max-width: 86%;
+				margin: 0 0 9px;
+				padding: 9px 11px;
+				border-radius: 13px;
+				font-size: 15px;
+				line-height: 1.5;
+			}
+			.chatBubble.staff {
+				background: rgba(66, 213, 207, 0.11);
+				border: 1px solid rgba(66, 213, 207, 0.22);
+				border-bottom-left-radius: 4px;
+				color: #d9eeee;
+			}
+			.chatBubble.patient {
+				margin-left: auto;
+				background: rgba(117, 184, 255, 0.12);
+				border: 1px solid rgba(117, 184, 255, 0.22);
+				border-bottom-right-radius: 4px;
+				color: #dceaff;
+			}
+			.chatWho {
+				display: block;
+				font-size: 15px;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				font-weight: 850;
+				color: #8fcfd0;
+				margin-bottom: 3px;
+			}
+			.chatBubble.patient .chatWho {
+				color: #9dc7fa;
+			}
+			.sdPrompt {
+				padding: 7px 14px 5px;
+				font-size: 15px;
+				color: #91a6ae;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				font-weight: 800;
+			}
+			.sdQuestions {
+				display: flex;
+				gap: 6px;
+				flex-wrap: wrap;
+				padding: 5px 14px 12px;
+			}
+			.sdQuestions button {
+				border: 1px solid rgba(129, 193, 214, 0.24);
+				background: rgba(255, 255, 255, 0.045);
+				color: #d9e6ea;
+				border-radius: 999px;
+				padding: 7px 10px;
+				font-size: 15px;
+				cursor: pointer;
+				text-align: left;
+			}
+			.sdQuestions button:hover {
+				border-color: rgba(66, 213, 207, 0.5);
+				background: rgba(66, 213, 207, 0.1);
+			}
+			.sdQuestions button:disabled {
+				opacity: 0.42;
+				cursor: default;
+			}
+			.sdFoot {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 10px;
+				border-top: 1px solid rgba(129, 193, 214, 0.13);
+				padding: 8px 14px;
+				color: #718991;
+				font-size: 15px;
+			}
+			.sdFoot button {
+				border: 0;
+				background: transparent;
+				color: #83d8d2;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+				padding: 3px;
+			}
+			.sdNext {
+				padding: 10px 13px 12px;
+				border-top: 1px solid rgba(129, 193, 214, 0.13);
+				background: linear-gradient(180deg, rgba(66, 213, 207, 0.035), transparent);
+			}
+			.sdNext .sdPrompt {
+				margin: 0 0 7px;
+			}
+			.sdHandoffs {
+				display: grid;
+				gap: 6px;
+			}
+			.sdHandoffs button {
+				border: 1px solid rgba(66, 213, 207, 0.28);
+				background: rgba(66, 213, 207, 0.08);
+				color: #dff9f6;
+				border-radius: 9px;
+				padding: 8px 9px;
+				text-align: left;
+				font-size: 15px;
+				font-weight: 760;
+				cursor: pointer;
+				line-height: 1.25;
+			}
+			.sdHandoffs button:hover {
+				background: rgba(66, 213, 207, 0.15);
+				border-color: rgba(66, 213, 207, 0.48);
+			}
+			.sdHandoffs button:disabled {
+				opacity: 0.42;
+				cursor: default;
+			}
+			.roomIntro {
+				margin: 10px 0;
+				padding: 9px 10px;
+				border-radius: 10px;
+				background: rgba(66, 213, 207, 0.075);
+				border: 1px solid rgba(66, 213, 207, 0.2);
+				font-size: 15px;
+				line-height: 1.5;
+				color: #cce5e4;
+			}
+			.staffCard {
+				display: grid;
+				grid-template-columns: 36px 1fr;
+				gap: 8px;
+				align-items: center;
+				margin: 8px 0;
+				padding: 8px;
+				border: 1px solid rgba(129, 193, 214, 0.16);
+				border-radius: 10px;
+				background: rgba(255, 255, 255, 0.03);
+			}
+			.staffCard .av {
+				width: 34px;
+				height: 34px;
+				border-radius: 10px;
+				display: grid;
+				place-items: center;
+				background: #1f5260;
+				color: #e9ffff;
+				font-weight: 900;
+				font-size: 15px;
+			}
+			.staffCard b {
+				display: block;
+				font-size: 15px;
+			}
+			.staffCard span {
+				font-size: 15px;
+				color: #91a6ae;
+			}
+			.iactions.three {
+				grid-template-columns: 1.2fr 1fr 1fr;
+			}
+			.iactions .talk {
+				background: linear-gradient(135deg, #42d5cf, #74dfbd);
+				color: #06231f;
+				border-color: transparent;
+			}
+			@media (max-width: 650px) {
+				#staffDialog {
+					bottom: 10px;
+				}
+				.sdQuestions {
+					max-height: 140px;
+					overflow: auto;
+				}
+				.iactions.three {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* Clinical interaction and equipment */
+			#clinicalFocusHUD {
+				position: fixed;
+				z-index: 77;
+				top: 72px;
+				left: 50%;
+				transform: translateX(-50%) translateY(-8px);
+				opacity: 0;
+				pointer-events: none;
+				width: min(520px, calc(100vw - 590px));
+				min-width: 300px;
+				background: rgba(8, 17, 23, 0.94);
+				border: 1px solid rgba(66, 213, 207, 0.32);
+				border-radius: 12px;
+				padding: 8px 12px;
+				box-shadow: var(--shadow);
+				transition: 0.22s;
+				backdrop-filter: blur(10px);
+			}
+			#clinicalFocusHUD.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+				pointer-events: auto;
+			}
+			.cfTop {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 12px;
+			}
+			.cfTop span {
+				font-size: 15px;
+				text-transform: uppercase;
+				letter-spacing: 0.11em;
+				color: var(--teal);
+				font-weight: 850;
+			}
+			.cfTop button {
+				border: 1px solid rgba(66, 213, 207, 0.28);
+				background: rgba(66, 213, 207, 0.08);
+				color: #d8f7f4;
+				border-radius: 7px;
+				padding: 4px 7px;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+			}
+			.cfTitle {
+				font-size: 15px;
+				font-weight: 850;
+				margin-top: 2px;
+			}
+			.cfNote {
+				font-size: 15px;
+				color: #a8bbc3;
+				line-height: 1.35;
+				margin-top: 3px;
+			}
+			#equipmentPanel {
+				position: fixed;
+				z-index: 190;
+				right: 14px;
+				bottom: 48px;
+				width: min(360px, calc(100vw - 28px));
+				max-height: 72vh;
+				overflow: auto;
+				opacity: 0;
+				pointer-events: none;
+				transform: translateY(14px);
+				transition: 0.22s;
+				background: rgba(8, 17, 23, 0.97);
+				border: 1px solid rgba(66, 213, 207, 0.36);
+				border-radius: 16px;
+				box-shadow: 0 22px 65px rgba(0, 0, 0, 0.56);
+				backdrop-filter: blur(15px);
+			}
+			#equipmentPanel.show {
+				opacity: 1;
+				pointer-events: auto;
+				transform: translateY(0);
+			}
+			.eqHead {
+				display: grid;
+				grid-template-columns: 1fr 30px;
+				gap: 8px;
+				align-items: start;
+				padding: 12px 13px;
+				border-bottom: 1px solid var(--stroke);
+				background: linear-gradient(120deg, rgba(66, 213, 207, 0.11), transparent);
+			}
+			.eqK {
+				font-size: 15px;
+				letter-spacing: 0.11em;
+				text-transform: uppercase;
+				color: var(--teal);
+				font-weight: 850;
+			}
+			.eqHead h3 {
+				font-size: 16px;
+				margin: 2px 0 0;
+			}
+			.eqRoom {
+				font-size: 15px;
+				color: #9eb0b8;
+				margin-top: 3px;
+			}
+			.eqClose {
+				width: 29px;
+				height: 29px;
+				border-radius: 999px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.04);
+				color: #e5eef1;
+				cursor: pointer;
+			}
+			.eqBody {
+				padding: 11px 13px 13px;
+			}
+			.eqSection {
+				margin: 0 0 9px;
+				padding: 8px 9px;
+				border-radius: 9px;
+				background: rgba(255, 255, 255, 0.03);
+				border: 1px solid rgba(129, 193, 214, 0.13);
+				font-size: 15px;
+				line-height: 1.45;
+				color: #cbd9dd;
+			}
+			.eqSection b {
+				display: block;
+				font-size: 15px;
+				text-transform: uppercase;
+				letter-spacing: 0.09em;
+				color: #7dded8;
+				margin-bottom: 3px;
+			}
+			.eqProgress {
+				font-size: 15px;
+				color: #8fa5ad;
+				text-align: right;
+				margin-top: 4px;
+			}
+			.eqList {
+				margin: 9px 0 0;
+				padding-top: 8px;
+				border-top: 1px solid rgba(129, 193, 214, 0.13);
+			}
+			.eqList .eqLabel {
+				font-size: 15px;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				color: #839ba4;
+				font-weight: 850;
+				margin-bottom: 5px;
+			}
+			.eqRoomButtons {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 5px;
+			}
+			.eqRoomButtons button {
+				border: 1px solid rgba(129, 193, 214, 0.22);
+				background: rgba(255, 255, 255, 0.035);
+				color: #d4e1e5;
+				border-radius: 8px;
+				padding: 6px 7px;
+				font-size: 15px;
+				font-weight: 750;
+				cursor: pointer;
+			}
+			.eqRoomButtons button:hover {
+				background: rgba(66, 213, 207, 0.1);
+				border-color: rgba(66, 213, 207, 0.38);
+			}
+			#kioskDialog {
+				position: fixed;
+				inset: 0;
+				z-index: 205;
+				display: grid;
+				place-items: center;
+				background: rgba(3, 8, 12, 0.48);
+				opacity: 0;
+				pointer-events: none;
+				transition: 0.2s;
+			}
+			#kioskDialog.show {
+				opacity: 1;
+				pointer-events: auto;
+			}
+			.kioskCard {
+				width: min(520px, calc(100vw - 32px));
+				background: rgba(9, 18, 24, 0.98);
+				border: 1px solid rgba(66, 213, 207, 0.38);
+				border-radius: 18px;
+				box-shadow: 0 28px 80px rgba(0, 0, 0, 0.6);
+				padding: 17px;
+			}
+			.kioskCard .kk {
+				font-size: 15px;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--teal);
+				font-weight: 850;
+			}
+			.kioskCard h2 {
+				font-size: 20px;
+				margin: 4px 0 5px;
+			}
+			.kioskCard p {
+				font-size: 15px;
+				color: #b7c8ce;
+				line-height: 1.5;
+				margin: 0 0 13px;
+			}
+			.kioskChoices {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 7px;
+			}
+			.kioskChoices button {
+				border: 1px solid rgba(129, 193, 214, 0.22);
+				background: rgba(255, 255, 255, 0.04);
+				color: #e3eef1;
+				border-radius: 11px;
+				padding: 11px 10px;
+				text-align: left;
+				cursor: pointer;
+				font-size: 15px;
+				font-weight: 800;
+				line-height: 1.3;
+			}
+			.kioskChoices button b {
+				display: block;
+				color: #8ce5df;
+				font-size: 15px;
+				margin-bottom: 2px;
+			}
+			.kioskChoices button.full {
+				grid-column: 1/-1;
+			}
+			.kioskChoices button:hover {
+				background: rgba(66, 213, 207, 0.1);
+				border-color: rgba(66, 213, 207, 0.42);
+			}
+			@media (max-width: 1080px) {
+				#clinicalFocusHUD {
+					width: min(430px, calc(100vw - 500px));
+				}
+			}
+			@media (max-width: 800px) {
+				#clinicalFocusHUD {
+					display: none;
+				}
+				.kioskChoices {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* Readability baseline: minimum interface text size approximately 11 pt. */
+			#roomRail {
+				width: 300px;
+			}
+			#infoPanel {
+				width: 360px;
+			}
+			#journeyBox {
+				max-height: 330px;
+			}
+			#patientJourneyHUD {
+				min-width: 430px;
+				max-width: 680px;
+			}
+			#topbar {
+				max-width: calc(100vw - 40px);
+			}
+			.roombtn {
+				grid-template-columns: 10px 1fr 20px;
+				padding: 9px 9px;
+				margin-bottom: 5px;
+			}
+			.zonechips {
+				grid-template-columns: repeat(2, 1fr);
+			}
+			.journeyModes {
+				grid-template-columns: 1fr;
+			}
+			.journeyButtons {
+				grid-template-columns: 1fr 1fr 38px;
+			}
+			#linacHeadDialog {
+				position: fixed;
+				inset: 0;
+				z-index: 240;
+				display: grid;
+				place-items: center;
+				background: rgba(3, 8, 12, 0.72);
+				opacity: 0;
+				pointer-events: none;
+				transition: 0.2s;
+				backdrop-filter: blur(5px);
+			}
+			#linacHeadDialog.show {
+				opacity: 1;
+				pointer-events: auto;
+			}
+			.linacHeadCard {
+				width: min(1180px, calc(100vw - 36px));
+				max-height: calc(100vh - 34px);
+				overflow: auto;
+				background: #f7fafc;
+				color: #1f2937;
+				border: 1px solid rgba(66, 213, 207, 0.45);
+				border-radius: 18px;
+				box-shadow: 0 30px 90px rgba(0, 0, 0, 0.68);
+				padding: 20px;
+			}
+			.linacHeadTop {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 20px;
+				margin-bottom: 14px;
+			}
+			.linacHeadTop h2 {
+				margin: 0;
+				font-size: 27px;
+				line-height: 1.15;
+				color: #16343f;
+			}
+			.linacHeadTop p {
+				margin: 6px 0 0;
+				color: #526773;
+				font-size: 15px;
+				line-height: 1.45;
+				max-width: 820px;
+			}
+			.linacHeadClose {
+				border: 1px solid #9fb2bc;
+				background: #fff;
+				color: #263b45;
+				border-radius: 10px;
+				padding: 9px 13px;
+				font-weight: 800;
+				cursor: pointer;
+				min-width: 88px;
+			}
+			.linacHeadControls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 9px;
+				align-items: center;
+				margin: 8px 0 13px;
+			}
+			.linacHeadControls button {
+				border: 0;
+				border-radius: 9px;
+				padding: 10px 14px;
+				background: #314a59;
+				color: #fff;
+				font-size: 15px;
+				font-weight: 800;
+				cursor: pointer;
+				box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+			}
+			.linacHeadControls button.active {
+				background: #178f87;
+			}
+			.linacHeadControls button.energy {
+				background: #d9e3e8;
+				color: #263945;
+			}
+			.linacHeadControls button.energy.active {
+				background: #687f8b;
+				color: #fff;
+			}
+			.linacHeadControls button.action {
+				background: #4f46e5;
+			}
+			.linacHeadControls button.reset {
+				background: #a64c55;
+			}
+			.linacHeadControls .divider {
+				width: 1px;
+				height: 34px;
+				background: #cad6db;
+				margin: 0 3px;
+			}
+			.linacHeadGrid {
+				display: grid;
+				grid-template-columns: minmax(620px, 1.65fr) minmax(310px, 0.85fr);
+				gap: 16px;
+			}
+			.linacHeadCanvasWrap {
+				position: relative;
+				background: #fff;
+				border: 1px solid #cbd8de;
+				border-radius: 12px;
+				padding: 10px;
+				overflow: hidden;
+			}
+			.linacHeadCanvasWrap canvas {
+				display: block;
+				width: 100%;
+				height: auto;
+				min-height: 570px;
+				background: #fff;
+				border: 0;
+				border-radius: 8px;
+			}
+			.linacHeadHint {
+				position: absolute;
+				left: 20px;
+				bottom: 18px;
+				background: rgba(14, 32, 40, 0.88);
+				color: #effbfc;
+				padding: 7px 10px;
+				border-radius: 7px;
+				font-size: 15px;
+				font-weight: 700;
+				pointer-events: none;
+			}
+			.linacHeadSide {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			.lhBox {
+				background: #eef4f7;
+				border: 1px solid #ccdbe1;
+				border-radius: 11px;
+				padding: 13px;
+			}
+			.lhBox h3 {
+				font-size: 17px;
+				margin: 0 0 7px;
+				color: #183b49;
+			}
+			.lhBox p {
+				font-size: 15px;
+				line-height: 1.5;
+				margin: 0;
+				color: #344d59;
+			}
+			.lhMode {
+				border-left: 5px solid #178f87;
+			}
+			.lhComponent {
+				border-left: 5px solid #4f46e5;
+			}
+			.lhCompare {
+				border-left: 5px solid #d79a2b;
+			}
+			.lhLegend {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 7px;
+				margin-top: 8px;
+			}
+			.lhLegend span {
+				font-size: 15px;
+				font-weight: 700;
+				display: flex;
+				align-items: center;
+				gap: 7px;
+			}
+			.lhDot {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				display: inline-block;
+				flex: 0 0 auto;
+			}
+			.lhFooter {
+				margin-top: 12px;
+				padding-top: 11px;
+				border-top: 1px solid #d2dde2;
+				color: #647985;
+				font-size: 15px;
+				line-height: 1.45;
+			}
+			@media (max-width: 900px) {
+				#roomRail {
+					width: 270px;
+				}
+				#infoPanel {
+					width: 330px;
+				}
+				.linacHeadGrid {
+					grid-template-columns: 1fr;
+				}
+				.linacHeadCanvasWrap canvas {
+					min-height: 500px;
+				}
+			}
+			@media (max-width: 680px) {
+				#roomRail {
+					width: 260px;
+				}
+				#infoPanel {
+					width: 310px;
+				}
+				.linacHeadCard {
+					padding: 14px;
+				}
+				.linacHeadTop {
+					flex-direction: column;
+				}
+				.linacHeadCanvasWrap canvas {
+					min-height: 430px;
+				}
+				.linacHeadControls .divider {
+					display: none;
+				}
+			}
+
+			/* ===== v41 · CT / QA Procedures Lab ===== */
+			#procedureLab {
+				position: fixed;
+				inset: 0;
+				z-index: 240;
+				display: none;
+				align-items: center;
+				justify-content: center;
+				background: rgba(3, 8, 12, 0.78);
+				backdrop-filter: blur(9px);
+				padding: 18px;
+			}
+			#procedureLab.show {
+				display: flex;
+			}
+			.procCard {
+				width: min(1040px, 96vw);
+				max-height: 92vh;
+				overflow: hidden;
+				background: #0e1821;
+				color: #e9f3f6;
+				border: 1px solid rgba(87, 198, 196, 0.42);
+				border-radius: 18px;
+				box-shadow: 0 28px 90px rgba(0, 0, 0, 0.65);
+				display: grid;
+				grid-template-rows: auto auto 1fr;
+			}
+			.procHead {
+				display: flex;
+				justify-content: space-between;
+				gap: 14px;
+				align-items: flex-start;
+				padding: 14px 16px;
+				border-bottom: 1px solid rgba(129, 193, 214, 0.18);
+				background: linear-gradient(120deg, rgba(66, 213, 207, 0.13), rgba(117, 184, 255, 0.03));
+			}
+			.procHead .k {
+				font-size: 11px;
+				letter-spacing: 0.13em;
+				text-transform: uppercase;
+				color: #58ddd3;
+				font-weight: 900;
+			}
+			.procHead h2 {
+				font-size: 21px;
+				margin: 4px 0 2px;
+			}
+			.procHead p {
+				margin: 0;
+				color: #9fb4bd;
+				font-size: 12px;
+				line-height: 1.4;
+			}
+			.procHead button {
+				border: 1px solid rgba(255, 255, 255, 0.18);
+				background: #5b3438;
+				color: #fff;
+				border-radius: 9px;
+				padding: 8px 11px;
+				font-weight: 800;
+				cursor: pointer;
+			}
+			.procTabs {
+				display: grid;
+				grid-template-columns: repeat(5, 1fr);
+				gap: 6px;
+				padding: 10px;
+				border-bottom: 1px solid rgba(129, 193, 214, 0.14);
+				background: #0b141c;
+			}
+			.procTabs button {
+				border: 1px solid rgba(129, 193, 214, 0.2);
+				background: #13212c;
+				color: #aebfc8;
+				border-radius: 9px;
+				padding: 9px 7px;
+				font-size: 11px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			.procTabs button.active {
+				background: rgba(66, 213, 207, 0.18);
+				border-color: rgba(66, 213, 207, 0.55);
+				color: #d9fbf8;
+			}
+			.procTabs button.done::after {
+				content: ' ✓';
+				color: #69e2a6;
+			}
+			.procBody {
+				overflow: auto;
+				padding: 14px 16px 18px;
+			}
+			.procPane {
+				display: none;
+			}
+			.procPane.active {
+				display: block;
+			}
+			.procIntro {
+				padding: 10px 12px;
+				border-left: 4px solid #42d5cf;
+				border-radius: 9px;
+				background: rgba(66, 213, 207, 0.07);
+				font-size: 13px;
+				line-height: 1.5;
+				color: #cee0e5;
+				margin-bottom: 12px;
+			}
+			.procGrid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 10px;
+			}
+			.procBox {
+				border: 1px solid rgba(129, 193, 214, 0.18);
+				background: rgba(255, 255, 255, 0.025);
+				border-radius: 12px;
+				padding: 11px;
+			}
+			.procBox h3 {
+				font-size: 14px;
+				margin: 0 0 8px;
+				color: #eff9fb;
+			}
+			.procBox p {
+				font-size: 12px;
+				line-height: 1.45;
+				color: #aebfc8;
+				margin: 0 0 8px;
+			}
+			.procCheck {
+				display: flex;
+				gap: 9px;
+				align-items: flex-start;
+				padding: 7px 8px;
+				margin: 5px 0;
+				border: 1px solid rgba(129, 193, 214, 0.13);
+				border-radius: 8px;
+				background: #0c151d;
+				font-size: 12px;
+				line-height: 1.4;
+			}
+			.procCheck input {
+				margin-top: 2px;
+				accent-color: #42d5cf;
+			}
+			.procActions {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+				margin-top: 11px;
+			}
+			.procActions button,
+			.procBtn {
+				border: 1px solid rgba(66, 213, 207, 0.34);
+				background: rgba(66, 213, 207, 0.11);
+				color: #d8f7f4;
+				border-radius: 9px;
+				padding: 8px 11px;
+				font-size: 12px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			.procActions button.primary,
+			.procBtn.primary {
+				background: #42d5cf;
+				color: #06231f;
+				border-color: transparent;
+			}
+			.procActions button.warn {
+				background: rgba(255, 188, 99, 0.14);
+				border-color: rgba(255, 188, 99, 0.38);
+				color: #ffe0af;
+			}
+			.procResult {
+				margin-top: 10px;
+				padding: 9px 11px;
+				border-radius: 9px;
+				border: 1px solid rgba(129, 193, 214, 0.2);
+				background: #0a131a;
+				color: #b8c9d0;
+				font-size: 12px;
+				line-height: 1.45;
+				min-height: 42px;
+			}
+			.procResult.pass {
+				background: rgba(56, 166, 107, 0.1);
+				border-color: rgba(80, 204, 137, 0.42);
+				color: #d8f7e6;
+			}
+			.procResult.fail {
+				background: rgba(205, 80, 89, 0.1);
+				border-color: rgba(235, 103, 111, 0.45);
+				color: #ffdadd;
+			}
+			.procMetrics {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 7px;
+				margin: 8px 0;
+			}
+			.procMetric {
+				padding: 9px;
+				border-radius: 9px;
+				background: #0a151d;
+				border: 1px solid rgba(129, 193, 214, 0.16);
+			}
+			.procMetric span {
+				display: block;
+				color: #7f98a4;
+				font-size: 9px;
+				text-transform: uppercase;
+				letter-spacing: 0.09em;
+				font-weight: 850;
+			}
+			.procMetric b {
+				display: block;
+				font:
+					850 18px/1.2 ui-monospace,
+					Consolas,
+					monospace;
+				color: #eefbff;
+				margin-top: 3px;
+			}
+			.procSelect {
+				width: 100%;
+				background: #0b151d;
+				color: #eaf4f7;
+				border: 1px solid #365164;
+				border-radius: 8px;
+				padding: 8px;
+				font-size: 12px;
+				margin-top: 4px;
+			}
+			.procChoiceGrid {
+				display: grid;
+				grid-template-columns: repeat(2, 1fr);
+				gap: 7px;
+			}
+			.procChoiceGrid label {
+				display: flex;
+				gap: 7px;
+				padding: 8px;
+				border: 1px solid rgba(129, 193, 214, 0.14);
+				border-radius: 8px;
+				font-size: 12px;
+				background: #0c151d;
+			}
+			.procStatus {
+				display: grid;
+				grid-template-columns: repeat(5, 1fr);
+				gap: 6px;
+				margin-bottom: 10px;
+			}
+			.procStatus div {
+				border: 1px solid rgba(129, 193, 214, 0.15);
+				border-radius: 8px;
+				padding: 7px;
+				text-align: center;
+				background: #0b151d;
+			}
+			.procStatus span {
+				display: block;
+				font-size: 8px;
+				color: #7f96a2;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+			.procStatus b {
+				display: block;
+				margin-top: 3px;
+				font-size: 11px;
+			}
+			.procRoomLaunch {
+				margin-top: 10px;
+				padding-top: 10px;
+				border-top: 1px solid rgba(129, 193, 214, 0.14);
+			}
+			.procRoomLaunch button {
+				width: 100%;
+				border: 1px solid rgba(66, 213, 207, 0.4);
+				background: rgba(66, 213, 207, 0.11);
+				color: #d8f7f4;
+				border-radius: 9px;
+				padding: 9px;
+				font-size: 12px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			#procedureTopBtn {
+				border: 1px solid rgba(66, 213, 207, 0.35);
+				background: rgba(66, 213, 207, 0.08);
+				color: #c7f5f0;
+				border-radius: 999px;
+				padding: 6px 10px;
+				font-size: 12px;
+				font-weight: 850;
+				cursor: pointer;
+				white-space: nowrap;
+			}
+			#procedureTopBtn:hover {
+				background: rgba(66, 213, 207, 0.16);
+			}
+			@media (max-width: 760px) {
+				.procTabs {
+					grid-template-columns: 1fr 1fr;
+				}
+				.procGrid {
+					grid-template-columns: 1fr;
+				}
+				.procStatus {
+					grid-template-columns: 1fr 1fr;
+				}
+			}
+
+			/* ===== v42 · contextual CT QA menu ===== */
+			#ctQaDock {
+				position: fixed;
+				right: 18px;
+				top: 88px;
+				z-index: 210;
+				display: none;
+				width: min(360px, 92vw);
+				background: rgba(9, 16, 22, 0.94);
+				color: #ebf6f8;
+				border: 1px solid rgba(86, 203, 203, 0.28);
+				border-radius: 16px;
+				box-shadow: 0 20px 56px rgba(0, 0, 0, 0.48);
+				overflow: hidden;
+				backdrop-filter: blur(8px);
+			}
+			#ctQaDock.show {
+				display: block;
+			}
+			.ctqa-head {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				gap: 10px;
+				padding: 12px 14px;
+				border-bottom: 1px solid rgba(126, 183, 196, 0.15);
+				background: linear-gradient(120deg, rgba(66, 213, 207, 0.12), rgba(117, 184, 255, 0.02));
+			}
+			.ctqa-head .k {
+				font-size: 10px;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: #59ddd4;
+				font-weight: 900;
+			}
+			.ctqa-head h3 {
+				margin: 3px 0 2px;
+				font-size: 18px;
+				color: #f3fbff;
+			}
+			.ctqa-head p {
+				margin: 0;
+				font-size: 11px;
+				color: #9eb3bc;
+				line-height: 1.35;
+			}
+			#ctQaClose {
+				border: 1px solid rgba(255, 255, 255, 0.16);
+				background: #533236;
+				color: #fff;
+				border-radius: 8px;
+				padding: 6px 8px;
+				font-weight: 800;
+				cursor: pointer;
+			}
+			.ctqa-body {
+				padding: 12px 14px 14px;
+			}
+			#ctQaLaunch {
+				width: 100%;
+				border: 1px solid rgba(66, 213, 207, 0.42);
+				background: rgba(66, 213, 207, 0.13);
+				color: #d8f7f4;
+				border-radius: 10px;
+				padding: 10px 12px;
+				font-size: 13px;
+				font-weight: 900;
+				cursor: pointer;
+			}
+			#ctQaLaunch:hover {
+				background: rgba(66, 213, 207, 0.2);
+			}
+			.ctqa-mini {
+				margin-top: 10px;
+				padding: 10px 11px;
+				border-radius: 10px;
+				background: #0c151d;
+				border: 1px solid rgba(126, 183, 196, 0.15);
+				font-size: 12px;
+				line-height: 1.5;
+				color: #bfd0d7;
+			}
+			.ctqa-mini b {
+				color: #ffffff;
+			}
+			.ctqa-progress {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 6px;
+				margin-top: 10px;
+			}
+			.ctqa-progress div {
+				padding: 7px 5px;
+				border-radius: 8px;
+				background: #0a141c;
+				border: 1px solid rgba(126, 183, 196, 0.13);
+				text-align: center;
+			}
+			.ctqa-progress span {
+				display: block;
+				font-size: 8px;
+				color: #7d94a0;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+			.ctqa-progress b {
+				display: block;
+				margin-top: 3px;
+				font-size: 10px;
+				color: #f0fbff;
+			}
+			.ctqa-roombtn {
+				margin-top: 10px;
+				width: 100%;
+				border: 1px solid rgba(255, 255, 255, 0.12);
+				background: #13202a;
+				color: #dcecf1;
+				border-radius: 10px;
+				padding: 9px 10px;
+				font-size: 12px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			.ctqa-step-run {
+				margin-top: 9px;
+				display: flex;
+				gap: 7px;
+				flex-wrap: wrap;
+			}
+			.ctqa-step-run button {
+				border: 1px solid rgba(66, 213, 207, 0.26);
+				background: rgba(66, 213, 207, 0.08);
+				color: #d2f2ef;
+				border-radius: 9px;
+				padding: 7px 9px;
+				font-size: 11px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="loader">
+			<div class="loadbox">
+				<div class="rtmark"><b>RT</b>Apps</div>
+				<div class="loadsub">Preparing the Radiation Oncology Department Orientation</div>
+				<div class="ring"></div>
+			</div>
+		</div>
+		<div id="watermark">RTApps</div>
+		<div id="topbar">
+			<div class="brand">
+				<b>RTApps</b> Radiation Oncology Center<small
+					>Explore departments · meet the team · follow patient journeys</small
+				>
+			</div>
+			<div class="seg" id="modeSeg">
+				<button data-mode="overview" class="active">Overview</button
+				><button data-mode="guided">Guided Travel</button><button data-mode="walk">Walk</button>
+			</div>
+			<button id="helpBtn" class="ambientBtn" title="Show simple use instructions">? Help</button
+			><button id="ambientBtn" class="ambientBtn" title="Toggle subtle department ambience">
+				🔇 Ambience Off
+			</button>
+		</div>
+		<div id="roomRail">
+			<div class="railbox">
+				<div class="railhead">
+					<button class="panelToggle" id="roomRailToggle" title="Collapse directory">◂</button>
+					<div class="k">Facility directory</div>
+					<div class="t">Explore the center</div>
+					<div class="zonechips" id="zoneChips">
+						<button class="active" data-zone="all">All</button
+						><button data-zone="front">Patient</button
+						><button data-zone="technical">Technical</button
+						><button data-zone="clinical">Clinical</button>
+					</div>
+				</div>
+				<div id="roomList"></div>
+			</div>
+			<div class="railbox" id="journeyBox">
+				<div class="jrow">
+					<button id="backBtn" disabled>← Back</button>
+					<div class="jtxt" id="locText">Overview of the full facility.</div>
+					<button id="homeBtn">Lobby</button>
+				</div>
+				<div class="journeyCtl">
+					<div class="journeyModes" id="journeyModes">
+						<button class="active" data-journey="treatment">Returning Treatment Day</button
+						><button data-journey="newpatient">Mia: Consult → First Tx</button>
+					</div>
+					<div class="journeyHead">
+						<b id="journeyTitle">Returning Treatment Patient</b
+						><span id="journeyPhaseLabel">Choose a path</span>
+					</div>
+					<div class="journeyStep" id="journeyStepText">
+						Follow one patient from check-in through treatment and departure.
+					</div>
+					<div class="journeyBar"><i id="journeyProgress"></i></div>
+					<div class="journeyButtons">
+						<button class="primary" id="journeyStart">Start Journey</button
+						><button id="journeyNext" disabled>Next Step</button
+						><button id="journeyReset" title="Reset patient journey">↺</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="infoPanel">
+			<div class="iph">
+				<button class="panelToggle" id="infoPanelToggle" title="Collapse info panel">▸</button>
+				<div class="k" id="infoK">Welcome</div>
+				<h2 id="infoTitle">RTApps Radiation Oncology Center</h2>
+				<div class="sub" id="infoSub">
+					Choose a room, meet the team, or follow a patient journey.
+				</div>
+			</div>
+			<div class="ipbody" id="infoBody"></div>
+		</div>
+		<div id="travelHUD">
+			<div class="thtop">
+				<span>Traveling to <b id="travelName">—</b></span
+				><span id="travelPct">0%</span>
+			</div>
+			<div class="travelbar"><i id="travelFill"></i></div>
+		</div>
+		<div id="walkHint">
+			<b>Walk:</b> W A S D · mouse to look · Shift faster · E interact · Esc release mouse
+		</div>
+		<div id="walkReticle"></div>
+		<div id="interactPrompt"><b>E</b><span id="interactText">Interact</span></div>
+		<div id="roomLookHint">
+			<b>Room view:</b> drag to look around · wheel to zoom · use the room panel to interact
+		</div>
+		<div id="overviewNote">
+			<b>Start here:</b> choose a department from the left, or start a patient journey.
+		</div>
+		<div id="toast"></div>
+		<div id="patientJourneyHUD">
+			<div class="jhTop">
+				<span
+					><b id="jhPatient">Jordan Ellis</b> ·
+					<span id="jhType">Returning treatment patient</span></span
+				><span id="jhPhase">Check-in</span>
+			</div>
+			<div class="jhSub" id="jhSub">Treatment-day workflow</div>
+		</div>
+		<div id="dayTransition">
+			<b id="dayTransitionTitle">Tuesday · 9:15 AM</b
+			><span id="dayTransitionSub">Mia returns for her first radiation treatment.</span>
+		</div>
+		<div id="clinicalFocusHUD">
+			<div class="cfTop">
+				<span>Clinical focus</span><button id="clinicalFocusDetails">View equipment</button>
+			</div>
+			<div class="cfTitle" id="clinicalFocusTitle">—</div>
+			<div class="cfNote" id="clinicalFocusNote">—</div>
+		</div>
+		<div id="equipmentPanel" role="dialog" aria-labelledby="eqTitle">
+			<div class="eqHead">
+				<div>
+					<div class="eqK">Clinical equipment</div>
+					<h3 id="eqTitle">Equipment</h3>
+					<div class="eqRoom" id="eqRoom">Department area</div>
+				</div>
+				<button class="eqClose" id="eqClose" aria-label="Close equipment information">×</button>
+			</div>
+			<div class="eqBody">
+				<div class="eqSection"><b>What it is / why it matters</b><span id="eqPurpose"></span></div>
+				<div class="eqSection"><b>Who uses it</b><span id="eqUsers"></span></div>
+				<div class="eqSection"><b>What to notice</b><span id="eqNotice"></span></div>
+				<div class="eqSection"><b>Safety / workflow context</b><span id="eqSafety"></span></div>
+				<div class="eqProgress" id="eqProgress">Equipment explored: 0</div>
+			</div>
+		</div>
+		<div id="kioskDialog" role="dialog" aria-modal="true">
+			<div class="kioskCard">
+				<div class="kk">RTApps Radiation Oncology Center</div>
+				<h2>Choose how to explore</h2>
+				<p>Follow a patient journey or explore the departments on your own.</p>
+				<div class="kioskChoices">
+					<button id="kioskTreatment">
+						<b>Returning Treatment Day</b>Follow Jordan from check-in through LINAC treatment and
+						departure.</button
+					><button id="kioskNewPatient">
+						<b>Mia: Consult → First Treatment</b>Follow Mia from consultation and CT simulation
+						through planning, physics QA, and her return for the first radiation treatment.</button
+					><button class="full" id="kioskExplore">
+						<b>Explore Freely</b>Enter Walk mode and inspect staff, rooms, and clinical equipment.</button
+					><button class="full" id="kioskClose">
+						<b>Close kiosk</b>Return to the current view without starting a journey.
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="studentHelp" role="dialog" aria-modal="true" aria-labelledby="studentHelpTitle">
+			<div class="studentHelpCard">
+				<div class="hk">How to Use</div>
+				<h2 id="studentHelpTitle">Explore the Radiation Oncology Center</h2>
+				<p>Choose the style of exploration that works best for you.</p>
+				<div class="studentHelpGrid">
+					<div class="studentHelpStep">
+						<b>Overview:</b> select a department from the directory on the left.
+					</div>
+					<div class="studentHelpStep">
+						<b>Guided Travel:</b> choose a room, then drag the mouse to look around and use the room
+						panel to interact.
+					</div>
+					<div class="studentHelpStep">
+						<b>Walk:</b> use W A S D to move, the mouse to look, Shift to move faster, and E to
+						interact. Press Esc to release the mouse.
+					</div>
+					<div class="studentHelpStep">
+						<b>Patient Journeys:</b> choose Jordan or Mia, select Start Journey, and use Next Step
+						as the workflow progresses.
+					</div>
+				</div>
+				<div class="studentHelpActions">
+					<button class="primary" id="studentHelpClose">Start Exploring</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="staffDialog" role="dialog" aria-modal="false" aria-labelledby="sdName">
+			<div class="sdHead">
+				<div class="sdAvatar" id="sdAvatar">RT</div>
+				<div>
+					<div class="sdName" id="sdName">Staff Member</div>
+					<div class="sdRole" id="sdRole">Radiation Oncology Team</div>
+				</div>
+				<button class="sdClose" id="sdClose" aria-label="Close conversation">×</button>
+			</div>
+			<div id="staffTranscript"></div>
+			<div class="sdPrompt">Common questions patients ask</div>
+			<div class="sdQuestions" id="sdQuestions"></div>
+			<div class="sdNext" id="sdNext">
+				<div class="sdPrompt">Close the conversation / next step</div>
+				<div class="sdHandoffs" id="sdHandoffs"></div>
+			</div>
+			<div class="sdFoot">
+				<span>Questions and workflows may vary by patient and department.</span
+				><button id="sdRestart">Start conversation over</button>
+			</div>
+		</div>
+
+		<div id="procedureLab" role="dialog" aria-modal="true" aria-labelledby="procedureLabTitle">
+			<div class="procCard">
+				<div class="procHead">
+					<div>
+						<div class="k">RTApps · Procedures Integration</div>
+						<h2 id="procedureLabTitle">CT / QA Procedures Lab</h2>
+						<p>
+							Complete the five procedure stations. Results are simulator training values and should
+							be interpreted within this activity.
+						</p>
+					</div>
+					<button id="procedureLabClose" type="button">Close</button>
+				</div>
+				<div class="procTabs" id="procTabs">
+					<button data-proc="startup" class="active">1 · CT Start-Up</button>
+					<button data-proc="laser">2 · Laser QC</button>
+					<button data-proc="water">3 · Water Phantom</button>
+					<button data-proc="sitesim">4 · Site CT Sim</button>
+					<button data-proc="release">5 · Release / Hold</button>
+				</div>
+				<div class="procBody">
+					<section class="procPane active" data-pane="startup">
+						<div class="procIntro">
+							<b>CT Morning Start-Up.</b> Before the first patient, verify the scanner and room are
+							ready for clinical simulation.
+						</div>
+						<div class="procGrid">
+							<div class="procBox">
+								<h3>Daily start-up checklist</h3>
+								<label class="procCheck"
+									><input type="checkbox" data-startup />Visual inspection of gantry, table, cables,
+									and room</label
+								>
+								<label class="procCheck"
+									><input type="checkbox" data-startup />Console indicators / system status
+									reviewed</label
+								>
+								<label class="procCheck"
+									><input type="checkbox" data-startup />Tube warm-up sequence completed when
+									required</label
+								>
+								<label class="procCheck"
+									><input type="checkbox" data-startup />Room / gantry laser function checked</label
+								>
+								<label class="procCheck"
+									><input type="checkbox" data-startup />Warning lights and door / safety interlocks
+									checked</label
+								>
+								<label class="procCheck"
+									><input type="checkbox" data-startup />Emergency stop availability and room
+									condition confirmed</label
+								>
+								<div class="procActions">
+									<button class="primary" id="procStartupComplete">Complete Start-Up</button>
+								</div>
+								<div class="procResult" id="procStartupResult">
+									Complete each item before releasing the scanner for QC.
+								</div>
+							</div>
+							<div class="procBox">
+								<h3>Clinical connection</h3>
+								<p>
+									The CT queue should not be considered ready until required start-up and QC are
+									completed. This station establishes that equipment-release logic for the simulated
+									center.
+								</p>
+								<div class="procMetrics">
+									<div class="procMetric"><span>Scanner</span><b id="startupScanner">HOLD</b></div>
+									<div class="procMetric"><span>QC</span><b id="startupQC">PENDING</b></div>
+									<div class="procMetric">
+										<span>Patients</span><b id="startupPatients">LOCKED</b>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="procPane" data-pane="laser">
+						<div class="procIntro">
+							<b>CT Laser QC.</b> Evaluate the measured laser-to-imaging-plane displacement.
+							Training tolerance: <b>±2.0 mm</b>.
+						</div>
+						<div class="procGrid">
+							<div class="procBox">
+								<h3>Measurement</h3>
+								<div class="procMetrics">
+									<div class="procMetric"><span>Lateral</span><b id="laserLat">--</b></div>
+									<div class="procMetric"><span>Vertical</span><b id="laserVrt">--</b></div>
+									<div class="procMetric"><span>Longitudinal</span><b id="laserLng">--</b></div>
+								</div>
+								<div class="procActions">
+									<button id="laserNew">Generate Measurement</button
+									><button class="primary" id="laserPass">PASS</button
+									><button class="warn" id="laserHold">HOLD</button>
+								</div>
+								<div class="procResult" id="laserResult">
+									Generate a QC measurement, then decide whether the scanner passes.
+								</div>
+							</div>
+							<div class="procBox">
+								<h3>Reasoning</h3>
+								<p>
+									Use the largest absolute displacement. If any axis exceeds 2.0 mm in this training
+									scenario, the correct disposition is HOLD and escalate for evaluation.
+								</p>
+							</div>
+						</div>
+					</section>
+
+					<section class="procPane" data-pane="water">
+						<div class="procIntro">
+							<b>Water Phantom QC.</b> Assess CT-number accuracy, uniformity, and image-noise trend
+							before clinical use.
+						</div>
+						<div class="procGrid">
+							<div class="procBox">
+								<h3>Phantom result</h3>
+								<div class="procMetrics">
+									<div class="procMetric"><span>Center Water HU</span><b id="waterHU">--</b></div>
+									<div class="procMetric">
+										<span>Uniformity ΔHU</span><b id="waterUniform">--</b>
+									</div>
+									<div class="procMetric">
+										<span>Noise vs Baseline</span><b id="waterNoise">--</b>
+									</div>
+								</div>
+								<div class="procActions">
+									<button id="waterNew">Acquire Phantom</button
+									><button class="primary" id="waterPass">PASS</button
+									><button class="warn" id="waterHold">HOLD</button>
+								</div>
+								<div class="procResult" id="waterResult">
+									Acquire a training result, then determine the appropriate disposition.
+								</div>
+							</div>
+							<div class="procBox">
+								<h3>Training criteria</h3>
+								<p>
+									Use these simulator thresholds: water CT number within ±5 HU, center-to-periphery
+									uniformity difference ≤5 HU, and image-noise change within ±10% of baseline.
+								</p>
+							</div>
+						</div>
+					</section>
+
+					<section class="procPane" data-pane="sitesim">
+						<div class="procIntro">
+							<b>Site-Specific CT Simulation.</b> Match the setup choices to the requested treatment
+							site before scanning.
+						</div>
+						<div class="procGrid">
+							<div class="procBox">
+								<h3>Simulation order</h3>
+								<select class="procSelect" id="siteCase">
+									<option value="hn">Head & Neck</option>
+									<option value="breast">Breast</option>
+									<option value="lung">Lung</option>
+									<option value="abd">Abdomen / Pelvis</option>
+									<option value="prostate">Prostate</option>
+								</select>
+								<div id="sitePrompt" class="procResult" style="margin-top: 8px"></div>
+							</div>
+							<div class="procBox">
+								<h3>Select setup elements</h3>
+								<div class="procChoiceGrid" id="siteChoices"></div>
+								<div class="procActions">
+									<button class="primary" id="siteValidate">Validate Simulation Setup</button>
+								</div>
+								<div class="procResult" id="siteResult">
+									Choose the setup elements that best fit the selected site.
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="procPane" data-pane="release">
+						<div class="procIntro">
+							<b>QA Release / Hold Decision.</b> Integrate the upstream results before making the
+							scanner available to the CT Simulation Queue.
+						</div>
+						<div class="procStatus">
+							<div><span>Start-Up</span><b id="relStartup">PENDING</b></div>
+							<div><span>Laser QC</span><b id="relLaser">PENDING</b></div>
+							<div><span>Water QC</span><b id="relWater">PENDING</b></div>
+							<div><span>Site Sim</span><b id="relSite">PENDING</b></div>
+							<div><span>Final State</span><b id="relFinal">HOLD</b></div>
+						</div>
+						<div class="procBox">
+							<h3>Disposition</h3>
+							<p>
+								Review all procedure results. Release only when required start-up and QC have
+								passed. A failed QC result requires HOLD / escalation in this simulation.
+							</p>
+							<div class="procActions">
+								<button class="primary" id="releaseClinical">RELEASE CT</button
+								><button class="warn" id="holdClinical">HOLD CT</button
+								><button id="resetProcedures">Reset Lab</button>
+							</div>
+							<div class="procResult" id="releaseResult">
+								The CT simulator remains on HOLD until the procedure sequence supports release.
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+
+		<div id="ctQaDock" aria-label="CT QA menu">
+			<div class="ctqa-head">
+				<div>
+					<div class="k">CT Simulation Room</div>
+					<h3>CT Room Menu</h3>
+					<p>
+						This contextual menu becomes available after entering the CT room. Launch QA from here.
+					</p>
+				</div>
+				<button id="ctQaClose" type="button">Close</button>
+			</div>
+			<div class="ctqa-body">
+				<button id="ctQaLaunch" type="button">Run QA</button>
+				<div class="ctqa-mini">
+					<b>Available in CT Simulation only.</b><br />
+					Use this menu to run the CT morning start-up, laser QC, water phantom QC, and release/hold
+					workflow with machine-side animations.
+				</div>
+				<div class="ctqa-progress">
+					<div><span>Start-Up</span><b id="ctQaProgStartup">PENDING</b></div>
+					<div><span>Laser</span><b id="ctQaProgLaser">PENDING</b></div>
+					<div><span>Water</span><b id="ctQaProgWater">PENDING</b></div>
+					<div><span>Final</span><b id="ctQaProgFinal">HOLD</b></div>
+				</div>
+				<div class="ctqa-step-run">
+					<button id="ctQaQuickStartup" type="button">Animate Start-Up</button>
+					<button id="ctQaQuickLaser" type="button">Animate Laser QC</button>
+					<button id="ctQaQuickWater" type="button">Animate Phantom QC</button>
+				</div>
+				<button class="ctqa-roombtn" id="ctQaGoRoom" type="button">Return focus to CT room</button>
+			</div>
+		</div>
+
+		<div id="copyright">© 2026 <b>RTApps</b> · Kevin Kindle · Radiation Oncology Center</div>
+		<canvas id="scene"></canvas>
+
+		<div id="linacHeadDialog" role="dialog" aria-modal="true" aria-labelledby="linacHeadTitle">
+			<div class="linacHeadCard">
+				<div class="linacHeadTop">
+					<div>
+						<h2 id="linacHeadTitle">LINAC Treatment Head · Interactive Beam Path</h2>
+						<p>
+							Compare photon and conventional electron beam paths from the bending magnet through
+							the treatment head. Select components to learn what they do.
+						</p>
+					</div>
+					<button class="linacHeadClose" id="linacHeadClose">Close</button>
+				</div>
+				<div class="linacHeadControls">
+					<button id="lhPhoton" class="active">Photon Mode</button
+					><button id="lhElectron">Electron Mode</button><span class="divider"></span>
+					<span id="lhPhotonEnergies"
+						><button class="energy active" data-lhenergy="6 MV">6 MV</button
+						><button class="energy" data-lhenergy="10 MV">10 MV</button
+						><button class="energy" data-lhenergy="18 MV">18 MV</button></span
+					>
+					<span id="lhElectronEnergies" hidden
+						><button class="energy" data-lhenergy="6 MeV">6 MeV</button
+						><button class="energy active" data-lhenergy="9 MeV">9 MeV</button
+						><button class="energy" data-lhenergy="15 MeV">15 MeV</button></span
+					>
+					<span class="divider"></span
+					><button class="action" id="lhAnimate">Animate Beam Path</button
+					><button class="reset" id="lhReset">Reset</button>
+				</div>
+				<div class="linacHeadGrid">
+					<div class="linacHeadCanvasWrap">
+						<canvas id="linacHeadCanvas" width="980" height="650"></canvas>
+						<div class="linacHeadHint">Select a component on the schematic for details.</div>
+					</div>
+					<div class="linacHeadSide">
+						<div class="lhBox lhMode">
+							<h3 id="lhModeTitle">Photon Mode · 6 MV</h3>
+							<p id="lhNarrative"></p>
+						</div>
+						<div class="lhBox lhComponent">
+							<h3 id="lhComponentTitle">Select a component</h3>
+							<p id="lhComponentText">
+								Click any labeled component in the treatment-head schematic to review its role in
+								the beam path.
+							</p>
+						</div>
+						<div class="lhBox lhCompare">
+							<h3>Photon vs Electron</h3>
+							<p id="lhCompareText"></p>
+						</div>
+						<div class="lhBox">
+							<h3>Beam legend</h3>
+							<div class="lhLegend">
+								<span><i class="lhDot" style="background: #2f7de1"></i>Accelerated electrons</span
+								><span><i class="lhDot" style="background: #f2be27"></i>Photon beam</span
+								><span><i class="lhDot" style="background: #36a88d"></i>Clinical electrons</span
+								><span><i class="lhDot" style="background: #8b5cf6"></i>Selected component</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="lhFooter">
+					This learning schematic is simplified. In the electron mode shown here, the MLC is
+					retracted and inactive; the electron applicator/cone and insert define the field. Actual
+					LINAC designs vary by manufacturer.
+				</div>
+			</div>
+		</div>
+
+		<script src="/arcade/rtapps-sdk.js"></script>
+		<script type="module" src="./src/main.js"></script>
+	</body>
+</html>
