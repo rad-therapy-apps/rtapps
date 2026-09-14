@@ -1169,7 +1169,10 @@ def test_seed_simulator_arcade_directories_exist_on_disk() -> None:
     actually be built and present on disk, not just referenced by a seed row. A plain
     repo-relative file check, not seed data, so no `db`/`settings` fixtures are needed."""
     repo_root = Path(__file__).resolve().parents[3]
-    assert (repo_root / "apps/web/arcade/sim-hub/index.html").is_file()
+    # sim-hub is Vite-built from arcade-src/ (#77): apps/web/arcade/sim-hub/ is gitignored
+    # build output produced by `pnpm --filter web build`, so a fresh checkout only carries
+    # the source tree — that source is what guarantees the served app exists.
+    assert (repo_root / "apps/web/arcade-src/sim-hub/index.html").is_file()
     assert (repo_root / "apps/web/arcade/linac-ct/index.html").is_file()
     assert (repo_root / "apps/web/arcade/three-point-setup/index.html").is_file()
     assert (repo_root / "apps/web/arcade/linac-training-beginner/index.html").is_file()

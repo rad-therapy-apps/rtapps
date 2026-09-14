@@ -52,6 +52,9 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^2.27.2
         version: 2.27.2
+      three:
+        specifier: 0.160.0
+        version: 0.160.0
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -2045,6 +2048,9 @@ packages:
   svelte@5.56.10:
     resolution: {integrity: sha512-Lcxbj8I/KAbpY+VjtY4ENQBV0dDCipfGAhqb51XQZ67CIQqXgsv/8dPkbILaj4Fb6/b6JAEM/PIVbILXgDQy2g==}
     engines: {node: '>=18'}
+
+  three@0.160.0:
+    resolution: {integrity: sha512-DLU8lc0zNIPkM7rH5/e1Ks1Z8tWCGRq6g8mPowdDJpw1CFBJMU7UoJjC6PefXW7z//SSl0b2+GCw14LB+uDhng==}
 
   tiny-glob@0.2.9:
     resolution: {integrity: sha512-g/55ssRPUjShh+xkfx9UPDXqhckHEsHr4Vd9zX55oSdGZc/MD0m3sferOkwWtp98bv+kcVfEHtRJgBVJzelrzg==}
@@ -4162,6 +4168,8 @@ snapshots:
       zimmerframe: 1.1.4
     transitivePeerDependencies:
       - '@typescript-eslint/types'
+
+  three@0.160.0: {}
 
   tiny-glob@0.2.9:
     dependencies:
