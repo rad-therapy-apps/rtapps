@@ -410,7 +410,9 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 
 const canvas=document.getElementById('scene');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+/* RTApps perf pass: pixel-ratio cap 1.7→1.25 and PCFSoft→PCF shadows — the walkable world was
+   rendering ~2x the pixels it needed on retina screens with the most expensive shadow filter. */
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fc3d2);scene.fog=new THREE.FogExp2(0xa7c3cf,.0033);
 const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.08,280);camera.position.set(12,82,92);
 const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(innerWidth,innerHeight);labelRenderer.domElement.id='labels';document.body.appendChild(labelRenderer.domElement);

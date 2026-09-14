@@ -5989,6 +5989,11 @@ body.control-room-mode.rt-v2-console #consoleWorkflowDockBody #deliveryPanel.ope
         }
         function updateCCTVFeeds() {
             if (!Array.isArray(cctvFeeds) || !scene) return;
+            // RTApps perf pass: the CCTV monitors re-rendered the WHOLE scene up to 3 extra times
+            // EVERY frame; ~9Hz is visually identical on a monitor prop (same rate the hub uses).
+            const nowMs = performance.now();
+            if (nowMs - (updateCCTVFeeds._last || 0) < 110) return;
+            updateCCTVFeeds._last = nowMs;
             cctvFeeds.forEach(feed => {
                 if (feed.type === 'cameraSceneA') {
                     feed.camera.position.set(-0.4, 9.2, GANTRY_PLANE_Z_TARGET + 0.4);
@@ -6012,8 +6017,9 @@ body.control-room-mode.rt-v2-console #consoleWorkflowDockBody #deliveryPanel.ope
             camera.position.set(8.6, ISOCENTER_Y_TARGET + 2.8, GANTRY_PLANE_Z_TARGET + 7.2); 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+            // RTApps perf pass: pixel-ratio cap 2→1.25, PCFSoft→PCF (see sim-hub's matching change).
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+            renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
             viewerContainer.appendChild(renderer.domElement);
             controls = new OrbitControls(camera, renderer.domElement); 
             controls.target.set(-0.4, 1.15, GANTRY_PLANE_Z_TARGET - 0.3); 
