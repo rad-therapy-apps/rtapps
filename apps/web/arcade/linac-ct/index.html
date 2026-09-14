@@ -8270,6 +8270,21 @@ function igrtViewSVG(label,hCorrection,vCorrection,rotCorrection=0,hAxis='',vAxi
             // workspace (whose iframe runs its own loop) and in hidden tabs.
             if (document.hidden || document.getElementById('ctSimWorkspace')?.classList.contains('open')) return;
             const now = performance.now();
+            // Adaptive quality floor (mirror of sim-hub, shadows only): after 5s below ~26 FPS,
+            // turn shadows off for good. `?hq` bypasses for demos.
+            const P = animate._floor || (animate._floor = { done: new URLSearchParams(location.search).has('hq'), last: now, n: 0, acc: 0, bad: 0 });
+            if (!P.done) {
+                const d = (now - P.last) / 1000; P.last = now;
+                if (d < 0.5) { P.acc += d; P.n++; }
+                if (P.acc >= 1) {
+                    const fps = P.n / P.acc; P.acc = 0; P.n = 0; P.bad = fps < 26 ? P.bad + 1 : 0;
+                    if (P.bad >= 5) {
+                        P.done = true;
+                        renderer.shadowMap.enabled = false;
+                        scene.traverse(o => { if (o.isMesh && o.material) o.material.needsUpdate = true; });
+                    }
+                }
+            }
             updateMotionAnimation(now);
             updateVaultAesthetics(now);
             updateTravelWorkflow(now);
