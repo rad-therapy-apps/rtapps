@@ -5965,7 +5965,7 @@ body.control-room-mode.rt-v2-console #consoleWorkflowDockBody #deliveryPanel.ope
                 if (!def.container) return;
                 def.container.innerHTML = '';
                 let feedRenderer;
-                try { feedRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); }
+                try { feedRenderer = new THREE.WebGLRenderer({ antialias: false, alpha: false }); }
                 catch (err) { console.warn('CCTV renderer unavailable for', def.container?.id, err); return; }
                 feedRenderer.setPixelRatio(1);
                 feedRenderer.setClearColor(0x07131d, 1);
@@ -5995,6 +5995,7 @@ body.control-room-mode.rt-v2-console #consoleWorkflowDockBody #deliveryPanel.ope
             if (nowMs - (updateCCTVFeeds._last || 0) < 110) return;
             updateCCTVFeeds._last = nowMs;
             cctvFeeds.forEach(feed => {
+                if (feed.container.offsetParent === null) return;
                 if (feed.type === 'cameraSceneA') {
                     feed.camera.position.set(-0.4, 9.2, GANTRY_PLANE_Z_TARGET + 0.4);
                     feed.look.set(0.0, 1.15, GANTRY_PLANE_Z_TARGET - 0.25);
@@ -6015,7 +6016,7 @@ body.control-room-mode.rt-v2-console #consoleWorkflowDockBody #deliveryPanel.ope
             scene = new THREE.Scene(); scene.background = new THREE.Color(0xeceef1); 
             camera = new THREE.PerspectiveCamera(42, viewerContainer.clientWidth / viewerContainer.clientHeight, 0.1, 120); 
             camera.position.set(8.6, ISOCENTER_Y_TARGET + 2.8, GANTRY_PLANE_Z_TARGET + 7.2); 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio <= 1 });
             renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
             // RTApps perf pass: pixel-ratio cap 2→1.25, PCFSoft→PCF (see sim-hub's matching change).
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
@@ -8265,6 +8266,9 @@ function igrtViewSVG(label,hCorrection,vCorrection,rotCorrection=0,hAxis='',vAxi
 
         function animate() {
             requestAnimationFrame(animate);
+            // RTApps perf pass: the vault kept rendering underneath the full-screen CT
+            // workspace (whose iframe runs its own loop) and in hidden tabs.
+            if (document.hidden || document.getElementById('ctSimWorkspace')?.classList.contains('open')) return;
             const now = performance.now();
             updateMotionAnimation(now);
             updateVaultAesthetics(now);
