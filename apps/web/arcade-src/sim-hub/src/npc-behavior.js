@@ -4,12 +4,13 @@
    pair transitions between rooms. Verbatim extractions from main.js. Companion to ./npc.js
    (task 6's other module) — `personFigure`/`setNpcRole`/`poseCharacter`/`faceNpcToward`/
    `npcBubble`/`bubbleVis` are owned there and imported back here. A handful of symbols stay
-   owned by main.js — `JOURNEY`/`setupAmbulance` (future journey module, task 9),
+   owned by main.js — `JOURNEY` (future journey module, task 9),
    `ROOM_CAST`/`doorPoint`/`setDoorTarget`/`journeyActorRoom`/`corridorNodesFromHub`/
    `shortestCorridorRoute`/`shortestCorridorRouteFromPosition`/`makePolylineCurve`/`doors`
    (walk/corridor routing, task 8, and still-resident journey state) — because other
    still-resident systems read or write them too, so main.js exports them rather than
-   duplicating that state here. */
+   duplicating that state here. `setupAmbulance` moved to ./equipment.js in task 7 and is
+   imported from there instead. */
 import * as THREE from 'three';
 import { zeroY } from './helpers.js';
 import { scene, camera } from './scene.js';
@@ -32,13 +33,13 @@ import {
 	doors,
 	doorPoint,
 	setDoorTarget,
-	setupAmbulance,
 	journeyActorRoom,
 	corridorNodesFromHub,
 	shortestCorridorRoute,
 	shortestCorridorRouteFromPosition,
 	makePolylineCurve
 } from './main.js';
+import { setupAmbulance } from './equipment.js';
 
 export const movers = [];
 const dutyActors = [];

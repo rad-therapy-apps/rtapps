@@ -4,14 +4,14 @@
    network. Verbatim extractions from main.js. Furnishing calls out to ./props.js for the
    individual prop/furniture builders. A handful of symbols stay owned by main.js — either
    because other still-resident systems (walk-mode collision/raycasting, the door-open/close
-   animation loop, the future npc/journey/equipment modules) read or write them too, or because
+   animation loop, the future npc/journey modules) read or write them too, or because
    they weren't part of this task's anchor list — and are imported back from there: `add`/`MAT`/
    `C` (shared scene-building helpers/colors), `registerInteractable` (interaction registry),
    `roomFloors`/`ceilings`/`doors` (walk-mode collision + door-animation state), `doorNormal`/
    `doorCenter` (already exported from main.js per task 3's helpers.js), `roomById` (looks up
-   `ROOMS`, this module's own export), and `buildEngineeringWallSchematics`/
-   `buildLinacHeadWallStation` (entangled with the future LINAC-head-lab module's
-   `LINAC_HEAD_LAB` state, called from `furnish`). */
+   `ROOMS`, this module's own export). `buildEngineeringWallSchematics`/`buildLinacHeadWallStation`
+   (called from `furnish`) moved to ./equipment.js as part of task 7 and are imported from there
+   instead. */
 import * as THREE from 'three';
 import {
 	box,
@@ -73,10 +73,9 @@ import {
 	doors,
 	doorNormal,
 	doorCenter,
-	roomById,
-	buildEngineeringWallSchematics,
-	buildLinacHeadWallStation
+	roomById
 } from './main.js';
+import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment.js';
 
 export const ROOMS = [
 	{
