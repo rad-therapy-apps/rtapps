@@ -4,21 +4,14 @@
    extractions from main.js. A handful still reach back into main.js for symbols owned by
    modules not yet extracted: `add`/`MAT` (shared scene-building helpers), `registerInteractable`
    (the walk-mode interaction registry), `CT_COUCH`/`ROOM_CLOCKS` (mutable state read/written by
-   still-resident journey/clock update loops), `personFigure` (the future npc module), and
-   `openKioskDialog` (the wayfinding UI) — main.js exports them rather than duplicating that
-   state here. */
+   still-resident journey/clock update loops), and `openKioskDialog` (the wayfinding UI) —
+   main.js exports them rather than duplicating that state here. `personFigure` moved to
+   ./npc.js in task 6 and is imported from there instead. */
 import * as THREE from 'three';
 import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers.js';
 import { scene } from './scene.js';
-import {
-	add,
-	MAT,
-	registerInteractable,
-	CT_COUCH,
-	ROOM_CLOCKS,
-	personFigure,
-	openKioskDialog
-} from './main.js';
+import { personFigure } from './npc.js';
+import { add, MAT, registerInteractable, CT_COUCH, ROOM_CLOCKS, openKioskDialog } from './main.js';
 
 export function lampPost(x, z, h = 4.4) {
 	const g = new THREE.Group();
