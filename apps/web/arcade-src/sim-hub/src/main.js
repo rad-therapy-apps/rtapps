@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { S } from './state.js';
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({
@@ -1518,7 +1519,6 @@ function vehicleObject(kind = 'car', color = 0x5c89bf) {
 const movers = [];
 const interactables = [];
 const npcRoleLabels = [];
-let currentInteraction = null;
 function roleClass(role) {
 	const r = role.toLowerCase();
 	if (r.includes('patient') || r.includes('visitor')) return 'patient';
@@ -1748,7 +1748,7 @@ function updateNpcExchanges(sec) {
 		sc.a.getWorldPosition(pa);
 		sc.b.getWorldPosition(pb);
 		const mid = pa.clone().add(pb).multiplyScalar(0.5),
-			near = cam.distanceTo(mid) < 15 && mode !== 'overview';
+			near = cam.distanceTo(mid) < 15 && S.mode !== 'overview';
 		const t = (sec + sc.offset * sc.period) % sc.period;
 		bubbleVis(sc.bubbleA, false);
 		bubbleVis(sc.bubbleB, false);
@@ -1806,11 +1806,10 @@ const ROOM_APP_DOORS = new Set(['LINAC Control Area', 'CT Control Room', 'CT Sim
 // RTApps (plan 4c): prefetch the room app's player URL once; if it can't resolve
 // (activity unseeded/unpublished, or offline), ROOM_APP_URL stays null and the three
 // wired doors keep their legacy in-hub behavior instead of going dead.
-var ROOM_APP_URL = null;
 if (window.RTApps) {
 	window.RTApps.activityUrl('sim-linac-fraction')
 		.then(function (url) {
-			ROOM_APP_URL = url;
+			S.ROOM_APP_URL = url;
 		})
 		.catch(function () {});
 }
@@ -1819,19 +1818,17 @@ if (window.RTApps) {
 // Learning Commons door keeps its legacy in-hub behavior instead of going dead. A
 // parallel, independent pair alongside ROOM_APP_URL/ROOM_APP_DOORS (not merged into it) —
 // that set's semantics are "leads to sim-linac-fraction" and this leads elsewhere.
-var CONSOLE_APP_URL = null;
 window.CONSOLE_APP_URL = null; // also mirrored onto `window` (module scripts don't leak top-level vars there) so e2e can read the prefetch gate via frame.evaluate
 if (window.RTApps && window.RTApps.activityUrl) {
 	window.RTApps.activityUrl('sim-console')
 		.then(function (url) {
-			CONSOLE_APP_URL = url;
+			S.CONSOLE_APP_URL = url;
 			window.CONSOLE_APP_URL = url;
 		})
 		.catch(function () {});
 }
-var CONSOLE_APP_DOORS = new Set(['Learning Commons / Staff Education']);
 function performInteraction() {
-	if (mode !== 'walk') return;
+	if (S.mode !== 'walk') return;
 	const it = nearestInteractable();
 	const dr = nearestDoor();
 	if (it && (!dr || it.d <= dr.d + 0.25)) {
@@ -1847,14 +1844,14 @@ function performInteraction() {
 		return;
 	}
 	if (dr) {
-		if (ROOM_APP_URL && ROOM_APP_DOORS.has(dr.room.name)) {
+		if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(dr.room.name)) {
 			// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
-			window.top.location.href = ROOM_APP_URL;
+			window.top.location.href = S.ROOM_APP_URL;
 			return;
 		}
-		if (CONSOLE_APP_URL && CONSOLE_APP_DOORS.has(dr.room.name)) {
+		if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(dr.room.name)) {
 			// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
-			window.top.location.href = CONSOLE_APP_URL;
+			window.top.location.href = S.CONSOLE_APP_URL;
 			return;
 		}
 		const d = doors.get(dr.room.id);
@@ -1863,25 +1860,25 @@ function performInteraction() {
 	}
 }
 function updateInteractionUI() {
-	const S = updateInteractionUI,
+	const UI = updateInteractionUI,
 		ret = document.getElementById('walkReticle'),
 		p = document.getElementById('interactPrompt'),
 		txt = document.getElementById('interactText'),
 		apply = (retOn, pOn, label) => {
-			if (S._ret !== retOn) {
+			if (UI._ret !== retOn) {
 				ret.classList.toggle('show', retOn);
-				S._ret = retOn;
+				UI._ret = retOn;
 			}
-			if (S._p !== pOn) {
+			if (UI._p !== pOn) {
 				p.classList.toggle('show', pOn);
-				S._p = pOn;
+				UI._p = pOn;
 			}
-			if (pOn && S._txt !== label) {
+			if (pOn && UI._txt !== label) {
 				txt.textContent = label;
-				S._txt = label;
+				UI._txt = label;
 			}
 		};
-	if (mode !== 'walk' || travel) {
+	if (S.mode !== 'walk' || S.travel) {
 		apply(false, false);
 		return;
 	}
@@ -6022,8 +6019,8 @@ function activeVaultPatientTarget() {
 function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	const linacNeeded =
 		OPERATOR_CONSOLE.built &&
-		(activeRoom?.id === 'linaccontrol' ||
-			activeRoom?.id === 'vault1' ||
+		(S.activeRoom?.id === 'linaccontrol' ||
+			S.activeRoom?.id === 'vault1' ||
 			(typeof JOURNEY !== 'undefined' &&
 				JOURNEY.active &&
 				[
@@ -6047,8 +6044,8 @@ function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	}
 	const ctNeeded =
 		CT_OPERATOR_CONSOLE.built &&
-		(activeRoom?.id === 'ctcontrol' ||
-			activeRoom?.id === 'ctsim' ||
+		(S.activeRoom?.id === 'ctcontrol' ||
+			S.activeRoom?.id === 'ctsim' ||
 			(typeof JOURNEY !== 'undefined' &&
 				JOURNEY.active &&
 				['ctsetup', 'ctscan', 'ctdone'].includes(JOURNEY.stage)));
@@ -6095,9 +6092,6 @@ function addClinicalWallPolish() {
 addClinicalWallPolish();
 
 /* ---- Ambulance drop-off choreography: pull up, unload, dwell, load, depart ---- */
-let AMB = null,
-	ambUnload = null,
-	ambLoad = null;
 const ambState = { phase: 'approach', route: { i: 0, d: 0 }, wait: 0 };
 const AMB_FWD = -Math.PI / 2;
 const AMB_IN = [
@@ -6123,9 +6117,9 @@ function ambPatient() {
 	return q;
 }
 function setupAmbulance(a) {
-	AMB = a;
-	ambUnload = ambPatient();
-	ambLoad = ambPatient();
+	S.AMB = a;
+	S.ambUnload = ambPatient();
+	S.ambLoad = ambPatient();
 	ambState.phase = 'approach';
 	ambState.route = { i: 0, d: 0 };
 	ambState.wait = 0;
@@ -6183,20 +6177,20 @@ function advancePed(o, from, to, st, speed, dt) {
 	return false;
 }
 function updateAmbulance(dt, sec) {
-	if (!AMB) return;
+	if (!S.AMB) return;
 	const A = ambState;
 	if (A.phase === 'approach') {
-		if (advanceRoute(AMB, AMB_IN, A.route, 7.5, dt, AMB_FWD)) {
-			faceAlong(AMB, 0, -1, AMB_FWD);
+		if (advanceRoute(S.AMB, AMB_IN, A.route, 7.5, dt, AMB_FWD)) {
+			faceAlong(S.AMB, 0, -1, AMB_FWD);
 			A.phase = 'unload';
 			A.route = { i: 0, d: 0 };
-			ambUnload.visible = true;
-			ambUnload.position.set(AMB_REAR.x, 0, AMB_REAR.z);
+			S.ambUnload.visible = true;
+			S.ambUnload.position.set(AMB_REAR.x, 0, AMB_REAR.z);
 		}
 	} else if (A.phase === 'unload') {
-		walkSwing(ambUnload, sec);
-		if (advancePed(ambUnload, AMB_REAR, AMB_ENTRY, A.route, 1.5, dt)) {
-			ambUnload.visible = false;
+		walkSwing(S.ambUnload, sec);
+		if (advancePed(S.ambUnload, AMB_REAR, AMB_ENTRY, A.route, 1.5, dt)) {
+			S.ambUnload.visible = false;
 			A.phase = 'dwell';
 			A.wait = 0;
 		}
@@ -6205,26 +6199,26 @@ function updateAmbulance(dt, sec) {
 		if (A.wait > 3.4) {
 			A.phase = 'load';
 			A.route = { i: 0, d: 0 };
-			ambLoad.visible = true;
-			ambLoad.position.set(AMB_ENTRY.x, 0, AMB_ENTRY.z);
+			S.ambLoad.visible = true;
+			S.ambLoad.position.set(AMB_ENTRY.x, 0, AMB_ENTRY.z);
 		}
 	} else if (A.phase === 'load') {
-		walkSwing(ambLoad, sec);
-		if (advancePed(ambLoad, AMB_ENTRY, AMB_REAR, A.route, 1.4, dt)) {
-			ambLoad.visible = false;
+		walkSwing(S.ambLoad, sec);
+		if (advancePed(S.ambLoad, AMB_ENTRY, AMB_REAR, A.route, 1.4, dt)) {
+			S.ambLoad.visible = false;
 			A.phase = 'depart';
 			A.route = { i: 0, d: 0 };
 		}
 	} else if (A.phase === 'depart') {
-		if (advanceRoute(AMB, AMB_OUT, A.route, 8.6, dt, AMB_FWD)) {
+		if (advanceRoute(S.AMB, AMB_OUT, A.route, 8.6, dt, AMB_FWD)) {
 			A.phase = 'gap';
 			A.wait = 0;
 		}
 	} else if (A.phase === 'gap') {
 		A.wait += dt;
 		if (A.wait > 4.5) {
-			AMB.position.set(-42, 0, 20);
-			faceAlong(AMB, 1, 0, AMB_FWD);
+			S.AMB.position.set(-42, 0, 20);
+			faceAlong(S.AMB, 1, 0, AMB_FWD);
 			A.phase = 'approach';
 			A.route = { i: 0, d: 0 };
 		}
@@ -7331,7 +7325,7 @@ function updateJourneyUI() {
 	document.getElementById('jhPatient').textContent = meta.patient;
 	document.getElementById('jhType').textContent = meta.type;
 	start.style.display = JOURNEY.active ? 'none' : 'block';
-	next.disabled = !JOURNEY.active || JOURNEY.busy || JOURNEY.stage === 'done' || !!travel;
+	next.disabled = !JOURNEY.active || JOURNEY.busy || JOURNEY.stage === 'done' || !!S.travel;
 	next.textContent = JOURNEY.busy ? 'Sequence running…' : journeyNextLabel();
 	phase.textContent = JOURNEY.active
 		? JOURNEY.stage.toUpperCase().replaceAll('_', ' ')
@@ -7615,7 +7609,7 @@ function updateJourneyCameraFollow() {
 	const here = roomContainingWalkPoint(p.x, p.z);
 	if (here && here.id !== JOURNEY.cameraRoomId) {
 		JOURNEY.cameraRoomId = here.id;
-		activeRoom = here;
+		S.activeRoom = here;
 		updateRoomUI(here);
 		renderRoomList();
 		document.getElementById('locText').textContent =
@@ -7632,8 +7626,8 @@ function focusCtPatientFromControl() {
 	camera.lookAt(wp.clone().setY(1.25));
 	orbit.target.copy(wp.clone().setY(1.25));
 	orbit.enabled = false;
-	activeRoom = roomById('ctcontrol');
-	updateRoomUI(activeRoom);
+	S.activeRoom = roomById('ctcontrol');
+	updateRoomUI(S.activeRoom);
 	renderRoomList();
 	document.getElementById('locText').textContent =
 		'CT Control · observing Mia through the simulation-room window';
@@ -7689,7 +7683,7 @@ function updateCtCouchMotion(sec) {
 	}
 	CT_COUCH.table.position.x = CT_COUCH.baseX + offset;
 	CT_COUCH.patient.position.x = CT_COUCH.patientBaseX + offset;
-	if (JOURNEY.stage === 'ctscan' && activeRoom?.id === 'ctcontrol') {
+	if (JOURNEY.stage === 'ctscan' && S.activeRoom?.id === 'ctcontrol') {
 		const wp = new THREE.Vector3();
 		CT_COUCH.patient.getWorldPosition(wp);
 		camera.lookAt(wp.clone().setY(1.25));
@@ -7823,7 +7817,7 @@ function updateWorkflowTransitions(sec) {
 }
 function journeyFocusActors(a, b, roomId) {
 	clearJourneyCameraFollow();
-	if (mode === 'overview') setMode('guided', false);
+	if (S.mode === 'overview') setMode('guided', false);
 	const pa = new THREE.Vector3(),
 		pb = new THREE.Vector3();
 	a?.getWorldPosition(pa);
@@ -7849,9 +7843,9 @@ function journeyFocusActors(a, b, roomId) {
 	camera.position.copy(pos);
 	camera.lookAt(target);
 	orbit.target.copy(target);
-	orbit.enabled = mode === 'guided';
+	orbit.enabled = S.mode === 'guided';
 	orbit.update();
-	activeRoom = r;
+	S.activeRoom = r;
 	updateRoomUI(r);
 	renderRoomList();
 }
@@ -7994,8 +7988,8 @@ function startTreatmentJourney() {
 		workflowState('ctsim', 'AVAILABLE', 'CT simulator ready', '#65dda0');
 	}
 	applyJourneyPatientFocus();
-	if (activeRoom?.id === 'lobby' && !travel) later(showJourneyCheckinIntro, 450);
-	else if (!travel) beginTravel(roomById('lobby'), false);
+	if (S.activeRoom?.id === 'lobby' && !S.travel) later(showJourneyCheckinIntro, 450);
+	else if (!S.travel) beginTravel(roomById('lobby'), false);
 	updateJourneyUI();
 }
 function beginJordanPickupSequence() {
@@ -8253,7 +8247,7 @@ function beginJordanEscortToVault() {
 	);
 }
 function advanceTreatmentJourney() {
-	if (!JOURNEY.active || JOURNEY.busy || travel) return;
+	if (!JOURNEY.active || JOURNEY.busy || S.travel) return;
 	if (JOURNEY.kind === 'newpatient') {
 		advanceNewPatientJourney();
 		return;
@@ -8918,7 +8912,7 @@ function beginMiaFirstTreatmentEscort() {
 	);
 }
 function advanceNewPatientJourney() {
-	if (!JOURNEY.active || JOURNEY.busy || travel) return;
+	if (!JOURNEY.active || JOURNEY.busy || S.travel) return;
 	journeyActors();
 	if (JOURNEY.stage === 'checkin') {
 		beginMiaConsultSequence();
@@ -10278,7 +10272,7 @@ function initAmbience() {
 	Object.assign(AMBIENCE, { ctx, master, compressor, noiseGain, humGain, hum2Gain, filter });
 }
 function ambienceProfile() {
-	const r = activeRoom;
+	const r = S.activeRoom;
 	const id = r?.id || '';
 	if (id === 'vault1' || id === 'vault2')
 		return { master: 0.44, noise: 0.115, hum: 0.145, hum2: 0.038, freq: 560 };
@@ -10869,7 +10863,7 @@ function updateClinicalEquipment(sec) {
 		const active = CLINICAL_FOCUS.ids.has(item.id),
 			dx = p.x - item.anchor.position.x,
 			dz = p.z - item.anchor.position.z,
-			near = mode === 'walk' && Math.hypot(dx, dz) < 4.1;
+			near = S.mode === 'walk' && Math.hypot(dx, dz) < 4.1;
 		const target = active ? 0.76 : near ? 0.22 : 0;
 		item.mat.opacity += (target - item.mat.opacity) * 0.35;
 		const pulse = active ? 1 + 0.1 * Math.sin(sec * 4.2) : 1;
@@ -10918,13 +10912,8 @@ sign.rotation.y = Math.PI;
 scene.add(sign);
 monumentSign(-1.8, 14.25);
 
-let mode = 'overview',
-	activeRoom = null,
-	history = [];
-let travel = null;
 const player = { pos: new THREE.Vector3(0, 1.65, 5.5), yaw: Math.PI, pitch: 0, locked: false };
 const keys = {};
-let walkCompositionRoomId = null;
 function aimPlayerAt(target) {
 	const dx = target.x - player.pos.x,
 		dy = target.y - player.pos.y,
@@ -10961,11 +10950,11 @@ function applyWalkConversationComposition(r, reposition = false) {
 		player.pos.copy(pose.pos);
 		player.pos.y = 1.65;
 	}
-	activeRoom = r;
+	S.activeRoom = r;
 	updateRoomUI(r);
 	renderRoomList();
 	aimPlayerAt(f.target);
-	walkCompositionRoomId = r.id;
+	S.walkCompositionRoomId = r.id;
 	document.getElementById('locText').textContent =
 		`Current location: ${r.name} · conversation view`;
 }
@@ -11124,18 +11113,18 @@ function branchRouteBetween(srcRoom, destRoom) {
 }
 function makeRouteToApproach(dest) {
 	const pts = [camera.position.clone()];
-	if (activeRoom && !activeRoom.hub) {
-		pts.push(doorPoint(activeRoom));
+	if (S.activeRoom && !S.activeRoom.hub) {
+		pts.push(doorPoint(S.activeRoom));
 		if (dest.hub) {
 			pts.push(
-				...corridorNodesFromHub(activeRoom).slice().reverse(),
+				...corridorNodesFromHub(S.activeRoom).slice().reverse(),
 				HUB.clone(),
 				new THREE.Vector3(...dest.cam)
 			);
 		} else {
-			pts.push(...branchRouteBetween(activeRoom, dest), approachPoint(dest));
+			pts.push(...branchRouteBetween(S.activeRoom, dest), approachPoint(dest));
 		}
-	} else if (activeRoom?.hub) {
+	} else if (S.activeRoom?.hub) {
 		if (dest.hub) pts.push(new THREE.Vector3(...dest.cam));
 		else pts.push(...corridorNodesFromHub(dest), approachPoint(dest));
 	} else {
@@ -11163,12 +11152,12 @@ function doorLabel(type) {
 						: 'shielded HDR door';
 }
 function beginRoutePhase(now) {
-	travel.curve = makeRouteToApproach(travel.room);
-	const len = travel.curve.getLength();
-	travel.routeStart = now;
-	travel.routeDuration = Math.max(5200, Math.min(14500, 3500 + len * 92));
-	travel.phase = 'route';
-	travel.originClosed = false;
+	S.travel.curve = makeRouteToApproach(S.travel.room);
+	const len = S.travel.curve.getLength();
+	S.travel.routeStart = now;
+	S.travel.routeDuration = Math.max(5200, Math.min(14500, 3500 + len * 92));
+	S.travel.phase = 'route';
+	S.travel.originClosed = false;
 }
 function roomInspectPose(r) {
 	const f = focusTargetsForRoom(r);
@@ -11232,17 +11221,17 @@ function enableGuidedConversationComposition(r) {
 }
 function disableRoomInspection() {
 	document.getElementById('roomLookHint').classList.remove('show');
-	if (mode !== 'overview') orbit.enabled = false;
+	if (S.mode !== 'overview') orbit.enabled = false;
 }
 function beginTravel(room, push = true) {
-	if (!room || travel) return;
-	if (activeRoom?.id === 'ctsim' && room.id !== 'ctsim') showCtQaDock(false);
+	if (!room || S.travel) return;
+	if (S.activeRoom?.id === 'ctsim' && room.id !== 'ctsim') showCtQaDock(false);
 	disableRoomInspection();
-	if (push && activeRoom && activeRoom.id !== room.id) history.push(activeRoom.id);
-	if (mode === 'walk' && document.pointerLockElement) document.exitPointerLock();
-	const fromOverview = mode === 'overview';
+	if (push && S.activeRoom && S.activeRoom.id !== room.id) S.history.push(S.activeRoom.id);
+	if (S.mode === 'walk' && document.pointerLockElement) document.exitPointerLock();
+	const fromOverview = S.mode === 'overview';
 	if (fromOverview) {
-		mode = 'guided';
+		S.mode = 'guided';
 		document
 			.querySelectorAll('#modeSeg button')
 			.forEach((b) => b.classList.toggle('active', b.dataset.mode === 'guided'));
@@ -11253,8 +11242,9 @@ function beginTravel(room, push = true) {
 	} else setMode('guided', false);
 	document.getElementById('roomLookHint').classList.remove('show');
 	orbit.enabled = false;
-	const origin = activeRoom && !activeRoom.hub && doors.has(activeRoom.id) ? activeRoom : null;
-	travel = {
+	const origin =
+		S.activeRoom && !S.activeRoom.hub && doors.has(S.activeRoom.id) ? S.activeRoom : null;
+	S.travel = {
 		room,
 		origin,
 		phase: origin ? 'exitDoor' : 'route',
@@ -11271,7 +11261,7 @@ function beginTravel(room, push = true) {
 	toast(`Guided route to <b>${room.name}</b>`);
 }
 function beginEntryPhase(now) {
-	const r = travel.room;
+	const r = S.travel.room;
 	let pts = [camera.position.clone(), doorPoint(r), insidePoint(r), new THREE.Vector3(...r.cam)],
 		poly = false;
 	if (r.id === 'vault1') {
@@ -11301,39 +11291,39 @@ function beginEntryPhase(now) {
 		poly = true;
 	}
 	const clean = cleanPoints(pts);
-	travel.entryCurve = poly
+	S.travel.entryCurve = poly
 		? makePolylineCurve(clean)
 		: new THREE.CatmullRomCurve3(clean, false, 'catmullrom', 0.16);
-	travel.entryStart = now;
-	travel.entryDuration = r.vault ? 4450 : r.special ? 2850 : 2350;
-	travel.phase = 'enter';
+	S.travel.entryStart = now;
+	S.travel.entryDuration = r.vault ? 4450 : r.special ? 2850 : 2350;
+	S.travel.phase = 'enter';
 }
 function finishTravel() {
-	if (!travel) return;
-	activeRoom = travel.room;
-	const arrived = activeRoom;
+	if (!S.travel) return;
+	S.activeRoom = S.travel.room;
+	const arrived = S.activeRoom;
 	if (arrived && !arrived.hub && doors.has(arrived.id)) {
 		const id = arrived.id;
 		setTimeout(() => setDoorTarget(id, false), 1500);
 	}
-	travel = null;
+	S.travel = null;
 	document.getElementById('travelHUD').classList.remove('show');
 	enableGuidedConversationComposition(arrived);
 	player.pos.copy(camera.position);
 	updateRoomUI(arrived);
 	renderRoomList();
-	document.getElementById('backBtn').disabled = !history.length;
+	document.getElementById('backBtn').disabled = !S.history.length;
 	document.getElementById('locText').textContent =
 		`Current location: ${arrived.name} · initial view frames the staff interaction`;
 	if (arrived.id === 'lobby' && JOURNEY.introPending) setTimeout(showJourneyCheckinIntro, 350);
 	updateJourneyUI();
 }
 function updateTravel(now) {
-	if (!travel) return;
-	const r = travel.room;
-	if (travel.phase === 'exitDoor') {
-		const d = doors.get(travel.origin.id),
-			elapsed = now - travel.phaseStart,
+	if (!S.travel) return;
+	const r = S.travel.room;
+	if (S.travel.phase === 'exitDoor') {
+		const d = doors.get(S.travel.origin.id),
+			elapsed = now - S.travel.phaseStart,
 			wait = (d?.openSeconds || 2) * 1000 + 500;
 		document.getElementById('travelName').textContent = `Opening ${doorLabel(d?.type)}…`;
 		document.getElementById('travelPct').textContent = '5%';
@@ -11341,18 +11331,18 @@ function updateTravel(now) {
 		if (elapsed >= wait) beginRoutePhase(now);
 		return;
 	}
-	if (travel.phase === 'route') {
-		let t = (now - travel.routeStart) / travel.routeDuration;
+	if (S.travel.phase === 'route') {
+		let t = (now - S.travel.routeStart) / S.travel.routeDuration;
 		t = Math.max(0, Math.min(1, t));
 		const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
-			p = travel.curve.getPoint(e),
-			ahead = travel.curve.getPoint(Math.min(1, e + 0.01));
+			p = S.travel.curve.getPoint(e),
+			ahead = S.travel.curve.getPoint(Math.min(1, e + 0.01));
 		camera.position.copy(p);
 		if (r.vault && t > 0.78) camera.lookAt(doorCenter(r, 1.58));
 		else camera.lookAt(ahead);
-		if (travel.origin && !travel.originClosed && t > 0.1) {
-			setDoorTarget(travel.origin.id, false);
-			travel.originClosed = true;
+		if (S.travel.origin && !S.travel.originClosed && t > 0.1) {
+			setDoorTarget(S.travel.origin.id, false);
+			S.travel.originClosed = true;
 		}
 		document.getElementById('travelName').textContent = `Traveling through the center · ${r.name}`;
 		document.getElementById('travelPct').textContent = `${Math.round(8 + t * 62)}%`;
@@ -11363,14 +11353,14 @@ function updateTravel(now) {
 				return;
 			}
 			setDoorTarget(r.id, true);
-			travel.phase = 'destDoor';
-			travel.phaseStart = now;
+			S.travel.phase = 'destDoor';
+			S.travel.phaseStart = now;
 		}
 		return;
 	}
-	if (travel.phase === 'destDoor') {
+	if (S.travel.phase === 'destDoor') {
 		const d = doors.get(r.id),
-			elapsed = now - travel.phaseStart,
+			elapsed = now - S.travel.phaseStart,
 			wait = (d?.openSeconds || 2) * 1000 + 650;
 		camera.lookAt(doorCenter(r, 1.55));
 		const q = Math.min(1, elapsed / wait);
@@ -11380,12 +11370,12 @@ function updateTravel(now) {
 		if (elapsed >= wait) beginEntryPhase(now);
 		return;
 	}
-	if (travel.phase === 'enter') {
-		let t = (now - travel.entryStart) / travel.entryDuration;
+	if (S.travel.phase === 'enter') {
+		let t = (now - S.travel.entryStart) / S.travel.entryDuration;
 		t = Math.max(0, Math.min(1, t));
 		const e = t * t * (3 - 2 * t),
-			p = travel.entryCurve.getPoint(e),
-			ahead = travel.entryCurve.getPoint(Math.min(1, e + 0.012));
+			p = S.travel.entryCurve.getPoint(e),
+			ahead = S.travel.entryCurve.getPoint(Math.min(1, e + 0.012));
 		camera.position.copy(p);
 		if (r.vault) {
 			const door = doorCenter(r, 1.6),
@@ -11432,7 +11422,7 @@ function updateDoors(dt) {
 }
 
 function setMode(m, announce = true) {
-	mode = m;
+	S.mode = m;
 	document
 		.querySelectorAll('#modeSeg button')
 		.forEach((b) => b.classList.toggle('active', b.dataset.mode === m));
@@ -11453,7 +11443,7 @@ function setMode(m, announce = true) {
 		orbit.enablePan = false;
 		orbit.enabled = true;
 		orbit.update();
-		activeRoom = null;
+		S.activeRoom = null;
 		showCtQaDock(false);
 		document.getElementById('locText').textContent = 'Overview of the full facility.';
 		updateFacilityInfo();
@@ -11461,8 +11451,8 @@ function setMode(m, announce = true) {
 	} else if (m === 'walk') {
 		document.getElementById('roomLookHint').classList.remove('show');
 		orbit.enabled = false;
-		if (activeRoom) {
-			applyWalkConversationComposition(activeRoom, true);
+		if (S.activeRoom) {
+			applyWalkConversationComposition(S.activeRoom, true);
 		} else {
 			player.pos.set(0, 1.65, 5.5);
 			camera.position.copy(player.pos);
@@ -11476,10 +11466,10 @@ function setMode(m, announce = true) {
 		if (announce)
 			toast('Walk mode: use WASD and the mouse to move and look around. Press E to interact.');
 	} else if (m === 'guided') {
-		if (activeRoom && !travel) enableRoomInspection(activeRoom);
+		if (S.activeRoom && !S.travel) enableRoomInspection(S.activeRoom);
 		else {
 			orbit.enabled = false;
-			if (!activeRoom && !travel) {
+			if (!S.activeRoom && !S.travel) {
 				camera.position.set(0, 1.7, 5.5);
 				camera.lookAt(0, 1.35, 0);
 			}
@@ -11493,7 +11483,7 @@ function renderRoomList() {
 	host.innerHTML = '';
 	ROOMS.filter((r) => zone === 'all' || r.zone === zone).forEach((r) => {
 		const b = document.createElement('button');
-		b.className = 'roombtn' + (activeRoom?.id === r.id ? ' active' : '');
+		b.className = 'roombtn' + (S.activeRoom?.id === r.id ? ' active' : '');
 		b.style.setProperty('--rc', '#' + r.color.toString(16).padStart(6, '0'));
 		b.innerHTML = `<span class="dot"></span><span><div class="nm">${r.name}</div><div class="sb">${r.kicker}</div></span><span class="arr">›</span>`;
 		b.onclick = () => beginTravel(r);
@@ -11677,7 +11667,7 @@ const CT_QA_ANIM = { running: false, phase: null };
 function showCtQaDock(show = true) {
 	const el = document.getElementById('ctQaDock');
 	if (!el) return;
-	const inCt = activeRoom?.id === 'ctsim';
+	const inCt = S.activeRoom?.id === 'ctsim';
 	el.classList.toggle('show', !!show && inCt);
 }
 
@@ -11801,7 +11791,7 @@ async function ctQaAnimateWater() {
 	CT_QA_ANIM.running = false;
 }
 async function runCtQaSequence() {
-	if (activeRoom?.id !== 'ctsim') {
+	if (S.activeRoom?.id !== 'ctsim') {
 		qaToast('Enter the CT Simulation Room first');
 		return;
 	}
@@ -11861,7 +11851,6 @@ function updateRoomUI(r) {
 	if (tb) tb.onclick = () => openStaffDialogue(key);
 }
 
-let activeGuideKey = null;
 function escHtml(s) {
 	return String(s ?? '').replace(
 		/[&<>\"']/g,
@@ -11879,7 +11868,7 @@ function bubble(kind, who, msg) {
 function resetStaffDialogue(key) {
 	const g = STAFF_GUIDES[key];
 	if (!g) return;
-	activeGuideKey = key;
+	S.activeGuideKey = key;
 	document.getElementById('staffTranscript').innerHTML = '';
 	bubble('staff', g.name, g.intro);
 	const q = document.getElementById('sdQuestions');
@@ -11911,7 +11900,7 @@ function resetStaffDialogue(key) {
 				startActorHandoff(key, h);
 				if (h.follow && h.target) {
 					setTimeout(() => {
-						if (!travel) beginTravel(roomById(h.target));
+						if (!S.travel) beginTravel(roomById(h.target));
 					}, 450);
 				}
 			}, 1150);
@@ -11938,15 +11927,15 @@ function openStaffDialogue(key) {
 }
 function closeStaffDialogue(restore = true) {
 	document.getElementById('staffDialog').classList.remove('show');
-	activeGuideKey = null;
-	if (restore && activeRoom && !travel) {
-		if (mode === 'walk') applyWalkConversationComposition(activeRoom, false);
-		else enableRoomInspection(activeRoom);
+	S.activeGuideKey = null;
+	if (restore && S.activeRoom && !S.travel) {
+		if (S.mode === 'walk') applyWalkConversationComposition(S.activeRoom, false);
+		else enableRoomInspection(S.activeRoom);
 	}
 }
 document.getElementById('sdClose').onclick = closeStaffDialogue;
 document.getElementById('sdRestart').onclick = () =>
-	activeGuideKey && resetStaffDialogue(activeGuideKey);
+	S.activeGuideKey && resetStaffDialogue(S.activeGuideKey);
 
 function toast(html) {
 	const t = document.getElementById('toast');
@@ -11956,11 +11945,8 @@ function toast(html) {
 	toast._t = setTimeout(() => t.classList.remove('show'), 2300);
 }
 
-let walkDragLook = false,
-	walkLastX = 0,
-	walkLastY = 0;
 function requestWalkPointerLock() {
-	if (mode !== 'walk' || document.pointerLockElement === canvas) return;
+	if (S.mode !== 'walk' || document.pointerLockElement === canvas) return;
 	try {
 		const p = canvas.requestPointerLock?.();
 		if (p && typeof p.catch === 'function') p.catch(() => {});
@@ -11969,7 +11955,7 @@ function requestWalkPointerLock() {
 	}
 }
 function applyWalkMouseDelta(dx, dy) {
-	if (mode !== 'walk') return;
+	if (S.mode !== 'walk') return;
 	player.yaw -= dx * 0.0024;
 	player.pitch = Math.max(-1.12, Math.min(1.12, player.pitch - dy * 0.0024));
 }
@@ -11982,7 +11968,7 @@ document.getElementById('ctQaQuickStartup')?.addEventListener('click', ctQaAnima
 document.getElementById('ctQaQuickLaser')?.addEventListener('click', ctQaAnimateLaser);
 document.getElementById('ctQaQuickWater')?.addEventListener('click', ctQaAnimateWater);
 document.getElementById('ctQaGoRoom')?.addEventListener('click', () => {
-	if (activeRoom?.id !== 'ctsim' && !travel) beginTravel(roomById('ctsim'));
+	if (S.activeRoom?.id !== 'ctsim' && !S.travel) beginTravel(roomById('ctsim'));
 	else showCtQaDock(true);
 });
 
@@ -12204,9 +12190,9 @@ document.querySelectorAll('#zoneChips button').forEach(
 );
 document.getElementById('homeBtn').onclick = () => beginTravel(roomById('lobby'));
 document.getElementById('backBtn').onclick = () => {
-	const id = history.pop();
+	const id = S.history.pop();
 	if (id) beginTravel(roomById(id), false);
-	document.getElementById('backBtn').disabled = !history.length;
+	document.getElementById('backBtn').disabled = !S.history.length;
 };
 document.getElementById('linacHeadClose').onclick = closeLinacHeadLab;
 document.getElementById('lhPhoton').onclick = () => lhSetMode('photon');
@@ -12290,22 +12276,22 @@ bindPanelToggle('roomRail', 'roomRailToggle', '▸', '◂');
 bindPanelToggle('infoPanel', 'infoPanelToggle', '◂', '▸');
 
 labelRenderer.domElement.addEventListener('click', () => {
-	if (mode === 'walk') requestWalkPointerLock();
+	if (S.mode === 'walk') requestWalkPointerLock();
 });
 canvas.addEventListener('mousedown', (e) => {
-	if (mode === 'walk' && e.button === 0) {
-		walkDragLook = true;
-		walkLastX = e.clientX;
-		walkLastY = e.clientY;
+	if (S.mode === 'walk' && e.button === 0) {
+		S.walkDragLook = true;
+		S.walkLastX = e.clientX;
+		S.walkLastY = e.clientY;
 		requestWalkPointerLock();
 	}
 });
 canvas.addEventListener('click', (e) => {
-	if (mode === 'walk') {
+	if (S.mode === 'walk') {
 		requestWalkPointerLock();
 		return;
 	}
-	if (mode !== 'overview' || travel) return;
+	if (S.mode !== 'overview' || S.travel) return;
 	const rect = canvas.getBoundingClientRect();
 	mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
 	mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -12318,24 +12304,24 @@ canvas.addEventListener('click', (e) => {
 });
 document.addEventListener('pointerlockchange', () => {
 	player.locked = document.pointerLockElement === canvas;
-	walkDragLook = false;
+	S.walkDragLook = false;
 });
 document.addEventListener('mousemove', (e) => {
-	if (mode !== 'walk') return;
+	if (S.mode !== 'walk') return;
 	if (player.locked) {
 		applyWalkMouseDelta(e.movementX, e.movementY);
 		return;
 	}
-	if (walkDragLook) {
-		const dx = e.clientX - walkLastX,
-			dy = e.clientY - walkLastY;
-		walkLastX = e.clientX;
-		walkLastY = e.clientY;
+	if (S.walkDragLook) {
+		const dx = e.clientX - S.walkLastX,
+			dy = e.clientY - S.walkLastY;
+		S.walkLastX = e.clientX;
+		S.walkLastY = e.clientY;
 		applyWalkMouseDelta(dx, dy);
 	}
 });
-document.addEventListener('mouseup', () => (walkDragLook = false));
-window.addEventListener('blur', () => (walkDragLook = false));
+document.addEventListener('mouseup', () => (S.walkDragLook = false));
+window.addEventListener('blur', () => (S.walkDragLook = false));
 document.addEventListener('keydown', (e) => {
 	const k = e.key.toLowerCase();
 	keys[k] = true;
@@ -12353,7 +12339,7 @@ function canMove(x, z) {
 	return true;
 }
 function updateWalk(dt) {
-	if (mode !== 'walk' || travel) return;
+	if (S.mode !== 'walk' || S.travel) return;
 	const moving = keys.w || keys.s || keys.a || keys.d;
 	const speed = (keys.shift ? 6.1 : 3.35) * dt;
 	let f = (keys.w ? 1 : 0) - (keys.s ? 1 : 0),
@@ -12370,9 +12356,9 @@ function updateWalk(dt) {
 		if (canMove(player.pos.x, nz)) player.pos.z = nz;
 	}
 	const here = roomContainingWalkPoint(player.pos.x, player.pos.z);
-	if (here && walkCompositionReady(here) && walkCompositionRoomId !== here.id)
+	if (here && walkCompositionReady(here) && S.walkCompositionRoomId !== here.id)
 		applyWalkConversationComposition(here, false);
-	if (!here) walkCompositionRoomId = null;
+	if (!here) S.walkCompositionRoomId = null;
 	const bob = moving ? Math.sin(performance.now() * 0.01 * (keys.shift ? 1.25 : 1)) * 0.022 : 0;
 	camera.position.copy(player.pos);
 	camera.position.y += bob;
@@ -12463,7 +12449,7 @@ function animate(now) {
 	updatePerfFloor(dt);
 	if (
 		!JOURNEY.cameraFollow &&
-		(mode === 'overview' || (mode === 'guided' && activeRoom && !travel))
+		(S.mode === 'overview' || (S.mode === 'guided' && S.activeRoom && !S.travel))
 	)
 		orbit.update();
 	renderOperatorLiveFeeds(now);
