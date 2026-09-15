@@ -5,12 +5,12 @@
    (task 6's other module) — `personFigure`/`setNpcRole`/`poseCharacter`/`faceNpcToward`/
    `npcBubble`/`bubbleVis` are owned there and imported back here. A handful of symbols stay
    owned by main.js — `JOURNEY` (future journey module, task 9),
-   `ROOM_CAST`/`doorPoint`/`setDoorTarget`/`journeyActorRoom`/`corridorNodesFromHub`/
-   `shortestCorridorRoute`/`shortestCorridorRouteFromPosition`/`makePolylineCurve`/`doors`
-   (walk/corridor routing, task 8, and still-resident journey state) — because other
+   `ROOM_CAST`/`journeyActorRoom`/`doors` (still-resident journey state) — because other
    still-resident systems read or write them too, so main.js exports them rather than
    duplicating that state here. `setupAmbulance` moved to ./equipment.js in task 7 and is
-   imported from there instead. */
+   imported from there instead. `doorPoint`/`setDoorTarget`/`corridorNodesFromHub`/
+   `shortestCorridorRoute`/`shortestCorridorRouteFromPosition`/`makePolylineCurve` moved to
+   ./walk.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
 import { zeroY } from './helpers.js';
 import { scene, camera } from './scene.js';
@@ -27,18 +27,14 @@ import {
 	bubbleVis
 } from './npc.js';
 import {
-	JOURNEY,
-	roomById,
-	ROOM_CAST,
-	doors,
 	doorPoint,
 	setDoorTarget,
-	journeyActorRoom,
 	corridorNodesFromHub,
 	shortestCorridorRoute,
 	shortestCorridorRouteFromPosition,
 	makePolylineCurve
-} from './main.js';
+} from './walk.js';
+import { JOURNEY, roomById, ROOM_CAST, doors, journeyActorRoom } from './main.js';
 import { setupAmbulance } from './equipment.js';
 
 export const movers = [];

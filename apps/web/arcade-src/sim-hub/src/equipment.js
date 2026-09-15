@@ -2,23 +2,22 @@
    drop-off choreography, operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
    status displays, the LINAC-head/engineering wall stations, and Phase-5 wayfinding signage.
    Verbatim extractions from main.js. A handful of symbols stay owned by main.js because other
-   still-resident systems (the journey/patient state machine — task 9 — and the walk-mode
-   interaction registry) read or write them too: `JOURNEY`/`ROOM_WORKFLOW`/`MIA_SIM_SETUP`/
-   `currentJourneyMeta`/`journeyNextLabel`/`updateJourneyUI`/`roomElapsedLabel`/
-   `workflowTransitions`/`journeySpeech` (journey narrative state consumed by `workflowState`
-   and `updateWorkflowTransitions`), `player` (walk-mode position read by
-   `updateClinicalEquipment`), `roomById`/`registerInteractable`/`PRIMARY_PATIENTS`/`doors`/
-   `setDoorTarget` (already exported from main.js per earlier tasks), and
-   `openLinacHeadLab`/`lhPreviewTexture`/`LINAC_HEAD_LAB` (the future LINAC-head-lab dialog
-   module, still resident in main.js, referenced by `buildLinacHeadWallStation`), and
-   `showEquipmentPanel` (the still-resident equipment detail dialog, opened by
-   `buildClinicalEquipmentLayer`'s interaction callback). Conversely
+   still-resident systems (the journey/patient state machine, task 9) read or write them too:
+   `JOURNEY`/`ROOM_WORKFLOW`/`MIA_SIM_SETUP`/`currentJourneyMeta`/`journeyNextLabel`/
+   `updateJourneyUI`/`roomElapsedLabel`/`workflowTransitions`/`journeySpeech` (journey narrative
+   state consumed by `workflowState` and `updateWorkflowTransitions`), `player` (walk-mode
+   position read by `updateClinicalEquipment`), and `roomById`/`PRIMARY_PATIENTS`/`doors`
+   (already exported from main.js per earlier tasks). `registerInteractable` and
+   `openLinacHeadLab`/`lhPreviewTexture`/`LINAC_HEAD_LAB`/`showEquipmentPanel` (the LINAC-head-lab
+   dialog and equipment detail panel, referenced by `buildLinacHeadWallStation`/
+   `buildClinicalEquipmentLayer`'s interaction callbacks) moved to ./interact.js in task 8 and
+   are imported from there instead; `setDoorTarget` moved to ./walk.js in task 8. Conversely
    `CT_COUCH`/`ROOM_CLOCKS` (mutated by ./props.js furnishing) and
    `EQUIPMENT_BY_ID`/`EQUIPMENT_BY_ROOM`/`EQUIPMENT_EXPLORED`/`EQUIPMENT_SPECS`/
    `CLINICAL_FOCUS`/`setClinicalFocus`/`clearClinicalFocus`/`equipmentRoomName`/
-   `flashCtScanner`/`pulseCtObject`/`workflowState` (read by main.js's still-resident
-   equipment panel, CT QA console, and journey sequence) are exported here and imported back
-   into main.js. */
+   `flashCtScanner`/`pulseCtObject`/`workflowState` (read by main.js's still-resident CT QA
+   console/journey sequence and by ./interact.js's equipment panel) are exported here and
+   imported back into those. */
 import * as THREE from 'three';
 import { S } from './state.js';
 import {
@@ -34,12 +33,18 @@ import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor 
 import { personFigure, faceAlong, poseCharacter } from './npc.js';
 import { advanceRoute, advancePed, walkSwing } from './npc-behavior.js';
 import {
-	roomById,
 	registerInteractable,
+	openLinacHeadLab,
+	lhPreviewTexture,
+	LINAC_HEAD_LAB,
+	showEquipmentPanel
+} from './interact.js';
+import { setDoorTarget } from './walk.js';
+import {
+	roomById,
 	PRIMARY_PATIENTS,
 	JOURNEY,
 	doors,
-	setDoorTarget,
 	player,
 	ROOM_WORKFLOW,
 	currentJourneyMeta,
@@ -48,11 +53,7 @@ import {
 	updateJourneyUI,
 	roomElapsedLabel,
 	workflowTransitions,
-	journeySpeech,
-	openLinacHeadLab,
-	lhPreviewTexture,
-	LINAC_HEAD_LAB,
-	showEquipmentPanel
+	journeySpeech
 } from './main.js';
 
 const PHASE4_DISPLAYS = {};

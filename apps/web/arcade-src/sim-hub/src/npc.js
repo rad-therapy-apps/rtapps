@@ -3,23 +3,17 @@
    facing helpers, and the department cast placement (`departmentStaff`). Verbatim extractions
    from main.js. `registerDutyActor`/`registerNpcExchange` are duty/exchange registries owned
    by ./npc-behavior.js (task 6's companion module) and are imported back for use inside
-   `departmentStaff`. `STAFF_GUIDES`/`ROOM_CAST`/`PRIMARY_NPCS`/`PRIMARY_PATIENTS` and
-   `roomById`/`registerInteractable` stay owned by main.js — they're read/written by
-   still-resident journey (task 9) and walk/interact (task 8) systems too — so main.js exports
-   them rather than duplicating that state here. */
+   `departmentStaff`. `ROOM_CAST`/`PRIMARY_NPCS`/`PRIMARY_PATIENTS` and `roomById` stay owned by
+   main.js — they're read/written by still-resident journey (task 9) systems too — so main.js
+   exports them rather than duplicating that state here. `STAFF_GUIDES`/`registerInteractable`
+   moved to ./interact.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers.js';
 import { scene, camera } from './scene.js';
 import { registerDutyActor, registerNpcExchange } from './npc-behavior.js';
-import {
-	STAFF_GUIDES,
-	ROOM_CAST,
-	PRIMARY_NPCS,
-	PRIMARY_PATIENTS,
-	roomById,
-	registerInteractable
-} from './main.js';
+import { STAFF_GUIDES, registerInteractable } from './interact.js';
+import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main.js';
 
 export function personFigure(top = 0x5e8fb2, bottom = 0x394651, skin = 0xf0c7a3, opts = {}) {
 	const g = new THREE.Group(),

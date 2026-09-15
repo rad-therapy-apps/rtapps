@@ -2,17 +2,19 @@
    clinical furniture, signage, safety equipment, wall displays, and equipment shells (chairs,
    desks, exam tables, monitors, dispensers, the CT/LINAC-shell objects, etc). Verbatim
    extractions from main.js. A handful still reach back into main.js for symbols owned by
-   modules not yet extracted: `add`/`MAT` (shared scene-building helpers), `registerInteractable`
-   (the walk-mode interaction registry), and `openKioskDialog` (the wayfinding UI) — main.js
-   exports them rather than duplicating that state here. `personFigure` moved to ./npc.js in
-   task 6 and is imported from there instead. `CT_COUCH`/`ROOM_CLOCKS` (mutable state read/
-   written by the still-resident furnishing calls here and by the clock/CT-couch update loops)
-   moved to ./equipment.js in task 7 and are imported from there instead. */
+   modules not yet extracted: `add`/`MAT` (shared scene-building helpers) — main.js exports them
+   rather than duplicating that state here. `personFigure` moved to ./npc.js in task 6 and is
+   imported from there instead. `CT_COUCH`/`ROOM_CLOCKS` (mutable state read/written by the
+   still-resident furnishing calls here and by the clock/CT-couch update loops) moved to
+   ./equipment.js in task 7 and are imported from there instead. `registerInteractable` (the
+   walk-mode interaction registry) and `openKioskDialog` (the wayfinding UI) moved to
+   ./interact.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
 import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers.js';
 import { scene } from './scene.js';
 import { personFigure } from './npc.js';
-import { add, MAT, registerInteractable, openKioskDialog } from './main.js';
+import { add, MAT } from './main.js';
+import { registerInteractable, openKioskDialog } from './interact.js';
 import { CT_COUCH, ROOM_CLOCKS } from './equipment.js';
 
 export function lampPost(x, z, h = 4.4) {

@@ -2,13 +2,13 @@
    handling, adaptive perf floor, and ambient audio. Verbatim extractions from main.js —
    the top-of-script scene/camera/renderer/orbit/label-renderer setup plus the hemisphere+sun
    lights, `resize`, `PERF_FLOOR`/`updatePerfFloor`, and `AMBIENCE`/`initAmbience`/
-   `ambienceProfile`/`updateAmbience`. `toast` is still owned by main.js (UI toast widget)
-   and imported back here for the perf-floor "Reduced graphics" message. */
+   `ambienceProfile`/`updateAmbience`. `toast` is owned by ./interact.js (task 8's UI toast
+   widget) and imported back here for the perf-floor "Reduced graphics" message. */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { S } from './state.js';
-import { toast } from './main.js';
+import { toast } from './interact.js';
 
 export const canvas = document.getElementById('scene');
 export const renderer = new THREE.WebGLRenderer({

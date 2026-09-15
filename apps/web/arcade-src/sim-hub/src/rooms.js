@@ -6,12 +6,12 @@
    because other still-resident systems (walk-mode collision/raycasting, the door-open/close
    animation loop, the future npc/journey modules) read or write them too, or because
    they weren't part of this task's anchor list — and are imported back from there: `add`/`MAT`/
-   `C` (shared scene-building helpers/colors), `registerInteractable` (interaction registry),
-   `roomFloors`/`ceilings`/`doors` (walk-mode collision + door-animation state), `doorNormal`/
-   `doorCenter` (already exported from main.js per task 3's helpers.js), `roomById` (looks up
-   `ROOMS`, this module's own export). `buildEngineeringWallSchematics`/`buildLinacHeadWallStation`
-   (called from `furnish`) moved to ./equipment.js as part of task 7 and are imported from there
-   instead. */
+   `C` (shared scene-building helpers/colors), `roomFloors`/`ceilings`/`doors` (walk-mode
+   collision + door-animation state), `roomById` (looks up `ROOMS`, this module's own export).
+   `registerInteractable` (interaction registry) moved to ./interact.js and `doorNormal`/
+   `doorCenter` moved to ./walk.js as part of task 8. `buildEngineeringWallSchematics`/
+   `buildLinacHeadWallStation` (called from `furnish`) moved to ./equipment.js as part of task 7
+   and are imported from there instead. */
 import * as THREE from 'three';
 import {
 	box,
@@ -63,18 +63,9 @@ import {
 	emulatorLinacShell,
 	hdrSuite
 } from './props.js';
-import {
-	add,
-	MAT,
-	C,
-	registerInteractable,
-	roomFloors,
-	ceilings,
-	doors,
-	doorNormal,
-	doorCenter,
-	roomById
-} from './main.js';
+import { add, MAT, C, roomFloors, ceilings, doors, roomById } from './main.js';
+import { registerInteractable } from './interact.js';
+import { doorNormal, doorCenter } from './walk.js';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment.js';
 
 export const ROOMS = [
