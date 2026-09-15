@@ -37,7 +37,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    # Self-hosted "light" runner since 2026-09-14 (hosted minutes exhausted — see pr.yml).
+    # On a PERSISTENT runner the deploy key must not land in ~/.ssh (it would outlive the
+    # job and clobber the runner's own known_hosts), so all key material lives in
+    # $RUNNER_TEMP, which the runner wipes between jobs, and ssh/scp point at it with -i/-o.
+    runs-on: [self-hosted, light]
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v7
@@ -49,19 +53,20 @@ jobs:
       - if: steps.gate.outputs.configured == 'true'
         name: Configure SSH
         run: |
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > "$RUNNER_TEMP/deploy_key" && chmod 600 "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > "$RUNNER_TEMP/deploy_known_hosts"
       - if: steps.gate.outputs.configured == 'true'
         name: Copy compose files
         run: |
-          scp -r infra/compose.prod.yaml infra/compose.tunnel.yaml infra/Caddyfile.prod infra/backup infra/deploy \
+          scp -i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts" \
+            -r infra/compose.prod.yaml infra/compose.tunnel.yaml infra/Caddyfile.prod infra/backup infra/deploy \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/rtapps/"
       - if: steps.gate.outputs.configured == 'true'
         name: Deploy
         # GHCR_TOKEN travels only in the remote command's environment, never echoed or logged.
         run: |
-          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+          ssh -i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
             "GHCR_TOKEN='${{ secrets.GITHUB_TOKEN }}' GHCR_USER='${{ github.actor }}' \
              bash /opt/rtapps/deploy/deploy.sh '${{ inputs.image_tag }}'"
       - if: steps.gate.outputs.configured == 'true'
