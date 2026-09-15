@@ -20,6 +20,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 import { vehicleObject, monumentSign, privacyChangingNook } from './props.js';
 import {
+	C,
 	ROOMS,
 	buildRoom,
 	buildHubLobby,
@@ -86,7 +87,9 @@ import {
 	closeEquipmentPanel,
 	bindPanelToggle,
 	renderRoomList,
-	updateFacilityInfo
+	updateFacilityInfo,
+	procRenderSite,
+	procRefreshRelease
 } from './interact.js';
 import {
 	JOURNEY,
@@ -107,14 +110,6 @@ const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-export const C = {
-	front: 0x6fb6ff,
-	technical: 0xffb454,
-	clinical: 0x3fd6cf,
-	leadership: 0xb59bff,
-	vault: 0xff737b,
-	special: 0x72df9f
-};
 export const ROOM_GUIDES = {
 	lobby: 'lobby',
 	consult: 'consult',
@@ -719,6 +714,8 @@ workflowState('dosimetry', 'READY', 'Treatment planning workstations ready', '#4
 workflowState('physics', 'READY', 'Physics plan review available', '#42d5cf');
 applyJourneyPatientFocus();
 updateJourneyUI();
+procRenderSite();
+procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);

@@ -434,5 +434,3 @@ document.getElementById('holdClinical')?.addEventListener('click', () => {
 	}
 });
 document.getElementById('resetProcedures')?.addEventListener('click', procResetAll);
-procRenderSite();
-procRefreshRelease();

@@ -63,11 +63,19 @@ import {
 	emulatorLinacShell,
 	hdrSuite
 } from './props.js';
-import { add, MAT, C, roomFloors, ceilings, doors, roomById } from './main.js';
+import { add, MAT, roomFloors, ceilings, doors, roomById } from './main.js';
 import { registerInteractable } from './interact.js';
 import { doorNormal, doorCenter } from './walk.js';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment.js';
 
+export const C = {
+	front: 0x6fb6ff,
+	technical: 0xffb454,
+	clinical: 0x3fd6cf,
+	leadership: 0xb59bff,
+	vault: 0xff737b,
+	special: 0x72df9f
+};
 export const ROOMS = [
 	{
 		id: 'lobby',
