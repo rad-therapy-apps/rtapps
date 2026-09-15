@@ -491,6 +491,7 @@ export function requestWalkPointerLock() {
 	try {
 		const p = canvas.requestPointerLock?.();
 		if (p && typeof p.catch === 'function') p.catch(() => {});
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, error object intentionally unused
 	} catch (_) {
 		/* drag-look fallback remains available */
 	}

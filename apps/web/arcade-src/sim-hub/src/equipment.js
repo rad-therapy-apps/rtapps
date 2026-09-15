@@ -1475,6 +1475,7 @@ export function pulseCtObject(selector, ms = 900) {
 	setTimeout(() => {
 		try {
 			el.style.cssText = prev;
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 		} catch (e) {}
 	}, ms);
 }

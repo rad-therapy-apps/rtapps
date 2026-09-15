@@ -917,6 +917,7 @@ export function lhDraw() {
 	if (m === 'electron') labels.push(['applicator', 'Electron field definition']);
 	q.textAlign = 'left';
 	q.font = '700 15px Arial';
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy destructuring pattern, 'id' unused here
 	labels.forEach(([id, lab], i) => {
 		const y = 145 + i * 69;
 		q.fillStyle = '#415b67';
@@ -1300,6 +1301,7 @@ export function resetStaffDialogue(key) {
 	bubble('staff', g.name, g.intro);
 	const q = document.getElementById('sdQuestions');
 	q.innerHTML = '';
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, index 'i' unused here
 	g.questions.forEach(([question, answer], i) => {
 		const b = document.createElement('button');
 		b.textContent = question;

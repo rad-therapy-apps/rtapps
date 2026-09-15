@@ -30,7 +30,7 @@ export default defineConfig(
 	// same treatment as .prettierignore's `/arcade/` entry. Multi-file games' standalone
 	// script.js files would otherwise surface the legacy code's own unused-var etc. lint
 	// errors, which are out of scope to fix here (surgical-copy games, not authored code).
-	{ ignores: ['arcade/**', 'arcade-src/**'] }, // arcade-src ignore is temporary: lifted by the modularization plan's final task
+	{ ignores: ['arcade/**'] },
 	// Base rule sets: ESLint's own recommended rules, typescript-eslint's recommended rules, and
 	// eslint-plugin-svelte's recommended rules (includes svelte/no-navigation-without-resolve,
 	// svelte/no-at-html-tags at its default severity, etc).
@@ -69,6 +69,16 @@ export default defineConfig(
 			// ADR-0003's prose renderer must never use {@html} — that's the whole
 			// XSS-by-construction guarantee, so this rule is deliberately not left implicit.
 			'svelte/no-at-html-tags': 'error'
+		}
+	},
+	// sim-hub's extracted modules (#77 modularization): plain (non-TS) browser JS, so unlike the
+	// rest of the project no-undef is worth its keep here — it's what caught 3 ReferenceErrors
+	// left behind by the extraction. Re-enabled for just this tree rather than disabling it in the
+	// catch-all block above.
+	{
+		files: ['arcade-src/**/*.js'],
+		rules: {
+			'no-undef': 'error'
 		}
 	}
 );

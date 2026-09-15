@@ -537,6 +537,7 @@ function playIntercomAudio(text) {
 			beep(930, 0, 0.1, 0.028);
 			beep(710, 0.16, 0.12, 0.022);
 		}
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 	} catch (e) {}
 	try {
 		if ('speechSynthesis' in window) {
@@ -547,12 +548,14 @@ function playIntercomAudio(text) {
 			u.volume = 0.88;
 			window.speechSynthesis.speak(u);
 		}
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 	} catch (e) {}
 }
 function journeyIntercom(actor, text, ms = 12000) {
 	journeySpeech(actor, text, 'staff', ms);
 	playIntercomAudio(text);
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 function journeyAudioCue(actor, text, kind = 'staff', ms = 12000) {
 	journeySpeech(actor, text, kind, ms);
 	playIntercomAudio(text);

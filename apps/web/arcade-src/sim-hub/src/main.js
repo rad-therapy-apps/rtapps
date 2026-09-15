@@ -1,6 +1,8 @@
 import * as THREE from 'three';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { S } from './state.js';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 import { box, std, wall, makeDirectionalSign } from './helpers.js';
 import {
 	renderer,
@@ -15,6 +17,7 @@ import {
 	ambienceProfile,
 	updatePerfFloor
 } from './scene.js';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 import { vehicleObject, monumentSign, privacyChangingNook } from './props.js';
 import {
 	ROOMS,
@@ -397,6 +400,7 @@ scene.add(ground);
 export const roomFloors = [];
 export const ceilings = [];
 export const doors = new Map();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 function updateDoorNameLabels() {}
 
 buildExteriorAmbient();
@@ -443,6 +447,7 @@ async function toggleAmbience() {
 	}
 	try {
 		if (AMBIENCE.ctx.state !== 'running') await AMBIENCE.ctx.resume();
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, error object intentionally unused
 	} catch (e) {
 		toast(
 			'<b>Browser audio could not be started.</b><br>Click the page once and try Ambience again.'

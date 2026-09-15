@@ -135,12 +135,14 @@ function focusCtQaEquipment(ids, note) {
 		setTimeout(() => {
 			if (!JOURNEY?.active) clearClinicalFocus();
 		}, 1600);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 	} catch (e) {}
 }
 
 function qaToast(msg) {
 	try {
 		toast(`<b>CT QA</b> · ${msg}`);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 	} catch (e) {}
 }
 export function syncCtQaProgress() {

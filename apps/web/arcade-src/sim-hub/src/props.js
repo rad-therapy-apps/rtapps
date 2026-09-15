@@ -1075,6 +1075,7 @@ export function cctvCamera(g, x, y, z, rot = 0, tilt = -0.38) {
 		'Camera used by radiation therapists to continuously observe the patient from the protected control area during beam delivery.',
 		2.5
 	);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 	const head = new THREE.Group();
 	const bx = x + Math.sin(rot) * 0.18,
 		bz = z + Math.cos(rot) * 0.18;

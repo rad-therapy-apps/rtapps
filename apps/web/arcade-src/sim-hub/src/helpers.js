@@ -182,6 +182,7 @@ export function makeDoorHeaderSign(room, side, gap) {
 	else s.rotation.y = Math.PI / 2;
 	scene.add(s);
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 export function makeDoorNameLabel(room) {}
 
 export function makeLobbyEntranceSign(r) {
@@ -540,7 +541,9 @@ export function cleanPoints(pts) {
 
 export function escHtml(s) {
 	return String(s ?? '').replace(
+		// eslint-disable-next-line no-useless-escape -- legacy pattern, unnecessary but harmless escape of "
 		/[&<>\"']/g,
+		// eslint-disable-next-line no-useless-escape -- legacy pattern, unnecessary but harmless escape of "
 		(c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' })[c]
 	);
 }

@@ -464,6 +464,7 @@ export function buildDoor(room, side, gap) {
 	const type = doorTypeFor(room),
 		g = new THREE.Group();
 	const h = room.vault ? 3.15 : 2.55,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 		t = 0.09;
 	let cx = room.x,
 		cz = room.z;
@@ -735,6 +736,7 @@ export function lobbyWallWithGap(side, gap, h = 4.15, t = 0.18) {
 }
 
 export function buildLobbyEntrance(r) {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 	const side = 'zmax',
 		gap = 5.2,
 		h = 2.7,
@@ -795,10 +797,12 @@ export function buildHubLobby(room) {
 
 export function addVaultDoorwaySigns(room) {
 	const side = room.doorSide,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 		gap = 4.8,
 		normal = doorNormal(room),
 		tangent = side[0] === 'z' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1),
 		dc = doorCenter(room, 2.45);
+	// eslint-disable-next-line no-useless-assignment -- initial value always overwritten by the branch below; kept for parity with legacy pattern
 	let rot = 0;
 	if (side === 'zmin') rot = Math.PI;
 	else if (side === 'zmax') rot = 0;
@@ -816,6 +820,7 @@ export function addVaultDoorwaySigns(room) {
 	warningPlaque(scene, p2.x, 2.32, p2.z, rot, 'DO NOT ENTER', 'BEAM ON WHEN LIGHT IS ON');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 export function addRoomDecor(room, h) {
 	const g = new THREE.Group();
 	scene.add(g);
@@ -971,6 +976,7 @@ export function furnish(room) {
 			add(g, box(2.2, 0.62, 1.2, std(0x4a7a62, 0.9, 0.01), room.x + 1.0, 0.33, room.z + 1.0));
 			benchSeat(g, room.x + 9.2, room.z - 4.8, Math.PI / 2, 2.4, 0x82939a);
 			brochureRack(g, room.x + 8.8, room.z + 4.6, Math.PI / 2);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const wc = wheelchairObject(0.9, false);
 			wc.position.set(room.x - 8.5, 0, room.z + 5.3);
 			wc.rotation.y = 0.9;
@@ -982,6 +988,7 @@ export function furnish(room) {
 			monitor(g, room.x - 2.5, 1.35, room.z - 2.0);
 			chair(g, room.x + 2.3, room.z - 1.6);
 			brochureRack(g, room.x + 4.0, room.z - 2.8, Math.PI);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const iv = ivPoleObject(0.88);
 			iv.position.set(room.x + 3.0, 0, room.z + 1.4);
 			g.add(iv);
@@ -1007,9 +1014,11 @@ export function furnish(room) {
 			examTable(g, room.x - 2.6, room.z + 1.3);
 			examTable(g, room.x + 2.6, room.z + 1.3);
 			add(g, box(2.2, 0.95, 0.55, MAT.white, room.x, 0.55, room.z - 3));
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const mc = medCartObject(0.92, 0x7eaec1);
 			mc.position.set(room.x + 4.6, 0, room.z - 2.9);
 			g.add(mc);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const wc2 = wheelchairObject(0.9, false);
 			wc2.position.set(room.x - 5.4, 0, room.z - 3.1);
 			wc2.rotation.y = 0.2;
@@ -1024,6 +1033,7 @@ export function furnish(room) {
 			break;
 		case 'physics':
 			desk(g, room.x - 2.3, room.z - 2.2, 2, 0.75);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const atom = cyl(1.0, 1.0, 0.06, MAT.water, 34);
 			atom.rotation.x = Math.PI / 2;
 			atom.position.set(room.x + 1.7, 1.3, room.z + 0.5);
@@ -1039,6 +1049,7 @@ export function furnish(room) {
 			break;
 		case 'engineering':
 			desk(g, room.x - 1.3, room.z + 2.25, 3.8, 0.92, Math.PI / 10);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const head = cyl(0.65, 0.85, 1.25, MAT.metal);
 			head.position.set(room.x + 3.2, 1.25, room.z + 2.15);
 			add(g, head);
@@ -1049,6 +1060,7 @@ export function furnish(room) {
 			buildEngineeringWallSchematics(g, room);
 			break;
 		case 'qa':
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const tank = box(3.1, 1.55, 2.8, MAT.water, room.x, 1.0, room.z + 0.7);
 			add(g, tank);
 			registerInteractable(
@@ -1091,6 +1103,7 @@ export function furnish(room) {
 			wallClock(g, room.x + 2.9, 2.65, room.z - room.d / 2 + 0.13, 0);
 			sanitizerDispenser(g, room.x - 2.9, 1.55, room.z - room.d / 2 + 0.13, 0);
 			wallSpeaker(g, room.x + 3.75, 2.65, room.z, Math.PI / 2);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const ccart = medCartObject(0.88, 0x9db4bf);
 			ccart.position.set(room.x + 0.8, 0, room.z - 3.25);
 			g.add(ccart);
@@ -1102,11 +1115,13 @@ export function furnish(room) {
 			break;
 		case 'ctsim':
 			ctScanner(g, room);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const simwc = wheelchairObject(0.88, false);
 			simwc.position.set(room.x + 5.4, 0, room.z + 5.0);
 			simwc.rotation.y = -0.8;
 			g.add(simwc);
 			registerInteractable(simwc, 'Wheelchair', 'Patient mobility and transport equipment.');
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const simiv = ivPoleObject(0.9);
 			simiv.position.set(room.x + 4.7, 0, room.z + 3.9);
 			g.add(simiv);
@@ -1161,6 +1176,7 @@ export function furnish(room) {
 			);
 			wallShelf(g, room.x + 5.3, 1.35, room.z - 1.4, 1.2, Math.PI);
 			stool(g, room.x + 4.9, room.z - 1.5, 0x688596);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser1 = box(
 				0.12,
 				0.12,
@@ -1171,6 +1187,7 @@ export function furnish(room) {
 				room.z + 1.5
 			);
 			add(g, laser1);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser2 = box(
 				0.12,
 				0.12,
@@ -1181,6 +1198,7 @@ export function furnish(room) {
 				room.z + 1.5
 			);
 			add(g, laser2);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser3 = box(
 				0.12,
 				0.12,
@@ -1408,6 +1426,7 @@ export function furnish(room) {
 			break;
 		case 'hdr':
 			hdrSuite(g, room);
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const hcart = medCartObject(0.9, 0x90b98d);
 			hcart.position.set(room.x + 3.8, 0, room.z - 3.8);
 			g.add(hcart);
