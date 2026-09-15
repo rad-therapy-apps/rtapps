@@ -72,7 +72,8 @@ import {
 	updateNpcExchanges,
 	setActorSeated,
 	startActorHandoff,
-	updateHandoffTransitions
+	updateHandoffTransitions,
+	movementPathFor
 } from './npc-behavior.js';
 import {
 	buildClinicalEquipmentLayer,
