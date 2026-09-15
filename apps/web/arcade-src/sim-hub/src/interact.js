@@ -12,14 +12,13 @@
    extractions from main.js. `ROOM_APP_DOORS` (read only by `performInteraction`) and
    `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved functions) moved along
    with their sole consumers and are not exported. A handful of symbols stay owned by main.js
-   because still-resident journey/booking systems (task 9) read or write them too:
-   `roomById`/`player`/`doors` (already exported from main.js per earlier tasks),
-   `PROC_STATE`/`PROC_SITES` (also read/written by the still-resident CT-QA animation sequence
-   and top-level QA button wiring), `ROOM_GUIDES`/`HANDOFFS`/`focusTargetsForRoom`/
-   `focusConversationCamera`/`applyWalkConversationComposition`/`showCtQaDock`/
-   `syncCtQaProgress` (newly exported from main.js for this task). `setDoorTarget`/`doorCenter`/
-   `doorNormal`/`beginTravel`/`nearestDoor`/`setMode` are owned by ./walk.js (task 8's companion
-   module) and imported back here. */
+   because still-resident journey/booking systems read or write them too:
+   `roomById`/`player`/`doors`/`ROOM_GUIDES`/`HANDOFFS` (already exported from main.js per
+   earlier tasks — task 9 moved `focusTargetsForRoom`/`focusConversationCamera`/
+   `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES`/
+   `showCtQaDock`/`syncCtQaProgress` to ./sdk-bridge.js, both imported back here).
+   `setDoorTarget`/`doorCenter`/`doorNormal`/`beginTravel`/`nearestDoor`/`setMode` are owned by
+   ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
 import { S } from './state.js';
 import { camera, orbit } from './scene.js';
@@ -41,20 +40,13 @@ import {
 	nearestDoor,
 	setMode
 } from './walk.js';
+import { roomById, player, doors, ROOM_GUIDES, HANDOFFS } from './main.js';
+import { PROC_STATE, PROC_SITES, showCtQaDock, syncCtQaProgress } from './sdk-bridge.js';
 import {
-	roomById,
-	player,
-	doors,
-	PROC_STATE,
-	PROC_SITES,
-	ROOM_GUIDES,
-	HANDOFFS,
-	showCtQaDock,
-	syncCtQaProgress,
 	focusConversationCamera,
 	applyWalkConversationComposition,
 	focusTargetsForRoom
-} from './main.js';
+} from './journey.js';
 
 /* === Department orientation: staff roles and common patient questions === */
 export const STAFF_GUIDES = {

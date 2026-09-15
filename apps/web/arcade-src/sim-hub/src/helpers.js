@@ -3,14 +3,13 @@
    texture builders (sign/door-header/badge/workflow/engineering textures/architectural wall
    material), and small utilities (escHtml/zeroY/point helpers/later). A handful of these
    (wall, makeWallSign, makeDoorHeaderSign, makeLobbyEntranceSign, makeDirectionalSign, later)
-   still reach back for `scene` (now from ./scene.js, task 4) and `JOURNEY` (still from main.js —
-   owned by the future journey module) and `collider`/`doorCenter`/`doorNormal` (task 8's
-   ./walk.js). */
+   still reach back for `scene` (now from ./scene.js, task 4) and `JOURNEY` (owned by
+   ./journey.js, task 9) and `collider`/`doorCenter`/`doorNormal` (task 8's ./walk.js). */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { scene } from './scene.js';
 import { collider, doorCenter, doorNormal } from './walk.js';
-import { JOURNEY } from './main.js';
+import { JOURNEY } from './journey.js';
 
 export function std(c, r = 0.75, m = 0.03, o = {}) {
 	return new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: m, ...o });

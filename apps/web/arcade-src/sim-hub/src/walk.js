@@ -9,13 +9,13 @@
    extractions from main.js. `HUB`/`TREATMENT_JUNCTION_X` (corridor-routing constants used only
    here) and `colliders` (collision list read only by `canMove`/`collider`) moved along with
    their sole consumers and are not exported. A handful of symbols stay owned by main.js because
-   still-resident journey/booking systems (task 9) read or write them too, or because they're
-   entangled with the still-resident conversation-camera/journey-timing code:
-   `roomById`/`player`/`doors`/`ceilings`/`JOURNEY`/`updateJourneyUI` (already exported from
-   main.js per earlier tasks), `showCtQaDock`/`beginRoutePhase`/`beginEntryPhase`/
-   `focusTargetsForRoom`/`walkCompositionReady`/`applyWalkConversationComposition`/
-   `enableGuidedConversationComposition`/`showJourneyCheckinIntro`/`keys` (newly exported from
-   main.js for this task). `toast`/`disableRoomInspection`/`enableRoomInspection`/
+   still-resident journey/booking systems read or write them too, or because they're entangled
+   with the conversation-camera/journey-timing code: `roomById`/`player`/`doors`/`ceilings`/
+   `keys` (already exported from main.js per earlier tasks). `JOURNEY`/`updateJourneyUI`/
+   `beginRoutePhase`/`beginEntryPhase`/`focusTargetsForRoom`/`walkCompositionReady`/
+   `applyWalkConversationComposition`/`enableGuidedConversationComposition`/
+   `showJourneyCheckinIntro` moved to ./journey.js and `showCtQaDock` to ./sdk-bridge.js in
+   task 9, both imported back here. `toast`/`disableRoomInspection`/`enableRoomInspection`/
    `updateFacilityInfo`/`renderRoomList`/`updateRoomUI` are owned by ./interact.js (task 8's
    companion module) and imported back here. */
 import * as THREE from 'three';
@@ -23,23 +23,19 @@ import { S } from './state.js';
 import { camera, orbit, canvas } from './scene.js';
 import { ROOMS, corridorAnchor, doorLabel } from './rooms.js';
 import { cleanPoints } from './helpers.js';
+import { roomById, player, doors, ceilings, keys } from './main.js';
+import { showCtQaDock } from './sdk-bridge.js';
 import {
-	roomById,
-	player,
-	doors,
-	ceilings,
 	JOURNEY,
 	updateJourneyUI,
-	showCtQaDock,
 	beginRoutePhase,
 	beginEntryPhase,
 	focusTargetsForRoom,
 	walkCompositionReady,
 	applyWalkConversationComposition,
 	enableGuidedConversationComposition,
-	showJourneyCheckinIntro,
-	keys
-} from './main.js';
+	showJourneyCheckinIntro
+} from './journey.js';
 import {
 	toast,
 	disableRoomInspection,

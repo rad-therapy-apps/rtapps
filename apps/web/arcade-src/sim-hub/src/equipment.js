@@ -1,13 +1,13 @@
 /* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons, the ambulance
    drop-off choreography, operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
    status displays, the LINAC-head/engineering wall stations, and Phase-5 wayfinding signage.
-   Verbatim extractions from main.js. A handful of symbols stay owned by main.js because other
-   still-resident systems (the journey/patient state machine, task 9) read or write them too:
-   `JOURNEY`/`ROOM_WORKFLOW`/`MIA_SIM_SETUP`/`currentJourneyMeta`/`journeyNextLabel`/
-   `updateJourneyUI`/`roomElapsedLabel`/`workflowTransitions`/`journeySpeech` (journey narrative
-   state consumed by `workflowState` and `updateWorkflowTransitions`), `player` (walk-mode
-   position read by `updateClinicalEquipment`), and `roomById`/`PRIMARY_PATIENTS`/`doors`
-   (already exported from main.js per earlier tasks). `registerInteractable` and
+   Verbatim extractions from main.js. `player` (walk-mode position read by
+   `updateClinicalEquipment`) and `roomById`/`PRIMARY_PATIENTS`/`doors` stay owned by main.js
+   (already exported from main.js per earlier tasks). `JOURNEY`/`ROOM_WORKFLOW`/`MIA_SIM_SETUP`/
+   `currentJourneyMeta`/`journeyNextLabel`/`updateJourneyUI`/`roomElapsedLabel`/
+   `workflowTransitions`/`journeySpeech` (journey narrative state consumed by `workflowState` and
+   `updateWorkflowTransitions`) moved to ./journey.js in task 9 and are imported back here.
+   `registerInteractable` and
    `openLinacHeadLab`/`lhPreviewTexture`/`LINAC_HEAD_LAB`/`showEquipmentPanel` (the LINAC-head-lab
    dialog and equipment detail panel, referenced by `buildLinacHeadWallStation`/
    `buildClinicalEquipmentLayer`'s interaction callbacks) moved to ./interact.js in task 8 and
@@ -40,12 +40,9 @@ import {
 	showEquipmentPanel
 } from './interact.js';
 import { setDoorTarget } from './walk.js';
+import { roomById, PRIMARY_PATIENTS, doors, player } from './main.js';
 import {
-	roomById,
-	PRIMARY_PATIENTS,
 	JOURNEY,
-	doors,
-	player,
 	ROOM_WORKFLOW,
 	currentJourneyMeta,
 	MIA_SIM_SETUP,
@@ -54,7 +51,7 @@ import {
 	roomElapsedLabel,
 	workflowTransitions,
 	journeySpeech
-} from './main.js';
+} from './journey.js';
 
 const PHASE4_DISPLAYS = {};
 function paintWorkflowDisplay(d, status = 'READY', rows = [], accent = '#42d5cf') {
