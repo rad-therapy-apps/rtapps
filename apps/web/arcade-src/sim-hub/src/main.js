@@ -79,6 +79,8 @@ import {
 	bubble
 } from './npc.js';
 import {
+	movers,
+	interactionScenes,
 	updateMovers,
 	addMovingActors,
 	updateDutyAnimations,

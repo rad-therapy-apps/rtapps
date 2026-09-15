@@ -40,9 +40,9 @@ import {
 	makePolylineCurve
 } from './main.js';
 
-const movers = [];
-const dutyActors = [],
-	interactionScenes = [];
+export const movers = [];
+const dutyActors = [];
+export const interactionScenes = [];
 export function registerDutyActor(group, mode = 'idle', offset = Math.random()) {
 	dutyActors.push({ group, mode, offset });
 	return group;
