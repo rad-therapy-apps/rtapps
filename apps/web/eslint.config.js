@@ -78,7 +78,21 @@ export default defineConfig(
 	{
 		files: ['arcade-src/**/*.js'],
 		rules: {
-			'no-undef': 'error'
+			'no-undef': 'error',
+			// linac-ct's mechanical move (#77 phase 2, PR1) carries a `// @ts-nocheck -- <reason>`
+			// first-line header on each verbatim-moved legacy script (removed at TS conversion, PR4).
+			// `allow-with-description` permits only the described form, not a bare @ts-nocheck.
+			'@typescript-eslint/ban-ts-comment': ['error', { 'ts-nocheck': 'allow-with-description' }]
+		}
+	},
+	// Bundle smoke script (#77 phase 2, PR1), copied verbatim from
+	// docs/plans/2026-09-17-arcade-smoke.mjs (never linted there): its DOM/WebGL stub API
+	// surface intentionally leaves several interface-required callback params unused,
+	// prefixed with `_` by convention.
+	{
+		files: ['scripts/arcade-smoke.mjs'],
+		rules: {
+			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
 		}
 	}
 );

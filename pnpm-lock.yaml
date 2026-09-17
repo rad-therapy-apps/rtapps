@@ -55,6 +55,12 @@ importers:
       three:
         specifier: 0.160.0
         version: 0.160.0
+      three-ct:
+        specifier: npm:three@0.163.0
+        version: three@0.163.0
+      three-linac:
+        specifier: npm:three@0.160.1
+        version: three@0.160.1
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -2051,6 +2057,12 @@ packages:
 
   three@0.160.0:
     resolution: {integrity: sha512-DLU8lc0zNIPkM7rH5/e1Ks1Z8tWCGRq6g8mPowdDJpw1CFBJMU7UoJjC6PefXW7z//SSl0b2+GCw14LB+uDhng==}
+
+  three@0.160.1:
+    resolution: {integrity: sha512-Bgl2wPJypDOZ1stAxwfWAcJ0WQf7QzlptsxkjYiURPz+n5k4RBDLsq+6f9Y75TYxn6aHLcWz+JNmwTOXWrQTBQ==}
+
+  three@0.163.0:
+    resolution: {integrity: sha512-HlMgCb2TF/dTLRtknBnjUTsR8FsDqBY43itYop2+Zg822I+Kd0Ua2vs8CvfBVefXkBdNDrLMoRTGCIIpfCuDew==}
 
   tiny-glob@0.2.9:
     resolution: {integrity: sha512-g/55ssRPUjShh+xkfx9UPDXqhckHEsHr4Vd9zX55oSdGZc/MD0m3sferOkwWtp98bv+kcVfEHtRJgBVJzelrzg==}
@@ -4170,6 +4182,10 @@ snapshots:
       - '@typescript-eslint/types'
 
   three@0.160.0: {}
+
+  three@0.160.1: {}
+
+  three@0.163.0: {}
 
   tiny-glob@0.2.9:
     dependencies:

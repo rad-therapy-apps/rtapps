@@ -32,5 +32,6 @@ apps/web/playwright-report/
 coverage/
 .coverage
 apps/web/arcade/sim-hub/
+apps/web/arcade/linac-ct/
 # pnpm store created by the web container
 .pnpm-store/
