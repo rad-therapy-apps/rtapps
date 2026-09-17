@@ -1173,7 +1173,7 @@ def test_seed_simulator_arcade_directories_exist_on_disk() -> None:
     # build output produced by `pnpm --filter web build`, so a fresh checkout only carries
     # the source tree — that source is what guarantees the served app exists.
     assert (repo_root / "apps/web/arcade-src/sim-hub/index.html").is_file()
-    assert (repo_root / "apps/web/arcade/linac-ct/index.html").is_file()
+    assert (repo_root / "apps/web/arcade-src/linac-ct/index.html").is_file()
     assert (repo_root / "apps/web/arcade/three-point-setup/index.html").is_file()
     assert (repo_root / "apps/web/arcade/linac-training-beginner/index.html").is_file()
     assert (repo_root / "apps/web/arcade/linac-training-intermediate/index.html").is_file()
