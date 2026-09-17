@@ -2,519 +2,283 @@
 import * as THREE from 'three-linac';
 import { OrbitControls } from 'three-linac/examples/jsm/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three-linac/addons/geometries/RoundedBoxGeometry.js';
+import { S } from './state.js';
+import {
+	viewerContainer,
+	taskSelect,
+	startQuizButton,
+	quizArea,
+	quizQuestionElem,
+	quizOptionsElem,
+	submitAnswerButton,
+	messageArea,
+	balanceDisplay,
+	enhancementStoreElem,
+	resetButton,
+	treatmentCaseSelect,
+	loadTreatmentCaseBtn,
+	nextTreatmentCaseBtn,
+	ctSuiteLaunchButton,
+	ctSuitePanel,
+	ctSuiteClose,
+	igrtLaunchButton,
+	igrtPanel,
+	igrtClose,
+	igrtNewSetup,
+	igrtAcquire,
+	igrtVerify,
+	motionLaunchButton,
+	motionPanel,
+	motionClose,
+	motionAcquire,
+	motionVerify,
+	motionHold,
+	motionRelease,
+	motionReset,
+	motionRecheck,
+	motionWaveCanvas,
+	motionGateLow,
+	motionGateHigh,
+	motionDibhTarget,
+	motionDibhTolerance,
+	adaptiveLaunchButton,
+	adaptivePanel,
+	adaptiveClose,
+	adaptiveAssess,
+	adaptiveCompare,
+	adaptiveApprove,
+	oisLaunchButton,
+	oisPanel,
+	oisClose,
+	oisNote,
+	oisTherapist,
+	oisReviewCheck,
+	oisOverrideCard,
+	oisOverrideSummary,
+	oisOverrideReviewCheck,
+	oisSignOff,
+	adaptiveNextFraction,
+	adaptiveResetCourse,
+	adaptiveDoseCanvas,
+	srsLaunchButton,
+	srsPanel,
+	srsClose,
+	srsClearanceCheck,
+	srsDryRun,
+	srsVerifyTimeout,
+	specialSetupLaunchButton,
+	specialSetupPanel,
+	specialSetupClose,
+	specialSetupContent,
+	deliveryLaunchButton,
+	immobilizationLaunchButton,
+	immobilizationPanel,
+	immobilizationClose,
+	immobilizationShelf,
+	immobilizationTableDrop,
+	immobilizationPlacedList,
+	immobilizationVerify,
+	immobilizationReset,
+	deliveryPanel,
+	deliveryClose,
+	deliveryRecheck,
+	deliveryArm,
+	clearanceOverrideCard,
+	clearanceOverrideReason,
+	clearanceOverrideRationale,
+	clearanceOverrideAck,
+	clearanceOverrideApply,
+	clearanceOverrideWithdraw,
+	clearanceOverrideStatus,
+	deliveryStart,
+	deliveryHold,
+	deliveryTerminate,
+	deliveryFieldSelect,
+	deliveryCompleteSession,
+	deliveryReviewCharges,
+	chargeCapturePanel,
+	chargeCaptureClose,
+	chargeTreatmentCode,
+	chargeIgrtHandling,
+	chargeVerify,
+	chargePost,
+	loadingScreen,
+	tabButtons,
+	tabContentPanels,
+	bottomMachineControls,
+	gantryRotatePlusButton,
+	gantryRotateMinusButton,
+	collimatorRotatePlusButton,
+	collimatorRotateMinusButton,
+	pendantMotionEnable,
+	couchUpButton,
+	couchDownButton,
+	couchInButton,
+	couchOutButton,
+	couchLeftButton,
+	couchRightButton,
+	couchRollPlusButton,
+	couchRollMinusButton,
+	couchPitchPlusButton,
+	couchPitchMinusButton,
+	couchYawPlusButton,
+	couchYawMinusButton,
+	couchTreatmentAnglePlusButton,
+	couchTreatmentAngleMinusButton,
+	jawsOpenButton,
+	jawsCloseButton,
+	jawX1InButton,
+	jawX1OutButton,
+	jawX2InButton,
+	jawX2OutButton,
+	jawY1InButton,
+	jawY1OutButton,
+	jawY2InButton,
+	jawY2OutButton,
+	mlcOpenButton,
+	mlcCloseButton,
+	mlcShapeButton,
+	detectorToggleButton,
+	beamOnButton,
+	lasersToggleButton,
+	odiToggleButton,
+	bonusChallengeButton,
+	roomLightsToggleButton,
+	viewVaultButton,
+	viewControlRoomButton,
+	kvToggleButton,
+	operatorConsolePanel,
+	consoleActivePatient,
+	consoleActiveField,
+	consoleRoomStatus,
+	consoleMotionStatus,
+	consoleQueue,
+	consoleMotionEnable,
+	consoleImmoButton,
+	consoleIGRTButton,
+	consoleDeliveryButton,
+	consoleOISButton,
+	consoleGantryMinus,
+	consoleGantryPlus,
+	consoleCollMinus,
+	consoleCollPlus,
+	consoleVrtMinus,
+	consoleVrtPlus,
+	consoleLngMinus,
+	consoleLngPlus,
+	consoleLatMinus,
+	consoleLatPlus,
+	consoleKV,
+	consoleMV,
+	consoleLasers,
+	consoleBeamVisual,
+	consoleRoomLights,
+	consoleTravelVault,
+	consoleTravelControl,
+	consoleJawsClose,
+	consoleJawsOpen,
+	consoleMLCClose,
+	consoleMLCOpen,
+	consoleMLCShape,
+	consoleOdi,
+	consoleJawX1In,
+	consoleJawX1Out,
+	consoleJawX2In,
+	consoleJawX2Out,
+	consoleJawY1In,
+	consoleJawY1Out,
+	consoleJawY2In,
+	consoleJawY2Out,
+	consoleRollMinus,
+	consoleRollPlus,
+	consolePitchMinus,
+	consolePitchPlus,
+	consoleYawMinus,
+	consoleYawPlus,
+	consoleTableMinus,
+	consoleTablePlus,
+	consoleReadoutGantry,
+	consoleReadoutColl,
+	consoleReadoutJaws,
+	consoleReadoutMLC,
+	consoleCameraAStatus,
+	consoleCameraAInfo,
+	consoleCameraBStatus,
+	consoleCameraBInfo,
+	consoleCameraCStatus,
+	consoleCameraCInfo,
+	consolePatientClock,
+	consolePatientRefName,
+	consolePatientRefSubtitle,
+	consoleRefMRN,
+	consoleRefFraction,
+	consoleRefPosition,
+	consoleRefEnergy,
+	consoleRefTechnique,
+	consoleRefField,
+	consolePlanGantry,
+	consolePlanColl,
+	consolePlanJaws,
+	consolePlanMLC,
+	consolePlanImaging,
+	consolePlanCouch,
+	consoleImmoSummary,
+	consoleImmoList,
+	consoleBeamStatusChip,
+	consoleDoorStatusChip,
+	consoleIGRTStatusChip,
+	consoleLightsStatusChip,
+	cameraSceneA,
+	cameraSceneB,
+	cameraSceneC,
+	internalViewButton,
+	beamStagePrevButton,
+	beamStageNextButton,
+	asmBeamButton,
+	asmStandButton,
+	asmElectronButton,
+	asmAccessoryButton,
+	internalOverlay,
+	internalStageTitle,
+	internalStageDesc,
+	internalStageCounter,
+	bevInset,
+	bevCollapseButton,
+	bevFieldGroup,
+	bevFieldLight,
+	bevMlcLeaves,
+	bevJawMasks,
+	bevJawOutline
+} from './dom.js';
 
 // RTApps (plan 4c): prefetch the hub's player URL once; the back-link control only
 // renders/enables when it resolves (activity unseeded/unpublished, or offline leaves
 // HUB_URL null and the button stays disabled instead of going dead). Same pattern as
 // the hub's own door-fix precedent (commit 4cc341a).
-let HUB_URL = null;
 if (window.RTApps) {
 	window.RTApps.activityUrl('sim-hub-qa')
 		.then(function (url) {
-			HUB_URL = url;
+			S.HUB_URL = url;
 			const backBtn = document.getElementById('rtappsBackBtn');
 			if (backBtn) backBtn.disabled = false;
 		})
 		.catch(function () {});
 }
 document.getElementById('rtappsBackBtn')?.addEventListener('click', () => {
-	if (HUB_URL) window.top.location.href = HUB_URL;
+	if (S.HUB_URL) window.top.location.href = S.HUB_URL;
 });
 
-// --- DOM Elements ---
-const viewerContainer = document.getElementById('viewerContainer');
-const taskSelect = document.getElementById('taskSelect');
-const startQuizButton = document.getElementById('startQuizButton');
-const quizArea = document.getElementById('quizArea');
-const quizQuestionElem = document.getElementById('quizQuestion');
-const quizOptionsElem = document.getElementById('quizOptions');
-const submitAnswerButton = document.getElementById('submitAnswerButton');
-const messageArea = document.getElementById('messageArea');
-const balanceDisplay = document.getElementById('balanceDisplay');
-const enhancementStoreElem = document.getElementById('enhancementStore');
-const resetButton = document.getElementById('resetButton');
-const treatmentCaseSelect = document.getElementById('treatmentCaseSelect');
-const loadTreatmentCaseBtn = document.getElementById('loadTreatmentCaseBtn');
-const nextTreatmentCaseBtn = document.getElementById('nextTreatmentCaseBtn');
-const ctSuiteLaunchButton = document.getElementById('ctSuiteLaunchButton');
-const ctSuitePanel = document.getElementById('ctSuitePanel');
-const ctSuiteClose = document.getElementById('ctSuiteClose');
-const igrtLaunchButton = document.getElementById('igrtLaunchButton');
-const igrtPanel = document.getElementById('igrtPanel');
-const igrtClose = document.getElementById('igrtClose');
-const igrtNewSetup = document.getElementById('igrtNewSetup');
-const igrtAcquire = document.getElementById('igrtAcquire');
-const igrtVerify = document.getElementById('igrtVerify');
-const motionLaunchButton = document.getElementById('motionLaunchButton');
-const motionPanel = document.getElementById('motionPanel');
-const motionClose = document.getElementById('motionClose');
-const motionAcquire = document.getElementById('motionAcquire');
-const motionVerify = document.getElementById('motionVerify');
-const motionHold = document.getElementById('motionHold');
-const motionRelease = document.getElementById('motionRelease');
-const motionReset = document.getElementById('motionReset');
-const motionRecheck = document.getElementById('motionRecheck');
-const motionWaveCanvas = document.getElementById('motionWaveCanvas');
-const motionGateLow = document.getElementById('motionGateLow');
-const motionGateHigh = document.getElementById('motionGateHigh');
-const motionDibhTarget = document.getElementById('motionDibhTarget');
-const motionDibhTolerance = document.getElementById('motionDibhTolerance');
-const adaptiveLaunchButton = document.getElementById('adaptiveLaunchButton');
-const adaptivePanel = document.getElementById('adaptivePanel');
-const adaptiveClose = document.getElementById('adaptiveClose');
-const adaptiveAssess = document.getElementById('adaptiveAssess');
-const adaptiveCompare = document.getElementById('adaptiveCompare');
-const adaptiveApprove = document.getElementById('adaptiveApprove');
-const oisLaunchButton = document.getElementById('oisLaunchButton');
-const oisPanel = document.getElementById('oisPanel');
-const oisClose = document.getElementById('oisClose');
-const oisNote = document.getElementById('oisNote');
-const oisTherapist = document.getElementById('oisTherapist');
-const oisReviewCheck = document.getElementById('oisReviewCheck');
-const oisOverrideCard = document.getElementById('oisOverrideCard');
-const oisOverrideSummary = document.getElementById('oisOverrideSummary');
-const oisOverrideReviewCheck = document.getElementById('oisOverrideReviewCheck');
-const oisSignOff = document.getElementById('oisSignOff');
-const adaptiveNextFraction = document.getElementById('adaptiveNextFraction');
-const adaptiveResetCourse = document.getElementById('adaptiveResetCourse');
-const adaptiveDoseCanvas = document.getElementById('adaptiveDoseCanvas');
-const srsLaunchButton = document.getElementById('srsLaunchButton');
-const srsPanel = document.getElementById('srsPanel');
-const srsClose = document.getElementById('srsClose');
-const srsClearanceCheck = document.getElementById('srsClearanceCheck');
-const srsDryRun = document.getElementById('srsDryRun');
-const srsVerifyTimeout = document.getElementById('srsVerifyTimeout');
-const specialSetupLaunchButton = document.getElementById('specialSetupLaunchButton');
-const specialSetupPanel = document.getElementById('specialSetupPanel');
-const specialSetupClose = document.getElementById('specialSetupClose');
-const specialSetupContent = document.getElementById('specialSetupContent');
-const deliveryLaunchButton = document.getElementById('deliveryLaunchButton');
-const immobilizationLaunchButton = document.getElementById('immobilizationLaunchButton');
-const immobilizationPanel = document.getElementById('immobilizationPanel');
-const immobilizationClose = document.getElementById('immobilizationClose');
-const immobilizationShelf = document.getElementById('immobilizationShelf');
-const immobilizationTableDrop = document.getElementById('immobilizationTableDrop');
-const immobilizationPlacedList = document.getElementById('immobilizationPlacedList');
-const immobilizationVerify = document.getElementById('immobilizationVerify');
-const immobilizationReset = document.getElementById('immobilizationReset');
-const deliveryPanel = document.getElementById('deliveryPanel');
-const deliveryClose = document.getElementById('deliveryClose');
-const deliveryRecheck = document.getElementById('deliveryRecheck');
-const deliveryArm = document.getElementById('deliveryArm');
-const clearanceOverrideCard = document.getElementById('clearanceOverrideCard');
-const clearanceOverrideReason = document.getElementById('clearanceOverrideReason');
-const clearanceOverrideRationale = document.getElementById('clearanceOverrideRationale');
-const clearanceOverrideAck = document.getElementById('clearanceOverrideAck');
-const clearanceOverrideApply = document.getElementById('clearanceOverrideApply');
-const clearanceOverrideWithdraw = document.getElementById('clearanceOverrideWithdraw');
-const clearanceOverrideStatus = document.getElementById('clearanceOverrideStatus');
-const deliveryStart = document.getElementById('deliveryStart');
-const deliveryHold = document.getElementById('deliveryHold');
-const deliveryTerminate = document.getElementById('deliveryTerminate');
-const deliveryFieldSelect = document.getElementById('deliveryFieldSelect');
-const deliveryCompleteSession = document.getElementById('deliveryCompleteSession');
-const deliveryReviewCharges = document.getElementById('deliveryReviewCharges');
-const chargeCapturePanel = document.getElementById('chargeCapturePanel');
-const chargeCaptureClose = document.getElementById('chargeCaptureClose');
-const chargeTreatmentCode = document.getElementById('chargeTreatmentCode');
-const chargeIgrtHandling = document.getElementById('chargeIgrtHandling');
-const chargeVerify = document.getElementById('chargeVerify');
-const chargePost = document.getElementById('chargePost');
-const loadingScreen = document.getElementById('loadingScreen');
-
-const tabButtons = document.querySelectorAll('.tab-button');
-const tabContentPanels = document.querySelectorAll('.tab-content-panel');
-
-const bottomMachineControls = document.getElementById('bottomMachineControls');
-const gantryRotatePlusButton = document.getElementById('gantryRotatePlusButton');
-const gantryRotateMinusButton = document.getElementById('gantryRotateMinusButton');
-const collimatorRotatePlusButton = document.getElementById('collimatorRotatePlusButton');
-const collimatorRotateMinusButton = document.getElementById('collimatorRotateMinusButton');
-const pendantMotionEnable = document.getElementById('pendantMotionEnable');
-const couchUpButton = document.getElementById('couchUpButton');
-const couchDownButton = document.getElementById('couchDownButton');
-const couchInButton = document.getElementById('couchInButton');
-const couchOutButton = document.getElementById('couchOutButton');
-const couchLeftButton = document.getElementById('couchLeftButton');
-const couchRightButton = document.getElementById('couchRightButton');
-const couchRollPlusButton = document.getElementById('couchRollPlusButton');
-const couchRollMinusButton = document.getElementById('couchRollMinusButton');
-const couchPitchPlusButton = document.getElementById('couchPitchPlusButton');
-const couchPitchMinusButton = document.getElementById('couchPitchMinusButton');
-const couchYawPlusButton = document.getElementById('couchYawPlusButton');
-const couchYawMinusButton = document.getElementById('couchYawMinusButton');
-const couchTreatmentAnglePlusButton = document.getElementById('couchTreatmentAnglePlusButton');
-const couchTreatmentAngleMinusButton = document.getElementById('couchTreatmentAngleMinusButton');
-const jawsOpenButton = document.getElementById('jawsOpenButton');
-const jawsCloseButton = document.getElementById('jawsCloseButton');
-const jawX1InButton = document.getElementById('jawX1InButton');
-const jawX1OutButton = document.getElementById('jawX1OutButton');
-const jawX2InButton = document.getElementById('jawX2InButton');
-const jawX2OutButton = document.getElementById('jawX2OutButton');
-const jawY1InButton = document.getElementById('jawY1InButton');
-const jawY1OutButton = document.getElementById('jawY1OutButton');
-const jawY2InButton = document.getElementById('jawY2InButton');
-const jawY2OutButton = document.getElementById('jawY2OutButton');
-const mlcOpenButton = document.getElementById('mlcOpenButton');
-const mlcCloseButton = document.getElementById('mlcCloseButton');
-const mlcShapeButton = document.getElementById('mlcShapeButton');
-const detectorToggleButton = document.getElementById('detectorToggleButton');
-const beamOnButton = document.getElementById('beamOnButton');
-const lasersToggleButton = document.getElementById('lasersToggleButton');
-const odiToggleButton = document.getElementById('odiToggleButton');
-const bonusChallengeButton = document.getElementById('bonusChallengeButton');
-const roomLightsToggleButton = document.getElementById('roomLightsToggleButton');
-const viewVaultButton = document.getElementById('viewVaultButton');
-const viewControlRoomButton = document.getElementById('viewControlRoomButton');
-const kvToggleButton = document.getElementById('kvToggleButton');
-const operatorConsolePanel = document.getElementById('operatorConsolePanel');
-const consoleActivePatient = document.getElementById('consoleActivePatient');
-const consoleActiveField = document.getElementById('consoleActiveField');
-const consoleRoomStatus = document.getElementById('consoleRoomStatus');
-const consoleMotionStatus = document.getElementById('consoleMotionStatus');
-const consoleQueue = document.getElementById('consoleQueue');
-const consoleMotionEnable = document.getElementById('consoleMotionEnable');
-const consoleImmoButton = document.getElementById('consoleImmoButton');
-const consoleIGRTButton = document.getElementById('consoleIGRTButton');
-const consoleDeliveryButton = document.getElementById('consoleDeliveryButton');
-const consoleOISButton = document.getElementById('consoleOISButton');
-const consoleGantryMinus = document.getElementById('consoleGantryMinus');
-const consoleGantryPlus = document.getElementById('consoleGantryPlus');
-const consoleCollMinus = document.getElementById('consoleCollMinus');
-const consoleCollPlus = document.getElementById('consoleCollPlus');
-const consoleVrtMinus = document.getElementById('consoleVrtMinus');
-const consoleVrtPlus = document.getElementById('consoleVrtPlus');
-const consoleLngMinus = document.getElementById('consoleLngMinus');
-const consoleLngPlus = document.getElementById('consoleLngPlus');
-const consoleLatMinus = document.getElementById('consoleLatMinus');
-const consoleLatPlus = document.getElementById('consoleLatPlus');
-const consoleKV = document.getElementById('consoleKV');
-const consoleMV = document.getElementById('consoleMV');
-const consoleLasers = document.getElementById('consoleLasers');
-const consoleBeamVisual = document.getElementById('consoleBeamVisual');
-const consoleRoomLights = document.getElementById('consoleRoomLights');
-const consoleTravelVault = document.getElementById('consoleTravelVault');
-const consoleTravelControl = document.getElementById('consoleTravelControl');
-const consoleJawsClose = document.getElementById('consoleJawsClose');
-const consoleJawsOpen = document.getElementById('consoleJawsOpen');
-const consoleMLCClose = document.getElementById('consoleMLCClose');
-const consoleMLCOpen = document.getElementById('consoleMLCOpen');
-const consoleMLCShape = document.getElementById('consoleMLCShape');
-const consoleOdi = document.getElementById('consoleOdi');
-const consoleJawX1In = document.getElementById('consoleJawX1In');
-const consoleJawX1Out = document.getElementById('consoleJawX1Out');
-const consoleJawX2In = document.getElementById('consoleJawX2In');
-const consoleJawX2Out = document.getElementById('consoleJawX2Out');
-const consoleJawY1In = document.getElementById('consoleJawY1In');
-const consoleJawY1Out = document.getElementById('consoleJawY1Out');
-const consoleJawY2In = document.getElementById('consoleJawY2In');
-const consoleJawY2Out = document.getElementById('consoleJawY2Out');
-const consoleRollMinus = document.getElementById('consoleRollMinus');
-const consoleRollPlus = document.getElementById('consoleRollPlus');
-const consolePitchMinus = document.getElementById('consolePitchMinus');
-const consolePitchPlus = document.getElementById('consolePitchPlus');
-const consoleYawMinus = document.getElementById('consoleYawMinus');
-const consoleYawPlus = document.getElementById('consoleYawPlus');
-const consoleTableMinus = document.getElementById('consoleTableMinus');
-const consoleTablePlus = document.getElementById('consoleTablePlus');
-const consoleReadoutGantry = document.getElementById('consoleReadoutGantry');
-const consoleReadoutColl = document.getElementById('consoleReadoutColl');
-const consoleReadoutJaws = document.getElementById('consoleReadoutJaws');
-const consoleReadoutMLC = document.getElementById('consoleReadoutMLC');
-const consoleCameraAStatus = document.getElementById('consoleCameraAStatus');
-const consoleCameraAInfo = document.getElementById('consoleCameraAInfo');
-const consoleCameraBStatus = document.getElementById('consoleCameraBStatus');
-const consoleCameraBInfo = document.getElementById('consoleCameraBInfo');
-const consoleCameraCStatus = document.getElementById('consoleCameraCStatus');
-const consoleCameraCInfo = document.getElementById('consoleCameraCInfo');
-const consolePatientClock = document.getElementById('consolePatientClock');
-const consolePatientRefName = document.getElementById('consolePatientRefName');
-const consolePatientRefSubtitle = document.getElementById('consolePatientRefSubtitle');
-const consoleRefMRN = document.getElementById('consoleRefMRN');
-const consoleRefFraction = document.getElementById('consoleRefFraction');
-const consoleRefPosition = document.getElementById('consoleRefPosition');
-const consoleRefEnergy = document.getElementById('consoleRefEnergy');
-const consoleRefTechnique = document.getElementById('consoleRefTechnique');
-const consoleRefField = document.getElementById('consoleRefField');
-const consolePlanGantry = document.getElementById('consolePlanGantry');
-const consolePlanColl = document.getElementById('consolePlanColl');
-const consolePlanJaws = document.getElementById('consolePlanJaws');
-const consolePlanMLC = document.getElementById('consolePlanMLC');
-const consolePlanImaging = document.getElementById('consolePlanImaging');
-const consolePlanCouch = document.getElementById('consolePlanCouch');
-const consoleImmoSummary = document.getElementById('consoleImmoSummary');
-const consoleImmoList = document.getElementById('consoleImmoList');
-const consoleBeamStatusChip = document.getElementById('consoleBeamStatusChip');
-const consoleDoorStatusChip = document.getElementById('consoleDoorStatusChip');
-const consoleIGRTStatusChip = document.getElementById('consoleIGRTStatusChip');
-const consoleLightsStatusChip = document.getElementById('consoleLightsStatusChip');
-const cameraSceneA = document.getElementById('cameraSceneA');
-const cameraSceneB = document.getElementById('cameraSceneB');
-const cameraSceneC = document.getElementById('cameraSceneC');
-const internalViewButton = document.getElementById('internalViewButton');
-const beamStagePrevButton = document.getElementById('beamStagePrevButton');
-const beamStageNextButton = document.getElementById('beamStageNextButton');
-const asmBeamButton = document.getElementById('asmBeamButton');
-const asmStandButton = document.getElementById('asmStandButton');
-const asmElectronButton = document.getElementById('asmElectronButton');
-const asmAccessoryButton = document.getElementById('asmAccessoryButton');
-const internalOverlay = document.getElementById('internalOverlay');
-const internalStageTitle = document.getElementById('internalStageTitle');
-const internalStageDesc = document.getElementById('internalStageDesc');
-const internalStageCounter = document.getElementById('internalStageCounter');
-let internalViewOn = false,
-	stageIndex = -1,
-	activeAssembly = 'beam';
-let beamPathGroup = null,
-	standPathGroup = null,
-	standInternalsGroup = null;
-let beamHighlight = null,
-	standHighlight = null;
-let detailGantryGroup = null,
-	detailFilter = null,
-	detailFoil = null,
-	detailTarget = null,
-	detailAccessoryTray = null,
-	detailElectronCone = null;
-
-let scene, camera, renderer, controls;
-let staticSetupGroup,
-	gantryRotatingGroup,
-	couchGroup,
-	couchTopGroup,
-	patientGroup,
-	patientHome = null,
-	patientSetupRAF = null,
-	patientErrorGroup = null,
-	errorGroupHome = null,
-	patientBodyGroup = null,
-	couchTopHomePos = null,
-	couchTopHomeRot = null,
-	couchTreatmentPivot = null,
-	electronBolusMesh = null,
-	immobilizationShelf3D = null,
-	immobilizationPatientGroup = null;
-let patientAnatomyParts = {},
-	specialAnatomyTargetMarker = null;
-let linacHeadObject,
-	jawXN,
-	jawXP,
-	jawYN,
-	jawYP,
-	electronApplicatorGroup = null;
-let mlcGroup = null,
-	mlcLeavesA = [],
-	mlcLeavesB = [];
-let odiLine = null,
-	odiSpot = null,
-	odiOn = false,
-	lastODIcm = null;
-const bevInset = document.getElementById('bevInset');
-const bevCollapseButton = document.getElementById('bevCollapseButton');
-const bevFieldGroup = document.getElementById('bevFieldGroup');
-const bevFieldLight = document.getElementById('bevFieldLight');
-const bevMlcLeaves = document.getElementById('bevMlcLeaves');
-const bevJawMasks = document.getElementById('bevJawMasks');
-const bevJawOutline = document.getElementById('bevJawOutline');
-
-let detectorPanel, detectorArm;
-let beamCone = null,
-	laserGroup = null;
-let beamOn = false,
-	lasersOn = false;
-let kvGroup = null,
-	kvOn = false;
-let roomLightsOn = true;
-let hemiLight = null,
-	ambientRoomLight = null,
-	keyRoomLight = null,
-	fillRoomLight = null,
-	rimRoomLight = null;
 const roomCeilingFixtureMats = [];
-let vaultDoorGroup = null,
-	vaultDoorPanel = null,
-	vaultDoorIndicator = null,
-	vaultDoorTrack = null;
-let controlRoomGroup = null;
 const controlRoomAccentMats = [];
-let cameraTravel = null,
-	currentRoomView = 'vault';
-let vaultDoorProgress = 0,
-	vaultDoorTarget = 0,
-	travelRequest = null;
-let consoleMotionArmed = false;
 const controlRoomMonitorGroups = [];
 const cctvFeeds = [];
 // In-room treatment monitor state. Keep these in the main module scope because
 // createTreatmentMonitor3D(), renderTreatmentMonitor(), and the case loader all share them.
-let treatmentMonitorCanvas = null;
-let treatmentMonitorCtx = null;
-let treatmentMonitorTexture = null;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
-let treatmentMonitorMesh = null;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
-let treatmentMonitorFrame = null;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
-let treatmentMonitorFrameSecondary = null;
-let activeTreatmentCase = null;
-let activeTreatmentCaseIndex = 0;
 // Clinical IGRT controller must exist before initThreeJS() creates or resets
 // imaging hardware. Hardware helpers may refresh the IGRT panel during startup.
-let clinicalIGRT = {
-	active: false,
-	acquired: false,
-	verified: false,
-	mode: 'CBCT',
-	error: null,
-	correction: null,
-	baseline: null,
-	attainable: true,
-	couchTopBasePos: null,
-	couchTopBaseRot: null,
-	clearance: null,
-	alignmentWithinTolerance: false,
-	clearancePlacementOffset: 0
-};
 window.clinicalIGRTActive = false;
-let treatmentDelivery = {
-	armed: false,
-	delivering: false,
-	held: false,
-	gateHeld: false,
-	completed: false,
-	terminated: false,
-	muDelivered: 0,
-	startedAt: 0,
-	lastTick: 0,
-	autoHoldReason: '',
-	activeFieldIndex: 0,
-	completedFields: {},
-	dynamicFraction: 0,
-	controlPointIndex: 0
-};
-let clearanceOverrideState = { byField: {} };
 
-let motionManagement = {
-	required: false,
-	mode: 'NONE',
-	acquired: false,
-	verified: false,
-	gateOpen: false,
-	phase: 0,
-	breathLevel: 50,
-	period: 4.5,
-	excursionSI: 0,
-	excursionAP: 0,
-	excursionLR: 0,
-	gateLow: 40,
-	gateHigh: 60,
-	dibhTarget: 80,
-	dibhTolerance: 5,
-	holdActive: false,
-	holdStartedAt: 0,
-	samples: [],
-	trace: [],
-	phaseData: [],
-	lastFrame: 0,
-	lastPanelPaint: 0
-};
-let adaptiveWorkflow = {
-	required: false,
-	assessed: false,
-	compared: false,
-	approved: false,
-	scenario: null,
-	selectedPlanKey: '',
-	doseChecked: false,
-	finalApproved: false,
-	basePlanKey: '',
-	caseBase: null
-};
-let adaptiveCourse = {
-	history: [],
-	totalFractions: 0,
-	prescriptionGy: 0,
-	dosePerFractionGy: 0,
-	loaded: false
-};
-let oisSession = {
-	key: '',
-	events: [],
-	note: '',
-	therapist: '',
-	reviewed: false,
-	overrideReviewed: false,
-	clearanceOverrides: [],
-	signed: false,
-	signedAt: null,
-	status: 'OPEN',
-	snapshot: null
-};
-let immobilizationWorkflow = {
-	required: false,
-	verified: false,
-	selected: [],
-	shelfOrder: [],
-	attempts: 0,
-	lastFeedback: '',
-	positionChecked: false,
-	indexingChecked: false,
-	preparationChecked: false
-};
-let srsWorkflow = {
-	dryRunByField: {},
-	timeoutVerifiedByField: {},
-	lastClearance: null,
-	dryRunning: false
-};
-let specialSetupWorkflow = {
-	type: 'NONE',
-	verified: false,
-	breastOffset: 0,
-	csiJunctionA: 0,
-	csiJunctionB: 0,
-	electron: {
-		shape: '',
-		width: 0,
-		height: 0,
-		cone: '',
-		template: false,
-		fabricated: false,
-		mounted: false,
-		bolusShape: '',
-		bolusWidth: 0,
-		bolusHeight: 0,
-		bolusThickness: 0,
-		bolusPlaced: false,
-		airGapMm: 4,
-		bolusDragX: 54,
-		bolusDragY: 92,
-		bolusContactY: 38,
-		bolusPositionOK: false,
-		bolusAirGapOK: false,
-		bolusLogged: false
-	}
-};
-let motionTarget3D = null,
-	motionTargetBase = null,
-	motionSurfaceMarker = null,
-	motionSurfaceBase = null,
-	motionHeart3D = null,
-	motionHeartBase = null;
-let deliveryRAF = null,
-	deliveryMonitorStamp = 0;
 const DELIVERY_SPEED_FACTOR = 4;
-let treatmentCompletion = {
-	verified: false,
-	posted: false,
-	code: null,
-	attempts: 0,
-	igrtHandling: null,
-	postedAt: null,
-	record: null
-};
-let quizMode = 'part'; // 'part' | 'bonus'
-let activeBonus = null;
 
 const ISOCENTER_Y_TARGET = 1.5;
 const GANTRY_PLANE_Z_TARGET = -1.0;
@@ -528,22 +292,10 @@ const HEAD_CENTER_LOCAL = new THREE.Vector3(0, 1.1, 0); // treatment-head group 
 const JAW_PLANE_HEADLOCAL = -0.52; // head-local Y of the collimator exit plane
 const EPID_Z = 0.0; // beam-axis plane (gantry-local z)
 
-let currentBalance = 0;
-let earnedParts = [];
-let purchasedEnhancements = [];
-let currentQuizPart = null;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
-let bdSyncFromMachine = null;
-let bonusQuestionDeck = [];
-let recentScenarioKeys = [];
-let allCorePartsEarned = false;
-let jawOffset = 0.1;
 const MAX_JAW_OFFSET = 0.25;
 const MIN_JAW_OFFSET = 0.03;
-let detectorExtended = false;
 const EPID_RETRACT_Y = -0.5; // parked below the circular gantry section
 const EPID_RETRACT_Z = -0.9; // near the original stowed position, away from the beam axis
-let epidReceptorY = -1.02; // EPID depth below isocenter (driven by the Divergence Lab SID slider)
 
 // ---- Shared Varian-style palette (clean white shells, taupe/grey trim) ----
 const MAT = {
@@ -1392,7 +1144,7 @@ function createRoom() {
 		m.rotation.y = ry;
 		m.receiveShadow = true;
 		m.castShadow = false;
-		scene.add(m);
+		S.scene.add(m);
 		return m;
 	};
 	mkWall(Xw * 2, 0, -Zw, 0); // back wall
@@ -1425,7 +1177,7 @@ function createRoom() {
 	ceil.rotation.x = Math.PI / 2;
 	ceil.position.set(0, ceilY, 0);
 	ceil.receiveShadow = true;
-	scene.add(ceil);
+	S.scene.add(ceil);
 
 	// Baseboards / wall trim inside the vault.
 	const baseboardSpecs = [
@@ -1440,7 +1192,7 @@ function createRoom() {
 		const b = new THREE.Mesh(new THREE.BoxGeometry(len, 0.22, 0.08), baseMat);
 		b.position.set(x, GROUND_Y + 0.11, z);
 		b.rotation.y = ry;
-		scene.add(b);
+		S.scene.add(b);
 	});
 	const crownSpecs = [
 		[24, 0, -11.86, 0],
@@ -1454,7 +1206,7 @@ function createRoom() {
 		const b = new THREE.Mesh(new THREE.BoxGeometry(len, 0.12, 0.06), trimMat);
 		b.position.set(x, ceilY - 0.1, z);
 		b.rotation.y = ry;
-		scene.add(b);
+		S.scene.add(b);
 	});
 
 	// Overhead treatment-room luminaires.
@@ -1478,7 +1230,7 @@ function createRoom() {
 		const panel = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.72), mat);
 		panel.rotation.x = Math.PI / 2;
 		panel.position.set(x, ceilY - 0.035, z);
-		scene.add(panel);
+		S.scene.add(panel);
 		roomCeilingFixtureMats.push(mat);
 	});
 	const sign = new THREE.Mesh(
@@ -1486,7 +1238,7 @@ function createRoom() {
 		new THREE.MeshStandardMaterial({ map: makeRadSignTexture(), roughness: 0.8 })
 	);
 	sign.position.set(-3.5, 2.5, -Zw + 0.05);
-	scene.add(sign);
+	S.scene.add(sign);
 
 	// Sliding vault entry door.
 	const frameMat = new THREE.MeshStandardMaterial({
@@ -1499,57 +1251,57 @@ function createRoom() {
 		roughness: 0.64,
 		metalness: 0.24
 	});
-	vaultDoorGroup = new THREE.Group();
+	S.vaultDoorGroup = new THREE.Group();
 	const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.24, 4.68, 3.1), frameMat);
 	doorFrame.position.set(-11.76, GROUND_Y + 2.34, doorCenterZ);
-	vaultDoorGroup.add(doorFrame);
+	S.vaultDoorGroup.add(doorFrame);
 	const doorOpening = new THREE.Mesh(
 		new THREE.BoxGeometry(0.32, 4.42, 2.62),
 		new THREE.MeshStandardMaterial({ color: 0x0e1115, roughness: 0.96, metalness: 0.0 })
 	);
 	doorOpening.position.set(-11.72, GROUND_Y + 2.21, doorCenterZ);
-	vaultDoorGroup.add(doorOpening);
-	vaultDoorTrack = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.18, 4.2), frameMat);
-	vaultDoorTrack.position.set(-11.58, GROUND_Y + 4.78, doorCenterZ + 0.82);
-	vaultDoorGroup.add(vaultDoorTrack);
+	S.vaultDoorGroup.add(doorOpening);
+	S.vaultDoorTrack = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.18, 4.2), frameMat);
+	S.vaultDoorTrack.position.set(-11.58, GROUND_Y + 4.78, doorCenterZ + 0.82);
+	S.vaultDoorGroup.add(S.vaultDoorTrack);
 	const trackMotor = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.26, 0.58), frameMat);
 	trackMotor.position.set(-11.47, GROUND_Y + 4.78, doorCenterZ - 1.52);
-	vaultDoorGroup.add(trackMotor);
-	vaultDoorPanel = new THREE.Mesh(new THREE.BoxGeometry(0.18, 4.34, 2.42), doorMat);
-	vaultDoorPanel.position.set(-11.6, GROUND_Y + 2.17, doorCenterZ);
-	vaultDoorPanel.castShadow = true;
-	vaultDoorPanel.receiveShadow = true;
-	vaultDoorGroup.add(vaultDoorPanel);
+	S.vaultDoorGroup.add(trackMotor);
+	S.vaultDoorPanel = new THREE.Mesh(new THREE.BoxGeometry(0.18, 4.34, 2.42), doorMat);
+	S.vaultDoorPanel.position.set(-11.6, GROUND_Y + 2.17, doorCenterZ);
+	S.vaultDoorPanel.castShadow = true;
+	S.vaultDoorPanel.receiveShadow = true;
+	S.vaultDoorGroup.add(S.vaultDoorPanel);
 	const doorInset = new THREE.Mesh(
 		new THREE.BoxGeometry(0.03, 1.0, 0.72),
 		new THREE.MeshStandardMaterial({ color: 0x7f878d, roughness: 0.7, metalness: 0.18 })
 	);
 	doorInset.position.set(0.07, 0.58, 0);
-	vaultDoorPanel.add(doorInset);
+	S.vaultDoorPanel.add(doorInset);
 	const pushBar = new THREE.Mesh(
 		new THREE.BoxGeometry(0.06, 0.1, 1.0),
 		new THREE.MeshStandardMaterial({ color: 0xc2b28d, roughness: 0.34, metalness: 0.52 })
 	);
 	pushBar.position.set(0.1, 0.1, 0);
-	vaultDoorPanel.add(pushBar);
+	S.vaultDoorPanel.add(pushBar);
 	const threshold = new THREE.Mesh(
 		new THREE.BoxGeometry(0.52, 0.04, 2.68),
 		new THREE.MeshStandardMaterial({ color: 0x666f77, roughness: 0.8 })
 	);
 	threshold.position.set(-11.58, GROUND_Y + 0.02, doorCenterZ);
-	vaultDoorGroup.add(threshold);
+	S.vaultDoorGroup.add(threshold);
 	const indicatorMat = new THREE.MeshStandardMaterial({
 		color: 0x8ce7a7,
 		emissive: 0x72ff9d,
 		emissiveIntensity: 1.5
 	});
-	vaultDoorIndicator = new THREE.Mesh(new THREE.SphereGeometry(0.08, 18, 18), indicatorMat);
-	vaultDoorIndicator.position.set(-11.5, GROUND_Y + 4.35, doorCenterZ - 1.36);
-	vaultDoorGroup.add(vaultDoorIndicator);
+	S.vaultDoorIndicator = new THREE.Mesh(new THREE.SphereGeometry(0.08, 18, 18), indicatorMat);
+	S.vaultDoorIndicator.position.set(-11.5, GROUND_Y + 4.35, doorCenterZ - 1.36);
+	S.vaultDoorGroup.add(S.vaultDoorIndicator);
 	const indicatorBox = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.26, 0.42), frameMat);
 	indicatorBox.position.set(-11.56, GROUND_Y + 4.35, doorCenterZ - 1.36);
-	vaultDoorGroup.add(indicatorBox);
-	scene.add(vaultDoorGroup);
+	S.vaultDoorGroup.add(indicatorBox);
+	S.scene.add(S.vaultDoorGroup);
 
 	// Closed-circuit wall-mounted cameras.
 	const camBodyMat = new THREE.MeshStandardMaterial({
@@ -1595,7 +1347,7 @@ function createRoom() {
 		g.add(led);
 		g.position.set(pos[0], pos[1], pos[2]);
 		g.rotation.set(rot[0], rot[1], rot[2]);
-		scene.add(g);
+		S.scene.add(g);
 		return g;
 	};
 	makeCCTV([-10.9, 5.6, -10.9], [0, Math.PI / 4, 0]);
@@ -1630,7 +1382,7 @@ function createRoom() {
 		handle.position.set(10.06, 0.8, z);
 		cabinet.add(handle);
 	});
-	scene.add(cabinet);
+	S.scene.add(cabinet);
 	const stool = new THREE.Group();
 	const seat = new THREE.Mesh(
 		new THREE.CylinderGeometry(0.26, 0.28, 0.1, 18),
@@ -1644,7 +1396,7 @@ function createRoom() {
 	const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.06, 0.05, 16), frameMat);
 	foot.position.set(9.3, 0.04, -7.8);
 	stool.add(foot);
-	scene.add(stool);
+	S.scene.add(stool);
 	const cart = new THREE.Group();
 	const cartFrame = new THREE.Mesh(new THREE.BoxGeometry(0.72, 1.0, 1.4), cartMat);
 	cartFrame.position.set(10.65, 0.5, 5.2);
@@ -1666,41 +1418,41 @@ function createRoom() {
 		wheel.position.set(x, y, z);
 		cart.add(wheel);
 	});
-	scene.add(cart);
+	S.scene.add(cart);
 
 	// Control room outside the vault.
-	controlRoomGroup = new THREE.Group();
+	S.controlRoomGroup = new THREE.Group();
 	const crFloor = new THREE.Mesh(
 		new THREE.BoxGeometry(5.7, 0.04, 7.2),
 		new THREE.MeshStandardMaterial({ color: 0xa7aaad, roughness: 0.78, metalness: 0.05 })
 	);
 	crFloor.position.set(-15.0, GROUND_Y + 0.02, -4.0);
 	crFloor.receiveShadow = true;
-	controlRoomGroup.add(crFloor);
+	S.controlRoomGroup.add(crFloor);
 	const crWallMat = wallMat;
 	const crBackWall = new THREE.Mesh(new THREE.PlaneGeometry(7.2, wallH), crWallMat);
 	crBackWall.position.set(-17.82, midY, -4.0);
 	crBackWall.rotation.y = -Math.PI / 2;
-	controlRoomGroup.add(crBackWall);
+	S.controlRoomGroup.add(crBackWall);
 	const crSideBack = new THREE.Mesh(new THREE.PlaneGeometry(5.7, wallH), crWallMat);
 	crSideBack.position.set(-15.0, midY, -7.58);
 	crSideBack.rotation.y = 0;
-	controlRoomGroup.add(crSideBack);
+	S.controlRoomGroup.add(crSideBack);
 	const crSideFront = new THREE.Mesh(new THREE.PlaneGeometry(5.7, wallH), crWallMat);
 	crSideFront.position.set(-15.0, midY, -0.42);
 	crSideFront.rotation.y = Math.PI;
-	controlRoomGroup.add(crSideFront);
+	S.controlRoomGroup.add(crSideFront);
 	const crLeftWall = new THREE.Mesh(new THREE.PlaneGeometry(7.2, wallH), crWallMat);
 	crLeftWall.position.set(-12.18, midY, -4.0);
 	crLeftWall.rotation.y = Math.PI / 2;
-	controlRoomGroup.add(crLeftWall);
+	S.controlRoomGroup.add(crLeftWall);
 	const crCeil = new THREE.Mesh(
 		new THREE.PlaneGeometry(5.7, 7.2),
 		new THREE.MeshStandardMaterial({ color: 0xd9dbde, roughness: 0.9, side: THREE.DoubleSide })
 	);
 	crCeil.rotation.x = Math.PI / 2;
 	crCeil.position.set(-15.0, ceilY - 0.02, -4.0);
-	controlRoomGroup.add(crCeil);
+	S.controlRoomGroup.add(crCeil);
 	[
 		{ g: [5.68, 0.22, 0.08], p: [-15.0, GROUND_Y + 0.11, -7.54], r: [0, 0, 0] },
 		{ g: [5.68, 0.22, 0.08], p: [-15.0, GROUND_Y + 0.11, -0.46], r: [0, 0, 0] },
@@ -1710,7 +1462,7 @@ function createRoom() {
 		const b = new THREE.Mesh(new THREE.BoxGeometry(...g), baseMat);
 		b.position.set(...p);
 		b.rotation.set(...r);
-		controlRoomGroup.add(b);
+		S.controlRoomGroup.add(b);
 	});
 	const crLightMat = new THREE.MeshStandardMaterial({
 		color: 0xfffcf0,
@@ -1726,7 +1478,7 @@ function createRoom() {
 		const l = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.42), crLightMat);
 		l.rotation.x = Math.PI / 2;
 		l.position.set(x, ceilY - 0.04, z);
-		controlRoomGroup.add(l);
+		S.controlRoomGroup.add(l);
 	});
 	const deskMat = new THREE.MeshStandardMaterial({
 		color: 0x5e6770,
@@ -1798,59 +1550,60 @@ function createRoom() {
 		g.rotation.y = Math.PI / 2;
 		return g;
 	};
-	controlRoomGroup.add(makeConsole(-14.45, -5.35, 'CAM A', '#68d7e3'));
-	controlRoomGroup.add(makeConsole(-14.5, -2.65, 'CAM B', '#72e0a7'));
+	S.controlRoomGroup.add(makeConsole(-14.45, -5.35, 'CAM A', '#68d7e3'));
+	S.controlRoomGroup.add(makeConsole(-14.5, -2.65, 'CAM B', '#72e0a7'));
 	const credenza = new THREE.Mesh(new THREE.BoxGeometry(0.72, 1.2, 2.5), deskMat);
 	credenza.position.set(-16.9, 0.6, -4.0);
-	controlRoomGroup.add(credenza);
+	S.controlRoomGroup.add(credenza);
 	const stool2 = stool.clone();
 	stool2.position.set(-16.3, 0, -2.0);
-	controlRoomGroup.add(stool2);
-	scene.add(controlRoomGroup);
+	S.controlRoomGroup.add(stool2);
+	S.scene.add(S.controlRoomGroup);
 }
 function setRoomLightsState(on) {
-	roomLightsOn = !!on;
-	if (hemiLight) hemiLight.intensity = roomLightsOn ? 0.9 : 0.16;
-	if (ambientRoomLight) ambientRoomLight.intensity = roomLightsOn ? 0.55 : 0.1;
-	if (keyRoomLight) keyRoomLight.intensity = roomLightsOn ? 1.15 : 0.22;
-	if (fillRoomLight) fillRoomLight.intensity = roomLightsOn ? 0.45 : 0.08;
-	if (rimRoomLight) rimRoomLight.intensity = roomLightsOn ? 0.35 : 0.08;
+	S.roomLightsOn = !!on;
+	if (S.hemiLight) S.hemiLight.intensity = S.roomLightsOn ? 0.9 : 0.16;
+	if (S.ambientRoomLight) S.ambientRoomLight.intensity = S.roomLightsOn ? 0.55 : 0.1;
+	if (S.keyRoomLight) S.keyRoomLight.intensity = S.roomLightsOn ? 1.15 : 0.22;
+	if (S.fillRoomLight) S.fillRoomLight.intensity = S.roomLightsOn ? 0.45 : 0.08;
+	if (S.rimRoomLight) S.rimRoomLight.intensity = S.roomLightsOn ? 0.35 : 0.08;
 	roomCeilingFixtureMats.forEach((mat) => {
-		mat.emissiveIntensity = roomLightsOn ? 2.3 : 0.03;
-		mat.color.setHex(roomLightsOn ? 0xfffdf1 : 0x55585b);
+		mat.emissiveIntensity = S.roomLightsOn ? 2.3 : 0.03;
+		mat.color.setHex(S.roomLightsOn ? 0xfffdf1 : 0x55585b);
 		mat.needsUpdate = true;
 	});
 	controlRoomAccentMats.forEach((mat) => {
-		mat.emissiveIntensity = roomLightsOn ? 1.9 : 0.35;
-		mat.color.setHex(roomLightsOn ? 0xfffcf0 : 0x777c80);
+		mat.emissiveIntensity = S.roomLightsOn ? 1.9 : 0.35;
+		mat.color.setHex(S.roomLightsOn ? 0xfffcf0 : 0x777c80);
 		mat.needsUpdate = true;
 	});
-	if (scene && scene.background) scene.background.setHex(roomLightsOn ? 0xeceef1 : 0x171b20);
+	if (S.scene && S.scene.background)
+		S.scene.background.setHex(S.roomLightsOn ? 0xeceef1 : 0x171b20);
 	if (roomLightsToggleButton) {
-		roomLightsToggleButton.classList.toggle('active-function', roomLightsOn);
-		roomLightsToggleButton.setAttribute('aria-pressed', String(roomLightsOn));
+		roomLightsToggleButton.classList.toggle('active-function', S.roomLightsOn);
+		roomLightsToggleButton.setAttribute('aria-pressed', String(S.roomLightsOn));
 		const small = roomLightsToggleButton.querySelector('small');
-		if (small) small.textContent = roomLightsOn ? 'Lights ON' : 'Lights OFF';
+		if (small) small.textContent = S.roomLightsOn ? 'Lights ON' : 'Lights OFF';
 	}
-	setPendantLCD('ROOM LIGHTS', roomLightsOn ? 'ON' : 'OFF · treatment vault dimmed');
+	setPendantLCD('ROOM LIGHTS', S.roomLightsOn ? 'ON' : 'OFF · treatment vault dimmed');
 }
 function createTreatmentMonitor3D() {
-	treatmentMonitorCanvas = document.createElement('canvas');
+	S.treatmentMonitorCanvas = document.createElement('canvas');
 	// Match the physical 16:9 monitor aspect ratio and use a high-resolution texture
 	// so text remains readable when the camera is several metres away or oblique.
-	treatmentMonitorCanvas.width = 1600;
-	treatmentMonitorCanvas.height = 900;
-	treatmentMonitorCtx = treatmentMonitorCanvas.getContext('2d', { alpha: false });
-	treatmentMonitorTexture = new THREE.CanvasTexture(treatmentMonitorCanvas);
-	treatmentMonitorTexture.colorSpace = THREE.SRGBColorSpace;
-	treatmentMonitorTexture.minFilter = THREE.LinearMipmapLinearFilter;
-	treatmentMonitorTexture.magFilter = THREE.LinearFilter;
-	treatmentMonitorTexture.generateMipmaps = true;
-	if (renderer && renderer.capabilities)
-		treatmentMonitorTexture.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
+	S.treatmentMonitorCanvas.width = 1600;
+	S.treatmentMonitorCanvas.height = 900;
+	S.treatmentMonitorCtx = S.treatmentMonitorCanvas.getContext('2d', { alpha: false });
+	S.treatmentMonitorTexture = new THREE.CanvasTexture(S.treatmentMonitorCanvas);
+	S.treatmentMonitorTexture.colorSpace = THREE.SRGBColorSpace;
+	S.treatmentMonitorTexture.minFilter = THREE.LinearMipmapLinearFilter;
+	S.treatmentMonitorTexture.magFilter = THREE.LinearFilter;
+	S.treatmentMonitorTexture.generateMipmaps = true;
+	if (S.renderer && S.renderer.capabilities)
+		S.treatmentMonitorTexture.anisotropy = Math.min(16, S.renderer.capabilities.getMaxAnisotropy());
 	// Basic material keeps the clinical display bright and legible even when room lights are off.
 	const screenMat = new THREE.MeshBasicMaterial({
-		map: treatmentMonitorTexture,
+		map: S.treatmentMonitorTexture,
 		toneMapped: false
 	});
 	const frameMat = new THREE.MeshStandardMaterial({
@@ -1881,28 +1634,28 @@ function createTreatmentMonitor3D() {
 
 	const primary = buildMonitorGroup();
 	primary.group.position.set(4.1, 3.48, -11.9);
-	scene.add(primary.group);
-	treatmentMonitorMesh = primary.screen;
-	treatmentMonitorFrame = primary.group;
+	S.scene.add(primary.group);
+	S.treatmentMonitorMesh = primary.screen;
+	S.treatmentMonitorFrame = primary.group;
 
 	const secondary = buildMonitorGroup();
 	secondary.group.position.set(-11.88, 3.46, -4.85);
 	secondary.group.rotation.y = Math.PI / 2;
-	scene.add(secondary.group);
-	treatmentMonitorFrameSecondary = secondary.group;
+	S.scene.add(secondary.group);
+	S.treatmentMonitorFrameSecondary = secondary.group;
 
 	const consoleA = buildMonitorGroup();
 	consoleA.group.scale.set(0.34, 0.34, 0.34);
 	consoleA.group.position.set(-14.42, 1.86, -5.35);
 	consoleA.group.rotation.y = Math.PI / 2;
-	scene.add(consoleA.group);
+	S.scene.add(consoleA.group);
 	controlRoomMonitorGroups.push(consoleA.group);
 
 	const consoleB = buildMonitorGroup();
 	consoleB.group.scale.set(0.34, 0.34, 0.34);
 	consoleB.group.position.set(-14.45, 1.86, -2.68);
 	consoleB.group.rotation.y = Math.PI / 2;
-	scene.add(consoleB.group);
+	S.scene.add(consoleB.group);
 	controlRoomMonitorGroups.push(consoleB.group);
 
 	const cameraBankMatA = new THREE.MeshBasicMaterial({
@@ -1930,7 +1683,7 @@ function createTreatmentMonitor3D() {
 		g.add(frame, screen);
 		g.position.set(x, y, z);
 		g.rotation.y = Math.PI / 2;
-		scene.add(g);
+		S.scene.add(g);
 		return g;
 	};
 	buildWallScreen(cameraBankMatA, -17.72, 4.85, -5.65);
@@ -1994,16 +1747,16 @@ function getPlannedCouchState() {
 }
 function getIGRTExpectedAbsoluteCouch() {
 	if (
-		!clinicalIGRT?.active ||
-		!clinicalIGRT?.acquired ||
-		!clinicalIGRT?.correction ||
-		!clinicalIGRT?.baseline
+		!S.clinicalIGRT?.active ||
+		!S.clinicalIGRT?.acquired ||
+		!S.clinicalIGRT?.correction ||
+		!S.clinicalIGRT?.baseline
 	)
 		return null;
 	return {
-		vrt: clinicalIGRT.baseline.vrt + clinicalIGRT.correction.vrt,
-		lng: clinicalIGRT.baseline.lng + clinicalIGRT.correction.lng,
-		lat: clinicalIGRT.baseline.lat + clinicalIGRT.correction.lat
+		vrt: S.clinicalIGRT.baseline.vrt + S.clinicalIGRT.correction.vrt,
+		lng: S.clinicalIGRT.baseline.lng + S.clinicalIGRT.correction.lng,
+		lat: S.clinicalIGRT.baseline.lat + S.clinicalIGRT.correction.lat
 	};
 }
 function couchStateMatchesPlan(tol = 0.01) {
@@ -2051,7 +1804,8 @@ function treatmentParamMatches(key, plannedValue, actualValue) {
 	return canon(plannedValue) === canon(actualValue);
 }
 function monitorPlannedDisplay(key, value) {
-	if (key === 'imaging' && clinicalIGRT?.active && clinicalIGRT?.acquired) return 'IGRT verified';
+	if (key === 'imaging' && S.clinicalIGRT?.active && S.clinicalIGRT?.acquired)
+		return 'IGRT verified';
 	if (key === 'couch') {
 		const target = getIGRTExpectedAbsoluteCouch();
 		if (target) return canonicalCouchDisplay([target.vrt, target.lng, target.lat]);
@@ -2084,15 +1838,15 @@ function getTreatmentMonitorActual() {
 					couchAngle: 0
 				};
 	const imaging =
-		clinicalIGRT?.active && clinicalIGRT?.acquired
-			? clinicalIGRT.verified
+		S.clinicalIGRT?.active && S.clinicalIGRT?.acquired
+			? S.clinicalIGRT.verified
 				? 'IGRT alignment verified'
 				: 'Correction pending'
-			: kvOn && detectorExtended
+			: S.kvOn && S.detectorExtended
 				? 'kV + MV deployed'
-				: kvOn
+				: S.kvOn
 					? 'kV arms extended'
-					: detectorExtended
+					: S.detectorExtended
 						? 'MV panel extended'
 						: 'None';
 	return {
@@ -2104,13 +1858,13 @@ function getTreatmentMonitorActual() {
 		mlcAperture: `${fs.mlc} cm`,
 		mlcShape: `${fs.mlcShape}`,
 		imaging,
-		odi: odiOn ? 'On' : 'Off',
+		odi: S.odiOn ? 'On' : 'Off',
 		couch: `${fmtSignedInt(fs.vrt)} / ${fmtSignedInt(fs.lng)} / ${fmtSignedInt(fs.lat)} mm`,
 		couchAngle: `${wrap360(fs.couchAngle || 0)}°`,
 		electronAccessory: (() => {
 			const ss = activeSpecialSetupSpec();
 			if (String(ss?.type || '').toUpperCase() !== 'ELECTRON') return 'N/A';
-			const e = specialSetupWorkflow.electron || {};
+			const e = S.specialSetupWorkflow.electron || {};
 			return e.mounted
 				? `${e.shape} ${e.width} × ${e.height} cm · ${e.cone}${e.bolusPlaced ? ` · bolus ${Number(e.bolusThickness || ss?.bolusThicknessCm || 0.5).toFixed(1)} cm` : ''}`
 				: 'Not mounted';
@@ -2176,9 +1930,9 @@ function drawMonitorCell(ctx, x, y, w, h, opts = {}) {
 	ctx.fillText(String(text), textX, y + h / 2 + 1);
 }
 function renderTreatmentMonitor() {
-	if (!treatmentMonitorCtx || !treatmentMonitorTexture) return;
-	const ctx = treatmentMonitorCtx,
-		c = treatmentMonitorCanvas;
+	if (!S.treatmentMonitorCtx || !S.treatmentMonitorTexture) return;
+	const ctx = S.treatmentMonitorCtx,
+		c = S.treatmentMonitorCanvas;
 	ctx.clearRect(0, 0, c.width, c.height);
 	ctx.fillStyle = '#071019';
 	ctx.fillRect(0, 0, c.width, c.height);
@@ -2197,7 +1951,7 @@ function renderTreatmentMonitor() {
 	ctx.font = '600 22px Segoe UI, Arial';
 	ctx.fillText('PLANNED vs ACTUAL · independent machine parameter verification', 54, 94);
 
-	const planned = activeTreatmentCase || {
+	const planned = S.activeTreatmentCase || {
 		patient: 'No case loaded',
 		mrn: '—',
 		siteLabel: '—',
@@ -2207,8 +1961,8 @@ function renderTreatmentMonitor() {
 		fraction: '—',
 		planned: {}
 	};
-	const plannedParams = activeTreatmentCase ? getCurrentPlannedParameters() : {};
-	const activeField = activeTreatmentCase ? deliveryCasePlan() : null;
+	const plannedParams = S.activeTreatmentCase ? getCurrentPlannedParameters() : {};
+	const activeField = S.activeTreatmentCase ? deliveryCasePlan() : null;
 	const actual = getTreatmentMonitorActual();
 	const rowDefs = activeField?.electron
 		? [
@@ -2245,10 +1999,10 @@ function renderTreatmentMonitor() {
 	});
 	const matches = rows.reduce((sum, row) => sum + (row[3] ? 1 : 0), 0);
 	const allMatch = matches === rows.length;
-	const motionPlanOK = !motionRequired() || !!motionManagement.verified;
+	const motionPlanOK = !motionRequired() || !!S.motionManagement.verified;
 	const srsPlanOK =
 		!srsRequired() ||
-		!!srsWorkflow.timeoutVerifiedByField[Number(treatmentDelivery.activeFieldIndex) || 0];
+		!!S.srsWorkflow.timeoutVerifiedByField[Number(S.treatmentDelivery.activeFieldIndex) || 0];
 	const specialPlanOK = specialSetupVerified();
 	const immobilizationPlanOK = immobilizationVerified();
 	const treatmentVerified =
@@ -2391,25 +2145,25 @@ function renderTreatmentMonitor() {
 				: !srsPlanOK
 					? 'STEREOTACTIC TIMEOUT / DRY-RUN VERIFICATION REQUIRED'
 					: 'PARAMETER MISMATCH · VERIFY RED VALUES BEFORE BEAM ENABLE';
-	if (treatmentCompletion?.posted) {
+	if (S.treatmentCompletion?.posted) {
 		summaryFill = '#0b5a3b';
 		summaryStroke = '#53e6a2';
 		summaryText = '#dcffea';
 		summaryMessage =
-			treatmentCompletion.code === 'SRS-NOT-MODELED'
+			S.treatmentCompletion.code === 'SRS-NOT-MODELED'
 				? 'SRS FRACTION COMPLETE · ALL PRESCRIBED ARCS DELIVERED'
-				: `TREATMENT COMPLETE · CPT ${treatmentCompletion.code} CAPTURED`;
-	} else if (treatmentDelivery?.delivering) {
-		const autoGate = !!treatmentDelivery.gateHeld;
-		summaryFill = treatmentDelivery.held || autoGate ? '#5b4215' : '#641f27';
-		summaryStroke = treatmentDelivery.held || autoGate ? '#ffc15e' : '#ff6674';
+				: `TREATMENT COMPLETE · CPT ${S.treatmentCompletion.code} CAPTURED`;
+	} else if (S.treatmentDelivery?.delivering) {
+		const autoGate = !!S.treatmentDelivery.gateHeld;
+		summaryFill = S.treatmentDelivery.held || autoGate ? '#5b4215' : '#641f27';
+		summaryStroke = S.treatmentDelivery.held || autoGate ? '#ffc15e' : '#ff6674';
 		summaryText = '#fff0f1';
-		summaryMessage = treatmentDelivery.held
-			? `BEAM HOLD · ${treatmentDelivery.muDelivered.toFixed(1)} MU DELIVERED`
+		summaryMessage = S.treatmentDelivery.held
+			? `BEAM HOLD · ${S.treatmentDelivery.muDelivered.toFixed(1)} MU DELIVERED`
 			: autoGate
-				? `RESPIRATORY GATE HOLD · ${treatmentDelivery.muDelivered.toFixed(1)} MU DELIVERED`
-				: `BEAM ON · ${treatmentDelivery.muDelivered.toFixed(1)} / ${deliveryCasePlan().mu} MU`;
-	} else if (treatmentDelivery?.completed) {
+				? `RESPIRATORY GATE HOLD · ${S.treatmentDelivery.muDelivered.toFixed(1)} MU DELIVERED`
+				: `BEAM ON · ${S.treatmentDelivery.muDelivered.toFixed(1)} / ${deliveryCasePlan().mu} MU`;
+	} else if (S.treatmentDelivery?.completed) {
 		summaryFill = '#0e5439';
 		summaryStroke = '#3ce39a';
 		summaryText = '#d1ffe7';
@@ -2435,15 +2189,19 @@ function renderTreatmentMonitor() {
 		46,
 		888
 	);
-	treatmentMonitorTexture.needsUpdate = true;
+	S.treatmentMonitorTexture.needsUpdate = true;
 	syncOperatorConsole();
 	if (typeof renderTreatmentDeliveryPanel === 'function') renderTreatmentDeliveryPanel();
 }
 function getTreatmentFields() {
-	if (!activeTreatmentCase) return [];
-	if (Array.isArray(activeTreatmentCase.fields) && activeTreatmentCase.fields.length)
-		return activeTreatmentCase.fields;
-	const legacy = activeTreatmentCase.delivery || { field: 'Static field', mu: 100, doseRate: 600 };
+	if (!S.activeTreatmentCase) return [];
+	if (Array.isArray(S.activeTreatmentCase.fields) && S.activeTreatmentCase.fields.length)
+		return S.activeTreatmentCase.fields;
+	const legacy = S.activeTreatmentCase.delivery || {
+		field: 'Static field',
+		mu: 100,
+		doseRate: 600
+	};
 	return [
 		{
 			name: legacy.field || 'Static field',
@@ -2466,7 +2224,7 @@ function deliveryCasePlan() {
 		};
 	const idx = Math.max(
 		0,
-		Math.min(fields.length - 1, Number(treatmentDelivery?.activeFieldIndex) || 0)
+		Math.min(fields.length - 1, Number(S.treatmentDelivery?.activeFieldIndex) || 0)
 	);
 	const f = fields[idx];
 	return {
@@ -2485,8 +2243,8 @@ function isDynamicTreatmentField(field = deliveryCasePlan()) {
 }
 function deliveryProgressFraction(field = deliveryCasePlan()) {
 	const total = Math.max(0.0001, Number(field?.mu) || 1);
-	if (treatmentDelivery?.completed) return 1;
-	return Math.max(0, Math.min(1, (Number(treatmentDelivery?.muDelivered) || 0) / total));
+	if (S.treatmentDelivery?.completed) return 1;
+	return Math.max(0, Math.min(1, (Number(S.treatmentDelivery?.muDelivered) || 0) / total));
 }
 function arcAngularState(arc, fraction) {
 	if (!arc) return null;
@@ -2561,12 +2319,12 @@ function getDynamicFieldState(
 	};
 }
 function getCurrentPlannedParameters() {
-	const base = { couchAngle: '0°', ...(activeTreatmentCase?.planned || {}) };
+	const base = { couchAngle: '0°', ...(S.activeTreatmentCase?.planned || {}) };
 	const field = deliveryCasePlan();
 	let geometry = { ...(field.geometry || {}) };
 	if (
 		isDynamicTreatmentField(field) &&
-		(treatmentDelivery?.delivering || treatmentDelivery?.held || treatmentDelivery?.completed)
+		(S.treatmentDelivery?.delivering || S.treatmentDelivery?.held || S.treatmentDelivery?.completed)
 	) {
 		const d = getDynamicFieldState(field);
 		geometry = {
@@ -2589,11 +2347,11 @@ function applyDynamicDeliveryMachineState(
 ) {
 	if (!isDynamicTreatmentField(field)) return getDynamicFieldState(field, fraction);
 	const d = getDynamicFieldState(field, fraction);
-	treatmentDelivery.dynamicFraction = d.fraction;
-	treatmentDelivery.controlPointIndex = d.controlPointIndex;
+	S.treatmentDelivery.dynamicFraction = d.fraction;
+	S.treatmentDelivery.controlPointIndex = d.controlPointIndex;
 	if (d.mode === 'VMAT') {
 		fundamentalState.gantry = d.gantry;
-		if (gantryRotatingGroup) gantryRotatingGroup.rotation.z = -((d.gantry * Math.PI) / 180);
+		if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z = -((d.gantry * Math.PI) / 180);
 	}
 	fundamentalState.mlc = Number(d.mlcAperture.toFixed(2));
 	fundamentalState.mlcShape = d.mlcShape;
@@ -2637,26 +2395,26 @@ function populateDeliveryFieldSelect() {
 				: mode === 'IMRT'
 					? ' · IMRT'
 					: '';
-		const done = treatmentDelivery.completedFields[i] ? ' ✓' : '';
+		const done = S.treatmentDelivery.completedFields[i] ? ' ✓' : '';
 		opt.textContent = `${i + 1}. ${f.name || f.field || `Field ${i + 1}`}${gantry}${couch}${dyn}${done}`;
 		deliveryFieldSelect.appendChild(opt);
 	});
-	treatmentDelivery.activeFieldIndex = Math.max(
+	S.treatmentDelivery.activeFieldIndex = Math.max(
 		0,
-		Math.min(fields.length - 1, Number(treatmentDelivery.activeFieldIndex) || 0)
+		Math.min(fields.length - 1, Number(S.treatmentDelivery.activeFieldIndex) || 0)
 	);
-	deliveryFieldSelect.value = String(treatmentDelivery.activeFieldIndex);
-	deliveryFieldSelect.disabled = !!treatmentDelivery.delivering;
+	deliveryFieldSelect.value = String(S.treatmentDelivery.activeFieldIndex);
+	deliveryFieldSelect.disabled = !!S.treatmentDelivery.delivering;
 }
 
 function activeSpecialSetupSpec() {
-	return activeTreatmentCase?.specialSetup || null;
+	return S.activeTreatmentCase?.specialSetup || null;
 }
 function specialSetupRequired() {
 	return !!activeSpecialSetupSpec();
 }
 function specialSetupVerified() {
-	return !specialSetupRequired() || !!specialSetupWorkflow.verified;
+	return !specialSetupRequired() || !!S.specialSetupWorkflow.verified;
 }
 function specialRndNonzero() {
 	const a = [-3, -2, -1, 1, 2, 3];
@@ -2664,7 +2422,7 @@ function specialRndNonzero() {
 }
 function resetSpecialSetupForCase() {
 	const s = activeSpecialSetupSpec();
-	specialSetupWorkflow = {
+	S.specialSetupWorkflow = {
 		type: String(s?.type || 'NONE'),
 		verified: false,
 		breastOffset: s ? specialRndNonzero() : 0,
@@ -2702,7 +2460,7 @@ function specialMatchStatus(v, tol = 1) {
 	return Math.abs(Number(v) || 0) <= tol;
 }
 function breastMatchDiagram() {
-	const v = specialSetupWorkflow.breastOffset,
+	const v = S.specialSetupWorkflow.breastOffset,
 		scale = 8,
 		y = 82,
 		scvEdge = y - (v * scale) / 2,
@@ -2713,12 +2471,12 @@ function breastMatchDiagram() {
 	return `<div class="special-diagram"><svg viewBox="0 0 500 165" aria-label="Supraclavicular tangent matchline diagram"><rect width="500" height="165" fill="#070b10"/><text x="18" y="22" fill="#d7e8f3" font-size="12" font-family="Consolas">SCV / TANGENT JUNCTION</text><rect x="55" y="34" width="390" height="${Math.max(8, scvEdge - 34)}" fill="#365f88" opacity=".68"/><rect x="55" y="${tanEdge}" width="390" height="${Math.max(8, 145 - tanEdge)}" fill="#8b4f68" opacity=".68"/><line x1="45" y1="82" x2="455" y2="82" stroke="#42d9ef" stroke-dasharray="4 4"/><text x="460" y="86" fill="#42d9ef" font-size="10">PLAN</text><line x1="55" y1="${scvEdge}" x2="445" y2="${scvEdge}" stroke="#a6d2ff" stroke-width="2"/><line x1="55" y1="${tanEdge}" x2="445" y2="${tanEdge}" stroke="#ff9fcb" stroke-width="2"/><text x="70" y="54" fill="#d9edff" font-size="11">SUPRACLAV AP</text><text x="70" y="137" fill="#ffd7e8" font-size="11">BREAST TANGENTS</text><text x="250" y="158" text-anchor="middle" fill="${specialMatchStatus(v) ? '#80e2a4' : '#ff8b97'}" font-size="12" font-weight="700">${v === 0 ? '0 mm · MATCHED' : `${Math.abs(v)} mm ${overlap ? 'OVERLAP' : 'GAP'}`}</text></svg></div>`;
 }
 function csiDiagram() {
-	const a = specialSetupWorkflow.csiJunctionA,
-		b = specialSetupWorkflow.csiJunctionB;
+	const a = S.specialSetupWorkflow.csiJunctionA,
+		b = S.specialSetupWorkflow.csiJunctionB;
 	return `<div class="special-diagram"><svg viewBox="0 0 500 165" aria-label="Craniospinal field junction diagram"><rect width="500" height="165" fill="#070b10"/><text x="18" y="21" fill="#d7e8f3" font-size="12" font-family="Consolas">CRANIOSPINAL FIELD STATIONS</text><rect x="65" y="34" width="120" height="36" rx="8" fill="#375f87"/><rect x="190" y="34" width="120" height="70" rx="8" fill="#506f5c"/><rect x="315" y="34" width="120" height="108" rx="8" fill="#77546e"/><text x="125" y="56" text-anchor="middle" fill="#fff" font-size="10">CRANIAL</text><text x="250" y="56" text-anchor="middle" fill="#fff" font-size="10">UPPER SPINE</text><text x="375" y="56" text-anchor="middle" fill="#fff" font-size="10">LOWER SPINE</text><line x1="187" y1="30" x2="187" y2="148" stroke="${specialMatchStatus(a) ? '#52df91' : '#ff6674'}" stroke-width="3"/><line x1="312" y1="30" x2="312" y2="148" stroke="${specialMatchStatus(b) ? '#52df91' : '#ff6674'}" stroke-width="3"/><text x="187" y="158" text-anchor="middle" fill="#d8e5ec" font-size="10">J1 ${a === 0 ? '0' : (a > 0 ? '+' : '') + a} mm</text><text x="312" y="158" text-anchor="middle" fill="#d8e5ec" font-size="10">J2 ${b === 0 ? '0' : (b > 0 ? '+' : '') + b} mm</text></svg></div>`;
 }
 function electronDiagram() {
-	const e = specialSetupWorkflow.electron,
+	const e = S.specialSetupWorkflow.electron,
 		s = activeSpecialSetupSpec();
 	const w = (Number(e.width) || Number(s?.widthCm) || 6) * 11,
 		h = (Number(e.height) || Number(s?.heightCm) || 4) * 11;
@@ -2734,14 +2492,14 @@ function renderSpecialSetupPanel() {
 	const s = activeSpecialSetupSpec();
 	setTextById(
 		'specialSetupPatient',
-		activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${activeTreatmentCase.siteLabel}`
+		S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${S.activeTreatmentCase.siteLabel}`
 			: 'No special case'
 	);
 	setTextById('specialSetupTechnique', s?.label || 'Not prescribed');
 	setTextById(
 		'specialSetupVerified',
-		!s ? 'N/A' : specialSetupWorkflow.verified ? 'VERIFIED' : 'NOT VERIFIED'
+		!s ? 'N/A' : S.specialSetupWorkflow.verified ? 'VERIFIED' : 'NOT VERIFIED'
 	);
 	const title = document.getElementById('specialSetupTitle'),
 		sub = document.getElementById('specialSetupSubtitle'),
@@ -2764,11 +2522,11 @@ function renderSpecialSetupPanel() {
 		if (sub)
 			sub.textContent =
 				'Supraclavicular field + tangents · recognize and correct gap/overlap at the junction.';
-		const ok = specialMatchStatus(specialSetupWorkflow.breastOffset, Number(s.toleranceMm) || 1);
-		specialSetupContent.innerHTML = `${breastMatchDiagram()}<div class="special-card"><h4>Junction adjustment</h4><div class="special-junction-readout ${ok ? 'good' : 'bad'}">${specialSetupWorkflow.breastOffset === 0 ? '0 mm · MATCHED' : `${specialSetupWorkflow.breastOffset > 0 ? '+' : ''}${specialSetupWorkflow.breastOffset} mm · ${specialSetupWorkflow.breastOffset > 0 ? 'GAP' : 'OVERLAP'}`}</div><p>Use the simulated field-edge adjustment to bring the SCV inferior edge and tangent superior edge to the planned matchline. Acceptable teaching tolerance: ±${s.toleranceMm || 1} mm.</p><div class="special-actions"><button data-special="breast-minus">−1 mm edge</button><button data-special="breast-plus">+1 mm edge</button><button data-special="breast-verify">Verify Matchline</button></div></div><div class="special-card"><h4>Planned fields</h4><p><b>SCV AP:</b> G0° · T0° · couch V/L/L 0/0/0. <b>Medial tangent:</b> G300° · T355° · LNG +2 mm. <b>Lateral tangent:</b> G120° · T5° · LNG +2 mm. The two-isocenter teaching model places the SCV reference near the SC-joint/low-neck region and shifts the tangents inferiorly to the breast/chest-wall isocenter. The tangent couch kicks model divergence matching; exact clinical values are plan-derived.</p><div class="special-checks"><label><input id="specialCheckIndex" type="checkbox" ${specialSetupWorkflow.indexChecked ? 'checked' : ''}> Patient/board indexing and arm position verified.</label><label><input id="specialCheckMatchDoc" type="checkbox" ${specialSetupWorkflow.matchDoc ? 'checked' : ''}> Junction location, half-beam field-edge concept, and tangent couch kicks reviewed.</label></div></div>`;
+		const ok = specialMatchStatus(S.specialSetupWorkflow.breastOffset, Number(s.toleranceMm) || 1);
+		specialSetupContent.innerHTML = `${breastMatchDiagram()}<div class="special-card"><h4>Junction adjustment</h4><div class="special-junction-readout ${ok ? 'good' : 'bad'}">${S.specialSetupWorkflow.breastOffset === 0 ? '0 mm · MATCHED' : `${S.specialSetupWorkflow.breastOffset > 0 ? '+' : ''}${S.specialSetupWorkflow.breastOffset} mm · ${S.specialSetupWorkflow.breastOffset > 0 ? 'GAP' : 'OVERLAP'}`}</div><p>Use the simulated field-edge adjustment to bring the SCV inferior edge and tangent superior edge to the planned matchline. Acceptable teaching tolerance: ±${s.toleranceMm || 1} mm.</p><div class="special-actions"><button data-special="breast-minus">−1 mm edge</button><button data-special="breast-plus">+1 mm edge</button><button data-special="breast-verify">Verify Matchline</button></div></div><div class="special-card"><h4>Planned fields</h4><p><b>SCV AP:</b> G0° · T0° · couch V/L/L 0/0/0. <b>Medial tangent:</b> G300° · T355° · LNG +2 mm. <b>Lateral tangent:</b> G120° · T5° · LNG +2 mm. The two-isocenter teaching model places the SCV reference near the SC-joint/low-neck region and shifts the tangents inferiorly to the breast/chest-wall isocenter. The tangent couch kicks model divergence matching; exact clinical values are plan-derived.</p><div class="special-checks"><label><input id="specialCheckIndex" type="checkbox" ${S.specialSetupWorkflow.indexChecked ? 'checked' : ''}> Patient/board indexing and arm position verified.</label><label><input id="specialCheckMatchDoc" type="checkbox" ${S.specialSetupWorkflow.matchDoc ? 'checked' : ''}> Junction location, half-beam field-edge concept, and tangent couch kicks reviewed.</label></div></div>`;
 		if (status) {
-			status.className = specialSetupWorkflow.verified ? 'good' : ok ? '' : 'bad';
-			status.textContent = specialSetupWorkflow.verified
+			status.className = S.specialSetupWorkflow.verified ? 'good' : ok ? '' : 'bad';
+			status.textContent = S.specialSetupWorkflow.verified
 				? 'MATCHLINE VERIFIED · SCV and tangents may proceed without changing the verified patient setup.'
 				: ok
 					? 'Junction is within tolerance. Complete the indexing/documentation checks and verify the matchline.'
@@ -2779,12 +2537,12 @@ function renderSpecialSetupPanel() {
 		if (sub)
 			sub.textContent =
 				'Cranial + upper spine + lower spine · multi-isocenter indexing and two junctions.';
-		const aok = specialMatchStatus(specialSetupWorkflow.csiJunctionA, s.toleranceMm || 1),
-			bok = specialMatchStatus(specialSetupWorkflow.csiJunctionB, s.toleranceMm || 1);
-		specialSetupContent.innerHTML = `${csiDiagram()}<div class="special-card"><h4>Field-junction management</h4><div class="special-grid"><div class="special-control"><label>Junction 1 <b>${specialSetupWorkflow.csiJunctionA > 0 ? '+' : ''}${specialSetupWorkflow.csiJunctionA} mm</b></label><div class="special-actions"><button data-special="csi-a-minus">−1</button><button data-special="csi-a-plus">+1</button><button data-special="csi-a-zero">0</button></div></div><div class="special-control"><label>Junction 2 <b>${specialSetupWorkflow.csiJunctionB > 0 ? '+' : ''}${specialSetupWorkflow.csiJunctionB} mm</b></label><div class="special-actions"><button data-special="csi-b-minus">−1</button><button data-special="csi-b-plus">+1</button><button data-special="csi-b-zero">0</button></div></div></div><p>J1 = cranial/upper-spine junction. J2 = upper/lower-spine junction. Green indicates ±${s.toleranceMm || 1} mm teaching tolerance.</p><p><b>Teaching field geometry:</b> Right cranial lateral G270° / C5° / T355°; Left cranial lateral G90° / C355° / T5°. Upper spine PA uses LNG +6 mm; lower spine PA uses LNG +12 mm. The ±5° cranial rotations represent plan-derived divergence matching; the source notes the couch kick is approximately 5° but the exact collimator/couch values depend on field length and planning geometry.</p></div><div class="special-card"><h4>Indexed setup verification</h4><div class="special-checks"><label><input id="specialCheckCranial" type="checkbox" ${specialSetupWorkflow.cranialIndex ? 'checked' : ''}> Cranial immobilization/head position and index verified.</label><label><input id="specialCheckSpine" type="checkbox" ${specialSetupWorkflow.spineIndex ? 'checked' : ''}> Upper/lower spinal station indexing verified.</label><label><input id="specialCheckCSIPlan" type="checkbox" ${specialSetupWorkflow.csiPlan ? 'checked' : ''}> Cranial laterals and PA spine geometry reviewed, including the cranial couch/collimator divergence match.</label></div><div class="special-actions" style="margin-top:7px"><button data-special="csi-verify" style="grid-column:1/-1">Verify CSI Setup & Junctions</button></div></div>`;
+		const aok = specialMatchStatus(S.specialSetupWorkflow.csiJunctionA, s.toleranceMm || 1),
+			bok = specialMatchStatus(S.specialSetupWorkflow.csiJunctionB, s.toleranceMm || 1);
+		specialSetupContent.innerHTML = `${csiDiagram()}<div class="special-card"><h4>Field-junction management</h4><div class="special-grid"><div class="special-control"><label>Junction 1 <b>${S.specialSetupWorkflow.csiJunctionA > 0 ? '+' : ''}${S.specialSetupWorkflow.csiJunctionA} mm</b></label><div class="special-actions"><button data-special="csi-a-minus">−1</button><button data-special="csi-a-plus">+1</button><button data-special="csi-a-zero">0</button></div></div><div class="special-control"><label>Junction 2 <b>${S.specialSetupWorkflow.csiJunctionB > 0 ? '+' : ''}${S.specialSetupWorkflow.csiJunctionB} mm</b></label><div class="special-actions"><button data-special="csi-b-minus">−1</button><button data-special="csi-b-plus">+1</button><button data-special="csi-b-zero">0</button></div></div></div><p>J1 = cranial/upper-spine junction. J2 = upper/lower-spine junction. Green indicates ±${s.toleranceMm || 1} mm teaching tolerance.</p><p><b>Teaching field geometry:</b> Right cranial lateral G270° / C5° / T355°; Left cranial lateral G90° / C355° / T5°. Upper spine PA uses LNG +6 mm; lower spine PA uses LNG +12 mm. The ±5° cranial rotations represent plan-derived divergence matching; the source notes the couch kick is approximately 5° but the exact collimator/couch values depend on field length and planning geometry.</p></div><div class="special-card"><h4>Indexed setup verification</h4><div class="special-checks"><label><input id="specialCheckCranial" type="checkbox" ${S.specialSetupWorkflow.cranialIndex ? 'checked' : ''}> Cranial immobilization/head position and index verified.</label><label><input id="specialCheckSpine" type="checkbox" ${S.specialSetupWorkflow.spineIndex ? 'checked' : ''}> Upper/lower spinal station indexing verified.</label><label><input id="specialCheckCSIPlan" type="checkbox" ${S.specialSetupWorkflow.csiPlan ? 'checked' : ''}> Cranial laterals and PA spine geometry reviewed, including the cranial couch/collimator divergence match.</label></div><div class="special-actions" style="margin-top:7px"><button data-special="csi-verify" style="grid-column:1/-1">Verify CSI Setup & Junctions</button></div></div>`;
 		if (status) {
-			status.className = specialSetupWorkflow.verified ? 'good' : !aok || !bok ? 'bad' : '';
-			status.textContent = specialSetupWorkflow.verified
+			status.className = S.specialSetupWorkflow.verified ? 'good' : !aok || !bok ? 'bad' : '';
+			status.textContent = S.specialSetupWorkflow.verified
 				? 'CSI SETUP VERIFIED · both junctions and indexed treatment stations are approved.'
 				: !aok || !bok
 					? 'One or both field junctions remain outside tolerance. Correct them before treatment.'
@@ -2795,8 +2553,8 @@ function renderSpecialSetupPanel() {
 		if (sub)
 			sub.textContent =
 				'Design → template → safe simulated fabrication → mount / label. Bolus placement occurs later in Treatment Delivery.';
-		const e = specialSetupWorkflow.electron;
-		specialSetupContent.innerHTML = `${electronDiagram()}<div class="special-card"><h4>Prescription / accessory order</h4><p><b>${activeTreatmentCase.energy}</b> · ${s.cone} electron cone · ${s.shape} cutout ${s.widthCm} × ${s.heightCm} cm · nominal SSD ${s.ssdCm} cm.</p><p><b>Patient position:</b> breast-treatment posture with arms elevated; the left chest-wall scar is centered to the electron central ray. Use an en-face 0° beam so the cone/cutout face is parallel to the treated surface.</p><div class="special-grid"><div class="special-control"><label>Cutout shape</label><select id="electronShape"><option>Oval</option><option>Rectangle</option><option>Circle</option></select></div><div class="special-control"><label>Electron cone</label><select id="electronCone"><option>6 × 6 cm</option><option>10 × 10 cm</option><option>15 × 15 cm</option></select></div><div class="special-control"><label>Opening width</label><select id="electronWidth">${[4, 5, 6, 7, 8].map((v) => `<option value="${v}">${v} cm</option>`).join('')}</select></div><div class="special-control"><label>Opening height</label><select id="electronHeight">${[3, 4, 5, 6, 7].map((v) => `<option value="${v}">${v} cm</option>`).join('')}</select></div></div><div class="special-actions" style="margin-top:7px"><button data-special="electron-template">Create Template</button><button data-special="electron-fabricate">Fabricate Cutout</button><button data-special="electron-mount">Mount & Verify</button></div></div><div class="special-card"><h4>Fabrication / accessory safety verification</h4><div class="special-checks"><label><input id="electronCheckPPE" type="checkbox" ${specialSetupWorkflow.ePPE ? 'checked' : ''}> Required PPE, ventilation, and local low-melting-alloy handling procedure confirmed.</label><label><input id="electronCheckCool" type="checkbox" ${specialSetupWorkflow.eCool ? 'checked' : ''}> Insert completely cooled/solidified before handling and mounting.</label><label><input id="electronCheckLabel" type="checkbox" ${specialSetupWorkflow.eLabel ? 'checked' : ''}> Patient, site, energy/cone, orientation, and cutout identity labeled.</label><label><input id="electronCheckLight" type="checkbox" ${specialSetupWorkflow.eLight ? 'checked' : ''}> Light-field/skin-mark fit and cutout orientation verified before beam delivery.</label></div><p><b>ODI/SSD:</b> ${odiOn && lastODIcm != null ? `SSD ${lastODIcm.toFixed(1)} cm · active` : 'Turn ODI ON and obtain a valid surface reading before mounting the insert.'}</p><p>${e.mounted ? 'The 3D treatment head now shows the mounted electron applicator/cone and insert tray. Bolus has not yet been applied; that is a separate in-room task in Delivery.' : 'After successful mount & verify, the room view will display the mounted electron applicator/cone beneath the treatment head.'}</p><div class="special-step ${e.template ? 'done' : ''}">1 · Template ${e.template ? 'created' : 'pending'}</div><div class="special-step ${e.fabricated ? 'done' : ''}">2 · Cutout ${e.fabricated ? 'fabricated/cooled' : 'pending fabrication'}</div><div class="special-step ${e.mounted ? 'done' : ''}">3 · Insert ${e.mounted ? 'mounted and verified' : 'pending mount/verification'}</div><div class="special-step">4 · Bolus placement · performed at treatment delivery</div></div>`;
+		const e = S.specialSetupWorkflow.electron;
+		specialSetupContent.innerHTML = `${electronDiagram()}<div class="special-card"><h4>Prescription / accessory order</h4><p><b>${S.activeTreatmentCase.energy}</b> · ${s.cone} electron cone · ${s.shape} cutout ${s.widthCm} × ${s.heightCm} cm · nominal SSD ${s.ssdCm} cm.</p><p><b>Patient position:</b> breast-treatment posture with arms elevated; the left chest-wall scar is centered to the electron central ray. Use an en-face 0° beam so the cone/cutout face is parallel to the treated surface.</p><div class="special-grid"><div class="special-control"><label>Cutout shape</label><select id="electronShape"><option>Oval</option><option>Rectangle</option><option>Circle</option></select></div><div class="special-control"><label>Electron cone</label><select id="electronCone"><option>6 × 6 cm</option><option>10 × 10 cm</option><option>15 × 15 cm</option></select></div><div class="special-control"><label>Opening width</label><select id="electronWidth">${[4, 5, 6, 7, 8].map((v) => `<option value="${v}">${v} cm</option>`).join('')}</select></div><div class="special-control"><label>Opening height</label><select id="electronHeight">${[3, 4, 5, 6, 7].map((v) => `<option value="${v}">${v} cm</option>`).join('')}</select></div></div><div class="special-actions" style="margin-top:7px"><button data-special="electron-template">Create Template</button><button data-special="electron-fabricate">Fabricate Cutout</button><button data-special="electron-mount">Mount & Verify</button></div></div><div class="special-card"><h4>Fabrication / accessory safety verification</h4><div class="special-checks"><label><input id="electronCheckPPE" type="checkbox" ${S.specialSetupWorkflow.ePPE ? 'checked' : ''}> Required PPE, ventilation, and local low-melting-alloy handling procedure confirmed.</label><label><input id="electronCheckCool" type="checkbox" ${S.specialSetupWorkflow.eCool ? 'checked' : ''}> Insert completely cooled/solidified before handling and mounting.</label><label><input id="electronCheckLabel" type="checkbox" ${S.specialSetupWorkflow.eLabel ? 'checked' : ''}> Patient, site, energy/cone, orientation, and cutout identity labeled.</label><label><input id="electronCheckLight" type="checkbox" ${S.specialSetupWorkflow.eLight ? 'checked' : ''}> Light-field/skin-mark fit and cutout orientation verified before beam delivery.</label></div><p><b>ODI/SSD:</b> ${S.odiOn && S.lastODIcm != null ? `SSD ${S.lastODIcm.toFixed(1)} cm · active` : 'Turn ODI ON and obtain a valid surface reading before mounting the insert.'}</p><p>${e.mounted ? 'The 3D treatment head now shows the mounted electron applicator/cone and insert tray. Bolus has not yet been applied; that is a separate in-room task in Delivery.' : 'After successful mount & verify, the room view will display the mounted electron applicator/cone beneath the treatment head.'}</p><div class="special-step ${e.template ? 'done' : ''}">1 · Template ${e.template ? 'created' : 'pending'}</div><div class="special-step ${e.fabricated ? 'done' : ''}">2 · Cutout ${e.fabricated ? 'fabricated/cooled' : 'pending fabrication'}</div><div class="special-step ${e.mounted ? 'done' : ''}">3 · Insert ${e.mounted ? 'mounted and verified' : 'pending mount/verification'}</div><div class="special-step">4 · Bolus placement · performed at treatment delivery</div></div>`;
 		const sh = document.getElementById('electronShape'),
 			co = document.getElementById('electronCone'),
 			wi = document.getElementById('electronWidth'),
@@ -2806,12 +2564,12 @@ function renderSpecialSetupPanel() {
 		if (wi) wi.value = String(e.width || s.widthCm);
 		if (he) he.value = String(e.height || s.heightCm);
 		if (status) {
-			status.className = specialSetupWorkflow.verified
+			status.className = S.specialSetupWorkflow.verified
 				? 'good'
 				: e.fabricated && !e.mounted
 					? 'bad'
 					: '';
-			status.textContent = specialSetupWorkflow.verified
+			status.textContent = S.specialSetupWorkflow.verified
 				? 'ELECTRON CUTOUT VERIFIED · fabrication, accessory identity, fit, orientation, and mounting complete. Proceed to Delivery for bolus placement.'
 				: e.fabricated
 					? 'Fabrication complete. Complete the safety/label/fit checks and mount the insert.'
@@ -2821,16 +2579,16 @@ function renderSpecialSetupPanel() {
 }
 function syncSpecialCheckboxes() {
 	const by = (id) => !!document.getElementById(id)?.checked;
-	specialSetupWorkflow.indexChecked = by('specialCheckIndex');
-	specialSetupWorkflow.matchDoc = by('specialCheckMatchDoc');
-	specialSetupWorkflow.cranialIndex = by('specialCheckCranial');
-	specialSetupWorkflow.spineIndex = by('specialCheckSpine');
-	specialSetupWorkflow.csiPlan = by('specialCheckCSIPlan');
-	specialSetupWorkflow.ePPE = by('electronCheckPPE');
-	specialSetupWorkflow.eCool = by('electronCheckCool');
-	specialSetupWorkflow.eLabel = by('electronCheckLabel');
-	specialSetupWorkflow.eLight = by('electronCheckLight');
-	const e = specialSetupWorkflow.electron;
+	S.specialSetupWorkflow.indexChecked = by('specialCheckIndex');
+	S.specialSetupWorkflow.matchDoc = by('specialCheckMatchDoc');
+	S.specialSetupWorkflow.cranialIndex = by('specialCheckCranial');
+	S.specialSetupWorkflow.spineIndex = by('specialCheckSpine');
+	S.specialSetupWorkflow.csiPlan = by('specialCheckCSIPlan');
+	S.specialSetupWorkflow.ePPE = by('electronCheckPPE');
+	S.specialSetupWorkflow.eCool = by('electronCheckCool');
+	S.specialSetupWorkflow.eLabel = by('electronCheckLabel');
+	S.specialSetupWorkflow.eLight = by('electronCheckLight');
+	const e = S.specialSetupWorkflow.electron;
 	if (e) {
 		const sh = document.getElementById('electronShape'),
 			co = document.getElementById('electronCone'),
@@ -2849,52 +2607,52 @@ function handleSpecialSetupAction(action) {
 	const type = String(s.type || '').toUpperCase();
 	if (type === 'BREAST_MATCH') {
 		if (action === 'breast-minus') {
-			specialSetupWorkflow.breastOffset = Math.max(-5, specialSetupWorkflow.breastOffset - 1);
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.breastOffset = Math.max(-5, S.specialSetupWorkflow.breastOffset - 1);
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'breast-plus') {
-			specialSetupWorkflow.breastOffset = Math.min(5, specialSetupWorkflow.breastOffset + 1);
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.breastOffset = Math.min(5, S.specialSetupWorkflow.breastOffset + 1);
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'breast-verify')
-			specialSetupWorkflow.verified =
-				specialMatchStatus(specialSetupWorkflow.breastOffset, s.toleranceMm || 1) &&
-				specialSetupWorkflow.indexChecked &&
-				specialSetupWorkflow.matchDoc;
+			S.specialSetupWorkflow.verified =
+				specialMatchStatus(S.specialSetupWorkflow.breastOffset, s.toleranceMm || 1) &&
+				S.specialSetupWorkflow.indexChecked &&
+				S.specialSetupWorkflow.matchDoc;
 	} else if (type === 'CSI') {
 		if (action === 'csi-a-minus') {
-			specialSetupWorkflow.csiJunctionA = Math.max(-5, specialSetupWorkflow.csiJunctionA - 1);
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.csiJunctionA = Math.max(-5, S.specialSetupWorkflow.csiJunctionA - 1);
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'csi-a-plus') {
-			specialSetupWorkflow.csiJunctionA = Math.min(5, specialSetupWorkflow.csiJunctionA + 1);
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.csiJunctionA = Math.min(5, S.specialSetupWorkflow.csiJunctionA + 1);
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'csi-a-zero') {
-			specialSetupWorkflow.csiJunctionA = 0;
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.csiJunctionA = 0;
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'csi-b-minus') {
-			specialSetupWorkflow.csiJunctionB = Math.max(-5, specialSetupWorkflow.csiJunctionB - 1);
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.csiJunctionB = Math.max(-5, S.specialSetupWorkflow.csiJunctionB - 1);
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'csi-b-plus') {
-			specialSetupWorkflow.csiJunctionB = Math.min(5, specialSetupWorkflow.csiJunctionB + 1);
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.csiJunctionB = Math.min(5, S.specialSetupWorkflow.csiJunctionB + 1);
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'csi-b-zero') {
-			specialSetupWorkflow.csiJunctionB = 0;
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.csiJunctionB = 0;
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'csi-verify')
-			specialSetupWorkflow.verified =
-				specialMatchStatus(specialSetupWorkflow.csiJunctionA, s.toleranceMm || 1) &&
-				specialMatchStatus(specialSetupWorkflow.csiJunctionB, s.toleranceMm || 1) &&
-				specialSetupWorkflow.cranialIndex &&
-				specialSetupWorkflow.spineIndex &&
-				specialSetupWorkflow.csiPlan;
+			S.specialSetupWorkflow.verified =
+				specialMatchStatus(S.specialSetupWorkflow.csiJunctionA, s.toleranceMm || 1) &&
+				specialMatchStatus(S.specialSetupWorkflow.csiJunctionB, s.toleranceMm || 1) &&
+				S.specialSetupWorkflow.cranialIndex &&
+				S.specialSetupWorkflow.spineIndex &&
+				S.specialSetupWorkflow.csiPlan;
 	} else if (type === 'ELECTRON') {
-		const e = specialSetupWorkflow.electron;
+		const e = S.specialSetupWorkflow.electron;
 		const shape = document.getElementById('electronShape')?.value || '';
 		const cone = document.getElementById('electronCone')?.value || '';
 		const width = Number(document.getElementById('electronWidth')?.value) || 0;
@@ -2907,11 +2665,11 @@ function handleSpecialSetupAction(action) {
 			e.template = true;
 			e.fabricated = false;
 			e.mounted = false;
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'electron-fabricate') {
 			if (e.template) e.fabricated = true;
-			specialSetupWorkflow.verified = false;
+			S.specialSetupWorkflow.verified = false;
 		}
 		if (action === 'electron-mount') {
 			const dims =
@@ -2920,15 +2678,15 @@ function handleSpecialSetupAction(action) {
 				Math.abs(width - s.widthCm) < 0.01 &&
 				Math.abs(height - s.heightCm) < 0.01;
 			const checks =
-				specialSetupWorkflow.ePPE &&
-				specialSetupWorkflow.eCool &&
-				specialSetupWorkflow.eLabel &&
-				specialSetupWorkflow.eLight &&
-				odiOn &&
-				lastODIcm != null;
+				S.specialSetupWorkflow.ePPE &&
+				S.specialSetupWorkflow.eCool &&
+				S.specialSetupWorkflow.eLabel &&
+				S.specialSetupWorkflow.eLight &&
+				S.odiOn &&
+				S.lastODIcm != null;
 			if (e.template && e.fabricated && dims && checks) {
 				e.mounted = true;
-				specialSetupWorkflow.verified = true;
+				S.specialSetupWorkflow.verified = true;
 				e.bolusPlaced = false;
 				e.airGapMm = 4;
 				e.bolusDragX = 54;
@@ -2939,7 +2697,7 @@ function handleSpecialSetupAction(action) {
 				e.bolusLogged = false;
 			} else {
 				e.mounted = false;
-				specialSetupWorkflow.verified = false;
+				S.specialSetupWorkflow.verified = false;
 			}
 			updateElectronBolusMesh();
 		}
@@ -2953,7 +2711,7 @@ function handleSpecialSetupAction(action) {
 }
 
 function activeSRSConfig() {
-	return activeTreatmentCase?.stereotactic || null;
+	return S.activeTreatmentCase?.stereotactic || null;
 }
 function srsRequired() {
 	return !!activeSRSConfig();
@@ -2975,7 +2733,7 @@ function activeIGRTTolerances() {
 	};
 }
 function resetSRSWorkflowForCase() {
-	srsWorkflow = {
+	S.srsWorkflow = {
 		dryRunByField: {},
 		timeoutVerifiedByField: {},
 		lastClearance: null,
@@ -2993,7 +2751,7 @@ function srsCurrentFieldGeometryOK() {
 }
 function srsChecklistData() {
 	const field = deliveryCasePlan(),
-		idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+		idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 		tol = activeIGRTTolerances();
 	const couchPlan = monitorPlannedDisplay(
 		'couchAngle',
@@ -3003,22 +2761,22 @@ function srsChecklistData() {
 		{
 			name: 'Stereotactic 6DOF alignment',
 			ok: igrtAlignmentReadyForDelivery(),
-			detail: clinicalIGRT?.verified
+			detail: S.clinicalIGRT?.verified
 				? `≤${tol.translation} mm / ≤${tol.rotation}°`
 				: 'Complete high-precision IGRT'
 		},
 		{
 			name: 'Imaging hardware retracted',
-			ok: !kvOn && !detectorExtended,
-			detail: !kvOn && !detectorExtended ? 'kV + MV stowed' : 'Retract imaging hardware'
+			ok: !S.kvOn && !S.detectorExtended,
+			detail: !S.kvOn && !S.detectorExtended ? 'kV + MV stowed' : 'Retract imaging hardware'
 		}
 	];
 	if (sbrtRequired())
 		rows.push({
 			name: '4D respiratory management',
-			ok: !!motionManagement?.verified,
-			detail: motionManagement?.verified
-				? `Gate ${motionManagement.gateLow}–${motionManagement.gateHigh}% approved`
+			ok: !!S.motionManagement?.verified,
+			detail: S.motionManagement?.verified
+				? `Gate ${S.motionManagement.gateLow}–${S.motionManagement.gateHigh}% approved`
 				: 'Complete 4D motion verification'
 		});
 	rows.push(
@@ -3029,8 +2787,8 @@ function srsChecklistData() {
 		},
 		{
 			name: 'Arc collision / trajectory clearance',
-			ok: !!srsWorkflow.dryRunByField[idx] || clearanceOverrideActive(idx),
-			detail: srsWorkflow.dryRunByField[idx]
+			ok: !!S.srsWorkflow.dryRunByField[idx] || clearanceOverrideActive(idx),
+			detail: S.srsWorkflow.dryRunByField[idx]
 				? clearanceOverrideActive(idx)
 					? 'Beam-off trajectory completed · clearance proxy overridden'
 					: 'Selected arc clear'
@@ -3040,8 +2798,8 @@ function srsChecklistData() {
 		},
 		{
 			name: `${stereotacticCaseLabel()} timeout approval`,
-			ok: !!srsWorkflow.timeoutVerifiedByField[idx],
-			detail: srsWorkflow.timeoutVerifiedByField[idx]
+			ok: !!S.srsWorkflow.timeoutVerifiedByField[idx],
+			detail: S.srsWorkflow.timeoutVerifiedByField[idx]
 				? 'Approved for this arc'
 				: 'Final timeout required'
 		}
@@ -3052,7 +2810,7 @@ function renderSRSPanel() {
 	if (!srsPanel) return;
 	const config = activeSRSConfig(),
 		field = deliveryCasePlan(),
-		idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+		idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 		tol = activeIGRTTolerances(),
 		type = stereotacticCaseLabel();
 	setTextById(
@@ -3079,7 +2837,7 @@ function renderSRSPanel() {
 	);
 	setTextById(
 		'srsPatient',
-		config ? `${activeTreatmentCase.patient} · ${field.field}` : 'No stereotactic case'
+		config ? `${S.activeTreatmentCase.patient} · ${field.field}` : 'No stereotactic case'
 	);
 	setTextById('srsTolerance', config ? `±${tol.translation} mm / ±${tol.rotation}°` : '—');
 	setTextById(
@@ -3112,7 +2870,7 @@ function renderSRSPanel() {
 	const rx = document.getElementById('srsPrescription');
 	if (rx)
 		rx.innerHTML = config
-			? `<b>${config.label}</b> · ${activeTreatmentCase.energy} · Fraction ${activeTreatmentCase.fraction}<br>Selected arc: <b>${field.field}</b> · Gantry ${monitorPlannedDisplay('gantry', field.geometry?.gantry)} · Couch ${monitorPlannedDisplay('couchAngle', field.geometry?.couchAngle || '0°')} · Collimator ${monitorPlannedDisplay('collimator', field.geometry?.collimator)} · ${field.mu} MU.`
+			? `<b>${config.label}</b> · ${S.activeTreatmentCase.energy} · Fraction ${S.activeTreatmentCase.fraction}<br>Selected arc: <b>${field.field}</b> · Gantry ${monitorPlannedDisplay('gantry', field.geometry?.gantry)} · Couch ${monitorPlannedDisplay('couchAngle', field.geometry?.couchAngle || '0°')} · Collimator ${monitorPlannedDisplay('collimator', field.geometry?.collimator)} · ${field.mu} MU.`
 			: 'Load an SRS or SBRT patient to begin.';
 	const list = document.getElementById('srsChecklist');
 	if (list)
@@ -3126,19 +2884,19 @@ function renderSRSPanel() {
 	if (status) {
 		status.className = '';
 		if (!config) status.textContent = 'Load a stereotactic patient case.';
-		else if (srsWorkflow.dryRunning)
+		else if (S.srsWorkflow.dryRunning)
 			status.textContent =
 				'DRY RUN IN PROGRESS · beam off · checking the selected treatment trajectory.';
-		else if (srsWorkflow.timeoutVerifiedByField[idx]) {
+		else if (S.srsWorkflow.timeoutVerifiedByField[idx]) {
 			status.className = 'good';
 			status.textContent = `${type} TIMEOUT APPROVED · selected arc is cleared for treatment delivery.`;
-		} else if (srsWorkflow.lastClearance?.safe === false) {
+		} else if (S.srsWorkflow.lastClearance?.safe === false) {
 			if (clearanceOverrideActive(idx)) {
 				status.className = 'good';
-				status.textContent = `SIMULATION CLEARANCE OVERRIDE ACTIVE · ${srsWorkflow.lastClearance.field || field.field} near gantry ${Number(srsWorkflow.lastClearance.angle || 0).toFixed(0)}° · OIS sign-off required.`;
+				status.textContent = `SIMULATION CLEARANCE OVERRIDE ACTIVE · ${S.srsWorkflow.lastClearance.field || field.field} near gantry ${Number(S.srsWorkflow.lastClearance.angle || 0).toFixed(0)}° · OIS sign-off required.`;
 			} else {
 				status.className = 'bad';
-				status.textContent = `CLEARANCE HOLD · ${srsWorkflow.lastClearance.field || field.field} near gantry ${Number(srsWorkflow.lastClearance.angle || 0).toFixed(0)}°.`;
+				status.textContent = `CLEARANCE HOLD · ${S.srsWorkflow.lastClearance.field || field.field} near gantry ${Number(S.srsWorkflow.lastClearance.angle || 0).toFixed(0)}°.`;
 			}
 		} else
 			status.textContent = sbrtRequired()
@@ -3148,12 +2906,12 @@ function renderSRSPanel() {
 	if (srsDryRun)
 		srsDryRun.disabled =
 			!config ||
-			srsWorkflow.dryRunning ||
-			!clinicalIGRT?.verified ||
-			kvOn ||
-			detectorExtended ||
+			S.srsWorkflow.dryRunning ||
+			!S.clinicalIGRT?.verified ||
+			S.kvOn ||
+			S.detectorExtended ||
 			!srsCurrentFieldGeometryOK();
-	if (srsVerifyTimeout) srsVerifyTimeout.disabled = !config || srsWorkflow.dryRunning;
+	if (srsVerifyTimeout) srsVerifyTimeout.disabled = !config || S.srsWorkflow.dryRunning;
 }
 function recheckSRSClearance() {
 	if (!srsRequired()) {
@@ -3161,9 +2919,9 @@ function recheckSRSClearance() {
 		renderSRSPanel();
 		return;
 	}
-	const idx = Number(treatmentDelivery.activeFieldIndex) || 0;
+	const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0;
 	const c = currentSelectedFieldClearance(TREATMENT_CLEARANCE_REQUIRED_MARGIN);
-	srsWorkflow.lastClearance = c;
+	S.srsWorkflow.lastClearance = c;
 	if (c.safe) {
 		setPendantLCD(
 			`${stereotacticCaseLabel()} CLEARANCE`,
@@ -3184,19 +2942,19 @@ function recheckSRSClearance() {
 	renderTreatmentDeliveryPanel();
 }
 async function runSRSDryRun() {
-	if (!srsRequired() || srsWorkflow.dryRunning) return;
-	if (!clinicalIGRT?.verified || kvOn || detectorExtended || !srsCurrentFieldGeometryOK()) {
+	if (!srsRequired() || S.srsWorkflow.dryRunning) return;
+	if (!S.clinicalIGRT?.verified || S.kvOn || S.detectorExtended || !srsCurrentFieldGeometryOK()) {
 		setPendantLCD(`${stereotacticCaseLabel()} DRY RUN`, 'Complete IGRT / start geometry first');
 		renderSRSPanel();
 		return;
 	}
 	const field = deliveryCasePlan(),
-		idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+		idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 		overrideActive = clearanceOverrideActive(idx);
 	const check = currentSelectedFieldClearance(TREATMENT_CLEARANCE_REQUIRED_MARGIN);
-	srsWorkflow.lastClearance = check;
+	S.srsWorkflow.lastClearance = check;
 	if (!check.safe && !overrideActive) {
-		srsWorkflow.dryRunByField[idx] = false;
+		S.srsWorkflow.dryRunByField[idx] = false;
 		setPendantLCD(`${stereotacticCaseLabel()} DRY RUN`, 'HOLD · predicted collision');
 		renderSRSPanel();
 		renderTreatmentDeliveryPanel();
@@ -3205,9 +2963,9 @@ async function runSRSDryRun() {
 
 	const samples = treatmentTrajectorySamples(field),
 		start = normalizeAngleValue(field.geometry?.gantry) || 0;
-	srsWorkflow.dryRunning = true;
-	srsWorkflow.dryRunByField[idx] = false;
-	srsWorkflow.timeoutVerifiedByField[idx] = false;
+	S.srsWorkflow.dryRunning = true;
+	S.srsWorkflow.dryRunByField[idx] = false;
+	S.srsWorkflow.timeoutVerifiedByField[idx] = false;
 	setBeamState(false);
 	renderSRSPanel();
 
@@ -3216,15 +2974,15 @@ async function runSRSDryRun() {
 	for (let i = 0; i < samples.length; i++) {
 		const a = samples[i].angle;
 		fundamentalState.gantry = wrap360(a);
-		if (gantryRotatingGroup) gantryRotatingGroup.rotation.z = -((a * Math.PI) / 180);
+		if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z = -((a * Math.PI) / 180);
 		syncFundamentalReadouts(
 			`${stereotacticCaseLabel()} DRY RUN`,
 			`G ${a.toFixed(0)}° · beam off${overrideActive ? ' · clearance override' : ''}`
 		);
-		scene?.updateMatrixWorld(true);
+		S.scene?.updateMatrixWorld(true);
 		const c = getCollisionAssessment();
 		if (c && c.margin < TREATMENT_CLEARANCE_REQUIRED_MARGIN) {
-			srsWorkflow.lastClearance = {
+			S.srsWorkflow.lastClearance = {
 				safe: false,
 				minMargin: c.margin,
 				reason: c.reason,
@@ -3239,11 +2997,11 @@ async function runSRSDryRun() {
 	}
 
 	fundamentalState.gantry = wrap360(start);
-	if (gantryRotatingGroup) gantryRotatingGroup.rotation.z = -((start * Math.PI) / 180);
-	srsWorkflow.dryRunning = false;
+	if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z = -((start * Math.PI) / 180);
+	S.srsWorkflow.dryRunning = false;
 
-	const pass = srsWorkflow.lastClearance?.safe !== false || overrideActive;
-	srsWorkflow.dryRunByField[idx] = pass;
+	const pass = S.srsWorkflow.lastClearance?.safe !== false || overrideActive;
+	S.srsWorkflow.dryRunByField[idx] = pass;
 
 	if (pass && encounteredOverrideClearance) {
 		const detail = `${field.field} · beam-off trajectory completed under simulation clearance override${firstOverrideHit ? ` · first proxy hold near G ${Number(firstOverrideHit.angle).toFixed(0)}°` : ''}`;
@@ -3268,19 +3026,19 @@ async function runSRSDryRun() {
 }
 function verifySRSTimeout() {
 	if (!srsRequired()) return;
-	const idx = Number(treatmentDelivery.activeFieldIndex) || 0;
+	const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0;
 	const manual = ['srsCheckPatient', 'srsCheckRx', 'srsCheckMask', 'srsCheckTeam'].every(
 		(id) => !!document.getElementById(id)?.checked
 	);
 	const auto =
 		igrtAlignmentReadyForDelivery() &&
-		(!sbrtRequired() || !!motionManagement?.verified) &&
-		!kvOn &&
-		!detectorExtended &&
+		(!sbrtRequired() || !!S.motionManagement?.verified) &&
+		!S.kvOn &&
+		!S.detectorExtended &&
 		srsCurrentFieldGeometryOK() &&
-		(!!srsWorkflow.dryRunByField[idx] || clearanceOverrideActive(idx));
-	srsWorkflow.timeoutVerifiedByField[idx] = manual && auto;
-	if (srsWorkflow.timeoutVerifiedByField[idx])
+		(!!S.srsWorkflow.dryRunByField[idx] || clearanceOverrideActive(idx));
+	S.srsWorkflow.timeoutVerifiedByField[idx] = manual && auto;
+	if (S.srsWorkflow.timeoutVerifiedByField[idx])
 		oisLogEvent(
 			'TIMEOUT',
 			`${stereotacticCaseLabel()} timeout approved`,
@@ -3289,7 +3047,7 @@ function verifySRSTimeout() {
 		);
 	setPendantLCD(
 		`${stereotacticCaseLabel()} TIMEOUT`,
-		srsWorkflow.timeoutVerifiedByField[idx]
+		S.srsWorkflow.timeoutVerifiedByField[idx]
 			? 'APPROVED · selected arc'
 			: 'HOLD · complete checklist'
 	);
@@ -3299,69 +3057,69 @@ function verifySRSTimeout() {
 }
 
 function activeMotionSpec() {
-	return activeTreatmentCase?.motionManagement || null;
+	return S.activeTreatmentCase?.motionManagement || null;
 }
 function motionRequired() {
 	return !!activeMotionSpec();
 }
 function configureMotionPatientVisuals() {
 	const spec = activeMotionSpec();
-	if (motionTarget3D) motionTarget3D.visible = !!spec;
-	if (motionSurfaceMarker) motionSurfaceMarker.visible = !!spec;
-	if (motionHeart3D) motionHeart3D.visible = !!spec && spec.type === 'DIBH';
+	if (S.motionTarget3D) S.motionTarget3D.visible = !!spec;
+	if (S.motionSurfaceMarker) S.motionSurfaceMarker.visible = !!spec;
+	if (S.motionHeart3D) S.motionHeart3D.visible = !!spec && spec.type === 'DIBH';
 	if (!spec) return;
 	if (spec.type === 'DIBH') {
-		if (motionTarget3D) {
-			motionTarget3D.position.set(-0.14, 0.075, -0.45);
-			motionTargetBase = motionTarget3D.position.clone();
+		if (S.motionTarget3D) {
+			S.motionTarget3D.position.set(-0.14, 0.075, -0.45);
+			S.motionTargetBase = S.motionTarget3D.position.clone();
 		}
-		if (motionSurfaceMarker) {
-			motionSurfaceMarker.position.set(-0.15, 0.145, -0.45);
-			motionSurfaceBase = motionSurfaceMarker.position.clone();
+		if (S.motionSurfaceMarker) {
+			S.motionSurfaceMarker.position.set(-0.15, 0.145, -0.45);
+			S.motionSurfaceBase = S.motionSurfaceMarker.position.clone();
 		}
-		if (motionHeart3D) {
-			motionHeart3D.position.set(-0.035, 0.035, -0.42);
-			motionHeartBase = motionHeart3D.position.clone();
+		if (S.motionHeart3D) {
+			S.motionHeart3D.position.set(-0.035, 0.035, -0.42);
+			S.motionHeartBase = S.motionHeart3D.position.clone();
 		}
 	} else {
-		if (motionTarget3D) {
-			motionTarget3D.position.set(0.09, 0.02, -0.45);
-			motionTargetBase = motionTarget3D.position.clone();
+		if (S.motionTarget3D) {
+			S.motionTarget3D.position.set(0.09, 0.02, -0.45);
+			S.motionTargetBase = S.motionTarget3D.position.clone();
 		}
-		if (motionSurfaceMarker) {
-			motionSurfaceMarker.position.set(0.09, 0.13, -0.45);
-			motionSurfaceBase = motionSurfaceMarker.position.clone();
+		if (S.motionSurfaceMarker) {
+			S.motionSurfaceMarker.position.set(0.09, 0.13, -0.45);
+			S.motionSurfaceBase = S.motionSurfaceMarker.position.clone();
 		}
-		if (motionHeart3D) motionHeart3D.visible = false;
+		if (S.motionHeart3D) S.motionHeart3D.visible = false;
 	}
 }
 function resetMotionManagementForCase() {
 	const s = activeMotionSpec();
-	motionManagement.required = !!s;
-	motionManagement.mode = s?.type || 'NONE';
-	motionManagement.acquired = false;
-	motionManagement.verified = false;
-	motionManagement.gateOpen = false;
-	motionManagement.period = Number(s?.period) || 4.5;
-	motionManagement.phase = 0;
-	motionManagement.breathLevel = 45;
-	motionManagement.excursionSI = Number(s?.siExcursion) || 0;
-	motionManagement.excursionAP = Number(s?.apExcursion) || 0;
-	motionManagement.excursionLR = Number(s?.lrExcursion) || 0;
-	motionManagement.gateLow = Number(s?.gateLow ?? 40);
-	motionManagement.gateHigh = Number(s?.gateHigh ?? 60);
-	motionManagement.dibhTarget = Number(s?.dibhTarget ?? 80);
-	motionManagement.dibhTolerance = Number(s?.dibhTolerance ?? 5);
-	motionManagement.holdActive = false;
-	motionManagement.holdStartedAt = 0;
-	motionManagement.samples = [];
-	motionManagement.trace = [];
-	motionManagement.phaseData = [];
-	motionManagement.lastFrame = performance.now();
-	if (motionGateLow) motionGateLow.value = String(motionManagement.gateLow);
-	if (motionGateHigh) motionGateHigh.value = String(motionManagement.gateHigh);
-	if (motionDibhTarget) motionDibhTarget.value = String(motionManagement.dibhTarget);
-	if (motionDibhTolerance) motionDibhTolerance.value = String(motionManagement.dibhTolerance);
+	S.motionManagement.required = !!s;
+	S.motionManagement.mode = s?.type || 'NONE';
+	S.motionManagement.acquired = false;
+	S.motionManagement.verified = false;
+	S.motionManagement.gateOpen = false;
+	S.motionManagement.period = Number(s?.period) || 4.5;
+	S.motionManagement.phase = 0;
+	S.motionManagement.breathLevel = 45;
+	S.motionManagement.excursionSI = Number(s?.siExcursion) || 0;
+	S.motionManagement.excursionAP = Number(s?.apExcursion) || 0;
+	S.motionManagement.excursionLR = Number(s?.lrExcursion) || 0;
+	S.motionManagement.gateLow = Number(s?.gateLow ?? 40);
+	S.motionManagement.gateHigh = Number(s?.gateHigh ?? 60);
+	S.motionManagement.dibhTarget = Number(s?.dibhTarget ?? 80);
+	S.motionManagement.dibhTolerance = Number(s?.dibhTolerance ?? 5);
+	S.motionManagement.holdActive = false;
+	S.motionManagement.holdStartedAt = 0;
+	S.motionManagement.samples = [];
+	S.motionManagement.trace = [];
+	S.motionManagement.phaseData = [];
+	S.motionManagement.lastFrame = performance.now();
+	if (motionGateLow) motionGateLow.value = String(S.motionManagement.gateLow);
+	if (motionGateHigh) motionGateHigh.value = String(S.motionManagement.gateHigh);
+	if (motionDibhTarget) motionDibhTarget.value = String(S.motionManagement.dibhTarget);
+	if (motionDibhTolerance) motionDibhTolerance.value = String(S.motionManagement.dibhTolerance);
 	configureMotionPatientVisuals();
 	renderMotionPanel(true);
 }
@@ -3370,17 +3128,17 @@ function respiratoryValueFromPhase(phase) {
 }
 function motionConditionOpen() {
 	if (!motionRequired()) return true;
-	if (motionManagement.mode === 'DIBH')
+	if (S.motionManagement.mode === 'DIBH')
 		return (
-			!!motionManagement.holdActive &&
-			Math.abs(motionManagement.breathLevel - motionManagement.dibhTarget) <=
-				motionManagement.dibhTolerance
+			!!S.motionManagement.holdActive &&
+			Math.abs(S.motionManagement.breathLevel - S.motionManagement.dibhTarget) <=
+				S.motionManagement.dibhTolerance
 		);
-	const p = ((motionManagement.phase % 100) + 100) % 100;
-	return p >= motionManagement.gateLow && p <= motionManagement.gateHigh;
+	const p = ((S.motionManagement.phase % 100) + 100) % 100;
+	return p >= S.motionManagement.gateLow && p <= S.motionManagement.gateHigh;
 }
 function currentMotionGateOpen() {
-	return !motionRequired() || (!!motionManagement.verified && motionConditionOpen());
+	return !motionRequired() || (!!S.motionManagement.verified && motionConditionOpen());
 }
 function motion4DPhaseData() {
 	const arr = [];
@@ -3388,9 +3146,9 @@ function motion4DPhaseData() {
 		const wave = respiratoryValueFromPhase(p);
 		arr.push({
 			phase: p,
-			si: (motionManagement.excursionSI / 2) * wave,
-			ap: (motionManagement.excursionAP / 2) * wave,
-			lr: (motionManagement.excursionLR / 2) * wave
+			si: (S.motionManagement.excursionSI / 2) * wave,
+			ap: (S.motionManagement.excursionAP / 2) * wave,
+			lr: (S.motionManagement.excursionLR / 2) * wave
 		});
 	}
 	return arr;
@@ -3401,84 +3159,84 @@ function acquireMotionCharacterization() {
 		renderMotionPanel();
 		return;
 	}
-	if (motionManagement.mode === 'DIBH') {
-		if (!motionManagement.holdActive || !motionConditionOpen()) {
+	if (S.motionManagement.mode === 'DIBH') {
+		if (!S.motionManagement.holdActive || !motionConditionOpen()) {
 			setPendantLCD('DIBH', 'Start a stable in-tolerance hold first');
 			renderMotionPanel();
 			return;
 		}
-		const sample = Number(motionManagement.breathLevel.toFixed(1));
-		motionManagement.samples.push(sample);
-		motionManagement.acquired = motionManagement.samples.length >= 3;
+		const sample = Number(S.motionManagement.breathLevel.toFixed(1));
+		S.motionManagement.samples.push(sample);
+		S.motionManagement.acquired = S.motionManagement.samples.length >= 3;
 		setPendantLCD(
 			'DIBH SAMPLE',
-			`${sample.toFixed(1)}% · ${motionManagement.samples.length}/3 holds`
+			`${sample.toFixed(1)}% · ${S.motionManagement.samples.length}/3 holds`
 		);
 	} else {
-		motionManagement.phaseData = motion4DPhaseData();
-		motionManagement.samples = motionManagement.phaseData.map((x) => x.si);
-		motionManagement.acquired = true;
-		setPendantLCD('4D ACQUIRED', `SI excursion ${motionManagement.excursionSI.toFixed(0)} mm`);
+		S.motionManagement.phaseData = motion4DPhaseData();
+		S.motionManagement.samples = S.motionManagement.phaseData.map((x) => x.si);
+		S.motionManagement.acquired = true;
+		setPendantLCD('4D ACQUIRED', `SI excursion ${S.motionManagement.excursionSI.toFixed(0)} mm`);
 	}
-	motionManagement.verified = false;
+	S.motionManagement.verified = false;
 	renderMotionPanel(true);
 	renderTreatmentDeliveryPanel();
 }
 function verifyMotionManagement() {
 	if (!motionRequired()) {
-		motionManagement.verified = true;
+		S.motionManagement.verified = true;
 		renderMotionPanel();
 		return;
 	}
-	if (motionManagement.mode === 'DIBH') {
+	if (S.motionManagement.mode === 'DIBH') {
 		const need = Number(activeMotionSpec()?.practiceHolds) || 3;
-		const recent = motionManagement.samples.slice(-need);
+		const recent = S.motionManagement.samples.slice(-need);
 		const ok =
 			recent.length >= need &&
 			recent.every(
-				(v) => Math.abs(v - motionManagement.dibhTarget) <= motionManagement.dibhTolerance
+				(v) => Math.abs(v - S.motionManagement.dibhTarget) <= S.motionManagement.dibhTolerance
 			);
-		motionManagement.acquired = recent.length >= need;
-		motionManagement.verified = ok;
+		S.motionManagement.acquired = recent.length >= need;
+		S.motionManagement.verified = ok;
 		setPendantLCD(
 			'DIBH VERIFICATION',
 			ok ? 'PASS · reproducible holds' : 'HOLD · record 3 in-tolerance holds'
 		);
 	} else {
-		const width = motionManagement.gateHigh - motionManagement.gateLow,
-			containsEE = motionManagement.gateLow <= 50 && motionManagement.gateHigh >= 50;
-		motionManagement.verified =
-			!!motionManagement.acquired && width >= 10 && width <= 30 && containsEE;
+		const width = S.motionManagement.gateHigh - S.motionManagement.gateLow,
+			containsEE = S.motionManagement.gateLow <= 50 && S.motionManagement.gateHigh >= 50;
+		S.motionManagement.verified =
+			!!S.motionManagement.acquired && width >= 10 && width <= 30 && containsEE;
 		setPendantLCD(
 			'4D GATE',
-			motionManagement.verified
+			S.motionManagement.verified
 				? 'PASS · end-expiration gate approved'
 				: 'HOLD · acquire 4D / review gate'
 		);
 	}
-	if (motionManagement.verified)
+	if (S.motionManagement.verified)
 		oisLogEvent(
 			'MOTION',
 			'Motion management verified',
-			motionManagement.mode === 'DIBH'
-				? `DIBH ${motionManagement.dibhTarget}% ±${motionManagement.dibhTolerance}%`
-				: `Gate ${motionManagement.gateLow}–${motionManagement.gateHigh}%`,
+			S.motionManagement.mode === 'DIBH'
+				? `DIBH ${S.motionManagement.dibhTarget}% ±${S.motionManagement.dibhTolerance}%`
+				: `Gate ${S.motionManagement.gateLow}–${S.motionManagement.gateHigh}%`,
 			'motion-verified'
 		);
 	renderMotionPanel(true);
 	renderTreatmentDeliveryPanel();
 }
 function startDIBHHold() {
-	if (motionManagement.mode !== 'DIBH') return;
-	motionManagement.holdActive = true;
-	motionManagement.holdStartedAt = performance.now();
+	if (S.motionManagement.mode !== 'DIBH') return;
+	S.motionManagement.holdActive = true;
+	S.motionManagement.holdStartedAt = performance.now();
 	setPendantLCD('DIBH', 'COACH · inhale and hold');
 	renderMotionPanel();
 }
 function releaseDIBHHold() {
-	if (motionManagement.mode !== 'DIBH') return;
-	motionManagement.holdActive = false;
-	motionManagement.holdStartedAt = 0;
+	if (S.motionManagement.mode !== 'DIBH') return;
+	S.motionManagement.holdActive = false;
+	S.motionManagement.holdStartedAt = 0;
 	setPendantLCD('DIBH', 'BREATH HOLD RELEASED');
 	renderMotionPanel();
 }
@@ -3505,20 +3263,20 @@ function drawMotionWave() {
 		ctx.lineTo(w, y);
 		ctx.stroke();
 	}
-	if (motionManagement.mode === 'DIBH') {
-		const top = h - ((motionManagement.dibhTarget + motionManagement.dibhTolerance) / 100) * h,
-			bot = h - ((motionManagement.dibhTarget - motionManagement.dibhTolerance) / 100) * h;
+	if (S.motionManagement.mode === 'DIBH') {
+		const top = h - ((S.motionManagement.dibhTarget + S.motionManagement.dibhTolerance) / 100) * h,
+			bot = h - ((S.motionManagement.dibhTarget - S.motionManagement.dibhTolerance) / 100) * h;
 		ctx.fillStyle = 'rgba(63,167,108,.16)';
 		ctx.fillRect(0, top, w, bot - top);
 		ctx.strokeStyle = 'rgba(91,214,142,.75)';
 		ctx.setLineDash([8, 6]);
 		ctx.beginPath();
-		ctx.moveTo(0, h - (motionManagement.dibhTarget / 100) * h);
-		ctx.lineTo(w, h - (motionManagement.dibhTarget / 100) * h);
+		ctx.moveTo(0, h - (S.motionManagement.dibhTarget / 100) * h);
+		ctx.lineTo(w, h - (S.motionManagement.dibhTarget / 100) * h);
 		ctx.stroke();
 		ctx.setLineDash([]);
 	}
-	const tr = motionManagement.trace;
+	const tr = S.motionManagement.trace;
 	if (tr.length > 1) {
 		ctx.strokeStyle = '#b28af4';
 		ctx.lineWidth = 3;
@@ -3531,9 +3289,9 @@ function drawMotionWave() {
 		});
 		ctx.stroke();
 	}
-	const val = motionManagement.breathLevel,
+	const val = S.motionManagement.breathLevel,
 		y = h - (val / 100) * h;
-	ctx.fillStyle = motionManagement.gateOpen ? '#55e293' : '#ff7184';
+	ctx.fillStyle = S.motionManagement.gateOpen ? '#55e293' : '#ff7184';
 	ctx.beginPath();
 	ctx.arc(w - 12, y, 7, 0, Math.PI * 2);
 	ctx.fill();
@@ -3542,17 +3300,17 @@ function drawMotionWave() {
 function renderMotionPanel(force = false) {
 	if (!motionPanel) return;
 	const spec = activeMotionSpec(),
-		dibh = motionManagement.mode === 'DIBH';
+		dibh = S.motionManagement.mode === 'DIBH';
 	setTextById(
 		'motionPatient',
-		activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${activeTreatmentCase.siteLabel}`
+		S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${S.activeTreatmentCase.siteLabel}`
 			: 'No case'
 	);
 	setTextById('motionStrategy', spec?.label || 'Not prescribed');
 	setTextById(
 		'motionVerified',
-		!spec ? 'N/A' : motionManagement.verified ? 'VERIFIED' : 'NOT VERIFIED'
+		!spec ? 'N/A' : S.motionManagement.verified ? 'VERIFIED' : 'NOT VERIFIED'
 	);
 	const lowC = document.getElementById('motionLowControl'),
 		highC = document.getElementById('motionHighControl'),
@@ -3562,38 +3320,44 @@ function renderMotionPanel(force = false) {
 	if (highC) highC.style.display = dibh ? 'none' : 'block';
 	if (dtC) dtC.style.display = dibh ? 'block' : 'none';
 	if (tolC) tolC.style.display = dibh ? 'block' : 'none';
-	setTextById('motionGateLowValue', `${motionManagement.gateLow}%`);
-	setTextById('motionGateHighValue', `${motionManagement.gateHigh}%`);
-	setTextById('motionDibhTargetValue', `${motionManagement.dibhTarget}%`);
-	setTextById('motionDibhToleranceValue', `±${motionManagement.dibhTolerance}%`);
+	setTextById('motionGateLowValue', `${S.motionManagement.gateLow}%`);
+	setTextById('motionGateHighValue', `${S.motionManagement.gateHigh}%`);
+	setTextById('motionDibhTargetValue', `${S.motionManagement.dibhTarget}%`);
+	setTextById('motionDibhToleranceValue', `±${S.motionManagement.dibhTolerance}%`);
 	const phaseLabel = document.getElementById('motionPhaseLabel');
 	if (phaseLabel) phaseLabel.textContent = dibh ? 'Breath level' : '4D phase';
 	setTextById(
 		'motionPhaseValue',
-		dibh ? `${motionManagement.breathLevel.toFixed(0)}%` : `${motionManagement.phase.toFixed(0)}%`
+		dibh
+			? `${S.motionManagement.breathLevel.toFixed(0)}%`
+			: `${S.motionManagement.phase.toFixed(0)}%`
 	);
-	setTextById('motionGateValue', motionManagement.gateOpen ? 'OPEN' : 'CLOSED');
+	setTextById('motionGateValue', S.motionManagement.gateOpen ? 'OPEN' : 'CLOSED');
 	const gm = document.getElementById('motionGateMetric');
 	if (gm) {
-		gm.classList.toggle('good', motionManagement.gateOpen);
-		gm.classList.toggle('bad', !motionManagement.gateOpen);
+		gm.classList.toggle('good', S.motionManagement.gateOpen);
+		gm.classList.toggle('bad', !S.motionManagement.gateOpen);
 	}
 	setTextById(
 		'motionExcursionValue',
 		dibh
-			? `DIBH ${motionManagement.dibhTarget}%`
-			: `SI ${motionManagement.excursionSI.toFixed(0)} mm`
+			? `DIBH ${S.motionManagement.dibhTarget}%`
+			: `SI ${S.motionManagement.excursionSI.toFixed(0)} mm`
 	);
 	setTextById(
 		'motionSamplesValue',
-		dibh ? `${motionManagement.samples.length}/3` : motionManagement.acquired ? '10 phases' : '0/10'
+		dibh
+			? `${S.motionManagement.samples.length}/3`
+			: S.motionManagement.acquired
+				? '10 phases'
+				: '0/10'
 	);
 	setTextById('motionWaveLabel', dibh ? 'DIBH RESPIRATORY LEVEL' : '4D RESPIRATORY TRACE');
 	setTextById(
 		'motionWaveGateLabel',
 		dibh
-			? `TARGET ${motionManagement.dibhTarget}% ±${motionManagement.dibhTolerance}%`
-			: `GATE ${motionManagement.gateLow}–${motionManagement.gateHigh}%`
+			? `TARGET ${S.motionManagement.dibhTarget}% ±${S.motionManagement.dibhTolerance}%`
+			: `GATE ${S.motionManagement.gateLow}–${S.motionManagement.gateHigh}%`
 	);
 	if (motionAcquire) motionAcquire.textContent = dibh ? 'Record Hold' : 'Acquire 4D';
 	if (motionHold) motionHold.style.display = dibh ? 'block' : 'none';
@@ -3602,21 +3366,21 @@ function renderMotionPanel(force = false) {
 	if (strip) {
 		if (dibh) {
 			strip.innerHTML =
-				motionManagement.samples
+				S.motionManagement.samples
 					.map(
 						(v, i) =>
-							`<div class="motion-phase ${Math.abs(v - motionManagement.dibhTarget) <= motionManagement.dibhTolerance ? 'gate' : ''}"><b>H${i + 1}</b>${v.toFixed(0)}%</div>`
+							`<div class="motion-phase ${Math.abs(v - S.motionManagement.dibhTarget) <= S.motionManagement.dibhTolerance ? 'gate' : ''}"><b>H${i + 1}</b>${v.toFixed(0)}%</div>`
 					)
 					.join('') ||
 				'<div class="motion-phase" style="grid-column:1/-1">Record three reproducible breath holds.</div>';
 		} else {
-			const data = motionManagement.phaseData.length
-				? motionManagement.phaseData
+			const data = S.motionManagement.phaseData.length
+				? S.motionManagement.phaseData
 				: motion4DPhaseData();
 			strip.innerHTML = data
 				.map(
 					(x) =>
-						`<div class="motion-phase ${x.phase >= motionManagement.gateLow && x.phase <= motionManagement.gateHigh ? 'gate' : ''}"><b>${x.phase}%</b>${x.si >= 0 ? '+' : ''}${x.si.toFixed(1)} mm</div>`
+						`<div class="motion-phase ${x.phase >= S.motionManagement.gateLow && x.phase <= S.motionManagement.gateHigh ? 'gate' : ''}"><b>${x.phase}%</b>${x.si >= 0 ? '+' : ''}${x.si.toFixed(1)} mm</div>`
 				)
 				.join('');
 		}
@@ -3628,15 +3392,15 @@ function renderMotionPanel(force = false) {
 			st.textContent =
 				'No active respiratory motion-management technique is prescribed for this patient.';
 		else if (dibh) {
-			if (motionManagement.verified) {
+			if (S.motionManagement.verified) {
 				st.classList.add('good');
-				st.textContent = `DIBH VERIFIED · ${motionManagement.samples.length} reproducible holds. Radiation is permitted only while the signal remains ${motionManagement.dibhTarget - motionManagement.dibhTolerance}%–${motionManagement.dibhTarget + motionManagement.dibhTolerance}%.`;
+				st.textContent = `DIBH VERIFIED · ${S.motionManagement.samples.length} reproducible holds. Radiation is permitted only while the signal remains ${S.motionManagement.dibhTarget - S.motionManagement.dibhTolerance}%–${S.motionManagement.dibhTarget + S.motionManagement.dibhTolerance}%.`;
 			} else
 				st.textContent =
 					'Practice DIBH: start a breath hold, wait for the green target band, record the hold, release, and repeat for three reproducible holds.';
-		} else if (motionManagement.verified) {
+		} else if (S.motionManagement.verified) {
 			st.classList.add('good');
-			st.textContent = `4D VERIFIED · ${motionManagement.excursionSI.toFixed(0)} mm SI motion envelope. Approved phase gate ${motionManagement.gateLow}%–${motionManagement.gateHigh}% around end-expiration.`;
+			st.textContent = `4D VERIFIED · ${S.motionManagement.excursionSI.toFixed(0)} mm SI motion envelope. Approved phase gate ${S.motionManagement.gateLow}%–${S.motionManagement.gateHigh}% around end-expiration.`;
 		} else
 			st.textContent =
 				'Acquire the 10-phase dataset, review the motion envelope, then approve a 10–30% phase window containing 50% end-expiration.';
@@ -3647,67 +3411,71 @@ function renderMotionPanel(force = false) {
 function updateMotionAnimation(now) {
 	const spec = activeMotionSpec();
 	if (!spec) {
-		motionManagement.gateOpen = true;
+		S.motionManagement.gateOpen = true;
 		return;
 	}
-	const dt = Math.max(0, Math.min(0.1, (now - (motionManagement.lastFrame || now)) / 1000));
-	motionManagement.lastFrame = now;
-	if (motionManagement.mode === 'DIBH') {
-		if (motionManagement.holdActive) {
-			const t = Math.max(0, (now - motionManagement.holdStartedAt) / 1000),
+	const dt = Math.max(0, Math.min(0.1, (now - (S.motionManagement.lastFrame || now)) / 1000));
+	S.motionManagement.lastFrame = now;
+	if (S.motionManagement.mode === 'DIBH') {
+		if (S.motionManagement.holdActive) {
+			const t = Math.max(0, (now - S.motionManagement.holdStartedAt) / 1000),
 				ramp = Math.min(1, t / 1.2),
 				start = 48,
 				drift = Math.sin(t * 1.4) * 1.1 + Math.sin(t * 0.37) * 0.5;
-			motionManagement.breathLevel =
-				start + (motionManagement.dibhTarget - start) * ramp + (ramp >= 1 ? drift : 0);
+			S.motionManagement.breathLevel =
+				start + (S.motionManagement.dibhTarget - start) * ramp + (ramp >= 1 ? drift : 0);
 		} else {
-			motionManagement.phase =
-				(motionManagement.phase + (dt / motionManagement.period) * 100) % 100;
-			motionManagement.breathLevel = 48 + 18 * respiratoryValueFromPhase(motionManagement.phase);
+			S.motionManagement.phase =
+				(S.motionManagement.phase + (dt / S.motionManagement.period) * 100) % 100;
+			S.motionManagement.breathLevel =
+				48 + 18 * respiratoryValueFromPhase(S.motionManagement.phase);
 		}
 	} else {
-		motionManagement.phase = (motionManagement.phase + (dt / motionManagement.period) * 100) % 100;
-		motionManagement.breathLevel = 50 + 36 * respiratoryValueFromPhase(motionManagement.phase);
+		S.motionManagement.phase =
+			(S.motionManagement.phase + (dt / S.motionManagement.period) * 100) % 100;
+		S.motionManagement.breathLevel = 50 + 36 * respiratoryValueFromPhase(S.motionManagement.phase);
 	}
-	motionManagement.gateOpen = motionConditionOpen();
-	motionManagement.trace.push(Math.max(0, Math.min(100, motionManagement.breathLevel)));
-	if (motionManagement.trace.length > 240) motionManagement.trace.shift();
-	if (motionTarget3D && motionTargetBase) {
-		if (motionManagement.mode === 'DIBH') {
-			const f = (motionManagement.breathLevel - 50) / 50;
-			motionTarget3D.position.copy(motionTargetBase);
-			motionTarget3D.position.y += Math.max(0, f) * 0.025;
-			if (motionSurfaceMarker && motionSurfaceBase) {
-				motionSurfaceMarker.position.copy(motionSurfaceBase);
-				motionSurfaceMarker.position.y += Math.max(0, f) * 0.045;
+	S.motionManagement.gateOpen = motionConditionOpen();
+	S.motionManagement.trace.push(Math.max(0, Math.min(100, S.motionManagement.breathLevel)));
+	if (S.motionManagement.trace.length > 240) S.motionManagement.trace.shift();
+	if (S.motionTarget3D && S.motionTargetBase) {
+		if (S.motionManagement.mode === 'DIBH') {
+			const f = (S.motionManagement.breathLevel - 50) / 50;
+			S.motionTarget3D.position.copy(S.motionTargetBase);
+			S.motionTarget3D.position.y += Math.max(0, f) * 0.025;
+			if (S.motionSurfaceMarker && S.motionSurfaceBase) {
+				S.motionSurfaceMarker.position.copy(S.motionSurfaceBase);
+				S.motionSurfaceMarker.position.y += Math.max(0, f) * 0.045;
 			}
-			if (motionHeart3D && motionHeartBase) {
-				motionHeart3D.position.copy(motionHeartBase);
-				motionHeart3D.position.y -= Math.max(0, f) * 0.028;
-				motionHeart3D.position.z += Math.max(0, f) * 0.018;
+			if (S.motionHeart3D && S.motionHeartBase) {
+				S.motionHeart3D.position.copy(S.motionHeartBase);
+				S.motionHeart3D.position.y -= Math.max(0, f) * 0.028;
+				S.motionHeart3D.position.z += Math.max(0, f) * 0.018;
 			}
 		} else {
-			const wave = respiratoryValueFromPhase(motionManagement.phase);
-			motionTarget3D.position.copy(motionTargetBase);
-			motionTarget3D.position.z += (motionManagement.excursionSI / 2) * wave * 0.004;
-			motionTarget3D.position.y += (motionManagement.excursionAP / 2) * wave * 0.004;
-			motionTarget3D.position.x += (motionManagement.excursionLR / 2) * wave * 0.004;
-			if (motionSurfaceMarker && motionSurfaceBase) {
-				motionSurfaceMarker.position.copy(motionSurfaceBase);
-				motionSurfaceMarker.position.y += wave * 0.02;
+			const wave = respiratoryValueFromPhase(S.motionManagement.phase);
+			S.motionTarget3D.position.copy(S.motionTargetBase);
+			S.motionTarget3D.position.z += (S.motionManagement.excursionSI / 2) * wave * 0.004;
+			S.motionTarget3D.position.y += (S.motionManagement.excursionAP / 2) * wave * 0.004;
+			S.motionTarget3D.position.x += (S.motionManagement.excursionLR / 2) * wave * 0.004;
+			if (S.motionSurfaceMarker && S.motionSurfaceBase) {
+				S.motionSurfaceMarker.position.copy(S.motionSurfaceBase);
+				S.motionSurfaceMarker.position.y += wave * 0.02;
 			}
 		}
 	}
-	if (now - motionManagement.lastPanelPaint > 100) {
-		motionManagement.lastPanelPaint = now;
+	if (now - S.motionManagement.lastPanelPaint > 100) {
+		S.motionManagement.lastPanelPaint = now;
 		renderMotionPanel();
-		if (treatmentDelivery.delivering) renderTreatmentDeliveryPanel();
+		if (S.treatmentDelivery.delivering) renderTreatmentDeliveryPanel();
 	}
 }
 
 const OIS_STORE_KEY = 'linacOISRecordVerify_v1';
 function oisSessionKey() {
-	return activeTreatmentCase ? `${activeTreatmentCase.mrn}|${activeTreatmentCase.fraction}` : '';
+	return S.activeTreatmentCase
+		? `${S.activeTreatmentCase.mrn}|${S.activeTreatmentCase.fraction}`
+		: '';
 }
 function readOISStore() {
 	try {
@@ -3730,7 +3498,7 @@ function oisClock() {
 function loadOISSession() {
 	const key = oisSessionKey();
 	if (!key) {
-		oisSession = {
+		S.oisSession = {
 			key: '',
 			events: [],
 			note: '',
@@ -3748,7 +3516,7 @@ function loadOISSession() {
 	}
 	const store = readOISStore(),
 		saved = store[key];
-	oisSession = saved
+	S.oisSession = saved
 		? { ...saved, key, events: Array.isArray(saved.events) ? saved.events : [] }
 		: {
 				key,
@@ -3762,46 +3530,48 @@ function loadOISSession() {
 				signedAt: null,
 				status: 'OPEN',
 				snapshot: null,
-				patient: activeTreatmentCase.patient,
-				mrn: activeTreatmentCase.mrn,
-				site: activeTreatmentCase.siteLabel,
-				fraction: activeTreatmentCase.fraction,
-				technique: activeTreatmentCase.technique,
+				patient: S.activeTreatmentCase.patient,
+				mrn: S.activeTreatmentCase.mrn,
+				site: S.activeTreatmentCase.siteLabel,
+				fraction: S.activeTreatmentCase.fraction,
+				technique: S.activeTreatmentCase.technique,
 				createdAt: new Date().toISOString()
 			};
-	if (!Array.isArray(oisSession.clearanceOverrides)) oisSession.clearanceOverrides = [];
-	if (typeof oisSession.overrideReviewed !== 'boolean') oisSession.overrideReviewed = false;
-	if (oisNote) oisNote.value = oisSession.note || '';
-	if (oisTherapist) oisTherapist.value = oisSession.therapist || '';
-	if (oisReviewCheck) oisReviewCheck.checked = !!oisSession.reviewed;
-	if (oisOverrideReviewCheck) oisOverrideReviewCheck.checked = !!oisSession.overrideReviewed;
-	if (!oisSession.events.length)
+	if (!Array.isArray(S.oisSession.clearanceOverrides)) S.oisSession.clearanceOverrides = [];
+	if (typeof S.oisSession.overrideReviewed !== 'boolean') S.oisSession.overrideReviewed = false;
+	if (oisNote) oisNote.value = S.oisSession.note || '';
+	if (oisTherapist) oisTherapist.value = S.oisSession.therapist || '';
+	if (oisReviewCheck) oisReviewCheck.checked = !!S.oisSession.reviewed;
+	if (oisOverrideReviewCheck) oisOverrideReviewCheck.checked = !!S.oisSession.overrideReviewed;
+	if (!S.oisSession.events.length)
 		oisLogEvent(
 			'SESSION',
 			'Patient / treatment plan loaded',
-			`${activeTreatmentCase.siteLabel} · ${activeTreatmentCase.technique}`,
+			`${S.activeTreatmentCase.siteLabel} · ${S.activeTreatmentCase.technique}`,
 			'session-open'
 		);
 	renderOISPanel();
 }
 function persistOISSession() {
-	if (!oisSession?.key) return;
+	if (!S.oisSession?.key) return;
 	const store = readOISStore();
-	oisSession.note = oisNote?.value ?? oisSession.note ?? '';
-	oisSession.therapist = oisTherapist?.value ?? oisSession.therapist ?? '';
-	oisSession.reviewed = !!(oisReviewCheck?.checked ?? oisSession.reviewed);
-	oisSession.overrideReviewed = !!(oisOverrideReviewCheck?.checked ?? oisSession.overrideReviewed);
-	oisSession.snapshot = buildOISSnapshot();
-	store[oisSession.key] = oisSession;
+	S.oisSession.note = oisNote?.value ?? S.oisSession.note ?? '';
+	S.oisSession.therapist = oisTherapist?.value ?? S.oisSession.therapist ?? '';
+	S.oisSession.reviewed = !!(oisReviewCheck?.checked ?? S.oisSession.reviewed);
+	S.oisSession.overrideReviewed = !!(
+		oisOverrideReviewCheck?.checked ?? S.oisSession.overrideReviewed
+	);
+	S.oisSession.snapshot = buildOISSnapshot();
+	store[S.oisSession.key] = S.oisSession;
 	writeOISStore(store);
 }
 function oisLogEvent(type, title, detail = '', dedupe = '') {
-	if (!activeTreatmentCase) return;
+	if (!S.activeTreatmentCase) return;
 	const key = oisSessionKey();
-	if (oisSession.key !== key) {
+	if (S.oisSession.key !== key) {
 		const store = readOISStore(),
 			saved = store[key];
-		oisSession = saved
+		S.oisSession = saved
 			? { ...saved, key, events: Array.isArray(saved.events) ? saved.events : [] }
 			: {
 					key,
@@ -3816,8 +3586,8 @@ function oisLogEvent(type, title, detail = '', dedupe = '') {
 					status: 'OPEN'
 				};
 	}
-	if (dedupe && oisSession.events.some((e) => e.dedupe === dedupe)) return;
-	oisSession.events.push({
+	if (dedupe && S.oisSession.events.some((e) => e.dedupe === dedupe)) return;
+	S.oisSession.events.push({
 		ts: new Date().toISOString(),
 		time: oisClock(),
 		type: String(type || 'EVENT'),
@@ -3825,33 +3595,33 @@ function oisLogEvent(type, title, detail = '', dedupe = '') {
 		detail: String(detail || ''),
 		dedupe: String(dedupe || '')
 	});
-	if (oisSession.events.length > 160) oisSession.events = oisSession.events.slice(-160);
+	if (S.oisSession.events.length > 160) S.oisSession.events = S.oisSession.events.slice(-160);
 	persistOISSession();
 	renderOISPanel();
 }
 function buildOISSnapshot() {
-	if (!activeTreatmentCase) return null;
-	const residual = clinicalIGRT?.acquired ? getIGRTResidual() : null,
-		applied = clinicalIGRT?.acquired ? getIGRTApplied() : null;
+	if (!S.activeTreatmentCase) return null;
+	const residual = S.clinicalIGRT?.acquired ? getIGRTResidual() : null,
+		applied = S.clinicalIGRT?.acquired ? getIGRTApplied() : null;
 	const fields = getTreatmentFields();
 	return {
-		patient: activeTreatmentCase.patient,
-		mrn: activeTreatmentCase.mrn,
-		site: activeTreatmentCase.siteLabel,
-		fraction: activeTreatmentCase.fraction,
-		technique: activeTreatmentCase.technique,
-		energy: activeTreatmentCase.energy,
+		patient: S.activeTreatmentCase.patient,
+		mrn: S.activeTreatmentCase.mrn,
+		site: S.activeTreatmentCase.siteLabel,
+		fraction: S.activeTreatmentCase.fraction,
+		technique: S.activeTreatmentCase.technique,
+		energy: S.activeTreatmentCase.energy,
 		immobilization: immobilizationRequired()
 			? {
 					required: true,
-					verified: !!immobilizationWorkflow.verified,
-					count: (immobilizationWorkflow.selected || []).length
+					verified: !!S.immobilizationWorkflow.verified,
+					count: (S.immobilizationWorkflow.selected || []).length
 				}
 			: { required: false },
 		igrt: {
-			required: String(activeTreatmentCase?.planned?.imaging || 'None').toLowerCase() !== 'none',
-			mode: clinicalIGRT?.mode || '—',
-			acquired: !!clinicalIGRT?.acquired,
+			required: String(S.activeTreatmentCase?.planned?.imaging || 'None').toLowerCase() !== 'none',
+			mode: S.clinicalIGRT?.mode || '—',
+			acquired: !!S.clinicalIGRT?.acquired,
 			verified: igrtAlignmentReadyForDelivery(),
 			applied,
 			residual
@@ -3859,22 +3629,22 @@ function buildOISSnapshot() {
 		adaptive: adaptiveRequired()
 			? {
 					required: true,
-					approved: !!adaptiveWorkflow.approved,
+					approved: !!S.adaptiveWorkflow.approved,
 					plan:
-						adaptiveSpec()?.plans?.[adaptiveWorkflow.selectedPlanKey]?.title ||
-						adaptiveWorkflow.selectedPlanKey,
-					anatomy: adaptiveWorkflow.scenario?.title || '—'
+						adaptiveSpec()?.plans?.[S.adaptiveWorkflow.selectedPlanKey]?.title ||
+						S.adaptiveWorkflow.selectedPlanKey,
+					anatomy: S.adaptiveWorkflow.scenario?.title || '—'
 				}
 			: { required: false },
 		motion: motionRequired()
 			? {
 					required: true,
-					verified: !!motionManagement.verified,
-					mode: motionManagement.mode,
+					verified: !!S.motionManagement.verified,
+					mode: S.motionManagement.mode,
 					detail:
-						motionManagement.mode === 'DIBH'
-							? `DIBH ${motionManagement.dibhTarget}% ±${motionManagement.dibhTolerance}%`
-							: `Gate ${motionManagement.gateLow}–${motionManagement.gateHigh}%`
+						S.motionManagement.mode === 'DIBH'
+							? `DIBH ${S.motionManagement.dibhTarget}% ±${S.motionManagement.dibhTolerance}%`
+							: `Gate ${S.motionManagement.gateLow}–${S.motionManagement.gateHigh}%`
 				}
 			: { required: false },
 		stereo: srsRequired()
@@ -3882,32 +3652,34 @@ function buildOISSnapshot() {
 					required: true,
 					type: stereotacticCaseLabel(),
 					timeout:
-						!!srsWorkflow.timeoutVerifiedByField?.[Number(treatmentDelivery.activeFieldIndex) || 0]
+						!!S.srsWorkflow.timeoutVerifiedByField?.[
+							Number(S.treatmentDelivery.activeFieldIndex) || 0
+						]
 				}
 			: { required: false },
 		clearanceOverride: {
 			used: clearanceOverrideUsedAny(),
-			reviewed: !!oisSession.overrideReviewed,
-			records: [...(oisSession.clearanceOverrides || [])]
+			reviewed: !!S.oisSession.overrideReviewed,
+			records: [...(S.oisSession.clearanceOverrides || [])]
 		},
 		fields: fields.map((f, i) => ({
 			name: f.name || `Field ${i + 1}`,
 			plannedMU: Number(f.mu) || 0,
-			deliveredMU: treatmentDelivery.completedFields?.[i]
+			deliveredMU: S.treatmentDelivery.completedFields?.[i]
 				? Number(f.mu) || 0
-				: i === Number(treatmentDelivery.activeFieldIndex)
-					? Number(treatmentDelivery.muDelivered) || 0
+				: i === Number(S.treatmentDelivery.activeFieldIndex)
+					? Number(S.treatmentDelivery.muDelivered) || 0
 					: 0,
-			status: treatmentDelivery.completedFields?.[i]
+			status: S.treatmentDelivery.completedFields?.[i]
 				? 'COMPLETE'
-				: i === Number(treatmentDelivery.activeFieldIndex) && treatmentDelivery.terminated
+				: i === Number(S.treatmentDelivery.activeFieldIndex) && S.treatmentDelivery.terminated
 					? 'TERMINATED'
 					: 'PENDING'
 		})),
-		charge: treatmentCompletion?.posted
-			? { posted: true, code: treatmentCompletion.code, record: treatmentCompletion.record }
+		charge: S.treatmentCompletion?.posted
+			? { posted: true, code: S.treatmentCompletion.code, record: S.treatmentCompletion.record }
 			: { posted: false },
-		signed: !!oisSession.signed
+		signed: !!S.oisSession.signed
 	};
 }
 function fmtOISShift(obj) {
@@ -3922,9 +3694,9 @@ function renderOISPanel() {
 	setTextById('oisCourse', s ? s.site : '—');
 	const recordStatus = !s
 		? 'NO CASE'
-		: oisSession.signed
+		: S.oisSession.signed
 			? 'SIGNED / CLOSED'
-			: treatmentCompletion?.posted
+			: S.treatmentCompletion?.posted
 				? 'POSTED · SIGN-OFF PENDING'
 				: allTreatmentFieldsCompleted()
 					? 'DELIVERY COMPLETE'
@@ -3995,7 +3767,7 @@ function renderOISPanel() {
 	}
 	const tl = document.getElementById('oisTimeline');
 	if (tl) {
-		const events = (oisSession.events || []).slice().reverse().slice(0, 40);
+		const events = (S.oisSession.events || []).slice().reverse().slice(0, 40);
 		tl.innerHTML = events.length
 			? events
 					.map(
@@ -4005,7 +3777,7 @@ function renderOISPanel() {
 					.join('')
 			: '<div class="ois-event"><time>—</time><b>SESSION</b><span>No recorded events.</span></div>';
 	}
-	const overrideRecords = oisSession.clearanceOverrides || [];
+	const overrideRecords = S.oisSession.clearanceOverrides || [];
 	if (oisOverrideCard) {
 		oisOverrideCard.hidden = !overrideRecords.length;
 	}
@@ -4017,33 +3789,33 @@ function renderOISPanel() {
 			)
 			.join('');
 	if (oisOverrideReviewCheck) {
-		oisOverrideReviewCheck.checked = !!oisSession.overrideReviewed;
-		oisOverrideReviewCheck.disabled = !!oisSession.signed || !overrideRecords.length;
+		oisOverrideReviewCheck.checked = !!S.oisSession.overrideReviewed;
+		oisOverrideReviewCheck.disabled = !!S.oisSession.signed || !overrideRecords.length;
 	}
-	const overrideSignoffOK = !overrideRecords.length || !!oisSession.overrideReviewed;
+	const overrideSignoffOK = !overrideRecords.length || !!S.oisSession.overrideReviewed;
 	if (oisSignOff)
 		oisSignOff.disabled =
-			!activeTreatmentCase ||
-			!treatmentCompletion?.posted ||
-			!!oisSession.signed ||
+			!S.activeTreatmentCase ||
+			!S.treatmentCompletion?.posted ||
+			!!S.oisSession.signed ||
 			!oisReviewCheck?.checked ||
 			!(oisTherapist?.value || '').trim() ||
 			!overrideSignoffOK;
-	if (oisNote && !oisNote.matches(':focus')) oisNote.value = oisSession.note || '';
+	if (oisNote && !oisNote.matches(':focus')) oisNote.value = S.oisSession.note || '';
 	if (oisTherapist && !oisTherapist.matches(':focus'))
-		oisTherapist.value = oisSession.therapist || '';
-	if (oisReviewCheck) oisReviewCheck.checked = !!oisSession.reviewed;
+		oisTherapist.value = S.oisSession.therapist || '';
+	if (oisReviewCheck) oisReviewCheck.checked = !!S.oisSession.reviewed;
 	const st = document.getElementById('oisStatus');
 	if (st) {
 		st.className = 'ois-status';
 		if (!s) st.textContent = 'Load a treatment case to begin a daily record.';
-		else if (oisSession.signed) {
+		else if (S.oisSession.signed) {
 			st.classList.add('good');
-			st.textContent = `DAILY RECORD SIGNED · ${oisSession.therapist || 'Therapist'} · ${oisSession.signedAt ? new Date(oisSession.signedAt).toLocaleString() : ''}`;
-		} else if (treatmentCompletion?.posted) {
+			st.textContent = `DAILY RECORD SIGNED · ${S.oisSession.therapist || 'Therapist'} · ${S.oisSession.signedAt ? new Date(S.oisSession.signedAt).toLocaleString() : ''}`;
+		} else if (S.treatmentCompletion?.posted) {
 			st.classList.add('hold');
 			st.textContent =
-				overrideRecords.length && !oisSession.overrideReviewed
+				overrideRecords.length && !S.oisSession.overrideReviewed
 					? 'Treatment and charge are posted. A simulation clearance override was used; review its rationale and complete the override acknowledgment before sign-off.'
 					: 'Treatment and charge are posted. Review the complete record, enter therapist/student initials, and sign off the encounter.';
 		} else
@@ -4052,23 +3824,23 @@ function renderOISPanel() {
 	}
 }
 function signOffOISRecord() {
-	if (!activeTreatmentCase || !treatmentCompletion?.posted || oisSession.signed) return;
+	if (!S.activeTreatmentCase || !S.treatmentCompletion?.posted || S.oisSession.signed) return;
 	const who = (oisTherapist?.value || '').trim();
-	const overrideRequired = (oisSession.clearanceOverrides || []).length > 0;
-	if (!who || !oisReviewCheck?.checked || (overrideRequired && !oisSession.overrideReviewed)) {
+	const overrideRequired = (S.oisSession.clearanceOverrides || []).length > 0;
+	if (!who || !oisReviewCheck?.checked || (overrideRequired && !S.oisSession.overrideReviewed)) {
 		renderOISPanel();
 		return;
 	}
-	oisSession.note = oisNote?.value || '';
-	oisSession.therapist = who;
-	oisSession.reviewed = true;
-	oisSession.signed = true;
-	oisSession.signedAt = new Date().toISOString();
-	oisSession.status = 'CLOSED';
+	S.oisSession.note = oisNote?.value || '';
+	S.oisSession.therapist = who;
+	S.oisSession.reviewed = true;
+	S.oisSession.signed = true;
+	S.oisSession.signedAt = new Date().toISOString();
+	S.oisSession.status = 'CLOSED';
 	oisLogEvent(
 		'SIGN-OFF',
 		'Daily treatment record signed',
-		`${who}${(oisSession.clearanceOverrides || []).length ? ' · clearance override reviewed' : ''}`,
+		`${who}${(S.oisSession.clearanceOverrides || []).length ? ' · clearance override reviewed' : ''}`,
 		'signoff'
 	);
 	persistOISSession();
@@ -4078,16 +3850,16 @@ function signOffOISRecord() {
 }
 
 function adaptiveSpec() {
-	return activeTreatmentCase?.adaptive || null;
+	return S.activeTreatmentCase?.adaptive || null;
 }
 function adaptiveRequired() {
 	return !!adaptiveSpec();
 }
 function adaptiveCourseKey() {
-	return activeTreatmentCase ? `linacAdaptiveCourse_${activeTreatmentCase.mrn}_v1` : '';
+	return S.activeTreatmentCase ? `linacAdaptiveCourse_${S.activeTreatmentCase.mrn}_v1` : '';
 }
 function adaptiveFractionNumber() {
-	const m = String(activeTreatmentCase?.fraction || '').match(/\d+/);
+	const m = String(S.activeTreatmentCase?.fraction || '').match(/\d+/);
 	return m ? Number(m[0]) : 1;
 }
 function adaptivePlanRank(key) {
@@ -4095,10 +3867,10 @@ function adaptivePlanRank(key) {
 }
 function adaptiveScenarioIndex() {
 	const s = adaptiveSpec(),
-		sc = adaptiveWorkflow.scenario;
+		sc = S.adaptiveWorkflow.scenario;
 	return Math.max(0, (s?.scenarios || []).indexOf(sc));
 }
-function adaptivePredictedMetrics(planKey, scenario = adaptiveWorkflow.scenario) {
+function adaptivePredictedMetrics(planKey, scenario = S.adaptiveWorkflow.scenario) {
 	const spec = adaptiveSpec();
 	if (!spec || !scenario)
 		return {
@@ -4148,25 +3920,25 @@ function adaptivePredictedMetrics(planKey, scenario = adaptiveWorkflow.scenario)
 function loadAdaptiveCourse() {
 	const spec = adaptiveSpec(),
 		c = spec?.course;
-	adaptiveCourse = {
+	S.adaptiveCourse = {
 		history: [],
 		totalFractions: Number(c?.totalFractions) || 0,
 		prescriptionGy: Number(c?.prescriptionGy) || 0,
 		dosePerFractionGy: Number(c?.dosePerFractionGy) || 0,
 		loaded: !!c
 	};
-	if (!c || !activeTreatmentCase) return;
+	if (!c || !S.activeTreatmentCase) return;
 	try {
 		const stored = JSON.parse(localStorage.getItem(adaptiveCourseKey()) || 'null');
 		if (stored && Array.isArray(stored.history)) {
-			adaptiveCourse = { ...adaptiveCourse, ...stored, loaded: true };
+			S.adaptiveCourse = { ...S.adaptiveCourse, ...stored, loaded: true };
 			return;
 		}
 	} catch (e) {
 		console.warn('Adaptive course history could not be read', e);
 	}
 	const scenarios = spec.scenarios || [];
-	adaptiveCourse.history = (c.seedHistory || []).map((seed) => {
+	S.adaptiveCourse.history = (c.seedHistory || []).map((seed) => {
 		const sc = scenarios[Number(seed.scenarioIndex) || 0] || scenarios[0];
 		const met = adaptivePredictedMetrics(
 			String(seed.planKey || sc?.recommendedPlan || 'medium'),
@@ -4188,15 +3960,15 @@ function loadAdaptiveCourse() {
 	persistAdaptiveCourse();
 }
 function persistAdaptiveCourse() {
-	if (!adaptiveCourse.loaded || !activeTreatmentCase) return;
+	if (!S.adaptiveCourse.loaded || !S.activeTreatmentCase) return;
 	try {
 		localStorage.setItem(
 			adaptiveCourseKey(),
 			JSON.stringify({
-				history: adaptiveCourse.history,
-				totalFractions: adaptiveCourse.totalFractions,
-				prescriptionGy: adaptiveCourse.prescriptionGy,
-				dosePerFractionGy: adaptiveCourse.dosePerFractionGy
+				history: S.adaptiveCourse.history,
+				totalFractions: S.adaptiveCourse.totalFractions,
+				prescriptionGy: S.adaptiveCourse.prescriptionGy,
+				dosePerFractionGy: S.adaptiveCourse.dosePerFractionGy
 			})
 		);
 	} catch (e) {
@@ -4204,7 +3976,7 @@ function persistAdaptiveCourse() {
 	}
 }
 function accumulatedAdaptiveMetrics() {
-	const h = adaptiveCourse.history || [],
+	const h = S.adaptiveCourse.history || [],
 		n = h.length;
 	return {
 		n,
@@ -4290,22 +4062,22 @@ function renderAdaptiveCourse() {
 		a = accumulatedAdaptiveMetrics();
 	setTextById(
 		'adaptiveCourseProgress',
-		spec ? `${a.n} / ${adaptiveCourse.totalFractions} fx` : '0 / 0 fx'
+		spec ? `${a.n} / ${S.adaptiveCourse.totalFractions} fx` : '0 / 0 fx'
 	);
 	setTextById(
 		'adaptiveTargetDose',
-		spec ? `${a.targetGy.toFixed(1)} / ${adaptiveCourse.prescriptionGy.toFixed(1)} Gy` : '0.0 Gy'
+		spec ? `${a.targetGy.toFixed(1)} / ${S.adaptiveCourse.prescriptionGy.toFixed(1)} Gy` : '0.0 Gy'
 	);
 	setTextById('adaptiveMeanCoverage', a.n ? `${a.meanV95.toFixed(1)}%` : '—');
 	setTextById(
 		'adaptiveCurrentAnatomy',
-		adaptiveWorkflow.scenario?.recommendedPlan
-			? `${String(adaptiveWorkflow.scenario.recommendedPlan).toUpperCase()} plan fit`
+		S.adaptiveWorkflow.scenario?.recommendedPlan
+			? `${String(S.adaptiveWorkflow.scenario.recommendedPlan).toUpperCase()} plan fit`
 			: '—'
 	);
 	const hist = document.getElementById('adaptiveHistory');
 	if (hist) {
-		const rows = (adaptiveCourse.history || []).slice(-8).reverse();
+		const rows = (S.adaptiveCourse.history || []).slice(-8).reverse();
 		hist.innerHTML =
 			`<div class="adaptive-history-row header"><span>Fx</span><span>Anatomy</span><span>Plan</span><span>V95</span><span>Rect</span><span>Bowel</span></div>` +
 			(rows.length
@@ -4320,9 +4092,9 @@ function renderAdaptiveCourse() {
 	if (adaptiveNextFraction)
 		adaptiveNextFraction.disabled =
 			!adaptiveRequired() ||
-			!treatmentCompletion.posted ||
-			!oisSession.signed ||
-			adaptiveFractionNumber() >= adaptiveCourse.totalFractions;
+			!S.treatmentCompletion.posted ||
+			!S.oisSession.signed ||
+			adaptiveFractionNumber() >= S.adaptiveCourse.totalFractions;
 	if (adaptiveResetCourse) adaptiveResetCourse.disabled = !adaptiveRequired();
 	drawAdaptiveDoseChart();
 }
@@ -4330,9 +4102,9 @@ function applyAdaptivePlan(planKey) {
 	const spec = adaptiveSpec();
 	if (!spec || !spec.plans || !spec.plans[planKey]) return false;
 	const plan = spec.plans[planKey];
-	activeTreatmentCase.planned = JSON.parse(JSON.stringify(plan.planned || {}));
-	activeTreatmentCase.fields = JSON.parse(JSON.stringify(plan.fields || []));
-	adaptiveWorkflow.selectedPlanKey = planKey;
+	S.activeTreatmentCase.planned = JSON.parse(JSON.stringify(plan.planned || {}));
+	S.activeTreatmentCase.fields = JSON.parse(JSON.stringify(plan.fields || []));
+	S.adaptiveWorkflow.selectedPlanKey = planKey;
 	setPendantLCD('ADAPTIVE PLAN', `${plan.title || planKey} selected`);
 	resetTreatmentDeliveryForCase();
 	renderTreatmentMonitor();
@@ -4352,7 +4124,7 @@ function chooseNewAdaptiveScenario(previousIndex = -1) {
 }
 function resetAdaptiveWorkflowForCase() {
 	const spec = adaptiveSpec();
-	adaptiveWorkflow = {
+	S.adaptiveWorkflow = {
 		required: !!spec,
 		assessed: false,
 		compared: false,
@@ -4369,7 +4141,7 @@ function resetAdaptiveWorkflowForCase() {
 	if (d) d.checked = false;
 	if (a) a.checked = false;
 	if (!spec) {
-		adaptiveCourse = {
+		S.adaptiveCourse = {
 			history: [],
 			totalFractions: 0,
 			prescriptionGy: 0,
@@ -4383,43 +4155,45 @@ function resetAdaptiveWorkflowForCase() {
 	const scenarios = spec.scenarios || [];
 	const fx = adaptiveFractionNumber();
 	const seed = spec.course?.seedHistory?.find((x) => Number(x.fx) === fx);
-	adaptiveWorkflow.scenario = seed
+	S.adaptiveWorkflow.scenario = seed
 		? scenarios[Number(seed.scenarioIndex) || 0]
 		: chooseNewAdaptiveScenario(-1);
-	adaptiveWorkflow.caseBase = {
-		planned: JSON.parse(JSON.stringify(activeTreatmentCase.planned || {})),
-		fields: JSON.parse(JSON.stringify(activeTreatmentCase.fields || []))
+	S.adaptiveWorkflow.caseBase = {
+		planned: JSON.parse(JSON.stringify(S.activeTreatmentCase.planned || {})),
+		fields: JSON.parse(JSON.stringify(S.activeTreatmentCase.fields || []))
 	};
 	const startKey = String(spec.defaultPlanKey || Object.keys(spec.plans || {})[0] || '');
 	if (startKey) applyAdaptivePlan(startKey);
-	adaptiveWorkflow.selectedPlanKey = startKey;
-	adaptiveWorkflow.approved = false;
+	S.adaptiveWorkflow.selectedPlanKey = startKey;
+	S.adaptiveWorkflow.approved = false;
 	renderAdaptivePanel();
 }
 function verifyAdaptivePlan() {
 	if (!adaptiveRequired()) return;
-	adaptiveWorkflow.doseChecked = !!document.getElementById('adaptiveCheckDose')?.checked;
-	adaptiveWorkflow.finalApproved = !!document.getElementById('adaptiveCheckApprove')?.checked;
-	const recommended = String(adaptiveWorkflow.scenario?.recommendedPlan || '');
+	S.adaptiveWorkflow.doseChecked = !!document.getElementById('adaptiveCheckDose')?.checked;
+	S.adaptiveWorkflow.finalApproved = !!document.getElementById('adaptiveCheckApprove')?.checked;
+	const recommended = String(S.adaptiveWorkflow.scenario?.recommendedPlan || '');
 	const correct =
-		adaptiveWorkflow.assessed &&
-		adaptiveWorkflow.compared &&
-		adaptiveWorkflow.selectedPlanKey &&
-		adaptiveWorkflow.selectedPlanKey === recommended;
-	adaptiveWorkflow.approved = !!(
+		S.adaptiveWorkflow.assessed &&
+		S.adaptiveWorkflow.compared &&
+		S.adaptiveWorkflow.selectedPlanKey &&
+		S.adaptiveWorkflow.selectedPlanKey === recommended;
+	S.adaptiveWorkflow.approved = !!(
 		correct &&
-		adaptiveWorkflow.doseChecked &&
-		adaptiveWorkflow.finalApproved
+		S.adaptiveWorkflow.doseChecked &&
+		S.adaptiveWorkflow.finalApproved
 	);
 	setPendantLCD(
 		'ADAPTIVE REVIEW',
-		adaptiveWorkflow.approved ? 'APPROVED · adapted plan ready' : 'HOLD · complete adaptive review'
+		S.adaptiveWorkflow.approved
+			? 'APPROVED · adapted plan ready'
+			: 'HOLD · complete adaptive review'
 	);
-	if (adaptiveWorkflow.approved)
+	if (S.adaptiveWorkflow.approved)
 		oisLogEvent(
 			'ADAPTIVE',
 			'Adaptive plan approved',
-			`${adaptiveWorkflow.scenario?.title || 'Daily anatomy'} · ${adaptiveSpec()?.plans?.[adaptiveWorkflow.selectedPlanKey]?.title || adaptiveWorkflow.selectedPlanKey}`,
+			`${S.adaptiveWorkflow.scenario?.title || 'Daily anatomy'} · ${adaptiveSpec()?.plans?.[S.adaptiveWorkflow.selectedPlanKey]?.title || S.adaptiveWorkflow.selectedPlanKey}`,
 			'adaptive-approved'
 		);
 	renderAdaptivePanel();
@@ -4427,35 +4201,36 @@ function verifyAdaptivePlan() {
 	renderTreatmentMonitor();
 }
 function recordAdaptiveFractionDose() {
-	if (!adaptiveRequired() || !adaptiveWorkflow.approved || !treatmentCompletion.posted) return;
+	if (!adaptiveRequired() || !S.adaptiveWorkflow.approved || !S.treatmentCompletion.posted) return;
 	const fx = adaptiveFractionNumber();
-	if (adaptiveCourse.history.some((x) => Number(x.fx) === fx)) {
+	if (S.adaptiveCourse.history.some((x) => Number(x.fx) === fx)) {
 		renderAdaptiveCourse();
 		return;
 	}
-	const met = adaptivePredictedMetrics(adaptiveWorkflow.selectedPlanKey),
+	const met = adaptivePredictedMetrics(S.adaptiveWorkflow.selectedPlanKey),
 		spec = adaptiveSpec(),
-		sc = adaptiveWorkflow.scenario;
-	adaptiveCourse.history.push({
+		sc = S.adaptiveWorkflow.scenario;
+	S.adaptiveCourse.history.push({
 		fx,
 		anatomy: sc?.title || 'Daily anatomy',
 		scenarioIndex: adaptiveScenarioIndex(),
-		planKey: adaptiveWorkflow.selectedPlanKey,
+		planKey: S.adaptiveWorkflow.selectedPlanKey,
 		planTitle:
-			spec?.plans?.[adaptiveWorkflow.selectedPlanKey]?.title || adaptiveWorkflow.selectedPlanKey,
+			spec?.plans?.[S.adaptiveWorkflow.selectedPlanKey]?.title ||
+			S.adaptiveWorkflow.selectedPlanKey,
 		targetDoseGy: Number(spec?.course?.dosePerFractionGy) || 0,
 		ptvV95: met.ptvV95,
 		rectumGy: met.rectumGy,
 		bowelGy: met.bowelGy,
 		postedAt: new Date().toISOString()
 	});
-	adaptiveCourse.history.sort((x, y) => Number(x.fx) - Number(y.fx));
+	S.adaptiveCourse.history.sort((x, y) => Number(x.fx) - Number(y.fx));
 	persistAdaptiveCourse();
 	renderAdaptiveCourse();
 }
 function advanceAdaptiveFraction() {
-	if (!adaptiveRequired() || !treatmentCompletion.posted) return;
-	if (!oisSession.signed) {
+	if (!adaptiveRequired() || !S.treatmentCompletion.posted) return;
+	if (!S.oisSession.signed) {
 		setPendantLCD('OIS SIGN-OFF', 'Complete daily record before next fraction');
 		oisPanel?.classList.add('open');
 		renderOISPanel();
@@ -4468,14 +4243,14 @@ function advanceAdaptiveFraction() {
 		return;
 	}
 	const prev = adaptiveScenarioIndex();
-	activeTreatmentCase.fraction = `${cur + 1} / ${total}`;
-	const site = IMAGING_SITES.find((s) => s.key === activeTreatmentCase.siteKey);
+	S.activeTreatmentCase.fraction = `${cur + 1} / ${total}`;
+	const site = IMAGING_SITES.find((s) => s.key === S.activeTreatmentCase.siteKey);
 	if (site && typeof runPatientSetup === 'function')
 		runPatientSetup(
-			activeTreatmentCase.position || 'HFS',
-			Number.isFinite(activeTreatmentCase.setupSiteZ) ? activeTreatmentCase.setupSiteZ : site.z,
-			activeTreatmentCase.setupBodyX || 0,
-			activeTreatmentCase.setupBodyY || 0
+			S.activeTreatmentCase.position || 'HFS',
+			Number.isFinite(S.activeTreatmentCase.setupSiteZ) ? S.activeTreatmentCase.setupSiteZ : site.z,
+			S.activeTreatmentCase.setupBodyX || 0,
+			S.activeTreatmentCase.setupBodyY || 0
 		);
 	setKvState(false);
 	setDetectorStateGame(false);
@@ -4484,16 +4259,16 @@ function advanceAdaptiveFraction() {
 	resetMotionManagementForCase();
 	resetSRSWorkflowForCase();
 	resetSpecialSetupForCase();
-	adaptiveWorkflow.assessed = false;
-	adaptiveWorkflow.compared = false;
-	adaptiveWorkflow.approved = false;
-	adaptiveWorkflow.doseChecked = false;
-	adaptiveWorkflow.finalApproved = false;
+	S.adaptiveWorkflow.assessed = false;
+	S.adaptiveWorkflow.compared = false;
+	S.adaptiveWorkflow.approved = false;
+	S.adaptiveWorkflow.doseChecked = false;
+	S.adaptiveWorkflow.finalApproved = false;
 	const d = document.getElementById('adaptiveCheckDose'),
 		a = document.getElementById('adaptiveCheckApprove');
 	if (d) d.checked = false;
 	if (a) a.checked = false;
-	adaptiveWorkflow.scenario = chooseNewAdaptiveScenario(prev);
+	S.adaptiveWorkflow.scenario = chooseNewAdaptiveScenario(prev);
 	applyAdaptivePlan(String(adaptiveSpec()?.defaultPlanKey || 'medium'));
 	resetTreatmentDeliveryForCase();
 	loadOISSession();
@@ -4510,14 +4285,14 @@ function resetAdaptiveCourseHistory() {
 		localStorage.removeItem(adaptiveCourseKey());
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 	} catch (e) {}
-	adaptiveCourse.loaded = false;
+	S.adaptiveCourse.loaded = false;
 	loadAdaptiveCourse();
-	const firstUnrecorded = Math.max(1, (adaptiveCourse.history.at(-1)?.fx || 0) + 1);
-	activeTreatmentCase.fraction = `${Math.min(firstUnrecorded, adaptiveCourse.totalFractions || firstUnrecorded)} / ${adaptiveCourse.totalFractions || 20}`;
-	adaptiveWorkflow.assessed = false;
-	adaptiveWorkflow.compared = false;
-	adaptiveWorkflow.approved = false;
-	adaptiveWorkflow.scenario = chooseNewAdaptiveScenario(-1);
+	const firstUnrecorded = Math.max(1, (S.adaptiveCourse.history.at(-1)?.fx || 0) + 1);
+	S.activeTreatmentCase.fraction = `${Math.min(firstUnrecorded, S.adaptiveCourse.totalFractions || firstUnrecorded)} / ${S.adaptiveCourse.totalFractions || 20}`;
+	S.adaptiveWorkflow.assessed = false;
+	S.adaptiveWorkflow.compared = false;
+	S.adaptiveWorkflow.approved = false;
+	S.adaptiveWorkflow.scenario = chooseNewAdaptiveScenario(-1);
 	applyAdaptivePlan(String(adaptiveSpec()?.defaultPlanKey || 'medium'));
 	resetTreatmentDeliveryForCase();
 	loadOISSession();
@@ -4530,14 +4305,14 @@ function renderAdaptivePanel() {
 	const spec = adaptiveSpec();
 	setTextById(
 		'adaptivePatient',
-		activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${activeTreatmentCase.siteLabel} · Fx ${activeTreatmentCase.fraction}`
+		S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${S.activeTreatmentCase.siteLabel} · Fx ${S.activeTreatmentCase.fraction}`
 			: 'No adaptive case'
 	);
 	setTextById('adaptiveTechnique', spec?.label || 'Not prescribed');
 	setTextById(
 		'adaptiveVerified',
-		!spec ? 'N/A' : adaptiveWorkflow.approved ? 'APPROVED' : 'PENDING'
+		!spec ? 'N/A' : S.adaptiveWorkflow.approved ? 'APPROVED' : 'PENDING'
 	);
 	const anatomyCard = document.getElementById('adaptiveAnatomyCard'),
 		planGrid = document.getElementById('adaptivePlanGrid'),
@@ -4557,17 +4332,17 @@ function renderAdaptivePanel() {
 		renderAdaptiveCourse();
 		return;
 	}
-	const scen = adaptiveWorkflow.scenario || {};
+	const scen = S.adaptiveWorkflow.scenario || {};
 	if (anatomyCard)
 		anatomyCard.innerHTML = `<h4>Today’s anatomy assessment</h4><p><b>${scen.title || 'Daily CBCT / on-table review'}</b></p><p style="margin-top:6px">${scen.summary || 'Review the daily anatomy, compare the available adaptive plans, then approve the most appropriate one.'}</p><ul class="adaptive-findings">${(scen.findings || []).map((x) => `<li>${x}</li>`).join('')}</ul>`;
 	if (planGrid) {
 		const recommended = String(scen.recommendedPlan || '');
 		planGrid.innerHTML = Object.entries(spec.plans || {})
 			.map(([key, plan]) => {
-				const selected = adaptiveWorkflow.selectedPlanKey === key,
+				const selected = S.adaptiveWorkflow.selectedPlanKey === key,
 					met = adaptivePredictedMetrics(key, scen),
 					planState =
-						adaptiveWorkflow.compared && selected
+						S.adaptiveWorkflow.compared && selected
 							? key === recommended
 								? 'correct'
 								: 'wrong'
@@ -4579,35 +4354,35 @@ function renderAdaptivePanel() {
 	if (stepList) {
 		const recommended = String(scen.recommendedPlan || ''),
 			selectedOk =
-				adaptiveWorkflow.selectedPlanKey && adaptiveWorkflow.selectedPlanKey === recommended;
+				S.adaptiveWorkflow.selectedPlanKey && S.adaptiveWorkflow.selectedPlanKey === recommended;
 		stepList.innerHTML = [
 			{
 				label: '1. Daily anatomy assessed',
-				detail: adaptiveWorkflow.assessed
+				detail: S.adaptiveWorkflow.assessed
 					? scen.title || 'Assessment captured'
 					: 'Review anatomy change and daily setup findings',
-				ok: adaptiveWorkflow.assessed
+				ok: S.adaptiveWorkflow.assessed
 			},
 			{
 				label: '2. Candidate plans compared',
-				detail: adaptiveWorkflow.compared
+				detail: S.adaptiveWorkflow.compared
 					? 'Small / medium / large options reviewed'
 					: 'Compare predicted target/OAR dose for the available plans',
-				ok: adaptiveWorkflow.compared
+				ok: S.adaptiveWorkflow.compared
 			},
 			{
 				label: '3. Best plan selected',
-				detail: adaptiveWorkflow.selectedPlanKey
-					? `${spec.plans?.[adaptiveWorkflow.selectedPlanKey]?.title || adaptiveWorkflow.selectedPlanKey}${adaptiveWorkflow.compared ? (selectedOk ? ' · matches daily anatomy' : ' · reassess daily anatomy') : ''}`
+				detail: S.adaptiveWorkflow.selectedPlanKey
+					? `${spec.plans?.[S.adaptiveWorkflow.selectedPlanKey]?.title || S.adaptiveWorkflow.selectedPlanKey}${S.adaptiveWorkflow.compared ? (selectedOk ? ' · matches daily anatomy' : ' · reassess daily anatomy') : ''}`
 					: 'No adaptive plan selected',
-				ok: !!adaptiveWorkflow.selectedPlanKey && (!adaptiveWorkflow.compared || selectedOk)
+				ok: !!S.adaptiveWorkflow.selectedPlanKey && (!S.adaptiveWorkflow.compared || selectedOk)
 			},
 			{
 				label: '4. Final adaptive approval',
-				detail: adaptiveWorkflow.approved
+				detail: S.adaptiveWorkflow.approved
 					? 'Plan approved for treatment delivery'
 					: 'Dose/OAR review and final approval still required',
-				ok: adaptiveWorkflow.approved
+				ok: S.adaptiveWorkflow.approved
 			}
 		]
 			.map(
@@ -4619,21 +4394,21 @@ function renderAdaptivePanel() {
 	if (status) {
 		status.className = '';
 		const recommended = String(scen.recommendedPlan || '');
-		if (adaptiveWorkflow.approved) {
+		if (S.adaptiveWorkflow.approved) {
 			status.classList.add('good');
-			status.textContent = `ADAPTIVE PLAN APPROVED · ${spec.plans?.[adaptiveWorkflow.selectedPlanKey]?.title || adaptiveWorkflow.selectedPlanKey} is now the active plan for fraction ${adaptiveFractionNumber()}.`;
+			status.textContent = `ADAPTIVE PLAN APPROVED · ${spec.plans?.[S.adaptiveWorkflow.selectedPlanKey]?.title || S.adaptiveWorkflow.selectedPlanKey} is now the active plan for fraction ${adaptiveFractionNumber()}.`;
 		} else if (
-			adaptiveWorkflow.compared &&
-			adaptiveWorkflow.selectedPlanKey &&
-			adaptiveWorkflow.selectedPlanKey !== recommended
+			S.adaptiveWorkflow.compared &&
+			S.adaptiveWorkflow.selectedPlanKey &&
+			S.adaptiveWorkflow.selectedPlanKey !== recommended
 		) {
 			status.classList.add('bad');
 			status.textContent =
 				'Selected plan does not best match today’s anatomy. Reassess the plan-of-the-day choice before approval.';
-		} else if (!adaptiveWorkflow.assessed)
+		} else if (!S.adaptiveWorkflow.assessed)
 			status.textContent =
 				'Start with the daily anatomy assessment. The patient cannot proceed to treatment until the anatomy change is reviewed.';
-		else if (!adaptiveWorkflow.compared)
+		else if (!S.adaptiveWorkflow.compared)
 			status.textContent = 'Compare the adaptive options and their predicted target/OAR impact.';
 		else
 			status.textContent =
@@ -4653,9 +4428,9 @@ function electronBolusDeliveryRequired() {
 }
 function electronBolusDeliveryOK() {
 	if (!electronBolusDeliveryRequired()) return true;
-	const e = specialSetupWorkflow?.electron || {};
+	const e = S.specialSetupWorkflow?.electron || {};
 	return !!(
-		specialSetupWorkflow.verified &&
+		S.specialSetupWorkflow.verified &&
 		e.mounted &&
 		e.bolusPlaced &&
 		e.bolusPositionOK &&
@@ -4678,7 +4453,7 @@ function renderElectronBolusDeliveryTask() {
 		return;
 	}
 	host.hidden = false;
-	const e = specialSetupWorkflow.electron || {};
+	const e = S.specialSetupWorkflow.electron || {};
 	if (!Number.isFinite(Number(e.bolusDragX))) e.bolusDragX = 54;
 	if (!Number.isFinite(Number(e.bolusDragY))) e.bolusDragY = 92;
 	if (!Number.isFinite(Number(e.bolusContactY))) e.bolusContactY = 38;
@@ -4723,7 +4498,7 @@ function wireElectronBolusDeliveryDrag() {
 		target = document.getElementById('electronFieldTarget');
 	const profile = document.getElementById('electronBolusProfile'),
 		profileBolus = document.getElementById('electronProfileBolus');
-	const e = specialSetupWorkflow?.electron;
+	const e = S.specialSetupWorkflow?.electron;
 	if (!e || !stage || !piece || !target || !profile || !profileBolus) return;
 	const finishPlacement = () => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
@@ -4751,7 +4526,7 @@ function wireElectronBolusDeliveryDrag() {
 		ox = 0,
 		oy = 0;
 	piece.addEventListener('pointerdown', (ev) => {
-		if (!specialSetupWorkflow.verified || treatmentDelivery.delivering) return;
+		if (!S.specialSetupWorkflow.verified || S.treatmentDelivery.delivering) return;
 		dragging = true;
 		piece.setPointerCapture(ev.pointerId);
 		const r = piece.getBoundingClientRect();
@@ -4789,7 +4564,7 @@ function wireElectronBolusDeliveryDrag() {
 	});
 	let pdrag = false;
 	profileBolus.addEventListener('pointerdown', (ev) => {
-		if (!e.bolusPositionOK || treatmentDelivery.delivering) return;
+		if (!e.bolusPositionOK || S.treatmentDelivery.delivering) return;
 		pdrag = true;
 		profileBolus.setPointerCapture(ev.pointerId);
 	});
@@ -4875,14 +4650,14 @@ const IMMOBILIZATION_DEVICE_IDS = [
 	'legPositioner'
 ];
 function immobilizationSpec() {
-	return activeTreatmentCase?.immobilization || null;
+	return S.activeTreatmentCase?.immobilization || null;
 }
 function immobilizationRequired() {
 	const s = immobilizationSpec();
 	return !!(s && Array.isArray(s.required) && s.required.length);
 }
 function immobilizationVerified() {
-	return !immobilizationRequired() || !!immobilizationWorkflow.verified;
+	return !immobilizationRequired() || !!S.immobilizationWorkflow.verified;
 }
 function shuffleImmo(arr) {
 	const a = [...arr];
@@ -4894,7 +4669,7 @@ function shuffleImmo(arr) {
 }
 function resetImmobilizationWorkflowForCase() {
 	const required = immobilizationRequired();
-	immobilizationWorkflow = {
+	S.immobilizationWorkflow = {
 		required,
 		verified: !required,
 		selected: [],
@@ -4942,17 +4717,17 @@ function renderImmobilizationPanel() {
 	const spec = immobilizationSpec();
 	setTextById(
 		'immobilizationPatient',
-		activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${activeTreatmentCase.siteLabel}`
+		S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${S.activeTreatmentCase.siteLabel}`
 			: 'No setup case'
 	);
 	setTextById(
 		'immobilizationPosition',
-		activeTreatmentCase?.positionLabel || activeTreatmentCase?.position || '—'
+		S.activeTreatmentCase?.positionLabel || S.activeTreatmentCase?.position || '—'
 	);
 	setTextById(
 		'immobilizationStatusChip',
-		!spec ? 'N/A' : immobilizationWorkflow.verified ? 'VERIFIED' : 'PENDING'
+		!spec ? 'N/A' : S.immobilizationWorkflow.verified ? 'VERIFIED' : 'PENDING'
 	);
 	const summary = document.getElementById('immobilizationOrderSummary'),
 		inst = document.getElementById('immobilizationInstructions'),
@@ -5001,21 +4776,23 @@ function renderImmobilizationPanel() {
 		const prepRequired =
 			Array.isArray(spec.preparationInstructions) && spec.preparationInstructions.length > 0;
 		verifyBox.innerHTML = `<h4>Setup verification</h4><div class="immo-verify-checks">
-                    <label><input id="immoPositionCheck" type="checkbox" ${immobilizationWorkflow.positionChecked ? 'checked' : ''}> <span><b>Position</b> · patient position/orientation reproduced from the setup record.</span></label>
-                    <label><input id="immoIndexCheck" type="checkbox" ${immobilizationWorkflow.indexingChecked ? 'checked' : ''}> <span><b>Indexing</b> · required board/device indices and alignment references verified.</span></label>
-                    ${prepRequired ? `<label><input id="immoPrepCheck" type="checkbox" ${immobilizationWorkflow.preparationChecked ? 'checked' : ''}> <span><b>Preparation</b> · prescribed pre-treatment preparation/monitoring requirements confirmed.</span></label>` : ''}
+                    <label><input id="immoPositionCheck" type="checkbox" ${S.immobilizationWorkflow.positionChecked ? 'checked' : ''}> <span><b>Position</b> · patient position/orientation reproduced from the setup record.</span></label>
+                    <label><input id="immoIndexCheck" type="checkbox" ${S.immobilizationWorkflow.indexingChecked ? 'checked' : ''}> <span><b>Indexing</b> · required board/device indices and alignment references verified.</span></label>
+                    ${prepRequired ? `<label><input id="immoPrepCheck" type="checkbox" ${S.immobilizationWorkflow.preparationChecked ? 'checked' : ''}> <span><b>Preparation</b> · prescribed pre-treatment preparation/monitoring requirements confirmed.</span></label>` : ''}
                 </div>`;
 	}
-	const selected = new Set(immobilizationWorkflow.selected || []);
+	const selected = new Set(S.immobilizationWorkflow.selected || []);
 	if (immobilizationShelf)
-		immobilizationShelf.innerHTML = (immobilizationWorkflow.shelfOrder || IMMOBILIZATION_DEVICE_IDS)
+		immobilizationShelf.innerHTML = (
+			S.immobilizationWorkflow.shelfOrder || IMMOBILIZATION_DEVICE_IDS
+		)
 			.map((id) => {
 				const meta = immoMeta(id);
 				return `<div class="immo-device ${selected.has(id) ? 'used' : ''}" style="--device-color:${meta.color};--device-color-dark:${meta.dark}" draggable="${selected.has(id) ? 'false' : 'true'}" data-immo-id="${id}" aria-label="${meta.name}">${immobilizationDeviceSVG(id)}<div class="immo-device-label">${meta.name}</div></div>`;
 			})
 			.join('');
 	if (immobilizationPlacedList)
-		immobilizationPlacedList.innerHTML = (immobilizationWorkflow.selected || [])
+		immobilizationPlacedList.innerHTML = (S.immobilizationWorkflow.selected || [])
 			.map((id) => {
 				const meta = immoMeta(id);
 				return `<div class="immo-placed-device" style="--device-color:${meta.color};--device-color-dark:${meta.dark}" draggable="true" data-immo-id="${id}" aria-label="${meta.name} placed on treatment table">${immobilizationDeviceSVG(id)}<div class="immo-device-label">${meta.name}</div></div>`;
@@ -5024,10 +4801,14 @@ function renderImmobilizationPanel() {
 	if (feedback) {
 		feedback.className =
 			'immo-status' +
-			(immobilizationWorkflow.verified ? ' good' : immobilizationWorkflow.attempts ? ' bad' : '');
-		feedback.textContent = immobilizationWorkflow.verified
+			(S.immobilizationWorkflow.verified
+				? ' good'
+				: S.immobilizationWorkflow.attempts
+					? ' bad'
+					: '');
+		feedback.textContent = S.immobilizationWorkflow.verified
 			? 'SETUP VERIFIED · equipment, position, indexing, and prescribed preparation are complete.'
-			: immobilizationWorkflow.lastFeedback ||
+			: S.immobilizationWorkflow.lastFeedback ||
 				'Complete the setup instructions, drag the prescribed equipment to the table, then verify the setup.';
 	}
 	wireImmobilizationDragDrop();
@@ -5042,9 +4823,9 @@ function wireImmobilizationVerificationChecks() {
 		const el = document.getElementById(id);
 		if (!el) return;
 		el.addEventListener('change', () => {
-			immobilizationWorkflow[key] = !!el.checked;
-			immobilizationWorkflow.verified = false;
-			immobilizationWorkflow.lastFeedback =
+			S.immobilizationWorkflow[key] = !!el.checked;
+			S.immobilizationWorkflow.verified = false;
+			S.immobilizationWorkflow.lastFeedback =
 				'Setup verification changed · re-verify before treatment.';
 			renderTreatmentDeliveryPanel();
 			renderTreatmentMonitor();
@@ -5073,9 +4854,9 @@ function wireImmobilizationDragDrop() {
 }
 function addImmobilizationDevice(id) {
 	if (!immobilizationRequired() || !IMMOBILIZATION_DEVICE_IDS.includes(id)) return;
-	if (!immobilizationWorkflow.selected.includes(id)) immobilizationWorkflow.selected.push(id);
-	immobilizationWorkflow.verified = false;
-	immobilizationWorkflow.lastFeedback =
+	if (!S.immobilizationWorkflow.selected.includes(id)) S.immobilizationWorkflow.selected.push(id);
+	S.immobilizationWorkflow.verified = false;
+	S.immobilizationWorkflow.lastFeedback =
 		'Equipment changed · verify the complete setup before proceeding.';
 	updateImmobilizationPatientVisuals();
 	renderImmobilizationPanel();
@@ -5083,9 +4864,11 @@ function addImmobilizationDevice(id) {
 	renderTreatmentMonitor();
 }
 function removeImmobilizationDevice(id) {
-	immobilizationWorkflow.selected = (immobilizationWorkflow.selected || []).filter((x) => x !== id);
-	immobilizationWorkflow.verified = false;
-	immobilizationWorkflow.lastFeedback =
+	S.immobilizationWorkflow.selected = (S.immobilizationWorkflow.selected || []).filter(
+		(x) => x !== id
+	);
+	S.immobilizationWorkflow.verified = false;
+	S.immobilizationWorkflow.lastFeedback =
 		'Equipment removed · complete the prescribed setup before verification.';
 	updateImmobilizationPatientVisuals();
 	renderImmobilizationPanel();
@@ -5095,28 +4878,28 @@ function removeImmobilizationDevice(id) {
 function verifyImmobilizationSelection() {
 	const spec = immobilizationSpec();
 	if (!spec) return;
-	immobilizationWorkflow.attempts++;
+	S.immobilizationWorkflow.attempts++;
 	const req = [...(spec.required || [])],
 		optional = [...(spec.optional || [])],
-		got = [...(immobilizationWorkflow.selected || [])];
+		got = [...(S.immobilizationWorkflow.selected || [])];
 	const devicesOK =
 		req.every((x) => got.includes(x)) && got.every((x) => req.includes(x) || optional.includes(x));
 	const prepRequired =
 		Array.isArray(spec.preparationInstructions) && spec.preparationInstructions.length > 0;
 	const workflowOK =
-		!!immobilizationWorkflow.positionChecked &&
-		!!immobilizationWorkflow.indexingChecked &&
-		(!prepRequired || !!immobilizationWorkflow.preparationChecked);
+		!!S.immobilizationWorkflow.positionChecked &&
+		!!S.immobilizationWorkflow.indexingChecked &&
+		(!prepRequired || !!S.immobilizationWorkflow.preparationChecked);
 	const ok = devicesOK && workflowOK;
-	immobilizationWorkflow.verified = ok;
+	S.immobilizationWorkflow.verified = ok;
 	if (ok)
-		immobilizationWorkflow.lastFeedback =
+		S.immobilizationWorkflow.lastFeedback =
 			'SETUP VERIFIED · equipment, position, indexing, and prescribed preparation are complete.';
 	else if (!devicesOK)
-		immobilizationWorkflow.lastFeedback =
+		S.immobilizationWorkflow.lastFeedback =
 			'SETUP HOLD · one or more selected devices do not match the required or plan-dependent setup equipment.';
 	else
-		immobilizationWorkflow.lastFeedback =
+		S.immobilizationWorkflow.lastFeedback =
 			'SETUP HOLD · complete the position, indexing, and prescribed preparation verification checks.';
 	if (ok) {
 		setPendantLCD('PATIENT SETUP', 'IMMOBILIZATION VERIFIED');
@@ -5134,12 +4917,12 @@ function verifyImmobilizationSelection() {
 	renderOISPanel();
 }
 function clearImmobilizationSelection() {
-	immobilizationWorkflow.selected = [];
-	immobilizationWorkflow.verified = false;
-	immobilizationWorkflow.positionChecked = false;
-	immobilizationWorkflow.indexingChecked = false;
-	immobilizationWorkflow.preparationChecked = false;
-	immobilizationWorkflow.lastFeedback =
+	S.immobilizationWorkflow.selected = [];
+	S.immobilizationWorkflow.verified = false;
+	S.immobilizationWorkflow.positionChecked = false;
+	S.immobilizationWorkflow.indexingChecked = false;
+	S.immobilizationWorkflow.preparationChecked = false;
+	S.immobilizationWorkflow.lastFeedback =
 		'All equipment returned to the shelf and setup verification reset.';
 	updateImmobilizationPatientVisuals();
 	renderImmobilizationPanel();
@@ -5147,7 +4930,7 @@ function clearImmobilizationSelection() {
 	renderTreatmentMonitor();
 }
 function createImmobilizationShelf3D() {
-	if (!scene || immobilizationShelf3D) return;
+	if (!S.scene || S.immobilizationShelf3D) return;
 	const g = new THREE.Group();
 	g.name = 'vaultImmobilizationShelf';
 	const metal = new THREE.MeshStandardMaterial({
@@ -5241,28 +5024,28 @@ function createImmobilizationShelf3D() {
 	addBox(0.34, 0.16, 0.22, deviceMat('legPositioner'), 0.62, 0.96, 0.2, 0, 0, 0.18);
 	g.position.set(-11.1, GROUND_Y + 0.01, -6.8);
 	g.rotation.y = Math.PI / 2;
-	scene.add(g);
-	immobilizationShelf3D = g;
+	S.scene.add(g);
+	S.immobilizationShelf3D = g;
 }
 function createImmobilizationPatientGroup() {
-	if (!patientBodyGroup || immobilizationPatientGroup) return;
-	immobilizationPatientGroup = new THREE.Group();
-	immobilizationPatientGroup.name = 'selectedImmobilization';
-	patientBodyGroup.add(immobilizationPatientGroup);
+	if (!S.patientBodyGroup || S.immobilizationPatientGroup) return;
+	S.immobilizationPatientGroup = new THREE.Group();
+	S.immobilizationPatientGroup.name = 'selectedImmobilization';
+	S.patientBodyGroup.add(S.immobilizationPatientGroup);
 }
 function updateImmobilizationPatientVisuals() {
-	if (!immobilizationPatientGroup) {
+	if (!S.immobilizationPatientGroup) {
 		createImmobilizationPatientGroup();
-		if (!immobilizationPatientGroup) return;
+		if (!S.immobilizationPatientGroup) return;
 	}
-	while (immobilizationPatientGroup.children.length)
-		immobilizationPatientGroup.remove(immobilizationPatientGroup.children[0]);
-	const ids = immobilizationWorkflow.selected || [];
+	while (S.immobilizationPatientGroup.children.length)
+		S.immobilizationPatientGroup.remove(S.immobilizationPatientGroup.children[0]);
+	const ids = S.immobilizationWorkflow.selected || [];
 	const addBox = (w, h, d, mat, x, y, z, rx = 0, ry = 0, rz = 0) => {
 		const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
 		m.position.set(x, y, z);
 		m.rotation.set(rx, ry, rz);
-		immobilizationPatientGroup.add(m);
+		S.immobilizationPatientGroup.add(m);
 		return m;
 	};
 	ids.forEach((id) => {
@@ -5282,7 +5065,7 @@ function updateImmobilizationPatientVisuals() {
 			m.scale.set(1, 0.55, 1.05);
 			m.rotation.x = Math.PI;
 			m.position.set(0, 0.125, -0.88);
-			immobilizationPatientGroup.add(m);
+			S.immobilizationPatientGroup.add(m);
 			if (id === 'hnMask') addBox(0.52, 0.018, 0.34, mat, 0, 0.095, -0.7);
 		} else if (id === 'headrest') addBox(0.25, 0.05, 0.18, mat, 0, 0.035, -0.9, -0.18, 0, 0);
 		else if (id === 'shoulderPull') {
@@ -5306,13 +5089,13 @@ function updateImmobilizationPatientVisuals() {
 			const hole = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.025, 10, 24), mat);
 			hole.rotation.x = Math.PI / 2;
 			hole.position.set(0, 0.012, 0.08);
-			immobilizationPatientGroup.add(hole);
+			S.immobilizationPatientGroup.add(hole);
 		} else if (id === 'kneeSupport') {
 			const geo = new THREE.ConeGeometry(0.18, 0.28, 3),
 				m = new THREE.Mesh(geo, mat);
 			m.rotation.z = Math.PI / 2;
 			m.position.set(0, 0.03, 0.52);
-			immobilizationPatientGroup.add(m);
+			S.immobilizationPatientGroup.add(m);
 		} else if (id === 'footStocks') {
 			addBox(0.16, 0.12, 0.16, mat, -0.12, 0.05, 0.87);
 			addBox(0.16, 0.12, 0.16, mat, 0.12, 0.05, 0.87);
@@ -5320,7 +5103,7 @@ function updateImmobilizationPatientVisuals() {
 			const m = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.018, 10, 24, Math.PI * 1.7), mat);
 			m.rotation.x = Math.PI / 2;
 			m.position.set(0, 0.13, -0.88);
-			immobilizationPatientGroup.add(m);
+			S.immobilizationPatientGroup.add(m);
 			addBox(0.34, 0.02, 0.22, mat, 0, 0.02, -0.88);
 		} else if (id === 'legPositioner') {
 			addBox(0.18, 0.14, 0.22, mat, -0.12, 0.05, 0.84, 0, 0, 0.12);
@@ -5328,24 +5111,24 @@ function updateImmobilizationPatientVisuals() {
 	});
 }
 
-function clearanceOverrideRecord(idx = Number(treatmentDelivery.activeFieldIndex) || 0) {
-	return clearanceOverrideState.byField?.[idx] || null;
+function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
+	return S.clearanceOverrideState.byField?.[idx] || null;
 }
-function clearanceOverrideActive(idx = Number(treatmentDelivery.activeFieldIndex) || 0) {
+function clearanceOverrideActive(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return !!clearanceOverrideRecord(idx)?.active;
 }
 function clearanceOverrideUsedAny() {
 	return !!(
-		(oisSession?.clearanceOverrides || []).length ||
-		Object.values(clearanceOverrideState.byField || {}).some((r) => r?.used)
+		(S.oisSession?.clearanceOverrides || []).length ||
+		Object.values(S.clearanceOverrideState.byField || {}).some((r) => r?.used)
 	);
 }
 function igrtAlignmentReadyForDelivery() {
-	return !activeTreatmentCase ? false : !!clinicalIGRT?.verified;
+	return !S.activeTreatmentCase ? false : !!S.clinicalIGRT?.verified;
 }
 function rawClearanceStatus() {
 	const fieldPlan = deliveryCasePlan();
-	if (!activeTreatmentCase || !fieldPlan) return { hasHold: false };
+	if (!S.activeTreatmentCase || !fieldPlan) return { hasHold: false };
 	const current = getCollisionAssessment(),
 		fixedElectron = isFixedElectronField(fieldPlan),
 		collisionOK = !current || current.margin >= -COLLISION_PROXY_TOL;
@@ -5370,7 +5153,7 @@ function rawClearanceStatus() {
 }
 function renderClearanceOverrideCard() {
 	if (!clearanceOverrideCard) return;
-	const idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+	const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 		record = clearanceOverrideRecord(idx),
 		raw = rawClearanceStatus(),
 		show = !!record?.active || raw.hasHold;
@@ -5385,27 +5168,27 @@ function renderClearanceOverrideCard() {
 	if (clearanceOverrideRationale && !clearanceOverrideRationale.matches(':focus'))
 		clearanceOverrideRationale.value = record?.rationale || '';
 	if (clearanceOverrideRationale)
-		clearanceOverrideRationale.disabled = !!record?.active || treatmentDelivery.delivering;
+		clearanceOverrideRationale.disabled = !!record?.active || S.treatmentDelivery.delivering;
 	if (clearanceOverrideAck) {
 		clearanceOverrideAck.checked = !!record?.ack;
-		clearanceOverrideAck.disabled = !!record?.active || treatmentDelivery.delivering;
+		clearanceOverrideAck.disabled = !!record?.active || S.treatmentDelivery.delivering;
 	}
 	if (clearanceOverrideApply) {
 		clearanceOverrideApply.disabled =
-			!!record?.active || !raw.hasHold || treatmentDelivery.delivering;
+			!!record?.active || !raw.hasHold || S.treatmentDelivery.delivering;
 		clearanceOverrideApply.textContent = record?.active
 			? 'Override Applied'
 			: 'Apply Simulation Override';
 	}
 	if (clearanceOverrideWithdraw)
-		clearanceOverrideWithdraw.disabled = !record?.active || treatmentDelivery.delivering;
+		clearanceOverrideWithdraw.disabled = !record?.active || S.treatmentDelivery.delivering;
 	if (clearanceOverrideStatus)
 		clearanceOverrideStatus.textContent = record?.active
 			? 'Current-pose and trajectory clearance proxies are overridden for this field. OIS/R&V acknowledgment is mandatory before final sign-off.'
 			: 'This affects simulator mechanical/trajectory clearance checks only; geometry, setup, imaging, motion, timeout, and all other treatment interlocks remain active.';
 }
 function applyClearanceOverride() {
-	if (!activeTreatmentCase || treatmentDelivery.delivering) return;
+	if (!S.activeTreatmentCase || S.treatmentDelivery.delivering) return;
 	const raw = rawClearanceStatus();
 	if (!raw.hasHold) {
 		renderTreatmentDeliveryPanel();
@@ -5419,7 +5202,7 @@ function applyClearanceOverride() {
 				'Enter a meaningful rationale (at least 15 characters) and acknowledge the simulation-only warning.';
 		return;
 	}
-	const idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+	const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 		field = deliveryCasePlan()?.field || `Field ${idx + 1}`;
 	const rec = {
 		active: true,
@@ -5439,16 +5222,16 @@ function applyClearanceOverride() {
 			'stereotactic-dry-run'
 		]
 	};
-	clearanceOverrideState.byField[idx] = rec;
-	if (!Array.isArray(oisSession.clearanceOverrides)) oisSession.clearanceOverrides = [];
-	const existing = oisSession.clearanceOverrides.findIndex((x) => Number(x.fieldIndex) === idx);
+	S.clearanceOverrideState.byField[idx] = rec;
+	if (!Array.isArray(S.oisSession.clearanceOverrides)) S.oisSession.clearanceOverrides = [];
+	const existing = S.oisSession.clearanceOverrides.findIndex((x) => Number(x.fieldIndex) === idx);
 	if (existing >= 0)
-		oisSession.clearanceOverrides[existing] = {
-			...oisSession.clearanceOverrides[existing],
+		S.oisSession.clearanceOverrides[existing] = {
+			...S.oisSession.clearanceOverrides[existing],
 			...rec
 		};
-	else oisSession.clearanceOverrides.push({ ...rec });
-	oisSession.overrideReviewed = false;
+	else S.oisSession.clearanceOverrides.push({ ...rec });
+	S.oisSession.overrideReviewed = false;
 	oisLogEvent(
 		'OVERRIDE',
 		'Simulation clearance override applied',
@@ -5463,17 +5246,17 @@ function applyClearanceOverride() {
 	renderSRSPanel();
 }
 function withdrawClearanceOverride() {
-	const idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+	const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 		rec = clearanceOverrideRecord(idx);
-	if (!rec?.active || treatmentDelivery.delivering) return;
+	if (!rec?.active || S.treatmentDelivery.delivering) return;
 	rec.active = false;
 	rec.withdrawnAt = new Date().toISOString();
-	const saved = (oisSession.clearanceOverrides || []).find((x) => Number(x.fieldIndex) === idx);
+	const saved = (S.oisSession.clearanceOverrides || []).find((x) => Number(x.fieldIndex) === idx);
 	if (saved) {
 		saved.active = false;
 		saved.withdrawnAt = rec.withdrawnAt;
 	}
-	oisSession.overrideReviewed = false;
+	S.oisSession.overrideReviewed = false;
 	oisLogEvent(
 		'OVERRIDE',
 		'Simulation clearance override withdrawn',
@@ -5489,7 +5272,7 @@ function withdrawClearanceOverride() {
 }
 
 function deliveryGeometryChecks() {
-	if (!activeTreatmentCase) return [];
+	if (!S.activeTreatmentCase) return [];
 	const actual = getTreatmentMonitorActual(),
 		planned = getCurrentPlannedParameters();
 	const field = deliveryCasePlan();
@@ -5520,8 +5303,8 @@ function getDeliveryReadiness() {
 	const checks = [];
 	checks.push({
 		name: 'Patient / plan loaded',
-		ok: !!activeTreatmentCase,
-		detail: activeTreatmentCase ? activeTreatmentCase.siteLabel : 'No case'
+		ok: !!S.activeTreatmentCase,
+		detail: S.activeTreatmentCase ? S.activeTreatmentCase.siteLabel : 'No case'
 	});
 	if (immobilizationRequired())
 		checks.push({
@@ -5534,8 +5317,8 @@ function getDeliveryReadiness() {
 	const fieldPlan = deliveryCasePlan();
 	checks.push({
 		name: 'Selected treatment field',
-		ok: !!activeTreatmentCase && !!fieldPlan,
-		detail: activeTreatmentCase
+		ok: !!S.activeTreatmentCase && !!fieldPlan,
+		detail: S.activeTreatmentCase
 			? `${fieldPlan.field} · Gantry ${monitorPlannedDisplay('gantry', getCurrentPlannedParameters().gantry)}`
 			: 'No field'
 	});
@@ -5547,40 +5330,40 @@ function getDeliveryReadiness() {
 		detail: geomOK ? 'Gantry · Coll · Jaws · MLC · Couch' : 'Review parameter mismatches'
 	});
 	const imagingRequired = !!(
-		activeTreatmentCase?.planned?.imaging &&
-		String(activeTreatmentCase.planned.imaging).toLowerCase() !== 'none'
+		S.activeTreatmentCase?.planned?.imaging &&
+		String(S.activeTreatmentCase.planned.imaging).toLowerCase() !== 'none'
 	);
 	const overrideActive = clearanceOverrideActive();
-	const igrtOK = !imagingRequired || !!clinicalIGRT?.verified;
+	const igrtOK = !imagingRequired || !!S.clinicalIGRT?.verified;
 	checks.push({
 		name: 'Image guidance verified',
 		ok: igrtOK,
 		detail: imagingRequired
-			? clinicalIGRT?.verified
+			? S.clinicalIGRT?.verified
 				? 'IGRT alignment verified'
 				: 'Registration / correction incomplete'
 			: 'Not prescribed'
 	});
 	const mmRequired = motionRequired(),
-		mmOK = !mmRequired || !!motionManagement.verified;
+		mmOK = !mmRequired || !!S.motionManagement.verified;
 	checks.push({
 		name: '4D / motion management verified',
 		ok: mmOK,
 		detail: mmRequired
-			? motionManagement.verified
-				? motionManagement.mode === 'DIBH'
+			? S.motionManagement.verified
+				? S.motionManagement.mode === 'DIBH'
 					? 'DIBH reproducibility approved'
-					: `Gate ${motionManagement.gateLow}–${motionManagement.gateHigh}% approved`
+					: `Gate ${S.motionManagement.gateLow}–${S.motionManagement.gateHigh}% approved`
 				: 'Complete 4D / DIBH verification'
 			: 'Not prescribed'
 	});
-	const adaptiveOK = !adaptiveRequired() || !!adaptiveWorkflow.approved;
+	const adaptiveOK = !adaptiveRequired() || !!S.adaptiveWorkflow.approved;
 	checks.push({
 		name: 'Adaptive plan approved',
 		ok: adaptiveOK,
 		detail: adaptiveRequired()
-			? adaptiveWorkflow.approved
-				? `${adaptiveSpec()?.plans?.[adaptiveWorkflow.selectedPlanKey]?.title || adaptiveWorkflow.selectedPlanKey} approved`
+			? S.adaptiveWorkflow.approved
+				? `${adaptiveSpec()?.plans?.[S.adaptiveWorkflow.selectedPlanKey]?.title || S.adaptiveWorkflow.selectedPlanKey} approved`
 				: 'Open Adaptive and complete the anatomy review / plan selection workflow'
 			: 'Not prescribed'
 	});
@@ -5595,7 +5378,7 @@ function getDeliveryReadiness() {
 			: 'Not prescribed'
 	});
 	if (electronBolusDeliveryRequired()) {
-		const e = specialSetupWorkflow.electron || {},
+		const e = S.specialSetupWorkflow.electron || {},
 			bolusOK = electronBolusDeliveryOK();
 		const detail = !specialOK
 			? 'Complete electron cutout / cone setup first'
@@ -5606,13 +5389,13 @@ function getDeliveryReadiness() {
 					: `${Number(e.bolusThickness || activeElectronBolusSpec()?.bolusThicknessCm || 0.5).toFixed(1)} cm bolus · field matched · no air gap`;
 		checks.push({ name: 'Bolus placement / skin contact', ok: bolusOK, detail });
 	}
-	const hardwareOK = !kvOn && !detectorExtended;
+	const hardwareOK = !S.kvOn && !S.detectorExtended;
 	checks.push({
 		name: 'Imaging hardware retracted',
 		ok: hardwareOK,
 		detail: hardwareOK
 			? 'kV + MV stowed'
-			: `${kvOn ? 'kV extended' : ''}${kvOn && detectorExtended ? ' · ' : ''}${detectorExtended ? 'MV extended' : ''}`
+			: `${S.kvOn ? 'kV extended' : ''}${S.kvOn && S.detectorExtended ? ' · ' : ''}${S.detectorExtended ? 'MV extended' : ''}`
 	});
 	const clearance = getCollisionAssessment();
 	const fixedElectron = isFixedElectronField(fieldPlan);
@@ -5654,8 +5437,8 @@ function getDeliveryReadiness() {
 		});
 	}
 	if (srsRequired()) {
-		const idx = Number(treatmentDelivery.activeFieldIndex) || 0;
-		const ok = !!srsWorkflow.timeoutVerifiedByField[idx],
+		const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0;
+		const ok = !!S.srsWorkflow.timeoutVerifiedByField[idx],
 			type = stereotacticCaseLabel();
 		checks.push({
 			name: `${type} stereotactic timeout`,
@@ -5665,7 +5448,7 @@ function getDeliveryReadiness() {
 				: `Open SRS / SBRT · dry run + ${type} timeout required`
 		});
 	}
-	const motionOK = !pendantMotionArmed;
+	const motionOK = !S.pendantMotionArmed;
 	checks.push({
 		name: 'In-room motion locked',
 		ok: motionOK,
@@ -5675,27 +5458,27 @@ function getDeliveryReadiness() {
 }
 function allTreatmentFieldsCompleted() {
 	const fields = getTreatmentFields();
-	return !!fields.length && fields.every((_, i) => !!treatmentDelivery.completedFields[i]);
+	return !!fields.length && fields.every((_, i) => !!S.treatmentDelivery.completedFields[i]);
 }
 function deliveredTreatmentMU() {
 	return getTreatmentFields().reduce(
-		(sum, f, i) => sum + (treatmentDelivery.completedFields[i] ? Number(f.mu) || 0 : 0),
+		(sum, f, i) => sum + (S.treatmentDelivery.completedFields[i] ? Number(f.mu) || 0 : 0),
 		0
 	);
 }
 function expectedTechnicalTreatmentCode() {
-	return String(activeTreatmentCase?.billing?.treatmentCode || '');
+	return String(S.activeTreatmentCase?.billing?.treatmentCode || '');
 }
 function expectedTechnicalIGRTHandling() {
-	const explicit = String(activeTreatmentCase?.billing?.igrtHandling || '');
+	const explicit = String(S.activeTreatmentCase?.billing?.igrtHandling || '');
 	if (explicit) return explicit;
-	const imaging = (activeTreatmentCase?.planned?.imaging || '').toLowerCase();
+	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();
 	if (!imaging || imaging === 'none') return 'none';
 	if (cranialSRSRequired()) return 'separate';
 	return 'bundled';
 }
 function resetTreatmentCompletion() {
-	treatmentCompletion = {
+	S.treatmentCompletion = {
 		verified: false,
 		posted: false,
 		code: null,
@@ -5723,37 +5506,37 @@ function resetTreatmentCompletion() {
 function renderTreatmentCompletionControls() {
 	const allDone = allTreatmentFieldsCompleted();
 	if (deliveryCompleteSession) {
-		const skip = !!activeTreatmentCase?.billing?.skipChargeCapture;
+		const skip = !!S.activeTreatmentCase?.billing?.skipChargeCapture;
 		deliveryCompleteSession.disabled =
-			!activeTreatmentCase ||
+			!S.activeTreatmentCase ||
 			!allDone ||
-			treatmentDelivery.delivering ||
-			treatmentCompletion.posted;
-		deliveryCompleteSession.classList.toggle('ready', allDone && !treatmentCompletion.posted);
-		deliveryCompleteSession.textContent = treatmentCompletion.posted
+			S.treatmentDelivery.delivering ||
+			S.treatmentCompletion.posted;
+		deliveryCompleteSession.classList.toggle('ready', allDone && !S.treatmentCompletion.posted);
+		deliveryCompleteSession.textContent = S.treatmentCompletion.posted
 			? 'Fraction Completed'
 			: skip
 				? 'Complete SRS Fraction'
 				: 'Complete Fraction / Charges';
 	}
 	if (deliveryReviewCharges) {
-		const skip = !!activeTreatmentCase?.billing?.skipChargeCapture;
-		deliveryReviewCharges.disabled = skip || !treatmentCompletion.posted;
+		const skip = !!S.activeTreatmentCase?.billing?.skipChargeCapture;
+		deliveryReviewCharges.disabled = skip || !S.treatmentCompletion.posted;
 		deliveryReviewCharges.textContent = skip ? 'SRS Coding Not Modeled' : 'Review Charge Record';
 	}
 	const hint = document.getElementById('deliveryCompletionHint');
 	if (hint) {
 		const fields = getTreatmentFields(),
-			done = fields.filter((_, i) => !!treatmentDelivery.completedFields[i]).length;
-		hint.textContent = treatmentCompletion.posted
-			? treatmentCompletion.code === 'SRS-NOT-MODELED'
+			done = fields.filter((_, i) => !!S.treatmentDelivery.completedFields[i]).length;
+		hint.textContent = S.treatmentCompletion.posted
+			? S.treatmentCompletion.code === 'SRS-NOT-MODELED'
 				? 'SRS fraction closed · all prescribed stereotactic arcs delivered. Procedure coding is outside the current CPT exercise.'
-				: `Treatment session closed · CPT ${treatmentCompletion.code} posted to the simulation charge record.`
+				: `Treatment session closed · CPT ${S.treatmentCompletion.code} posted to the simulation charge record.`
 			: allDone
-				? activeTreatmentCase?.billing?.skipChargeCapture
+				? S.activeTreatmentCase?.billing?.skipChargeCapture
 					? 'All prescribed SRS arcs are complete. Close the SRS fraction; stereotactic procedure coding is outside the current CPT exercise.'
 					: 'All prescribed fields are complete. Open Charge Capture to close today’s treatment fraction.'
-				: activeTreatmentCase
+				: S.activeTreatmentCase
 					? `${done} of ${fields.length} prescribed field${fields.length === 1 ? '' : 's'} complete. Finish all fields before charge capture.`
 					: 'Load a treatment case.';
 	}
@@ -5858,57 +5641,58 @@ function renderChargeCapturePanel() {
 		tech = document.getElementById('chargeTechnique'),
 		del = document.getElementById('chargeDelivered');
 	if (pat)
-		pat.textContent = activeTreatmentCase
-			? `${activeTreatmentCase.patient} · Fx ${activeTreatmentCase.fraction}`
+		pat.textContent = S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · Fx ${S.activeTreatmentCase.fraction}`
 			: 'No case';
-	if (tech) tech.textContent = activeTreatmentCase ? activeTreatmentCase.technique : '—';
+	if (tech) tech.textContent = S.activeTreatmentCase ? S.activeTreatmentCase.technique : '—';
 	if (del)
-		del.textContent = activeTreatmentCase
-			? `${fields.filter((_, i) => !!treatmentDelivery.completedFields[i]).length}/${fields.length} fields · ${deliveredTreatmentMU()} MU`
+		del.textContent = S.activeTreatmentCase
+			? `${fields.filter((_, i) => !!S.treatmentDelivery.completedFields[i]).length}/${fields.length} fields · ${deliveredTreatmentMU()} MU`
 			: '—';
-	if (chargeTreatmentCode) chargeTreatmentCode.disabled = treatmentCompletion.posted;
+	if (chargeTreatmentCode) chargeTreatmentCode.disabled = S.treatmentCompletion.posted;
 	if (chargeIgrtHandling) {
-		chargeIgrtHandling.disabled = treatmentCompletion.posted || sbrtRequired();
+		chargeIgrtHandling.disabled = S.treatmentCompletion.posted || sbrtRequired();
 		const row = chargeIgrtHandling.closest('.charge-field');
 		if (row) row.style.display = sbrtRequired() ? 'none' : 'grid';
 		if (sbrtRequired()) chargeIgrtHandling.value = '';
 	}
 	if (chargeVerify)
-		chargeVerify.disabled = !activeTreatmentCase || !allDone || treatmentCompletion.posted;
-	if (chargePost) chargePost.disabled = !treatmentCompletion.verified || treatmentCompletion.posted;
+		chargeVerify.disabled = !S.activeTreatmentCase || !allDone || S.treatmentCompletion.posted;
+	if (chargePost)
+		chargePost.disabled = !S.treatmentCompletion.verified || S.treatmentCompletion.posted;
 	updateChargeEducation();
 	const feedback = document.getElementById('chargeFeedback');
-	if (feedback && !allDone && !treatmentCompletion.posted) {
+	if (feedback && !allDone && !S.treatmentCompletion.posted) {
 		feedback.className = 'bad';
 		feedback.textContent =
 			'Treatment completion is locked until every prescribed field has been delivered.';
 	}
 	const rec = document.getElementById('chargePostedRecord');
-	if (rec && treatmentCompletion.posted && treatmentCompletion.record) {
-		const r = treatmentCompletion.record;
+	if (rec && S.treatmentCompletion.posted && S.treatmentCompletion.record) {
+		const r = S.treatmentCompletion.record;
 		rec.className = 'show';
 		rec.innerHTML = `<b>FRACTION COMPLETE · CHARGE POSTED</b><br>${r.patient} · ${r.site} · Fx ${r.fraction}<br>CPT ${r.code} · ${r.level}<br>${r.fields} field${r.fields === 1 ? '' : 's'} · ${r.totalMU} MU · IGRT ${r.igrtHandling === 'bundled' ? 'TC bundled' : r.igrtHandling === 'separate' ? '77387-TC captured separately' : r.igrtHandling === 'not-assessed' ? 'handling shown for context' : 'not captured'}<br>Simulation record: ${r.postedAt}`;
 	}
 }
 function completeFractionWithoutCurrentCPTModule() {
 	if (
-		!activeTreatmentCase?.billing?.skipChargeCapture ||
+		!S.activeTreatmentCase?.billing?.skipChargeCapture ||
 		!allTreatmentFieldsCompleted() ||
-		treatmentCompletion.posted
+		S.treatmentCompletion.posted
 	)
 		return;
 	const now = new Date(),
 		fields = getTreatmentFields();
-	treatmentCompletion.posted = true;
-	treatmentCompletion.verified = true;
-	treatmentCompletion.code = 'SRS-NOT-MODELED';
-	treatmentCompletion.postedAt = now;
-	treatmentCompletion.record = {
-		patient: activeTreatmentCase.patient,
-		mrn: activeTreatmentCase.mrn,
-		site: activeTreatmentCase.siteLabel,
-		fraction: activeTreatmentCase.fraction,
-		technique: activeTreatmentCase.technique,
+	S.treatmentCompletion.posted = true;
+	S.treatmentCompletion.verified = true;
+	S.treatmentCompletion.code = 'SRS-NOT-MODELED';
+	S.treatmentCompletion.postedAt = now;
+	S.treatmentCompletion.record = {
+		patient: S.activeTreatmentCase.patient,
+		mrn: S.activeTreatmentCase.mrn,
+		site: S.activeTreatmentCase.siteLabel,
+		fraction: S.activeTreatmentCase.fraction,
+		technique: S.activeTreatmentCase.technique,
 		code: 'SRS-NOT-MODELED',
 		level: 'Stereotactic coding outside current exercise',
 		igrtHandling: 'bundled/context not assessed',
@@ -5932,11 +5716,11 @@ function completeFractionWithoutCurrentCPTModule() {
 	if (window.RTApps) window.RTApps.recordResult('sim-linac-fraction').catch(function () {});
 }
 function openChargeCapture() {
-	if (!activeTreatmentCase) {
+	if (!S.activeTreatmentCase) {
 		setPendantLCD('CHARGE CAPTURE', 'Load a patient first');
 		return;
 	}
-	if (!allTreatmentFieldsCompleted() && !treatmentCompletion.posted) {
+	if (!allTreatmentFieldsCompleted() && !S.treatmentCompletion.posted) {
 		setPendantLCD('TREATMENT INCOMPLETE', 'Finish all prescribed fields');
 		renderTreatmentDeliveryPanel();
 		return;
@@ -5954,20 +5738,20 @@ function verifyChargeCapture() {
 		renderChargeCapturePanel();
 		return;
 	}
-	treatmentCompletion.attempts++;
+	S.treatmentCompletion.attempts++;
 	const selected = String(chargeTreatmentCode?.value || ''),
 		igrt = String(chargeIgrtHandling?.value || '');
 	const expected = expectedTechnicalTreatmentCode(),
 		expectedIGRT = expectedTechnicalIGRTHandling();
 	const codeOK = selected === expected,
 		igrtOK = expectedIGRT === 'not-assessed' ? true : igrt === expectedIGRT;
-	treatmentCompletion.verified = codeOK && igrtOK;
-	treatmentCompletion.code = selected || null;
-	treatmentCompletion.igrtHandling = igrt || null;
+	S.treatmentCompletion.verified = codeOK && igrtOK;
+	S.treatmentCompletion.code = selected || null;
+	S.treatmentCompletion.igrtHandling = igrt || null;
 	const feedback = document.getElementById('chargeFeedback');
 	if (feedback) {
-		feedback.className = treatmentCompletion.verified ? 'good' : 'bad';
-		if (treatmentCompletion.verified) {
+		feedback.className = S.treatmentCompletion.verified ? 'good' : 'bad';
+		if (S.treatmentCompletion.verified) {
 			const igrtWhy =
 				expectedIGRT === 'bundled'
 					? 'Because image guidance was performed, its modeled technical component is bundled into the treatment-delivery code in this exercise.'
@@ -5976,7 +5760,7 @@ function verifyChargeCapture() {
 						: expectedIGRT === 'not-assessed'
 							? 'For this SBRT case the simulator grades CPT 77373 and displays the supplied image-guidance notes for discussion rather than grading a separate IGRT-TC selection.'
 							: '';
-			feedback.innerHTML = `<b>Charge selection verified.</b> <b>${expected} (${activeTreatmentCase.billing?.level || ''})</b> is appropriate because ${activeTreatmentCase.billing?.reason || 'the delivered technique matches this treatment-delivery category'}. ${CPT_EDU[expected]?.plain || ''} ${igrtWhy}`;
+			feedback.innerHTML = `<b>Charge selection verified.</b> <b>${expected} (${S.activeTreatmentCase.billing?.level || ''})</b> is appropriate because ${S.activeTreatmentCase.billing?.reason || 'the delivered technique matches this treatment-delivery category'}. ${CPT_EDU[expected]?.plain || ''} ${igrtWhy}`;
 		} else {
 			const issues = [];
 			if (!codeOK)
@@ -6000,7 +5784,7 @@ function verifyChargeCapture() {
 			feedback.innerHTML = `<b>Charge hold.</b> ${issues.join('; ')}.`;
 		}
 	}
-	if (chargePost) chargePost.disabled = !treatmentCompletion.verified;
+	if (chargePost) chargePost.disabled = !S.treatmentCompletion.verified;
 }
 function persistChargeRecord(record) {
 	try {
@@ -6013,29 +5797,33 @@ function persistChargeRecord(record) {
 	}
 }
 function postChargeAndCompleteFraction() {
-	if (!treatmentCompletion.verified || treatmentCompletion.posted || !allTreatmentFieldsCompleted())
+	if (
+		!S.treatmentCompletion.verified ||
+		S.treatmentCompletion.posted ||
+		!allTreatmentFieldsCompleted()
+	)
 		return;
 	const fields = getTreatmentFields(),
 		now = new Date();
 	const record = {
-		patient: activeTreatmentCase.patient,
-		mrn: activeTreatmentCase.mrn,
-		site: activeTreatmentCase.siteLabel,
-		fraction: activeTreatmentCase.fraction,
-		technique: activeTreatmentCase.technique,
+		patient: S.activeTreatmentCase.patient,
+		mrn: S.activeTreatmentCase.mrn,
+		site: S.activeTreatmentCase.siteLabel,
+		fraction: S.activeTreatmentCase.fraction,
+		technique: S.activeTreatmentCase.technique,
 		code: expectedTechnicalTreatmentCode(),
-		level: activeTreatmentCase.billing?.level || '',
-		reason: activeTreatmentCase.billing?.reason || '',
+		level: S.activeTreatmentCase.billing?.level || '',
+		reason: S.activeTreatmentCase.billing?.reason || '',
 		igrtHandling: expectedTechnicalIGRTHandling(),
 		fields: fields.length,
 		totalMU: fields.reduce((s, f) => s + (Number(f.mu) || 0), 0),
 		postedAt: now.toLocaleString()
 	};
-	treatmentCompletion.posted = true;
-	treatmentCompletion.code = record.code;
-	treatmentCompletion.igrtHandling = record.igrtHandling;
-	treatmentCompletion.postedAt = now;
-	treatmentCompletion.record = record;
+	S.treatmentCompletion.posted = true;
+	S.treatmentCompletion.code = record.code;
+	S.treatmentCompletion.igrtHandling = record.igrtHandling;
+	S.treatmentCompletion.postedAt = now;
+	S.treatmentCompletion.record = record;
 	persistChargeRecord(record);
 	oisLogEvent(
 		'CHARGE',
@@ -6045,9 +5833,9 @@ function postChargeAndCompleteFraction() {
 	);
 	recordAdaptiveFractionDose();
 	setBeamState(false);
-	treatmentDelivery.armed = false;
-	treatmentDelivery.delivering = false;
-	treatmentDelivery.held = false;
+	S.treatmentDelivery.armed = false;
+	S.treatmentDelivery.delivering = false;
+	S.treatmentDelivery.held = false;
 	setPendantLCD('TREATMENT COMPLETE', `CPT ${record.code} · fraction closed`);
 	renderChargeCapturePanel();
 	renderTreatmentCompletionControls();
@@ -6059,26 +5847,26 @@ function postChargeAndCompleteFraction() {
 	if (window.RTApps) window.RTApps.recordResult('sim-linac-fraction').catch(function () {});
 }
 function resetTreatmentDeliveryForCase() {
-	if (deliveryRAF) {
-		cancelAnimationFrame(deliveryRAF);
-		deliveryRAF = null;
+	if (S.deliveryRAF) {
+		cancelAnimationFrame(S.deliveryRAF);
+		S.deliveryRAF = null;
 	}
-	treatmentDelivery.armed = false;
-	treatmentDelivery.delivering = false;
-	treatmentDelivery.held = false;
-	treatmentDelivery.gateHeld = false;
-	treatmentDelivery.completed = false;
-	treatmentDelivery.terminated = false;
-	treatmentDelivery.muDelivered = 0;
-	treatmentDelivery.startedAt = 0;
-	treatmentDelivery.lastTick = 0;
-	treatmentDelivery.autoHoldReason = '';
-	treatmentDelivery.activeFieldIndex = 0;
-	treatmentDelivery.completedFields = {};
-	treatmentDelivery.dynamicFraction = 0;
-	treatmentDelivery.controlPointIndex = 0;
-	clearanceOverrideState = { byField: {} };
-	if (beamOn) setBeamState(false);
+	S.treatmentDelivery.armed = false;
+	S.treatmentDelivery.delivering = false;
+	S.treatmentDelivery.held = false;
+	S.treatmentDelivery.gateHeld = false;
+	S.treatmentDelivery.completed = false;
+	S.treatmentDelivery.terminated = false;
+	S.treatmentDelivery.muDelivered = 0;
+	S.treatmentDelivery.startedAt = 0;
+	S.treatmentDelivery.lastTick = 0;
+	S.treatmentDelivery.autoHoldReason = '';
+	S.treatmentDelivery.activeFieldIndex = 0;
+	S.treatmentDelivery.completedFields = {};
+	S.treatmentDelivery.dynamicFraction = 0;
+	S.treatmentDelivery.controlPointIndex = 0;
+	S.clearanceOverrideState = { byField: {} };
+	if (S.beamOn) setBeamState(false);
 	if (beamOnButton) beamOnButton.disabled = false;
 	populateDeliveryFieldSelect();
 	resetTreatmentCompletion();
@@ -6092,9 +5880,9 @@ function renderTreatmentDeliveryPanel() {
 		const fields = getTreatmentFields();
 		if (deliveryFieldSelect.options.length !== fields.length) populateDeliveryFieldSelect();
 		deliveryFieldSelect.value = String(
-			Math.max(0, Number(treatmentDelivery.activeFieldIndex) || 0)
+			Math.max(0, Number(S.treatmentDelivery.activeFieldIndex) || 0)
 		);
-		deliveryFieldSelect.disabled = !activeTreatmentCase || treatmentDelivery.delivering;
+		deliveryFieldSelect.disabled = !S.activeTreatmentCase || S.treatmentDelivery.delivering;
 	}
 	const pat = document.getElementById('deliveryPatient'),
 		pmu = document.getElementById('deliveryPlannedMU'),
@@ -6107,15 +5895,17 @@ function renderTreatmentDeliveryPanel() {
 		status = document.getElementById('deliveryStatus');
 	const dynState = getDynamicFieldState(plan, deliveryProgressFraction(plan));
 	if (pat)
-		pat.textContent = activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${plan.field}`
+		pat.textContent = S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${plan.field}`
 			: 'No case';
-	if (pmu) pmu.textContent = activeTreatmentCase ? `${plan.mu} MU` : '—';
-	if (dr) dr.textContent = activeTreatmentCase ? `${Math.round(dynState.doseRate)} MU/min` : '—';
-	setTextById('deliveryModeValue', activeTreatmentCase ? plan.mode || 'STATIC' : '—');
+	if (pmu) pmu.textContent = S.activeTreatmentCase ? `${plan.mu} MU` : '—';
+	if (dr) dr.textContent = S.activeTreatmentCase ? `${Math.round(dynState.doseRate)} MU/min` : '—';
+	setTextById('deliveryModeValue', S.activeTreatmentCase ? plan.mode || 'STATIC' : '—');
 	setTextById(
 		'deliveryCPValue',
-		activeTreatmentCase ? `${dynState.controlPointIndex + 1} / ${dynState.controlPointCount}` : '—'
+		S.activeTreatmentCase
+			? `${dynState.controlPointIndex + 1} / ${dynState.controlPointCount}`
+			: '—'
 	);
 	const motionEl = document.getElementById('deliveryMotionValue'),
 		detailEl = document.getElementById('deliveryDynamicDetail');
@@ -6148,14 +5938,14 @@ function renderTreatmentDeliveryPanel() {
 					`<div class="delivery-check ${c.ok ? 'good' : 'bad'}"><div class="lamp">${c.ok ? '✓' : '!'}</div><div class="name">${c.name}</div><div class="detail">${c.detail}</div></div>`
 			)
 			.join('');
-	if (treatmentDelivery.armed && !treatmentDelivery.delivering && !readyInfo.ready) {
-		treatmentDelivery.armed = false;
+	if (S.treatmentDelivery.armed && !S.treatmentDelivery.delivering && !readyInfo.ready) {
+		S.treatmentDelivery.armed = false;
 	}
 	if (state) {
 		const ready = readyInfo.ready;
 		state.className = `delivery-ready ${ready ? 'good' : 'bad'}`;
 		state.textContent = ready
-			? treatmentDelivery.armed
+			? S.treatmentDelivery.armed
 				? clearanceOverrideActive()
 					? 'BEAM ENABLED · SIMULATION CLEARANCE OVERRIDE ACTIVE.'
 					: 'BEAM ENABLED · field may be delivered.'
@@ -6165,54 +5955,54 @@ function renderTreatmentDeliveryPanel() {
 			: 'TREATMENT HOLD · resolve the failed interlocks above.';
 	}
 	const total = Number(plan.mu) || 0,
-		delivered = Math.min(total, treatmentDelivery.muDelivered || 0),
+		delivered = Math.min(total, S.treatmentDelivery.muDelivered || 0),
 		pct = total ? Math.max(0, Math.min(100, (delivered / total) * 100)) : 0;
 	if (muVal) muVal.textContent = `${delivered.toFixed(1)} MU`;
 	if (muDet) muDet.textContent = `${delivered.toFixed(1)} / ${total.toFixed(1)} MU`;
 	if (bar) bar.style.width = `${pct}%`;
 	if (deliveryArm) {
 		deliveryArm.disabled =
-			!readyInfo.ready || treatmentDelivery.delivering || treatmentDelivery.completed;
-		deliveryArm.textContent = treatmentDelivery.armed ? 'Beam Enabled' : 'Enable Beam';
+			!readyInfo.ready || S.treatmentDelivery.delivering || S.treatmentDelivery.completed;
+		deliveryArm.textContent = S.treatmentDelivery.armed ? 'Beam Enabled' : 'Enable Beam';
 	}
 	if (deliveryStart)
 		deliveryStart.disabled =
-			!treatmentDelivery.armed ||
+			!S.treatmentDelivery.armed ||
 			!readyInfo.ready ||
-			treatmentDelivery.delivering ||
-			treatmentDelivery.completed;
+			S.treatmentDelivery.delivering ||
+			S.treatmentDelivery.completed;
 	if (deliveryHold) {
-		deliveryHold.disabled = !treatmentDelivery.delivering || treatmentDelivery.completed;
-		deliveryHold.textContent = treatmentDelivery.held ? 'Resume Beam' : 'Beam Hold';
+		deliveryHold.disabled = !S.treatmentDelivery.delivering || S.treatmentDelivery.completed;
+		deliveryHold.textContent = S.treatmentDelivery.held ? 'Resume Beam' : 'Beam Hold';
 	}
 	if (deliveryTerminate)
-		deliveryTerminate.disabled = !treatmentDelivery.delivering || treatmentDelivery.completed;
+		deliveryTerminate.disabled = !S.treatmentDelivery.delivering || S.treatmentDelivery.completed;
 	if (status) {
 		status.classList.remove('beam-on', 'complete');
-		if (treatmentCompletion.posted) {
+		if (S.treatmentCompletion.posted) {
 			status.classList.add('complete');
 			status.textContent =
-				treatmentCompletion.code === 'SRS-NOT-MODELED'
+				S.treatmentCompletion.code === 'SRS-NOT-MODELED'
 					? 'SRS FRACTION COMPLETE · all prescribed arcs delivered.'
-					: `TREATMENT SESSION COMPLETE · CPT ${treatmentCompletion.code} posted.`;
-		} else if (treatmentDelivery.completed) {
+					: `TREATMENT SESSION COMPLETE · CPT ${S.treatmentCompletion.code} posted.`;
+		} else if (S.treatmentDelivery.completed) {
 			status.classList.add('complete');
 			status.textContent = allTreatmentFieldsCompleted()
-				? activeTreatmentCase?.billing?.skipChargeCapture
+				? S.activeTreatmentCase?.billing?.skipChargeCapture
 					? `ALL PRESCRIBED SRS ARCS COMPLETE · close the SRS fraction.`
 					: `ALL PRESCRIBED FIELDS COMPLETE · open Charge Capture to close the fraction.`
 				: `FIELD COMPLETE · ${total.toFixed(1)} MU delivered. Select the next prescribed field.`;
-		} else if (treatmentDelivery.delivering && treatmentDelivery.held) {
-			status.textContent = `BEAM HOLD · ${treatmentDelivery.autoHoldReason || 'delivery paused'}.`;
-		} else if (treatmentDelivery.delivering && treatmentDelivery.gateHeld) {
-			status.textContent = `RESPIRATORY GATE HOLD · ${motionManagement.mode === 'DIBH' ? 'DIBH outside tolerance / breath hold released' : `phase ${motionManagement.phase.toFixed(0)}% outside ${motionManagement.gateLow}–${motionManagement.gateHigh}% gate`} · MU and machine progression paused.`;
-		} else if (treatmentDelivery.delivering) {
+		} else if (S.treatmentDelivery.delivering && S.treatmentDelivery.held) {
+			status.textContent = `BEAM HOLD · ${S.treatmentDelivery.autoHoldReason || 'delivery paused'}.`;
+		} else if (S.treatmentDelivery.delivering && S.treatmentDelivery.gateHeld) {
+			status.textContent = `RESPIRATORY GATE HOLD · ${S.motionManagement.mode === 'DIBH' ? 'DIBH outside tolerance / breath hold released' : `phase ${S.motionManagement.phase.toFixed(0)}% outside ${S.motionManagement.gateLow}–${S.motionManagement.gateHigh}% gate`} · MU and machine progression paused.`;
+		} else if (S.treatmentDelivery.delivering) {
 			status.classList.add('beam-on');
 			const d = getDynamicFieldState(plan, deliveryProgressFraction(plan));
-			status.textContent = `BEAM ON · ${plan.mode}${plan.mode === 'VMAT' && d.arc ? ` · G ${d.gantry.toFixed(1)}° ${d.arc.direction}` : ''}${motionRequired() ? ` · ${motionManagement.mode === 'DIBH' ? 'DIBH' : 'GATED'}` : ''} · CP ${d.controlPointIndex + 1}/${d.controlPointCount} · ${delivered.toFixed(1)} / ${total.toFixed(1)} MU · ${Math.round(d.doseRate)} MU/min (×${DELIVERY_SPEED_FACTOR} training speed)`;
-		} else if (treatmentDelivery.terminated) {
+			status.textContent = `BEAM ON · ${plan.mode}${plan.mode === 'VMAT' && d.arc ? ` · G ${d.gantry.toFixed(1)}° ${d.arc.direction}` : ''}${motionRequired() ? ` · ${S.motionManagement.mode === 'DIBH' ? 'DIBH' : 'GATED'}` : ''} · CP ${d.controlPointIndex + 1}/${d.controlPointCount} · ${delivered.toFixed(1)} / ${total.toFixed(1)} MU · ${Math.round(d.doseRate)} MU/min (×${DELIVERY_SPEED_FACTOR} training speed)`;
+		} else if (S.treatmentDelivery.terminated) {
 			status.textContent = `DELIVERY TERMINATED at ${delivered.toFixed(1)} MU. Reset/load case to restart field.`;
-		} else if (treatmentDelivery.armed) {
+		} else if (S.treatmentDelivery.armed) {
 			status.textContent = 'Beam is enabled. Recheck the patient and press Deliver Field.';
 		} else
 			status.textContent = readyInfo.ready
@@ -6225,61 +6015,61 @@ function renderTreatmentDeliveryPanel() {
 function armTreatmentDelivery() {
 	const r = getDeliveryReadiness();
 	if (!r.ready) {
-		treatmentDelivery.armed = false;
+		S.treatmentDelivery.armed = false;
 		setPendantLCD('BEAM ENABLE', 'HOLD · interlocks not satisfied');
 		renderTreatmentDeliveryPanel();
 		return;
 	}
-	treatmentDelivery.armed = true;
-	treatmentDelivery.terminated = false;
+	S.treatmentDelivery.armed = true;
+	S.treatmentDelivery.terminated = false;
 	setPendantLCD('BEAM ENABLE', 'READY · field enabled');
 	renderTreatmentDeliveryPanel();
 }
 function holdTreatmentDelivery(reason = 'manual hold') {
-	if (!treatmentDelivery.delivering) return;
-	treatmentDelivery.held = true;
-	treatmentDelivery.autoHoldReason = reason;
+	if (!S.treatmentDelivery.delivering) return;
+	S.treatmentDelivery.held = true;
+	S.treatmentDelivery.autoHoldReason = reason;
 	oisLogEvent('BEAM HOLD', 'Treatment delivery held', reason);
 	setBeamState(false);
 	setPendantLCD('BEAM HOLD', reason);
 	renderTreatmentDeliveryPanel();
 }
 function resumeTreatmentDelivery() {
-	if (!treatmentDelivery.delivering || !treatmentDelivery.held) return;
+	if (!S.treatmentDelivery.delivering || !S.treatmentDelivery.held) return;
 	const r = getDeliveryReadiness();
 	if (!r.ready) {
-		treatmentDelivery.autoHoldReason = 'interlock remains';
+		S.treatmentDelivery.autoHoldReason = 'interlock remains';
 		renderTreatmentDeliveryPanel();
 		return;
 	}
-	treatmentDelivery.held = false;
-	treatmentDelivery.autoHoldReason = '';
+	S.treatmentDelivery.held = false;
+	S.treatmentDelivery.autoHoldReason = '';
 	oisLogEvent('DELIVERY', 'Beam resumed', deliveryCasePlan()?.field || 'Selected field');
-	treatmentDelivery.lastTick = performance.now();
+	S.treatmentDelivery.lastTick = performance.now();
 	setBeamState(true);
 	setPendantLCD('BEAM', 'RESUMED');
-	deliveryRAF = requestAnimationFrame(deliveryTick);
+	S.deliveryRAF = requestAnimationFrame(deliveryTick);
 	renderTreatmentDeliveryPanel();
 }
 function finishTreatmentDelivery() {
-	if (deliveryRAF) {
-		cancelAnimationFrame(deliveryRAF);
-		deliveryRAF = null;
+	if (S.deliveryRAF) {
+		cancelAnimationFrame(S.deliveryRAF);
+		S.deliveryRAF = null;
 	}
 	const total = Number(deliveryCasePlan().mu) || 0;
-	treatmentDelivery.muDelivered = total;
+	S.treatmentDelivery.muDelivered = total;
 	applyDynamicDeliveryMachineState(deliveryCasePlan(), 1);
-	treatmentDelivery.delivering = false;
-	treatmentDelivery.held = false;
-	treatmentDelivery.gateHeld = false;
-	treatmentDelivery.completed = true;
-	treatmentDelivery.armed = false;
-	treatmentDelivery.completedFields[treatmentDelivery.activeFieldIndex] = true;
+	S.treatmentDelivery.delivering = false;
+	S.treatmentDelivery.held = false;
+	S.treatmentDelivery.gateHeld = false;
+	S.treatmentDelivery.completed = true;
+	S.treatmentDelivery.armed = false;
+	S.treatmentDelivery.completedFields[S.treatmentDelivery.activeFieldIndex] = true;
 	oisLogEvent(
 		'DELIVERY',
 		'Field / arc complete',
 		`${deliveryCasePlan()?.field || 'Field'} · ${total.toFixed(1)} MU`,
-		`field-complete-${treatmentDelivery.activeFieldIndex}`
+		`field-complete-${S.treatmentDelivery.activeFieldIndex}`
 	);
 	setBeamState(false);
 	if (beamOnButton) beamOnButton.disabled = false;
@@ -6293,23 +6083,23 @@ function finishTreatmentDelivery() {
 	renderTreatmentMonitor();
 }
 function deliveryTick(now) {
-	if (!treatmentDelivery.delivering || treatmentDelivery.held) {
-		deliveryRAF = null;
+	if (!S.treatmentDelivery.delivering || S.treatmentDelivery.held) {
+		S.deliveryRAF = null;
 		return;
 	}
 	const plan = deliveryCasePlan(),
 		total = Number(plan.mu) || 0;
 	if (motionRequired() && !currentMotionGateOpen()) {
-		treatmentDelivery.gateHeld = true;
-		treatmentDelivery.lastTick = now;
-		if (beamOn) setBeamState(false);
+		S.treatmentDelivery.gateHeld = true;
+		S.treatmentDelivery.lastTick = now;
+		if (S.beamOn) setBeamState(false);
 		renderTreatmentDeliveryPanel();
-		deliveryRAF = requestAnimationFrame(deliveryTick);
+		S.deliveryRAF = requestAnimationFrame(deliveryTick);
 		return;
 	}
-	if (treatmentDelivery.gateHeld) {
-		treatmentDelivery.gateHeld = false;
-		treatmentDelivery.lastTick = now;
+	if (S.treatmentDelivery.gateHeld) {
+		S.treatmentDelivery.gateHeld = false;
+		S.treatmentDelivery.lastTick = now;
 		setPendantLCD('RESPIRATORY GATE', 'OPEN · delivery resumed');
 	}
 	if (isDynamicTreatmentField(plan))
@@ -6318,16 +6108,16 @@ function deliveryTick(now) {
 	if (!r.ready) {
 		const failed = r.checks.find((x) => !x.ok);
 		holdTreatmentDelivery(failed?.name || 'interlock');
-		deliveryRAF = null;
+		S.deliveryRAF = null;
 		return;
 	}
 	const d = getDynamicFieldState(plan, deliveryProgressFraction(plan)),
 		rate = Math.max(1, Number(d.doseRate) || Number(plan.doseRate) || 600);
-	if (!treatmentDelivery.lastTick) treatmentDelivery.lastTick = now;
-	const dt = Math.max(0, Math.min(0.25, (now - treatmentDelivery.lastTick) / 1000));
-	treatmentDelivery.lastTick = now;
-	treatmentDelivery.muDelivered += (rate / 60) * dt * DELIVERY_SPEED_FACTOR;
-	if (treatmentDelivery.muDelivered >= total) {
+	if (!S.treatmentDelivery.lastTick) S.treatmentDelivery.lastTick = now;
+	const dt = Math.max(0, Math.min(0.25, (now - S.treatmentDelivery.lastTick) / 1000));
+	S.treatmentDelivery.lastTick = now;
+	S.treatmentDelivery.muDelivered += (rate / 60) * dt * DELIVERY_SPEED_FACTOR;
+	if (S.treatmentDelivery.muDelivered >= total) {
 		finishTreatmentDelivery();
 		return;
 	}
@@ -6337,14 +6127,14 @@ function deliveryTick(now) {
 		if (clearance && clearance.margin < -COLLISION_PROXY_TOL) {
 			if (!clearanceOverrideActive()) {
 				holdTreatmentDelivery('dynamic gantry clearance');
-				deliveryRAF = null;
+				S.deliveryRAF = null;
 				return;
 			}
-			const idx = Number(treatmentDelivery.activeFieldIndex) || 0,
+			const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
 				rec = clearanceOverrideRecord(idx);
 			if (rec && !rec.dynamicEncounterLogged) {
 				rec.dynamicEncounterLogged = true;
-				const saved = (oisSession.clearanceOverrides || []).find(
+				const saved = (S.oisSession.clearanceOverrides || []).find(
 					(x) => Number(x.fieldIndex) === idx
 				);
 				if (saved) saved.dynamicEncounterLogged = true;
@@ -6357,57 +6147,57 @@ function deliveryTick(now) {
 			}
 		}
 	}
-	if (!beamOn) setBeamState(true);
+	if (!S.beamOn) setBeamState(true);
 	renderTreatmentDeliveryPanel();
-	if (now - deliveryMonitorStamp > 250) {
-		deliveryMonitorStamp = now;
+	if (now - S.deliveryMonitorStamp > 250) {
+		S.deliveryMonitorStamp = now;
 		renderTreatmentMonitor();
 	}
-	deliveryRAF = requestAnimationFrame(deliveryTick);
+	S.deliveryRAF = requestAnimationFrame(deliveryTick);
 }
 function startTreatmentDelivery() {
 	const r = getDeliveryReadiness();
-	if (!treatmentDelivery.armed || !r.ready) {
+	if (!S.treatmentDelivery.armed || !r.ready) {
 		setPendantLCD('DELIVERY', 'Beam not enabled / interlock');
 		renderTreatmentDeliveryPanel();
 		return;
 	}
-	treatmentDelivery.delivering = true;
-	treatmentDelivery.held = false;
-	treatmentDelivery.gateHeld = motionRequired() && !currentMotionGateOpen();
-	treatmentDelivery.completed = false;
-	treatmentDelivery.terminated = false;
-	treatmentDelivery.autoHoldReason = '';
-	treatmentDelivery.lastTick = performance.now();
-	treatmentDelivery.dynamicFraction = 0;
-	treatmentDelivery.controlPointIndex = 0;
+	S.treatmentDelivery.delivering = true;
+	S.treatmentDelivery.held = false;
+	S.treatmentDelivery.gateHeld = motionRequired() && !currentMotionGateOpen();
+	S.treatmentDelivery.completed = false;
+	S.treatmentDelivery.terminated = false;
+	S.treatmentDelivery.autoHoldReason = '';
+	S.treatmentDelivery.lastTick = performance.now();
+	S.treatmentDelivery.dynamicFraction = 0;
+	S.treatmentDelivery.controlPointIndex = 0;
 	applyDynamicDeliveryMachineState(deliveryCasePlan(), 0);
 	if (beamOnButton) beamOnButton.disabled = true;
-	setBeamState(!treatmentDelivery.gateHeld);
+	setBeamState(!S.treatmentDelivery.gateHeld);
 	setPendantLCD(
-		treatmentDelivery.gateHeld ? 'RESPIRATORY HOLD' : 'BEAM ON',
-		treatmentDelivery.gateHeld
+		S.treatmentDelivery.gateHeld ? 'RESPIRATORY HOLD' : 'BEAM ON',
+		S.treatmentDelivery.gateHeld
 			? 'Waiting for approved respiratory condition'
 			: `${deliveryCasePlan().mu} MU field`
 	);
-	deliveryRAF = requestAnimationFrame(deliveryTick);
+	S.deliveryRAF = requestAnimationFrame(deliveryTick);
 	renderTreatmentDeliveryPanel();
 }
 function terminateTreatmentDelivery() {
-	if (!treatmentDelivery.delivering) return;
-	if (deliveryRAF) {
-		cancelAnimationFrame(deliveryRAF);
-		deliveryRAF = null;
+	if (!S.treatmentDelivery.delivering) return;
+	if (S.deliveryRAF) {
+		cancelAnimationFrame(S.deliveryRAF);
+		S.deliveryRAF = null;
 	}
-	treatmentDelivery.delivering = false;
-	treatmentDelivery.held = false;
-	treatmentDelivery.gateHeld = false;
-	treatmentDelivery.armed = false;
-	treatmentDelivery.terminated = true;
+	S.treatmentDelivery.delivering = false;
+	S.treatmentDelivery.held = false;
+	S.treatmentDelivery.gateHeld = false;
+	S.treatmentDelivery.armed = false;
+	S.treatmentDelivery.terminated = true;
 	oisLogEvent(
 		'TERMINATION',
 		'Treatment field terminated',
-		`${deliveryCasePlan()?.field || 'Field'} at ${Number(treatmentDelivery.muDelivered || 0).toFixed(1)} MU`
+		`${deliveryCasePlan()?.field || 'Field'} at ${Number(S.treatmentDelivery.muDelivered || 0).toFixed(1)} MU`
 	);
 	setBeamState(false);
 	if (beamOnButton) beamOnButton.disabled = false;
@@ -6425,21 +6215,21 @@ function createVaultEnvironment() {
 	const machinePad = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 0.04, 48), padMat);
 	machinePad.position.set(0, GROUND_Y + 0.02, GANTRY_PLANE_Z_TARGET - 1.7);
 	machinePad.receiveShadow = true;
-	scene.add(machinePad);
+	S.scene.add(machinePad);
 	const isoPad = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.03, 48), padMat);
 	isoPad.position.set(0, GROUND_Y + 0.025, GANTRY_PLANE_Z_TARGET);
 	isoPad.receiveShadow = true;
-	scene.add(isoPad);
+	S.scene.add(isoPad);
 	// pad under the corner modulator cabinet
 	const cornerPad = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.03, 40), padMat);
 	cornerPad.position.set(-3.5, GROUND_Y + 0.02, -3.9);
 	cornerPad.receiveShadow = true;
-	scene.add(cornerPad);
+	S.scene.add(cornerPad);
 }
 
 // ---------- kV / CBCT on-board imaging arms (orthogonal to the treatment beam) ----------
 function createKvImaging3D() {
-	kvGroup = new THREE.Group();
+	S.kvGroup = new THREE.Group();
 	const armMaterial = new THREE.MeshStandardMaterial({
 		transparent: true,
 		opacity: 0,
@@ -6466,8 +6256,8 @@ function createKvImaging3D() {
 		return b;
 	};
 	// gantry-mount booms (keep the imagers attached to the drum face)
-	kvGroup.add(mkBoom(0.8));
-	kvGroup.add(mkBoom(-0.8));
+	S.kvGroup.add(mkBoom(0.8));
+	S.kvGroup.add(mkBoom(-0.8));
 
 	//-----------------------------------------------------
 	// kV SOURCE
@@ -6475,47 +6265,47 @@ function createKvImaging3D() {
 	const tube = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.22), darkMaterial);
 	tube.position.set(1.02, 0, isoZ);
 	tube.castShadow = true;
-	kvGroup.add(tube);
+	S.kvGroup.add(tube);
 	// collimated window on the isocenter-facing side of the tube
 	const srcWindow = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.06, 0.06, 20), brassMaterial);
 	srcWindow.rotation.z = Math.PI / 2;
 	srcWindow.position.set(0.9, 0, isoZ);
 	srcWindow.castShadow = true;
-	kvGroup.add(srcWindow);
+	S.kvGroup.add(srcWindow);
 	// Support arm OUTSIDE the tube
 	const srcArm = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.07), armMaterial);
 	srcArm.position.set(1.34, 0, isoZ);
 	srcArm.castShadow = false;
-	kvGroup.add(srcArm);
+	S.kvGroup.add(srcArm);
 	//
 	// Detector — flat panel, broad face PERPENDICULAR to the horizontal kV beam (faces the source across isocenter)
 	//
 	const detFrame = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.4, 0.36), carbonMaterial);
 	detFrame.position.set(-1.06, 0, isoZ);
 	detFrame.castShadow = true;
-	kvGroup.add(detFrame);
+	S.kvGroup.add(detFrame);
 	const detector = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.34, 0.3), panelMaterial);
 	detector.position.set(-1.02, 0, isoZ);
 	detector.castShadow = true;
-	kvGroup.add(detector);
+	S.kvGroup.add(detector);
 	// Detector support arm OUTSIDE detector
 	const detArm = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.07), armMaterial);
 	detArm.position.set(-1.34, 0, isoZ);
 	detArm.castShadow = false;
-	kvGroup.add(detArm);
-	kvGroup.visible = false;
-	gantryRotatingGroup.add(kvGroup);
+	S.kvGroup.add(detArm);
+	S.kvGroup.visible = false;
+	S.gantryRotatingGroup.add(S.kvGroup);
 }
 function setKvState(isOn) {
-	kvOn = isOn;
-	if (kvGroup) kvGroup.visible = isOn;
+	S.kvOn = isOn;
+	if (S.kvGroup) S.kvGroup.visible = isOn;
 	if (kvToggleButton) {
 		const s = kvToggleButton.querySelector('small');
 		if (s) s.textContent = isOn ? 'Retract' : 'Imaging';
 		else kvToggleButton.textContent = isOn ? 'Retract kV Arms' : 'Extend kV Arms';
 	}
 	renderTreatmentMonitor();
-	if (clinicalIGRT?.active) renderClinicalIGRT();
+	if (S.clinicalIGRT?.active) renderClinicalIGRT();
 }
 
 // ---------- Internal-construction view + assembly sequencer ----------
@@ -6692,33 +6482,32 @@ const ASSEMBLIES = {
 	beam: {
 		stages: BEAM_STAGES,
 		label: 'Photon Beam Line',
-		path: () => beamPathGroup,
-		hl: () => beamHighlight,
+		path: () => S.beamPathGroup,
+		hl: () => S.beamHighlight,
 		target: [0, 1.2, GANTRY_PLANE_Z_TARGET]
 	},
 	electron: {
 		stages: ELECTRON_STAGES,
 		label: 'Electron Beam Line',
-		path: () => beamPathGroup,
-		hl: () => beamHighlight,
+		path: () => S.beamPathGroup,
+		hl: () => S.beamHighlight,
 		target: [0, 0.9, GANTRY_PLANE_Z_TARGET]
 	},
 	accessory: {
 		stages: ACCESSORY_STAGES,
 		label: 'Accessory Beam Line',
-		path: () => beamPathGroup,
-		hl: () => beamHighlight,
+		path: () => S.beamPathGroup,
+		hl: () => S.beamHighlight,
 		target: [0, 0.35, GANTRY_PLANE_Z_TARGET]
 	},
 	stand: {
 		stages: STAND_STAGES,
 		label: 'RF & Cooling',
-		path: () => standPathGroup,
-		hl: () => standHighlight,
+		path: () => S.standPathGroup,
+		hl: () => S.standHighlight,
 		target: [0, 1.0, GANTRY_PLANE_Z_TARGET - 2.5]
 	}
 };
-let ghostMat = null;
 const SHELL_MATS = () => new Set([MAT.shell, MAT.shellSoft, MAT.trim, MAT.trimDark, MAT.base]);
 function mkHighlight() {
 	const h = new THREE.Mesh(
@@ -6749,7 +6538,7 @@ function tube(group, a, b, r, mat, minStage) {
 }
 
 function createBeamPathViz() {
-	beamPathGroup = new THREE.Group();
+	S.beamPathGroup = new THREE.Group();
 	const eMat = new THREE.MeshStandardMaterial({
 		color: 0x27c4e0,
 		emissive: 0x1aa0c0,
@@ -6772,7 +6561,7 @@ function createBeamPathViz() {
 		opacity: 0.82
 	});
 	const addSeg = (a, b, r, mat, minStage, modes) => {
-		const m = tube(beamPathGroup, a, b, r, mat, minStage);
+		const m = tube(S.beamPathGroup, a, b, r, mat, minStage);
 		m.userData.modes = modes;
 		return m;
 	};
@@ -6782,7 +6571,7 @@ function createBeamPathViz() {
 		m.userData.minStage = minStage;
 		m.userData.modes = modes;
 		m.visible = false;
-		beamPathGroup.add(m);
+		S.beamPathGroup.add(m);
 	};
 	addSeg([0, 0.65, -2.4], [0, 1.05, -1.3], 0.025, aMat, 0, ['beam', 'electron']);
 	addSeg([0, 1.05, -1.3], [0, 1.05, -0.2], 0.035, eMat, 2, ['beam']);
@@ -6792,15 +6581,15 @@ function createBeamPathViz() {
 	addSeg([0, 1.1, 0], [0, 0.18, 0], 0.05, pMat, 6, ['beam']);
 	addSeg([0, 1.1, 0], [0, -0.22, 0], 0.045, eMat, 3, ['electron']);
 	addSeg([0, 0.36, 0], [0, -0.22, 0], 0.055, aMat, 0, ['accessory']);
-	beamPathGroup.visible = false;
-	beamHighlight = mkHighlight();
-	gantryRotatingGroup.add(beamPathGroup);
-	gantryRotatingGroup.add(beamHighlight);
+	S.beamPathGroup.visible = false;
+	S.beamHighlight = mkHighlight();
+	S.gantryRotatingGroup.add(S.beamPathGroup);
+	S.gantryRotatingGroup.add(S.beamHighlight);
 }
 
 function createStandAssembly3D() {
 	// --- always-present internal components inside the stand (revealed when its shell is ghosted) ---
-	standInternalsGroup = new THREE.Group();
+	S.standInternalsGroup = new THREE.Group();
 	const ferrite = new THREE.MeshStandardMaterial({
 		color: 0x6b7075,
 		metalness: 0.6,
@@ -6819,44 +6608,44 @@ function createStandAssembly3D() {
 	// circulator: ferrite body + 3 waveguide ports, sitting above the klystron
 	const cBody = cyl(0.17, 0.17, 0.18, ferrite, 6);
 	cBody.position.set(0, 1.15, -2.4);
-	standInternalsGroup.add(cBody);
+	S.standInternalsGroup.add(cBody);
 	const portUp = rbox(0.1, 0.16, 0.1, MAT.steelDark, 0.02);
 	portUp.position.set(0, 1.32, -2.4);
-	standInternalsGroup.add(portUp);
+	S.standInternalsGroup.add(portUp);
 	const portDn = rbox(0.1, 0.16, 0.1, MAT.steelDark, 0.02);
 	portDn.position.set(0, 0.98, -2.4);
-	standInternalsGroup.add(portDn);
+	S.standInternalsGroup.add(portDn);
 	const portSide = rbox(0.16, 0.1, 0.1, MAT.steelDark, 0.02);
 	portSide.position.set(0.18, 1.12, -2.4);
-	standInternalsGroup.add(portSide);
+	S.standInternalsGroup.add(portSide);
 	const load = rbox(0.14, 0.14, 0.22, ferrite, 0.03);
 	load.position.set(0.36, 1.12, -2.4);
-	standInternalsGroup.add(load); // dummy load
+	S.standInternalsGroup.add(load); // dummy load
 	// water cooling: reservoir + pump + motor
 	const tank = cyl(0.17, 0.17, 0.5, tankMat, 24);
 	tank.position.set(0.52, 0.95, -2.6);
-	standInternalsGroup.add(tank);
+	S.standInternalsGroup.add(tank);
 	const tankCap = cyl(0.18, 0.18, 0.04, MAT.trim, 24);
 	tankCap.position.set(0.52, 1.22, -2.6);
-	standInternalsGroup.add(tankCap);
+	S.standInternalsGroup.add(tankCap);
 	const pump = rbox(0.22, 0.2, 0.22, MAT.steel, 0.04);
 	pump.position.set(0.52, 0.5, -2.6);
-	standInternalsGroup.add(pump);
+	S.standInternalsGroup.add(pump);
 	const motor = cyl(0.08, 0.08, 0.16, MAT.steelDark, 20);
 	motor.rotation.z = Math.PI / 2;
 	motor.position.set(0.72, 0.5, -2.6);
-	standInternalsGroup.add(motor);
+	S.standInternalsGroup.add(motor);
 	// cooling pipe loop (thin blue tubes): reservoir → pump → klystron → circulator → back
-	tube(standInternalsGroup, [0.52, 0.72, -2.6], [0.52, 0.6, -2.6], 0.028, pipeMat);
-	tube(standInternalsGroup, [0.52, 0.44, -2.6], [0.18, 0.44, -2.5], 0.028, pipeMat);
-	tube(standInternalsGroup, [0.18, 0.44, -2.5], [0.05, 0.55, -2.42], 0.028, pipeMat);
-	tube(standInternalsGroup, [0.08, 0.92, -2.4], [0.08, 1.05, -2.4], 0.028, pipeMat);
-	tube(standInternalsGroup, [0.12, 1.15, -2.4], [0.52, 1.16, -2.6], 0.028, pipeMat);
-	standInternalsGroup.visible = true;
-	staticSetupGroup.add(standInternalsGroup);
+	tube(S.standInternalsGroup, [0.52, 0.72, -2.6], [0.52, 0.6, -2.6], 0.028, pipeMat);
+	tube(S.standInternalsGroup, [0.52, 0.44, -2.6], [0.18, 0.44, -2.5], 0.028, pipeMat);
+	tube(S.standInternalsGroup, [0.18, 0.44, -2.5], [0.05, 0.55, -2.42], 0.028, pipeMat);
+	tube(S.standInternalsGroup, [0.08, 0.92, -2.4], [0.08, 1.05, -2.4], 0.028, pipeMat);
+	tube(S.standInternalsGroup, [0.12, 1.15, -2.4], [0.52, 1.16, -2.6], 0.028, pipeMat);
+	S.standInternalsGroup.visible = true;
+	S.staticSetupGroup.add(S.standInternalsGroup);
 
 	// --- walkthrough flow-path viz (revealed stage by stage) ---
-	standPathGroup = new THREE.Group();
+	S.standPathGroup = new THREE.Group();
 	const rfMat = new THREE.MeshStandardMaterial({
 		color: 0xffb066,
 		emissive: 0xff8c1a,
@@ -6878,21 +6667,21 @@ function createStandAssembly3D() {
 		m.position.set(...pos);
 		m.userData.minStage = minStage;
 		m.visible = false;
-		standPathGroup.add(m);
+		S.standPathGroup.add(m);
 	};
 	node([0, 0.65, -2.4], rfMat, 0); // RF generated in the klystron
-	tube(standPathGroup, [0, 0.9, -2.4], [0, 1.05, -2.4], 0.03, rfMat, 1); // klystron → circulator
-	tube(standPathGroup, [0, 1.24, -2.4], [0, 1.55, -2.4], 0.03, rfMat, 1); // circulator → up to waveguide
+	tube(S.standPathGroup, [0, 0.9, -2.4], [0, 1.05, -2.4], 0.03, rfMat, 1); // klystron → circulator
+	tube(S.standPathGroup, [0, 1.24, -2.4], [0, 1.55, -2.4], 0.03, rfMat, 1); // circulator → up to waveguide
 	// water loop highlighted at stage 3
-	tube(standPathGroup, [0.52, 0.72, -2.6], [0.52, 0.6, -2.6], 0.032, waterMat, 2);
-	tube(standPathGroup, [0.52, 0.44, -2.6], [0.18, 0.44, -2.5], 0.032, waterMat, 2);
-	tube(standPathGroup, [0.18, 0.44, -2.5], [0.05, 0.55, -2.42], 0.032, waterMat, 2);
-	tube(standPathGroup, [0.08, 0.92, -2.4], [0.08, 1.05, -2.4], 0.032, waterMat, 2);
-	tube(standPathGroup, [0.12, 1.15, -2.4], [0.52, 1.16, -2.6], 0.032, waterMat, 2);
-	standPathGroup.visible = false;
-	standHighlight = mkHighlight();
-	staticSetupGroup.add(standPathGroup);
-	staticSetupGroup.add(standHighlight);
+	tube(S.standPathGroup, [0.52, 0.72, -2.6], [0.52, 0.6, -2.6], 0.032, waterMat, 2);
+	tube(S.standPathGroup, [0.52, 0.44, -2.6], [0.18, 0.44, -2.5], 0.032, waterMat, 2);
+	tube(S.standPathGroup, [0.18, 0.44, -2.5], [0.05, 0.55, -2.42], 0.032, waterMat, 2);
+	tube(S.standPathGroup, [0.08, 0.92, -2.4], [0.08, 1.05, -2.4], 0.032, waterMat, 2);
+	tube(S.standPathGroup, [0.12, 1.15, -2.4], [0.52, 1.16, -2.6], 0.032, waterMat, 2);
+	S.standPathGroup.visible = false;
+	S.standHighlight = mkHighlight();
+	S.staticSetupGroup.add(S.standPathGroup);
+	S.staticSetupGroup.add(S.standHighlight);
 }
 
 // ================= DETAILED INTERNAL COMPONENTS (supplied snippets) =================
@@ -7065,13 +6854,13 @@ function createMLCDetail() {
 
 // Assemble the detailed beam line inside the gantry (revealed in the Internal View)
 function createDetailedInternals3D() {
-	detailGantryGroup = new THREE.Group();
+	S.detailGantryGroup = new THREE.Group();
 	const RY = -Math.PI / 2; // components built along +X → align to my +Z beam axis
 	const HY = Math.PI / 2; // head-stack parts (built facing Z) → face down (−Y)
 	const add = (obj, pos, rot) => {
 		if (pos) obj.position.set(...pos);
 		if (rot) obj.rotation.set(...rot);
-		detailGantryGroup.add(obj);
+		S.detailGantryGroup.add(obj);
 		return obj;
 	};
 	// horizontal accelerator section (y ≈ 1.05, along Z from back to head)
@@ -7082,28 +6871,28 @@ function createDetailedInternals3D() {
 	add(createIonPump(), [0, 1.28, -0.24], [0, 0, 0]);
 	add(createBendingMagnet(), [0, 1.16, -0.02], [0, RY, 0]);
 	// vertical head stack (beam travels −Y through the head)
-	detailTarget = add(createTargetDetail(), [0, 1.1, 0], [HY, 0, 0]);
+	S.detailTarget = add(createTargetDetail(), [0, 1.1, 0], [HY, 0, 0]);
 	add(createPrimaryCollimator(), [0, 0.96, 0], [HY, 0, 0]);
-	detailFilter = add(createFlatteningFilter(), [0, 0.85, 0], [HY, 0, 0]);
-	detailFoil = add(createScatteringFoil(), [0, 0.85, 0], [HY, 0, 0]);
+	S.detailFilter = add(createFlatteningFilter(), [0, 0.85, 0], [HY, 0, 0]);
+	S.detailFoil = add(createScatteringFoil(), [0, 0.85, 0], [HY, 0, 0]);
 	add(createMonitorChamber(), [0, 0.76, 0], [HY, 0, 0]);
 	add(createMirrorAssembly(), [0, 0.66, 0], [Math.PI / 4, 0, 0]);
 	add(createMLCDetail(), [0, 0.47, 0], [0, 0, 0]);
-	detailAccessoryTray = add(
+	S.detailAccessoryTray = add(
 		roundedBox(0.62, 0.025, 0.62, 0.02, brassMaterial),
 		[0, 0.27, 0],
 		[0, 0, 0]
 	);
-	detailElectronCone = add(
+	S.detailElectronCone = add(
 		new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.42, 0.46, 4, 1, true), aluminumMaterial),
 		[0, 0.02, 0],
 		[0, Math.PI / 4, 0]
 	);
-	detailAccessoryTray.visible = false;
-	detailElectronCone.visible = false;
-	if (detailFoil) detailFoil.visible = false; // photon mode by default (filter shown, foil hidden)
-	detailGantryGroup.visible = false;
-	gantryRotatingGroup.add(detailGantryGroup);
+	S.detailAccessoryTray.visible = false;
+	S.detailElectronCone.visible = false;
+	if (S.detailFoil) S.detailFoil.visible = false; // photon mode by default (filter shown, foil hidden)
+	S.detailGantryGroup.visible = false;
+	S.gantryRotatingGroup.add(S.detailGantryGroup);
 }
 
 // hide/show the simpler earned internal meshes so they don't overlap the detailed ones
@@ -7123,8 +6912,8 @@ function toggleSimpleInternals(hide) {
 }
 
 function ghostShells(on) {
-	if (!ghostMat)
-		ghostMat = new THREE.MeshStandardMaterial({
+	if (!S.ghostMat)
+		S.ghostMat = new THREE.MeshStandardMaterial({
 			color: 0xf4f5f7,
 			transparent: true,
 			opacity: 0.13,
@@ -7140,7 +6929,7 @@ function ghostShells(on) {
 			if (on) {
 				if (mats.has(m.material)) {
 					m.userData._origMat = m.material;
-					m.material = ghostMat;
+					m.material = S.ghostMat;
 				}
 			} else if (m.userData._origMat) {
 				m.material = m.userData._origMat;
@@ -7151,10 +6940,10 @@ function ghostShells(on) {
 }
 
 function setInternalView(on) {
-	internalViewOn = on;
+	S.internalViewOn = on;
 	ghostShells(on);
 	toggleSimpleInternals(on);
-	if (detailGantryGroup) detailGantryGroup.visible = on;
+	if (S.detailGantryGroup) S.detailGantryGroup.visible = on;
 	internalViewButton.textContent = on ? '🔍 Hide Internals' : '🔍 Show Internals';
 	[
 		beamStagePrevButton,
@@ -7167,13 +6956,13 @@ function setInternalView(on) {
 		if (b) b.disabled = !on;
 	});
 	if (on) {
-		setAssembly(activeAssembly);
+		setAssembly(S.activeAssembly);
 	} else {
-		stageIndex = -1;
-		[beamPathGroup, standPathGroup].forEach((g) => {
+		S.stageIndex = -1;
+		[S.beamPathGroup, S.standPathGroup].forEach((g) => {
 			if (g) g.visible = false;
 		});
-		[beamHighlight, standHighlight].forEach((h) => {
+		[S.beamHighlight, S.standHighlight].forEach((h) => {
 			if (h) h.visible = false;
 		});
 		internalOverlay.style.display = 'none';
@@ -7181,38 +6970,39 @@ function setInternalView(on) {
 }
 
 function setAssembly(name) {
-	activeAssembly = name;
-	stageIndex = 0;
+	S.activeAssembly = name;
+	S.stageIndex = 0;
 	if (asmBeamButton) asmBeamButton.classList.toggle('asm-active', name === 'beam');
 	if (asmStandButton) asmStandButton.classList.toggle('asm-active', name === 'stand');
 	if (asmElectronButton) asmElectronButton.classList.toggle('asm-active', name === 'electron');
 	if (asmAccessoryButton) asmAccessoryButton.classList.toggle('asm-active', name === 'accessory');
-	if (detailFilter) detailFilter.visible = name === 'beam';
-	if (detailFoil) detailFoil.visible = name === 'electron';
-	if (detailTarget) detailTarget.visible = name !== 'electron';
-	if (detailAccessoryTray) detailAccessoryTray.visible = name === 'accessory';
-	if (detailElectronCone) detailElectronCone.visible = name === 'electron' || name === 'accessory';
-	if (controls) controls.target.set(...ASSEMBLIES[name].target);
+	if (S.detailFilter) S.detailFilter.visible = name === 'beam';
+	if (S.detailFoil) S.detailFoil.visible = name === 'electron';
+	if (S.detailTarget) S.detailTarget.visible = name !== 'electron';
+	if (S.detailAccessoryTray) S.detailAccessoryTray.visible = name === 'accessory';
+	if (S.detailElectronCone)
+		S.detailElectronCone.visible = name === 'electron' || name === 'accessory';
+	if (S.controls) S.controls.target.set(...ASSEMBLIES[name].target);
 	updateStage();
 }
 
 function beamStageStep(dir) {
-	if (!internalViewOn) return;
-	const stages = ASSEMBLIES[activeAssembly].stages;
-	stageIndex = Math.max(0, Math.min(stages.length - 1, stageIndex + dir));
+	if (!S.internalViewOn) return;
+	const stages = ASSEMBLIES[S.activeAssembly].stages;
+	S.stageIndex = Math.max(0, Math.min(stages.length - 1, S.stageIndex + dir));
 	updateStage();
 }
 
 function updateStage() {
-	const A = ASSEMBLIES[activeAssembly];
-	if (activeAssembly === 'stand') {
-		if (beamPathGroup) beamPathGroup.visible = false;
-		if (beamHighlight) beamHighlight.visible = false;
+	const A = ASSEMBLIES[S.activeAssembly];
+	if (S.activeAssembly === 'stand') {
+		if (S.beamPathGroup) S.beamPathGroup.visible = false;
+		if (S.beamHighlight) S.beamHighlight.visible = false;
 	} else {
-		if (standPathGroup) standPathGroup.visible = false;
-		if (standHighlight) standHighlight.visible = false;
+		if (S.standPathGroup) S.standPathGroup.visible = false;
+		if (S.standHighlight) S.standHighlight.visible = false;
 	}
-	if (!internalViewOn || stageIndex < 0) {
+	if (!S.internalViewOn || S.stageIndex < 0) {
 		internalOverlay.style.display = 'none';
 		if (A.path()) A.path().visible = false;
 		if (A.hl()) A.hl().visible = false;
@@ -7221,16 +7011,16 @@ function updateStage() {
 	const stages = A.stages,
 		grp = A.path(),
 		hl = A.hl(),
-		s = stages[stageIndex];
+		s = stages[S.stageIndex];
 	internalOverlay.style.display = 'block';
 	internalStageTitle.textContent = s.title;
 	internalStageDesc.textContent = s.desc;
-	internalStageCounter.textContent = `Stage ${stageIndex + 1} of ${stages.length} · ${A.label} — ◀ Prev / Next ▶`;
+	internalStageCounter.textContent = `Stage ${S.stageIndex + 1} of ${stages.length} · ${A.label} — ◀ Prev / Next ▶`;
 	if (grp) {
 		grp.visible = true;
 		grp.children.forEach((c) => {
-			const modeOK = !c.userData.modes || c.userData.modes.includes(activeAssembly);
-			c.visible = modeOK && stageIndex >= (c.userData.minStage ?? 0);
+			const modeOK = !c.userData.modes || c.userData.modes.includes(S.activeAssembly);
+			c.visible = modeOK && S.stageIndex >= (c.userData.minStage ?? 0);
 		});
 	}
 	if (hl) {
@@ -7294,7 +7084,7 @@ function resizeCCTVFeeds() {
 	});
 }
 function updateCCTVFeeds() {
-	if (!Array.isArray(cctvFeeds) || !scene) return;
+	if (!Array.isArray(cctvFeeds) || !S.scene) return;
 	// RTApps perf pass: the CCTV monitors re-rendered the WHOLE scene up to 3 extra times
 	// EVERY frame; ~9Hz is visually identical on a monitor prop (same rate the hub uses).
 	const nowMs = performance.now();
@@ -7314,7 +7104,7 @@ function updateCCTVFeeds() {
 		}
 		feed.camera.lookAt(feed.look);
 		try {
-			feed.renderer.render(scene, feed.camera);
+			feed.renderer.render(S.scene, feed.camera);
 		} catch (err) {
 			if (!feed.renderErrorLogged) {
 				console.warn('CCTV feed render skipped:', feed.type, err);
@@ -7325,50 +7115,50 @@ function updateCCTVFeeds() {
 }
 
 function initThreeJS() {
-	scene = new THREE.Scene();
-	scene.background = new THREE.Color(0xeceef1);
-	camera = new THREE.PerspectiveCamera(
+	S.scene = new THREE.Scene();
+	S.scene.background = new THREE.Color(0xeceef1);
+	S.camera = new THREE.PerspectiveCamera(
 		42,
 		viewerContainer.clientWidth / viewerContainer.clientHeight,
 		0.1,
 		120
 	);
-	camera.position.set(8.6, ISOCENTER_Y_TARGET + 2.8, GANTRY_PLANE_Z_TARGET + 7.2);
-	renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio <= 1 });
-	renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+	S.camera.position.set(8.6, ISOCENTER_Y_TARGET + 2.8, GANTRY_PLANE_Z_TARGET + 7.2);
+	S.renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio <= 1 });
+	S.renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
 	// RTApps perf pass: pixel-ratio cap 2→1.25, PCFSoft→PCF (see sim-hub's matching change).
-	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
-	renderer.shadowMap.enabled = true;
-	renderer.shadowMap.type = THREE.PCFShadowMap;
-	viewerContainer.appendChild(renderer.domElement);
-	controls = new OrbitControls(camera, renderer.domElement);
-	controls.target.set(-0.4, 1.15, GANTRY_PLANE_Z_TARGET - 0.3);
-	controls.enableDamping = true;
-	controls.update();
+	S.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+	S.renderer.shadowMap.enabled = true;
+	S.renderer.shadowMap.type = THREE.PCFShadowMap;
+	viewerContainer.appendChild(S.renderer.domElement);
+	S.controls = new OrbitControls(S.camera, S.renderer.domElement);
+	S.controls.target.set(-0.4, 1.15, GANTRY_PLANE_Z_TARGET - 0.3);
+	S.controls.enableDamping = true;
+	S.controls.update();
 	// Soft, even treatment-room lighting; references are retained so the pendant can toggle the vault lights.
-	hemiLight = new THREE.HemisphereLight(0xffffff, 0xc7cbd0, 0.9);
-	scene.add(hemiLight);
-	ambientRoomLight = new THREE.AmbientLight(0xffffff, 0.55);
-	scene.add(ambientRoomLight);
-	keyRoomLight = new THREE.DirectionalLight(0xffffff, 1.15);
-	keyRoomLight.position.set(9, 16, 12);
-	keyRoomLight.castShadow = true;
-	keyRoomLight.shadow.mapSize.width = 2048;
-	keyRoomLight.shadow.mapSize.height = 2048;
-	keyRoomLight.shadow.camera.left = -8;
-	keyRoomLight.shadow.camera.right = 8;
-	keyRoomLight.shadow.camera.top = 8;
-	keyRoomLight.shadow.camera.bottom = -8;
-	keyRoomLight.shadow.camera.near = 1;
-	keyRoomLight.shadow.camera.far = 50;
-	keyRoomLight.shadow.bias = -0.0004;
-	scene.add(keyRoomLight);
-	fillRoomLight = new THREE.DirectionalLight(0xffffff, 0.45);
-	fillRoomLight.position.set(-10, 8, -6);
-	scene.add(fillRoomLight);
-	rimRoomLight = new THREE.DirectionalLight(0xffffff, 0.35);
-	rimRoomLight.position.set(-4, 6, 12);
-	scene.add(rimRoomLight);
+	S.hemiLight = new THREE.HemisphereLight(0xffffff, 0xc7cbd0, 0.9);
+	S.scene.add(S.hemiLight);
+	S.ambientRoomLight = new THREE.AmbientLight(0xffffff, 0.55);
+	S.scene.add(S.ambientRoomLight);
+	S.keyRoomLight = new THREE.DirectionalLight(0xffffff, 1.15);
+	S.keyRoomLight.position.set(9, 16, 12);
+	S.keyRoomLight.castShadow = true;
+	S.keyRoomLight.shadow.mapSize.width = 2048;
+	S.keyRoomLight.shadow.mapSize.height = 2048;
+	S.keyRoomLight.shadow.camera.left = -8;
+	S.keyRoomLight.shadow.camera.right = 8;
+	S.keyRoomLight.shadow.camera.top = 8;
+	S.keyRoomLight.shadow.camera.bottom = -8;
+	S.keyRoomLight.shadow.camera.near = 1;
+	S.keyRoomLight.shadow.camera.far = 50;
+	S.keyRoomLight.shadow.bias = -0.0004;
+	S.scene.add(S.keyRoomLight);
+	S.fillRoomLight = new THREE.DirectionalLight(0xffffff, 0.45);
+	S.fillRoomLight.position.set(-10, 8, -6);
+	S.scene.add(S.fillRoomLight);
+	S.rimRoomLight = new THREE.DirectionalLight(0xffffff, 0.35);
+	S.rimRoomLight.position.set(-4, 6, 12);
+	S.scene.add(S.rimRoomLight);
 	const groundPlane = new THREE.Mesh(
 		new THREE.PlaneGeometry(60, 60),
 		new THREE.MeshStandardMaterial({ map: makeFloorTexture(), roughness: 0.95, metalness: 0.0 })
@@ -7376,31 +7166,31 @@ function initThreeJS() {
 	groundPlane.rotation.x = -Math.PI / 2;
 	groundPlane.position.y = GROUND_Y;
 	groundPlane.receiveShadow = true;
-	scene.add(groundPlane);
+	S.scene.add(groundPlane);
 	createRoom();
 	createTreatmentMonitor3D();
 	createVaultEnvironment();
-	staticSetupGroup = new THREE.Group();
-	staticSetupGroup.position.set(0, 0, GANTRY_PLANE_Z_TARGET);
-	scene.add(staticSetupGroup);
-	gantryRotatingGroup = new THREE.Group();
-	gantryRotatingGroup.position.set(0, ISOCENTER_Y_TARGET, 0);
-	staticSetupGroup.add(gantryRotatingGroup);
+	S.staticSetupGroup = new THREE.Group();
+	S.staticSetupGroup.position.set(0, 0, GANTRY_PLANE_Z_TARGET);
+	S.scene.add(S.staticSetupGroup);
+	S.gantryRotatingGroup = new THREE.Group();
+	S.gantryRotatingGroup.position.set(0, ISOCENTER_Y_TARGET, 0);
+	S.staticSetupGroup.add(S.gantryRotatingGroup);
 	const couchBaseHeightRef = 0.7;
 	const initialCouchY = couchBaseHeightRef / 2 + GROUND_Y + 0.54; // raised so the patient's chest sits at isocenter
-	couchGroup = new THREE.Group();
-	couchGroup.position.set(0, initialCouchY, GANTRY_PLANE_Z_TARGET + COUCH_SEPARATION_OFFSET);
-	scene.add(couchGroup);
+	S.couchGroup = new THREE.Group();
+	S.couchGroup.position.set(0, initialCouchY, GANTRY_PLANE_Z_TARGET + COUCH_SEPARATION_OFFSET);
+	S.scene.add(S.couchGroup);
 	// Treatment couch rotation uses a dedicated vertical-axis pivot located at isocenter.
 	// This keeps the target fixed at isocenter while the tabletop rotates for noncoplanar SRS arcs.
-	couchTreatmentPivot = new THREE.Group();
-	couchTreatmentPivot.position.set(0, couchBaseHeightRef / 2 + 0.15 / 2 + 0.235, -2.8);
-	couchGroup.add(couchTreatmentPivot);
-	couchTopGroup = new THREE.Group();
-	couchTopGroup.position.set(0, -0.235, 1.1);
-	couchTreatmentPivot.add(couchTopGroup); // same world pose as legacy tabletop at table angle 0°
-	couchTopHomePos = couchTopGroup.position.clone();
-	couchTopHomeRot = couchTopGroup.rotation.clone();
+	S.couchTreatmentPivot = new THREE.Group();
+	S.couchTreatmentPivot.position.set(0, couchBaseHeightRef / 2 + 0.15 / 2 + 0.235, -2.8);
+	S.couchGroup.add(S.couchTreatmentPivot);
+	S.couchTopGroup = new THREE.Group();
+	S.couchTopGroup.position.set(0, -0.235, 1.1);
+	S.couchTreatmentPivot.add(S.couchTopGroup); // same world pose as legacy tabletop at table angle 0°
+	S.couchTopHomePos = S.couchTopGroup.position.clone();
+	S.couchTopHomeRot = S.couchTopGroup.rotation.clone();
 	createCouch3DModels();
 	createImmobilizationShelf3D();
 	createImmobilizationPatientGroup();
@@ -7653,11 +7443,11 @@ function createLinacPart3D(partData) {
 			partData.silhouetteObject.visible = false;
 		}
 	} else if (partData.group === 'static') {
-		staticSetupGroup.add(mesh);
-		staticSetupGroup.add(silhouette);
+		S.staticSetupGroup.add(mesh);
+		S.staticSetupGroup.add(silhouette);
 	} else if (partData.group === 'gantry') {
-		gantryRotatingGroup.add(mesh);
-		gantryRotatingGroup.add(silhouette);
+		S.gantryRotatingGroup.add(mesh);
+		S.gantryRotatingGroup.add(silhouette);
 	}
 }
 
@@ -7688,16 +7478,16 @@ function createCouch3DModels() {
 	// Flat carbon-fibre patient top (slightly raised on a white tray)
 	const top = rbox(0.52, 0.05, 4.3, couchTopMaterial, 0.02);
 	top.position.set(0, 0.11, 0.0);
-	couchTopGroup.add(top);
+	S.couchTopGroup.add(top);
 	const tray = rbox(0.6, 0.08, 1.0, MAT.shell, 0.03);
 	tray.position.set(0, 0.04, 1.1);
-	couchTopGroup.add(tray);
+	S.couchTopGroup.add(tray);
 	const railL = rbox(0.03, 0.05, 3.9, MAT.trim, 0.01);
 	railL.position.set(-0.24, 0.05, 0.0);
-	couchTopGroup.add(railL);
+	S.couchTopGroup.add(railL);
 	const railR = railL.clone();
 	railR.position.x = 0.24;
-	couchTopGroup.add(railR);
+	S.couchTopGroup.add(railR);
 
 	// ---- supine patient; a body-offset group slides the chosen treatment site onto isocenter ----
 	const skinMat = new THREE.MeshStandardMaterial({
@@ -7713,7 +7503,7 @@ function createCouch3DModels() {
 	const patient = new THREE.Group(); // orientation group (roll/pitch/yaw for HFS/FFP etc.)
 	const bodyGroup = new THREE.Group(); // shifts the body so the treatment site sits at the origin
 	patient.add(bodyGroup);
-	patientBodyGroup = bodyGroup;
+	S.patientBodyGroup = bodyGroup;
 	// parts positioned by body region along z (head -0.93 ... feet +0.97); site offset re-centers one region on iso
 	const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 20, 16), skinMat);
 	head.position.set(0, 0, -0.93);
@@ -7746,7 +7536,7 @@ function createCouch3DModels() {
 	const armR = armL.clone();
 	armR.position.x = 0.25;
 	bodyGroup.add(armR);
-	patientAnatomyParts = { head, nose, torso, hips, legL, legR, footL, footR, armL, armR };
+	S.patientAnatomyParts = { head, nose, torso, hips, legL, legR, footL, footR, armL, armR };
 	const targetMarkerMat = new THREE.MeshStandardMaterial({
 		color: 0xffd166,
 		emissive: 0x6c4310,
@@ -7756,13 +7546,13 @@ function createCouch3DModels() {
 		opacity: 0.9,
 		depthTest: true
 	});
-	specialAnatomyTargetMarker = new THREE.Mesh(
+	S.specialAnatomyTargetMarker = new THREE.Mesh(
 		new THREE.SphereGeometry(0.055, 18, 14),
 		targetMarkerMat
 	);
-	specialAnatomyTargetMarker.visible = false;
-	specialAnatomyTargetMarker.name = 'specialAnatomicFieldTarget';
-	bodyGroup.add(specialAnatomyTargetMarker);
+	S.specialAnatomyTargetMarker.visible = false;
+	S.specialAnatomyTargetMarker.name = 'specialAnatomicFieldTarget';
+	bodyGroup.add(S.specialAnatomyTargetMarker);
 	const bolusMat = new THREE.MeshStandardMaterial({
 		color: 0x66d0f2,
 		emissive: 0x0c3f55,
@@ -7771,11 +7561,11 @@ function createCouch3DModels() {
 		transparent: true,
 		opacity: 0.58
 	});
-	electronBolusMesh = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.01, 0.1), bolusMat);
-	electronBolusMesh.visible = false;
-	electronBolusMesh.name = 'electronBolus';
-	electronBolusMesh.position.set(-0.12, 0.108, -0.45);
-	bodyGroup.add(electronBolusMesh);
+	S.electronBolusMesh = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.01, 0.1), bolusMat);
+	S.electronBolusMesh.visible = false;
+	S.electronBolusMesh.name = 'electronBolus';
+	S.electronBolusMesh.position.set(-0.12, 0.108, -0.45);
+	bodyGroup.add(S.electronBolusMesh);
 	const motionTargetMat = new THREE.MeshStandardMaterial({
 		color: 0xff4fe1,
 		emissive: 0x5a153f,
@@ -7783,9 +7573,9 @@ function createCouch3DModels() {
 		transparent: true,
 		opacity: 0.88
 	});
-	motionTarget3D = new THREE.Mesh(new THREE.SphereGeometry(0.045, 18, 14), motionTargetMat);
-	motionTarget3D.visible = false;
-	bodyGroup.add(motionTarget3D);
+	S.motionTarget3D = new THREE.Mesh(new THREE.SphereGeometry(0.045, 18, 14), motionTargetMat);
+	S.motionTarget3D.visible = false;
+	bodyGroup.add(S.motionTarget3D);
 	const surfaceMat = new THREE.MeshStandardMaterial({
 		color: 0x62e2ff,
 		emissive: 0x143d48,
@@ -7793,9 +7583,9 @@ function createCouch3DModels() {
 		transparent: true,
 		opacity: 0.9
 	});
-	motionSurfaceMarker = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.025, 0.07), surfaceMat);
-	motionSurfaceMarker.visible = false;
-	bodyGroup.add(motionSurfaceMarker);
+	S.motionSurfaceMarker = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.025, 0.07), surfaceMat);
+	S.motionSurfaceMarker.visible = false;
+	bodyGroup.add(S.motionSurfaceMarker);
 	const heartMat = new THREE.MeshStandardMaterial({
 		color: 0xe54d5a,
 		emissive: 0x4b1118,
@@ -7803,27 +7593,27 @@ function createCouch3DModels() {
 		transparent: true,
 		opacity: 0.78
 	});
-	motionHeart3D = new THREE.Mesh(new THREE.SphereGeometry(0.055, 18, 14), heartMat);
-	motionHeart3D.scale.set(0.8, 1.15, 0.8);
-	motionHeart3D.visible = false;
-	bodyGroup.add(motionHeart3D);
+	S.motionHeart3D = new THREE.Mesh(new THREE.SphereGeometry(0.055, 18, 14), heartMat);
+	S.motionHeart3D.scale.set(0.8, 1.15, 0.8);
+	S.motionHeart3D.visible = false;
+	bodyGroup.add(S.motionHeart3D);
 	// error group sits at isocenter; the imaging setup error displaces/tilts it, corrections re-center it
-	patientErrorGroup = new THREE.Group();
-	patientErrorGroup.position.set(0, 0.235, -1.1); // isocenter (couch-top-local)
-	couchTopGroup.add(patientErrorGroup);
-	errorGroupHome = patientErrorGroup.position.clone();
+	S.patientErrorGroup = new THREE.Group();
+	S.patientErrorGroup.position.set(0, 0.235, -1.1); // isocenter (couch-top-local)
+	S.couchTopGroup.add(S.patientErrorGroup);
+	S.errorGroupHome = S.patientErrorGroup.position.clone();
 	patient.position.set(0, 0, 0); // patient centered on isocenter within the error group
 	patient.scale.set(0.8, 0.8, 0.8); // fit the iso-to-gantry clearance for off-center sites
-	patientErrorGroup.add(patient);
-	patientGroup = patient;
-	patientHome = patient.position.clone();
+	S.patientErrorGroup.add(patient);
+	S.patientGroup = patient;
+	S.patientHome = patient.position.clone();
 
 	// White rotatable couch housing (sits above the bellows)
 	const housing = rbox(0.62, couchBaseHeightRef, 1.15, MAT.shell, 0.08);
-	couchGroup.add(housing);
+	S.couchGroup.add(housing);
 	const housingBand = rbox(0.66, 0.08, 1.2, MAT.trim, 0.03);
 	housingBand.position.y = 0.3;
-	couchGroup.add(housingBand);
+	S.couchGroup.add(housingBand);
 
 	// Ribbed telescoping bellows column (scaled by updateCouchAccordion)
 	const couchAccordionVisualGeo = new THREE.BoxGeometry(0.52, ACCORDION_GEOMETRIC_HEIGHT, 0.7);
@@ -7831,27 +7621,27 @@ function createCouch3DModels() {
 	couchAccordionVisualMesh.name = 'couchAccordionVisual';
 	couchAccordionVisualMesh.castShadow = true;
 	couchAccordionVisualMesh.receiveShadow = true;
-	couchGroup.add(couchAccordionVisualMesh);
+	S.couchGroup.add(couchAccordionVisualMesh);
 
 	// Grey floor base plate for the couch (stationary on the floor)
 	const couchBase = cyl(0.62, 0.7, 0.12, MAT.base, 40);
-	couchBase.position.set(couchGroup.position.x, GROUND_Y + 0.06, couchGroup.position.z);
+	couchBase.position.set(S.couchGroup.position.x, GROUND_Y + 0.06, S.couchGroup.position.z);
 	couchBase.receiveShadow = true;
-	scene.add(couchBase);
+	S.scene.add(couchBase);
 
 	// Hand pendant on the side of the housing
 	const pendant = rbox(0.09, 0.22, 0.05, MAT.glassDark, 0.02);
 	pendant.position.set(0.36, 0.12, 0.45);
-	couchGroup.add(pendant);
+	S.couchGroup.add(pendant);
 
 	updateCouchAccordion();
 }
 
 function updateCouchAccordion() {
-	const accordionVisual = couchGroup.getObjectByName('couchAccordionVisual');
-	if (!accordionVisual || !couchGroup) return;
+	const accordionVisual = S.couchGroup.getObjectByName('couchAccordionVisual');
+	if (!accordionVisual || !S.couchGroup) return;
 	const couchBaseHeightRef = 0.7;
-	const baseBottomWorldY = couchGroup.position.y - couchBaseHeightRef / 2;
+	const baseBottomWorldY = S.couchGroup.position.y - couchBaseHeightRef / 2;
 	const accordionVisibleHeight = Math.max(0.01, baseBottomWorldY - GROUND_Y);
 	accordionVisual.scale.y = accordionVisibleHeight / ACCORDION_GEOMETRIC_HEIGHT;
 	accordionVisual.position.y =
@@ -7861,7 +7651,7 @@ function updateCouchAccordion() {
 function createCollimatorJaws3D() {
 	const headData = linacPartsData.find((p) => p.id === 'treatmentHead');
 	if (!headData || !headData.threeJSObject) return;
-	linacHeadObject = headData.threeJSObject;
+	S.linacHeadObject = headData.threeJSObject;
 	const jawMaterialX = new THREE.MeshStandardMaterial({
 		color: 0xf0a020,
 		metalness: 0.6,
@@ -7875,35 +7665,35 @@ function createCollimatorJaws3D() {
 	const jawThickness = 0.04;
 	const jawDepth = 0.14;
 	const jawSpan = 0.34;
-	jawXN = new THREE.Mesh(new THREE.BoxGeometry(jawThickness, jawSpan, jawDepth), jawMaterialX);
-	jawXP = new THREE.Mesh(new THREE.BoxGeometry(jawThickness, jawSpan, jawDepth), jawMaterialX);
-	jawYN = new THREE.Mesh(new THREE.BoxGeometry(jawSpan, jawThickness, jawDepth), jawMaterialY);
-	jawYP = new THREE.Mesh(new THREE.BoxGeometry(jawSpan, jawThickness, jawDepth), jawMaterialY);
+	S.jawXN = new THREE.Mesh(new THREE.BoxGeometry(jawThickness, jawSpan, jawDepth), jawMaterialX);
+	S.jawXP = new THREE.Mesh(new THREE.BoxGeometry(jawThickness, jawSpan, jawDepth), jawMaterialX);
+	S.jawYN = new THREE.Mesh(new THREE.BoxGeometry(jawSpan, jawThickness, jawDepth), jawMaterialY);
+	S.jawYP = new THREE.Mesh(new THREE.BoxGeometry(jawSpan, jawThickness, jawDepth), jawMaterialY);
 	const headCenterToBeamExitY = JAW_PLANE_HEADLOCAL;
-	jawXN.position.set(
+	S.jawXN.position.set(
 		-jawEdgeCmToOffset(Number(fundamentalState?.jawX1 ?? 5)),
 		headCenterToBeamExitY,
 		0
 	);
-	jawXP.position.set(
+	S.jawXP.position.set(
 		jawEdgeCmToOffset(Number(fundamentalState?.jawX2 ?? 5)),
 		headCenterToBeamExitY,
 		0
 	);
-	jawYN.position.set(
+	S.jawYN.position.set(
 		0,
 		headCenterToBeamExitY - jawEdgeCmToOffset(Number(fundamentalState?.jawY1 ?? 5)) - jawThickness,
 		0
 	);
-	jawYP.position.set(
+	S.jawYP.position.set(
 		0,
 		headCenterToBeamExitY + jawEdgeCmToOffset(Number(fundamentalState?.jawY2 ?? 5)) + jawThickness,
 		0
 	);
-	[jawXN, jawXP, jawYN, jawYP].forEach((jaw) => {
+	[S.jawXN, S.jawXP, S.jawYN, S.jawYP].forEach((jaw) => {
 		jaw.visible = false;
 		jaw.castShadow = true;
-		linacHeadObject.add(jaw);
+		S.linacHeadObject.add(jaw);
 	});
 }
 
@@ -7912,17 +7702,17 @@ function jawEdgeCmToOffset(cm) {
 	return MIN_JAW_OFFSET + (c / 12.5) * (MAX_JAW_OFFSET - MIN_JAW_OFFSET);
 }
 function updateJawPositions() {
-	if (!jawXN) return;
+	if (!S.jawXN) return;
 	const headCenterToBeamExitY = JAW_PLANE_HEADLOCAL;
 	const x1 = Number(fundamentalState?.jawX1 ?? 5),
 		x2 = Number(fundamentalState?.jawX2 ?? 5),
 		y1 = Number(fundamentalState?.jawY1 ?? 5),
 		y2 = Number(fundamentalState?.jawY2 ?? 5);
-	jawXN.position.x = -jawEdgeCmToOffset(x1);
-	jawXP.position.x = jawEdgeCmToOffset(x2);
-	jawYN.position.y = headCenterToBeamExitY - jawEdgeCmToOffset(y1) - 0.04;
-	jawYP.position.y = headCenterToBeamExitY + jawEdgeCmToOffset(y2) + 0.04;
-	jawOffset =
+	S.jawXN.position.x = -jawEdgeCmToOffset(x1);
+	S.jawXP.position.x = jawEdgeCmToOffset(x2);
+	S.jawYN.position.y = headCenterToBeamExitY - jawEdgeCmToOffset(y1) - 0.04;
+	S.jawYP.position.y = headCenterToBeamExitY + jawEdgeCmToOffset(y2) + 0.04;
+	S.jawOffset =
 		(jawEdgeCmToOffset(x1) +
 			jawEdgeCmToOffset(x2) +
 			jawEdgeCmToOffset(y1) +
@@ -7931,9 +7721,9 @@ function updateJawPositions() {
 }
 
 function createElectronApplicator3D() {
-	if (!linacHeadObject) return;
-	electronApplicatorGroup = new THREE.Group();
-	electronApplicatorGroup.name = 'electronApplicator';
+	if (!S.linacHeadObject) return;
+	S.electronApplicatorGroup = new THREE.Group();
+	S.electronApplicatorGroup.name = 'electronApplicator';
 	const frameMat = new THREE.MeshStandardMaterial({
 		color: 0xc5cad0,
 		metalness: 0.72,
@@ -7959,7 +7749,7 @@ function createElectronApplicator3D() {
 		m.position.set(x, y, z);
 		m.rotation.set(rx, ry, rz);
 		m.castShadow = m.receiveShadow = true;
-		electronApplicatorGroup.add(m);
+		S.electronApplicatorGroup.add(m);
 		return m;
 	};
 	// Compact Type-III style electron applicator. The baseline geometry is intentionally
@@ -7984,25 +7774,25 @@ function createElectronApplicator3D() {
 	addBox(0.035, 0.028, 0.22, frameMat, -0.13, -0.69, 0);
 	const insert = addBox(0.14, 0.018, 0.14, insertMat, 0, -0.77, 0);
 	insert.name = 'electronInsertBlock';
-	electronApplicatorGroup.visible = false;
-	linacHeadObject.add(electronApplicatorGroup);
+	S.electronApplicatorGroup.visible = false;
+	S.linacHeadObject.add(S.electronApplicatorGroup);
 	updateElectronApplicator3D();
 }
 function updateElectronApplicator3D() {
-	if (!electronApplicatorGroup) return;
+	if (!S.electronApplicatorGroup) return;
 	const isElectronCase =
-		!!activeTreatmentCase &&
+		!!S.activeTreatmentCase &&
 		String(activeSpecialSetupSpec()?.type || '').toUpperCase() === 'ELECTRON';
-	const mounted = !!specialSetupWorkflow?.electron?.mounted;
-	electronApplicatorGroup.visible = isElectronCase && mounted;
-	if (!electronApplicatorGroup.visible) return;
-	const e = specialSetupWorkflow?.electron || {};
+	const mounted = !!S.specialSetupWorkflow?.electron?.mounted;
+	S.electronApplicatorGroup.visible = isElectronCase && mounted;
+	if (!S.electronApplicatorGroup.visible) return;
+	const e = S.specialSetupWorkflow?.electron || {};
 	const s = activeSpecialSetupSpec() || {};
 	const cone = String(e.cone || s.cone || '10 × 10 cm');
 	const coneScale = cone.includes('6 × 6') ? 0.82 : cone.includes('15 × 15') ? 1.08 : 0.94;
-	electronApplicatorGroup.scale.set(coneScale, 1.0, coneScale);
-	electronApplicatorGroup.position.set(0, 0.03, 0);
-	const insert = electronApplicatorGroup.getObjectByName('electronInsertBlock');
+	S.electronApplicatorGroup.scale.set(coneScale, 1.0, coneScale);
+	S.electronApplicatorGroup.position.set(0, 0.03, 0);
+	const insert = S.electronApplicatorGroup.getObjectByName('electronInsertBlock');
 	if (insert) {
 		const width = Number(e.width) || Number(s.widthCm) || 6;
 		const height = Number(e.height) || Number(s.heightCm) || 4;
@@ -8011,7 +7801,7 @@ function updateElectronApplicator3D() {
 			1,
 			Math.max(0.58, Math.min(1.18, height / 4))
 		);
-		insert.material.color.set(specialSetupWorkflow?.verified ? 0x6bbf87 : 0xb96b68);
+		insert.material.color.set(S.specialSetupWorkflow?.verified ? 0x6bbf87 : 0xb96b68);
 	}
 }
 
@@ -8019,9 +7809,9 @@ const MLC_MIN_CM = 4,
 	MLC_MAX_CM = 20;
 const MLC_SHAPES = ['Square', 'Conformal', 'Asymmetric'];
 function createMLC3D() {
-	if (!linacHeadObject) return;
-	mlcGroup = new THREE.Group();
-	mlcGroup.name = 'mlcClinical';
+	if (!S.linacHeadObject) return;
+	S.mlcGroup = new THREE.Group();
+	S.mlcGroup.name = 'mlcClinical';
 	const leafMatA = new THREE.MeshStandardMaterial({
 		color: 0x59636f,
 		metalness: 0.75,
@@ -8042,17 +7832,17 @@ function createMLC3D() {
 		a.position.z = b.position.z = z;
 		a.userData.leafIndex = b.userData.leafIndex = i;
 		a.castShadow = b.castShadow = true;
-		mlcGroup.add(a, b);
-		mlcLeavesA.push(a);
-		mlcLeavesB.push(b);
+		S.mlcGroup.add(a, b);
+		S.mlcLeavesA.push(a);
+		S.mlcLeavesB.push(b);
 	}
 	// Place the leaf tips immediately below the collimator exit so leaf motion is visible from the room view.
-	mlcGroup.position.y = -0.565;
-	linacHeadObject.add(mlcGroup);
+	S.mlcGroup.position.y = -0.565;
+	S.linacHeadObject.add(S.mlcGroup);
 	updateMLCPositions();
 }
 function mlcGapForLeaf(index) {
-	const n = Math.max(1, mlcLeavesA.length),
+	const n = Math.max(1, S.mlcLeavesA.length),
 		mid = (n - 1) / 2;
 	const t = Math.abs((index - mid) / Math.max(1, mid));
 	const baseHalfGap =
@@ -8062,13 +7852,13 @@ function mlcGapForLeaf(index) {
 	return baseHalfGap;
 }
 function updateMLCPositions() {
-	if (!mlcGroup || !mlcLeavesA.length) return;
+	if (!S.mlcGroup || !S.mlcLeavesA.length) return;
 	const leafLen = 0.26;
-	mlcLeavesA.forEach((leaf, i) => {
+	S.mlcLeavesA.forEach((leaf, i) => {
 		const gap = mlcGapForLeaf(i);
 		const asym = fundamentalState.mlcShape === 'Asymmetric' ? 0.026 : 0;
 		leaf.position.x = -(gap + leafLen / 2) + asym;
-		mlcLeavesB[i].position.x = +(gap + leafLen / 2) + asym;
+		S.mlcLeavesB[i].position.x = +(gap + leafLen / 2) + asym;
 	});
 }
 function createODI3D() {
@@ -8077,24 +7867,24 @@ function createODI3D() {
 		new THREE.Vector3(),
 		new THREE.Vector3(0, -1, 0)
 	]);
-	odiLine = new THREE.Line(geo, mat);
-	odiLine.visible = false;
-	scene.add(odiLine);
-	odiSpot = new THREE.Mesh(
+	S.odiLine = new THREE.Line(geo, mat);
+	S.odiLine.visible = false;
+	S.scene.add(S.odiLine);
+	S.odiSpot = new THREE.Mesh(
 		new THREE.SphereGeometry(0.018, 16, 12),
 		new THREE.MeshBasicMaterial({ color: 0xffcf6a })
 	);
-	odiSpot.visible = false;
-	scene.add(odiSpot);
+	S.odiSpot.visible = false;
+	S.scene.add(S.odiSpot);
 }
 function getODIMeasurement() {
-	if (!gantryRotatingGroup || !patientGroup) return null;
-	scene.updateMatrixWorld(true);
-	const source = gantryRotatingGroup.localToWorld(new THREE.Vector3(0, 1.5, 0));
-	const axis = gantryRotatingGroup.localToWorld(new THREE.Vector3(0, 0, 0));
+	if (!S.gantryRotatingGroup || !S.patientGroup) return null;
+	S.scene.updateMatrixWorld(true);
+	const source = S.gantryRotatingGroup.localToWorld(new THREE.Vector3(0, 1.5, 0));
+	const axis = S.gantryRotatingGroup.localToWorld(new THREE.Vector3(0, 0, 0));
 	const dir = axis.clone().sub(source).normalize();
 	const ray = new THREE.Raycaster(source, dir, 0, 4.0);
-	const hits = ray.intersectObject(patientGroup, true);
+	const hits = ray.intersectObject(S.patientGroup, true);
 	if (!hits.length) return { source, axis, point: axis.clone(), cm: null };
 	const point = hits[0].point.clone();
 	// Virtual geometry calibration: source-to-axis = 100 cm.
@@ -8104,24 +7894,24 @@ function getODIMeasurement() {
 }
 function updateODIReadout() {
 	const m = getODIMeasurement();
-	lastODIcm = m && Number.isFinite(m.cm) ? m.cm : null;
-	const txt = lastODIcm == null ? 'NO SURFACE' : `SSD ${lastODIcm.toFixed(1)} cm`;
-	setTextById('hudODI', odiOn ? txt : 'OFF');
-	if (odiLine && m) {
-		odiLine.geometry.setFromPoints([m.source, m.point]);
-		odiLine.visible = odiOn;
+	S.lastODIcm = m && Number.isFinite(m.cm) ? m.cm : null;
+	const txt = S.lastODIcm == null ? 'NO SURFACE' : `SSD ${S.lastODIcm.toFixed(1)} cm`;
+	setTextById('hudODI', S.odiOn ? txt : 'OFF');
+	if (S.odiLine && m) {
+		S.odiLine.geometry.setFromPoints([m.source, m.point]);
+		S.odiLine.visible = S.odiOn;
 	}
-	if (odiSpot && m) {
-		odiSpot.position.copy(m.point);
-		odiSpot.visible = odiOn && lastODIcm != null;
+	if (S.odiSpot && m) {
+		S.odiSpot.position.copy(m.point);
+		S.odiSpot.visible = S.odiOn && S.lastODIcm != null;
 	}
 	return txt;
 }
 function setODIState(on) {
-	odiOn = !!on;
+	S.odiOn = !!on;
 	const txt = updateODIReadout();
-	odiToggleButton?.classList.toggle('active-function', odiOn);
-	setPendantLCD('OPTICAL DISTANCE INDICATOR', odiOn ? txt : 'OFF');
+	odiToggleButton?.classList.toggle('active-function', S.odiOn);
+	setPendantLCD('OPTICAL DISTANCE INDICATOR', S.odiOn ? txt : 'OFF');
 	renderTreatmentMonitor();
 }
 
@@ -8133,11 +7923,11 @@ function setBeamWidth(cm) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
 function setReceptorSID(sidCm) {
 	// lab Receptor SID (120–180 cm) → stored EPID depth only
-	epidReceptorY = -0.7 - ((sidCm - 120) / 60) * 0.6;
+	S.epidReceptorY = -0.7 - ((sidCm - 120) / 60) * 0.6;
 	// IMPORTANT: changing a lab SID must NEVER deploy the MV detector.
 	// If the learner has already extended the EPID from the pendant, update only
 	// its beam-axis depth; otherwise leave the panel parked in its retracted pose.
-	if (detectorExtended) applyDetectorCommandedPose();
+	if (S.detectorExtended) applyDetectorCommandedPose();
 }
 
 // ----- Patient setup positions + auto 3-point localization -----
@@ -11473,24 +11263,24 @@ function populateTreatmentCaseSelect() {
 function loadTreatmentCase(index) {
 	const safeIndex =
 		((index % TREATMENT_CASES.length) + TREATMENT_CASES.length) % TREATMENT_CASES.length;
-	activeTreatmentCaseIndex = safeIndex;
-	activeTreatmentCase = TREATMENT_CASES[safeIndex];
+	S.activeTreatmentCaseIndex = safeIndex;
+	S.activeTreatmentCase = TREATMENT_CASES[safeIndex];
 	if (treatmentCaseSelect) treatmentCaseSelect.value = String(safeIndex);
-	const site = IMAGING_SITES.find((s) => s.key === activeTreatmentCase.siteKey);
+	const site = IMAGING_SITES.find((s) => s.key === S.activeTreatmentCase.siteKey);
 	if (site && typeof runPatientSetup === 'function') {
-		const setupZ = Number.isFinite(activeTreatmentCase.setupSiteZ)
-			? activeTreatmentCase.setupSiteZ
+		const setupZ = Number.isFinite(S.activeTreatmentCase.setupSiteZ)
+			? S.activeTreatmentCase.setupSiteZ
 			: site.z;
 		runPatientSetup(
-			activeTreatmentCase.position || (site.orient && site.orient[0]) || 'HFS',
+			S.activeTreatmentCase.position || (site.orient && site.orient[0]) || 'HFS',
 			setupZ,
-			activeTreatmentCase.setupBodyX || 0,
-			activeTreatmentCase.setupBodyY || 0
+			S.activeTreatmentCase.setupBodyX || 0,
+			S.activeTreatmentCase.setupBodyY || 0
 		);
 	}
 	setPendantLCD(
 		'PATIENT LOADED',
-		`${activeTreatmentCase.patient} · ${activeTreatmentCase.siteLabel}`
+		`${S.activeTreatmentCase.patient} · ${S.activeTreatmentCase.siteLabel}`
 	);
 	resetImmobilizationWorkflowForCase();
 	resetClinicalIGRTForCase();
@@ -11507,11 +11297,11 @@ function loadTreatmentCase(index) {
 }
 
 function clinicalIGRTModeForCase() {
-	const imaging = (activeTreatmentCase?.planned?.imaging || '').toLowerCase();
+	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();
 	return imaging.includes('mv') ? 'MV Pair' : 'CBCT';
 }
 function igrtHardwareReady() {
-	return clinicalIGRT.mode === 'MV Pair' ? !!detectorExtended : !!kvOn;
+	return S.clinicalIGRT.mode === 'MV Pair' ? !!S.detectorExtended : !!S.kvOn;
 }
 function fmtIGRT(v, unit) {
 	const n = Math.abs(v) < 0.0001 ? 0 : v;
@@ -11519,7 +11309,7 @@ function fmtIGRT(v, unit) {
 	return `${n > 0 ? '+' : ''}${n.toFixed(dec)}${unit}`;
 }
 function getIGRTApplied() {
-	const b = clinicalIGRT.baseline || { lat: 0, lng: 0, vrt: 0, roll: 0, pitch: 0, yaw: 0 };
+	const b = S.clinicalIGRT.baseline || { lat: 0, lng: 0, vrt: 0, roll: 0, pitch: 0, yaw: 0 };
 	return {
 		lat: fundamentalState.lat - b.lat,
 		lng: fundamentalState.lng - b.lng,
@@ -11530,9 +11320,9 @@ function getIGRTApplied() {
 	};
 }
 function getIGRTResidual() {
-	if (!clinicalIGRT.correction) return { lat: 0, lng: 0, vrt: 0, roll: 0, pitch: 0, yaw: 0 };
+	if (!S.clinicalIGRT.correction) return { lat: 0, lng: 0, vrt: 0, roll: 0, pitch: 0, yaw: 0 };
 	const a = getIGRTApplied(),
-		c = clinicalIGRT.correction;
+		c = S.clinicalIGRT.correction;
 	return {
 		lat: c.lat - a.lat,
 		lng: c.lng - a.lng,
@@ -11543,7 +11333,7 @@ function getIGRTResidual() {
 	};
 }
 function setClinicalIGRTError(err) {
-	if (!patientErrorGroup || !errorGroupHome || !couchTopGroup) return;
+	if (!S.patientErrorGroup || !S.errorGroupHome || !S.couchTopGroup) return;
 	const r = err || { lat: 0, lng: 0, vrt: 0, roll: 0, pitch: 0, yaw: 0 };
 	// Keep the patient physically on the couch during daily setup error generation.
 	// Translate and rotate the couch TOP together with the patient, then let the learner
@@ -11551,21 +11341,21 @@ function setClinicalIGRTError(err) {
 	const MM = 0.1,
 		ROT = Math.PI / 180;
 	const homePos =
-		clinicalIGRT?.couchTopBasePos || couchTopHomePos || couchTopGroup.position.clone();
+		S.clinicalIGRT?.couchTopBasePos || S.couchTopHomePos || S.couchTopGroup.position.clone();
 	const homeRot =
-		clinicalIGRT?.couchTopBaseRot || couchTopHomeRot || couchTopGroup.rotation.clone();
-	couchTopGroup.position.set(
+		S.clinicalIGRT?.couchTopBaseRot || S.couchTopHomeRot || S.couchTopGroup.rotation.clone();
+	S.couchTopGroup.position.set(
 		homePos.x - (r.lat || 0) * MM,
 		homePos.y - (r.vrt || 0) * MM,
 		homePos.z - (r.lng || 0) * MM
 	);
-	couchTopGroup.rotation.set(
+	S.couchTopGroup.rotation.set(
 		homeRot.x - (r.pitch || 0) * ROT,
 		homeRot.y - (r.yaw || 0) * ROT,
 		homeRot.z - (r.roll || 0) * ROT
 	);
-	patientErrorGroup.position.copy(errorGroupHome);
-	patientErrorGroup.rotation.set(0, 0, 0);
+	S.patientErrorGroup.position.copy(S.errorGroupHome);
+	S.patientErrorGroup.rotation.set(0, 0, 0);
 	updateCouchAccordion();
 }
 const COLLISION_PROXY_TOL = 0.025;
@@ -11599,7 +11389,7 @@ function evaluateTreatmentTrajectoryClearance(
 	fields = getTreatmentFields(),
 	requiredMargin = TREATMENT_CLEARANCE_REQUIRED_MARGIN
 ) {
-	if (!gantryRotatingGroup || !couchTopGroup || !scene)
+	if (!S.gantryRotatingGroup || !S.couchTopGroup || !S.scene)
 		return {
 			safe: true,
 			minMargin: Infinity,
@@ -11629,12 +11419,12 @@ function evaluateTreatmentTrajectoryClearance(
 				? ELECTRON_FIXED_CLEARANCE_REQUIRED_MARGIN
 				: requiredMargin;
 			const tableAngle = normalizeAngleValue(field?.geometry?.couchAngle ?? '0°') || 0;
-			if (couchTreatmentPivot) couchTreatmentPivot.rotation.y = (tableAngle * Math.PI) / 180;
+			if (S.couchTreatmentPivot) S.couchTreatmentPivot.rotation.y = (tableAngle * Math.PI) / 180;
 			// Electron treatment has no gantry/couch trajectory: evaluate only the prescribed
 			// fixed pose. Photon/VMAT fields retain the existing field/arc sampling behavior.
 			for (const s of treatmentTrajectorySamples(field)) {
-				gantryRotatingGroup.rotation.z = -((s.angle * Math.PI) / 180);
-				scene.updateMatrixWorld(true);
+				S.gantryRotatingGroup.rotation.z = -((s.angle * Math.PI) / 180);
+				S.scene.updateMatrixWorld(true);
 				const c = getCollisionAssessment();
 				samples++;
 				const margin = Number(c?.margin ?? Infinity);
@@ -11682,7 +11472,7 @@ function currentSelectedFieldClearance(requiredMargin = TREATMENT_CLEARANCE_REQU
 	return evaluateTreatmentTrajectoryClearance([field], requiredMargin);
 }
 function prepareTreatmentClearanceBaseline() {
-	if (!couchTopGroup || !patientErrorGroup || !errorGroupHome)
+	if (!S.couchTopGroup || !S.patientErrorGroup || !S.errorGroupHome)
 		return {
 			safe: true,
 			minMargin: Infinity,
@@ -11692,20 +11482,20 @@ function prepareTreatmentClearanceBaseline() {
 			requiredMargin: TREATMENT_CLEARANCE_REQUIRED_MARGIN,
 			placementOffset: 0
 		};
-	const baseTop = couchTopGroup.position.clone(),
-		basePatient = patientErrorGroup.position.clone();
+	const baseTop = S.couchTopGroup.position.clone(),
+		basePatient = S.patientErrorGroup.position.clone();
 	// Small longitudinal indexing changes are acceptable during initial patient setup,
 	// but keep them limited so the patient remains visibly supported by the tabletop.
 	const offsets = [0, 0.1, -0.1, 0.2, -0.2, 0.3, -0.3, 0.4, -0.4, 0.5, -0.5, 0.6, -0.6, 0.7, -0.7];
 	let best = null;
 	for (const dz of offsets) {
-		couchTopGroup.position.copy(baseTop);
-		couchTopGroup.position.z += dz;
+		S.couchTopGroup.position.copy(baseTop);
+		S.couchTopGroup.position.z += dz;
 		// Slide the tabletop beneath the patient while counter-shifting the patient's
 		// couch-local placement. The treatment target therefore remains at isocenter.
-		patientErrorGroup.position.copy(basePatient);
-		patientErrorGroup.position.z -= dz;
-		scene.updateMatrixWorld(true);
+		S.patientErrorGroup.position.copy(basePatient);
+		S.patientErrorGroup.position.z -= dz;
+		S.scene.updateMatrixWorld(true);
 		const c = evaluateTreatmentTrajectoryClearance(
 			getTreatmentFields(),
 			TREATMENT_CLEARANCE_REQUIRED_MARGIN
@@ -11713,8 +11503,8 @@ function prepareTreatmentClearanceBaseline() {
 		const candidate = {
 			...c,
 			placementOffset: dz,
-			top: couchTopGroup.position.clone(),
-			patient: patientErrorGroup.position.clone()
+			top: S.couchTopGroup.position.clone(),
+			patient: S.patientErrorGroup.position.clone()
 		};
 		if (!best || candidate.minMargin > best.minMargin) best = candidate;
 		if (candidate.safe) {
@@ -11723,8 +11513,8 @@ function prepareTreatmentClearanceBaseline() {
 		}
 	}
 	if (!best) {
-		couchTopGroup.position.copy(baseTop);
-		patientErrorGroup.position.copy(basePatient);
+		S.couchTopGroup.position.copy(baseTop);
+		S.patientErrorGroup.position.copy(basePatient);
 		return {
 			safe: false,
 			minMargin: -Infinity,
@@ -11735,25 +11525,25 @@ function prepareTreatmentClearanceBaseline() {
 			placementOffset: 0
 		};
 	}
-	couchTopGroup.position.copy(best.top);
-	patientErrorGroup.position.copy(best.patient);
+	S.couchTopGroup.position.copy(best.top);
+	S.patientErrorGroup.position.copy(best.patient);
 	// errorGroupHome follows the patient's intentional placement on the tabletop, while
 	// couchTopHomePos remains the machine's canonical tabletop geometry.
-	errorGroupHome = patientErrorGroup.position.clone();
-	scene.updateMatrixWorld(true);
+	S.errorGroupHome = S.patientErrorGroup.position.clone();
+	S.scene.updateMatrixWorld(true);
 	updateCouchAccordion();
 	return { ...best, top: undefined, patient: undefined };
 }
 function removeTreatmentClearancePlacement() {
-	const dz = Number(clinicalIGRT?.clearancePlacementOffset) || 0;
-	if (Math.abs(dz) > 1e-9 && couchTopGroup && patientErrorGroup) {
-		couchTopGroup.position.z -= dz;
-		patientErrorGroup.position.z += dz;
-		errorGroupHome = patientErrorGroup.position.clone();
-		scene?.updateMatrixWorld(true);
+	const dz = Number(S.clinicalIGRT?.clearancePlacementOffset) || 0;
+	if (Math.abs(dz) > 1e-9 && S.couchTopGroup && S.patientErrorGroup) {
+		S.couchTopGroup.position.z -= dz;
+		S.patientErrorGroup.position.z += dz;
+		S.errorGroupHome = S.patientErrorGroup.position.clone();
+		S.scene?.updateMatrixWorld(true);
 		updateCouchAccordion();
 	}
-	clinicalIGRT.clearancePlacementOffset = 0;
+	S.clinicalIGRT.clearancePlacementOffset = 0;
 }
 function randomIGRTError(mode) {
 	// Generate only values that can be reproduced exactly by the pendant:
@@ -11781,11 +11571,11 @@ function correctionFromIGRTError(e) {
 	return { lat: -e.lat, lng: -e.lng, vrt: e.vrt, roll: e.roll, pitch: e.pitch, yaw: e.yaw };
 }
 function quietIGRTStep(mutator) {
-	scene?.updateMatrixWorld(true);
+	S.scene?.updateMatrixWorld(true);
 	const before = getCollisionAssessment();
 	const beforePose = captureCollisionPose();
 	mutator();
-	scene?.updateMatrixWorld(true);
+	S.scene?.updateMatrixWorld(true);
 	const after = getCollisionAssessment();
 	const tol = COLLISION_PROXY_TOL;
 	const entered = before.margin >= -tol && after.margin < -tol;
@@ -11797,7 +11587,7 @@ function quietIGRTStep(mutator) {
 	return true;
 }
 function isIGRTCorrectionAttainable(error, c) {
-	if (!couchGroup || !couchTopGroup || !c) return true;
+	if (!S.couchGroup || !S.couchTopGroup || !c) return true;
 	const origin = captureCollisionPose();
 	let ok = true;
 	const baseHalf = 0.7 / 2,
@@ -11805,7 +11595,7 @@ function isIGRTCorrectionAttainable(error, c) {
 	// Test the real path: first create the daily setup error, then apply the proposed
 	// couch correction in the same sequence available to the learner.
 	setClinicalIGRTError(error);
-	scene?.updateMatrixWorld(true);
+	S.scene?.updateMatrixWorld(true);
 	const setupClearance = getCollisionAssessment();
 	if (setupClearance && setupClearance.margin < -COLLISION_PROXY_TOL) {
 		restoreCollisionPose(origin);
@@ -11815,16 +11605,16 @@ function isIGRTCorrectionAttainable(error, c) {
 		const sign = Math.sign(count),
 			n = Math.round(Math.abs(count));
 		for (let i = 0; i < n && ok; i++) {
-			if (key === 'vrt' && couchGroup.position.y + sign * MOVEMENT_STEP < minY - 1e-6) {
+			if (key === 'vrt' && S.couchGroup.position.y + sign * MOVEMENT_STEP < minY - 1e-6) {
 				ok = false;
 				break;
 			}
 			ok = quietIGRTStep(() => {
 				if (key === 'vrt') {
-					couchGroup.position.y += sign * MOVEMENT_STEP;
+					S.couchGroup.position.y += sign * MOVEMENT_STEP;
 					updateCouchAccordion();
-				} else if (key === 'lng') couchTopGroup.position.z -= sign * MOVEMENT_STEP;
-				else if (key === 'lat') couchGroup.position.x -= sign * MOVEMENT_STEP;
+				} else if (key === 'lng') S.couchTopGroup.position.z -= sign * MOVEMENT_STEP;
+				else if (key === 'lat') S.couchGroup.position.x -= sign * MOVEMENT_STEP;
 			});
 		}
 	};
@@ -11835,7 +11625,7 @@ function isIGRTCorrectionAttainable(error, c) {
 		const axis = key === 'roll' ? 'z' : key === 'pitch' ? 'x' : 'y';
 		for (let i = 0; i < n && ok; i++)
 			ok = quietIGRTStep(() => {
-				couchTopGroup.rotation[axis] += sign * rad;
+				S.couchTopGroup.rotation[axis] += sign * rad;
 			});
 	};
 	stepTranslation('vrt', c.vrt);
@@ -11989,7 +11779,7 @@ function igrtViewSVG(
 		tx = cx + Math.max(-34, Math.min(34, h * scale)),
 		ty = cy - Math.max(-34, Math.min(34, v * scale));
 	const residualText = `${hAxis} ${fmtIGRT(hCorrection, 'mm')} · ${vAxis} ${fmtIGRT(vCorrection, 'mm')}${rotAxis ? ` · ${rotAxis} ${fmtIGRT(rotCorrection, '°')}` : ''}`;
-	const site = activeTreatmentCase?.siteKey || 'chest';
+	const site = S.activeTreatmentCase?.siteKey || 'chest';
 	const plane =
 		label === 'AXIAL'
 			? 'axial'
@@ -12007,8 +11797,8 @@ function igrtViewSVG(
 				: plane === 'sagittal' || plane === 'lateral'
 					? RTAPPS_CT_SAGITTAL
 					: RTAPPS_CT_CORONAL;
-		const bodyLabel = activeTreatmentCase?.siteLabel || site;
-		const sourceLabel = clinicalIGRT.acquired ? 'DAILY / REGISTERED' : 'SIM / PLAN';
+		const bodyLabel = S.activeTreatmentCase?.siteLabel || site;
+		const sourceLabel = S.clinicalIGRT.acquired ? 'DAILY / REGISTERED' : 'SIM / PLAN';
 		const imgDx = Math.max(-34, Math.min(34, h * scale)),
 			imgDy = -Math.max(-34, Math.min(34, v * scale));
 		return `<div class="igrt-view"><svg viewBox="0 0 160 160" aria-label="${label} CT registration view for ${bodyLabel}">
@@ -12026,7 +11816,7 @@ function igrtViewSVG(
 	}
 
 	const anatomy = igrtAnatomyBody(site, plane);
-	const bodyLabel = activeTreatmentCase?.siteLabel || site;
+	const bodyLabel = S.activeTreatmentCase?.siteLabel || site;
 	const target = `<circle cx="${tx}" cy="${ty}" r="7" fill="none" stroke="#ff54e8" stroke-width="2.1"/><line x1="${tx - 10}" y1="${ty}" x2="${tx + 10}" y2="${ty}" stroke="#ff54e8" stroke-width="1.1"/><line x1="${tx}" y1="${ty - 10}" x2="${tx}" y2="${ty + 10}" stroke="#ff54e8" stroke-width="1.1"/>`;
 	return `<div class="igrt-view"><svg viewBox="0 0 160 160" aria-label="${label} registration view for ${bodyLabel}">
               <defs><radialGradient id="igbg${label.replace(/\W/g, '')}" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#26323c"/><stop offset="1" stop-color="#05080b"/></radialGradient></defs>
@@ -12046,10 +11836,10 @@ function renderClinicalIGRT() {
 		rows = document.getElementById('igrtCorrectionRows'),
 		result = document.getElementById('igrtResult');
 	if (pat)
-		pat.textContent = activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${activeTreatmentCase.siteLabel}`
+		pat.textContent = S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${S.activeTreatmentCase.siteLabel}`
 			: 'No case';
-	if (modeEl) modeEl.textContent = clinicalIGRT.mode;
+	if (modeEl) modeEl.textContent = S.clinicalIGRT.mode;
 	const tolNote = document.getElementById('igrtToleranceFootnote'),
 		it = activeIGRTTolerances();
 	if (tolNote)
@@ -12057,11 +11847,11 @@ function renderClinicalIGRT() {
 	const ready = igrtHardwareReady();
 	if (hard) {
 		hard.textContent =
-			clinicalIGRT.mode === 'MV Pair'
-				? detectorExtended
+			S.clinicalIGRT.mode === 'MV Pair'
+				? S.detectorExtended
 					? 'MV panel extended'
 					: 'Extend MV panel'
-				: kvOn
+				: S.kvOn
 					? 'kV arms extended'
 					: 'Extend kV arms';
 	}
@@ -12069,7 +11859,7 @@ function renderClinicalIGRT() {
 		hardChip.classList.toggle('good', ready);
 		hardChip.classList.toggle('bad', !ready);
 	}
-	if (!clinicalIGRT.active) {
+	if (!S.clinicalIGRT.active) {
 		if (status)
 			status.textContent =
 				'Press New Daily Setup to create a reproducible setup error for the loaded patient.';
@@ -12082,19 +11872,19 @@ function renderClinicalIGRT() {
 		return;
 	}
 	if (status) {
-		const base = clinicalIGRT.baseline
+		const base = S.clinicalIGRT.baseline
 			? canonicalCouchDisplay([
-					clinicalIGRT.baseline.vrt,
-					clinicalIGRT.baseline.lng,
-					clinicalIGRT.baseline.lat
+					S.clinicalIGRT.baseline.vrt,
+					S.clinicalIGRT.baseline.lng,
+					S.clinicalIGRT.baseline.lat
 				])
 			: '—';
-		if (!clinicalIGRT.acquired) {
+		if (!S.clinicalIGRT.acquired) {
 			const preflightNote =
-				clinicalIGRT.clearance?.safe === false
+				S.clinicalIGRT.clearance?.safe === false
 					? `<div class="igrt-attainable" style="color:#ffd27a">Pre-treatment trajectory clearance will be rechecked after alignment correction. Imaging acquisition remains available.</div>`
 					: `<div class="igrt-attainable">✓ Baseline treatment trajectory preflight clear.</div>`;
-			status.innerHTML = `Daily setup error created from planned couch baseline <b>${base}</b> (VRT / LNG / LAT). Use the pendant to ${clinicalIGRT.mode === 'MV Pair' ? 'extend the MV panel' : 'extend the kV imaging arms'}, then acquire images.${preflightNote}`;
+			status.innerHTML = `Daily setup error created from planned couch baseline <b>${base}</b> (VRT / LNG / LAT). Use the pendant to ${S.clinicalIGRT.mode === 'MV Pair' ? 'extend the MV panel' : 'extend the kV imaging arms'}, then acquire images.${preflightNote}`;
 		} else {
 			const targetObj = getIGRTExpectedAbsoluteCouch();
 			const target = targetObj
@@ -12104,25 +11894,25 @@ function renderClinicalIGRT() {
 			const selectedField = deliveryCasePlan();
 			const clearanceOK = selectedFieldClearance?.safe !== false;
 			const placementNote =
-				Math.abs(Number(clinicalIGRT.clearancePlacementOffset) || 0) > 1e-9
+				Math.abs(Number(S.clinicalIGRT.clearancePlacementOffset) || 0) > 1e-9
 					? ' Tabletop/patient placement was pre-positioned to improve treatment clearance without moving the target off isocenter.'
 					: '';
 			const clearanceText = clearanceOK
 				? `<div class="igrt-attainable">✓ Selected-field preflight clear: ${selectedField?.field || 'Treatment field'} · G ${Number(selectedFieldClearance?.angle || normalizeAngleValue(selectedField?.geometry?.gantry) || 0).toFixed(0)}°.${placementNote}</div>`
 				: `<div class="igrt-attainable" style="color:#ffd27a">Selected-field clearance proxy hold: ${selectedFieldClearance?.field || selectedField?.field || 'planned field'} · G ${Number(selectedFieldClearance?.angle || 0).toFixed(0)}°. Alignment may still be verified; resolve or document a simulation override in Delivery.</div>`;
 			const wholePlanNote =
-				clinicalIGRT.clearance?.safe === false &&
-				clinicalIGRT.clearance?.field !== selectedFieldClearance?.field
-					? `<div class="igrt-attainable" style="color:#a9bac4">Whole-plan preflight also identified a hold on ${clinicalIGRT.clearance?.field || 'another field'} · G ${Number(clinicalIGRT.clearance?.angle || 0).toFixed(0)}°. Each field is handled independently in Delivery.</div>`
+				S.clinicalIGRT.clearance?.safe === false &&
+				S.clinicalIGRT.clearance?.field !== selectedFieldClearance?.field
+					? `<div class="igrt-attainable" style="color:#a9bac4">Whole-plan preflight also identified a hold on ${S.clinicalIGRT.clearance?.field || 'another field'} · G ${Number(S.clinicalIGRT.clearance?.angle || 0).toFixed(0)}°. Each field is handled independently in Delivery.</div>`
 					: '';
-			status.innerHTML = `Registration complete. Baseline couch: <b>${base}</b>. Post-IGRT treatment target: <b>${target}</b>. Use ONLY the couch controls on the pendant to apply the recommended correction; residuals update live.${clinicalIGRT.attainable ? '<div class="igrt-attainable">✓ Generated correction is attainable with 1 mm / 0.5° pendant increments from this machine position.</div>' : '<div class="igrt-attainable" style="color:#ffb3b8">The couch correction path is not attainable from this machine position. Reposition the machine and create a new daily setup.</div>'}${clearanceText}${wholePlanNote}`;
+			status.innerHTML = `Registration complete. Baseline couch: <b>${base}</b>. Post-IGRT treatment target: <b>${target}</b>. Use ONLY the couch controls on the pendant to apply the recommended correction; residuals update live.${S.clinicalIGRT.attainable ? '<div class="igrt-attainable">✓ Generated correction is attainable with 1 mm / 0.5° pendant increments from this machine position.</div>' : '<div class="igrt-attainable" style="color:#ffb3b8">The couch correction path is not attainable from this machine position. Reposition the machine and create a new daily setup.</div>'}${clearanceText}${wholePlanNote}`;
 		}
 	}
 	const residual = getIGRTResidual();
 	if (images) {
-		if (!clinicalIGRT.acquired) {
+		if (!S.clinicalIGRT.acquired) {
 			images.innerHTML = '';
-		} else if (clinicalIGRT.mode === 'CBCT') {
+		} else if (S.clinicalIGRT.mode === 'CBCT') {
 			images.className = 'igrt-images';
 			images.innerHTML =
 				igrtViewSVG('AXIAL', residual.lat, residual.vrt, residual.roll, 'LAT', 'VRT', 'ROLL') +
@@ -12136,15 +11926,15 @@ function renderClinicalIGRT() {
 		}
 	}
 	if (rows) {
-		if (!clinicalIGRT.acquired) {
+		if (!S.clinicalIGRT.acquired) {
 			rows.innerHTML =
 				'<div class="igrt-row"><div class="axis">Awaiting acquisition</div><div></div><div></div><div></div></div>';
 		} else {
 			const a = getIGRTApplied(),
-				c = clinicalIGRT.correction;
+				c = S.clinicalIGRT.correction;
 			const it = activeIGRTTolerances();
 			const axes =
-				clinicalIGRT.mode === 'CBCT'
+				S.clinicalIGRT.mode === 'CBCT'
 					? [
 							['Lateral', 'lat', 'mm', it.translation],
 							['Longitudinal', 'lng', 'mm', it.translation],
@@ -12170,10 +11960,10 @@ function renderClinicalIGRT() {
 		}
 	}
 	if (result) {
-		if (!clinicalIGRT.acquired) {
+		if (!S.clinicalIGRT.acquired) {
 			result.textContent = 'No registration acquired.';
 			result.className = '';
-		} else if (clinicalIGRT.verified) {
+		} else if (S.clinicalIGRT.verified) {
 			const selectedClearance = currentSelectedFieldClearance();
 			result.textContent = selectedClearance?.safe
 				? 'IGRT VERIFIED · alignment is within tolerance. Selected treatment field clearance is clear.'
@@ -12187,7 +11977,7 @@ function renderClinicalIGRT() {
 	}
 }
 function startClinicalIGRT() {
-	if (!activeTreatmentCase) {
+	if (!S.activeTreatmentCase) {
 		setPendantLCD('IGRT', 'Load a patient case first');
 		return;
 	}
@@ -12202,27 +11992,28 @@ function startClinicalIGRT() {
 			status.innerHTML = `<b>Baseline setup not verified.</b> Before creating the daily IGRT error, set the couch to the planned case position <b>${target}</b> (VRT / LNG / LAT).`;
 		return;
 	}
-	if (Math.abs(Number(clinicalIGRT.clearancePlacementOffset) || 0) > 1e-9) {
-		if (clinicalIGRT.couchTopBasePos && couchTopGroup) {
-			couchTopGroup.position.copy(clinicalIGRT.couchTopBasePos);
-			if (clinicalIGRT.couchTopBaseRot) couchTopGroup.rotation.copy(clinicalIGRT.couchTopBaseRot);
+	if (Math.abs(Number(S.clinicalIGRT.clearancePlacementOffset) || 0) > 1e-9) {
+		if (S.clinicalIGRT.couchTopBasePos && S.couchTopGroup) {
+			S.couchTopGroup.position.copy(S.clinicalIGRT.couchTopBasePos);
+			if (S.clinicalIGRT.couchTopBaseRot)
+				S.couchTopGroup.rotation.copy(S.clinicalIGRT.couchTopBaseRot);
 		}
 		removeTreatmentClearancePlacement();
 	}
 	const clearancePrep = prepareTreatmentClearanceBaseline();
-	clinicalIGRT.clearance = clearancePrep;
-	clinicalIGRT.clearancePlacementOffset = Number(clearancePrep.placementOffset) || 0;
+	S.clinicalIGRT.clearance = clearancePrep;
+	S.clinicalIGRT.clearancePlacementOffset = Number(clearancePrep.placementOffset) || 0;
 	// Do not block image acquisition at this stage. Daily imaging must remain available
 	// even when a treatment-trajectory preflight needs later confirmation. The corrected
 	// post-IGRT pose is re-evaluated before IGRT can be VERIFIED and again before beam enable.
 	// This preserves the educational sequence: image first, correct alignment, then approve
 	// the final treatment position only when the full prescribed trajectory is clear.
-	clinicalIGRT.mode = clinicalIGRTModeForCase();
-	clinicalIGRT.active = true;
-	clinicalIGRT.acquired = false;
-	clinicalIGRT.verified = false;
-	clinicalIGRT.alignmentWithinTolerance = false;
-	clinicalIGRT.baseline = {
+	S.clinicalIGRT.mode = clinicalIGRTModeForCase();
+	S.clinicalIGRT.active = true;
+	S.clinicalIGRT.acquired = false;
+	S.clinicalIGRT.verified = false;
+	S.clinicalIGRT.alignmentWithinTolerance = false;
+	S.clinicalIGRT.baseline = {
 		lat: fundamentalState.lat,
 		lng: fundamentalState.lng,
 		vrt: fundamentalState.vrt,
@@ -12230,73 +12021,73 @@ function startClinicalIGRT() {
 		pitch: fundamentalState.pitch,
 		yaw: fundamentalState.yaw
 	};
-	clinicalIGRT.couchTopBasePos = couchTopGroup ? couchTopGroup.position.clone() : null;
-	clinicalIGRT.couchTopBaseRot = couchTopGroup ? couchTopGroup.rotation.clone() : null;
-	const generated = generateAttainableIGRTSetup(clinicalIGRT.mode);
-	clinicalIGRT.error = generated.error;
-	clinicalIGRT.correction = generated.correction;
-	clinicalIGRT.attainable = generated.attainable;
-	clinicalIGRT.clearancePending = !!generated.clearancePending || clearancePrep.safe === false;
-	clinicalIGRT.clearance = clearancePrep;
-	setClinicalIGRTError(clinicalIGRT.error);
+	S.clinicalIGRT.couchTopBasePos = S.couchTopGroup ? S.couchTopGroup.position.clone() : null;
+	S.clinicalIGRT.couchTopBaseRot = S.couchTopGroup ? S.couchTopGroup.rotation.clone() : null;
+	const generated = generateAttainableIGRTSetup(S.clinicalIGRT.mode);
+	S.clinicalIGRT.error = generated.error;
+	S.clinicalIGRT.correction = generated.correction;
+	S.clinicalIGRT.attainable = generated.attainable;
+	S.clinicalIGRT.clearancePending = !!generated.clearancePending || clearancePrep.safe === false;
+	S.clinicalIGRT.clearance = clearancePrep;
+	setClinicalIGRTError(S.clinicalIGRT.error);
 	window.clinicalIGRTActive = true;
 	setPendantLCD('DAILY SETUP', 'IGRT error loaded · acquire images');
 	renderClinicalIGRT();
 }
 function acquireClinicalIGRT() {
-	if (!clinicalIGRT.active) {
+	if (!S.clinicalIGRT.active) {
 		setPendantLCD('IGRT', 'Create a daily setup first');
 		return;
 	}
 	if (!igrtHardwareReady()) {
 		const msg =
-			clinicalIGRT.mode === 'MV Pair'
+			S.clinicalIGRT.mode === 'MV Pair'
 				? 'Extend the MV panel with the pendant first'
 				: 'Extend the kV arms with the pendant first';
 		setPendantLCD('IMAGING NOT READY', msg);
 		renderClinicalIGRT();
 		return;
 	}
-	clinicalIGRT.acquired = true;
-	clinicalIGRT.verified = false;
+	S.clinicalIGRT.acquired = true;
+	S.clinicalIGRT.verified = false;
 	oisLogEvent(
 		'IMAGING',
-		`${clinicalIGRT.mode} acquired`,
+		`${S.clinicalIGRT.mode} acquired`,
 		'Registration available for review',
 		'igrt-acquired'
 	);
-	setPendantLCD(clinicalIGRT.mode, 'REGISTRATION COMPLETE');
+	setPendantLCD(S.clinicalIGRT.mode, 'REGISTRATION COMPLETE');
 	renderClinicalIGRT();
 	renderTreatmentMonitor();
 }
 function verifyClinicalIGRT() {
-	if (!clinicalIGRT.acquired) {
+	if (!S.clinicalIGRT.acquired) {
 		setPendantLCD('IGRT', 'Acquire images first');
 		return;
 	}
 	const r = getIGRTResidual();
 	const it = activeIGRTTolerances();
 	const transOK = ['lat', 'lng', 'vrt'].every((k) => Math.abs(r[k]) <= it.translation);
-	const rotKeys = clinicalIGRT.mode === 'CBCT' ? ['roll', 'pitch', 'yaw'] : ['pitch', 'yaw'];
+	const rotKeys = S.clinicalIGRT.mode === 'CBCT' ? ['roll', 'pitch', 'yaw'] : ['pitch', 'yaw'];
 	const rotOK = rotKeys.every((k) => Math.abs(r[k]) <= it.rotation);
-	clinicalIGRT.alignmentWithinTolerance = transOK && rotOK;
+	S.clinicalIGRT.alignmentWithinTolerance = transOK && rotOK;
 
 	// Retain a whole-plan preflight summary for teaching context, but do not make
 	// patient alignment verification depend on a clearance proxy from another field.
-	const wholePlanClearance = clinicalIGRT.alignmentWithinTolerance
+	const wholePlanClearance = S.clinicalIGRT.alignmentWithinTolerance
 		? evaluateTreatmentTrajectoryClearance(
 				getTreatmentFields(),
 				TREATMENT_CLEARANCE_REQUIRED_MARGIN
 			)
-		: clinicalIGRT.clearance;
-	if (wholePlanClearance) clinicalIGRT.clearance = wholePlanClearance;
+		: S.clinicalIGRT.clearance;
+	if (wholePlanClearance) S.clinicalIGRT.clearance = wholePlanClearance;
 
-	clinicalIGRT.verified = clinicalIGRT.alignmentWithinTolerance;
-	const selectedClearance = clinicalIGRT.alignmentWithinTolerance
+	S.clinicalIGRT.verified = S.clinicalIGRT.alignmentWithinTolerance;
+	const selectedClearance = S.clinicalIGRT.alignmentWithinTolerance
 		? currentSelectedFieldClearance()
 		: null;
 
-	if (clinicalIGRT.verified) {
+	if (S.clinicalIGRT.verified) {
 		if (selectedClearance?.safe) {
 			setPendantLCD('IGRT VERIFICATION', 'PASS · ALIGNMENT VERIFIED');
 		} else {
@@ -12317,50 +12108,51 @@ function verifyClinicalIGRT() {
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
 window.clinicalIGRTCouchShift = function (axis, delta) {
-	if (!clinicalIGRT.active || !clinicalIGRT.acquired) return false;
-	clinicalIGRT.verified = false;
+	if (!S.clinicalIGRT.active || !S.clinicalIGRT.acquired) return false;
+	S.clinicalIGRT.verified = false;
 	renderClinicalIGRT();
 	return true;
 };
 function resetClinicalIGRTForCase() {
 	// Remove any simulated daily setup error first while the saved baseline pose still exists.
-	if (clinicalIGRT.couchTopBasePos && couchTopGroup) {
-		couchTopGroup.position.copy(clinicalIGRT.couchTopBasePos);
-		if (clinicalIGRT.couchTopBaseRot) couchTopGroup.rotation.copy(clinicalIGRT.couchTopBaseRot);
-		if (patientErrorGroup && errorGroupHome) {
-			patientErrorGroup.position.copy(errorGroupHome);
-			patientErrorGroup.rotation.set(0, 0, 0);
+	if (S.clinicalIGRT.couchTopBasePos && S.couchTopGroup) {
+		S.couchTopGroup.position.copy(S.clinicalIGRT.couchTopBasePos);
+		if (S.clinicalIGRT.couchTopBaseRot)
+			S.couchTopGroup.rotation.copy(S.clinicalIGRT.couchTopBaseRot);
+		if (S.patientErrorGroup && S.errorGroupHome) {
+			S.patientErrorGroup.position.copy(S.errorGroupHome);
+			S.patientErrorGroup.rotation.set(0, 0, 0);
 		}
-		scene?.updateMatrixWorld(true);
+		S.scene?.updateMatrixWorld(true);
 		updateCouchAccordion();
 	}
 	// Undo only the automatic tabletop-under-patient clearance placement. This preserves
 	// the machine's ordinary couch coordinates and prevents placement offsets from stacking
 	// when a new patient/case is loaded.
 	removeTreatmentClearancePlacement();
-	clinicalIGRT.active = false;
-	clinicalIGRT.acquired = false;
-	clinicalIGRT.verified = false;
-	clinicalIGRT.mode = clinicalIGRTModeForCase();
-	clinicalIGRT.error = null;
-	clinicalIGRT.correction = null;
-	clinicalIGRT.baseline = null;
-	clinicalIGRT.attainable = true;
-	clinicalIGRT.couchTopBasePos = null;
-	clinicalIGRT.couchTopBaseRot = null;
-	clinicalIGRT.clearance = null;
-	clinicalIGRT.alignmentWithinTolerance = false;
-	clinicalIGRT.clearancePlacementOffset = 0;
+	S.clinicalIGRT.active = false;
+	S.clinicalIGRT.acquired = false;
+	S.clinicalIGRT.verified = false;
+	S.clinicalIGRT.mode = clinicalIGRTModeForCase();
+	S.clinicalIGRT.error = null;
+	S.clinicalIGRT.correction = null;
+	S.clinicalIGRT.baseline = null;
+	S.clinicalIGRT.attainable = true;
+	S.clinicalIGRT.couchTopBasePos = null;
+	S.clinicalIGRT.couchTopBaseRot = null;
+	S.clinicalIGRT.clearance = null;
+	S.clinicalIGRT.alignmentWithinTolerance = false;
+	S.clinicalIGRT.clearancePlacementOffset = 0;
 	window.clinicalIGRTActive = false;
 	renderClinicalIGRT();
 }
 function setPatientPosition(name) {
-	if (!patientGroup) return;
+	if (!S.patientGroup) return;
 	const r = PATIENT_ROT[name] || PATIENT_ROT.HFS;
-	patientGroup.rotation.set(r[0], r[1], r[2]);
+	S.patientGroup.rotation.set(r[0], r[1], r[2]);
 }
-function applyCasePatientPose(c = activeTreatmentCase) {
-	const p = patientAnatomyParts || {};
+function applyCasePatientPose(c = S.activeTreatmentCase) {
+	const p = S.patientAnatomyParts || {};
 	if (p.armL) {
 		p.armL.position.set(-0.25, 0, -0.35);
 		p.armL.rotation.set(0, 0, 0);
@@ -12407,7 +12199,7 @@ function applyCasePatientPose(c = activeTreatmentCase) {
 }
 function currentSpecialFieldTarget() {
 	const field = typeof deliveryCasePlan === 'function' ? deliveryCasePlan() : null;
-	const type = String(activeTreatmentCase?.specialSetup?.type || '').toUpperCase();
+	const type = String(S.activeTreatmentCase?.specialSetup?.type || '').toUpperCase();
 	if (type === 'BREAST_MATCH') {
 		if (
 			String(field?.field || field?.name || '')
@@ -12428,26 +12220,26 @@ function currentSpecialFieldTarget() {
 	return null;
 }
 function updateSpecialAnatomyTargetMarker() {
-	if (!specialAnatomyTargetMarker) return;
+	if (!S.specialAnatomyTargetMarker) return;
 	const t = currentSpecialFieldTarget();
-	specialAnatomyTargetMarker.visible = !!t;
+	S.specialAnatomyTargetMarker.visible = !!t;
 	if (t) {
-		specialAnatomyTargetMarker.position.set(t.x, t.y, t.z);
-		specialAnatomyTargetMarker.userData.label = t.label;
+		S.specialAnatomyTargetMarker.position.set(t.x, t.y, t.z);
+		S.specialAnatomyTargetMarker.userData.label = t.label;
 	}
 }
 function updateElectronBolusMesh() {
-	if (!electronBolusMesh) return;
+	if (!S.electronBolusMesh) return;
 	const s = activeSpecialSetupSpec();
 	const isElectronCase =
-		!!activeTreatmentCase && String(s?.type || '').toUpperCase() === 'ELECTRON';
-	const e = specialSetupWorkflow?.electron || {};
-	electronBolusMesh.visible = isElectronCase && !!e.bolusPlaced;
-	if (!electronBolusMesh.visible) return;
+		!!S.activeTreatmentCase && String(s?.type || '').toUpperCase() === 'ELECTRON';
+	const e = S.specialSetupWorkflow?.electron || {};
+	S.electronBolusMesh.visible = isElectronCase && !!e.bolusPlaced;
+	if (!S.electronBolusMesh.visible) return;
 	const w = Number(e.bolusWidth || s?.widthCm || 6);
 	const h = Number(e.bolusHeight || s?.heightCm || 4);
 	const thickness = Number(e.bolusThickness || s?.bolusThicknessCm || 0.5);
-	electronBolusMesh.scale.set(
+	S.electronBolusMesh.scale.set(
 		Math.max(0.55, Math.min(1.25, w / 6)),
 		Math.max(0.7, Math.min(2.4, thickness / 0.5)),
 		Math.max(0.55, Math.min(1.25, h / 4))
@@ -12455,23 +12247,29 @@ function updateElectronBolusMesh() {
 	const gap = Math.max(0, Number(e.airGapMm) || 0);
 	const dxCm = Number(e.bolusOffsetXcm) || 0,
 		dzCm = Number(e.bolusOffsetYcm) || 0;
-	electronBolusMesh.position.set(-0.12 + dxCm * 0.012, 0.106 + gap * 0.0018, -0.45 + dzCm * 0.012);
-	electronBolusMesh.material.color.set(e.bolusPositionOK && e.bolusAirGapOK ? 0x72e0b8 : 0x66d0f2);
+	S.electronBolusMesh.position.set(
+		-0.12 + dxCm * 0.012,
+		0.106 + gap * 0.0018,
+		-0.45 + dzCm * 0.012
+	);
+	S.electronBolusMesh.material.color.set(
+		e.bolusPositionOK && e.bolusAirGapOK ? 0x72e0b8 : 0x66d0f2
+	);
 }
 
 function runPatientSetup(name, siteZ, bodyX = 0, bodyY = 0) {
 	// animate patient into isocenter (3-point setup); body offset centers the prescribed anatomy
-	if (patientBodyGroup)
-		patientBodyGroup.position.set(Number(bodyX) || 0, Number(bodyY) || 0, -(siteZ || 0));
-	applyCasePatientPose(activeTreatmentCase);
+	if (S.patientBodyGroup)
+		S.patientBodyGroup.position.set(Number(bodyX) || 0, Number(bodyY) || 0, -(siteZ || 0));
+	applyCasePatientPose(S.activeTreatmentCase);
 	updateSpecialAnatomyTargetMarker();
 	updateElectronBolusMesh();
-	if (!patientGroup || !patientHome) {
+	if (!S.patientGroup || !S.patientHome) {
 		setPatientPosition(name);
 		return;
 	}
 	setPatientPosition(name);
-	const home = patientHome;
+	const home = S.patientHome;
 	const start = home
 		.clone()
 		.add(
@@ -12481,32 +12279,36 @@ function runPatientSetup(name, siteZ, bodyX = 0, bodyY = 0) {
 				(Math.random() < 0.5 ? -1 : 1) * 0.5
 			)
 		);
-	patientGroup.position.copy(start);
+	S.patientGroup.position.copy(start);
 	const t0 = performance.now(),
 		dur = 1100;
-	if (patientSetupRAF) cancelAnimationFrame(patientSetupRAF);
+	if (S.patientSetupRAF) cancelAnimationFrame(S.patientSetupRAF);
 	const step = (t) => {
 		const p = Math.min(1, (t - t0) / dur),
 			e = 1 - Math.pow(1 - p, 3);
-		patientGroup.position.lerpVectors(start, home, e);
-		if (p < 1) patientSetupRAF = requestAnimationFrame(step);
-		else patientGroup.position.copy(home);
+		S.patientGroup.position.lerpVectors(start, home, e);
+		if (p < 1) S.patientSetupRAF = requestAnimationFrame(step);
+		else S.patientGroup.position.copy(home);
 	};
-	patientSetupRAF = requestAnimationFrame(step);
+	S.patientSetupRAF = requestAnimationFrame(step);
 }
 
 // Displace/tilt the 3D patient by the residual imaging error; residual 0 → re-centered on isocenter.
 function setImagingError6DOF(res) {
-	if (!patientErrorGroup || !errorGroupHome) return;
+	if (!S.patientErrorGroup || !S.errorGroupHome) return;
 	const r = res || { lat: 0, lng: 0, vrt: 0, roll: 0, pitch: 0, yaw: 0 };
 	const MM = 0.02,
 		ROT = (Math.PI / 180) * 2.5; // world units per mm; radians per degree (visually amplified)
-	patientErrorGroup.position.set(
-		errorGroupHome.x - (r.lat || 0) * MM,
-		errorGroupHome.y - (r.vrt || 0) * MM,
-		errorGroupHome.z - (r.lng || 0) * MM
+	S.patientErrorGroup.position.set(
+		S.errorGroupHome.x - (r.lat || 0) * MM,
+		S.errorGroupHome.y - (r.vrt || 0) * MM,
+		S.errorGroupHome.z - (r.lng || 0) * MM
 	);
-	patientErrorGroup.rotation.set(-(r.pitch || 0) * ROT, -(r.yaw || 0) * ROT, -(r.roll || 0) * ROT);
+	S.patientErrorGroup.rotation.set(
+		-(r.pitch || 0) * ROT,
+		-(r.yaw || 0) * ROT,
+		-(r.roll || 0) * ROT
+	);
 }
 
 function createImagingPanel3D() {
@@ -12531,11 +12333,11 @@ function createImagingPanel3D() {
 	epidPanel.position.y = 0.04; // detector surface on top, faces up toward the head
 	epidPanel.castShadow = true;
 	panelGrp.add(epidPanel);
-	detectorPanel = panelGrp;
+	S.detectorPanel = panelGrp;
 	//
 	// Support arm — rendered CLEAR (invisible) so only the panel shows
 	//
-	detectorArm = new THREE.Group();
+	S.detectorArm = new THREE.Group();
 	const clearArmMat = new THREE.MeshStandardMaterial({
 		transparent: true,
 		opacity: 0,
@@ -12553,45 +12355,45 @@ function createImagingPanel3D() {
 	const epidArm = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.08), clearArmMat);
 	epidArm.position.set(0, -1.36, 0);
 	epidArm.castShadow = false;
-	detectorArm.add(boom);
-	detectorArm.add(strut);
-	detectorArm.add(epidArm);
-	detectorArm.visible = false;
-	detectorPanel.visible = false;
-	gantryRotatingGroup.add(detectorArm);
-	gantryRotatingGroup.add(detectorPanel);
+	S.detectorArm.add(boom);
+	S.detectorArm.add(strut);
+	S.detectorArm.add(epidArm);
+	S.detectorArm.visible = false;
+	S.detectorPanel.visible = false;
+	S.gantryRotatingGroup.add(S.detectorArm);
+	S.gantryRotatingGroup.add(S.detectorPanel);
 	setDetectorStateGame(false);
 }
 
 function applyDetectorCommandedPose() {
-	if (!detectorArm || !detectorPanel) return;
-	if (detectorExtended) {
-		detectorArm.visible = true;
-		detectorPanel.visible = true;
-		detectorArm.position.set(0, 0, 0);
-		detectorPanel.rotation.set(0, 0, 0);
-		detectorPanel.position.set(0, epidReceptorY, EPID_Z);
+	if (!S.detectorArm || !S.detectorPanel) return;
+	if (S.detectorExtended) {
+		S.detectorArm.visible = true;
+		S.detectorPanel.visible = true;
+		S.detectorArm.position.set(0, 0, 0);
+		S.detectorPanel.rotation.set(0, 0, 0);
+		S.detectorPanel.position.set(0, S.epidReceptorY, EPID_Z);
 	} else {
 		// HOME / RETRACTED: park beneath the circular gantry section with the
 		// broad panel face vertical. This pose is reasserted after unrelated
 		// machine motion so no other subsystem can accidentally deploy it.
-		detectorArm.visible = false;
-		detectorPanel.visible = true;
-		detectorPanel.rotation.set(Math.PI / 2, 0, 0);
-		detectorPanel.position.set(0, EPID_RETRACT_Y, EPID_RETRACT_Z);
+		S.detectorArm.visible = false;
+		S.detectorPanel.visible = true;
+		S.detectorPanel.rotation.set(Math.PI / 2, 0, 0);
+		S.detectorPanel.position.set(0, EPID_RETRACT_Y, EPID_RETRACT_Z);
 	}
 }
 function setDetectorStateGame(isExtended) {
 	// Only this function is allowed to change the commanded EPID extension state.
-	detectorExtended = !!isExtended;
+	S.detectorExtended = !!isExtended;
 	applyDetectorCommandedPose();
 	if (detectorToggleButton) {
 		const s = detectorToggleButton.querySelector('small');
-		if (s) s.textContent = detectorExtended ? 'Retract' : 'EPID';
-		else detectorToggleButton.textContent = detectorExtended ? 'Retract Panel' : 'Extend Panel';
+		if (s) s.textContent = S.detectorExtended ? 'Retract' : 'EPID';
+		else detectorToggleButton.textContent = S.detectorExtended ? 'Retract Panel' : 'Extend Panel';
 	}
 	renderTreatmentMonitor();
-	if (clinicalIGRT?.active) renderClinicalIGRT();
+	if (S.clinicalIGRT?.active) renderClinicalIGRT();
 }
 
 // --- Beam Delivery (child of the treatment head so it follows gantry rotation) ---
@@ -12609,16 +12411,16 @@ function createBeam3D() {
 		side: THREE.DoubleSide,
 		depthWrite: false
 	});
-	beamCone = new THREE.Mesh(beamGeo, beamMat);
-	beamCone.position.set(0, jawExitY - beamLength / 2, 0);
-	beamCone.visible = false;
-	headData.threeJSObject.add(beamCone);
+	S.beamCone = new THREE.Mesh(beamGeo, beamMat);
+	S.beamCone.position.set(0, jawExitY - beamLength / 2, 0);
+	S.beamCone.visible = false;
+	headData.threeJSObject.add(S.beamCone);
 }
 function setBeamState(isOn) {
 	const next = !!isOn,
-		changed = beamOn !== next;
-	beamOn = next;
-	if (beamCone) beamCone.visible = next;
+		changed = S.beamOn !== next;
+	S.beamOn = next;
+	if (S.beamCone) S.beamCone.visible = next;
 	if (beamOnButton) {
 		const s = beamOnButton.querySelector('small');
 		if (s) s.textContent = next ? 'OFF' : 'Visualize';
@@ -12629,7 +12431,7 @@ function setBeamState(isOn) {
 
 // --- Room alignment lasers (cross at the world isocenter) ---
 function createLasers3D() {
-	laserGroup = new THREE.Group();
+	S.laserGroup = new THREE.Group();
 	const laserMat = new THREE.MeshBasicMaterial({ color: 0xff2b2b });
 	const len = 7,
 		r = 0.006;
@@ -12638,16 +12440,16 @@ function createLasers3D() {
 		m.rotation.set(rx, ry, rz);
 		return m;
 	};
-	laserGroup.add(mkLine(0, 0, 0)); // vertical (Y)
-	laserGroup.add(mkLine(0, 0, Math.PI / 2)); // lateral (X)
-	laserGroup.add(mkLine(Math.PI / 2, 0, 0)); // longitudinal (Z)
-	laserGroup.position.copy(WORLD_ISOCENTER);
-	laserGroup.visible = false;
-	scene.add(laserGroup);
+	S.laserGroup.add(mkLine(0, 0, 0)); // vertical (Y)
+	S.laserGroup.add(mkLine(0, 0, Math.PI / 2)); // lateral (X)
+	S.laserGroup.add(mkLine(Math.PI / 2, 0, 0)); // longitudinal (Z)
+	S.laserGroup.position.copy(WORLD_ISOCENTER);
+	S.laserGroup.visible = false;
+	S.scene.add(S.laserGroup);
 }
 function setLaserState(isOn) {
-	lasersOn = isOn;
-	if (laserGroup) laserGroup.visible = isOn;
+	S.lasersOn = isOn;
+	if (S.laserGroup) S.laserGroup.visible = isOn;
 	if (lasersToggleButton) {
 		const s = lasersToggleButton.querySelector('small');
 		if (s) s.textContent = isOn ? 'OFF' : 'Align';
@@ -12657,13 +12459,13 @@ function setLaserState(isOn) {
 }
 
 function onWindowResize() {
-	if (camera && renderer && viewerContainer) {
-		camera.aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
-		camera.updateProjectionMatrix();
-		renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+	if (S.camera && S.renderer && viewerContainer) {
+		S.camera.aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
+		S.camera.updateProjectionMatrix();
+		S.renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
 	}
 }
-function syncRoomViewButtons(mode = currentRoomView) {
+function syncRoomViewButtons(mode = S.currentRoomView) {
 	if (viewVaultButton) viewVaultButton.classList.toggle('active-function', mode === 'vault');
 	if (viewControlRoomButton)
 		viewControlRoomButton.classList.toggle('active-function', mode === 'control');
@@ -12685,18 +12487,18 @@ function getRoomViewPreset(mode) {
 	return presets[mode] || presets.vault;
 }
 function setConsoleMotionArmed(on) {
-	consoleMotionArmed = !!on;
+	S.consoleMotionArmed = !!on;
 	if (consoleMotionEnable) {
-		consoleMotionEnable.classList.toggle('active', consoleMotionArmed);
-		consoleMotionEnable.textContent = consoleMotionArmed
+		consoleMotionEnable.classList.toggle('active', S.consoleMotionArmed);
+		consoleMotionEnable.textContent = S.consoleMotionArmed
 			? 'Console motion enabled'
 			: 'Enable console motion';
 	}
 	syncOperatorConsole();
-	if (currentRoomView === 'control')
+	if (S.currentRoomView === 'control')
 		setPendantLCD(
 			'CONSOLE MOTION',
-			consoleMotionArmed ? 'ARMED · console enabled' : 'LOCKED · arm console motion'
+			S.consoleMotionArmed ? 'ARMED · console enabled' : 'LOCKED · arm console motion'
 		);
 }
 function openWorkflowPanelFromConsole(kind) {
@@ -12823,27 +12625,29 @@ CONSOLE_DOCK_PANEL_IDS.forEach((id) => {
 
 function syncOperatorConsole() {
 	if (!operatorConsolePanel) return;
-	operatorConsolePanel.classList.toggle('active', currentRoomView === 'control');
-	document.body.classList.toggle('control-room-mode', currentRoomView === 'control');
-	if (currentRoomView === 'control') dockConsoleWorkflowPanels();
+	operatorConsolePanel.classList.toggle('active', S.currentRoomView === 'control');
+	document.body.classList.toggle('control-room-mode', S.currentRoomView === 'control');
+	if (S.currentRoomView === 'control') dockConsoleWorkflowPanels();
 	else undockConsoleWorkflowPanels();
 	if (consoleActivePatient)
-		consoleActivePatient.textContent = activeTreatmentCase?.patient || 'No patient loaded';
+		consoleActivePatient.textContent = S.activeTreatmentCase?.patient || 'No patient loaded';
 	if (consoleActiveField) {
-		const field = activeTreatmentCase ? deliveryCasePlan() : null;
-		consoleActiveField.textContent = activeTreatmentCase
-			? `${activeTreatmentCase.siteLabel || activeTreatmentCase.site || '—'} · ${activeTreatmentCase.technique || '—'}${field ? ` · ${field.field}` : ''}`
+		const field = S.activeTreatmentCase ? deliveryCasePlan() : null;
+		consoleActiveField.textContent = S.activeTreatmentCase
+			? `${S.activeTreatmentCase.siteLabel || S.activeTreatmentCase.site || '—'} · ${S.activeTreatmentCase.technique || '—'}${field ? ` · ${field.field}` : ''}`
 			: 'Load a patient case to begin.';
 	}
 	if (consoleRoomStatus) {
 		consoleRoomStatus.textContent =
-			currentRoomView === 'control' ? 'Control room active' : 'Vault view';
-		consoleRoomStatus.classList.toggle('active', currentRoomView === 'control');
+			S.currentRoomView === 'control' ? 'Control room active' : 'Vault view';
+		consoleRoomStatus.classList.toggle('active', S.currentRoomView === 'control');
 	}
 	if (consoleMotionStatus) {
-		consoleMotionStatus.textContent = consoleMotionArmed ? 'Console motion armed' : 'Motion locked';
-		consoleMotionStatus.classList.toggle('active', consoleMotionArmed);
-		consoleMotionStatus.classList.toggle('warn', !consoleMotionArmed);
+		consoleMotionStatus.textContent = S.consoleMotionArmed
+			? 'Console motion armed'
+			: 'Motion locked';
+		consoleMotionStatus.classList.toggle('active', S.consoleMotionArmed);
+		consoleMotionStatus.classList.toggle('warn', !S.consoleMotionArmed);
 	}
 	if (consoleReadoutGantry)
 		consoleReadoutGantry.textContent = `${Number(wrap360(fundamentalState.gantry).toFixed(1))}°`;
@@ -12857,13 +12661,13 @@ function syncOperatorConsole() {
 		const list = (Array.isArray(TREATMENT_CASES) ? TREATMENT_CASES : [])
 			.slice(0, 6)
 			.map((c, idx) => {
-				const active = idx === activeTreatmentCaseIndex ? ' class="active"' : '';
-				return `<li${active}><b>${c.patient}</b><span>${c.siteLabel || c.site || 'Treatment site'} · ${c.technique || 'Technique'}${idx === activeTreatmentCaseIndex ? ' · current' : ''}</span></li>`;
+				const active = idx === S.activeTreatmentCaseIndex ? ' class="active"' : '';
+				return `<li${active}><b>${c.patient}</b><span>${c.siteLabel || c.site || 'Treatment site'} · ${c.technique || 'Technique'}${idx === S.activeTreatmentCaseIndex ? ' · current' : ''}</span></li>`;
 			})
 			.join('');
 		consoleQueue.innerHTML = list;
 	}
-	const field = activeTreatmentCase ? deliveryCasePlan() : null;
+	const field = S.activeTreatmentCase ? deliveryCasePlan() : null;
 	if (consolePatientClock)
 		consolePatientClock.textContent = new Date().toLocaleTimeString([], {
 			hour: '2-digit',
@@ -12871,72 +12675,73 @@ function syncOperatorConsole() {
 			second: '2-digit'
 		});
 	if (consolePatientRefName)
-		consolePatientRefName.textContent = activeTreatmentCase?.patient || 'No patient loaded';
+		consolePatientRefName.textContent = S.activeTreatmentCase?.patient || 'No patient loaded';
 	if (consolePatientRefSubtitle)
-		consolePatientRefSubtitle.textContent = activeTreatmentCase
-			? `${activeTreatmentCase.siteLabel || '—'} · ${activeTreatmentCase.positionLabel || activeTreatmentCase.position || '—'} · ${activeTreatmentCase.technique || '—'}`
+		consolePatientRefSubtitle.textContent = S.activeTreatmentCase
+			? `${S.activeTreatmentCase.siteLabel || '—'} · ${S.activeTreatmentCase.positionLabel || S.activeTreatmentCase.position || '—'} · ${S.activeTreatmentCase.technique || '—'}`
 			: 'Load a patient case to display setup guidance.';
-	if (consoleRefMRN) consoleRefMRN.textContent = activeTreatmentCase?.mrn || '—';
-	if (consoleRefFraction) consoleRefFraction.textContent = activeTreatmentCase?.fraction || '—';
+	if (consoleRefMRN) consoleRefMRN.textContent = S.activeTreatmentCase?.mrn || '—';
+	if (consoleRefFraction) consoleRefFraction.textContent = S.activeTreatmentCase?.fraction || '—';
 	if (consoleRefPosition)
 		consoleRefPosition.textContent =
-			activeTreatmentCase?.positionLabel || activeTreatmentCase?.position || '—';
-	if (consoleRefEnergy) consoleRefEnergy.textContent = activeTreatmentCase?.energy || '—';
-	if (consoleRefTechnique) consoleRefTechnique.textContent = activeTreatmentCase?.technique || '—';
+			S.activeTreatmentCase?.positionLabel || S.activeTreatmentCase?.position || '—';
+	if (consoleRefEnergy) consoleRefEnergy.textContent = S.activeTreatmentCase?.energy || '—';
+	if (consoleRefTechnique)
+		consoleRefTechnique.textContent = S.activeTreatmentCase?.technique || '—';
 	if (consoleRefField)
 		consoleRefField.textContent = field?.field || field?.name || field?.mode || '—';
 	if (consolePlanGantry)
 		consolePlanGantry.textContent =
-			field?.geometry?.gantry || activeTreatmentCase?.planned?.gantry || '—';
+			field?.geometry?.gantry || S.activeTreatmentCase?.planned?.gantry || '—';
 	if (consolePlanColl)
 		consolePlanColl.textContent =
-			field?.geometry?.collimator || activeTreatmentCase?.planned?.collimator || '—';
+			field?.geometry?.collimator || S.activeTreatmentCase?.planned?.collimator || '—';
 	if (consolePlanJaws)
 		consolePlanJaws.textContent =
-			field?.geometry?.jaws || activeTreatmentCase?.planned?.jaws || '—';
+			field?.geometry?.jaws || S.activeTreatmentCase?.planned?.jaws || '—';
 	if (consolePlanMLC)
 		consolePlanMLC.textContent =
-			field?.geometry?.mlcAperture || activeTreatmentCase?.planned?.mlcAperture || '—';
+			field?.geometry?.mlcAperture || S.activeTreatmentCase?.planned?.mlcAperture || '—';
 	if (consolePlanImaging)
-		consolePlanImaging.textContent = activeTreatmentCase?.planned?.imaging || '—';
-	if (consolePlanCouch) consolePlanCouch.textContent = activeTreatmentCase?.planned?.couch || '—';
+		consolePlanImaging.textContent = S.activeTreatmentCase?.planned?.imaging || '—';
+	if (consolePlanCouch) consolePlanCouch.textContent = S.activeTreatmentCase?.planned?.couch || '—';
 	if (consoleImmoSummary)
 		consoleImmoSummary.textContent =
-			activeTreatmentCase?.immobilization?.orderSummary ||
-			activeTreatmentCase?.note ||
+			S.activeTreatmentCase?.immobilization?.orderSummary ||
+			S.activeTreatmentCase?.note ||
 			'No immobilization instructions loaded.';
 	if (consoleImmoList) {
 		const items = (
-			activeTreatmentCase?.immobilization?.instructions?.length
-				? activeTreatmentCase.immobilization.instructions
-				: [activeTreatmentCase?.note || 'Load a patient case to display setup instructions.']
+			S.activeTreatmentCase?.immobilization?.instructions?.length
+				? S.activeTreatmentCase.immobilization.instructions
+				: [S.activeTreatmentCase?.note || 'Load a patient case to display setup instructions.']
 		).slice(0, 3);
 		consoleImmoList.innerHTML = items.map((item) => `<li>${item}</li>`).join('');
 	}
 	// In-room monitor · setup targets + beam-enable interlock readiness (Bank A / screen 1)
 	const consoleTargetFieldEl = document.getElementById('consoleTargetField');
 	if (consoleTargetFieldEl)
-		consoleTargetFieldEl.textContent = activeTreatmentCase
-			? `${activeTreatmentCase.patient} · ${field?.field || field?.name || activeTreatmentCase.technique || '—'}`
+		consoleTargetFieldEl.textContent = S.activeTreatmentCase
+			? `${S.activeTreatmentCase.patient} · ${field?.field || field?.name || S.activeTreatmentCase.technique || '—'}`
 			: 'Load a patient case to set preliminary parameters.';
 	setTextById(
 		'consoleTargetGantry',
-		field?.geometry?.gantry || activeTreatmentCase?.planned?.gantry || '—'
+		field?.geometry?.gantry || S.activeTreatmentCase?.planned?.gantry || '—'
 	);
 	setTextById(
 		'consoleTargetColl',
-		field?.geometry?.collimator || activeTreatmentCase?.planned?.collimator || '—'
+		field?.geometry?.collimator || S.activeTreatmentCase?.planned?.collimator || '—'
 	);
 	setTextById(
 		'consoleTargetJaws',
-		field?.geometry?.jaws || activeTreatmentCase?.planned?.jaws || '—'
+		field?.geometry?.jaws || S.activeTreatmentCase?.planned?.jaws || '—'
 	);
 	setTextById(
 		'consoleTargetMLC',
-		field?.geometry?.mlcAperture || activeTreatmentCase?.planned?.mlcAperture || '—'
+		field?.geometry?.mlcAperture || S.activeTreatmentCase?.planned?.mlcAperture || '—'
 	);
-	setTextById('consoleTargetEnergy', activeTreatmentCase?.energy || '—');
-	setTextById('consoleTargetCouch', activeTreatmentCase?.planned?.couch || '—');
+	setTextById('consoleTargetEnergy', S.activeTreatmentCase?.energy || '—');
+	setTextById('consoleTargetCouch', S.activeTreatmentCase?.planned?.couch || '—');
 	if (typeof getDeliveryReadiness === 'function') {
 		const readiness = getDeliveryReadiness();
 		const ilEl = document.getElementById('consoleInterlockReadout');
@@ -12952,65 +12757,69 @@ function syncOperatorConsole() {
 			rsEl.className = `console-ready ${readiness.ready ? 'good' : 'bad'}`;
 			rsEl.textContent = readiness.ready
 				? 'READY · beam-enable interlocks satisfied'
-				: activeTreatmentCase
+				: S.activeTreatmentCase
 					? 'HOLD · resolve the flagged interlocks'
 					: 'Load a case to evaluate interlocks';
 		}
 	}
-	setStatusChip(consoleBeamStatusChip, beamOn ? 'Beam On' : 'Standby', beamOn ? 'alert' : 'good');
+	setStatusChip(
+		consoleBeamStatusChip,
+		S.beamOn ? 'Beam On' : 'Standby',
+		S.beamOn ? 'alert' : 'good'
+	);
 	setStatusChip(
 		consoleDoorStatusChip,
-		vaultDoorProgress > 0.1 ? 'Open' : 'Secure',
-		vaultDoorProgress > 0.1 ? 'warn' : 'good'
+		S.vaultDoorProgress > 0.1 ? 'Open' : 'Secure',
+		S.vaultDoorProgress > 0.1 ? 'warn' : 'good'
 	);
 	setStatusChip(
 		consoleIGRTStatusChip,
-		clinicalIGRT?.verified ? 'Verified' : 'Pending',
-		clinicalIGRT?.verified ? 'good' : 'warn'
+		S.clinicalIGRT?.verified ? 'Verified' : 'Pending',
+		S.clinicalIGRT?.verified ? 'good' : 'warn'
 	);
 	setStatusChip(
 		consoleLightsStatusChip,
-		roomLightsOn ? 'On' : 'Off',
-		roomLightsOn ? 'good' : 'warn'
+		S.roomLightsOn ? 'On' : 'Off',
+		S.roomLightsOn ? 'good' : 'warn'
 	);
 	if (consoleCameraAStatus)
-		consoleCameraAStatus.textContent = beamOn
+		consoleCameraAStatus.textContent = S.beamOn
 			? 'Live vault feed · beam visualization active'
 			: 'Live vault feed nominal';
 	if (consoleCameraAInfo)
-		consoleCameraAInfo.textContent = activeTreatmentCase
-			? `Active case: ${activeTreatmentCase.patient} · gantry ${Number(wrap360(fundamentalState.gantry).toFixed(1))}°`
+		consoleCameraAInfo.textContent = S.activeTreatmentCase
+			? `Active case: ${S.activeTreatmentCase.patient} · gantry ${Number(wrap360(fundamentalState.gantry).toFixed(1))}°`
 			: 'GANTRY, couch, and treatment monitor visible.';
 	if (consoleCameraBStatus)
-		consoleCameraBStatus.textContent = clinicalIGRT?.verified
+		consoleCameraBStatus.textContent = S.clinicalIGRT?.verified
 			? 'Live patient feed · alignment verified'
-			: activeTreatmentCase
+			: S.activeTreatmentCase
 				? 'Live patient / isocenter observation'
 				: 'No patient loaded';
 	if (consoleCameraBInfo)
-		consoleCameraBInfo.textContent = activeTreatmentCase
+		consoleCameraBInfo.textContent = S.activeTreatmentCase
 			? `Couch V/LAT/LNG ${fmtSignedInt(Math.round(fundamentalState.vrt * 10))} / ${fmtSignedInt(Math.round(fundamentalState.lat * 10))} / ${fmtSignedInt(Math.round(fundamentalState.lng * 10))} mm`
 			: 'Patient surface and treatment isocenter visible.';
 	if (consoleCameraCStatus)
 		consoleCameraCStatus.textContent =
-			vaultDoorProgress > 0.1
+			S.vaultDoorProgress > 0.1
 				? 'Live access feed · door open / transit'
 				: 'Live access feed · door secure';
 	if (consoleCameraCInfo)
-		consoleCameraCInfo.textContent = `Room lights ${roomLightsOn ? 'ON' : 'OFF'} · ${currentRoomView === 'control' ? 'console occupied' : 'vault occupied'}`;
+		consoleCameraCInfo.textContent = `Room lights ${S.roomLightsOn ? 'ON' : 'OFF'} · ${S.currentRoomView === 'control' ? 'console occupied' : 'vault occupied'}`;
 }
 function beginTravelPath(toMode) {
-	if (!camera || !controls) return;
+	if (!S.camera || !S.controls) return;
 	const dest = getRoomViewPreset(toMode);
 	if (!dest?.pos?.isVector3 || !dest?.target?.isVector3) {
 		console.warn('RTApps room travel cancelled: invalid destination preset.', toMode, dest);
-		travelRequest = null;
-		vaultDoorTarget = 0;
+		S.travelRequest = null;
+		S.vaultDoorTarget = 0;
 		return;
 	}
-	let positions = [camera.position.clone()];
-	let targets = [controls.target.clone()];
-	if (currentRoomView === 'vault' && toMode === 'control') {
+	let positions = [S.camera.position.clone()];
+	let targets = [S.controls.target.clone()];
+	if (S.currentRoomView === 'vault' && toMode === 'control') {
 		positions.push(
 			new THREE.Vector3(4.8, 3.0, GANTRY_PLANE_Z_TARGET + 7.8),
 			new THREE.Vector3(-2.0, 2.9, 7.8),
@@ -13029,7 +12838,7 @@ function beginTravelPath(toMode) {
 			new THREE.Vector3(-14.7, 1.5, -1.6),
 			dest.target.clone()
 		);
-	} else if (currentRoomView === 'control' && toMode === 'vault') {
+	} else if (S.currentRoomView === 'control' && toMode === 'vault') {
 		positions.push(
 			new THREE.Vector3(-13.8, 2.35, -0.8),
 			new THREE.Vector3(-13.0, 2.35, 3.0),
@@ -13078,50 +12887,51 @@ function beginTravelPath(toMode) {
 	if (cleanPositions.length < 2) {
 		cleanPositions.length = 0;
 		cleanTargets.length = 0;
-		cleanPositions.push(camera.position.clone(), dest.pos.clone());
-		cleanTargets.push(controls.target.clone(), dest.target.clone());
+		cleanPositions.push(S.camera.position.clone(), dest.pos.clone());
+		cleanTargets.push(S.controls.target.clone(), dest.target.clone());
 	}
-	cameraTravel = {
+	S.cameraTravel = {
 		mode: toMode,
 		startTime: performance.now(),
-		duration: currentRoomView === toMode ? 900 : 5200,
+		duration: S.currentRoomView === toMode ? 900 : 5200,
 		positions: cleanPositions,
 		targets: cleanTargets
 	};
 	setPendantLCD('DOOR OPEN', `Entering ${dest.label}`);
 }
 function travelToRoomView(mode) {
-	if (!camera || !controls || mode === currentRoomView || travelRequest || cameraTravel) return;
+	if (!S.camera || !S.controls || mode === S.currentRoomView || S.travelRequest || S.cameraTravel)
+		return;
 	const dest = getRoomViewPreset(mode);
-	travelRequest = { fromMode: currentRoomView, toMode: mode, stage: 'opening', openAt: 0 };
-	vaultDoorTarget = 1;
-	syncRoomViewButtons(currentRoomView);
+	S.travelRequest = { fromMode: S.currentRoomView, toMode: mode, stage: 'opening', openAt: 0 };
+	S.vaultDoorTarget = 1;
+	syncRoomViewButtons(S.currentRoomView);
 	setPendantLCD('VAULT DOOR', `Opening for ${dest.label}`);
 }
 function updateTravelWorkflow(now) {
-	if (!travelRequest) return;
-	if (travelRequest.stage === 'opening') {
-		if (vaultDoorProgress >= 0.985) {
-			if (!travelRequest.openAt) {
-				travelRequest.openAt = now;
-				const dest = getRoomViewPreset(travelRequest.toMode);
+	if (!S.travelRequest) return;
+	if (S.travelRequest.stage === 'opening') {
+		if (S.vaultDoorProgress >= 0.985) {
+			if (!S.travelRequest.openAt) {
+				S.travelRequest.openAt = now;
+				const dest = getRoomViewPreset(S.travelRequest.toMode);
 				setPendantLCD('VAULT DOOR', `Open · Enter ${dest.label}`);
 			}
-			if (now - travelRequest.openAt >= 650) {
-				travelRequest.stage = 'moving';
-				beginTravelPath(travelRequest.toMode);
+			if (now - S.travelRequest.openAt >= 650) {
+				S.travelRequest.stage = 'moving';
+				beginTravelPath(S.travelRequest.toMode);
 			}
 		}
-	} else if (travelRequest.stage === 'closing') {
-		if (vaultDoorProgress <= 0.02) {
-			setPendantLCD('ROOM VIEW', getRoomViewPreset(currentRoomView).label);
-			travelRequest = null;
+	} else if (S.travelRequest.stage === 'closing') {
+		if (S.vaultDoorProgress <= 0.02) {
+			setPendantLCD('ROOM VIEW', getRoomViewPreset(S.currentRoomView).label);
+			S.travelRequest = null;
 		}
 	}
 }
 function updateCameraTravel(now) {
-	if (!cameraTravel || !camera || !controls) return;
-	const travel = cameraTravel;
+	if (!S.cameraTravel || !S.camera || !S.controls) return;
+	const travel = S.cameraTravel;
 	const positions = Array.isArray(travel.positions) ? travel.positions : [];
 	const targets = Array.isArray(travel.targets) ? travel.targets : [];
 	const pointCount = Math.min(positions.length, targets.length);
@@ -13131,13 +12941,13 @@ function updateCameraTravel(now) {
 	const finishTravelSafely = (reason = 'complete') => {
 		const mode = travel.mode === 'control' ? 'control' : 'vault';
 		const dest = getRoomViewPreset(mode);
-		if (dest?.pos?.isVector3) camera.position.copy(dest.pos);
-		if (dest?.target?.isVector3) controls.target.copy(dest.target);
-		currentRoomView = mode;
-		cameraTravel = null;
-		syncRoomViewButtons(currentRoomView);
-		vaultDoorTarget = 0;
-		if (travelRequest) travelRequest.stage = 'closing';
+		if (dest?.pos?.isVector3) S.camera.position.copy(dest.pos);
+		if (dest?.target?.isVector3) S.controls.target.copy(dest.target);
+		S.currentRoomView = mode;
+		S.cameraTravel = null;
+		syncRoomViewButtons(S.currentRoomView);
+		S.vaultDoorTarget = 0;
+		if (S.travelRequest) S.travelRequest.stage = 'closing';
 		if (reason !== 'complete') console.warn('RTApps camera travel recovered safely:', reason);
 	};
 
@@ -13170,38 +12980,38 @@ function updateCameraTravel(now) {
 		return;
 	}
 
-	camera.position.lerpVectors(p0, p1, easedLocal);
-	controls.target.lerpVectors(q0, q1, easedLocal);
+	S.camera.position.lerpVectors(p0, p1, easedLocal);
+	S.controls.target.lerpVectors(q0, q1, easedLocal);
 	if (t >= 1) finishTravelSafely('complete');
 }
 
 function updateVaultAesthetics(now) {
 	const moveStep = 0.0055;
-	if (vaultDoorTarget > vaultDoorProgress)
-		vaultDoorProgress = Math.min(vaultDoorTarget, vaultDoorProgress + moveStep);
-	else if (vaultDoorTarget < vaultDoorProgress)
-		vaultDoorProgress = Math.max(vaultDoorTarget, vaultDoorProgress - moveStep);
+	if (S.vaultDoorTarget > S.vaultDoorProgress)
+		S.vaultDoorProgress = Math.min(S.vaultDoorTarget, S.vaultDoorProgress + moveStep);
+	else if (S.vaultDoorTarget < S.vaultDoorProgress)
+		S.vaultDoorProgress = Math.max(S.vaultDoorTarget, S.vaultDoorProgress - moveStep);
 	const easedDoor =
-		vaultDoorProgress < 0.5
-			? 2 * vaultDoorProgress * vaultDoorProgress
-			: 1 - Math.pow(-2 * vaultDoorProgress + 2, 2) / 2;
-	if (vaultDoorPanel) {
-		vaultDoorPanel.position.z = 5.1 + 2.15 * easedDoor;
-		vaultDoorPanel.position.x = -11.6 + 0.03 * easedDoor;
-		if (vaultDoorIndicator && vaultDoorIndicator.material) {
+		S.vaultDoorProgress < 0.5
+			? 2 * S.vaultDoorProgress * S.vaultDoorProgress
+			: 1 - Math.pow(-2 * S.vaultDoorProgress + 2, 2) / 2;
+	if (S.vaultDoorPanel) {
+		S.vaultDoorPanel.position.z = 5.1 + 2.15 * easedDoor;
+		S.vaultDoorPanel.position.x = -11.6 + 0.03 * easedDoor;
+		if (S.vaultDoorIndicator && S.vaultDoorIndicator.material) {
 			const activeColor =
-				vaultDoorProgress > 0.95 ? 0x79f0ac : vaultDoorProgress > 0.05 ? 0xffcf74 : 0x7be09f;
+				S.vaultDoorProgress > 0.95 ? 0x79f0ac : S.vaultDoorProgress > 0.05 ? 0xffcf74 : 0x7be09f;
 			const col = new THREE.Color(activeColor);
-			vaultDoorIndicator.material.color.copy(col);
-			vaultDoorIndicator.material.emissive.copy(col);
-			vaultDoorIndicator.material.emissiveIntensity =
-				vaultDoorProgress > 0.05 && vaultDoorProgress < 0.95 ? 1.35 : 1.7;
+			S.vaultDoorIndicator.material.color.copy(col);
+			S.vaultDoorIndicator.material.emissive.copy(col);
+			S.vaultDoorIndicator.material.emissiveIntensity =
+				S.vaultDoorProgress > 0.05 && S.vaultDoorProgress < 0.95 ? 1.35 : 1.7;
 		}
 	}
 	if (controlRoomAccentMats.length) {
 		const pulse = 0.12 * (0.5 + 0.5 * Math.sin(now * 0.0011));
 		controlRoomAccentMats.forEach((mat) => {
-			mat.emissiveIntensity = (roomLightsOn ? 1.9 : 0.35) + pulse;
+			mat.emissiveIntensity = (S.roomLightsOn ? 1.9 : 0.35) + pulse;
 		});
 	}
 }
@@ -13238,8 +13048,8 @@ function animate() {
 			P.bad = fps < 26 ? P.bad + 1 : 0;
 			if (P.bad >= 5) {
 				P.done = true;
-				renderer.shadowMap.enabled = false;
-				scene.traverse((o) => {
+				S.renderer.shadowMap.enabled = false;
+				S.scene.traverse((o) => {
 					if (o.isMesh && o.material) o.material.needsUpdate = true;
 				});
 			}
@@ -13249,16 +13059,16 @@ function animate() {
 	updateVaultAesthetics(now);
 	updateTravelWorkflow(now);
 	updateCameraTravel(now);
-	if (controls) controls.update();
-	[beamHighlight, standHighlight].forEach((h) => {
+	if (S.controls) S.controls.update();
+	[S.beamHighlight, S.standHighlight].forEach((h) => {
 		if (h && h.visible) {
 			const t = performance.now() * 0.004;
 			h.material.opacity = 0.14 + 0.12 * (0.5 + 0.5 * Math.sin(t));
 			h.scale.setScalar(1 + 0.06 * Math.sin(t));
 		}
 	});
-	if (renderer && scene && camera) renderer.render(scene, camera);
-	if (scene && cctvFeeds.length) updateCCTVFeeds();
+	if (S.renderer && S.scene && S.camera) S.renderer.render(S.scene, S.camera);
+	if (S.scene && cctvFeeds.length) updateCCTVFeeds();
 }
 
 function openTab(event) {
@@ -13278,17 +13088,17 @@ function openTab(event) {
 tabButtons.forEach((button) => button.addEventListener('click', openTab));
 
 function updateBalanceDisplay() {
-	balanceDisplay.textContent = `Balance: $${currentBalance}`;
+	balanceDisplay.textContent = `Balance: $${S.currentBalance}`;
 }
 
 function checkAllCorePartsEarned() {
-	allCorePartsEarned = CORE_PART_IDS.every((id) => earnedParts.includes(id));
-	bottomMachineControls.style.display = allCorePartsEarned ? 'flex' : 'none'; // Use flex for the bottom panel
+	S.allCorePartsEarned = CORE_PART_IDS.every((id) => S.earnedParts.includes(id));
+	bottomMachineControls.style.display = S.allCorePartsEarned ? 'flex' : 'none'; // Use flex for the bottom panel
 	if (bonusChallengeButton)
-		bonusChallengeButton.style.display = allCorePartsEarned ? 'block' : 'none';
-	if (internalViewButton) internalViewButton.disabled = !allCorePartsEarned;
-	if (!allCorePartsEarned && internalViewOn) setInternalView(false);
-	if (allCorePartsEarned && !localStorage.getItem('linacFullyAssembledMessageShown_v2')) {
+		bonusChallengeButton.style.display = S.allCorePartsEarned ? 'block' : 'none';
+	if (internalViewButton) internalViewButton.disabled = !S.allCorePartsEarned;
+	if (!S.allCorePartsEarned && S.internalViewOn) setInternalView(false);
+	if (S.allCorePartsEarned && !localStorage.getItem('linacFullyAssembledMessageShown_v2')) {
 		showMessage(
 			'LINAC assembly complete! Movement & operational enhancements now available in store.',
 			'correct'
@@ -13300,7 +13110,7 @@ function checkAllCorePartsEarned() {
 function populateTaskSelect() {
 	taskSelect.innerHTML = '';
 	const availableParts = linacPartsData.filter(
-		(part) => !part.isSubComponent && !earnedParts.includes(part.id)
+		(part) => !part.isSubComponent && !S.earnedParts.includes(part.id)
 	);
 	if (availableParts.length === 0) {
 		const option = document.createElement('option');
@@ -13347,32 +13157,35 @@ function renderQuiz(quizObj) {
 
 function displayQuiz() {
 	const selectedPartId = taskSelect.value;
-	currentQuizPart = linacPartsData.find((part) => part.id === selectedPartId);
-	if (!currentQuizPart) {
+	S.currentQuizPart = linacPartsData.find((part) => part.id === selectedPartId);
+	if (!S.currentQuizPart) {
 		showMessage('Please select a valid part.', 'info');
 		return;
 	}
-	quizMode = 'part';
-	activeBonus = null;
-	renderQuiz(currentQuizPart.quiz);
+	S.quizMode = 'part';
+	S.activeBonus = null;
+	renderQuiz(S.currentQuizPart.quiz);
 }
 
 function displayBonusChallenge() {
-	if (!allCorePartsEarned) {
+	if (!S.allCorePartsEarned) {
 		showMessage('Assemble the LINAC first.', 'info');
 		return;
 	}
-	if (!bonusQuestionDeck.length) {
-		bonusQuestionDeck = BONUS_QUESTIONS.map((_, i) => i);
-		for (let i = bonusQuestionDeck.length - 1; i > 0; i--) {
+	if (!S.bonusQuestionDeck.length) {
+		S.bonusQuestionDeck = BONUS_QUESTIONS.map((_, i) => i);
+		for (let i = S.bonusQuestionDeck.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
-			[bonusQuestionDeck[i], bonusQuestionDeck[j]] = [bonusQuestionDeck[j], bonusQuestionDeck[i]];
+			[S.bonusQuestionDeck[i], S.bonusQuestionDeck[j]] = [
+				S.bonusQuestionDeck[j],
+				S.bonusQuestionDeck[i]
+			];
 		}
 	}
-	activeBonus = BONUS_QUESTIONS[bonusQuestionDeck.pop()];
-	quizMode = 'bonus';
-	currentQuizPart = null;
-	renderQuiz(activeBonus);
+	S.activeBonus = BONUS_QUESTIONS[S.bonusQuestionDeck.pop()];
+	S.quizMode = 'bonus';
+	S.currentQuizPart = null;
+	renderQuiz(S.activeBonus);
 }
 
 function handleSubmitAnswer() {
@@ -13383,13 +13196,13 @@ function handleSubmitAnswer() {
 	}
 	const answerIndex = parseInt(selectedOption.value);
 
-	if (quizMode === 'bonus') {
-		if (!activeBonus) {
+	if (S.quizMode === 'bonus') {
+		if (!S.activeBonus) {
 			quizArea.style.display = 'none';
 			return;
 		}
-		if (answerIndex === activeBonus.correctAnswerIndex) {
-			currentBalance += BONUS_REWARD;
+		if (answerIndex === S.activeBonus.correctAnswerIndex) {
+			S.currentBalance += BONUS_REWARD;
 			showMessage(`Correct! Continuing-education credit earned: +$${BONUS_REWARD}.`, 'correct');
 			updateBalanceDisplay();
 			populateEnhancementStore();
@@ -13398,26 +13211,26 @@ function handleSubmitAnswer() {
 			showMessage('Incorrect. Review the concept and try another challenge.', 'incorrect');
 		}
 		quizArea.style.display = 'none';
-		activeBonus = null;
+		S.activeBonus = null;
 		return;
 	}
 
-	if (!currentQuizPart) {
+	if (!S.currentQuizPart) {
 		showMessage('No quiz active.', 'info');
 		quizArea.style.display = 'none';
 		return;
 	}
-	if (answerIndex === currentQuizPart.quiz.correctAnswerIndex) {
+	if (answerIndex === S.currentQuizPart.quiz.correctAnswerIndex) {
 		showMessage(
-			`Correct! You've earned the ${currentQuizPart.name} and $${currentQuizPart.cost}.`,
+			`Correct! You've earned the ${S.currentQuizPart.name} and $${S.currentQuizPart.cost}.`,
 			'correct'
 		);
-		currentBalance += currentQuizPart.cost;
-		earnedParts.push(currentQuizPart.id);
-		if (currentQuizPart.threeJSObject) currentQuizPart.threeJSObject.visible = true;
-		if (currentQuizPart.silhouetteObject) currentQuizPart.silhouetteObject.visible = false;
+		S.currentBalance += S.currentQuizPart.cost;
+		S.earnedParts.push(S.currentQuizPart.id);
+		if (S.currentQuizPart.threeJSObject) S.currentQuizPart.threeJSObject.visible = true;
+		if (S.currentQuizPart.silhouetteObject) S.currentQuizPart.silhouetteObject.visible = false;
 		linacPartsData
-			.filter((p) => p.isSubComponent && p.parentPart === currentQuizPart.id)
+			.filter((p) => p.isSubComponent && p.parentPart === S.currentQuizPart.id)
 			.forEach((subPart) => {
 				if (subPart.threeJSObject) subPart.threeJSObject.visible = true;
 			});
@@ -13429,7 +13242,7 @@ function handleSubmitAnswer() {
 		showMessage('Incorrect. Try again.', 'incorrect');
 	}
 	quizArea.style.display = 'none';
-	currentQuizPart = null;
+	S.currentQuizPart = null;
 }
 
 function showMessage(msg, type = 'info') {
@@ -13442,7 +13255,7 @@ function showMessage(msg, type = 'info') {
 
 function populateEnhancementStore() {
 	enhancementStoreElem.innerHTML = '';
-	const ownedCount = enhancementsData.filter((e) => purchasedEnhancements.includes(e.id)).length;
+	const ownedCount = enhancementsData.filter((e) => S.purchasedEnhancements.includes(e.id)).length;
 	const total = enhancementsData.length;
 
 	const progress = document.createElement('div');
@@ -13450,7 +13263,7 @@ function populateEnhancementStore() {
 	progress.textContent = `Systems installed: ${ownedCount} / ${total}`;
 	enhancementStoreElem.appendChild(progress);
 
-	if (!allCorePartsEarned) {
+	if (!S.allCorePartsEarned) {
 		const note = document.createElement('p');
 		note.style.cssText = 'color:#a94442; margin:0 0 10px;';
 		note.textContent = 'Assemble the full LINAC (Assembly tab) to unlock the store.';
@@ -13482,21 +13295,21 @@ function populateEnhancementStore() {
 			'margin:12px 0 6px; color:#4a90e2; border-bottom:1px solid #ddd; padding-bottom:3px;';
 		enhancementStoreElem.appendChild(heading);
 		items.forEach((enh) => {
-			const owned = purchasedEnhancements.includes(enh.id);
+			const owned = S.purchasedEnhancements.includes(enh.id);
 			const itemDiv = document.createElement('div');
 			itemDiv.classList.add('store-item');
 			let canPurchase = true;
-			if (!allCorePartsEarned) canPurchase = false;
+			if (!S.allCorePartsEarned) canPurchase = false;
 			if (owned) canPurchase = false;
-			else if (currentBalance < enh.cost) canPurchase = false;
+			else if (S.currentBalance < enh.cost) canPurchase = false;
 			itemDiv.innerHTML = `<h4>${enh.name} - $${enh.cost} ${owned ? "<span style='color:green;'>(Owned)</span>" : ''}</h4><p>${enh.description}</p>`;
 			const purchaseButton = document.createElement('button');
 			purchaseButton.textContent = owned ? 'Purchased' : `Purchase ($${enh.cost})`;
 			purchaseButton.disabled = !canPurchase || owned;
 			if (purchaseButton.disabled && !owned) {
 				let title = '';
-				if (!allCorePartsEarned) title += 'Assemble LINAC first. ';
-				if (currentBalance < enh.cost) title += 'Not enough funds.';
+				if (!S.allCorePartsEarned) title += 'Assemble LINAC first. ';
+				if (S.currentBalance < enh.cost) title += 'Not enough funds.';
 				purchaseButton.title = title.trim();
 			}
 			purchaseButton.onclick = () => purchaseEnhancement(enh.id);
@@ -13509,23 +13322,23 @@ function populateEnhancementStore() {
 function purchaseEnhancement(enhId) {
 	const enhancement = enhancementsData.find((e) => e.id === enhId);
 	if (!enhancement) return;
-	if (purchasedEnhancements.includes(enhId)) {
+	if (S.purchasedEnhancements.includes(enhId)) {
 		showMessage('Already owned.', 'info');
 		return;
 	}
-	if (!allCorePartsEarned) {
+	if (!S.allCorePartsEarned) {
 		showMessage('Assemble the LINAC first.', 'info');
 		return;
 	}
-	if (currentBalance >= enhancement.cost) {
-		currentBalance -= enhancement.cost;
-		purchasedEnhancements.push(enhId);
+	if (S.currentBalance >= enhancement.cost) {
+		S.currentBalance -= enhancement.cost;
+		S.purchasedEnhancements.push(enhId);
 		enableMovementControl(enhId, true);
 		showMessage(`Purchased ${enhancement.name}!`, 'correct');
 		updateBalanceDisplay();
 		populateEnhancementStore();
 		saveGameState();
-		if (enhancementsData.every((e) => purchasedEnhancements.includes(e.id))) {
+		if (enhancementsData.every((e) => S.purchasedEnhancements.includes(e.id))) {
 			showMessage('🏆 All systems installed — your LINAC is fully operational!', 'correct');
 		}
 	} else {
@@ -13580,7 +13393,7 @@ function enableMovementControl(enhId, isEnabled) {
 			].forEach((b) => {
 				if (b) b.disabled = !isEnabled;
 			});
-			if (jawXN) [jawXN, jawXP, jawYN, jawYP].forEach((j) => (j.visible = isEnabled));
+			if (S.jawXN) [S.jawXN, S.jawXP, S.jawYN, S.jawYP].forEach((j) => (j.visible = isEnabled));
 			break;
 		case 'imagingPanel':
 			// Enabling/disabling availability must not deploy, retract, or rotate imaging hardware.
@@ -13601,11 +13414,11 @@ function enableMovementControl(enhId, isEnabled) {
 function saveGameState() {
 	try {
 		const gameState = {
-			balance: currentBalance,
-			parts: earnedParts,
-			enhancements: purchasedEnhancements,
-			allCorePartsEarned: allCorePartsEarned,
-			jawOffset: jawOffset,
+			balance: S.currentBalance,
+			parts: S.earnedParts,
+			enhancements: S.purchasedEnhancements,
+			allCorePartsEarned: S.allCorePartsEarned,
+			jawOffset: S.jawOffset,
 			jawX1: fundamentalState.jawX1,
 			jawX2: fundamentalState.jawX2,
 			jawY1: fundamentalState.jawY1,
@@ -13622,11 +13435,11 @@ function loadGameState() {
 		const savedState = localStorage.getItem('linacGameState_v4');
 		if (savedState) {
 			const gameState = JSON.parse(savedState);
-			currentBalance = gameState.balance || 0;
-			earnedParts = gameState.parts || [];
-			purchasedEnhancements = gameState.enhancements || [];
-			allCorePartsEarned = gameState.allCorePartsEarned || false;
-			jawOffset = gameState.jawOffset !== undefined ? gameState.jawOffset : 0.1;
+			S.currentBalance = gameState.balance || 0;
+			S.earnedParts = gameState.parts || [];
+			S.purchasedEnhancements = gameState.enhancements || [];
+			S.allCorePartsEarned = gameState.allCorePartsEarned || false;
+			S.jawOffset = gameState.jawOffset !== undefined ? gameState.jawOffset : 0.1;
 			if (Number.isFinite(Number(gameState.jawX1))) {
 				fundamentalState.jawX1 = Number(gameState.jawX1);
 				fundamentalState.jawX2 = Number(gameState.jawX2);
@@ -13635,25 +13448,25 @@ function loadGameState() {
 				syncLegacyJawValue();
 			} else setCenteredJawField(10, 10);
 			// EPID always initializes in its physical docked/home position on page load.
-			detectorExtended = false;
+			S.detectorExtended = false;
 		}
 	} catch (e) {
 		console.error('Load failed:', e);
 	}
 	linacPartsData.forEach((partData) => {
-		const isEarned = earnedParts.includes(partData.id);
+		const isEarned = S.earnedParts.includes(partData.id);
 		if (partData.threeJSObject) partData.threeJSObject.visible = isEarned;
 		if (partData.silhouetteObject)
 			partData.silhouetteObject.visible = !isEarned && !partData.isSubComponent;
 		if (isEarned && partData.isSubComponent) {
 			const parent = linacPartsData.find((p) => p.id === partData.parentPart);
-			if (parent && earnedParts.includes(parent.id) && partData.threeJSObject)
+			if (parent && S.earnedParts.includes(parent.id) && partData.threeJSObject)
 				partData.threeJSObject.visible = true;
 		}
 	});
-	purchasedEnhancements.forEach((enhId) => enableMovementControl(enhId, true));
+	S.purchasedEnhancements.forEach((enhId) => enableMovementControl(enhId, true));
 	updateJawPositions();
-	setDetectorStateGame(detectorExtended);
+	setDetectorStateGame(S.detectorExtended);
 	checkAllCorePartsEarned();
 }
 
@@ -13661,19 +13474,19 @@ function resetGame() {
 	if (window.confirm('Reset all progress?')) {
 		localStorage.removeItem('linacGameState_v4');
 		localStorage.removeItem('linacFullyAssembledMessageShown_v2');
-		currentBalance = 0;
-		earnedParts = [];
-		purchasedEnhancements = [];
-		allCorePartsEarned = false;
-		jawOffset = 0.1;
+		S.currentBalance = 0;
+		S.earnedParts = [];
+		S.purchasedEnhancements = [];
+		S.allCorePartsEarned = false;
+		S.jawOffset = 0.1;
 		setCenteredJawField(10, 10);
-		detectorExtended = false;
+		S.detectorExtended = false;
 		linacPartsData.forEach((partData) => {
 			if (partData.threeJSObject) partData.threeJSObject.visible = false;
 			if (partData.silhouetteObject) partData.silhouetteObject.visible = !partData.isSubComponent;
 		});
 		enhancementsData.forEach((enh) => enableMovementControl(enh.id, false));
-		if (jawXN) [jawXN, jawXP, jawYN, jawYP].forEach((j) => (j.visible = false));
+		if (S.jawXN) [S.jawXN, S.jawXP, S.jawYN, S.jawYP].forEach((j) => (j.visible = false));
 		setDetectorStateGame(false);
 		setBeamState(false);
 		setLaserState(false);
@@ -13696,7 +13509,6 @@ function updateUI() {
 
 const ROTATION_STEP = Math.PI / 36;
 const MOVEMENT_STEP = 0.1;
-let pendantMotionArmed = false;
 const fundamentalState = {
 	gantry: 0,
 	collimator: 0,
@@ -13776,7 +13588,6 @@ function nudgeJawEdge(key, delta) {
 		`${fundamentalState[key].toFixed(1)} cm`
 	);
 }
-let collisionBannerTimer = null;
 const wrap360 = (v) => ((v % 360) + 360) % 360;
 const setTextById = (id, value) => {
 	const el = document.getElementById(id);
@@ -13815,9 +13626,9 @@ function updateBEVInset() {
 	bevJawOutline.setAttribute('width', jawPx);
 	bevJawOutline.setAttribute('height', jawPy);
 	const activelyDelivering = !!(
-		treatmentDelivery?.delivering &&
-		!treatmentDelivery?.held &&
-		!treatmentDelivery?.gateHeld
+		S.treatmentDelivery?.delivering &&
+		!S.treatmentDelivery?.held &&
+		!S.treatmentDelivery?.gateHeld
 	);
 	if (bevFieldLight) {
 		bevFieldLight.setAttribute('x', jawX);
@@ -13864,8 +13675,8 @@ function updateBEVInset() {
 		)
 		.join('');
 
-	const field = activeTreatmentCase ? deliveryCasePlan() : null;
-	const planned = activeTreatmentCase ? getCurrentPlannedParameters() : null;
+	const field = S.activeTreatmentCase ? deliveryCasePlan() : null;
+	const planned = S.activeTreatmentCase ? getCurrentPlannedParameters() : null;
 	const planGroup = document.getElementById('bevPlanGroup');
 	const planJaw = document.getElementById('bevPlannedJawOutline');
 	const planMlc = document.getElementById('bevPlannedMlcContour');
@@ -13917,11 +13728,11 @@ function updateBEVInset() {
 	if (accessory) {
 		const s = activeSpecialSetupSpec();
 		if (field?.electron && String(s?.type || '').toUpperCase() === 'ELECTRON') {
-			const e = specialSetupWorkflow.electron || {},
+			const e = S.specialSetupWorkflow.electron || {},
 				w = (Number(e.width) || Number(s.widthCm) || 6) * pxPerCm,
 				h = (Number(e.height) || Number(s.heightCm) || 4) * pxPerCm,
 				shape = String(e.shape || s.shape || 'Oval'),
-				stroke = specialSetupWorkflow.verified ? '#6df0a3' : '#ffd36b';
+				stroke = S.specialSetupWorkflow.verified ? '#6df0a3' : '#ffd36b';
 			accessory.innerHTML =
 				shape === 'Rectangle'
 					? `<rect x="${cx - w / 2}" y="${cy - h / 2}" width="${w}" height="${h}" fill="none" stroke="${stroke}" stroke-width="2.2"/>`
@@ -13940,7 +13751,7 @@ function updateBEVInset() {
 	const planT = planned ? monitorPlannedDisplay('couchAngle', planned.couchAngle || '0°') : '—';
 	setTextById(
 		'bevFieldNameLabel',
-		field ? `${field.field} · ${activeTreatmentCase.siteLabel}` : 'NO FIELD'
+		field ? `${field.field} · ${S.activeTreatmentCase.siteLabel}` : 'NO FIELD'
 	);
 	setTextById('bevFieldValue', field ? field.field : 'No field');
 	const bevDyn = field ? getDynamicFieldState(field, deliveryProgressFraction(field)) : null;
@@ -13968,25 +13779,25 @@ function updateBEVInset() {
 
 	let beamState = 'STANDBY',
 		beamClass = '';
-	if (treatmentCompletion?.posted) {
+	if (S.treatmentCompletion?.posted) {
 		beamState = 'SESSION COMPLETE';
 		beamClass = 'complete';
-	} else if (treatmentDelivery?.completed) {
+	} else if (S.treatmentDelivery?.completed) {
 		beamState = allTreatmentFieldsCompleted() ? 'ALL FIELDS COMPLETE' : 'FIELD COMPLETE';
 		beamClass = 'complete';
-	} else if (treatmentDelivery?.terminated) {
+	} else if (S.treatmentDelivery?.terminated) {
 		beamState = 'TERMINATED';
 		beamClass = 'hold';
-	} else if (treatmentDelivery?.delivering && treatmentDelivery?.held) {
+	} else if (S.treatmentDelivery?.delivering && S.treatmentDelivery?.held) {
 		beamState = 'BEAM HOLD';
 		beamClass = 'hold';
-	} else if (treatmentDelivery?.delivering && treatmentDelivery?.gateHeld) {
+	} else if (S.treatmentDelivery?.delivering && S.treatmentDelivery?.gateHeld) {
 		beamState = 'GATE HOLD';
 		beamClass = 'hold';
 	} else if (activelyDelivering) {
 		beamState = 'BEAM ON';
 		beamClass = 'beam-on';
-	} else if (treatmentDelivery?.armed) {
+	} else if (S.treatmentDelivery?.armed) {
 		beamState = 'BEAM ENABLED';
 	} else if (field && geomMatch) {
 		beamState = 'FIELD GEOMETRY MATCH';
@@ -14002,7 +13813,7 @@ function updateBEVInset() {
 	}
 
 	const total = field ? Number(field.mu) || 0 : 0;
-	const delivered = field ? Math.min(total, Number(treatmentDelivery?.muDelivered) || 0) : 0;
+	const delivered = field ? Math.min(total, Number(S.treatmentDelivery?.muDelivered) || 0) : 0;
 	const pct = total ? Math.max(0, Math.min(100, (delivered / total) * 100)) : 0;
 	const progress = document.getElementById('bevProgressBar');
 	if (progress) progress.style.width = `${pct}%`;
@@ -14088,45 +13899,45 @@ function syncFundamentalReadouts(label, value) {
 		`${fundamentalState.vrt} / ${fundamentalState.lng} / ${fundamentalState.lat} mm`
 	);
 	renderTreatmentMonitor();
-	if (clinicalIGRT?.active) renderClinicalIGRT();
+	if (S.clinicalIGRT?.active) renderClinicalIGRT();
 	if (srsRequired()) renderSRSPanel();
 	if (label) setPendantLCD(label, value || 'Ready');
 }
 function captureCollisionPose() {
 	return {
-		gantryZ: gantryRotatingGroup ? gantryRotatingGroup.rotation.z : 0,
-		couchPos: couchGroup ? couchGroup.position.clone() : null,
-		couchTreatmentRot: couchTreatmentPivot ? couchTreatmentPivot.rotation.clone() : null,
-		topPos: couchTopGroup ? couchTopGroup.position.clone() : null,
-		topRot: couchTopGroup ? couchTopGroup.rotation.clone() : null
+		gantryZ: S.gantryRotatingGroup ? S.gantryRotatingGroup.rotation.z : 0,
+		couchPos: S.couchGroup ? S.couchGroup.position.clone() : null,
+		couchTreatmentRot: S.couchTreatmentPivot ? S.couchTreatmentPivot.rotation.clone() : null,
+		topPos: S.couchTopGroup ? S.couchTopGroup.position.clone() : null,
+		topRot: S.couchTopGroup ? S.couchTopGroup.rotation.clone() : null
 	};
 }
 function restoreCollisionPose(p) {
-	if (gantryRotatingGroup) gantryRotatingGroup.rotation.z = p.gantryZ;
-	if (couchGroup && p.couchPos) couchGroup.position.copy(p.couchPos);
-	if (couchTreatmentPivot && p.couchTreatmentRot)
-		couchTreatmentPivot.rotation.copy(p.couchTreatmentRot);
-	if (couchTopGroup && p.topPos) couchTopGroup.position.copy(p.topPos);
-	if (couchTopGroup && p.topRot) couchTopGroup.rotation.copy(p.topRot);
+	if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z = p.gantryZ;
+	if (S.couchGroup && p.couchPos) S.couchGroup.position.copy(p.couchPos);
+	if (S.couchTreatmentPivot && p.couchTreatmentRot)
+		S.couchTreatmentPivot.rotation.copy(p.couchTreatmentRot);
+	if (S.couchTopGroup && p.topPos) S.couchTopGroup.position.copy(p.topPos);
+	if (S.couchTopGroup && p.topRot) S.couchTopGroup.rotation.copy(p.topRot);
 	updateCouchAccordion();
-	scene?.updateMatrixWorld(true);
+	S.scene?.updateMatrixWorld(true);
 	updateODIReadout();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
 function getCouchClearanceBox() {
-	if (!couchTopGroup) return null;
-	scene.updateMatrixWorld(true);
+	if (!S.couchTopGroup) return null;
+	S.scene.updateMatrixWorld(true);
 	// Retained for diagnostics/legacy callers. Collision decisions below intentionally
 	// use per-mesh volumes instead of this single union box because a union AABB can
 	// falsely fill empty space between the patient, rails, tray and tabletop at oblique angles.
-	return new THREE.Box3().setFromObject(couchTopGroup);
+	return new THREE.Box3().setFromObject(S.couchTopGroup);
 }
 function getCouchClearanceVolumes() {
-	if (!couchTopGroup || !scene) return [];
-	scene.updateMatrixWorld(true);
+	if (!S.couchTopGroup || !S.scene) return [];
+	S.scene.updateMatrixWorld(true);
 	const volumes = [];
-	couchTopGroup.traverse((obj) => {
+	S.couchTopGroup.traverse((obj) => {
 		if (!obj || !obj.isMesh || obj.visible === false || !obj.geometry) return;
 		// Use each mesh's LOCAL bounding box rather than a world-axis-aligned Box3.
 		// The proxy point is transformed into mesh-local coordinates during clearance
@@ -14161,25 +13972,25 @@ function clearanceToProxy(volumes, point, radius, reason) {
 }
 function getCollisionAssessment() {
 	const volumes = getCouchClearanceVolumes();
-	if (!volumes.length || !gantryRotatingGroup) return { margin: Infinity, reason: '' };
+	if (!volumes.length || !S.gantryRotatingGroup) return { margin: Infinity, reason: '' };
 	const checks = [];
 
 	// Physical treatment-head proxies only. Do NOT include beam cones, ODI rays,
 	// MLC teaching overlays, or other non-solid descendants in the collision envelope.
-	if (linacHeadObject) {
+	if (S.linacHeadObject) {
 		const physicalHead = [
 			{ p: new THREE.Vector3(0, 0.04, 0), r: 0.4, reason: 'Treatment head drum clearance' },
 			{ p: new THREE.Vector3(0, -0.34, 0), r: 0.32, reason: 'Collimator housing clearance' },
 			{ p: new THREE.Vector3(0, -0.5, 0), r: 0.2, reason: 'Treatment head aperture clearance' }
 		];
 		physicalHead.forEach((c) => {
-			const world = linacHeadObject.localToWorld(c.p.clone());
+			const world = S.linacHeadObject.localToWorld(c.p.clone());
 			checks.push(clearanceToProxy(volumes, world, c.r, c.reason));
 		});
-		if (electronApplicatorGroup?.visible) {
+		if (S.electronApplicatorGroup?.visible) {
 			const coneScale = Math.max(
-				Math.abs(electronApplicatorGroup.scale.x || 1),
-				Math.abs(electronApplicatorGroup.scale.z || 1)
+				Math.abs(S.electronApplicatorGroup.scale.x || 1),
+				Math.abs(S.electronApplicatorGroup.scale.z || 1)
 			);
 			const electronCone = [
 				{
@@ -14194,8 +14005,8 @@ function getCollisionAssessment() {
 				}
 			];
 			electronCone.forEach((c) => {
-				const world = linacHeadObject.localToWorld(
-					c.p.clone().add(electronApplicatorGroup.position)
+				const world = S.linacHeadObject.localToWorld(
+					c.p.clone().add(S.electronApplicatorGroup.position)
 				);
 				checks.push(clearanceToProxy(volumes, world, c.r, c.reason));
 			});
@@ -14212,7 +14023,7 @@ function getCollisionAssessment() {
 		{ p: [0, 0.62, -1.3], r: 0.3, reason: 'Gantry knee clearance' }
 	];
 	housingSamples.forEach((c) => {
-		const world = gantryRotatingGroup.localToWorld(new THREE.Vector3(...c.p));
+		const world = S.gantryRotatingGroup.localToWorld(new THREE.Vector3(...c.p));
 		checks.push(clearanceToProxy(volumes, world, c.r, c.reason));
 	});
 
@@ -14248,8 +14059,8 @@ function showCollisionBlocked(reason) {
 	if (b) {
 		b.textContent = `COLLISION BLOCKED · ${reason}`;
 		b.classList.add('show');
-		clearTimeout(collisionBannerTimer);
-		collisionBannerTimer = setTimeout(() => {
+		clearTimeout(S.collisionBannerTimer);
+		S.collisionBannerTimer = setTimeout(() => {
 			b.classList.remove('show');
 			setSafetyHUD(false);
 		}, 1800);
@@ -14257,10 +14068,10 @@ function showCollisionBlocked(reason) {
 }
 function attemptCollisionSafeMotion(label, mutator) {
 	const pose = captureCollisionPose();
-	scene?.updateMatrixWorld(true);
+	S.scene?.updateMatrixWorld(true);
 	const before = getCollisionAssessment();
 	mutator();
-	scene?.updateMatrixWorld(true);
+	S.scene?.updateMatrixWorld(true);
 	const after = getCollisionAssessment();
 
 	// Block entry into a collision zone, or motion that makes an existing overlap worse.
@@ -14284,26 +14095,26 @@ function attemptCollisionSafeMotion(label, mutator) {
 }
 
 function setPendantMotionArmed(on) {
-	pendantMotionArmed = !!on;
+	S.pendantMotionArmed = !!on;
 	if (pendantMotionEnable)
-		pendantMotionEnable.setAttribute('aria-pressed', String(pendantMotionArmed));
+		pendantMotionEnable.setAttribute('aria-pressed', String(S.pendantMotionArmed));
 	const status = document.getElementById('headerMotionStatus');
 	if (status) {
-		status.textContent = pendantMotionArmed ? 'Motion armed' : 'Motion locked';
-		status.classList.toggle('armed', pendantMotionArmed);
-		status.classList.toggle('locked', !pendantMotionArmed);
+		status.textContent = S.pendantMotionArmed ? 'Motion armed' : 'Motion locked';
+		status.classList.toggle('armed', S.pendantMotionArmed);
+		status.classList.toggle('locked', !S.pendantMotionArmed);
 	}
 	setPendantLCD(
 		'MOTION ENABLE',
-		pendantMotionArmed ? 'ARMED · geometry enabled' : 'LOCKED · squeeze enable'
+		S.pendantMotionArmed ? 'ARMED · geometry enabled' : 'LOCKED · squeeze enable'
 	);
 	if (typeof renderTreatmentDeliveryPanel === 'function') renderTreatmentDeliveryPanel();
 	syncOperatorConsole();
 }
 function requirePendantMotion(controlName) {
-	if (pendantMotionArmed || consoleMotionArmed) return true;
+	if (S.pendantMotionArmed || S.consoleMotionArmed) return true;
 	setPendantLCD(controlName || 'MOTION', 'LOCKED · enable motion first');
-	if (currentRoomView === 'control' && consoleMotionEnable?.animate)
+	if (S.currentRoomView === 'control' && consoleMotionEnable?.animate)
 		consoleMotionEnable.animate(
 			[
 				{ transform: 'translateX(0)' },
@@ -14325,7 +14136,7 @@ function requirePendantMotion(controlName) {
 		);
 	return false;
 }
-pendantMotionEnable?.addEventListener('click', () => setPendantMotionArmed(!pendantMotionArmed));
+pendantMotionEnable?.addEventListener('click', () => setPendantMotionArmed(!S.pendantMotionArmed));
 // Room/imaging function keys must not alter mechanical geometry. Capture and restore
 // gantry/collimator/couch state around each function action as a defensive interlock.
 function captureMechanicalGeometryState() {
@@ -14341,12 +14152,12 @@ function captureMechanicalGeometryState() {
 			yaw: fundamentalState.yaw,
 			couchAngle: fundamentalState.couchAngle
 		},
-		gantryZ: gantryRotatingGroup ? gantryRotatingGroup.rotation.z : null,
-		headY: linacHeadObject ? linacHeadObject.rotation.y : null,
-		couchPos: couchGroup ? couchGroup.position.clone() : null,
-		couchTreatmentRot: couchTreatmentPivot ? couchTreatmentPivot.rotation.clone() : null,
-		couchTopPos: couchTopGroup ? couchTopGroup.position.clone() : null,
-		couchTopRot: couchTopGroup ? couchTopGroup.rotation.clone() : null
+		gantryZ: S.gantryRotatingGroup ? S.gantryRotatingGroup.rotation.z : null,
+		headY: S.linacHeadObject ? S.linacHeadObject.rotation.y : null,
+		couchPos: S.couchGroup ? S.couchGroup.position.clone() : null,
+		couchTreatmentRot: S.couchTreatmentPivot ? S.couchTreatmentPivot.rotation.clone() : null,
+		couchTopPos: S.couchTopGroup ? S.couchTopGroup.position.clone() : null,
+		couchTopRot: S.couchTopGroup ? S.couchTopGroup.rotation.clone() : null
 	};
 }
 function restoreMechanicalGeometryState(s) {
@@ -14354,13 +14165,13 @@ function restoreMechanicalGeometryState(s) {
 	fundamentalState.gantry = s.gantryState;
 	fundamentalState.collimator = s.collimatorState;
 	Object.assign(fundamentalState, s.couchState);
-	if (gantryRotatingGroup && s.gantryZ !== null) gantryRotatingGroup.rotation.z = s.gantryZ;
-	if (linacHeadObject && s.headY !== null) linacHeadObject.rotation.y = s.headY;
-	if (couchGroup && s.couchPos) couchGroup.position.copy(s.couchPos);
-	if (couchTreatmentPivot && s.couchTreatmentRot)
-		couchTreatmentPivot.rotation.copy(s.couchTreatmentRot);
-	if (couchTopGroup && s.couchTopPos) couchTopGroup.position.copy(s.couchTopPos);
-	if (couchTopGroup && s.couchTopRot) couchTopGroup.rotation.copy(s.couchTopRot);
+	if (S.gantryRotatingGroup && s.gantryZ !== null) S.gantryRotatingGroup.rotation.z = s.gantryZ;
+	if (S.linacHeadObject && s.headY !== null) S.linacHeadObject.rotation.y = s.headY;
+	if (S.couchGroup && s.couchPos) S.couchGroup.position.copy(s.couchPos);
+	if (S.couchTreatmentPivot && s.couchTreatmentRot)
+		S.couchTreatmentPivot.rotation.copy(s.couchTreatmentRot);
+	if (S.couchTopGroup && s.couchTopPos) S.couchTopGroup.position.copy(s.couchTopPos);
+	if (S.couchTopGroup && s.couchTopRot) S.couchTopGroup.rotation.copy(s.couchTopRot);
 	updateCouchAccordion();
 }
 function runFunctionKeyIsolated(action) {
@@ -14372,7 +14183,7 @@ function runFunctionKeyIsolated(action) {
 gantryRotatePlusButton.addEventListener('click', () => {
 	if (!requirePendantMotion('GANTRY')) return;
 	const ok = attemptCollisionSafeMotion('GANTRY', () => {
-		if (gantryRotatingGroup) gantryRotatingGroup.rotation.z -= ROTATION_STEP;
+		if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z -= ROTATION_STEP;
 	});
 	if (!ok) return;
 	fundamentalState.gantry = wrap360(fundamentalState.gantry + 5);
@@ -14381,7 +14192,7 @@ gantryRotatePlusButton.addEventListener('click', () => {
 gantryRotateMinusButton.addEventListener('click', () => {
 	if (!requirePendantMotion('GANTRY')) return;
 	const ok = attemptCollisionSafeMotion('GANTRY', () => {
-		if (gantryRotatingGroup) gantryRotatingGroup.rotation.z += ROTATION_STEP;
+		if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z += ROTATION_STEP;
 	});
 	if (!ok) return;
 	fundamentalState.gantry = wrap360(fundamentalState.gantry - 5);
@@ -14390,13 +14201,15 @@ gantryRotateMinusButton.addEventListener('click', () => {
 collimatorRotatePlusButton?.addEventListener('click', () => {
 	if (!requirePendantMotion('COLLIMATOR')) return;
 	fundamentalState.collimator = wrap360(fundamentalState.collimator + 5);
-	if (linacHeadObject) linacHeadObject.rotation.y = (fundamentalState.collimator * Math.PI) / 180;
+	if (S.linacHeadObject)
+		S.linacHeadObject.rotation.y = (fundamentalState.collimator * Math.PI) / 180;
 	syncFundamentalReadouts('COLLIMATOR', `${fundamentalState.collimator}°`);
 });
 collimatorRotateMinusButton?.addEventListener('click', () => {
 	if (!requirePendantMotion('COLLIMATOR')) return;
 	fundamentalState.collimator = wrap360(fundamentalState.collimator - 5);
-	if (linacHeadObject) linacHeadObject.rotation.y = (fundamentalState.collimator * Math.PI) / 180;
+	if (S.linacHeadObject)
+		S.linacHeadObject.rotation.y = (fundamentalState.collimator * Math.PI) / 180;
 	syncFundamentalReadouts('COLLIMATOR', `${fundamentalState.collimator}°`);
 });
 const imgCouch = (axis, d) => {
@@ -14408,8 +14221,8 @@ const imgCouch = (axis, d) => {
 couchUpButton.addEventListener('click', () => {
 	if (!requirePendantMotion('COUCH VERTICAL')) return;
 	const ok = attemptCollisionSafeMotion('COUCH VERTICAL', () => {
-		if (couchGroup) {
-			couchGroup.position.y += MOVEMENT_STEP;
+		if (S.couchGroup) {
+			S.couchGroup.position.y += MOVEMENT_STEP;
 			updateCouchAccordion();
 		}
 	});
@@ -14426,8 +14239,8 @@ couchDownButton.addEventListener('click', () => {
 	const couchBaseHeightRef = 0.7,
 		minY = couchBaseHeightRef / 2 + GROUND_Y;
 	const ok = attemptCollisionSafeMotion('COUCH VERTICAL', () => {
-		if (couchGroup) {
-			couchGroup.position.y = Math.max(minY, couchGroup.position.y - MOVEMENT_STEP);
+		if (S.couchGroup) {
+			S.couchGroup.position.y = Math.max(minY, S.couchGroup.position.y - MOVEMENT_STEP);
 			updateCouchAccordion();
 		}
 	});
@@ -14439,7 +14252,7 @@ couchDownButton.addEventListener('click', () => {
 couchInButton.addEventListener('click', () => {
 	if (!requirePendantMotion('COUCH LONGITUDINAL')) return;
 	const ok = attemptCollisionSafeMotion('COUCH LONGITUDINAL', () => {
-		if (couchTopGroup) couchTopGroup.position.z -= MOVEMENT_STEP;
+		if (S.couchTopGroup) S.couchTopGroup.position.z -= MOVEMENT_STEP;
 	});
 	if (!ok) return;
 	fundamentalState.lng += 1;
@@ -14452,7 +14265,7 @@ couchInButton.addEventListener('click', () => {
 couchOutButton.addEventListener('click', () => {
 	if (!requirePendantMotion('COUCH LONGITUDINAL')) return;
 	const ok = attemptCollisionSafeMotion('COUCH LONGITUDINAL', () => {
-		if (couchTopGroup) couchTopGroup.position.z += MOVEMENT_STEP;
+		if (S.couchTopGroup) S.couchTopGroup.position.z += MOVEMENT_STEP;
 	});
 	if (!ok) return;
 	fundamentalState.lng -= 1;
@@ -14462,7 +14275,7 @@ couchOutButton.addEventListener('click', () => {
 couchLeftButton.addEventListener('click', () => {
 	if (!requirePendantMotion('COUCH LATERAL')) return;
 	const ok = attemptCollisionSafeMotion('COUCH LATERAL', () => {
-		if (couchGroup) couchGroup.position.x -= MOVEMENT_STEP;
+		if (S.couchGroup) S.couchGroup.position.x -= MOVEMENT_STEP;
 	});
 	if (!ok) return;
 	fundamentalState.lat += 1;
@@ -14475,7 +14288,7 @@ couchLeftButton.addEventListener('click', () => {
 couchRightButton.addEventListener('click', () => {
 	if (!requirePendantMotion('COUCH LATERAL')) return;
 	const ok = attemptCollisionSafeMotion('COUCH LATERAL', () => {
-		if (couchGroup) couchGroup.position.x += MOVEMENT_STEP;
+		if (S.couchGroup) S.couchGroup.position.x += MOVEMENT_STEP;
 	});
 	if (!ok) return;
 	fundamentalState.lat -= 1;
@@ -14485,7 +14298,7 @@ couchRightButton.addEventListener('click', () => {
 const ROT_DEG = 0.5,
 	ROT_RAD = (ROT_DEG * Math.PI) / 180;
 const couchTilt = (axis3d, sign) => {
-	if (couchTopGroup) couchTopGroup.rotation[axis3d] += sign * ROT_RAD;
+	if (S.couchTopGroup) S.couchTopGroup.rotation[axis3d] += sign * ROT_RAD;
 };
 const safeTilt = (label, axis, sign, stateKey) => {
 	if (!requirePendantMotion(label)) return;
@@ -14505,14 +14318,14 @@ const moveTreatmentCouchAngle = (sign) => {
 	if (!requirePendantMotion('TREATMENT COUCH')) return;
 	const next = wrap360((fundamentalState.couchAngle || 0) + sign * 5);
 	const ok = attemptCollisionSafeMotion('TREATMENT COUCH', () => {
-		if (couchTreatmentPivot) couchTreatmentPivot.rotation.y = (next * Math.PI) / 180;
+		if (S.couchTreatmentPivot) S.couchTreatmentPivot.rotation.y = (next * Math.PI) / 180;
 	});
 	if (!ok) return;
 	fundamentalState.couchAngle = next;
 	if (srsRequired()) {
-		const idx = Number(treatmentDelivery.activeFieldIndex) || 0;
-		srsWorkflow.timeoutVerifiedByField[idx] = false;
-		srsWorkflow.dryRunByField[idx] = false;
+		const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0;
+		S.srsWorkflow.timeoutVerifiedByField[idx] = false;
+		S.srsWorkflow.dryRunByField[idx] = false;
 	}
 	syncFundamentalReadouts('TREATMENT COUCH', `${next}°`);
 	renderSRSPanel();
@@ -14575,40 +14388,42 @@ mlcShapeButton?.addEventListener('click', () => {
 });
 detectorToggleButton.addEventListener('click', () =>
 	runFunctionKeyIsolated(() => {
-		setDetectorStateGame(!detectorExtended);
-		detectorToggleButton.classList.toggle('active-function', detectorExtended);
-		setPendantLCD('MV DETECTOR', detectorExtended ? 'EXTENDED' : 'RETRACTED');
+		setDetectorStateGame(!S.detectorExtended);
+		detectorToggleButton.classList.toggle('active-function', S.detectorExtended);
+		setPendantLCD('MV DETECTOR', S.detectorExtended ? 'EXTENDED' : 'RETRACTED');
 		saveGameState();
 	})
 );
 beamOnButton.addEventListener('click', () =>
 	runFunctionKeyIsolated(() => {
-		setBeamState(!beamOn);
-		beamOnButton.classList.toggle('active-function', beamOn);
-		setPendantLCD('BEAM VISUALIZATION', beamOn ? 'ON' : 'OFF');
+		setBeamState(!S.beamOn);
+		beamOnButton.classList.toggle('active-function', S.beamOn);
+		setPendantLCD('BEAM VISUALIZATION', S.beamOn ? 'ON' : 'OFF');
 	})
 );
 lasersToggleButton.addEventListener('click', () =>
 	runFunctionKeyIsolated(() => {
-		setLaserState(!lasersOn);
-		lasersToggleButton.classList.toggle('active-function', lasersOn);
-		setPendantLCD('ALIGNMENT LASERS', lasersOn ? 'ON' : 'OFF');
+		setLaserState(!S.lasersOn);
+		lasersToggleButton.classList.toggle('active-function', S.lasersOn);
+		setPendantLCD('ALIGNMENT LASERS', S.lasersOn ? 'ON' : 'OFF');
 	})
 );
-odiToggleButton?.addEventListener('click', () => runFunctionKeyIsolated(() => setODIState(!odiOn)));
+odiToggleButton?.addEventListener('click', () =>
+	runFunctionKeyIsolated(() => setODIState(!S.odiOn))
+);
 kvToggleButton.addEventListener('click', () =>
 	runFunctionKeyIsolated(() => {
-		setKvState(!kvOn);
-		kvToggleButton.classList.toggle('active-function', kvOn);
-		setPendantLCD('kV IMAGING ARMS', kvOn ? 'EXTENDED' : 'RETRACTED');
+		setKvState(!S.kvOn);
+		kvToggleButton.classList.toggle('active-function', S.kvOn);
+		setPendantLCD('kV IMAGING ARMS', S.kvOn ? 'EXTENDED' : 'RETRACTED');
 	})
 );
 roomLightsToggleButton?.addEventListener('click', () =>
-	runFunctionKeyIsolated(() => setRoomLightsState(!roomLightsOn))
+	runFunctionKeyIsolated(() => setRoomLightsState(!S.roomLightsOn))
 );
 viewVaultButton?.addEventListener('click', () => travelToRoomView('vault'));
 viewControlRoomButton?.addEventListener('click', () => travelToRoomView('control'));
-consoleMotionEnable?.addEventListener('click', () => setConsoleMotionArmed(!consoleMotionArmed));
+consoleMotionEnable?.addEventListener('click', () => setConsoleMotionArmed(!S.consoleMotionArmed));
 consoleImmoButton?.addEventListener('click', () => openWorkflowPanelFromConsole('immo'));
 consoleIGRTButton?.addEventListener('click', () => openWorkflowPanelFromConsole('igrt'));
 consoleDeliveryButton?.addEventListener('click', () => openWorkflowPanelFromConsole('delivery'));
@@ -14653,21 +14468,21 @@ consoleYawPlus?.addEventListener('click', () => couchYawPlusButton?.click());
 consoleTableMinus?.addEventListener('click', () => couchTreatmentAngleMinusButton?.click());
 consoleTablePlus?.addEventListener('click', () => couchTreatmentAnglePlusButton?.click());
 internalViewButton.addEventListener('click', () => {
-	setInternalView(!internalViewOn);
+	setInternalView(!S.internalViewOn);
 });
 beamStagePrevButton.addEventListener('click', () => beamStageStep(-1));
 beamStageNextButton.addEventListener('click', () => beamStageStep(1));
 asmBeamButton.addEventListener('click', () => {
-	if (internalViewOn) setAssembly('beam');
+	if (S.internalViewOn) setAssembly('beam');
 });
 asmStandButton.addEventListener('click', () => {
-	if (internalViewOn) setAssembly('stand');
+	if (S.internalViewOn) setAssembly('stand');
 });
 asmElectronButton.addEventListener('click', () => {
-	if (internalViewOn) setAssembly('electron');
+	if (S.internalViewOn) setAssembly('electron');
 });
 asmAccessoryButton.addEventListener('click', () => {
-	if (internalViewOn) setAssembly('accessory');
+	if (S.internalViewOn) setAssembly('accessory');
 });
 bonusChallengeButton.addEventListener('click', displayBonusChallenge);
 startQuizButton.addEventListener('click', displayQuiz);
@@ -14677,16 +14492,16 @@ resetButton.addEventListener('click', resetGame);
 initThreeJS();
 // Standalone simulator: always load a complete, operational LINAC.
 loadGameState();
-earnedParts = [...CORE_PART_IDS];
-purchasedEnhancements = enhancementsData.map((item) => item.id);
-allCorePartsEarned = true;
+S.earnedParts = [...CORE_PART_IDS];
+S.purchasedEnhancements = enhancementsData.map((item) => item.id);
+S.allCorePartsEarned = true;
 // show solid (opaque) coverings — real part meshes visible, silhouettes hidden
 linacPartsData.forEach((partData) => {
 	if (partData.threeJSObject) partData.threeJSObject.visible = true;
 	if (partData.silhouetteObject) partData.silhouetteObject.visible = false;
 });
 // make every machine control operational and begin from a consistent teaching baseline
-purchasedEnhancements.forEach((enhId) => enableMovementControl(enhId, true));
+S.purchasedEnhancements.forEach((enhId) => enableMovementControl(enhId, true));
 setBeamWidth(10);
 fundamentalState.mlc = 10;
 fundamentalState.mlcShape = 'Square';
@@ -14704,15 +14519,15 @@ bottomMachineControls.style.display = 'flex';
 const patientToggleBtn = document.getElementById('patientToggleBtn');
 if (patientToggleBtn)
 	patientToggleBtn.addEventListener('click', () => {
-		if (!patientGroup) return;
-		patientGroup.visible = !patientGroup.visible;
-		patientToggleBtn.textContent = patientGroup.visible ? 'Hide Patient' : 'Show Patient';
+		if (!S.patientGroup) return;
+		S.patientGroup.visible = !S.patientGroup.visible;
+		patientToggleBtn.textContent = S.patientGroup.visible ? 'Hide Patient' : 'Show Patient';
 	});
 document.getElementById('resetViewButton')?.addEventListener('click', () => {
-	if (!camera || !controls) return;
-	camera.position.set(8.6, ISOCENTER_Y_TARGET + 2.8, GANTRY_PLANE_Z_TARGET + 7.2);
-	controls.target.set(-0.4, 1.15, GANTRY_PLANE_Z_TARGET - 0.3);
-	controls.update();
+	if (!S.camera || !S.controls) return;
+	S.camera.position.set(8.6, ISOCENTER_Y_TARGET + 2.8, GANTRY_PLANE_Z_TARGET + 7.2);
+	S.controls.target.set(-0.4, 1.15, GANTRY_PLANE_Z_TARGET - 0.3);
+	S.controls.update();
 	setPendantLCD('CAMERA', 'Default treatment-room view');
 });
 document.getElementById('fundamentalsResetButton')?.addEventListener('click', () => {
@@ -14723,7 +14538,7 @@ loadTreatmentCaseBtn?.addEventListener('click', () =>
 	loadTreatmentCase(parseInt(treatmentCaseSelect?.value || '0', 10) || 0)
 );
 nextTreatmentCaseBtn?.addEventListener('click', () =>
-	loadTreatmentCase(activeTreatmentCaseIndex + 1)
+	loadTreatmentCase(S.activeTreatmentCaseIndex + 1)
 );
 treatmentCaseSelect?.addEventListener('change', () => renderTreatmentMonitor());
 immobilizationLaunchButton?.addEventListener('click', () => {
@@ -14813,26 +14628,26 @@ motionRecheck?.addEventListener('click', () => {
 	renderTreatmentDeliveryPanel();
 });
 motionGateLow?.addEventListener('input', () => {
-	motionManagement.gateLow = Number(motionGateLow.value);
-	motionManagement.verified = false;
+	S.motionManagement.gateLow = Number(motionGateLow.value);
+	S.motionManagement.verified = false;
 	renderMotionPanel(true);
 	renderTreatmentDeliveryPanel();
 });
 motionGateHigh?.addEventListener('input', () => {
-	motionManagement.gateHigh = Number(motionGateHigh.value);
-	motionManagement.verified = false;
+	S.motionManagement.gateHigh = Number(motionGateHigh.value);
+	S.motionManagement.verified = false;
 	renderMotionPanel(true);
 	renderTreatmentDeliveryPanel();
 });
 motionDibhTarget?.addEventListener('input', () => {
-	motionManagement.dibhTarget = Number(motionDibhTarget.value);
-	motionManagement.verified = false;
+	S.motionManagement.dibhTarget = Number(motionDibhTarget.value);
+	S.motionManagement.verified = false;
 	renderMotionPanel(true);
 	renderTreatmentDeliveryPanel();
 });
 motionDibhTolerance?.addEventListener('input', () => {
-	motionManagement.dibhTolerance = Number(motionDibhTolerance.value);
-	motionManagement.verified = false;
+	S.motionManagement.dibhTolerance = Number(motionDibhTolerance.value);
+	S.motionManagement.verified = false;
 	renderMotionPanel(true);
 	renderTreatmentDeliveryPanel();
 });
@@ -14851,16 +14666,16 @@ adaptiveLaunchButton?.addEventListener('click', () => {
 adaptiveClose?.addEventListener('click', () => adaptivePanel?.classList.remove('open'));
 adaptiveAssess?.addEventListener('click', () => {
 	if (!adaptiveRequired()) return;
-	adaptiveWorkflow.assessed = true;
-	adaptiveWorkflow.approved = false;
+	S.adaptiveWorkflow.assessed = true;
+	S.adaptiveWorkflow.approved = false;
 	setPendantLCD('ADAPTIVE REVIEW', 'Daily anatomy assessed');
 	renderAdaptivePanel();
 	renderTreatmentDeliveryPanel();
 });
 adaptiveCompare?.addEventListener('click', () => {
 	if (!adaptiveRequired()) return;
-	adaptiveWorkflow.compared = true;
-	adaptiveWorkflow.approved = false;
+	S.adaptiveWorkflow.compared = true;
+	S.adaptiveWorkflow.approved = false;
 	setPendantLCD('ADAPTIVE REVIEW', 'Plans compared');
 	renderAdaptivePanel();
 	renderTreatmentDeliveryPanel();
@@ -14871,16 +14686,16 @@ adaptiveResetCourse?.addEventListener('click', resetAdaptiveCourseHistory);
 adaptivePanel?.addEventListener('click', (ev) => {
 	const btn = ev.target.closest('[data-adaptive-plan]');
 	if (!btn || !adaptiveRequired()) return;
-	adaptiveWorkflow.approved = false;
+	S.adaptiveWorkflow.approved = false;
 	applyAdaptivePlan(btn.dataset.adaptivePlan);
 	renderAdaptivePanel();
 });
 ['adaptiveCheckDose', 'adaptiveCheckApprove'].forEach((id) =>
 	document.getElementById(id)?.addEventListener('change', () => {
 		if (!adaptiveRequired()) return;
-		adaptiveWorkflow.approved = false;
-		adaptiveWorkflow.doseChecked = !!document.getElementById('adaptiveCheckDose')?.checked;
-		adaptiveWorkflow.finalApproved = !!document.getElementById('adaptiveCheckApprove')?.checked;
+		S.adaptiveWorkflow.approved = false;
+		S.adaptiveWorkflow.doseChecked = !!document.getElementById('adaptiveCheckDose')?.checked;
+		S.adaptiveWorkflow.finalApproved = !!document.getElementById('adaptiveCheckApprove')?.checked;
 		renderAdaptivePanel();
 		renderTreatmentDeliveryPanel();
 	})
@@ -14899,21 +14714,21 @@ oisLaunchButton?.addEventListener('click', () => {
 });
 oisClose?.addEventListener('click', () => oisPanel?.classList.remove('open'));
 oisNote?.addEventListener('input', () => {
-	oisSession.note = oisNote.value;
+	S.oisSession.note = oisNote.value;
 	persistOISSession();
 });
 oisTherapist?.addEventListener('input', () => {
-	oisSession.therapist = oisTherapist.value;
+	S.oisSession.therapist = oisTherapist.value;
 	persistOISSession();
 	renderOISPanel();
 });
 oisReviewCheck?.addEventListener('change', () => {
-	oisSession.reviewed = !!oisReviewCheck.checked;
+	S.oisSession.reviewed = !!oisReviewCheck.checked;
 	persistOISSession();
 	renderOISPanel();
 });
 oisOverrideReviewCheck?.addEventListener('change', () => {
-	oisSession.overrideReviewed = !!oisOverrideReviewCheck.checked;
+	S.oisSession.overrideReviewed = !!oisOverrideReviewCheck.checked;
 	persistOISSession();
 	renderOISPanel();
 });
@@ -14936,8 +14751,8 @@ srsDryRun?.addEventListener('click', runSRSDryRun);
 srsVerifyTimeout?.addEventListener('click', verifySRSTimeout);
 ['srsCheckPatient', 'srsCheckRx', 'srsCheckMask', 'srsCheckTeam'].forEach((id) =>
 	document.getElementById(id)?.addEventListener('change', () => {
-		const idx = Number(treatmentDelivery.activeFieldIndex) || 0;
-		srsWorkflow.timeoutVerifiedByField[idx] = false;
+		const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0;
+		S.srsWorkflow.timeoutVerifiedByField[idx] = false;
 		renderSRSPanel();
 		renderTreatmentDeliveryPanel();
 	})
@@ -14957,12 +14772,12 @@ specialSetupLaunchButton?.addEventListener('click', () => {
 specialSetupClose?.addEventListener('click', () => specialSetupPanel?.classList.remove('open'));
 specialSetupContent?.addEventListener('change', () => {
 	syncSpecialCheckboxes();
-	specialSetupWorkflow.verified = false;
-	if (specialSetupWorkflow.electron) {
-		specialSetupWorkflow.electron.mounted = false;
-		specialSetupWorkflow.electron.bolusPlaced = false;
-		specialSetupWorkflow.electron.bolusPositionOK = false;
-		specialSetupWorkflow.electron.bolusAirGapOK = false;
+	S.specialSetupWorkflow.verified = false;
+	if (S.specialSetupWorkflow.electron) {
+		S.specialSetupWorkflow.electron.mounted = false;
+		S.specialSetupWorkflow.electron.bolusPlaced = false;
+		S.specialSetupWorkflow.electron.bolusPositionOK = false;
+		S.specialSetupWorkflow.electron.bolusAirGapOK = false;
 	}
 	renderSpecialSetupPanel();
 	renderTreatmentDeliveryPanel();
@@ -14988,22 +14803,22 @@ deliveryLaunchButton?.addEventListener('click', () => {
 	renderTreatmentDeliveryPanel();
 });
 deliveryFieldSelect?.addEventListener('change', () => {
-	if (treatmentDelivery.delivering) {
-		deliveryFieldSelect.value = String(treatmentDelivery.activeFieldIndex);
+	if (S.treatmentDelivery.delivering) {
+		deliveryFieldSelect.value = String(S.treatmentDelivery.activeFieldIndex);
 		return;
 	}
-	treatmentDelivery.activeFieldIndex = Number(deliveryFieldSelect.value) || 0;
-	treatmentDelivery.armed = false;
-	treatmentDelivery.held = false;
-	treatmentDelivery.completed =
-		!!treatmentDelivery.completedFields[treatmentDelivery.activeFieldIndex];
-	treatmentDelivery.terminated = false;
-	treatmentDelivery.muDelivered = treatmentDelivery.completed
+	S.treatmentDelivery.activeFieldIndex = Number(deliveryFieldSelect.value) || 0;
+	S.treatmentDelivery.armed = false;
+	S.treatmentDelivery.held = false;
+	S.treatmentDelivery.completed =
+		!!S.treatmentDelivery.completedFields[S.treatmentDelivery.activeFieldIndex];
+	S.treatmentDelivery.terminated = false;
+	S.treatmentDelivery.muDelivered = S.treatmentDelivery.completed
 		? Number(deliveryCasePlan().mu) || 0
 		: 0;
-	treatmentDelivery.autoHoldReason = '';
-	treatmentDelivery.dynamicFraction = treatmentDelivery.completed ? 1 : 0;
-	treatmentDelivery.controlPointIndex = 0;
+	S.treatmentDelivery.autoHoldReason = '';
+	S.treatmentDelivery.dynamicFraction = S.treatmentDelivery.completed ? 1 : 0;
+	S.treatmentDelivery.controlPointIndex = 0;
 	setBeamState(false);
 	const f = deliveryCasePlan();
 	setPendantLCD(
@@ -15032,19 +14847,19 @@ clearanceOverrideRationale?.addEventListener('input', () => {
 deliveryArm?.addEventListener('click', armTreatmentDelivery);
 deliveryStart?.addEventListener('click', startTreatmentDelivery);
 deliveryHold?.addEventListener('click', () => {
-	if (treatmentDelivery.held) resumeTreatmentDelivery();
+	if (S.treatmentDelivery.held) resumeTreatmentDelivery();
 	else holdTreatmentDelivery('manual hold');
 });
 deliveryTerminate?.addEventListener('click', terminateTreatmentDelivery);
 deliveryCompleteSession?.addEventListener('click', () =>
-	activeTreatmentCase?.billing?.skipChargeCapture
+	S.activeTreatmentCase?.billing?.skipChargeCapture
 		? completeFractionWithoutCurrentCPTModule()
 		: openChargeCapture()
 );
 deliveryReviewCharges?.addEventListener('click', openChargeCapture);
 chargeCaptureClose?.addEventListener('click', () => chargeCapturePanel?.classList.remove('open'));
 chargeTreatmentCode?.addEventListener('change', () => {
-	treatmentCompletion.verified = false;
+	S.treatmentCompletion.verified = false;
 	if (chargePost) chargePost.disabled = true;
 	updateChargeEducation();
 	const f = document.getElementById('chargeFeedback');
@@ -15055,7 +14870,7 @@ chargeTreatmentCode?.addEventListener('change', () => {
 	}
 });
 chargeIgrtHandling?.addEventListener('change', () => {
-	treatmentCompletion.verified = false;
+	S.treatmentCompletion.verified = false;
 	if (chargePost) chargePost.disabled = true;
 	updateChargeEducation();
 	const f = document.getElementById('chargeFeedback');
@@ -15172,9 +14987,9 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 			probError = mode === 'error' ? Math.floor(Math.random() * 10) - 5 || -3 : 0;
 			scenarioKey = [mode, probGantry, probJaw, probSid, probError].join('|');
 			attempts++;
-		} while (recentScenarioKeys.includes(scenarioKey) && attempts < 40);
-		recentScenarioKeys.push(scenarioKey);
-		if (recentScenarioKeys.length > 10) recentScenarioKeys.shift();
+		} while (S.recentScenarioKeys.includes(scenarioKey) && attempts < 40);
+		S.recentScenarioKeys.push(scenarioKey);
+		if (S.recentScenarioKeys.length > 10) S.recentScenarioKeys.shift();
 		const rad = probGantry * (Math.PI / 180);
 		const depth =
 			(rx * ry) / Math.sqrt(Math.pow(rx * Math.cos(rad), 2) + Math.pow(ry * Math.sin(rad), 2));
@@ -15582,7 +15397,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 			msg.style.color = '#ff3333';
 		}
 	}
-	bdSyncFromMachine = (control, delta) => {
+	S.bdSyncFromMachine = (control, delta) => {
 		if (control === 'gantry') {
 			let v = (parseFloat(ui.gantry.value) + delta) % 360;
 			if (v < 0) v += 360;
@@ -15819,7 +15634,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 
 	function sweepGantry(fromRad, toRad, dur, onProgress) {
 		return new Promise((resolve) => {
-			if (typeof gantryRotatingGroup === 'undefined' || !gantryRotatingGroup) {
+			if (typeof S.gantryRotatingGroup === 'undefined' || !S.gantryRotatingGroup) {
 				resolve();
 				return;
 			}
@@ -15827,7 +15642,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 			if (gantryRAF) cancelAnimationFrame(gantryRAF);
 			const step = (t) => {
 				const p = Math.min(1, (t - t0) / dur);
-				gantryRotatingGroup.rotation.z = fromRad + (toRad - fromRad) * p;
+				S.gantryRotatingGroup.rotation.z = fromRad + (toRad - fromRad) * p;
 				if (onProgress) onProgress(p);
 				if (p < 1) gantryRAF = requestAnimationFrame(step);
 				else resolve();
@@ -15837,17 +15652,17 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 	}
 	const rotGantryTo = (targetRad, dur) =>
 		new Promise((resolve) => {
-			if (typeof gantryRotatingGroup === 'undefined' || !gantryRotatingGroup) {
+			if (typeof S.gantryRotatingGroup === 'undefined' || !S.gantryRotatingGroup) {
 				resolve();
 				return;
 			}
-			const start = gantryRotatingGroup.rotation.z,
+			const start = S.gantryRotatingGroup.rotation.z,
 				t0 = performance.now();
 			if (gantryRAF) cancelAnimationFrame(gantryRAF);
 			const step = (t) => {
 				const p = Math.min(1, (t - t0) / dur),
 					e = 0.5 - 0.5 * Math.cos(Math.PI * p);
-				gantryRotatingGroup.rotation.z = start + (targetRad - start) * e;
+				S.gantryRotatingGroup.rotation.z = start + (targetRad - start) * e;
 				if (p < 1) gantryRAF = requestAnimationFrame(step);
 				else resolve();
 			};
@@ -16336,8 +16151,8 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 			el.innerHTML = `<span class="fn-icon" aria-hidden="true">${PENDANT_ICON_SVG[iconKey]}</span><b>${label}</b><small>${sub}</small>`;
 			el.setAttribute('aria-label', aria);
 		});
-		setRoomLightsState(roomLightsOn);
-		syncRoomViewButtons(currentRoomView);
+		setRoomLightsState(S.roomLightsOn);
+		syncRoomViewButtons(S.currentRoomView);
 	}
 	applyPendantControlIcons();
 
@@ -16369,10 +16184,10 @@ window.RTAppsLinacMirrorBridge = {
 				typeof getDynamicFieldState === 'function' ? getDynamicFieldState(plan, progress) : null;
 			const activeFields = typeof getTreatmentFields === 'function' ? getTreatmentFields() : [];
 			return {
-				activeTreatmentCase,
-				treatmentDelivery,
-				treatmentCompletion,
-				specialSetupWorkflow,
+				activeTreatmentCase: S.activeTreatmentCase,
+				treatmentDelivery: S.treatmentDelivery,
+				treatmentCompletion: S.treatmentCompletion,
+				specialSetupWorkflow: S.specialSetupWorkflow,
 				fundamentalState,
 				plan,
 				readyInfo,
