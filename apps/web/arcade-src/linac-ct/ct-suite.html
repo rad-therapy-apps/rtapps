@@ -1,0 +1,1504 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<base href="/arcade/linac-ct/" />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>CT Simulation Suite — Operator Console</title>
+		<style>
+			:root {
+				--bg: #080b0f;
+				--panel: #111922;
+				--panel2: #16212c;
+				--raise: #1c2a37;
+				--line: #243444;
+				--ink: #e9f1fa;
+				--muted: #8ba0b7;
+				--faint: #5f7284;
+				--cyan: #31d6c4;
+				--cyan-d: #0f6f68;
+				--amber: #f5b53d;
+				--red: #ff5646;
+				--green: #37d67f;
+				--blue: #4aa6f0;
+				--mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+				--sans: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				margin: 0;
+				height: 100%;
+				background: var(--bg);
+				color: var(--ink);
+				font-family: var(--sans);
+				overflow: hidden;
+			}
+			button {
+				font-family: inherit;
+			}
+			.app {
+				display: grid;
+				grid-template-rows: auto 1fr auto;
+				height: 100vh;
+				width: 100vw;
+			}
+
+			/* ===== top status bar ===== */
+			.topbar {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				padding: 8px 14px;
+				background: linear-gradient(180deg, #0e1620, #0a0f15);
+				border-bottom: 1px solid var(--line);
+			}
+			.brand {
+				display: flex;
+				flex-direction: column;
+				line-height: 1;
+				gap: 3px;
+				min-width: 150px;
+			}
+			.brand .mark {
+				font: 800 15px/1 var(--sans);
+				letter-spacing: 0.16em;
+				color: var(--cyan);
+			}
+			.brand .sub {
+				font: 600 9px/1 var(--mono);
+				letter-spacing: 0.22em;
+				color: var(--faint);
+				text-transform: uppercase;
+			}
+			.pt-banner {
+				display: flex;
+				gap: 20px;
+				align-items: center;
+				flex: 1;
+				background: #0b131b;
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 7px 14px;
+			}
+			.pt-field {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+				min-width: 0;
+			}
+			.pt-field span {
+				font: 600 8.5px/1 var(--mono);
+				letter-spacing: 0.12em;
+				color: var(--faint);
+				text-transform: uppercase;
+			}
+			.pt-field b {
+				font: 600 13px/1.1 var(--sans);
+				color: var(--ink);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.xray {
+				display: flex;
+				align-items: center;
+				gap: 9px;
+				padding: 7px 15px;
+				border-radius: 8px;
+				background: #12100a;
+				border: 1px solid #3a3320;
+				min-width: 150px;
+				justify-content: center;
+			}
+			.xray .dot {
+				width: 13px;
+				height: 13px;
+				border-radius: 50%;
+				background: #3a3320;
+				box-shadow: inset 0 0 4px #000;
+			}
+			.xray b {
+				font: 800 13px/1 var(--mono);
+				letter-spacing: 0.14em;
+				color: #6b6350;
+			}
+			.xray.on {
+				background: #2a0f0c;
+				border-color: #7a2c22;
+				animation: xrayPulse 1s infinite alternate;
+			}
+			.xray.on .dot {
+				background: var(--amber);
+				box-shadow:
+					0 0 12px var(--amber),
+					0 0 4px #fff;
+			}
+			.xray.on b {
+				color: var(--amber);
+			}
+			@keyframes xrayPulse {
+				from {
+					box-shadow: 0 0 0 rgba(245, 181, 61, 0);
+				}
+				to {
+					box-shadow: 0 0 18px rgba(245, 86, 70, 0.35);
+				}
+			}
+
+			/* ===== main 3-column ===== */
+			.main {
+				display: grid;
+				grid-template-columns: minmax(300px, 1.15fr) minmax(420px, 1.5fr) 320px;
+				gap: 10px;
+				padding: 10px;
+				min-height: 0;
+			}
+			.col {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				min-height: 0;
+				min-width: 0;
+			}
+			.card {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 10px;
+				min-height: 0;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+			.card-h {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+				padding: 7px 11px;
+				background: var(--panel2);
+				border-bottom: 1px solid var(--line);
+			}
+			.card-h .t {
+				font: 700 11px/1 var(--mono);
+				letter-spacing: 0.13em;
+				text-transform: uppercase;
+				color: var(--cyan);
+			}
+			.card-h .aux {
+				font: 600 10px/1 var(--mono);
+				color: var(--muted);
+			}
+
+			/* scan room 3D */
+			.roomcard {
+				flex: 1;
+			}
+			.roomwrap {
+				position: relative;
+				flex: 1;
+				min-height: 0;
+			}
+			#scanCanvas {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				display: block;
+				background: radial-gradient(120% 120% at 50% 20%, #1a2530, #0a0f14 75%);
+			}
+			.room-overlay {
+				position: absolute;
+				left: 9px;
+				bottom: 9px;
+				display: flex;
+				gap: 6px;
+				flex-wrap: wrap;
+				max-width: calc(100% - 18px);
+			}
+			.vbtn {
+				font: 600 10px/1 var(--sans);
+				color: var(--muted);
+				background: rgba(10, 16, 22, 0.72);
+				border: 1px solid var(--line);
+				border-radius: 6px;
+				padding: 6px 9px;
+				cursor: pointer;
+				backdrop-filter: blur(4px);
+			}
+			.vbtn:hover {
+				color: var(--ink);
+				border-color: var(--cyan-d);
+			}
+			.room-tag {
+				position: absolute;
+				left: 10px;
+				top: 9px;
+				font: 600 9px/1 var(--mono);
+				letter-spacing: 0.16em;
+				color: #7f97ac;
+				background: rgba(8, 12, 16, 0.6);
+				padding: 4px 8px;
+				border-radius: 6px;
+				text-transform: uppercase;
+			}
+
+			/* image viewports */
+			.viewports {
+				display: grid;
+				grid-template-columns: 1fr 1.35fr;
+				gap: 10px;
+				flex: 1;
+				min-height: 0;
+			}
+			.vp {
+				position: relative;
+				background: #000;
+				border: 1px solid var(--line);
+				border-radius: 10px;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+			}
+			.vp-h {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 6px 10px;
+				background: linear-gradient(180deg, #0d141b, #0a0f14);
+				border-bottom: 1px solid var(--line);
+			}
+			.vp-h .t {
+				font: 700 10px/1 var(--mono);
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--cyan);
+			}
+			.vp-h .m {
+				font: 600 9px/1 var(--mono);
+				color: var(--muted);
+			}
+			.vp-body {
+				position: relative;
+				flex: 1;
+				min-height: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #000;
+			}
+			.vp-body canvas {
+				max-width: 100%;
+				max-height: 100%;
+				image-rendering: pixelated;
+			}
+			.vp-corner {
+				position: absolute;
+				font: 600 9px/1.35 var(--mono);
+				color: #9fb6cc;
+				pointer-events: none;
+				text-shadow: 0 0 3px #000;
+			}
+			.vp-corner.tl {
+				left: 8px;
+				top: 8px;
+			}
+			.vp-corner.tr {
+				right: 8px;
+				top: 8px;
+				text-align: right;
+			}
+			.vp-corner.bl {
+				left: 8px;
+				bottom: 8px;
+			}
+			.vp-corner.br {
+				right: 8px;
+				bottom: 8px;
+				text-align: right;
+			}
+			.vp-hint {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				color: var(--faint);
+				font: 500 12px/1.5 var(--sans);
+				padding: 20px;
+				pointer-events: none;
+			}
+			.slicebar {
+				display: flex;
+				align-items: center;
+				gap: 9px;
+				padding: 7px 10px;
+				background: #0a0f14;
+				border-top: 1px solid var(--line);
+			}
+			.slicebar input[type='range'] {
+				flex: 1;
+			}
+			.slicebar b {
+				font: 600 10px/1 var(--mono);
+				color: var(--muted);
+				min-width: 74px;
+				text-align: right;
+			}
+
+			/* control column */
+			.ctl {
+				overflow-y: auto;
+				padding: 11px;
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+			}
+			.sec-t {
+				font: 700 10px/1 var(--mono);
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--faint);
+				margin: 0 0 8px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.sec-t::after {
+				content: '';
+				flex: 1;
+				height: 1px;
+				background: var(--line);
+			}
+			.grid2 {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 6px;
+			}
+			.grid3 {
+				display: grid;
+				grid-template-columns: 1fr 1fr 1fr;
+				gap: 6px;
+			}
+			.chip {
+				font: 600 11px/1 var(--sans);
+				color: var(--muted);
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				border-radius: 7px;
+				padding: 9px 6px;
+				cursor: pointer;
+				text-align: center;
+				transition: 0.12s;
+			}
+			.chip:hover {
+				color: var(--ink);
+				border-color: var(--cyan-d);
+			}
+			.chip.active {
+				background: #0e2b2a;
+				border-color: var(--cyan);
+				color: #a8f4ec;
+			}
+			.readout {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 6px;
+			}
+			.ro {
+				background: #0b1219;
+				border: 1px solid var(--line);
+				border-radius: 7px;
+				padding: 7px 9px;
+			}
+			.ro span {
+				display: block;
+				font: 600 8px/1 var(--mono);
+				letter-spacing: 0.1em;
+				color: var(--faint);
+				text-transform: uppercase;
+				margin-bottom: 4px;
+			}
+			.ro b {
+				font: 600 13px/1 var(--mono);
+				color: var(--ink);
+			}
+			.ro b em {
+				font-style: normal;
+				font-size: 9px;
+				color: var(--muted);
+			}
+			.step {
+				display: flex;
+				gap: 9px;
+				align-items: flex-start;
+				padding: 8px 9px;
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				background: var(--panel2);
+				margin-bottom: 6px;
+			}
+			.step .n {
+				width: 19px;
+				height: 19px;
+				border-radius: 50%;
+				flex: none;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font: 700 10px/1 var(--mono);
+				background: #0b1219;
+				border: 1px solid var(--line);
+				color: var(--faint);
+			}
+			.step.done .n {
+				background: #0e2b1e;
+				border-color: var(--green);
+				color: var(--green);
+			}
+			.step.cur .n {
+				background: #0e2b2a;
+				border-color: var(--cyan);
+				color: var(--cyan);
+			}
+			.step .txt {
+				flex: 1;
+				min-width: 0;
+			}
+			.step .txt .lab {
+				font: 600 11px/1.2 var(--sans);
+				color: var(--ink);
+			}
+			.step .txt .sub {
+				font: 500 9.5px/1.3 var(--mono);
+				color: var(--muted);
+				margin-top: 2px;
+			}
+			.btn {
+				width: 100%;
+				font: 700 11px/1 var(--sans);
+				letter-spacing: 0.02em;
+				color: var(--ink);
+				background: var(--raise);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 11px 8px;
+				cursor: pointer;
+				transition: 0.12s;
+			}
+			.btn:hover:not(:disabled) {
+				border-color: var(--cyan-d);
+				background: #20323f;
+			}
+			.btn:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+			.btn.primary {
+				background: linear-gradient(180deg, #12494a, #0e3536);
+				border-color: var(--cyan-d);
+				color: #b8f6ee;
+			}
+			.btn.primary:hover:not(:disabled) {
+				background: linear-gradient(180deg, #186162, #12494a);
+			}
+			.btn.warn {
+				background: linear-gradient(180deg, #5a1f1a, #3f1512);
+				border-color: #7a2c22;
+				color: #ffd0c9;
+			}
+			.btnrow {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 6px;
+			}
+			.slab {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				font: 600 10px/1 var(--mono);
+				color: var(--muted);
+				margin-bottom: 5px;
+			}
+			.slab b {
+				color: var(--ink);
+			}
+			input[type='range'] {
+				-webkit-appearance: none;
+				appearance: none;
+				height: 4px;
+				background: #22323f;
+				border-radius: 3px;
+				outline: none;
+			}
+			input[type='range']::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: var(--cyan);
+				cursor: pointer;
+				border: 2px solid #08141a;
+			}
+			input[type='range']::-moz-range-thumb {
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: var(--cyan);
+				cursor: pointer;
+				border: 2px solid #08141a;
+			}
+			.rangefield {
+				margin-bottom: 10px;
+			}
+			.minibtns {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 5px;
+			}
+			.mb {
+				font: 700 12px/1 var(--sans);
+				color: var(--muted);
+				background: #0b1219;
+				border: 1px solid var(--line);
+				border-radius: 6px;
+				padding: 8px 0;
+				cursor: pointer;
+			}
+			.mb:hover:not(:disabled) {
+				color: var(--ink);
+				border-color: var(--cyan-d);
+			}
+			.mb:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+			.toggle {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font: 600 11px/1 var(--sans);
+				color: var(--muted);
+				cursor: pointer;
+				user-select: none;
+			}
+			.toggle input {
+				accent-color: var(--cyan);
+				width: 15px;
+				height: 15px;
+			}
+
+			/* bottom bar */
+			.botbar {
+				display: grid;
+				grid-template-columns: 1.15fr 1.5fr 320px;
+				gap: 10px;
+				padding: 0 10px 10px;
+			}
+			.botcard {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 10px;
+				padding: 9px 11px;
+				display: flex;
+				flex-direction: column;
+				gap: 7px;
+				min-height: 0;
+			}
+			.progwrap {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+			}
+			.prog {
+				height: 9px;
+				background: #0a0f14;
+				border: 1px solid var(--line);
+				border-radius: 6px;
+				overflow: hidden;
+			}
+			#progFill {
+				height: 100%;
+				width: 0%;
+				background: linear-gradient(90deg, var(--cyan-d), var(--cyan));
+				transition: width 0.1s linear;
+			}
+			#progFill.live {
+				background: linear-gradient(90deg, #b7431f, var(--amber));
+			}
+			.prog-meta {
+				display: flex;
+				justify-content: space-between;
+				font: 600 9.5px/1 var(--mono);
+				color: var(--muted);
+			}
+			.log {
+				flex: 1;
+				min-height: 52px;
+				max-height: 110px;
+				overflow-y: auto;
+				background: #080d12;
+				border: 1px solid var(--line);
+				border-radius: 7px;
+				padding: 6px 8px;
+				font: 500 10px/1.55 var(--mono);
+				color: #9db4c8;
+			}
+			.log .t {
+				color: var(--faint);
+			}
+			.log .ok {
+				color: var(--green);
+			}
+			.log .warn {
+				color: var(--amber);
+			}
+			.log .hot {
+				color: var(--red);
+			}
+			.status-line {
+				display: flex;
+				align-items: center;
+				gap: 9px;
+			}
+			.status-line .lamp {
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background: var(--faint);
+			}
+			.status-line.rdy .lamp {
+				background: var(--green);
+				box-shadow: 0 0 8px var(--green);
+			}
+			.status-line.busy .lamp {
+				background: var(--amber);
+				box-shadow: 0 0 8px var(--amber);
+			}
+			.status-line b {
+				font: 700 11px/1 var(--mono);
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+			.kv {
+				display: flex;
+				justify-content: space-between;
+				font: 600 10px/1.5 var(--mono);
+				color: var(--muted);
+			}
+			.kv b {
+				color: var(--ink);
+			}
+			::-webkit-scrollbar {
+				width: 9px;
+				height: 9px;
+			}
+			::-webkit-scrollbar-thumb {
+				background: #25384a;
+				border-radius: 6px;
+			}
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			@media (max-width: 1180px) {
+				.main {
+					grid-template-columns: 1fr 1fr;
+				}
+				.col.controls {
+					grid-column: 1/-1;
+				}
+				.botbar {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* ===== RTApps technique selection + enhanced CT windowing ===== */
+			.habitus-box {
+				background: #0b141c;
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 9px;
+				margin-bottom: 8px;
+			}
+			.habitus-cue {
+				font: 600 10px/1.45 var(--mono);
+				color: #a9bfd1;
+				margin-bottom: 7px;
+			}
+			.habitus-cue b {
+				color: #e7f4fd;
+			}
+			.habitus-grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 6px;
+			}
+			.habitus-btn {
+				font: 700 10px/1.2 var(--sans);
+				padding: 8px 5px;
+				margin: 0;
+				border-radius: 7px;
+				border: 1px solid var(--line);
+				background: var(--panel2);
+				color: var(--muted);
+				cursor: pointer;
+			}
+			.habitus-btn:hover {
+				border-color: var(--cyan-d);
+				color: var(--ink);
+			}
+			.habitus-btn.active {
+				background: #0e2b2a;
+				border-color: var(--cyan);
+				color: #b5f5ee;
+			}
+			.tech-adjust {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 7px;
+				margin: 8px 0;
+			}
+			.tech-field {
+				background: #0b1219;
+				border: 1px solid var(--line);
+				border-radius: 7px;
+				padding: 7px;
+			}
+			.tech-field label {
+				font: 700 8px/1 var(--mono);
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				color: var(--faint);
+				margin-bottom: 5px;
+			}
+			.tech-field select,
+			.tech-field input[type='number'] {
+				width: 100%;
+				padding: 7px;
+				background: #081019;
+				color: var(--ink);
+				border: 1px solid #31485b;
+				border-radius: 6px;
+				font: 700 13px/1 var(--mono);
+			}
+			.mas-row {
+				display: grid;
+				grid-template-columns: 1fr 54px;
+				gap: 6px;
+				align-items: center;
+			}
+			.mas-row input[type='range'] {
+				width: 100%;
+			}
+			.tech-feedback {
+				display: none;
+				margin-top: 7px;
+				padding: 8px 9px;
+				border-radius: 7px;
+				font: 600 10px/1.45 var(--sans);
+			}
+			.tech-feedback.show {
+				display: block;
+			}
+			.tech-feedback.good {
+				background: #0d2a20;
+				border: 1px solid #276c50;
+				color: #baf4d7;
+			}
+			.tech-feedback.warn {
+				background: #2b2410;
+				border: 1px solid #766127;
+				color: #ffe5a1;
+			}
+			.tech-feedback.bad {
+				background: #321717;
+				border: 1px solid #7b3737;
+				color: #ffc8c8;
+			}
+			.tech-rule {
+				margin-top: 7px;
+				color: #7890a2;
+				font: 500 9px/1.45 var(--sans);
+			}
+			.tech-lock {
+				display: flex;
+				align-items: center;
+				gap: 7px;
+				margin-top: 7px;
+				font: 700 9px/1.2 var(--mono);
+				color: #8fa5b5;
+			}
+			.tech-lock .lamp {
+				width: 9px;
+				height: 9px;
+				border-radius: 50%;
+				background: #6d7880;
+			}
+			.tech-lock.ok {
+				color: #78e8b0;
+			}
+			.tech-lock.ok .lamp {
+				background: #39d985;
+				box-shadow: 0 0 8px #39d985;
+			}
+			.wl-actions {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 6px;
+				margin-top: 7px;
+			}
+			.wl-actions button {
+				margin: 0;
+				padding: 7px;
+				background: #24384a;
+				color: #d6e6f2;
+				border: 1px solid #38556d;
+				border-radius: 6px;
+				font-size: 10px;
+				font-weight: 700;
+			}
+			.wl-actions button:hover {
+				background: #2c465c;
+				border-color: var(--cyan-d);
+			}
+			.wl-hint {
+				margin-top: 7px;
+				padding: 7px 8px;
+				border-left: 3px solid var(--cyan-d);
+				background: #0a141d;
+				color: #87a0b3;
+				font: 500 9px/1.45 var(--sans);
+			}
+			#axCanvas {
+				cursor: crosshair;
+				image-rendering: auto !important;
+			}
+
+			/* RTApps embedded CT room / console modes */
+			body.rtapps-room-mode .main {
+				grid-template-columns: 1fr !important;
+				padding: 10px !important;
+			}
+			body.rtapps-room-mode .main > .col:nth-child(2),
+			body.rtapps-room-mode .main > .col:nth-child(3),
+			body.rtapps-room-mode .botbar {
+				display: none !important;
+			}
+			body.rtapps-room-mode .main > .col:first-child {
+				display: flex !important;
+				width: 100%;
+			}
+			body.rtapps-room-mode .roomcard {
+				height: 100%;
+				min-height: 0;
+			}
+			body.rtapps-room-mode .roomwrap {
+				min-height: calc(100vh - 92px);
+			}
+			body.rtapps-console-mode .main {
+				grid-template-columns: minmax(430px, 1.55fr) 360px !important;
+				padding: 10px !important;
+			}
+			body.rtapps-console-mode .main > .col:first-child {
+				display: none !important;
+			}
+			body.rtapps-console-mode .main > .col:nth-child(2),
+			body.rtapps-console-mode .main > .col:nth-child(3) {
+				display: flex !important;
+			}
+			body.rtapps-console-mode .botbar {
+				grid-template-columns: 1fr 1.4fr 1fr;
+			}
+			.rtapps-embedded-badge {
+				position: fixed;
+				right: 12px;
+				bottom: 12px;
+				z-index: 99;
+				padding: 6px 9px;
+				border-radius: 999px;
+				background: rgba(8, 18, 26, 0.88);
+				border: 1px solid #31526b;
+				color: #83e9dc;
+				font:
+					700 10px/1 ui-monospace,
+					Consolas,
+					monospace;
+				pointer-events: none;
+			}
+
+			/* ===== RTApps zoom + CT room aesthetic upgrade ===== */
+			.rtapps-zoom-ui {
+				position: fixed;
+				right: 14px;
+				bottom: 14px;
+				z-index: 120;
+				width: 228px;
+				padding: 10px 11px;
+				border-radius: 14px;
+				background: rgba(9, 17, 24, 0.92);
+				color: #e8f5ff;
+				border: 1px solid #365168;
+				box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34);
+				backdrop-filter: blur(7px);
+				font-family: 'Segoe UI', Arial, sans-serif;
+			}
+			.rtapps-zoom-ui .title {
+				font-size: 10px;
+				font-weight: 900;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: #73e7d8;
+				margin-bottom: 5px;
+			}
+			.rtapps-zoom-ui .sub {
+				font-size: 11px;
+				color: #abc1cf;
+				margin-bottom: 8px;
+				line-height: 1.35;
+			}
+			.rtapps-zoom-ui .controls {
+				display: grid;
+				grid-template-columns: 34px 1fr 34px;
+				gap: 8px;
+				align-items: center;
+			}
+			.rtapps-zoom-ui button {
+				width: 34px;
+				height: 34px;
+				margin: 0;
+				padding: 0;
+				border-radius: 10px;
+				border: 1px solid #41617b;
+				background: #152533;
+				color: #e6f8ff;
+				font-weight: 900;
+				cursor: pointer;
+			}
+			.rtapps-zoom-ui button:hover {
+				background: #1d3346;
+			}
+			.rtapps-zoom-ui input[type='range'] {
+				width: 100%;
+				margin: 0;
+			}
+			.rtapps-zoom-ui .footer {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 10px;
+				margin-top: 8px;
+			}
+			.rtapps-zoom-ui .chip {
+				display: inline-flex;
+				align-items: center;
+				padding: 4px 8px;
+				border-radius: 999px;
+				background: #102633;
+				border: 1px solid #314d61;
+				color: #d8ecf8;
+				font:
+					800 10px/1 ui-monospace,
+					Consolas,
+					monospace;
+			}
+			.rtapps-zoom-ui .reset {
+				width: auto;
+				height: auto;
+				padding: 7px 9px;
+				font-size: 11px;
+				border-radius: 9px;
+			}
+			.rtapps-zoom-target {
+				outline: 2px solid #77e8db !important;
+				outline-offset: 2px !important;
+				box-shadow: 0 0 0 4px rgba(119, 232, 219, 0.14) !important;
+			}
+			.rtapps-zoom-host {
+				overflow: auto !important;
+			}
+			.rtapps-zoom-host img,
+			.rtapps-zoom-host canvas,
+			.rtapps-zoom-host svg {
+				transform-origin: center center;
+				transition: transform 0.16s ease;
+			}
+
+			.roomwrap,
+			.roomcard {
+				position: relative;
+				overflow: hidden;
+			}
+			.roomwrap {
+				background:
+					linear-gradient(
+						180deg,
+						rgba(13, 24, 33, 0.94) 0%,
+						rgba(12, 23, 31, 0.92) 44%,
+						rgba(16, 27, 35, 0.95) 45%,
+						rgba(18, 32, 41, 0.98) 100%
+					),
+					linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+					linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+				background-size:
+					auto,
+					44px 44px,
+					44px 44px;
+			}
+			.roomwrap::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				height: 40%;
+				background:
+					linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
+					repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 88px),
+					repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 54px);
+				opacity: 0.36;
+				pointer-events: none;
+			}
+			.roomwrap::after {
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				height: 34%;
+				background:
+					linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.24)),
+					repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 34px),
+					repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 34px);
+				opacity: 0.22;
+				pointer-events: none;
+			}
+			.roomcard {
+				border: 1px solid rgba(109, 142, 163, 0.38);
+				box-shadow:
+					0 12px 30px rgba(0, 0, 0, 0.28),
+					inset 0 1px 0 rgba(255, 255, 255, 0.04);
+			}
+			.ct-room-decor {
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				z-index: 5;
+				font-family: 'Segoe UI', Arial, sans-serif;
+			}
+			.ct-room-sign {
+				position: absolute;
+				left: 18px;
+				top: 16px;
+				padding: 8px 12px;
+				border-radius: 10px;
+				background: rgba(20, 38, 50, 0.84);
+				border: 1px solid rgba(108, 152, 177, 0.54);
+				color: #effaff;
+				font-size: 12px;
+				font-weight: 800;
+				letter-spacing: 0.04em;
+				box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+			}
+			.ct-room-sign small {
+				display: block;
+				color: #92b1c2;
+				font-size: 10px;
+				font-weight: 700;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				margin-bottom: 2px;
+			}
+			.ct-room-warning,
+			.ct-room-shield,
+			.ct-room-accessory,
+			.ct-room-monitor,
+			.ct-room-cabinet {
+				position: absolute;
+				border-radius: 10px;
+				box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
+			}
+			.ct-room-warning {
+				right: 22px;
+				top: 16px;
+				padding: 7px 10px;
+				background: rgba(72, 28, 28, 0.88);
+				border: 1px solid rgba(214, 121, 121, 0.58);
+				color: #ffd9d9;
+				font-size: 10px;
+				font-weight: 900;
+				text-transform: uppercase;
+			}
+			.ct-room-shield {
+				right: 24px;
+				top: 54px;
+				width: 114px;
+				height: 68px;
+				background: rgba(18, 33, 44, 0.86);
+				border: 1px solid rgba(98, 140, 168, 0.5);
+				color: #dcefff;
+				padding: 8px 10px;
+				font-size: 10px;
+				font-weight: 700;
+				line-height: 1.3;
+			}
+			.ct-room-monitor {
+				left: 22px;
+				bottom: 32px;
+				width: 118px;
+				height: 72px;
+				background: linear-gradient(180deg, #0f1d29, #1a2c39);
+				border: 1px solid rgba(98, 140, 168, 0.56);
+			}
+			.ct-room-monitor::before {
+				content: 'Protocol / Setup';
+				position: absolute;
+				left: 8px;
+				top: 8px;
+				color: #cfe8f7;
+				font-size: 10px;
+				font-weight: 800;
+			}
+			.ct-room-monitor::after {
+				content: 'LASERS · INDEX · TOPOSCAN';
+				position: absolute;
+				left: 8px;
+				bottom: 8px;
+				color: #78e3d7;
+				font-size: 8px;
+				font-weight: 800;
+				letter-spacing: 0.08em;
+			}
+			.ct-room-cabinet {
+				right: 28px;
+				bottom: 26px;
+				width: 112px;
+				height: 118px;
+				background: linear-gradient(180deg, #244455, #193543);
+				border: 1px solid rgba(108, 152, 177, 0.56);
+			}
+			.ct-room-cabinet::before {
+				content: 'Immobilization';
+				position: absolute;
+				left: 9px;
+				top: 8px;
+				color: #eff9ff;
+				font-size: 10px;
+				font-weight: 800;
+			}
+			.ct-room-cabinet::after {
+				content: '\25A0  Vac-Lok\A \25A0  Wing board\A \25A0  Knee sponge';
+				white-space: pre;
+				position: absolute;
+				left: 10px;
+				top: 28px;
+				color: #b8d5e8;
+				font-size: 9px;
+				line-height: 1.35;
+			}
+			.ct-room-accessory {
+				left: 158px;
+				bottom: 24px;
+				width: 74px;
+				height: 96px;
+				background: linear-gradient(180deg, #2f6a73, #224d57);
+				border: 1px solid rgba(126, 214, 219, 0.48);
+			}
+			.ct-room-accessory::before {
+				content: 'Accessory Cart';
+				position: absolute;
+				left: 8px;
+				top: 8px;
+				color: #effaff;
+				font-size: 9px;
+				font-weight: 800;
+			}
+			.ct-room-accessory::after {
+				content: '\25CF  Tape\A \25CF  Markers\A \25CF  Contrast prep';
+				white-space: pre;
+				position: absolute;
+				left: 10px;
+				top: 28px;
+				color: #d8f0f1;
+				font-size: 8px;
+				line-height: 1.45;
+			}
+			body.rtapps-console-mode .ct-room-decor {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="app">
+			<!-- ===== TOP STATUS BAR ===== -->
+			<header class="topbar">
+				<div class="brand">
+					<span class="mark">CT&nbsp;SIM&nbsp;SUITE</span><span class="sub">Operator Console</span>
+				</div>
+				<div class="pt-banner">
+					<div class="pt-field"><span>Patient</span><b id="ptName">— select protocol —</b></div>
+					<div class="pt-field"><span>ID</span><b id="ptId">—</b></div>
+					<div class="pt-field"><span>Protocol</span><b id="ptProto">—</b></div>
+					<div class="pt-field"><span>Position</span><b id="ptPos">Head First · Supine</b></div>
+					<div class="pt-field"><span>Series</span><b id="ptSeries">—</b></div>
+				</div>
+				<div class="xray" id="xrayInd"><span class="dot"></span><b>X-RAY</b></div>
+			</header>
+
+			<!-- ===== MAIN ===== -->
+			<div class="main">
+				<!-- LEFT: scan room -->
+				<div class="col">
+					<div class="card roomcard">
+						<div class="card-h">
+							<span class="t">Scan Room</span><span class="aux" id="roomAux">Gantry 0° · Idle</span>
+						</div>
+						<div class="roomwrap">
+							<span class="room-tag">Live · Bore Camera</span>
+							<canvas id="scanCanvas"></canvas>
+							<div class="room-overlay">
+								<button class="vbtn" data-view="iso">3D</button>
+								<button class="vbtn" data-view="front">Bore</button>
+								<button class="vbtn" data-view="side">Side</button>
+								<button class="vbtn" data-view="top">Top</button>
+								<button class="vbtn" id="btnSkin">Skin</button>
+								<button class="vbtn" id="btnBone">Skeleton</button>
+								<button class="vbtn" id="btnOrgans">Organs</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- CENTER: image viewports -->
+				<div class="col">
+					<div class="viewports">
+						<div class="vp">
+							<div class="vp-h">
+								<span class="t">Topogram</span><span class="m" id="topoMeta">Scout</span>
+							</div>
+							<div class="vp-body">
+								<canvas id="topoCanvas" width="300" height="360"></canvas>
+								<div class="vp-hint" id="topoHint">
+									Acquire a topogram (scout) to plan the scan range.
+								</div>
+								<div class="vp-corner tl" id="topoCornerTL"></div>
+							</div>
+						</div>
+						<div class="vp">
+							<div class="vp-h">
+								<span class="t">Axial Reconstruction</span><span class="m" id="axMeta">— HU</span>
+							</div>
+							<div class="vp-body">
+								<canvas id="axCanvas" width="256" height="256"></canvas>
+								<div class="vp-hint" id="axHint">
+									Reconstructed slices appear here during the scan.
+								</div>
+								<div class="vp-corner tl" id="axTL"></div>
+								<div class="vp-corner tr" id="axTR"></div>
+								<div class="vp-corner bl" id="axBL"></div>
+								<div class="vp-corner br" id="axBR"></div>
+							</div>
+							<div class="slicebar">
+								<input type="range" id="sliceScroll" min="0" max="0" value="0" step="1" disabled />
+								<b id="sliceLabel">— / —</b>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- RIGHT: controls -->
+				<div class="col controls" style="min-height: 0">
+					<div class="card" style="flex: 1">
+						<div class="card-h">
+							<span class="t">Console</span><span class="aux" id="conStep">Step 1 · Protocol</span>
+						</div>
+						<div class="ctl">
+							<div>
+								<div class="sec-t">Scan Protocol</div>
+								<div class="grid2" id="protoGrid"></div>
+							</div>
+
+							<div id="techniqueSection">
+								<div class="sec-t">Body Habitus &amp; Technique</div>
+								<div class="habitus-box">
+									<div class="habitus-cue" id="habitusCue">
+										Select a protocol to display patient-size cues.
+									</div>
+									<div class="habitus-grid" id="habitusGrid">
+										<button type="button" class="habitus-btn" data-habitus="small">Small</button>
+										<button type="button" class="habitus-btn" data-habitus="average">
+											Average
+										</button>
+										<button type="button" class="habitus-btn" data-habitus="large">Large</button>
+									</div>
+									<div class="tech-rule">
+										Training classification used here: AP diameter &lt;24 cm = small, 24–32 cm =
+										average, &gt;32 cm = large. These are simulator teaching thresholds, not
+										universal clinical cutoffs.
+									</div>
+								</div>
+								<div class="tech-adjust">
+									<div class="tech-field">
+										<label for="kvSelect">Tube potential (kVp)</label
+										><select id="kvSelect">
+											<option>80</option>
+											<option>100</option>
+											<option selected>120</option>
+											<option>140</option>
+										</select>
+									</div>
+									<div class="tech-field">
+										<label for="masSlider">Reference mAs</label>
+										<div class="mas-row">
+											<input
+												type="range"
+												id="masSlider"
+												min="40"
+												max="500"
+												step="5"
+												value="220"
+											/><input
+												type="number"
+												id="masInput"
+												min="40"
+												max="500"
+												step="5"
+												value="220"
+												aria-label="Reference mAs"
+											/>
+										</div>
+									</div>
+								</div>
+								<div class="readout">
+									<div class="ro"><span>Selected kVp</span><b id="roKv">—</b></div>
+									<div class="ro"><span>Selected mAs</span><b id="roMas">—</b></div>
+									<div class="ro"><span>Slice</span><b id="roSlice">—</b></div>
+									<div class="ro"><span>Pitch</span><b id="roPitch">—</b></div>
+								</div>
+								<button class="btn primary" id="btnValidateTechnique" style="margin-top: 8px">
+									Validate Habitus &amp; Technique
+								</button>
+								<div class="tech-lock" id="techLock">
+									<span class="lamp"></span
+									><span>Technique validation required before imaging.</span>
+								</div>
+								<div class="tech-feedback" id="techFeedback" aria-live="polite"></div>
+							</div>
+
+							<div>
+								<div class="sec-t">Acquisition Workflow</div>
+								<div id="workflowSteps"></div>
+								<button class="btn primary" id="btnTopogram" disabled>Acquire Topogram</button>
+								<div class="rangefield" style="margin-top: 10px">
+									<div class="slab">Scan start (superior)<b id="rangeStartLbl">— cm</b></div>
+									<input type="range" id="rangeStart" min="0" max="100" value="10" disabled />
+								</div>
+								<div class="rangefield">
+									<div class="slab">Scan end (inferior)<b id="rangeEndLbl">— cm</b></div>
+									<input type="range" id="rangeEnd" min="0" max="100" value="80" disabled />
+								</div>
+								<div class="kv" style="margin-bottom: 8px">
+									<span>Range length</span><b id="rangeLen">— cm</b><span>Slices</span
+									><b id="rangeSlices">—</b>
+								</div>
+								<div class="btnrow">
+									<button class="btn primary" id="btnScan" disabled>Start Scan</button>
+									<button class="btn warn" id="btnStop" disabled>Stop</button>
+								</div>
+							</div>
+
+							<div>
+								<div class="sec-t">Window / Level</div>
+								<div class="grid3" id="wlGrid"></div>
+								<div class="rangefield" style="margin-top: 9px">
+									<div class="slab">Window (WW)<b id="wwLbl">400</b></div>
+									<input type="range" id="wwSlider" min="20" max="4000" value="400" />
+								</div>
+								<div class="rangefield">
+									<div class="slab">Level (WL)<b id="wlLbl">40</b></div>
+									<input type="range" id="wlSlider" min="-1200" max="1600" value="40" />
+								</div>
+								<div class="wl-actions">
+									<button type="button" id="btnAutoWindow">Auto Contrast</button
+									><button type="button" id="btnResetWindow">Reset Protocol W/L</button>
+								</div>
+								<div class="wl-hint">
+									<b>Interactive W/L:</b> drag directly on the axial image — horizontal changes
+									window width; vertical changes window level. Double-click the image to restore the
+									protocol preset.
+								</div>
+							</div>
+
+							<div>
+								<div class="sec-t">Patient Positioning</div>
+								<div class="slab" style="margin-bottom: 5px">Couch longitudinal (in/out)</div>
+								<div class="minibtns" style="margin-bottom: 7px">
+									<button class="mb" data-couch="z-1">In ◄</button>
+									<button class="mb" id="couchZval" disabled style="cursor: default; opacity: 1">
+										Z 0.0
+									</button>
+									<button class="mb" data-couch="z1">► Out</button>
+								</div>
+								<div class="grid2" style="margin-bottom: 7px">
+									<div class="minibtns">
+										<button class="mb" data-couch="y1">Up</button
+										><button class="mb" data-couch="y-1">Dn</button>
+									</div>
+									<div class="minibtns">
+										<button class="mb" data-couch="x-1">◄ Lat</button
+										><button class="mb" data-couch="x1">Lat ►</button>
+									</div>
+								</div>
+								<button class="btn" id="btnSetIso" style="margin-bottom: 9px">
+									Align Lasers &amp; Set Isocenter
+								</button>
+								<label class="toggle" style="margin-bottom: 8px"
+									><input type="checkbox" id="rotChk" /> Rotate gantry (idle demo)</label
+								>
+								<label class="toggle" style="margin-bottom: 8px"
+									><input type="checkbox" id="motionChk" /> Respiratory motion</label
+								>
+								<div class="rangefield">
+									<div class="slab">Motion amplitude<b id="ampLbl">0.5</b></div>
+									<input type="range" id="ampSlider" min="0" max="1.5" step="0.1" value="0.5" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- ===== BOTTOM BAR ===== -->
+			<div class="botbar">
+				<div class="botcard">
+					<div class="status-line rdy" id="statusLine">
+						<span class="lamp"></span><b id="statusText">Ready</b>
+					</div>
+					<div class="kv">
+						<span>Couch Z</span><b id="botCouchZ">0.0</b><span>Iso</span><b id="botIso">— cm</b>
+					</div>
+					<div class="kv"><span>Table position</span><b id="botTablePos">S —</b></div>
+				</div>
+				<div class="botcard">
+					<div class="progwrap">
+						<div class="prog"><div id="progFill"></div></div>
+						<div class="prog-meta">
+							<span id="progText">No acquisition</span><span id="progPct">0%</span>
+						</div>
+					</div>
+					<div class="kv">
+						<span>Acquired slices</span><b id="acqSlices">0</b><span>DFOV</span
+						><b id="dfov">— cm</b>
+					</div>
+				</div>
+				<div class="botcard">
+					<div class="log" id="log"></div>
+				</div>
+			</div>
+		</div>
+
+		<script type="module" src="./src/ct-suite/main.js"></script>
+	</body>
+</html>

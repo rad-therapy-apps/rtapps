@@ -8,3 +8,6 @@ bun.lockb
 # Miscellaneous
 /static/
 /arcade/
+
+# Un-embedded static page kept byte-identical to its decoded source (#77 phase 2, PR1)
+/arcade-src/linac-ct/public/dicom-review.html
