@@ -3551,7 +3551,14 @@ function deliveryTick(now) {
 		}
 	}
 	if (!S.beamOn) setBeamState(true);
-	renderTreatmentDeliveryPanel();
+	// RTApps perf pass: throttle the delivery panel repaint like the adjacent monitor
+	// repaint — display-only text refreshed at 4Hz is imperceptible vs. 60Hz. Every exit
+	// path out of deliveryTick (hold/finish/terminate) still calls renderTreatmentDeliveryPanel()
+	// unconditionally, so end-state text is never stale.
+	if (now - S.deliveryPanelStamp > 250) {
+		S.deliveryPanelStamp = now;
+		renderTreatmentDeliveryPanel();
+	}
 	if (now - S.deliveryMonitorStamp > 250) {
 		S.deliveryMonitorStamp = now;
 		renderTreatmentMonitor();

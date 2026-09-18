@@ -398,9 +398,15 @@ export function onResize() {
 	camera.updateProjectionMatrix();
 }
 
+let lastRoomAux = '';
+
 export function animate() {
 	const dt = clock.getDelta(),
 		el = clock.elapsedTime;
+	// RTApps perf pass: skip rendering while the room isn't visible (backgrounded tab, or
+	// console-mode CSS hiding #scanCanvas). setAnimationLoop keeps ticking so it resumes on
+	// its own; clock.getDelta() above still runs each tick so dt/elapsedTime don't jump on resume.
+	if (document.hidden || document.body.classList.contains('rtapps-console-mode')) return;
 	if ((S.scanning || S.rotating) && gantryRotor) {
 		gantryAngle += (S.scanning ? 4.2 : 1.6) * dt;
 		gantryRotor.rotation.z = gantryAngle;
@@ -411,6 +417,9 @@ export function animate() {
 	if (couchGroup) couchGroup.position.z = S.couchZ;
 	controls.update();
 	renderer.render(scene, camera);
-	document.getElementById('roomAux').textContent =
-		`Gantry ${(THREE.MathUtils.radToDeg(gantryRotor ? gantryRotor.rotation.z : 0) % 360).toFixed(0)}° · ${S.scanning ? 'SCANNING' : S.rotating ? 'Rotating' : 'Idle'}`;
+	const roomAuxText = `Gantry ${(THREE.MathUtils.radToDeg(gantryRotor ? gantryRotor.rotation.z : 0) % 360).toFixed(0)}° · ${S.scanning ? 'SCANNING' : S.rotating ? 'Rotating' : 'Idle'}`;
+	if (roomAuxText !== lastRoomAux) {
+		lastRoomAux = roomAuxText;
+		document.getElementById('roomAux').textContent = roomAuxText;
+	}
 }
