@@ -536,3 +536,8 @@ module script (functions_real.txt @ b7140af). Every function appears in exactly 
 59 `let` statements are all accounted for in state.js; the 21 named const tables (plus HUB_URL and
 CT_CASES, documented as non-consts above) are each assigned; all remaining consts follow the const
 placement rule at the top of this appendix.
+
+## Corrections (Task 4 review, 2026-09-17)
+
+- `igrtViewSVG` (b7140af line 7441) was omitted from the original 315-function census — true total is 316. It belongs to **linac-igrt.js** (IGRT rendering cluster). Task 5 must move it with that group.
+- Verified circular import edges after Task 4 (all function-body-only, eval-safe): `main.js ↔ scene.js`, `main.js ↔ travel.js`, `scene.js ↔ cctv.js`. Later extractions should expect to preserve these.
