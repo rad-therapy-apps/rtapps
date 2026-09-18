@@ -3496,7 +3496,10 @@ function deliveryTick(now) {
 		S.treatmentDelivery.gateHeld = true;
 		S.treatmentDelivery.lastTick = now;
 		if (S.beamOn) setBeamState(false);
-		renderTreatmentDeliveryPanel();
+		if (now - S.deliveryPanelStamp > 250) {
+			S.deliveryPanelStamp = now;
+			renderTreatmentDeliveryPanel();
+		}
 		S.deliveryRAF = requestAnimationFrame(deliveryTick);
 		return;
 	}
