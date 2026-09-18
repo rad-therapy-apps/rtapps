@@ -61,6 +61,8 @@ import {
 	renderClinicalIGRT,
 	resetClinicalIGRTForCase
 } from './linac-igrt.js';
+import { setTextById, wrap360 } from './main.js';
+import { renderTreatmentCompletionControls, resetTreatmentCompletion } from './sdk.js';
 import {
 	allTreatmentFieldsCompleted,
 	clearanceOverrideActive,
@@ -74,17 +76,13 @@ import {
 	getDeliveryReadiness,
 	igrtAlignmentReadyForDelivery,
 	renderClearanceOverrideCard,
-	renderTreatmentCompletionControls,
-	resetTreatmentCompletion,
 	setCenteredJawField,
 	setPendantLCD,
-	setTextById,
 	syncFundamentalReadouts,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN,
 	treatmentTrajectorySamples,
-	updateBEVInset,
-	wrap360
-} from './main.js';
+	updateBEVInset
+} from './linac-safety.js';
 
 const DELIVERY_SPEED_FACTOR = 4;
 

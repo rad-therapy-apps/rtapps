@@ -29,7 +29,7 @@ import {
 	restoreCollisionPose,
 	setPendantLCD,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
-} from './main.js';
+} from './linac-safety.js';
 
 function clinicalIGRTModeForCase() {
 	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();

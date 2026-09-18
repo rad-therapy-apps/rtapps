@@ -25,15 +25,8 @@ import {
 	roomLightsToggleButton
 } from './dom.js';
 import { setupCCTVFeeds } from './cctv.js';
-import {
-	animate,
-	fundamentalState,
-	wrap360,
-	setTextById,
-	setPendantLCD,
-	syncOperatorConsole,
-	allTreatmentFieldsCompleted
-} from './main.js';
+import { animate, setTextById, syncOperatorConsole, wrap360 } from './main.js';
+import { allTreatmentFieldsCompleted, fundamentalState, setPendantLCD } from './linac-safety.js';
 import {
 	createImmobilizationShelf3D,
 	createImmobilizationPatientGroup,
@@ -384,6 +377,11 @@ export const linacPartsData = [
 		sil: { type: 'cylinder', size: [0.08, 0.08, 0.02, 16] }
 	}
 ];
+
+// Derived from linacPartsData above; kept in this module (rather than game.js, its
+// original main.js home) because reading linacPartsData at module top level from a
+// separate file is unsafe once that file sits in a cycle with scene.js (eval-order).
+export const CORE_PART_IDS = linacPartsData.filter((p) => !p.isSubComponent).map((p) => p.id);
 
 // ---------- Lightweight procedural vault (canvas textures, no external files) ----------
 function makeFloorTexture() {

@@ -3,7 +3,8 @@ import * as THREE from 'three-linac';
 import { S } from './state.js';
 import { viewVaultButton, viewControlRoomButton } from './dom.js';
 import { ISOCENTER_Y_TARGET, GANTRY_PLANE_Z_TARGET, controlRoomAccentMats } from './scene.js';
-import { setPendantLCD, syncOperatorConsole } from './main.js';
+import { syncOperatorConsole } from './main.js';
+import { setPendantLCD } from './linac-safety.js';
 
 export function syncRoomViewButtons(mode = S.currentRoomView) {
 	if (viewVaultButton) viewVaultButton.classList.toggle('active-function', mode === 'vault');
