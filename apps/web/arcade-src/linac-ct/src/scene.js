@@ -27,13 +27,16 @@ import {
 import { setupCCTVFeeds } from './cctv.js';
 import {
 	animate,
-	createImmobilizationShelf3D,
-	createImmobilizationPatientGroup,
 	fundamentalState,
 	wrap360,
 	setTextById,
 	setPendantLCD,
 	syncOperatorConsole,
+	allTreatmentFieldsCompleted
+} from './main.js';
+import {
+	createImmobilizationShelf3D,
+	createImmobilizationPatientGroup,
 	treatmentParamMatches,
 	canonicalCouchDisplay,
 	getIGRTExpectedAbsoluteCouch,
@@ -43,7 +46,6 @@ import {
 	normalizeAngleValue,
 	parseJawSpec,
 	getODIMeasurement,
-	allTreatmentFieldsCompleted,
 	activeSpecialSetupSpec,
 	specialSetupVerified,
 	immobilizationRequired,
@@ -51,9 +53,9 @@ import {
 	immobilizationVerified,
 	motionRequired,
 	srsRequired,
-	renderClinicalIGRT,
 	renderTreatmentDeliveryPanel
-} from './main.js';
+} from './linac-delivery.js';
+import { renderClinicalIGRT } from './linac-igrt.js';
 
 const roomCeilingFixtureMats = [];
 export const controlRoomAccentMats = [];
