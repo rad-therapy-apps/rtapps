@@ -1,4 +1,6 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
+import './console-patch.js';
+import './workspace.js';
 import { S } from './state.js';
 import {
 	adaptiveApprove,
