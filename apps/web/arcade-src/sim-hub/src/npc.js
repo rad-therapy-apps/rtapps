@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers.js';
 import { scene, camera } from './scene.js';
+import { S } from './state.js';
 import { registerDutyActor, registerNpcExchange } from './npc-behavior.js';
 import { STAFF_GUIDES, registerInteractable } from './interact.js';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main.js';
@@ -275,17 +276,29 @@ export function faceNpcToward(a, b) {
 	b.getWorldPosition(pb);
 	a.rotation.y = Math.atan2(pb.x - pa.x, pb.z - pa.z);
 }
+const LABEL_FADE_DIST = 3.4;
+const LABEL_RECHECK_STRIDE = 10;
+let labelFrameCount = 0;
+/* RTApps perf task 2: in walk mode, a label already known to be past the fade-out distance
+   skips the world-position/distance/DOM work most frames — it's re-checked every 10th frame so
+   an approaching NPC regains its label promptly. Skipped labels leave their DOM state (opacity,
+   visibility) exactly as it was, so a hidden label never flickers. Overview mode is unchanged:
+   every label is recomputed every frame there, same as before this gating existed. */
 export function updateNpcLabels() {
+	labelFrameCount++;
+	const walkGated = S.mode === 'walk';
 	const cam = new THREE.Vector3();
 	camera.getWorldPosition(cam);
 	const wp = new THREE.Vector3();
 	for (const n of npcRoleLabels) {
+		if (walkGated && n.farAway && labelFrameCount % LABEL_RECHECK_STRIDE !== 0) continue;
 		n.group.getWorldPosition(wp);
 		const d = cam.distanceTo(wp);
-		const near = d < 3.4;
+		const near = d < LABEL_FADE_DIST;
+		n.farAway = !near;
 		if (n.lab) n.lab.visible = near;
 		/* RTApps perf pass 2: invisible CSS2D objects skip DOM transforms entirely */ n.el.style.opacity =
-			near ? String(Math.max(0, Math.min(1, (3.4 - d) / 1.1))) : '0';
+			near ? String(Math.max(0, Math.min(1, (LABEL_FADE_DIST - d) / 1.1))) : '0';
 	}
 }
 export function faceAlong(o, dx, dz, off) {

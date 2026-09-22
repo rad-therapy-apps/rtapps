@@ -34,13 +34,41 @@ import {
 	shortestCorridorRouteFromPosition,
 	makePolylineCurve
 } from './walk.js';
-import { roomById, ROOM_CAST, doors } from './main.js';
+import { roomById, ROOM_CAST, doors, player } from './main.js';
 import { JOURNEY, journeyActorRoom } from './journey.js';
 import { setupAmbulance } from './equipment.js';
 
 export const movers = [];
 const dutyActors = [];
 export const interactionScenes = [];
+
+/* RTApps perf task 2: walk-mode distance gating for ambient movers and duty animations.
+   Full-fidelity always applies in overview/orbit mode, to any actor involved in the active
+   guided journey, and to any actor mid actor-handoff transition. Everyone else is strided by
+   distance to the player so far-off NPCs sample less often instead of freezing. Both
+   updateMovers and updateDutyAnimations already compute position/pose as a pure function of
+   absolute elapsed seconds (no per-frame accumulation) — so skipping frames never causes
+   drift; resampling at the current `sec` next time a strided actor updates lands exactly where
+   continuous motion would have put it, at the same real-world speed. */
+const NEAR_RADIUS_SQ = 30 * 30;
+let frameCount = 0;
+let journeyActorSet = null;
+let journeyActorSetFrame = -1;
+function journeyInvolved(actor) {
+	if (!actor) return false;
+	if (actor.userData?.inHandoff) return true;
+	if (typeof JOURNEY === 'undefined' || !JOURNEY.active) return false;
+	if (journeyActorSetFrame !== frameCount) {
+		journeyActorSet = new Set(Object.values(JOURNEY).filter((v) => v && v.isObject3D));
+		journeyActorSetFrame = frameCount;
+	}
+	return journeyActorSet.has(actor);
+}
+function actorUpdateStride(objWorldPos, actor) {
+	if (S.mode !== 'walk') return 1;
+	if (journeyInvolved(actor)) return 1;
+	return objWorldPos.distanceToSquared(player.pos) < NEAR_RADIUS_SQ ? 1 : 4;
+}
 export function registerDutyActor(group, mode = 'idle', offset = Math.random()) {
 	dutyActors.push({ group, mode, offset });
 	return group;
@@ -71,6 +99,8 @@ export function updateDutyAnimations(sec) {
 			poseCharacter(d.group, 'seated');
 			continue;
 		}
+		const stride = actorUpdateStride(d.group.position, d.group);
+		if (stride > 1 && frameCount % stride !== 0) continue;
 		const a = sec * 1.7 + d.offset * 6.283,
 			s = Math.sin(a),
 			s2 = Math.sin(a * 0.67 + 0.8);
@@ -170,7 +200,10 @@ function addMover(
 	movers.push({ group, curve: moverPath(points, closed), speed, offset, yawOffset });
 }
 export function updateMovers(sec) {
+	frameCount++;
 	for (const m of movers) {
+		const stride = actorUpdateStride(m.group.position, m.group);
+		if (stride > 1 && frameCount % stride !== 0) continue;
 		const u = (sec * m.speed + m.offset) % 1,
 			p = m.curve.getPointAt(u),
 			n = m.curve.getPointAt((u + 0.01) % 1);
