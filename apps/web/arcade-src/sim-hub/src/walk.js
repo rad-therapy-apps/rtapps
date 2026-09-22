@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 8): walk-mode movement, collision, doors, guided
    travel and corridor routing — player movement/collision (`canMove`, `collider`), pointer-lock
    mouse look, door open/close animation and target state (`updateDoors`, `setDoorTarget`,
@@ -19,12 +20,12 @@
    `updateFacilityInfo`/`renderRoomList`/`updateRoomUI` are owned by ./interact.js (task 8's
    companion module) and imported back here. */
 import * as THREE from 'three';
-import { S } from './state.js';
-import { camera, orbit, canvas } from './scene.js';
-import { ROOMS, corridorAnchor, doorLabel } from './rooms.js';
-import { cleanPoints } from './helpers.js';
-import { roomById, player, doors, ceilings, keys } from './main.js';
-import { showCtQaDock } from './sdk-bridge.js';
+import { S } from './state';
+import { camera, orbit, canvas } from './scene';
+import { ROOMS, corridorAnchor, doorLabel } from './rooms';
+import { cleanPoints } from './helpers';
+import { roomById, player, doors, ceilings, keys } from './main';
+import { showCtQaDock } from './sdk-bridge';
 import {
 	JOURNEY,
 	updateJourneyUI,
@@ -35,7 +36,7 @@ import {
 	applyWalkConversationComposition,
 	enableGuidedConversationComposition,
 	showJourneyCheckinIntro
-} from './journey.js';
+} from './journey';
 import {
 	toast,
 	disableRoomInspection,
@@ -43,7 +44,7 @@ import {
 	updateFacilityInfo,
 	renderRoomList,
 	updateRoomUI
-} from './interact.js';
+} from './interact';
 
 const HUB = new THREE.Vector3(0, 1.68, 0);
 const TREATMENT_JUNCTION_X = 64;

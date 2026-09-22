@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 5): world geometry and room builders — the ROOMS
    layout table, room-shell construction (walls, doors, floors, ceilings, lighting, decor,
    furnishing dispatch), the hub lobby, exterior grounds, and the hub-and-wings corridor
@@ -22,8 +23,8 @@ import {
 	makeDoorHeaderSign,
 	makeLobbyEntranceSign,
 	architecturalWallMaterial
-} from './helpers.js';
-import { scene } from './scene.js';
+} from './helpers';
+import { scene } from './scene';
 import {
 	lampPost,
 	wheelchairObject,
@@ -62,11 +63,11 @@ import {
 	ctScanner,
 	emulatorLinacShell,
 	hdrSuite
-} from './props.js';
-import { add, MAT, roomFloors, ceilings, doors, roomById } from './main.js';
-import { registerInteractable } from './interact.js';
-import { doorNormal, doorCenter } from './walk.js';
-import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment.js';
+} from './props';
+import { add, MAT, roomFloors, ceilings, doors, roomById } from './main';
+import { registerInteractable } from './interact';
+import { doorNormal, doorCenter } from './walk';
+import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment';
 
 export const C = {
 	front: 0x6fb6ff,

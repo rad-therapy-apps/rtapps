@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 6): NPC construction, appearance and labels —
    the humanoid figure builder, clothing/badge/pose helpers, role-label and speech-bubble UI,
    facing helpers, and the department cast placement (`departmentStaff`). Verbatim extractions
@@ -9,12 +10,12 @@
    moved to ./interact.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers.js';
-import { scene, camera } from './scene.js';
-import { S } from './state.js';
-import { registerDutyActor, registerNpcExchange } from './npc-behavior.js';
-import { STAFF_GUIDES, registerInteractable } from './interact.js';
-import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main.js';
+import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers';
+import { scene, camera } from './scene';
+import { S } from './state';
+import { registerDutyActor, registerNpcExchange } from './npc-behavior';
+import { STAFF_GUIDES, registerInteractable } from './interact';
+import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
 
 export function personFigure(top = 0x5e8fb2, bottom = 0x394651, skin = 0xf0c7a3, opts = {}) {
 	const g = new THREE.Group(),

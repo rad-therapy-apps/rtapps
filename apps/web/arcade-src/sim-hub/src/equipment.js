@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons, the ambulance
    drop-off choreography, operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
    status displays, the LINAC-head/engineering wall stations, and Phase-5 wayfinding signage.
@@ -19,7 +20,7 @@
    console/journey sequence and by ./interact.js's equipment panel) are exported here and
    imported back into those. */
 import * as THREE from 'three';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	box,
 	std,
@@ -27,20 +28,20 @@ import {
 	workflowDisplayTexture,
 	engineeringLinacOverviewTexture,
 	engineeringShieldingTexture
-} from './helpers.js';
-import { scene, camera, orbit, renderer } from './scene.js';
-import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props.js';
-import { personFigure, faceAlong, poseCharacter } from './npc.js';
-import { advanceRoute, advancePed, walkSwing } from './npc-behavior.js';
+} from './helpers';
+import { scene, camera, orbit, renderer } from './scene';
+import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
+import { personFigure, faceAlong, poseCharacter } from './npc';
+import { advanceRoute, advancePed, walkSwing } from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
 	lhPreviewTexture,
 	LINAC_HEAD_LAB,
 	showEquipmentPanel
-} from './interact.js';
-import { setDoorTarget } from './walk.js';
-import { roomById, PRIMARY_PATIENTS, doors, player } from './main.js';
+} from './interact';
+import { setDoorTarget } from './walk';
+import { roomById, PRIMARY_PATIENTS, doors, player } from './main';
 import {
 	JOURNEY,
 	ROOM_WORKFLOW,
@@ -51,7 +52,7 @@ import {
 	roomElapsedLabel,
 	workflowTransitions,
 	journeySpeech
-} from './journey.js';
+} from './journey';
 
 const PHASE4_DISPLAYS = {};
 function paintWorkflowDisplay(d, status = 'READY', rows = [], accent = '#42d5cf') {

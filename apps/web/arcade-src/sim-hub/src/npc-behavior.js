@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 6): NPC movement, duties, exchanges and handoffs —
    the ambient mover registry (path-walkers, patrols), duty-pose idle animation, staff/patient
    speech exchanges, and the corridor-routed actor-handoff system used when a staff/patient
@@ -12,11 +13,11 @@
    `shortestCorridorRoute`/`shortestCorridorRouteFromPosition`/`makePolylineCurve` moved to
    ./walk.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
-import { zeroY } from './helpers.js';
-import { scene, camera } from './scene.js';
-import { S } from './state.js';
-import { corridorAnchor } from './rooms.js';
-import { wheelchairObject, medCartObject, vehicleObject } from './props.js';
+import { zeroY } from './helpers';
+import { scene, camera } from './scene';
+import { S } from './state';
+import { corridorAnchor } from './rooms';
+import { wheelchairObject, medCartObject, vehicleObject } from './props';
 import {
 	personFigure,
 	setNpcRole,
@@ -25,7 +26,7 @@ import {
 	faceAlong,
 	npcBubble,
 	bubbleVis
-} from './npc.js';
+} from './npc';
 import {
 	doorPoint,
 	setDoorTarget,
@@ -33,10 +34,10 @@ import {
 	shortestCorridorRoute,
 	shortestCorridorRouteFromPosition,
 	makePolylineCurve
-} from './walk.js';
-import { roomById, ROOM_CAST, doors, player } from './main.js';
-import { JOURNEY, journeyActorRoom } from './journey.js';
-import { setupAmbulance } from './equipment.js';
+} from './walk';
+import { roomById, ROOM_CAST, doors, player } from './main';
+import { JOURNEY, journeyActorRoom } from './journey';
+import { setupAmbulance } from './equipment';
 
 export const movers = [];
 const dutyActors = [];

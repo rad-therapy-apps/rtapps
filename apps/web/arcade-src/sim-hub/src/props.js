@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 5): prop/furniture builders — waiting-room and
    clinical furniture, signage, safety equipment, wall displays, and equipment shells (chairs,
    desks, exam tables, monitors, dispensers, the CT/LINAC-shell objects, etc). Verbatim
@@ -10,12 +11,12 @@
    walk-mode interaction registry) and `openKioskDialog` (the wayfinding UI) moved to
    ./interact.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
-import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers.js';
-import { scene } from './scene.js';
-import { personFigure } from './npc.js';
-import { add, MAT } from './main.js';
-import { registerInteractable, openKioskDialog } from './interact.js';
-import { CT_COUCH, ROOM_CLOCKS } from './equipment.js';
+import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers';
+import { scene } from './scene';
+import { personFigure } from './npc';
+import { add, MAT } from './main';
+import { registerInteractable, openKioskDialog } from './interact';
+import { CT_COUCH, ROOM_CLOCKS } from './equipment';
 
 export function lampPost(x, z, h = 4.4) {
 	const g = new THREE.Group();

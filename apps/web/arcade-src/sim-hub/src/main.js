@@ -1,9 +1,10 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 import * as THREE from 'three';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { S } from './state.js';
+import { S } from './state';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { box, std, wall, makeDirectionalSign } from './helpers.js';
+import { box, std, wall, makeDirectionalSign } from './helpers';
 import {
 	renderer,
 	scene,
@@ -16,9 +17,9 @@ import {
 	updateAmbience,
 	ambienceProfile,
 	updatePerfFloor
-} from './scene.js';
+} from './scene';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { vehicleObject, monumentSign, privacyChangingNook } from './props.js';
+import { vehicleObject, monumentSign, privacyChangingNook } from './props';
 import {
 	C,
 	ROOMS,
@@ -33,15 +34,15 @@ import {
 	addCirculationProps,
 	addClinicalWallPolish,
 	buildExteriorAmbient
-} from './rooms.js';
-import { updateNpcLabels, departmentStaff } from './npc.js';
+} from './rooms';
+import { updateNpcLabels, departmentStaff } from './npc';
 import {
 	updateMovers,
 	addMovingActors,
 	updateDutyAnimations,
 	updateNpcExchanges,
 	updateHandoffTransitions
-} from './npc-behavior.js';
+} from './npc-behavior';
 import {
 	buildClinicalEquipmentLayer,
 	updateClinicalEquipment,
@@ -58,7 +59,7 @@ import {
 	buildPhase5Wayfinding,
 	workflowState,
 	CLINICAL_FOCUS
-} from './equipment.js';
+} from './equipment';
 import {
 	beginTravel,
 	updateTravel,
@@ -67,7 +68,7 @@ import {
 	setMode,
 	applyWalkMouseDelta,
 	requestWalkPointerLock
-} from './walk.js';
+} from './walk';
 import {
 	performInteraction,
 	updateInteractionUI,
@@ -90,7 +91,7 @@ import {
 	updateFacilityInfo,
 	procRenderSite,
 	procRefreshRelease
-} from './interact.js';
+} from './interact';
 import {
 	JOURNEY,
 	journeyActors,
@@ -103,8 +104,8 @@ import {
 	startJourneyFromKiosk,
 	updateJourneyRoomTiming,
 	updateJourneyCameraFollow
-} from './journey.js';
-import './sdk-bridge.js';
+} from './journey';
+import './sdk-bridge';
 
 const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();

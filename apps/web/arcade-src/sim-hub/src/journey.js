@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 9 — final extraction): the patient-journey narrative
    state machine and its conversation-camera composition helpers. Verbatim extractions from
    main.js: the two treatment-journey pathways (`startTreatmentJourney`/`advanceTreatmentJourney`
@@ -26,10 +27,10 @@
    anchor) is owned by ./sdk-bridge.js and imported back here for
    `advanceNewPatientJourney`'s use. */
 import * as THREE from 'three';
-import { S } from './state.js';
-import { box, sphere, std, cleanPoints, later } from './helpers.js';
-import { scene, camera, orbit, AMBIENCE, initAmbience } from './scene.js';
-import { ROOMS } from './rooms.js';
+import { S } from './state';
+import { box, sphere, std, cleanPoints, later } from './helpers';
+import { scene, camera, orbit, AMBIENCE, initAmbience } from './scene';
+import { ROOMS } from './rooms';
 import {
 	setPatientGown,
 	setNpcRole,
@@ -37,14 +38,14 @@ import {
 	npcBubble,
 	bubbleVis,
 	faceNpcToward
-} from './npc.js';
-import { movers, interactionScenes, setActorSeated, movementPathFor } from './npc-behavior.js';
+} from './npc';
+import { movers, interactionScenes, setActorSeated, movementPathFor } from './npc-behavior';
 import {
 	workflowState,
 	resetCtCouchMotion,
 	startCtCouchScan,
 	clearClinicalFocus
-} from './equipment.js';
+} from './equipment';
 import {
 	doorNormal,
 	doorPoint,
@@ -56,14 +57,8 @@ import {
 	beginTravel,
 	setMode,
 	makePolylineCurve
-} from './walk.js';
-import {
-	toast,
-	closeKioskDialog,
-	roomInspectPose,
-	updateRoomUI,
-	renderRoomList
-} from './interact.js';
+} from './walk';
+import { toast, closeKioskDialog, roomInspectPose, updateRoomUI, renderRoomList } from './interact';
 import {
 	roomById,
 	ROOM_GUIDES,
@@ -72,8 +67,8 @@ import {
 	PRIMARY_PATIENTS,
 	doors,
 	player
-} from './main.js';
-import { focusCtPatientFromControl } from './sdk-bridge.js';
+} from './main';
+import { focusCtPatientFromControl } from './sdk-bridge';
 
 const JOURNEY_ROOM_TIMING = { roomId: null, enteredAt: 0, lastPatient: null };
 function activeJourneyPatientActor() {

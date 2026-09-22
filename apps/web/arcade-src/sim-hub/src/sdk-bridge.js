@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 9 — final extraction): the RTApps SDK integration
    surface and the CT/QA procedures flow. Verbatim extractions from main.js: the sdk_slug
    fetch-resolvers that prefetch `S.ROOM_APP_URL`/`S.CONSOLE_APP_URL` from
@@ -20,15 +21,10 @@
    The `document.getElementById('sdClose'/'sdRestart')` staff-dialogue-restart wiring sitting
    between the v42 and v43 sections is unrelated to CT/QA and stayed in main.js. */
 import * as THREE from 'three';
-import { S } from './state.js';
-import { camera, orbit } from './scene.js';
-import {
-	setClinicalFocus,
-	clearClinicalFocus,
-	flashCtScanner,
-	pulseCtObject
-} from './equipment.js';
-import { beginTravel } from './walk.js';
+import { S } from './state';
+import { camera, orbit } from './scene';
+import { setClinicalFocus, clearClinicalFocus, flashCtScanner, pulseCtObject } from './equipment';
+import { beginTravel } from './walk';
 import {
 	toast,
 	openProcedureLab,
@@ -40,9 +36,9 @@ import {
 	procSetTab,
 	updateRoomUI,
 	renderRoomList
-} from './interact.js';
-import { roomById } from './main.js';
-import { JOURNEY, clearJourneyCameraFollow } from './journey.js';
+} from './interact';
+import { roomById } from './main';
+import { JOURNEY, clearJourneyCameraFollow } from './journey';
 
 // RTApps (plan 4c): prefetch the room app's player URL once; if it can't resolve
 // (activity unseeded/unpublished, or offline), ROOM_APP_URL stays null and the three

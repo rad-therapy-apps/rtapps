@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 3): primitives, textures, signs, small utils.
    Verbatim extractions from main.js — mesh primitives (box/cyl/sphere/std/eRbox), canvas
    texture builders (sign/door-header/badge/workflow/engineering textures/architectural wall
@@ -7,9 +8,9 @@
    ./journey.js, task 9) and `collider`/`doorCenter`/`doorNormal` (task 8's ./walk.js). */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { scene } from './scene.js';
-import { collider, doorCenter, doorNormal } from './walk.js';
-import { JOURNEY } from './journey.js';
+import { scene } from './scene';
+import { collider, doorCenter, doorNormal } from './walk';
+import { JOURNEY } from './journey';
 
 export function std(c, r = 0.75, m = 0.03, o = {}) {
 	return new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: m, ...o });

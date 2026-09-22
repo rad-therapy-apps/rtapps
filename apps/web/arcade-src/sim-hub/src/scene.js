@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 4): renderer/camera/light bootstrap, resize
    handling, adaptive perf floor, and ambient audio. Verbatim extractions from main.js —
    the top-of-script scene/camera/renderer/orbit/label-renderer setup plus the hemisphere+sun
@@ -7,8 +8,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
-import { S } from './state.js';
-import { toast } from './interact.js';
+import { S } from './state';
+import { toast } from './interact';
 
 export const canvas = document.getElementById('scene');
 export const renderer = new THREE.WebGLRenderer({

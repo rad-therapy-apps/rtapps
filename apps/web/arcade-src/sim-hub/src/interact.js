@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 8): interactables, prompts, staff dialogues,
    procedure/QA labs, the LINAC-head-lab dialog, equipment/kiosk panels, and room info/UI —
    the interactable registry (`registerInteractable`/`nearestInteractable`), the walk-mode
@@ -20,33 +21,26 @@
    `setDoorTarget`/`doorCenter`/`doorNormal`/`beginTravel`/`nearestDoor`/`setMode` are owned by
    ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
-import { S } from './state.js';
-import { camera, orbit } from './scene.js';
-import { ROOMS } from './rooms.js';
-import { bubble } from './npc.js';
-import { startActorHandoff } from './npc-behavior.js';
+import { S } from './state';
+import { camera, orbit } from './scene';
+import { ROOMS } from './rooms';
+import { bubble } from './npc';
+import { startActorHandoff } from './npc-behavior';
 import {
 	EQUIPMENT_BY_ID,
 	EQUIPMENT_BY_ROOM,
 	EQUIPMENT_EXPLORED,
 	EQUIPMENT_SPECS,
 	equipmentRoomName
-} from './equipment.js';
-import {
-	setDoorTarget,
-	doorCenter,
-	doorNormal,
-	beginTravel,
-	nearestDoor,
-	setMode
-} from './walk.js';
-import { roomById, player, doors, ROOM_GUIDES, HANDOFFS } from './main.js';
-import { PROC_STATE, PROC_SITES, showCtQaDock, syncCtQaProgress } from './sdk-bridge.js';
+} from './equipment';
+import { setDoorTarget, doorCenter, doorNormal, beginTravel, nearestDoor, setMode } from './walk';
+import { roomById, player, doors, ROOM_GUIDES, HANDOFFS } from './main';
+import { PROC_STATE, PROC_SITES, showCtQaDock, syncCtQaProgress } from './sdk-bridge';
 import {
 	focusConversationCamera,
 	applyWalkConversationComposition,
 	focusTargetsForRoom
-} from './journey.js';
+} from './journey';
 
 /* === Department orientation: staff roles and common patient questions === */
 export const STAFF_GUIDES = {

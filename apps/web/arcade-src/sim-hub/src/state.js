@@ -1,3 +1,4 @@
+// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 2): shared mutable state.
    Every top-level `let`/`var` formerly declared in main.js lives here as a
    property of `S` instead. ES module imports are read-only bindings, so a
