@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 3): primitives, textures, signs, small utils.
    Verbatim extractions from main.js — mesh primitives (box/cyl/sphere/std/eRbox), canvas
    texture builders (sign/door-header/badge/workflow/engineering textures/architectural wall
@@ -148,7 +147,7 @@ export function makeDoorHeaderTexture(room) {
 	x.fillRect(0, 0, c.width, 28);
 	x.fillStyle = '#19313a';
 	x.font = '800 58px Arial';
-	let nm = room.name
+	const nm = room.name
 		.replace('Treatment Vault 1 — LINAC', 'TREATMENT VAULT 1 · LINAC')
 		.replace('Treatment Vault 2 — LINAC', 'TREATMENT VAULT 2 · LINAC');
 	if (nm.length > 34) x.font = '800 48px Arial';
@@ -294,7 +293,7 @@ export function engineeringLinacOverviewTexture() {
 	x.strokeStyle = '#4fd1c5';
 	x.lineWidth = 4;
 	x.strokeRect(36, 138, 952, 440);
-	const nodes = [
+	const nodes: [string, number, number, number, number, string][] = [
 		['Modulator / Power cabinet', 110, 220, 160, 60, '#5b7381'],
 		['Magnetron / Klystron', 310, 220, 160, 60, '#6a86a8'],
 		['Accelerating waveguide', 520, 220, 180, 60, '#5f86d7'],
@@ -305,7 +304,9 @@ export function engineeringLinacOverviewTexture() {
 	];
 	x.textAlign = 'center';
 	nodes.forEach((n) => {
-		x.fillStyle = n[4];
+		// Cast preserves existing runtime behavior verbatim (n[4] is the numeric
+		// height, not the color at n[5] — pre-existing, not a logic fix here).
+		x.fillStyle = n[4] as unknown as string;
 		x.fillRect(n[1], n[2], n[3], n[4] ? 60 : 60);
 		x.fillStyle = '#fff';
 		x.font = '800 22px Arial';
@@ -330,7 +331,7 @@ export function engineeringLinacOverviewTexture() {
 	function wrapText(ctx, text, cx, y, maxW, lh) {
 		const words = text.split(' ');
 		let line = '';
-		let lines = [];
+		const lines = [];
 		words.forEach((w) => {
 			const test = line ? line + ' ' + w : w;
 			if (ctx.measureText(test).width > maxW && line) {
