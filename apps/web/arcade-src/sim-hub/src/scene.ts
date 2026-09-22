@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 4): renderer/camera/light bootstrap, resize
    handling, adaptive perf floor, and ambient audio. Verbatim extractions from main.js —
    the top-of-script scene/camera/renderer/orbit/label-renderer setup plus the hemisphere+sun
@@ -110,7 +109,10 @@ export const AMBIENCE = {
 };
 export function initAmbience() {
 	if (AMBIENCE.ctx) return;
-	const AC = window.AudioContext || window.webkitAudioContext;
+	// Legacy vendor-prefixed fallback, not in the DOM lib's Window type — cast only.
+	const AC =
+		window.AudioContext ||
+		(window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
 	if (!AC) return;
 	const ctx = new AC(),
 		master = ctx.createGain(),
@@ -152,7 +154,9 @@ export function initAmbience() {
 	Object.assign(AMBIENCE, { ctx, master, compressor, noiseGain, humGain, hum2Gain, filter });
 }
 export function ambienceProfile() {
-	const r = S.activeRoom;
+	// S.activeRoom is `unknown` (Room has no interface yet, task 11); cast to the
+	// minimal shape this function reads.
+	const r = S.activeRoom as { id?: string; zone?: string } | null;
 	const id = r?.id || '';
 	if (id === 'vault1' || id === 'vault2')
 		return { master: 0.44, noise: 0.115, hum: 0.145, hum2: 0.038, freq: 560 };
