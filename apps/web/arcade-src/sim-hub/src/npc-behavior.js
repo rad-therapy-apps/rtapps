@@ -49,8 +49,18 @@ export const interactionScenes = [];
    updateMovers and updateDutyAnimations already compute position/pose as a pure function of
    absolute elapsed seconds (no per-frame accumulation) — so skipping frames never causes
    drift; resampling at the current `sec` next time a strided actor updates lands exactly where
-   continuous motion would have put it, at the same real-world speed. */
-const NEAR_RADIUS_SQ = 30 * 30;
+   continuous motion would have put it, at the same real-world speed. Exchange conversations
+   need no membership check: NEAR_RADIUS is derived from EXCHANGE_TRIGGER_DIST (see below), so
+   actively-conversing actors are always full-rate by construction. */
+const EXCHANGE_TRIGGER_DIST = 15;
+/* Full-rate radius for the stride gate. Derived from the exchange trigger so the invariant
+   "an actor whose exchange conversation is active is ALWAYS inside the full-rate radius"
+   holds by construction: exchanges only activate when the camera (== player in walk mode)
+   is within EXCHANGE_TRIGGER_DIST of the pair midpoint, and partners stand within a couple
+   of units of that midpoint — so 2x the trigger distance always covers both actors.
+   Raising EXCHANGE_TRIGGER_DIST automatically widens this radius; do not decouple them. */
+const NEAR_RADIUS = Math.max(30, EXCHANGE_TRIGGER_DIST * 2);
+const NEAR_RADIUS_SQ = NEAR_RADIUS * NEAR_RADIUS;
 let frameCount = 0;
 let journeyActorSet = null;
 let journeyActorSetFrame = -1;
@@ -165,7 +175,7 @@ export function updateNpcExchanges(sec) {
 		sc.a.getWorldPosition(pa);
 		sc.b.getWorldPosition(pb);
 		const mid = pa.clone().add(pb).multiplyScalar(0.5),
-			near = cam.distanceTo(mid) < 15 && S.mode !== 'overview';
+			near = cam.distanceTo(mid) < EXCHANGE_TRIGGER_DIST && S.mode !== 'overview';
 		const t = (sec + sc.offset * sc.period) % sc.period;
 		bubbleVis(sc.bubbleA, false);
 		bubbleVis(sc.bubbleB, false);
