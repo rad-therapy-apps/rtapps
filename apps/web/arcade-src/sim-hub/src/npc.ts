@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 6): NPC construction, appearance and labels —
    the humanoid figure builder, clothing/badge/pose helpers, role-label and speech-bubble UI,
    facing helpers, and the department cast placement (`departmentStaff`). Verbatim extractions
@@ -17,7 +16,21 @@ import { registerDutyActor, registerNpcExchange } from './npc-behavior';
 import { STAFF_GUIDES, registerInteractable } from './interact';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
 
-export function personFigure(top = 0x5e8fb2, bottom = 0x394651, skin = 0xf0c7a3, opts = {}) {
+// RTApps (#77 phase 2 task 13): typed boundary for the appearance-options bag passed into
+// personFigure — every field read inside personFigure itself. Callers also pass richer
+// per-role literals (e.g. CHARACTER_STYLES entries with skin/pose) through this same
+// parameter; those extra fields are fine since they're never passed as inline literals here.
+interface PersonFigureOptions {
+	female?: boolean;
+	hairColor?: number;
+}
+
+export function personFigure(
+	top = 0x5e8fb2,
+	bottom = 0x394651,
+	skin = 0xf0c7a3,
+	opts: PersonFigureOptions = {}
+) {
 	const g = new THREE.Group(),
 		o = opts || {},
 		hairColor = o.hairColor ?? 0x4a382e;
@@ -256,8 +269,14 @@ function setNamedNpcRole(group, name, role, detail = 'Clinical team member') {
 	registerInteractable(group, `${name} · ${role}`, detail, 2.4, null);
 	return group;
 }
+// RTApps (#77 phase 2 task 13): npcBubble stashes the CSS2DObject it creates directly on the
+// DOM element, so bubbleVis can toggle both the CSS opacity and the CSS2DObject's visibility
+// from one reference — small interface extension + one cast at creation.
+interface NpcSpeechElement extends HTMLDivElement {
+	_rtappsObj?: CSS2DObject;
+}
 export function npcBubble(group, kind = 'staff') {
-	const el = document.createElement('div');
+	const el = document.createElement('div') as NpcSpeechElement;
 	el.className = 'npc-speech ' + kind;
 	const obj = new CSS2DObject(el);
 	obj.position.set(0, 2.48, 0);
@@ -266,7 +285,7 @@ export function npcBubble(group, kind = 'staff') {
 	return el;
 }
 /* RTApps perf pass 2: hide the CSS2DObject with the bubble so hidden bubbles cost zero DOM work. */
-export function bubbleVis(b, on) {
+export function bubbleVis(b: NpcSpeechElement, on) {
 	b.style.opacity = on ? '1' : '0';
 	if (b._rtappsObj) b._rtappsObj.visible = !!on;
 }
@@ -335,7 +354,10 @@ export function departmentStaff() {
 		vault2: { hairColor: 0x1c1310, skin: 0x6f4933, pose: 'support' },
 		hdr: { female: true, hairColor: 0x221814, skin: 0xd7a37f, pose: 'support' }
 	};
-	const place = (id, role, detail, top, dx, dz, ry, skin, bottom, guideKey = null) => {
+	// RTApps (#77 phase 2 task 13): `bottom` given an explicit `undefined` default — every
+	// call site either passes `undefined` or omits it (falls back to 0x39464f below) — so this
+	// is a type-only optionality fix, not a behavior change.
+	const place = (id, role, detail, top, dx, dz, ry, skin, bottom = undefined, guideKey = null) => {
 		const r = R(id);
 		if (!r) return;
 		const prof = CHARACTER_STYLES[guideKey || id] || {};
