@@ -323,3 +323,17 @@ Same conversion protocol. First, Task 10's plumbing pattern applied to linac-ct:
 ## Verification summary
 
 Per task: full gates (lint / check incl. `tsc -p tsconfig.arcade.json` / 161 tests / `build:arcade`) + `node scripts/arcade-smoke.mjs` over all three built pages + reviewer purity check (relocation purity PRs 1–2; types-only purity PRs 3–4) + bidirectional symbol sweeps on every move. Per push: CI fresh-stack e2e (`simulator.e2e.ts`: hub door handoff, `sim-linac-fraction` + `sim-ct-scan` completions, the ct-1.png URL + Cache-Control contract) on the self-hosted runner. Owner walks after PRs 1, 2, and 4. SDK/postMessage contract lines byte-verified at review wherever a diff touches them.
+
+---
+
+## PR 5 — vendor runtime CDN libraries (follow-up, added 2026-09-22)
+
+**Why:** five pages still load libraries from public CDNs at runtime — the last remnant of the copy-paste migration pattern this initiative exists to eliminate. A CDN outage or a filtered hospital network silently breaks them. The single-file policy for small games is unchanged; only the library SOURCE moves.
+
+Branch `chore/vendor-arcade-libs`, after PR 4:
+- Serve vendored copies from the arcade static route (e.g. `apps/web/static/arcade/vendor/three-0.160.1/…`, `three-0.163.0/…`, `dicom-parser-1.8.21/…`, `jszip-3.10.1/…`), byte-for-byte the files currently fetched (record each source URL + SHA-256 in a manifest committed alongside).
+- `linac-training-beginner`, `linac-training-intermediate`, `three-point-setup`: importmap URLs → `/arcade/vendor/three-0.160.1/...` (same version, same files).
+- `gantry-game`: the three unpkg `<script src>` tags (three@0.163.0 legacy `three.min.js` + examples scripts) → vendored equivalents; NO version change.
+- `arcade-src/linac-ct/public/dicom-review.html`: `dicom-parser@1.8.21` + `jszip@3.10.1` tags → vendored copies (closes the recorded DICOM-CDN follow-up).
+- Verify: each page loads with devtools network showing zero third-party requests; gates + e2e; the games' checksums of vendored files match the manifest.
+
