@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 5): world geometry and room builders — the ROOMS
    layout table, room-shell construction (walls, doors, floors, ceilings, lighting, decor,
    furnishing dispatch), the hub lobby, exterior grounds, and the hub-and-wings corridor
@@ -69,7 +68,37 @@ import { registerInteractable } from './interact';
 import { doorNormal, doorCenter } from './walk';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment';
 
-export const C = {
+// RTApps (#77 phase 2 task 12): typed boundary for the ROOMS layout table — fields
+// derived from every property literal actually present across the table entries below
+// plus every `room.<field>`/`r.<field>` read site across sim-hub (grep confirmed no
+// module ever assigns a new field onto a room object, only reads/constructs).
+export interface Room {
+	id: string;
+	hub?: boolean;
+	wing: 'hub' | 'patient' | 'technical' | 'clinical' | 'treatment';
+	zone: 'front' | 'technical' | 'clinical';
+	name: string;
+	kicker: string;
+	x: number;
+	z: number;
+	w: number;
+	d: number;
+	doorSide?: 'zmin' | 'zmax' | 'xmin' | 'xmax';
+	windowSide?: 'zmin' | 'zmax' | 'xmin' | 'xmax';
+	doorType?: 'leadershipSwing' | 'vaultSlide' | 'hdrSlide';
+	vault?: boolean;
+	special?: boolean;
+	color: number;
+	cam: [number, number, number];
+	look: [number, number, number];
+	desc: string;
+	what: string;
+}
+
+export const C: Record<
+	'front' | 'technical' | 'clinical' | 'leadership' | 'vault' | 'special',
+	number
+> = {
 	front: 0x6fb6ff,
 	technical: 0xffb454,
 	clinical: 0x3fd6cf,
@@ -77,7 +106,7 @@ export const C = {
 	vault: 0xff737b,
 	special: 0x72df9f
 };
-export const ROOMS = [
+export const ROOMS: Room[] = [
 	{
 		id: 'lobby',
 		hub: true,
@@ -447,7 +476,7 @@ export function addCirculationProps() {
 	scene.add(cameraPole);
 }
 
-export function doorTypeFor(room) {
+export function doorTypeFor(room: Room) {
 	if (room.doorType) return room.doorType;
 	if (room.vault) return 'vaultSlide';
 	if (room.special) return 'hdrSlide';
@@ -469,7 +498,7 @@ export function addDoorWindow(parent, x, y, z, w, h) {
 	parent.add(win);
 }
 
-export function buildDoor(room, side, gap) {
+export function buildDoor(room: Room, side, gap) {
 	const type = doorTypeFor(room),
 		g = new THREE.Group();
 	const h = room.vault ? 3.15 : 2.55,
@@ -561,7 +590,7 @@ export function buildDoor(room, side, gap) {
 	makeDoorHeaderSign(room, side, gap);
 }
 
-export function buildSide(room, side, h, t, mat) {
+export function buildSide(room: Room, side, h, t, mat) {
 	const hx = room.w / 2,
 		hz = room.d / 2,
 		isDoor = room.doorSide === side,
@@ -605,7 +634,7 @@ export function buildSide(room, side, h, t, mat) {
 	}
 }
 
-export function roomLightProfile(room) {
+export function roomLightProfile(room: Room) {
 	if (room.vault) return { c: 0xe8f6ff, i: 0.78 };
 	if (room.id === 'social' || room.id === 'education') return { c: 0xffe8c8, i: 0.68 };
 	if (room.id === 'manager' || room.id === 'commons') return { c: 0xffedd4, i: 0.65 };
@@ -614,7 +643,7 @@ export function roomLightProfile(room) {
 	return { c: 0xf4fbff, i: 0.68 };
 }
 
-export function floorMatFor(room) {
+export function floorMatFor(room: Room) {
 	const c = zoneFloorColor(room);
 	const rough = room.vault
 		? 0.48
@@ -632,7 +661,7 @@ export function floorMatFor(room) {
 	});
 }
 
-export function addRoomBaseboards(room) {
+export function addRoomBaseboards(room: Room) {
 	const hx = room.w / 2,
 		hz = room.d / 2,
 		y = 0.12,
@@ -644,7 +673,7 @@ export function addRoomBaseboards(room) {
 	scene.add(box(0.07, hh, room.d - 0.28, m, room.x + hx - 0.1, y, room.z));
 }
 
-export function addRoomLighting(room, h) {
+export function addRoomLighting(room: Room, h) {
 	const prof = roomLightProfile(room);
 	const count = Math.max(1, Math.floor(room.w / 4.5));
 	for (let i = 0; i < count; i++) {
@@ -675,7 +704,7 @@ export function addRoomLighting(room, h) {
 	scene.add(cove);
 }
 
-export function zoneFloorColor(room) {
+export function zoneFloorColor(room: Room) {
 	if (room.vault) return 0x3f4850;
 	if (room.special) return 0x65766e;
 	if (room.id === 'manager') return 0x85808f;
@@ -684,7 +713,7 @@ export function zoneFloorColor(room) {
 	return 0x8d9ba2;
 }
 
-export function zoneAccentColor(room) {
+export function zoneAccentColor(room: Room) {
 	if (room.vault) return 0x8f3944;
 	if (room.special) return 0x3d8467;
 	if (room.id === 'manager') return 0x74639b;
@@ -693,7 +722,7 @@ export function zoneAccentColor(room) {
 	return 0x4279a0;
 }
 
-export function buildRoom(room) {
+export function buildRoom(room: Room) {
 	const h = room.vault ? 5.7 : 3.75,
 		t = room.vault ? 0.58 : 0.16,
 		mat = room.vault ? MAT.wallVault : MAT.wall;
@@ -744,7 +773,7 @@ export function lobbyWallWithGap(side, gap, h = 4.15, t = 0.18) {
 	}
 }
 
-export function buildLobbyEntrance(r) {
+export function buildLobbyEntrance(r: Room) {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 	const side = 'zmax',
 		gap = 5.2,
@@ -765,7 +794,7 @@ export function buildLobbyEntrance(r) {
 	makeLobbyEntranceSign(r);
 }
 
-export function buildHubLobby(room) {
+export function buildHubLobby(room: Room) {
 	const h = 4.15,
 		t = 0.18;
 	const floorMat = new THREE.MeshPhysicalMaterial({
@@ -804,7 +833,7 @@ export function buildHubLobby(room) {
 	furnish(room);
 }
 
-export function addVaultDoorwaySigns(room) {
+export function addVaultDoorwaySigns(room: Room) {
 	const side = room.doorSide,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 		gap = 4.8,
@@ -830,7 +859,7 @@ export function addVaultDoorwaySigns(room) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-export function addRoomDecor(room, h) {
+export function addRoomDecor(room: Room, h) {
 	const g = new THREE.Group();
 	scene.add(g);
 	const ac = zoneAccentColor(room);
@@ -969,7 +998,7 @@ export function buildExteriorAmbient() {
 	scene.add(sky);
 }
 
-export function furnish(room) {
+export function furnish(room: Room) {
 	const g = new THREE.Group();
 	g.userData.roomId = room.id;
 	scene.add(g);
@@ -1637,7 +1666,7 @@ export function addClinicalWallPolish() {
 	}
 }
 
-export function corridorAnchor(room) {
+export function corridorAnchor(room: Room) {
 	if (!room || room.hub) return { p: new THREE.Vector3(0, 1.66, 0), line: 'main' };
 	if (room.wing === 'patient') return { p: new THREE.Vector3(room.x, 1.66, 0), line: 'main' };
 	if (room.wing === 'technical')

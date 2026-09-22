@@ -7,6 +7,7 @@
    `S.<name>` in its place. Initializers below are verbatim from the original
    top-level declarations. */
 import type * as THREE from 'three';
+import type { Room } from './rooms';
 
 // RTApps (#77 phase 2 task 11): typed boundary for `S`. Unions/types derived
 // from every actual assignment site across the sim-hub modules (grep `S.<member> =`).
@@ -21,9 +22,10 @@ interface SimHubState {
 	ambUnload: THREE.Object3D | null;
 	ambLoad: THREE.Object3D | null;
 	mode: 'overview' | 'guided' | 'walk';
-	// Room objects (rooms.js) have no interface yet — still @ts-nocheck and out
-	// of this module's scope, so this stays `unknown` rather than a guessed shape.
-	activeRoom: unknown;
+	// RTApps (#77 phase 2 task 12, type-only follow-up): rooms.ts now exports a `Room`
+	// interface for the ROOMS table entries this is always assigned from — tightened
+	// from `unknown` now that the shape exists.
+	activeRoom: Room | null;
 	history: string[];
 	// Assigned a literal shape here but grows further dynamic properties
 	// (curve/routeStart/routeDuration/entryCurve/entryStart/entryDuration/...)
