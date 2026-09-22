@@ -515,6 +515,7 @@ export function setProto(key) {
 }
 
 /* window/level */
+let wlRepaintPending = false;
 export function setWL(ww, wl) {
 	S.ww = Math.max(20, Math.min(4000, Math.round(ww)));
 	S.wl = Math.max(-1200, Math.min(1600, Math.round(wl)));
@@ -522,7 +523,16 @@ export function setWL(ww, wl) {
 	$('wlSlider').value = S.wl;
 	$('wwLbl').textContent = S.ww;
 	$('wlLbl').textContent = S.wl;
-	if (S.sliceHU && S.sliceHU.length) repaintCurrent();
+	if (!S.sliceHU || !S.sliceHU.length) return;
+	// RTApps perf pass: coalesce repaints to one per animation frame (pointermove during a
+	// WL drag can fire well over 60/sec); repaintCurrent() always reads the latest S.ww/S.wl,
+	// so the flushed frame reflects whatever values were last set — pixel-identical end state.
+	if (wlRepaintPending) return;
+	wlRepaintPending = true;
+	requestAnimationFrame(() => {
+		wlRepaintPending = false;
+		repaintCurrent();
+	});
 }
 
 /* range */

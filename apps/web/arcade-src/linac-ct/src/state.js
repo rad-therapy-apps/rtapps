@@ -232,6 +232,7 @@ export const S = {
 	motionHeartBase: null,
 	deliveryRAF: null,
 	deliveryMonitorStamp: 0,
+	deliveryPanelStamp: 0,
 	treatmentCompletion: {
 		verified: false,
 		posted: false,

@@ -51,13 +51,18 @@ export function setupCCTVFeeds() {
 	});
 	resizeCCTVFeeds();
 }
+const CCTV_MAX_BUFFER_W = 512;
 function resizeCCTVFeeds() {
 	cctvFeeds.forEach((feed) => {
 		const w = Math.max(120, feed.container.clientWidth || 260);
 		const h = Math.max(70, feed.container.clientHeight || 82);
 		feed.camera.aspect = w / h;
 		feed.camera.updateProjectionMatrix();
-		feed.renderer.setSize(w, h, false);
+		// RTApps perf pass: cap the internal drawing-buffer size independent of the
+		// container's CSS size (updateStyle=false, unchanged) — keeps aspect, softens the
+		// monitor-prop image on large layouts instead of rendering a full-res scene 3x/frame.
+		const scale = w > CCTV_MAX_BUFFER_W ? CCTV_MAX_BUFFER_W / w : 1;
+		feed.renderer.setSize(Math.round(w * scale), Math.round(h * scale), false);
 	});
 }
 export function updateCCTVFeeds() {

@@ -34,13 +34,51 @@ import {
 	shortestCorridorRouteFromPosition,
 	makePolylineCurve
 } from './walk.js';
-import { roomById, ROOM_CAST, doors } from './main.js';
+import { roomById, ROOM_CAST, doors, player } from './main.js';
 import { JOURNEY, journeyActorRoom } from './journey.js';
 import { setupAmbulance } from './equipment.js';
 
 export const movers = [];
 const dutyActors = [];
 export const interactionScenes = [];
+
+/* RTApps perf task 2: walk-mode distance gating for ambient movers and duty animations.
+   Full-fidelity always applies in overview/orbit mode, to any actor involved in the active
+   guided journey, and to any actor mid actor-handoff transition. Everyone else is strided by
+   distance to the player so far-off NPCs sample less often instead of freezing. Both
+   updateMovers and updateDutyAnimations already compute position/pose as a pure function of
+   absolute elapsed seconds (no per-frame accumulation) — so skipping frames never causes
+   drift; resampling at the current `sec` next time a strided actor updates lands exactly where
+   continuous motion would have put it, at the same real-world speed. Exchange conversations
+   need no membership check: NEAR_RADIUS is derived from EXCHANGE_TRIGGER_DIST (see below), so
+   actively-conversing actors are always full-rate by construction. */
+const EXCHANGE_TRIGGER_DIST = 15;
+/* Full-rate radius for the stride gate. Derived from the exchange trigger so the invariant
+   "an actor whose exchange conversation is active is ALWAYS inside the full-rate radius"
+   holds by construction: exchanges only activate when the camera (== player in walk mode)
+   is within EXCHANGE_TRIGGER_DIST of the pair midpoint, and partners stand within a couple
+   of units of that midpoint — so 2x the trigger distance always covers both actors.
+   Raising EXCHANGE_TRIGGER_DIST automatically widens this radius; do not decouple them. */
+const NEAR_RADIUS = Math.max(30, EXCHANGE_TRIGGER_DIST * 2);
+const NEAR_RADIUS_SQ = NEAR_RADIUS * NEAR_RADIUS;
+let frameCount = 0;
+let journeyActorSet = null;
+let journeyActorSetFrame = -1;
+function journeyInvolved(actor) {
+	if (!actor) return false;
+	if (actor.userData?.inHandoff) return true;
+	if (typeof JOURNEY === 'undefined' || !JOURNEY.active) return false;
+	if (journeyActorSetFrame !== frameCount) {
+		journeyActorSet = new Set(Object.values(JOURNEY).filter((v) => v && v.isObject3D));
+		journeyActorSetFrame = frameCount;
+	}
+	return journeyActorSet.has(actor);
+}
+function actorUpdateStride(objWorldPos, actor) {
+	if (S.mode !== 'walk') return 1;
+	if (journeyInvolved(actor)) return 1;
+	return objWorldPos.distanceToSquared(player.pos) < NEAR_RADIUS_SQ ? 1 : 4;
+}
 export function registerDutyActor(group, mode = 'idle', offset = Math.random()) {
 	dutyActors.push({ group, mode, offset });
 	return group;
@@ -71,6 +109,8 @@ export function updateDutyAnimations(sec) {
 			poseCharacter(d.group, 'seated');
 			continue;
 		}
+		const stride = actorUpdateStride(d.group.position, d.group);
+		if (stride > 1 && frameCount % stride !== 0) continue;
 		const a = sec * 1.7 + d.offset * 6.283,
 			s = Math.sin(a),
 			s2 = Math.sin(a * 0.67 + 0.8);
@@ -135,7 +175,7 @@ export function updateNpcExchanges(sec) {
 		sc.a.getWorldPosition(pa);
 		sc.b.getWorldPosition(pb);
 		const mid = pa.clone().add(pb).multiplyScalar(0.5),
-			near = cam.distanceTo(mid) < 15 && S.mode !== 'overview';
+			near = cam.distanceTo(mid) < EXCHANGE_TRIGGER_DIST && S.mode !== 'overview';
 		const t = (sec + sc.offset * sc.period) % sc.period;
 		bubbleVis(sc.bubbleA, false);
 		bubbleVis(sc.bubbleB, false);
@@ -170,7 +210,10 @@ function addMover(
 	movers.push({ group, curve: moverPath(points, closed), speed, offset, yawOffset });
 }
 export function updateMovers(sec) {
+	frameCount++;
 	for (const m of movers) {
+		const stride = actorUpdateStride(m.group.position, m.group);
+		if (stride > 1 && frameCount % stride !== 0) continue;
 		const u = (sec * m.speed + m.offset) % 1,
 			p = m.curve.getPointAt(u),
 			n = m.curve.getPointAt((u + 0.01) % 1);
