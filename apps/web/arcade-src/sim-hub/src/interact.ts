@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 8): interactables, prompts, staff dialogues,
    procedure/QA labs, the LINAC-head-lab dialog, equipment/kiosk panels, and room info/UI —
    the interactable registry (`registerInteractable`/`nearestInteractable`), the walk-mode
@@ -508,11 +507,15 @@ export function performInteraction() {
 	}
 }
 export function updateInteractionUI() {
-	const UI = updateInteractionUI,
+	const UI = updateInteractionUI as typeof updateInteractionUI & {
+			_ret?: boolean;
+			_p?: boolean;
+			_txt?: string;
+		},
 		ret = document.getElementById('walkReticle'),
 		p = document.getElementById('interactPrompt'),
 		txt = document.getElementById('interactText'),
-		apply = (retOn, pOn, label) => {
+		apply = (retOn, pOn, label?) => {
 			if (UI._ret !== retOn) {
 				ret.classList.toggle('show', retOn);
 				UI._ret = retOn;
@@ -619,7 +622,7 @@ export function lhPreviewTexture() {
 	q.font = '700 28px Arial';
 	q.fillText('Interactive photon / electron beam-path teaching station', 55, 134);
 	const x = 580;
-	const items = [
+	const items: [string, number][] = [
 		['BENDING MAGNET', 190],
 		['TARGET / BYPASS', 270],
 		['PRIMARY COLLIMATOR', 345],
@@ -672,7 +675,7 @@ export function lhSetMode(mode) {
 	document.getElementById('lhPhotonEnergies').hidden = mode !== 'photon';
 	document.getElementById('lhElectronEnergies').hidden = mode !== 'electron';
 	document
-		.querySelectorAll('[data-lhenergy]')
+		.querySelectorAll<HTMLElement>('[data-lhenergy]')
 		.forEach((b) => b.classList.toggle('active', b.dataset.lhenergy === LINAC_HEAD_LAB.energy));
 	lhUpdateText();
 	lhDraw();
@@ -682,7 +685,7 @@ export function lhSetEnergy(e) {
 	LINAC_HEAD_LAB.animating = false;
 	LINAC_HEAD_LAB.progress = 0;
 	document
-		.querySelectorAll('[data-lhenergy]')
+		.querySelectorAll<HTMLElement>('[data-lhenergy]')
 		.forEach((b) => b.classList.toggle('active', b.dataset.lhenergy === e));
 	lhUpdateText();
 	lhDraw();
@@ -732,7 +735,7 @@ function lhBox(ctx, id, label, x, y, w, h, fill = '#e6edf1', stroke = '#7b929e')
 	LINAC_HEAD_LAB.hit.push({ id, x, y, w, h });
 }
 export function lhDraw() {
-	const c = document.getElementById('linacHeadCanvas');
+	const c = document.getElementById('linacHeadCanvas') as HTMLCanvasElement | null;
 	if (!c) return;
 	const q = c.getContext('2d'),
 		m = LINAC_HEAD_LAB.mode,
@@ -924,7 +927,7 @@ export function lhDraw() {
 		q.stroke();
 	});
 	// beam path and progress highlight
-	const points =
+	const points: [number, number][] =
 		m === 'photon'
 			? [
 					[338, 205],
@@ -1043,7 +1046,7 @@ function roomEquipmentMarkup(roomId) {
 }
 function bindRoomEquipmentButtons() {
 	document
-		.querySelectorAll('[data-eqid]')
+		.querySelectorAll<HTMLElement>('[data-eqid]')
 		.forEach((b) => (b.onclick = () => showEquipmentPanel(b.dataset.eqid)));
 }
 export function openKioskDialog() {
@@ -1102,7 +1105,8 @@ export function disableRoomInspection() {
 }
 
 export function renderRoomList() {
-	const zone = document.querySelector('#zoneChips button.active')?.dataset.zone || 'all';
+	const zone =
+		document.querySelector<HTMLElement>('#zoneChips button.active')?.dataset.zone || 'all';
 	const host = document.getElementById('roomList');
 	host.innerHTML = '';
 	ROOMS.filter((r) => zone === 'all' || r.zone === zone).forEach((r) => {
@@ -1145,10 +1149,10 @@ export function closeProcedureLab() {
 }
 export function procSetTab(id) {
 	document
-		.querySelectorAll('#procTabs button')
+		.querySelectorAll<HTMLElement>('#procTabs button')
 		.forEach((b) => b.classList.toggle('active', b.dataset.proc === id));
 	document
-		.querySelectorAll('.procPane')
+		.querySelectorAll<HTMLElement>('.procPane')
 		.forEach((p) => p.classList.toggle('active', p.dataset.pane === id));
 	if (id === 'sitesim') procRenderSite();
 	if (id === 'release') procRefreshRelease();
@@ -1207,7 +1211,7 @@ export function procRefreshRelease() {
 	);
 }
 export function procRenderSite() {
-	const key = document.getElementById('siteCase')?.value || 'hn',
+	const key = (document.getElementById('siteCase') as HTMLSelectElement | null)?.value || 'hn',
 		s = PROC_SITES[key];
 	const p = document.getElementById('sitePrompt');
 	if (p) p.innerHTML = s.prompt;
@@ -1219,10 +1223,10 @@ export function procRenderSite() {
 		).join('');
 }
 export function procResetAll() {
-	window.__rtappsVerdictLocked = false; // #73: fresh scenario re-arms the verdict buttons
-	const rcBtn = document.getElementById('releaseClinical');
+	(window as unknown as { __rtappsVerdictLocked?: boolean }).__rtappsVerdictLocked = false; // #73: fresh scenario re-arms the verdict buttons
+	const rcBtn = document.getElementById('releaseClinical') as HTMLButtonElement | null;
 	if (rcBtn) rcBtn.disabled = false;
-	const hcBtn = document.getElementById('holdClinical');
+	const hcBtn = document.getElementById('holdClinical') as HTMLButtonElement | null;
 	if (hcBtn) hcBtn.disabled = false;
 	Object.assign(PROC_STATE, {
 		startup: false,
@@ -1233,7 +1237,7 @@ export function procResetAll() {
 		laserValues: null,
 		waterValues: null
 	});
-	document.querySelectorAll('[data-startup]').forEach((x) => (x.checked = false));
+	document.querySelectorAll<HTMLInputElement>('[data-startup]').forEach((x) => (x.checked = false));
 	['procStartupResult', 'laserResult', 'waterResult', 'siteResult', 'releaseResult'].forEach((id) =>
 		procSetResult(id, 'Reset. Complete the procedure station.', null)
 	);
@@ -1358,11 +1362,12 @@ export function closeStaffDialogue(restore = true) {
 }
 
 export function toast(html) {
-	const t = document.getElementById('toast');
+	const fn = toast as typeof toast & { _t?: ReturnType<typeof setTimeout> },
+		t = document.getElementById('toast');
 	t.innerHTML = html;
 	t.classList.add('show');
-	clearTimeout(toast._t);
-	toast._t = setTimeout(() => t.classList.remove('show'), 2300);
+	clearTimeout(fn._t);
+	fn._t = setTimeout(() => t.classList.remove('show'), 2300);
 }
 
 export function bindPanelToggle(panelId, buttonId, collapsedLabel, expandedLabel) {
