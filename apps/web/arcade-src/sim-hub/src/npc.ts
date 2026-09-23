@@ -357,7 +357,7 @@ export function departmentStaff() {
 	// RTApps (#77 phase 2 task 13): `bottom` given an explicit `undefined` default — every
 	// call site either passes `undefined` or omits it (falls back to 0x39464f below) — so this
 	// is a type-only optionality fix, not a behavior change.
-	const place = (id, role, detail, top, dx, dz, ry, skin, bottom = undefined, guideKey = null) => {
+	const place = (id, role, detail, top, dx, dz, ry, skin, bottom?, guideKey?) => {
 		const r = R(id);
 		if (!r) return;
 		const prof = CHARACTER_STYLES[guideKey || id] || {};
