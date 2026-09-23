@@ -1362,12 +1362,14 @@ export function closeStaffDialogue(restore = true) {
 }
 
 export function toast(html) {
-	const fn = toast as typeof toast & { _t?: ReturnType<typeof setTimeout> },
-		t = document.getElementById('toast');
+	const t = document.getElementById('toast');
 	t.innerHTML = html;
 	t.classList.add('show');
-	clearTimeout(fn._t);
-	fn._t = setTimeout(() => t.classList.remove('show'), 2300);
+	clearTimeout((toast as typeof toast & { _t?: ReturnType<typeof setTimeout> })._t);
+	(toast as typeof toast & { _t?: ReturnType<typeof setTimeout> })._t = setTimeout(
+		() => t.classList.remove('show'),
+		2300
+	);
 }
 
 export function bindPanelToggle(panelId, buttonId, collapsedLabel, expandedLabel) {
