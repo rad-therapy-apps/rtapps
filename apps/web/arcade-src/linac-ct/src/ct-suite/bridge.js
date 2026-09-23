@@ -1,5 +1,5 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import { PROTOCOLS, setProto } from './console.js';
+import { PROTOCOLS, setProto } from './console';
 
 /* ===== RTApps parent workstation bridge ===== */
 export function attachBridgeListener() {

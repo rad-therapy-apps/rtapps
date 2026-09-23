@@ -1,6 +1,6 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	bevFieldGroup,
 	bevFieldLight,
@@ -17,7 +17,7 @@ import {
 	consoleMotionEnable,
 	mlcShapeButton,
 	pendantMotionEnable
-} from './dom.js';
+} from './dom';
 import {
 	applyDetectorCommandedPose,
 	getTreatmentMonitorActual,
@@ -26,7 +26,7 @@ import {
 	updateCouchAccordion,
 	updateJawPositions,
 	updateODIReadout
-} from './scene.js';
+} from './scene';
 import {
 	activeElectronBolusSpec,
 	activeSpecialSetupSpec,
@@ -57,10 +57,10 @@ import {
 	srsRequired,
 	stereotacticCaseLabel,
 	treatmentParamMatches
-} from './linac-delivery.js';
-import { renderClinicalIGRT } from './linac-igrt.js';
-import { saveGameState } from './game.js';
-import { setTextById, syncOperatorConsole, wrap360 } from './main.js';
+} from './linac-delivery';
+import { renderClinicalIGRT } from './linac-igrt';
+import { saveGameState } from './game';
+import { setTextById, syncOperatorConsole, wrap360 } from './main';
 
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return S.clearanceOverrideState.byField?.[idx] || null;

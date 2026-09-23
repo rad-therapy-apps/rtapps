@@ -1,7 +1,7 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-ct';
 import { OrbitControls } from 'three-ct/addons/controls/OrbitControls.js';
-import { S } from './console.js';
+import { S } from './console';
 /* ============================================================
    1) 3D SCAN ROOM
    ============================================================ */

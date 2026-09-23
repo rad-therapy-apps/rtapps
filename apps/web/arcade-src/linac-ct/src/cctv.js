@@ -1,8 +1,8 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
-import { S } from './state.js';
-import { cameraSceneA, cameraSceneB, cameraSceneC } from './dom.js';
-import { GANTRY_PLANE_Z_TARGET } from './scene.js';
+import { S } from './state';
+import { cameraSceneA, cameraSceneB, cameraSceneC } from './dom';
+import { GANTRY_PLANE_Z_TARGET } from './scene';
 
 export const cctvFeeds = [];
 

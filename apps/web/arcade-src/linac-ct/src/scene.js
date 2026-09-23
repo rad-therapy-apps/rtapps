@@ -2,7 +2,7 @@
 import * as THREE from 'three-linac';
 import { OrbitControls } from 'three-linac/examples/jsm/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three-linac/addons/geometries/RoundedBoxGeometry.js';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	viewerContainer,
 	loadingScreen,
@@ -23,10 +23,10 @@ import {
 	lasersToggleButton,
 	odiToggleButton,
 	roomLightsToggleButton
-} from './dom.js';
-import { setupCCTVFeeds } from './cctv.js';
-import { animate, setTextById, syncOperatorConsole, wrap360 } from './main.js';
-import { allTreatmentFieldsCompleted, fundamentalState, setPendantLCD } from './linac-safety.js';
+} from './dom';
+import { setupCCTVFeeds } from './cctv';
+import { animate, setTextById, syncOperatorConsole, wrap360 } from './main';
+import { allTreatmentFieldsCompleted, fundamentalState, setPendantLCD } from './linac-safety';
 import {
 	createImmobilizationShelf3D,
 	createImmobilizationPatientGroup,
@@ -47,8 +47,8 @@ import {
 	motionRequired,
 	srsRequired,
 	renderTreatmentDeliveryPanel
-} from './linac-delivery.js';
-import { renderClinicalIGRT } from './linac-igrt.js';
+} from './linac-delivery';
+import { renderClinicalIGRT } from './linac-igrt';
 
 const roomCeilingFixtureMats = [];
 export const controlRoomAccentMats = [];

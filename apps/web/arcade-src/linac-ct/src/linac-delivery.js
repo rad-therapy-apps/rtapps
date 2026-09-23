@@ -1,6 +1,6 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	adaptiveDoseCanvas,
 	adaptiveNextFraction,
@@ -41,7 +41,7 @@ import {
 	srsPanel,
 	srsVerifyTimeout,
 	treatmentCaseSelect
-} from './dom.js';
+} from './dom';
 import {
 	GROUND_Y,
 	applyDetectorCommandedPose,
@@ -53,16 +53,16 @@ import {
 	setODIState,
 	updateElectronApplicator3D,
 	updateMLCPositions
-} from './scene.js';
+} from './scene';
 import {
 	fmtIGRT,
 	getIGRTApplied,
 	getIGRTResidual,
 	renderClinicalIGRT,
 	resetClinicalIGRTForCase
-} from './linac-igrt.js';
-import { setTextById, wrap360 } from './main.js';
-import { renderTreatmentCompletionControls, resetTreatmentCompletion } from './sdk.js';
+} from './linac-igrt';
+import { setTextById, wrap360 } from './main';
+import { renderTreatmentCompletionControls, resetTreatmentCompletion } from './sdk';
 import {
 	allTreatmentFieldsCompleted,
 	clearanceOverrideActive,
@@ -82,7 +82,7 @@ import {
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN,
 	treatmentTrajectorySamples,
 	updateBEVInset
-} from './linac-safety.js';
+} from './linac-safety';
 
 const DELIVERY_SPEED_FACTOR = 4;
 

@@ -12,8 +12,8 @@ import {
 	repaintCurrent,
 	drawTopogram,
 	lerp
-} from './imaging.js';
-import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room.js';
+} from './imaging';
+import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room';
 /* ---------------- CT PROTOCOL LIBRARY ---------------- */
 export const PROTOCOLS = {
 	pelvis: {

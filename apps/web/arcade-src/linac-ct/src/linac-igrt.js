@@ -1,7 +1,7 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import { S } from './state.js';
-import { igrtPanel } from './dom.js';
-import { GROUND_Y, renderTreatmentMonitor, updateCouchAccordion } from './scene.js';
+import { S } from './state';
+import { igrtPanel } from './dom';
+import { GROUND_Y, renderTreatmentMonitor, updateCouchAccordion } from './scene';
 import {
 	activeIGRTTolerances,
 	canonicalCouchDisplay,
@@ -15,7 +15,7 @@ import {
 	oisLogEvent,
 	renderTreatmentDeliveryPanel,
 	srsRequired
-} from './linac-delivery.js';
+} from './linac-delivery';
 import {
 	captureCollisionPose,
 	COLLISION_PROXY_TOL,
@@ -29,7 +29,7 @@ import {
 	restoreCollisionPose,
 	setPendantLCD,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
-} from './linac-safety.js';
+} from './linac-safety';
 
 function clinicalIGRTModeForCase() {
 	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();

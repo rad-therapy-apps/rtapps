@@ -1,5 +1,5 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import { S } from './state.js';
+import { S } from './state';
 import {
 	adaptivePanel,
 	chargeCapturePanel,
@@ -13,8 +13,8 @@ import {
 	igrtPanel,
 	motionPanel,
 	oisPanel
-} from './dom.js';
-import { renderTreatmentMonitor, setBeamState } from './scene.js';
+} from './dom';
+import { renderTreatmentMonitor, setBeamState } from './scene';
 import {
 	cranialSRSRequired,
 	deliveredTreatmentMU,
@@ -26,8 +26,8 @@ import {
 	renderOISPanel,
 	renderTreatmentDeliveryPanel,
 	sbrtRequired
-} from './linac-delivery.js';
-import { allTreatmentFieldsCompleted, setPendantLCD, updateBEVInset } from './linac-safety.js';
+} from './linac-delivery';
+import { allTreatmentFieldsCompleted, setPendantLCD, updateBEVInset } from './linac-safety';
 
 export function resolveHubUrl() {
 	if (window.RTApps) {

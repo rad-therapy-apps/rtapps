@@ -1,7 +1,7 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import './console-patch.js';
-import './workspace.js';
-import { S } from './state.js';
+import './console-patch';
+import './workspace';
+import { S } from './state';
 import {
 	adaptiveApprove,
 	adaptiveAssess,
@@ -218,7 +218,7 @@ import {
 	treatmentCaseSelect,
 	viewControlRoomButton,
 	viewVaultButton
-} from './dom.js';
+} from './dom';
 import {
 	beamStageStep,
 	CORE_PART_IDS,
@@ -244,15 +244,15 @@ import {
 	updateElectronApplicator3D,
 	updateJawPositions,
 	updateMLCPositions
-} from './scene.js';
-import { cctvFeeds, updateCCTVFeeds } from './cctv.js';
+} from './scene';
+import { cctvFeeds, updateCCTVFeeds } from './cctv';
 import {
 	syncRoomViewButtons,
 	travelToRoomView,
 	updateCameraTravel,
 	updateTravelWorkflow,
 	updateVaultAesthetics
-} from './travel.js';
+} from './travel';
 import {
 	acquireMotionCharacterization,
 	adaptiveRequired,
@@ -309,13 +309,13 @@ import {
 	verifyImmobilizationSelection,
 	verifyMotionManagement,
 	verifySRSTimeout
-} from './linac-delivery.js';
+} from './linac-delivery';
 import {
 	acquireClinicalIGRT,
 	renderClinicalIGRT,
 	startClinicalIGRT,
 	verifyClinicalIGRT
-} from './linac-igrt.js';
+} from './linac-igrt';
 import {
 	allTreatmentFieldsCompleted,
 	applyClearanceOverride,
@@ -341,7 +341,7 @@ import {
 	syncLegacyJawValue,
 	updateBEVInset,
 	withdrawClearanceOverride
-} from './linac-safety.js';
+} from './linac-safety';
 import {
 	completeFractionWithoutCurrentCPTModule,
 	openChargeCapture,
@@ -349,7 +349,7 @@ import {
 	resolveHubUrl,
 	updateChargeEducation,
 	verifyChargeCapture
-} from './sdk.js';
+} from './sdk';
 import {
 	checkAllCorePartsEarned,
 	displayBonusChallenge,
@@ -362,7 +362,7 @@ import {
 	resetGame,
 	saveGameState,
 	updateUI
-} from './game.js';
+} from './game';
 
 // RTApps (plan 4c): prefetch the hub's player URL once; the back-link control only
 // renders/enables when it resolves (activity unseeded/unpublished, or offline leaves

@@ -1,5 +1,5 @@
 // @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import { S } from './state.js';
+import { S } from './state';
 import {
 	balanceDisplay,
 	beamOnButton,
@@ -44,7 +44,7 @@ import {
 	tabButtons,
 	tabContentPanels,
 	taskSelect
-} from './dom.js';
+} from './dom';
 import {
 	CORE_PART_IDS,
 	linacPartsData,
@@ -55,8 +55,8 @@ import {
 	setLaserState,
 	updateCouchAccordion,
 	updateJawPositions
-} from './scene.js';
-import { fundamentalState, setCenteredJawField, syncLegacyJawValue } from './linac-safety.js';
+} from './scene';
+import { fundamentalState, setCenteredJawField, syncLegacyJawValue } from './linac-safety';
 
 export const enhancementsData = [
 	{

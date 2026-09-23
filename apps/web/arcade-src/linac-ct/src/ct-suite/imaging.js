@@ -9,7 +9,7 @@ import {
 	updateRangeLabels,
 	setWL,
 	spanOf
-} from './console.js';
+} from './console';
 /* ---------------- EMBEDDED REAL CT SERIES (all de-identified) ----------------
    Five real planning CTs, each downsampled to the 220^2 recon matrix and
    subsampled in slices. HU are packed loss-lessly into a PNG sprite (16-bit
