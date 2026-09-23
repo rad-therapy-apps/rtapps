@@ -1,4 +1,5 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
+import type { ParentToCtMessage, CtToParentMessage } from './ct-protocol';
+
 (function () {
 	'use strict';
 	const $ = (id) => document.getElementById(id);
@@ -37,7 +38,7 @@
 	const ctCheckedIn = new Set();
 	const ctComplete = new Set();
 	let ctOpenKey = '';
-	let ctView = 'room';
+	let ctView: 'room' | 'console' = 'room';
 	let ctFrameReady = false;
 
 	let pendingCase = '';
@@ -83,8 +84,8 @@
 			$('rtv2CTQueueTab')?.addEventListener('click', showCTQueue);
 		}
 		home.addEventListener('click', (e) => {
-			const check = e.target.closest('[data-ct-checkin]');
-			const open = e.target.closest('[data-ct-open]');
+			const check = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-ct-checkin]');
+			const open = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-ct-open]');
 			if (check) {
 				ctCheckedIn.add(check.dataset.ctCheckin);
 				renderCTQueue();
@@ -135,13 +136,13 @@
 		renderCTQueue();
 	}
 	function initFrame() {
-		const fr = $('rtappsCTFrame');
+		const fr = $('rtappsCTFrame') as HTMLIFrameElement | null;
 		if (!fr || fr.dataset.loaded) return;
 		fr.dataset.loaded = '1';
 		fr.src = '/arcade/linac-ct/ct-suite.html';
 	}
-	function postToCT(msg) {
-		const fr = $('rtappsCTFrame');
+	function postToCT(msg: ParentToCtMessage) {
+		const fr = $('rtappsCTFrame') as HTMLIFrameElement | null;
 		if (fr?.contentWindow) fr.contentWindow.postMessage(msg, '*');
 	}
 	function setCTView(view) {
@@ -185,7 +186,7 @@
 		});
 	}
 	window.addEventListener('message', (ev) => {
-		const d = ev.data || {};
+		const d = (ev.data || {}) as Partial<CtToParentMessage>;
 		if (d.type === 'rtapps-ct-ready') {
 			ctFrameReady = true;
 			$('ctwsLoading')?.classList.add('hidden');
