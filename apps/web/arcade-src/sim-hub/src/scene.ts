@@ -154,8 +154,8 @@ export function initAmbience() {
 	Object.assign(AMBIENCE, { ctx, master, compressor, noiseGain, humGain, hum2Gain, filter });
 }
 export function ambienceProfile() {
-	// S.activeRoom is `unknown` (Room has no interface yet, task 11); cast to the
-	// minimal shape this function reads.
+	// S.activeRoom is Room | null (rooms.ts); cast to the minimal shape this
+	// function reads.
 	const r = S.activeRoom as { id?: string; zone?: string } | null;
 	const id = r?.id || '';
 	if (id === 'vault1' || id === 'vault2')

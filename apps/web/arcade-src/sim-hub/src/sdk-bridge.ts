@@ -44,8 +44,8 @@ import { JOURNEY, clearJourneyCameraFollow } from './journey';
 // src/lib/arcade/sdk.spec.ts's declared `Window['RTApps']`) for the two members this module
 // calls — `activityUrl` (resolver, resolves to the player URL string) and `recordResult` (QA
 // score submission). `CONSOLE_APP_URL` is the byte-identical e2e mirror below; the latch is
-// `__rtappsVerdictLocked` (#73, one verdict per QA scenario — also read via a local cast in
-// ./interact.js's procResetAll).
+// `__rtappsVerdictLocked` (#73, one verdict per QA scenario — also written via a local cast in
+// ./interact.ts's procResetAll).
 declare global {
 	interface Window {
 		RTApps?: {
