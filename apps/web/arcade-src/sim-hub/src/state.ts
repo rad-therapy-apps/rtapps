@@ -8,6 +8,7 @@
    top-level declarations. */
 import type * as THREE from 'three';
 import type { Room } from './rooms';
+import type { Travel } from './walk';
 
 // RTApps (#77 phase 2 task 11): typed boundary for `S`. Unions/types derived
 // from every actual assignment site across the sim-hub modules (grep `S.<member> =`).
@@ -27,10 +28,10 @@ interface SimHubState {
 	// from `unknown` now that the shape exists.
 	activeRoom: Room | null;
 	history: string[];
-	// Assigned a literal shape here but grows further dynamic properties
-	// (curve/routeStart/routeDuration/entryCurve/entryStart/entryDuration/...)
-	// across walk.js and journey.js — genuinely dynamic, so `unknown`.
-	travel: unknown;
+	// RTApps (#77 phase 2 task 14): walk.ts now exports a `Travel` interface for the literal
+	// this is always assigned from (built in walk.ts's beginTravel, mutated by
+	// walk.ts/journey.js) — tightened from `unknown` now that the shape exists.
+	travel: Travel | null;
 	walkCompositionRoomId: string | null;
 	activeGuideKey: string | null;
 	walkDragLook: boolean;

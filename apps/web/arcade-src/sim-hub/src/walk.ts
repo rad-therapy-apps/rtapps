@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 8): walk-mode movement, collision, doors, guided
    travel and corridor routing — player movement/collision (`canMove`, `collider`), pointer-lock
    mouse look, door open/close animation and target state (`updateDoors`, `setDoorTarget`,
@@ -23,6 +22,7 @@ import * as THREE from 'three';
 import { S } from './state';
 import { camera, orbit, canvas } from './scene';
 import { ROOMS, corridorAnchor, doorLabel } from './rooms';
+import type { Room } from './rooms';
 import { cleanPoints } from './helpers';
 import { roomById, player, doors, ceilings, keys } from './main';
 import { showCtQaDock } from './sdk-bridge';
@@ -270,6 +270,24 @@ export function setDoorTarget(id, v) {
 	if (d) d.target = v ? 1 : 0;
 }
 
+// RTApps (#77 phase 2 task 14): typed boundary for `S.travel`, the guided-travel state
+// machine object this module creates (in beginTravel) and mutates (updateTravel/
+// finishTravel). curve/routeStart/routeDuration/entryCurve/entryStart/entryDuration are
+// assigned only by journey.js's beginRoutePhase/beginEntryPhase — absent from the initial
+// literal here, so optional — mirroring the Room typing precedent (state.ts task 12).
+export interface Travel {
+	room: Room;
+	origin: Room | null;
+	phase: 'exitDoor' | 'route' | 'destDoor' | 'enter';
+	phaseStart: number;
+	originClosed: boolean;
+	curve?: THREE.CatmullRomCurve3;
+	routeStart?: number;
+	routeDuration?: number;
+	entryCurve?: THREE.CatmullRomCurve3 | THREE.CurvePath;
+	entryStart?: number;
+	entryDuration?: number;
+}
 export function beginTravel(room, push = true) {
 	if (!room || S.travel) return;
 	if (S.activeRoom?.id === 'ctsim' && room.id !== 'ctsim') showCtQaDock(false);
@@ -280,7 +298,7 @@ export function beginTravel(room, push = true) {
 	if (fromOverview) {
 		S.mode = 'guided';
 		document
-			.querySelectorAll('#modeSeg button')
+			.querySelectorAll<HTMLElement>('#modeSeg button')
 			.forEach((b) => b.classList.toggle('active', b.dataset.mode === 'guided'));
 		document.getElementById('walkHint').classList.remove('show');
 		document.getElementById('overviewNote').style.display = 'none';
@@ -322,7 +340,7 @@ function finishTravel() {
 	player.pos.copy(camera.position);
 	updateRoomUI(arrived);
 	renderRoomList();
-	document.getElementById('backBtn').disabled = !S.history.length;
+	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
 	document.getElementById('locText').textContent =
 		`Current location: ${arrived.name} · initial view frames the staff interaction`;
 	if (arrived.id === 'lobby' && JOURNEY.introPending) setTimeout(showJourneyCheckinIntro, 350);
@@ -434,7 +452,7 @@ export function updateDoors(dt) {
 export function setMode(m, announce = true) {
 	S.mode = m;
 	document
-		.querySelectorAll('#modeSeg button')
+		.querySelectorAll<HTMLElement>('#modeSeg button')
 		.forEach((b) => b.classList.toggle('active', b.dataset.mode === m));
 	document.getElementById('walkHint').classList.toggle('show', m === 'walk');
 	document.getElementById('overviewNote').style.display = m === 'overview' ? 'block' : 'none';
