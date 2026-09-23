@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons, the ambulance
    drop-off choreography, operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
    status displays, the LINAC-head/engineering wall stations, and Phase-5 wayfinding signage.
@@ -54,7 +53,11 @@ import {
 	journeySpeech
 } from './journey';
 
-const PHASE4_DISPLAYS = {};
+// RTApps (#77 phase 2 task 14): PHASE4_DISPLAYS is a module-local registry keyed by the
+// display id passed to createWorkflowDisplay/updateWorkflowDisplay, but is also read via
+// known dot-property names (PHASE4_DISPLAYS.vault1State/.ctSimState) elsewhere in this file —
+// a Record keeps both access styles valid and reuses workflowDisplayTexture's own return shape.
+const PHASE4_DISPLAYS: Record<string, ReturnType<typeof workflowDisplayTexture>> = {};
 function paintWorkflowDisplay(d, status = 'READY', rows = [], accent = '#42d5cf') {
 	d.status = status;
 	d.rows = rows;
@@ -108,8 +111,8 @@ function updateWorkflowDisplay(key, status, rows = [], accent = '#42d5cf') {
 }
 export const ROOM_CLOCKS = [];
 export function updateWallClocks(now = performance.now()) {
-	if (now - (updateWallClocks._last || 0) < 250) return;
-	updateWallClocks._last = now;
+	if (now - ((updateWallClocks as { _last?: number })._last || 0) < 250) return;
+	(updateWallClocks as { _last?: number })._last = now;
 	/* RTApps perf pass 2: 4Hz is indistinguishable for clock hands */ const d = new Date(),
 		h = d.getHours() % 12,
 		m = d.getMinutes(),
@@ -280,7 +283,23 @@ export function buildPhase4WorkflowDisplays() {
 	);
 }
 
-const OPERATOR_CONSOLE = { built: false, feeds: [], screens: [] };
+// RTApps (#77 phase 2 task 14): typed boundary for the operator-console feed registry — fields
+// derived from every literal pushed onto `feeds`/`screens`. `lastRender` is never present in
+// the initializer (unlike CT_OPERATOR_CONSOLE's) — only ever read via `|| 0` and first written
+// once live rendering starts — so it's optional here rather than added to the literal.
+interface OperatorFeed {
+	name: string;
+	camera: THREE.PerspectiveCamera;
+	renderTarget: THREE.WebGLRenderTarget;
+	baseTarget: THREE.Vector3;
+}
+interface OperatorConsoleState {
+	built: boolean;
+	feeds: OperatorFeed[];
+	screens: THREE.Mesh[];
+	lastRender?: number;
+}
+const OPERATOR_CONSOLE: OperatorConsoleState = { built: false, feeds: [], screens: [] };
 function createOperatorMonitor(
 	g,
 	x,
@@ -959,7 +978,15 @@ export function updateWorkflowTransitions(sec) {
 	}
 }
 
-const STATUS_BEACONS = {};
+// RTApps (#77 phase 2 task 14): typed boundary for the status-beacon registry — fields
+// derived from the literal assigned in makeStatusBeacon and read in setStatusBeacon/
+// updateStatusBeacons.
+interface StatusBeaconEntry {
+	lamp: THREE.Mesh;
+	mat: THREE.MeshStandardMaterial;
+	state: string;
+}
+const STATUS_BEACONS: Record<string, StatusBeaconEntry> = {};
 function statusColorForState(state = 'READY') {
 	const s = String(state).toUpperCase();
 	if (s.includes('BEAM') || s === 'TREATMENT' || s === 'MONITORING') return 0xff5e66;
@@ -1051,7 +1078,9 @@ export function buildPhase5Wayfinding() {
 		3.4
 	);
 	orientationKiosk();
-	const placements = {
+	// RTApps (#77 phase 2 task 14): tuple-typed so the `...v` spread into makeStatusBeacon's
+	// (roomId, x, y, z, rot) fixed parameter list type-checks instead of widening to number[].
+	const placements: Record<string, [number, number, number, number]> = {
 		consult: [-17.0, 3.12, -2.12, 0],
 		education: [-41.0, 3.12, -2.12, 0],
 		ctsim: [44.0, 3.2, -2.88, 0],
@@ -1066,11 +1095,35 @@ export function buildPhase5Wayfinding() {
 	for (const [id, v] of Object.entries(placements)) makeStatusBeacon(id, ...v);
 }
 
-export const EQUIPMENT_BY_ID = {},
-	EQUIPMENT_BY_ROOM = {},
+// RTApps (#77 phase 2 task 14): typed boundary for the equipment spec table and the
+// registries built from it in buildClinicalEquipmentLayer — fields derived from every
+// property literal present across EQUIPMENT_SPECS plus the anchor/ring/mat added per item.
+interface EquipmentSpec {
+	id: string;
+	roomId: string;
+	dx: number;
+	dz: number;
+	y: number;
+	label: string;
+	purpose: string;
+	users: string;
+	notice: string;
+	safety: string;
+}
+interface EquipmentItem extends EquipmentSpec {
+	anchor: THREE.Object3D;
+	ring: THREE.Mesh;
+	mat: THREE.MeshBasicMaterial;
+}
+export const EQUIPMENT_BY_ID: Record<string, EquipmentItem> = {},
+	EQUIPMENT_BY_ROOM: Record<string, EquipmentItem[]> = {},
 	EQUIPMENT_EXPLORED = new Set();
-export const CLINICAL_FOCUS = { ids: new Set(), note: '', primary: null };
-export const EQUIPMENT_SPECS = [
+export const CLINICAL_FOCUS: { ids: Set<string>; note: string; primary: string | null } = {
+	ids: new Set(),
+	note: '',
+	primary: null
+};
+export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'consult_exam',
 		roomId: 'consult',
@@ -1396,7 +1449,7 @@ function syncClinicalFocus(roomId, state, detail = '') {
 	}
 	const s = String(state || '').toUpperCase();
 	let ids = [];
-	let note = detail;
+	const note = detail;
 	if (roomId === 'consult' && (s.includes('CONSULT') || s.includes('READY')))
 		ids = ['consult_exam'];
 	if (roomId === 'ctsim') {
