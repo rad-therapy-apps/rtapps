@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 6): NPC movement, duties, exchanges and handoffs —
    the ambient mover registry (path-walkers, patrols), duty-pose idle animation, staff/patient
    speech exchanges, and the corridor-routed actor-handoff system used when a staff/patient
