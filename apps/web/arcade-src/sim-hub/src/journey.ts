@@ -1,4 +1,3 @@
-// @ts-nocheck -- converted in this PR, header removed per-module
 /* RTApps (#77 sim-hub modularization, task 9 — final extraction): the patient-journey narrative
    state machine and its conversation-camera composition helpers. Verbatim extractions from
    main.js: the two treatment-journey pathways (`startTreatmentJourney`/`advanceTreatmentJourney`
@@ -128,7 +127,62 @@ export const ROOM_WORKFLOW = {
 	ctcontrol: { state: 'READY', detail: 'CT control ready', color: '#42d5cf' }
 };
 export const workflowTransitions = [];
-export const JOURNEY = {
+// RTApps (#77 phase 2 task 15): typed boundary for `JOURNEY`, the patient-journey state machine
+// this module owns — derived from the literal below plus every `JOURNEY.<member> =` assignment
+// site across the treatment and new-patient sequences (journeyActors/resetTreatmentJourney/
+// startTreatmentJourney/advanceTreatmentJourney/advanceNewPatientJourney and the begin/handoff
+// helpers they call). The ~18 actor slots (patient/therapist/…/miaTreatmentPatient) are only ever
+// assigned `null` or a THREE actor cast — PRIMARY_NPCS/PRIMARY_PATIENTS/ROOM_CAST entries (main.js,
+// still JS) or the lying/treatment patients this module builds. `stage` stays `string`: the two
+// sequences together assign ~30 distinct stage names, matched generically against
+// `JOURNEY_META[...].labels`/`.desc` (string-indexed lookups already), so a closed union would add
+// risk without buying anything. `sceneTimer`/`sceneTimers` are pre-existing dead state (only ever
+// reset to `0`/`[]`, never assigned a live timer) — typed, not removed.
+interface JourneyCameraFollow {
+	subject: THREE.Object3D;
+	companion: THREE.Object3D | null;
+	last: THREE.Vector3;
+	distance: number;
+	side: number;
+	height: number;
+	lead: number;
+	patientPrimary: boolean;
+}
+interface JourneyState {
+	active: boolean;
+	busy: boolean;
+	kind: 'treatment' | 'newpatient';
+	stage: string;
+	patientName: string;
+	patient: THREE.Object3D | null;
+	therapist: THREE.Object3D | null;
+	vaultTherapist: THREE.Object3D | null;
+	controlPartner: THREE.Object3D | null;
+	couchPatient: THREE.Object3D | null;
+	newPatient: THREE.Object3D | null;
+	consultStaff: THREE.Object3D | null;
+	navigator: THREE.Object3D | null;
+	ctTherapist: THREE.Object3D | null;
+	ctControlTherapist: THREE.Object3D | null;
+	ctControlPartner: THREE.Object3D | null;
+	dosimetrist: THREE.Object3D | null;
+	dosimetryPartner: THREE.Object3D | null;
+	physicist: THREE.Object3D | null;
+	physicsPartner: THREE.Object3D | null;
+	staticCtPatient: THREE.Object3D | null;
+	ctSimPatient: THREE.Object3D | null;
+	miaTreatmentPatient: THREE.Object3D | null;
+	jordanOnCouch: boolean;
+	miaOnTable: boolean;
+	miaOnTreatmentCouch: boolean;
+	introPending: boolean;
+	vaultMonitorPatientOnly: boolean;
+	sceneTimer: number;
+	sceneTimers: number[];
+	cameraFollow: JourneyCameraFollow | null;
+	cameraRoomId: string | null;
+}
+export const JOURNEY: JourneyState = {
 	active: false,
 	busy: false,
 	kind: 'treatment',
@@ -339,7 +393,7 @@ export function journeyNextLabel() {
 export function updateJourneyUI() {
 	const meta = currentJourneyMeta(),
 		start = document.getElementById('journeyStart'),
-		next = document.getElementById('journeyNext'),
+		next = document.getElementById('journeyNext') as HTMLButtonElement | null,
 		phase = document.getElementById('journeyPhaseLabel'),
 		txt = document.getElementById('journeyStepText'),
 		bar = document.getElementById('journeyProgress'),
@@ -361,7 +415,7 @@ export function updateJourneyUI() {
 		JOURNEY.stage === 'idle' ? 'Check-in' : JOURNEY.stage.toUpperCase().replaceAll('_', ' ');
 	document.getElementById('jhSub').textContent = txt.textContent;
 	document
-		.querySelectorAll('#journeyModes button')
+		.querySelectorAll<HTMLElement>('#journeyModes button')
 		.forEach((b) => b.classList.toggle('active', b.dataset.journey === JOURNEY.kind));
 }
 function createJourneyLyingPatient(room, skin = 0xd7a17d, hairColor = 0x3a281f) {
@@ -578,7 +632,23 @@ export function clearJourneyCameraFollow() {
 	JOURNEY.cameraFollow = null;
 	JOURNEY.cameraRoomId = null;
 }
-function setJourneyCameraFollow(subject, companion = null, opts = {}) {
+// RTApps (#77 phase 2 task 15): typed boundary for the `opts` bags passed by moveJourneyActor's
+// call sites — only these fields are ever set.
+interface JourneyCameraFollowOptions {
+	distance?: number;
+	side?: number;
+	height?: number;
+	lead?: number;
+	patientPrimary?: boolean;
+}
+interface MoveJourneyActorOptions {
+	cues?: Record<string, unknown>[];
+	followCamera?: boolean;
+	followSubject?: THREE.Object3D;
+	followTarget?: THREE.Object3D | null;
+	cameraOptions?: JourneyCameraFollowOptions;
+}
+function setJourneyCameraFollow(subject, companion = null, opts: JourneyCameraFollowOptions = {}) {
 	if (!subject) return;
 	const wp = new THREE.Vector3();
 	subject.getWorldPosition(wp);
@@ -602,13 +672,13 @@ export function updateJourneyCameraFollow() {
 	const p = new THREE.Vector3(),
 		q = new THREE.Vector3();
 	f.subject.getWorldPosition(p);
-	let target = p.clone();
+	const target = p.clone();
 	if (f.companion && f.companion.visible !== false) {
 		f.companion.getWorldPosition(q);
 		target.lerp(q, 0.32);
 	}
 	target.y = 1.3;
-	let dir = p.clone().sub(f.last);
+	const dir = p.clone().sub(f.last);
 	dir.y = 0;
 	if (dir.lengthSq() < 0.0004) {
 		dir.set(Math.sin(f.subject.rotation.y), 0, Math.cos(f.subject.rotation.y));
@@ -686,7 +756,15 @@ export function applyJourneyPatientFocus() {
 		if (JOURNEY.couchPatient) JOURNEY.couchPatient.visible = false;
 	}
 }
-function moveJourneyActor(actor, fromId, toId, final, onComplete = null, speed = 1.95, opts = {}) {
+function moveJourneyActor(
+	actor,
+	fromId,
+	toId,
+	final,
+	onComplete = null,
+	speed = 1.95,
+	opts: MoveJourneyActorOptions = {}
+) {
 	if (!actor) return;
 	if (fromId && doors.has(fromId)) setDoorTarget(fromId, true);
 	if (toId && doors.has(toId)) setDoorTarget(toId, true);
