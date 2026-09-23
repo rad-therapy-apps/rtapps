@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { S } from './state.js';
+import { S } from './state';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { box, std, wall, makeDirectionalSign } from './helpers.js';
+import { box, std, wall, makeDirectionalSign } from './helpers';
 import {
 	renderer,
 	scene,
@@ -16,9 +16,9 @@ import {
 	updateAmbience,
 	ambienceProfile,
 	updatePerfFloor
-} from './scene.js';
+} from './scene';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { vehicleObject, monumentSign, privacyChangingNook } from './props.js';
+import { vehicleObject, monumentSign, privacyChangingNook } from './props';
 import {
 	C,
 	ROOMS,
@@ -33,15 +33,15 @@ import {
 	addCirculationProps,
 	addClinicalWallPolish,
 	buildExteriorAmbient
-} from './rooms.js';
-import { updateNpcLabels, departmentStaff } from './npc.js';
+} from './rooms';
+import { updateNpcLabels, departmentStaff } from './npc';
 import {
 	updateMovers,
 	addMovingActors,
 	updateDutyAnimations,
 	updateNpcExchanges,
 	updateHandoffTransitions
-} from './npc-behavior.js';
+} from './npc-behavior';
 import {
 	buildClinicalEquipmentLayer,
 	updateClinicalEquipment,
@@ -58,7 +58,7 @@ import {
 	buildPhase5Wayfinding,
 	workflowState,
 	CLINICAL_FOCUS
-} from './equipment.js';
+} from './equipment';
 import {
 	beginTravel,
 	updateTravel,
@@ -67,7 +67,7 @@ import {
 	setMode,
 	applyWalkMouseDelta,
 	requestWalkPointerLock
-} from './walk.js';
+} from './walk';
 import {
 	performInteraction,
 	updateInteractionUI,
@@ -90,7 +90,7 @@ import {
 	updateFacilityInfo,
 	procRenderSite,
 	procRefreshRelease
-} from './interact.js';
+} from './interact';
 import {
 	JOURNEY,
 	journeyActors,
@@ -103,8 +103,8 @@ import {
 	startJourneyFromKiosk,
 	updateJourneyRoomTiming,
 	updateJourneyCameraFollow
-} from './journey.js';
-import './sdk-bridge.js';
+} from './journey';
+import './sdk-bridge';
 
 const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();
@@ -131,9 +131,13 @@ export const ROOM_GUIDES = {
 	vault2: 'vault2',
 	hdr: 'hdr'
 };
-export const ROOM_CAST = {},
-	PRIMARY_NPCS = {},
-	PRIMARY_PATIENTS = {};
+// RTApps (#77 phase 2 task 16): typed boundary for the room-cast/primary-actor registries —
+// filled incrementally by npc.ts's departmentStaff() (`{ g, kind }` cast entries; `g`/primary
+// slots are the THREE.Object3D each NPC's setNpcRole call returns), read by
+// npc-behavior.ts/journey.ts/equipment.ts.
+export const ROOM_CAST: Record<string, { g: THREE.Object3D; kind: string }[]> = {},
+	PRIMARY_NPCS: Record<string, THREE.Object3D> = {},
+	PRIMARY_PATIENTS: Record<string, THREE.Object3D> = {};
 export const HANDOFFS = {
 	lobby: [
 		{
@@ -367,7 +371,10 @@ export const HANDOFFS = {
 };
 export const roomById = (id) => ROOMS.find((r) => r.id === id);
 
-export const MAT = {};
+// RTApps (#77 phase 2 task 16): typed boundary for the shared-material registry — filled
+// incrementally below (std() always returns a THREE.MeshStandardMaterial), read by
+// rooms.ts/props.ts throughout.
+export const MAT: Record<string, THREE.MeshStandardMaterial> = {};
 MAT.floor = std(0x87939b, 0.82, 0.04);
 MAT.floorDark = std(0x3b4650, 0.86, 0.04);
 MAT.wall = std(0xd9e0e4, 0.92, 0.01);
@@ -528,9 +535,11 @@ export const player = {
 	pitch: 0,
 	locked: false
 };
-export const keys = {};
+// RTApps (#77 phase 2 task 16): typed boundary for the pressed-key registry, read by walk.ts.
+export const keys: Record<string, boolean> = {};
 
-document.getElementById('sdClose').onclick = closeStaffDialogue;
+document.getElementById('sdClose').onclick =
+	closeStaffDialogue as unknown as GlobalEventHandlers['onclick'];
 document.getElementById('sdRestart').onclick = () =>
 	S.activeGuideKey && resetStaffDialogue(S.activeGuideKey);
 
@@ -545,18 +554,18 @@ document.getElementById('studentHelpClose').onclick = closeStudentHelp;
 studentHelp?.addEventListener('click', (e) => {
 	if (e.target === studentHelp) closeStudentHelp();
 });
-document.querySelectorAll('#modeSeg button').forEach(
+document.querySelectorAll<HTMLElement>('#modeSeg button').forEach(
 	(b) =>
 		(b.onclick = () => {
 			setMode(b.dataset.mode);
 			if (b.dataset.mode === 'walk') requestWalkPointerLock();
 		})
 );
-document.querySelectorAll('#zoneChips button').forEach(
+document.querySelectorAll<HTMLElement>('#zoneChips button').forEach(
 	(b) =>
 		(b.onclick = () => {
 			document
-				.querySelectorAll('#zoneChips button')
+				.querySelectorAll<HTMLElement>('#zoneChips button')
 				.forEach((x) => x.classList.toggle('active', x === b));
 			renderRoomList();
 		})
@@ -565,19 +574,19 @@ document.getElementById('homeBtn').onclick = () => beginTravel(roomById('lobby')
 document.getElementById('backBtn').onclick = () => {
 	const id = S.history.pop();
 	if (id) beginTravel(roomById(id), false);
-	document.getElementById('backBtn').disabled = !S.history.length;
+	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
 };
 document.getElementById('linacHeadClose').onclick = closeLinacHeadLab;
 document.getElementById('lhPhoton').onclick = () => lhSetMode('photon');
 document.getElementById('lhElectron').onclick = () => lhSetMode('electron');
 document
-	.querySelectorAll('[data-lhenergy]')
+	.querySelectorAll<HTMLElement>('[data-lhenergy]')
 	.forEach((b) => (b.onclick = () => lhSetEnergy(b.dataset.lhenergy)));
 document.getElementById('lhAnimate').onclick = lhAnimate;
 document.getElementById('lhReset').onclick = () => lhReset();
 document.getElementById('linacHeadCanvas').onclick = lhCanvasClick;
 document.getElementById('linacHeadDialog').addEventListener('click', (e) => {
-	if (e.target.id === 'linacHeadDialog') closeLinacHeadLab();
+	if ((e.target as HTMLElement).id === 'linacHeadDialog') closeLinacHeadLab();
 });
 document.addEventListener('keydown', (e) => {
 	if (e.key === 'Escape' && document.getElementById('linacHeadDialog').classList.contains('show'))
@@ -597,10 +606,10 @@ document.getElementById('kioskExplore').onclick = () => {
 	setMode('walk');
 };
 document.getElementById('kioskDialog').addEventListener('click', (e) => {
-	if (e.target.id === 'kioskDialog') closeKioskDialog();
+	if ((e.target as HTMLElement).id === 'kioskDialog') closeKioskDialog();
 });
 document
-	.querySelectorAll('#journeyModes button')
+	.querySelectorAll<HTMLElement>('#journeyModes button')
 	.forEach((b) => (b.onclick = () => setJourneyKind(b.dataset.journey)));
 document.getElementById('journeyStart').onclick = startTreatmentJourney;
 document.getElementById('journeyNext').onclick = advanceTreatmentJourney;
@@ -670,7 +679,8 @@ function animate(now) {
 	if (document.hidden) return;
 	const dt = Math.min(0.05, clock.getDelta()),
 		sec = now * 0.001,
-		f = (animate._f = (animate._f || 0) + 1);
+		f = ((animate as unknown as { _f?: number })._f =
+			((animate as unknown as { _f?: number })._f || 0) + 1);
 	updateDoors(dt);
 	updateWalk(dt);
 	updateTravel(now);

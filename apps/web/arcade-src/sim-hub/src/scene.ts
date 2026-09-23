@@ -7,8 +7,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
-import { S } from './state.js';
-import { toast } from './interact.js';
+import { S } from './state';
+import { toast } from './interact';
 
 export const canvas = document.getElementById('scene');
 export const renderer = new THREE.WebGLRenderer({
@@ -109,7 +109,10 @@ export const AMBIENCE = {
 };
 export function initAmbience() {
 	if (AMBIENCE.ctx) return;
-	const AC = window.AudioContext || window.webkitAudioContext;
+	// Legacy vendor-prefixed fallback, not in the DOM lib's Window type — cast only.
+	const AC =
+		window.AudioContext ||
+		(window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
 	if (!AC) return;
 	const ctx = new AC(),
 		master = ctx.createGain(),
@@ -151,7 +154,9 @@ export function initAmbience() {
 	Object.assign(AMBIENCE, { ctx, master, compressor, noiseGain, humGain, hum2Gain, filter });
 }
 export function ambienceProfile() {
-	const r = S.activeRoom;
+	// S.activeRoom is Room | null (rooms.ts); cast to the minimal shape this
+	// function reads.
+	const r = S.activeRoom as { id?: string; zone?: string } | null;
 	const id = r?.id || '';
 	if (id === 'vault1' || id === 'vault2')
 		return { master: 0.44, noise: 0.115, hum: 0.145, hum2: 0.038, freq: 560 };

@@ -10,12 +10,13 @@
    walk-mode interaction registry) and `openKioskDialog` (the wayfinding UI) moved to
    ./interact.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
-import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers.js';
-import { scene } from './scene.js';
-import { personFigure } from './npc.js';
-import { add, MAT } from './main.js';
-import { registerInteractable, openKioskDialog } from './interact.js';
-import { CT_COUCH, ROOM_CLOCKS } from './equipment.js';
+import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers';
+import { scene } from './scene';
+import { personFigure } from './npc';
+import { add, MAT } from './main';
+import { registerInteractable, openKioskDialog } from './interact';
+import { CT_COUCH, ROOM_CLOCKS } from './equipment';
+import type { Room } from './rooms';
 
 export function lampPost(x, z, h = 4.4) {
 	const g = new THREE.Group();
@@ -1158,7 +1159,7 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 	);
 }
 
-export function ctScanner(g, room) {
+export function ctScanner(g, room: Room) {
 	const ring = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.58, 18, 54), MAT.white);
 	ring.rotation.y = Math.PI / 2;
 	ring.position.set(room.x, 2.15, room.z + 1.5);
@@ -1182,7 +1183,7 @@ export function ctScanner(g, room) {
 	add(g, box(2.1, 0.78, 0.65, MAT.metal, room.x - 5.0, 0.5, room.z + 1.5));
 }
 
-export function emulatorLinacShell(g, room) {
+export function emulatorLinacShell(g, room: Room) {
 	const shell = std(0xf7f8f8, 0.43, 0.06),
 		soft = std(0xdfe2e2, 0.58, 0.04),
 		trim = std(0x8a8278, 0.42, 0.35),
@@ -1341,7 +1342,7 @@ export function emulatorLinacShell(g, room) {
 	root.add(l2);
 }
 
-export function hdrSuite(g, room) {
+export function hdrSuite(g, room: Room) {
 	examTable(g, room.x - 1.3, room.z, 0);
 	const after = box(0.85, 1.0, 0.85, MAT.white, room.x + 2.2, 0.65, room.z - 0.7);
 	add(g, after);
