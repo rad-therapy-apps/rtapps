@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import { S } from './state';
 import {
 	adaptivePanel,
@@ -29,12 +28,32 @@ import {
 } from './linac-delivery';
 import { allTreatmentFieldsCompleted, setPendantLCD, updateBEVInset } from './linac-safety';
 
+// RTApps (#77 phase 2 task 19): honest shape for `S.treatmentCompletion.record`, built
+// at both posting sites below. Exported so state.ts can tighten that member from
+// `unknown` (type-only import, mirroring the sim-hub Room/Travel precedent) — this
+// module owns `TreatmentCompletionState` per state.ts's comment. `reason` is only set
+// by postChargeAndCompleteFraction's record, not completeFractionWithoutCurrentCPTModule's.
+export interface TreatmentCompletionRecord {
+	patient: string;
+	mrn: string;
+	site: string;
+	fraction: string;
+	technique: string;
+	code: string;
+	level: string;
+	reason?: string;
+	igrtHandling: string;
+	fields: number;
+	totalMU: number;
+	postedAt: string;
+}
+
 export function resolveHubUrl() {
 	if (window.RTApps) {
 		window.RTApps.activityUrl('sim-hub-qa')
 			.then(function (url) {
 				S.HUB_URL = url;
-				const backBtn = document.getElementById('rtappsBackBtn');
+				const backBtn = document.getElementById('rtappsBackBtn') as HTMLButtonElement | null;
 				if (backBtn) backBtn.disabled = false;
 			})
 			.catch(function () {});
@@ -220,7 +239,7 @@ function renderChargeCapturePanel() {
 	if (chargeTreatmentCode) chargeTreatmentCode.disabled = S.treatmentCompletion.posted;
 	if (chargeIgrtHandling) {
 		chargeIgrtHandling.disabled = S.treatmentCompletion.posted || sbrtRequired();
-		const row = chargeIgrtHandling.closest('.charge-field');
+		const row = chargeIgrtHandling.closest<HTMLElement>('.charge-field');
 		if (row) row.style.display = sbrtRequired() ? 'none' : 'grid';
 		if (sbrtRequired()) chargeIgrtHandling.value = '';
 	}

@@ -139,14 +139,24 @@ export const deliveryTerminate = document.getElementById(
 export const deliveryFieldSelect = document.getElementById(
 	'deliveryFieldSelect'
 ) as HTMLSelectElement | null;
-export const deliveryCompleteSession = document.getElementById('deliveryCompleteSession');
-export const deliveryReviewCharges = document.getElementById('deliveryReviewCharges');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement/HTMLSelectElement (not just
+// HTMLElement): sdk.ts reads/sets `.disabled`/`.value` on these.
+export const deliveryCompleteSession = document.getElementById(
+	'deliveryCompleteSession'
+) as HTMLButtonElement | null;
+export const deliveryReviewCharges = document.getElementById(
+	'deliveryReviewCharges'
+) as HTMLButtonElement | null;
 export const chargeCapturePanel = document.getElementById('chargeCapturePanel');
 export const chargeCaptureClose = document.getElementById('chargeCaptureClose');
-export const chargeTreatmentCode = document.getElementById('chargeTreatmentCode');
-export const chargeIgrtHandling = document.getElementById('chargeIgrtHandling');
-export const chargeVerify = document.getElementById('chargeVerify');
-export const chargePost = document.getElementById('chargePost');
+export const chargeTreatmentCode = document.getElementById(
+	'chargeTreatmentCode'
+) as HTMLSelectElement | null;
+export const chargeIgrtHandling = document.getElementById(
+	'chargeIgrtHandling'
+) as HTMLSelectElement | null;
+export const chargeVerify = document.getElementById('chargeVerify') as HTMLButtonElement | null;
+export const chargePost = document.getElementById('chargePost') as HTMLButtonElement | null;
 export const loadingScreen = document.getElementById('loadingScreen');
 export const tabButtons = document.querySelectorAll('.tab-button');
 export const tabContentPanels = document.querySelectorAll('.tab-content-panel');

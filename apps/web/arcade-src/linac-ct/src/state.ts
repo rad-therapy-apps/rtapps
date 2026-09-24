@@ -28,6 +28,11 @@ import type {
 // always assigned from (built/consumed in linac-igrt.ts, which owns `ClinicalIGRTState`
 // per the comment below) — same type-only-import pattern as above.
 import type { CouchShift6D } from './linac-igrt';
+// RTApps (#77 phase 2 task 19, type-only follow-up): sdk.ts now exports a
+// `TreatmentCompletionRecord` interface for the literal `treatmentCompletion.record` is
+// always assigned from (built in sdk.ts, which owns `TreatmentCompletionState` per the
+// comment below) — same type-only-import pattern as above.
+import type { TreatmentCompletionRecord } from './sdk';
 
 // RTApps (#77 phase 2 task 18): typed boundary for `S`. Unions/types derived from
 // every actual assignment site across the linac-ct modules (grep `S.<member> =`).
@@ -233,9 +238,9 @@ interface TreatmentCompletionState {
 	posted: boolean;
 	code: string | null;
 	attempts: number;
-	igrtHandling: unknown;
-	postedAt: unknown;
-	record: unknown;
+	igrtHandling: string | null;
+	postedAt: Date | null;
+	record: TreatmentCompletionRecord | null;
 }
 
 interface LinacState {
