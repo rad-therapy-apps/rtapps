@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-ct';
 import { OrbitControls } from 'three-ct/addons/controls/OrbitControls.js';
 import { S } from './console';
@@ -9,14 +8,27 @@ export const BORE_R = 7.5,
 	HOUSING_R = 11.5,
 	GANTRY_DEPTH = 6.5,
 	PATIENT_LEN = 34;
-export let scene, camera, renderer, controls, clock;
-export let gantryHousing, gantryRotor, tubeMesh, detectorMesh;
-export let couchGroup, tableTop, patientGroup, skinGroup, boneGroup, organGroup, tumorMesh;
-export let laserGroup;
+export let scene: THREE.Scene | undefined,
+	camera: THREE.PerspectiveCamera | undefined,
+	renderer: THREE.WebGLRenderer | undefined,
+	controls: OrbitControls | undefined,
+	clock: THREE.Clock | undefined;
+export let gantryHousing: THREE.Group | undefined,
+	gantryRotor: THREE.Group | undefined,
+	tubeMesh: THREE.Mesh | undefined,
+	detectorMesh: THREE.Mesh | undefined;
+export let couchGroup: THREE.Group | undefined,
+	tableTop: THREE.Mesh | undefined,
+	patientGroup: THREE.Group | undefined,
+	skinGroup: THREE.Group | undefined,
+	boneGroup: THREE.Group | undefined,
+	organGroup: THREE.Group | undefined,
+	tumorMesh: THREE.Mesh | undefined;
+export let laserGroup: THREE.Group | undefined;
 export let gantryAngle = 0;
 
 export function initThree() {
-	const canvas = document.getElementById('scanCanvas');
+	const canvas = document.getElementById('scanCanvas') as HTMLCanvasElement;
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x0a0f14);
 	scene.fog = new THREE.Fog(0x0a0f14, 55, 110);
@@ -259,7 +271,7 @@ export function buildPatient() {
 		opacity: 0.5
 	});
 	const boneMat = new THREE.MeshStandardMaterial({ color: 0xeae4d2, roughness: 0.6 });
-	const capsule = (rx, ry, len, z) => {
+	const capsule = (rx: number, ry: number, len: number, z: number) => {
 		const g = new THREE.CapsuleGeometry(1, 1, 4, 12);
 		const m = new THREE.Mesh(g, skinMat);
 		m.scale.set(rx, len / 2, ry);
@@ -329,7 +341,16 @@ export function buildPatient() {
 	}
 
 	// organs (region-representative internal structures, semi-transparent)
-	const org = (c, rx, ry, rz, x, y, z, op = 0.75) => {
+	const org = (
+		c: number,
+		rx: number,
+		ry: number,
+		rz: number,
+		x: number,
+		y: number,
+		z: number,
+		op = 0.75
+	) => {
 		const m = new THREE.Mesh(
 			new THREE.SphereGeometry(1, 16, 12),
 			new THREE.MeshStandardMaterial({
@@ -376,7 +397,7 @@ export function createLasers() {
 	scene.add(laserGroup);
 }
 
-export function setView(name) {
+export function setView(name: string) {
 	if (!camera) return;
 	const t = new THREE.Vector3(0, 0, 0);
 	if (name === 'iso') camera.position.set(24, 17, 26);
