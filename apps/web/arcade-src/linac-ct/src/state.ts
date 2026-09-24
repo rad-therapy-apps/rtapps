@@ -8,6 +8,21 @@
    `let` whose original declaration had no initializer defaults to `undefined`. */
 import type * as THREE from 'three-linac';
 import type { OrbitControls } from 'three-linac/examples/jsm/controls/OrbitControls.js';
+// RTApps (#77 phase 2 task 19, type-only follow-up): linac-delivery.ts now exports
+// interfaces for the literals several nested workflow objects are always assigned
+// from (built/consumed in linac-delivery.ts, which owns all of these per the
+// comments below), mirroring the sim-hub Room/Travel precedent (state.ts importing a
+// type from a module that imports `S` back — type-only, erased at compile time, no
+// runtime circularity).
+import type {
+	TreatmentCase,
+	AdaptiveScenario,
+	AdaptiveHistoryEntry,
+	MotionPhaseSample,
+	OISEvent,
+	ClearanceOverrideRecord,
+	ClearanceResult
+} from './linac-delivery';
 
 // RTApps (#77 phase 2 task 18): typed boundary for `S`. Unions/types derived from
 // every actual assignment site across the linac-ct modules (grep `S.<member> =`).
@@ -89,9 +104,9 @@ interface MotionManagementState {
 	dibhTolerance: number;
 	holdActive: boolean;
 	holdStartedAt: number;
-	samples: unknown[];
-	trace: unknown[];
-	phaseData: unknown[];
+	samples: number[];
+	trace: number[];
+	phaseData: MotionPhaseSample[];
 	lastFrame: number;
 	lastPanelPaint: number;
 }
@@ -102,7 +117,7 @@ interface AdaptiveWorkflowState {
 	assessed: boolean;
 	compared: boolean;
 	approved: boolean;
-	scenario: unknown;
+	scenario: AdaptiveScenario | null;
 	selectedPlanKey: string;
 	doseChecked: boolean;
 	finalApproved: boolean;
@@ -112,7 +127,7 @@ interface AdaptiveWorkflowState {
 
 // Shapes mutated almost entirely by linac-delivery.js.
 interface AdaptiveCourseState {
-	history: unknown[];
+	history: AdaptiveHistoryEntry[];
 	totalFractions: number;
 	prescriptionGy: number;
 	dosePerFractionGy: number;
@@ -122,14 +137,14 @@ interface AdaptiveCourseState {
 // Shapes mutated almost entirely by linac-delivery.js.
 interface OISSessionState {
 	key: string;
-	events: unknown[];
+	events: OISEvent[];
 	note: string;
 	therapist: string;
 	reviewed: boolean;
 	overrideReviewed: boolean;
-	clearanceOverrides: unknown[];
+	clearanceOverrides: ClearanceOverrideRecord[];
 	signed: boolean;
-	signedAt: unknown;
+	signedAt: string | null;
 	status: string;
 	snapshot: unknown;
 }
@@ -150,9 +165,9 @@ interface ImmobilizationWorkflowState {
 // Shapes mutated almost entirely by linac-delivery.js. `timeoutVerifiedByField`
 // is read (as a boolean flag map) from scene.js's fundamentalState summary.
 interface SRSWorkflowState {
-	dryRunByField: unknown;
+	dryRunByField: Record<number, boolean>;
 	timeoutVerifiedByField: Record<number, boolean>;
-	lastClearance: unknown;
+	lastClearance: ClearanceResult | null;
 	dryRunning: boolean;
 }
 
@@ -176,6 +191,10 @@ interface SpecialSetupElectronState {
 	bolusPositionOK: boolean;
 	bolusAirGapOK: boolean;
 	bolusLogged: boolean;
+	// RTApps (#77 phase 2 task 19): dynamically added by linac-delivery.ts's drag-finish
+	// handler (never in the initial literal, so optional).
+	bolusOffsetXcm?: number;
+	bolusOffsetYcm?: number;
 }
 
 // `type` is mutated by linac-delivery.js from case data; kept as `string` rather
@@ -187,6 +206,17 @@ interface SpecialSetupWorkflowState {
 	csiJunctionA: number;
 	csiJunctionB: number;
 	electron: SpecialSetupElectronState;
+	// RTApps (#77 phase 2 task 19): dynamically added by linac-delivery.ts's
+	// syncSpecialCheckboxes (never in the initial literal, so optional).
+	indexChecked?: boolean;
+	matchDoc?: boolean;
+	cranialIndex?: boolean;
+	spineIndex?: boolean;
+	csiPlan?: boolean;
+	ePPE?: boolean;
+	eCool?: boolean;
+	eLabel?: boolean;
+	eLight?: boolean;
 }
 
 // Shape mutated almost entirely by sdk.js.
@@ -284,9 +314,7 @@ interface LinacState {
 	treatmentMonitorMesh: THREE.Mesh | null;
 	treatmentMonitorFrame: THREE.Group | null;
 	treatmentMonitorFrameSecondary: THREE.Group | null;
-	// Shape lives in linac-delivery.js / game.js case data; only ever read here
-	// via truthiness checks.
-	activeTreatmentCase: unknown;
+	activeTreatmentCase: TreatmentCase | null;
 	activeTreatmentCaseIndex: number;
 	clinicalIGRT: ClinicalIGRTState;
 	treatmentDelivery: TreatmentDeliveryState;

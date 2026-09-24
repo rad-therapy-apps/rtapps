@@ -47,6 +47,7 @@ import {
 	srsRequired,
 	renderTreatmentDeliveryPanel
 } from './linac-delivery';
+import type { SpecialSetupSpec } from './linac-delivery';
 import { renderClinicalIGRT } from './linac-igrt';
 
 const roomCeilingFixtureMats = [];
@@ -3153,7 +3154,7 @@ export function updateElectronApplicator3D() {
 	S.electronApplicatorGroup.visible = isElectronCase && mounted;
 	if (!S.electronApplicatorGroup.visible) return;
 	const e = (S.specialSetupWorkflow?.electron || {}) as typeof S.specialSetupWorkflow.electron;
-	const s = activeSpecialSetupSpec() || {};
+	const s = (activeSpecialSetupSpec() || {}) as SpecialSetupSpec;
 	const cone = String(e.cone || s.cone || '10 × 10 cm');
 	const coneScale = cone.includes('6 × 6') ? 0.82 : cone.includes('15 × 15') ? 1.08 : 0.94;
 	S.electronApplicatorGroup.scale.set(coneScale, 1.0, coneScale);

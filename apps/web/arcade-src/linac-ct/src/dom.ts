@@ -10,7 +10,11 @@ export const messageArea = document.getElementById('messageArea');
 export const balanceDisplay = document.getElementById('balanceDisplay');
 export const enhancementStoreElem = document.getElementById('enhancementStore');
 export const resetButton = document.getElementById('resetButton');
-export const treatmentCaseSelect = document.getElementById('treatmentCaseSelect');
+// RTApps (#77 phase 2 task 19): cast to HTMLSelectElement (not just HTMLElement):
+// linac-delivery.ts reads/sets `.value`/`.options`/`.disabled` on these.
+export const treatmentCaseSelect = document.getElementById(
+	'treatmentCaseSelect'
+) as HTMLSelectElement | null;
 export const loadTreatmentCaseBtn = document.getElementById('loadTreatmentCaseBtn');
 export const nextTreatmentCaseBtn = document.getElementById('nextTreatmentCaseBtn');
 export const ctSuiteLaunchButton = document.getElementById('ctSuiteLaunchButton');
@@ -31,11 +35,19 @@ export const motionHold = document.getElementById('motionHold');
 export const motionRelease = document.getElementById('motionRelease');
 export const motionReset = document.getElementById('motionReset');
 export const motionRecheck = document.getElementById('motionRecheck');
-export const motionWaveCanvas = document.getElementById('motionWaveCanvas');
-export const motionGateLow = document.getElementById('motionGateLow');
-export const motionGateHigh = document.getElementById('motionGateHigh');
-export const motionDibhTarget = document.getElementById('motionDibhTarget');
-export const motionDibhTolerance = document.getElementById('motionDibhTolerance');
+// RTApps (#77 phase 2 task 19): cast to HTMLCanvasElement/HTMLInputElement (not just
+// HTMLElement): linac-delivery.ts reads `.getContext`/`.width`/`.height`/`.value` on these.
+export const motionWaveCanvas = document.getElementById(
+	'motionWaveCanvas'
+) as HTMLCanvasElement | null;
+export const motionGateLow = document.getElementById('motionGateLow') as HTMLInputElement | null;
+export const motionGateHigh = document.getElementById('motionGateHigh') as HTMLInputElement | null;
+export const motionDibhTarget = document.getElementById(
+	'motionDibhTarget'
+) as HTMLInputElement | null;
+export const motionDibhTolerance = document.getElementById(
+	'motionDibhTolerance'
+) as HTMLInputElement | null;
 export const adaptiveLaunchButton = document.getElementById('adaptiveLaunchButton');
 export const adaptivePanel = document.getElementById('adaptivePanel');
 export const adaptiveClose = document.getElementById('adaptiveClose');
@@ -45,28 +57,45 @@ export const adaptiveApprove = document.getElementById('adaptiveApprove');
 export const oisLaunchButton = document.getElementById('oisLaunchButton');
 export const oisPanel = document.getElementById('oisPanel');
 export const oisClose = document.getElementById('oisClose');
-export const oisNote = document.getElementById('oisNote');
-export const oisTherapist = document.getElementById('oisTherapist');
-export const oisReviewCheck = document.getElementById('oisReviewCheck');
+// RTApps (#77 phase 2 task 19): cast to HTMLTextAreaElement/HTMLInputElement/
+// HTMLButtonElement/HTMLCanvasElement (not just HTMLElement): linac-delivery.ts reads/sets
+// `.value`/`.checked`/`.disabled`/`.getContext` on these.
+export const oisNote = document.getElementById('oisNote') as HTMLTextAreaElement | null;
+export const oisTherapist = document.getElementById('oisTherapist') as HTMLInputElement | null;
+export const oisReviewCheck = document.getElementById('oisReviewCheck') as HTMLInputElement | null;
 export const oisOverrideCard = document.getElementById('oisOverrideCard');
 export const oisOverrideSummary = document.getElementById('oisOverrideSummary');
-export const oisOverrideReviewCheck = document.getElementById('oisOverrideReviewCheck');
-export const oisSignOff = document.getElementById('oisSignOff');
-export const adaptiveNextFraction = document.getElementById('adaptiveNextFraction');
-export const adaptiveResetCourse = document.getElementById('adaptiveResetCourse');
-export const adaptiveDoseCanvas = document.getElementById('adaptiveDoseCanvas');
+export const oisOverrideReviewCheck = document.getElementById(
+	'oisOverrideReviewCheck'
+) as HTMLInputElement | null;
+export const oisSignOff = document.getElementById('oisSignOff') as HTMLButtonElement | null;
+export const adaptiveNextFraction = document.getElementById(
+	'adaptiveNextFraction'
+) as HTMLButtonElement | null;
+export const adaptiveResetCourse = document.getElementById(
+	'adaptiveResetCourse'
+) as HTMLButtonElement | null;
+export const adaptiveDoseCanvas = document.getElementById(
+	'adaptiveDoseCanvas'
+) as HTMLCanvasElement | null;
 export const srsLaunchButton = document.getElementById('srsLaunchButton');
 export const srsPanel = document.getElementById('srsPanel');
 export const srsClose = document.getElementById('srsClose');
 export const srsClearanceCheck = document.getElementById('srsClearanceCheck');
-export const srsDryRun = document.getElementById('srsDryRun');
-export const srsVerifyTimeout = document.getElementById('srsVerifyTimeout');
+export const srsDryRun = document.getElementById('srsDryRun') as HTMLButtonElement | null;
+export const srsVerifyTimeout = document.getElementById(
+	'srsVerifyTimeout'
+) as HTMLButtonElement | null;
 export const specialSetupLaunchButton = document.getElementById('specialSetupLaunchButton');
 export const specialSetupPanel = document.getElementById('specialSetupPanel');
 export const specialSetupClose = document.getElementById('specialSetupClose');
 export const specialSetupContent = document.getElementById('specialSetupContent');
 export const deliveryLaunchButton = document.getElementById('deliveryLaunchButton');
-export const immobilizationLaunchButton = document.getElementById('immobilizationLaunchButton');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
+// linac-delivery.ts sets `.disabled` on this.
+export const immobilizationLaunchButton = document.getElementById(
+	'immobilizationLaunchButton'
+) as HTMLButtonElement | null;
 export const immobilizationPanel = document.getElementById('immobilizationPanel');
 export const immobilizationClose = document.getElementById('immobilizationClose');
 export const immobilizationShelf = document.getElementById('immobilizationShelf');
@@ -77,7 +106,9 @@ export const immobilizationReset = document.getElementById('immobilizationReset'
 export const deliveryPanel = document.getElementById('deliveryPanel');
 export const deliveryClose = document.getElementById('deliveryClose');
 export const deliveryRecheck = document.getElementById('deliveryRecheck');
-export const deliveryArm = document.getElementById('deliveryArm');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
+// linac-delivery.ts sets `.disabled` on these.
+export const deliveryArm = document.getElementById('deliveryArm') as HTMLButtonElement | null;
 export const clearanceOverrideCard = document.getElementById('clearanceOverrideCard');
 export const clearanceOverrideReason = document.getElementById('clearanceOverrideReason');
 export const clearanceOverrideRationale = document.getElementById('clearanceOverrideRationale');
@@ -85,10 +116,18 @@ export const clearanceOverrideAck = document.getElementById('clearanceOverrideAc
 export const clearanceOverrideApply = document.getElementById('clearanceOverrideApply');
 export const clearanceOverrideWithdraw = document.getElementById('clearanceOverrideWithdraw');
 export const clearanceOverrideStatus = document.getElementById('clearanceOverrideStatus');
-export const deliveryStart = document.getElementById('deliveryStart');
-export const deliveryHold = document.getElementById('deliveryHold');
-export const deliveryTerminate = document.getElementById('deliveryTerminate');
-export const deliveryFieldSelect = document.getElementById('deliveryFieldSelect');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
+// linac-delivery.ts sets `.disabled` on these.
+export const deliveryStart = document.getElementById('deliveryStart') as HTMLButtonElement | null;
+export const deliveryHold = document.getElementById('deliveryHold') as HTMLButtonElement | null;
+export const deliveryTerminate = document.getElementById(
+	'deliveryTerminate'
+) as HTMLButtonElement | null;
+// RTApps (#77 phase 2 task 19): cast to HTMLSelectElement (not just HTMLElement):
+// linac-delivery.ts reads/sets `.value`/`.options`/`.disabled` on this.
+export const deliveryFieldSelect = document.getElementById(
+	'deliveryFieldSelect'
+) as HTMLSelectElement | null;
 export const deliveryCompleteSession = document.getElementById('deliveryCompleteSession');
 export const deliveryReviewCharges = document.getElementById('deliveryReviewCharges');
 export const chargeCapturePanel = document.getElementById('chargeCapturePanel');
@@ -138,7 +177,9 @@ export const mlcOpenButton = document.getElementById('mlcOpenButton');
 export const mlcCloseButton = document.getElementById('mlcCloseButton');
 export const mlcShapeButton = document.getElementById('mlcShapeButton');
 export const detectorToggleButton = document.getElementById('detectorToggleButton');
-export const beamOnButton = document.getElementById('beamOnButton');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
+// linac-delivery.ts sets `.disabled` on this.
+export const beamOnButton = document.getElementById('beamOnButton') as HTMLButtonElement | null;
 export const lasersToggleButton = document.getElementById('lasersToggleButton');
 export const odiToggleButton = document.getElementById('odiToggleButton');
 export const bonusChallengeButton = document.getElementById('bonusChallengeButton');
