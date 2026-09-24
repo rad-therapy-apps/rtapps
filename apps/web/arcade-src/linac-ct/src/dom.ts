@@ -231,12 +231,21 @@ export const cameraSceneA = document.getElementById('cameraSceneA');
 export const cameraSceneB = document.getElementById('cameraSceneB');
 export const cameraSceneC = document.getElementById('cameraSceneC');
 export const internalViewButton = document.getElementById('internalViewButton');
-export const beamStagePrevButton = document.getElementById('beamStagePrevButton');
-export const beamStageNextButton = document.getElementById('beamStageNextButton');
-export const asmBeamButton = document.getElementById('asmBeamButton');
-export const asmStandButton = document.getElementById('asmStandButton');
-export const asmElectronButton = document.getElementById('asmElectronButton');
-export const asmAccessoryButton = document.getElementById('asmAccessoryButton');
+// Cast to HTMLButtonElement (not just HTMLElement): scene.ts sets `.disabled` on these.
+export const beamStagePrevButton = document.getElementById(
+	'beamStagePrevButton'
+) as HTMLButtonElement | null;
+export const beamStageNextButton = document.getElementById(
+	'beamStageNextButton'
+) as HTMLButtonElement | null;
+export const asmBeamButton = document.getElementById('asmBeamButton') as HTMLButtonElement | null;
+export const asmStandButton = document.getElementById('asmStandButton') as HTMLButtonElement | null;
+export const asmElectronButton = document.getElementById(
+	'asmElectronButton'
+) as HTMLButtonElement | null;
+export const asmAccessoryButton = document.getElementById(
+	'asmAccessoryButton'
+) as HTMLButtonElement | null;
 export const internalOverlay = document.getElementById('internalOverlay');
 export const internalStageTitle = document.getElementById('internalStageTitle');
 export const internalStageDesc = document.getElementById('internalStageDesc');
