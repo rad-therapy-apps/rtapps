@@ -6,7 +6,7 @@
    main.js in later tasks import `S` and read/write `S.<name>` in its place.
    Initializers below are verbatim from the original top-level declarations; a
    `let` whose original declaration had no initializer defaults to `undefined`. */
-import * as THREE from 'three-linac';
+import type * as THREE from 'three-linac';
 import type { OrbitControls } from 'three-linac/examples/jsm/controls/OrbitControls.js';
 
 // RTApps (#77 phase 2 task 18): typed boundary for `S`. Unions/types derived from
@@ -224,7 +224,7 @@ interface LinacState {
 	gantryRotatingGroup: THREE.Group | undefined;
 	couchGroup: THREE.Group | undefined;
 	couchTopGroup: THREE.Group | undefined;
-	patientGroup: THREE.Group | null;
+	patientGroup: THREE.Group | undefined;
 	patientHome: THREE.Vector3 | null;
 	patientSetupRAF: number | null;
 	patientErrorGroup: THREE.Group | null;
@@ -356,7 +356,7 @@ export const S: LinacState = {
 	gantryRotatingGroup: undefined,
 	couchGroup: undefined,
 	couchTopGroup: undefined,
-	patientGroup: null,
+	patientGroup: undefined,
 	patientHome: null,
 	patientSetupRAF: null,
 	patientErrorGroup: null,
