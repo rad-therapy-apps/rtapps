@@ -724,7 +724,9 @@ export function startScan() {
 	($('btnScan') as HTMLButtonElement).disabled = true;
 	($('btnStop') as HTMLButtonElement).disabled = false;
 	($('btnTopogram') as HTMLButtonElement).disabled = true;
-	document.querySelectorAll('.mb,[data-couch]').forEach((b) => ((b as HTMLButtonElement).disabled = true));
+	document
+		.querySelectorAll('.mb,[data-couch]')
+		.forEach((b) => ((b as HTMLButtonElement).disabled = true));
 	($('btnSetIso') as HTMLButtonElement).disabled = true;
 	$('axHint').style.display = 'none';
 	$('progFill').classList.add('live');
@@ -756,7 +758,7 @@ export function startScan() {
 			$('progFill').style.width = pct + '%';
 			$('progPct').textContent = pct + '%';
 			$('progText').textContent = `Acquiring slice ${i + 1} / ${n}`;
-			$('acqSlices').textContent = S.sliceHU.length;
+			$('acqSlices').textContent = String(S.sliceHU.length);
 			i++;
 			if (i >= n) {
 				clearInterval(scanTimer);
@@ -775,7 +777,9 @@ export function finishScan() {
 	($('btnScan') as HTMLButtonElement).disabled = false;
 	($('btnTopogram') as HTMLButtonElement).disabled = false;
 	($('btnSetIso') as HTMLButtonElement).disabled = false;
-	document.querySelectorAll('.mb,[data-couch]').forEach((b) => ((b as HTMLButtonElement).disabled = false));
+	document
+		.querySelectorAll('.mb,[data-couch]')
+		.forEach((b) => ((b as HTMLButtonElement).disabled = false));
 	const n = S.sliceHU.length;
 	($('sliceScroll') as HTMLInputElement).disabled = false;
 	($('sliceScroll') as HTMLInputElement).max = String(n - 1);
@@ -810,7 +814,9 @@ export function stopScan() {
 	($('btnScan') as HTMLButtonElement).disabled = false;
 	($('btnTopogram') as HTMLButtonElement).disabled = false;
 	($('btnSetIso') as HTMLButtonElement).disabled = false;
-	document.querySelectorAll('.mb,[data-couch]').forEach((b) => ((b as HTMLButtonElement).disabled = false));
+	document
+		.querySelectorAll('.mb,[data-couch]')
+		.forEach((b) => ((b as HTMLButtonElement).disabled = false));
 	const n = S.sliceHU ? S.sliceHU.length : 0;
 	if (n > 0) {
 		($('sliceScroll') as HTMLInputElement).disabled = false;
