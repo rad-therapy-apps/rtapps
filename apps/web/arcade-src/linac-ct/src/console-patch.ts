@@ -1,7 +1,65 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
+import type { TreatmentCase, TreatmentField } from './linac-delivery';
+
+// RTApps (#77 phase 2 task 19): interim `window.RTAppsLinacMirrorBridge` typing — the
+// plan puts the consolidated `declare global` for this app's window globals in
+// main.ts's conversion (last in this task); until then this member needs a home so
+// this IIFE's `window.RTAppsLinacMirrorBridge.snapshot()` read type-checks. Fields are
+// the ones actually read below, not the full state shape main.js's bridge exposes
+// (this is a read-only display mirror, not a second source of truth). Removed from
+// here and folded into main.ts's block when main.ts converts.
+interface BridgeSnapshot {
+	activeTreatmentCase: (TreatmentCase & { note?: string }) | null;
+	treatmentDelivery: {
+		muDelivered?: number;
+		activeFieldIndex?: number;
+		delivering?: boolean;
+		armed?: boolean;
+		completed?: boolean;
+		held?: boolean;
+		completedFields?: Record<number, boolean>;
+	};
+	treatmentCompletion: { posted?: boolean };
+	specialSetupWorkflow: {
+		electron?: { bolusRequired?: boolean; bolusPlaced?: boolean };
+	};
+	fundamentalState: {
+		gantry?: number;
+		collimator?: number;
+		couchAngle?: number;
+		jawX1?: number;
+		jawX2?: number;
+		jawY1?: number;
+		jawY2?: number;
+		vrt?: number;
+		lng?: number;
+		lat?: number;
+		pitch?: number;
+		roll?: number;
+		yaw?: number;
+	};
+	plan: {
+		mu?: number;
+		doseRate?: number;
+		mode?: string;
+		electron?: boolean;
+		geometry?: { jaws?: string; gantry?: string; collimator?: string; couchAngle?: string };
+	};
+	readyInfo: { ready: boolean; checks: { name: string; ok: boolean; detail: string }[] };
+	dyn: { doseRate?: number } | null;
+	activeFields: (TreatmentField & { field?: string })[];
+	allFieldsCompleted?: boolean;
+}
+
+declare global {
+	interface Window {
+		RTAppsLinacMirrorBridge: { snapshot: () => BridgeSnapshot | null };
+	}
+}
+
 (function () {
 	'use strict';
-	const $ = (id) => document.getElementById(id);
+	const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+		document.getElementById(id) as T | null;
 	const text = (id) => ($(id)?.textContent || '—').trim() || '—';
 	const checkedIn = new Set();
 	let openCaseValue = null;
@@ -15,7 +73,7 @@
 		);
 	}
 	function caseOptions() {
-		const sel = $('treatmentCaseSelect');
+		const sel = $<HTMLSelectElement>('treatmentCaseSelect');
 		if (!sel) return [];
 		return Array.from(sel.options)
 			.filter((o) => o.value !== '' && !/select/i.test(o.textContent || ''))
@@ -245,7 +303,7 @@
 		syncMirror();
 	}
 	function openChart(value) {
-		const sel = $('treatmentCaseSelect');
+		const sel = $<HTMLSelectElement>('treatmentCaseSelect');
 		if (!sel) return;
 		sel.value = value;
 		openCaseValue = value;
@@ -265,7 +323,7 @@
 		activeWorkflow = kind;
 		document
 			.querySelectorAll('.rtv2-nav button')
-			.forEach((b) => b.classList.toggle('active', b.dataset.workflow === kind));
+			.forEach((b: HTMLElement) => b.classList.toggle('active', b.dataset.workflow === kind));
 		const map = {
 			setup: 'consoleImmoButton',
 			igrt: 'consoleIGRTButton',
@@ -276,7 +334,7 @@
 		if (kind === 'chart') $('consoleDockClose')?.click();
 		if (kind === 'machine') {
 			$('consoleDockClose')?.click();
-			const panel = $('rtv2MachinePanel');
+			const panel = $<HTMLDetailsElement>('rtv2MachinePanel');
 			if (panel) {
 				panel.open = true;
 				panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -290,14 +348,14 @@
 		$('rtv2RoomToggle')?.addEventListener('click', () =>
 			jumpToRoom(document.body.classList.contains('control-room-mode') ? 'vault' : 'control')
 		);
-		$('rtv2MachinePanel')?.addEventListener('click', (e) => {
-			const control = e.target.closest('[data-console-target]');
+		$('rtv2MachinePanel')?.addEventListener('click', (e: MouseEvent) => {
+			const control = (e.target as HTMLElement).closest<HTMLElement>('[data-console-target]');
 			if (control) {
 				const target = $(control.dataset.consoleTarget);
 				if (target) target.click();
 				return;
 			}
-			const workflow = e.target.closest('[data-workflow-launch]');
+			const workflow = (e.target as HTMLElement).closest<HTMLElement>('[data-workflow-launch]');
 			if (workflow) {
 				const targetMap = {
 					motion: 'motionLaunchButton',
@@ -308,9 +366,9 @@
 				$(targetMap[workflow.dataset.workflowLaunch])?.click();
 			}
 		});
-		$('rtv2QueueRows')?.addEventListener('click', (e) => {
-			const check = e.target.closest('.rtv2-checkin');
-			const open = e.target.closest('.rtv2-openchart');
+		$('rtv2QueueRows')?.addEventListener('click', (e: MouseEvent) => {
+			const check = (e.target as HTMLElement).closest<HTMLElement>('.rtv2-checkin');
+			const open = (e.target as HTMLElement).closest<HTMLButtonElement>('.rtv2-openchart');
 			if (check) {
 				checkedIn.add(check.dataset.value);
 				renderQueue();
@@ -322,7 +380,9 @@
 		});
 		document
 			.querySelectorAll('.rtv2-nav button')
-			.forEach((b) => b.addEventListener('click', () => launchWorkflow(b.dataset.workflow)));
+			.forEach((b: HTMLElement) =>
+				b.addEventListener('click', () => launchWorkflow(b.dataset.workflow))
+			);
 		$('rtv2MotionEnable')?.addEventListener('click', () => $('consoleMotionEnable')?.click());
 		$('rtv2EnableBeam')?.addEventListener('click', () => {
 			$('consoleDeliveryButton')?.click();
@@ -345,15 +405,22 @@
 		});
 		$('rtv2dActionHold')?.addEventListener('click', () => $('deliveryHold')?.click());
 		$('rtv2dActionRecord')?.addEventListener('click', () => {
-			const t = $('deliveryCompleteSession');
+			const t = $<HTMLButtonElement>('deliveryCompleteSession');
 			if (t && !t.disabled) t.click();
 			else $('deliveryReviewCharges')?.click();
 		});
-		$('rtv2dFieldList')?.addEventListener('click', (e) => {
-			const row = e.target.closest('.rtv2d-field-row[data-index]');
-			if (!row || !$('deliveryFieldSelect') || $('deliveryFieldSelect').disabled) return;
-			$('deliveryFieldSelect').value = String(row.dataset.index);
-			$('deliveryFieldSelect').dispatchEvent(new Event('change', { bubbles: true }));
+		$('rtv2dFieldList')?.addEventListener('click', (e: MouseEvent) => {
+			const row = (e.target as HTMLElement).closest<HTMLElement>('.rtv2d-field-row[data-index]');
+			if (
+				!row ||
+				!$<HTMLSelectElement>('deliveryFieldSelect') ||
+				$<HTMLSelectElement>('deliveryFieldSelect').disabled
+			)
+				return;
+			$<HTMLSelectElement>('deliveryFieldSelect').value = String(row.dataset.index);
+			$<HTMLSelectElement>('deliveryFieldSelect').dispatchEvent(
+				new Event('change', { bubbles: true })
+			);
 		});
 	}
 	function syncRoomNav() {
@@ -364,15 +431,17 @@
 		if (toggle) toggle.textContent = atConsole ? 'ENTER VAULT' : 'RETURN TO CONSOLE';
 	}
 	function syncMachineControlStates() {
-		document.querySelectorAll('#rtv2MachinePanel [data-console-target]').forEach((btn) => {
-			const target = $(btn.dataset.consoleTarget);
-			if (!target) return;
-			btn.disabled = !!target.disabled;
-			btn.classList.toggle(
-				'active-source',
-				target.classList.contains('active-function') || target.classList.contains('active')
-			);
-		});
+		document
+			.querySelectorAll('#rtv2MachinePanel [data-console-target]')
+			.forEach((btn: HTMLButtonElement) => {
+				const target = $<HTMLButtonElement>(btn.dataset.consoleTarget);
+				if (!target) return;
+				btn.disabled = !!target.disabled;
+				btn.classList.toggle(
+					'active-source',
+					target.classList.contains('active-function') || target.classList.contains('active')
+				);
+			});
 	}
 	window.addEventListener('rtapps-linac-bridge-ready', () => {
 		try {
@@ -654,15 +723,15 @@
 		setDeliveryText('rtv2dProgressDetail', `${delivered.toFixed(1)} / ${total.toFixed(1)} MU`);
 		const fill = $('rtv2dProgressFill');
 		if (fill) fill.style.width = `${pct}%`;
-		const prep = $('rtv2dActionPrep'),
-			readyBtn = $('rtv2dActionReady'),
-			beamBtn = $('rtv2dActionBeam'),
-			holdBtn = $('rtv2dActionHold'),
-			recordBtn = $('rtv2dActionRecord');
-		const srcPrep = $('deliveryRecheck'),
-			srcReady = $('deliveryArm'),
-			srcBeam = $('deliveryStart'),
-			srcHold = $('deliveryHold');
+		const prep = $<HTMLButtonElement>('rtv2dActionPrep'),
+			readyBtn = $<HTMLButtonElement>('rtv2dActionReady'),
+			beamBtn = $<HTMLButtonElement>('rtv2dActionBeam'),
+			holdBtn = $<HTMLButtonElement>('rtv2dActionHold'),
+			recordBtn = $<HTMLButtonElement>('rtv2dActionRecord');
+		const srcPrep = $<HTMLButtonElement>('deliveryRecheck'),
+			srcReady = $<HTMLButtonElement>('deliveryArm'),
+			srcBeam = $<HTMLButtonElement>('deliveryStart'),
+			srcHold = $<HTMLButtonElement>('deliveryHold');
 		if (prep && srcPrep) prep.disabled = !!srcPrep.disabled;
 		if (readyBtn && srcReady) {
 			readyBtn.disabled = !!srcReady.disabled;
@@ -675,7 +744,8 @@
 		}
 		if (recordBtn) {
 			recordBtn.disabled = !!(
-				$('deliveryCompleteSession')?.disabled && $('deliveryReviewCharges')?.disabled
+				$<HTMLButtonElement>('deliveryCompleteSession')?.disabled &&
+				$<HTMLButtonElement>('deliveryReviewCharges')?.disabled
 			);
 		}
 		const checks = $('rtv2dChecklist');

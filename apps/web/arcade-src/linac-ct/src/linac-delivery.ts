@@ -114,7 +114,8 @@ interface ControlPoint {
 	doseRate: number;
 }
 
-interface TreatmentField {
+// Exported: console-patch.ts's bridge-snapshot mirror types `activeFields` off this.
+export interface TreatmentField {
 	name: string;
 	mu: number;
 	doseRate: number;
