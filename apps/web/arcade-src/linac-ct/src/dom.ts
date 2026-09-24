@@ -1,7 +1,9 @@
 // --- DOM Elements ---
 export const viewerContainer = document.getElementById('viewerContainer');
-export const taskSelect = document.getElementById('taskSelect');
-export const startQuizButton = document.getElementById('startQuizButton');
+export const taskSelect = document.getElementById('taskSelect') as HTMLSelectElement | null;
+export const startQuizButton = document.getElementById(
+	'startQuizButton'
+) as HTMLButtonElement | null;
 export const quizArea = document.getElementById('quizArea');
 export const quizQuestionElem = document.getElementById('quizQuestion');
 export const quizOptionsElem = document.getElementById('quizOptions');
@@ -161,53 +163,81 @@ export const loadingScreen = document.getElementById('loadingScreen');
 export const tabButtons = document.querySelectorAll('.tab-button');
 export const tabContentPanels = document.querySelectorAll('.tab-content-panel');
 export const bottomMachineControls = document.getElementById('bottomMachineControls');
-export const gantryRotatePlusButton = document.getElementById('gantryRotatePlusButton');
-export const gantryRotateMinusButton = document.getElementById('gantryRotateMinusButton');
+export const gantryRotatePlusButton = document.getElementById(
+	'gantryRotatePlusButton'
+) as HTMLButtonElement | null;
+export const gantryRotateMinusButton = document.getElementById(
+	'gantryRotateMinusButton'
+) as HTMLButtonElement | null;
 export const collimatorRotatePlusButton = document.getElementById('collimatorRotatePlusButton');
 export const collimatorRotateMinusButton = document.getElementById('collimatorRotateMinusButton');
 export const pendantMotionEnable = document.getElementById('pendantMotionEnable');
-export const couchUpButton = document.getElementById('couchUpButton');
-export const couchDownButton = document.getElementById('couchDownButton');
-export const couchInButton = document.getElementById('couchInButton');
-export const couchOutButton = document.getElementById('couchOutButton');
-export const couchLeftButton = document.getElementById('couchLeftButton');
-export const couchRightButton = document.getElementById('couchRightButton');
-export const couchRollPlusButton = document.getElementById('couchRollPlusButton');
-export const couchRollMinusButton = document.getElementById('couchRollMinusButton');
-export const couchPitchPlusButton = document.getElementById('couchPitchPlusButton');
-export const couchPitchMinusButton = document.getElementById('couchPitchMinusButton');
-export const couchYawPlusButton = document.getElementById('couchYawPlusButton');
-export const couchYawMinusButton = document.getElementById('couchYawMinusButton');
+export const couchUpButton = document.getElementById('couchUpButton') as HTMLButtonElement | null;
+export const couchDownButton = document.getElementById(
+	'couchDownButton'
+) as HTMLButtonElement | null;
+export const couchInButton = document.getElementById('couchInButton') as HTMLButtonElement | null;
+export const couchOutButton = document.getElementById('couchOutButton') as HTMLButtonElement | null;
+export const couchLeftButton = document.getElementById(
+	'couchLeftButton'
+) as HTMLButtonElement | null;
+export const couchRightButton = document.getElementById(
+	'couchRightButton'
+) as HTMLButtonElement | null;
+export const couchRollPlusButton = document.getElementById(
+	'couchRollPlusButton'
+) as HTMLButtonElement | null;
+export const couchRollMinusButton = document.getElementById(
+	'couchRollMinusButton'
+) as HTMLButtonElement | null;
+export const couchPitchPlusButton = document.getElementById(
+	'couchPitchPlusButton'
+) as HTMLButtonElement | null;
+export const couchPitchMinusButton = document.getElementById(
+	'couchPitchMinusButton'
+) as HTMLButtonElement | null;
+export const couchYawPlusButton = document.getElementById(
+	'couchYawPlusButton'
+) as HTMLButtonElement | null;
+export const couchYawMinusButton = document.getElementById(
+	'couchYawMinusButton'
+) as HTMLButtonElement | null;
 export const couchTreatmentAnglePlusButton = document.getElementById(
 	'couchTreatmentAnglePlusButton'
-);
+) as HTMLButtonElement | null;
 export const couchTreatmentAngleMinusButton = document.getElementById(
 	'couchTreatmentAngleMinusButton'
-);
-export const jawsOpenButton = document.getElementById('jawsOpenButton');
-export const jawsCloseButton = document.getElementById('jawsCloseButton');
-export const jawX1InButton = document.getElementById('jawX1InButton');
-export const jawX1OutButton = document.getElementById('jawX1OutButton');
-export const jawX2InButton = document.getElementById('jawX2InButton');
-export const jawX2OutButton = document.getElementById('jawX2OutButton');
-export const jawY1InButton = document.getElementById('jawY1InButton');
-export const jawY1OutButton = document.getElementById('jawY1OutButton');
-export const jawY2InButton = document.getElementById('jawY2InButton');
-export const jawY2OutButton = document.getElementById('jawY2OutButton');
+) as HTMLButtonElement | null;
+export const jawsOpenButton = document.getElementById('jawsOpenButton') as HTMLButtonElement | null;
+export const jawsCloseButton = document.getElementById(
+	'jawsCloseButton'
+) as HTMLButtonElement | null;
+export const jawX1InButton = document.getElementById('jawX1InButton') as HTMLButtonElement | null;
+export const jawX1OutButton = document.getElementById('jawX1OutButton') as HTMLButtonElement | null;
+export const jawX2InButton = document.getElementById('jawX2InButton') as HTMLButtonElement | null;
+export const jawX2OutButton = document.getElementById('jawX2OutButton') as HTMLButtonElement | null;
+export const jawY1InButton = document.getElementById('jawY1InButton') as HTMLButtonElement | null;
+export const jawY1OutButton = document.getElementById('jawY1OutButton') as HTMLButtonElement | null;
+export const jawY2InButton = document.getElementById('jawY2InButton') as HTMLButtonElement | null;
+export const jawY2OutButton = document.getElementById('jawY2OutButton') as HTMLButtonElement | null;
 export const mlcOpenButton = document.getElementById('mlcOpenButton');
 export const mlcCloseButton = document.getElementById('mlcCloseButton');
 export const mlcShapeButton = document.getElementById('mlcShapeButton');
-export const detectorToggleButton = document.getElementById('detectorToggleButton');
+export const detectorToggleButton = document.getElementById(
+	'detectorToggleButton'
+) as HTMLButtonElement | null;
 // RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
 // linac-delivery.ts sets `.disabled` on this.
 export const beamOnButton = document.getElementById('beamOnButton') as HTMLButtonElement | null;
-export const lasersToggleButton = document.getElementById('lasersToggleButton');
+export const lasersToggleButton = document.getElementById(
+	'lasersToggleButton'
+) as HTMLButtonElement | null;
 export const odiToggleButton = document.getElementById('odiToggleButton');
 export const bonusChallengeButton = document.getElementById('bonusChallengeButton');
 export const roomLightsToggleButton = document.getElementById('roomLightsToggleButton');
 export const viewVaultButton = document.getElementById('viewVaultButton');
 export const viewControlRoomButton = document.getElementById('viewControlRoomButton');
-export const kvToggleButton = document.getElementById('kvToggleButton');
+export const kvToggleButton = document.getElementById('kvToggleButton') as HTMLButtonElement | null;
 export const operatorConsolePanel = document.getElementById('operatorConsolePanel');
 export const consoleActivePatient = document.getElementById('consoleActivePatient');
 export const consoleActiveField = document.getElementById('consoleActiveField');
@@ -292,7 +322,9 @@ export const consoleLightsStatusChip = document.getElementById('consoleLightsSta
 export const cameraSceneA = document.getElementById('cameraSceneA');
 export const cameraSceneB = document.getElementById('cameraSceneB');
 export const cameraSceneC = document.getElementById('cameraSceneC');
-export const internalViewButton = document.getElementById('internalViewButton');
+export const internalViewButton = document.getElementById(
+	'internalViewButton'
+) as HTMLButtonElement | null;
 // Cast to HTMLButtonElement (not just HTMLElement): scene.ts sets `.disabled` on these.
 export const beamStagePrevButton = document.getElementById(
 	'beamStagePrevButton'

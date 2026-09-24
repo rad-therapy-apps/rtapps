@@ -33,6 +33,13 @@ import type { CouchShift6D } from './linac-igrt';
 // always assigned from (built in sdk.ts, which owns `TreatmentCompletionState` per the
 // comment below) — same type-only-import pattern as above.
 import type { TreatmentCompletionRecord } from './sdk';
+// RTApps (#77 phase 2 task 19, type-only follow-up): game.ts now exports a
+// `BonusQuestion` interface for the literal `activeBonus` is always assigned from
+// (owned by game.ts); scene.ts's `LinacPartData` (already the honest shape for
+// `linacPartsData` entries) is what `currentQuizPart` is always assigned from — same
+// type-only-import pattern as above.
+import type { BonusQuestion } from './game';
+import type { LinacPartData } from './scene';
 
 // RTApps (#77 phase 2 task 18): typed boundary for `S`. Unions/types derived from
 // every actual assignment site across the linac-ct modules (grep `S.<member> =`).
@@ -350,19 +357,14 @@ interface LinacState {
 	deliveryPanelStamp: number;
 	treatmentCompletion: TreatmentCompletionState;
 	quizMode: 'part' | 'bonus';
-	// Shape lives in game.js's bonus-question data.
-	activeBonus: unknown;
+	activeBonus: BonusQuestion | null;
 	currentBalance: number;
-	// Shape lives in game.js's earned-part tracking.
-	earnedParts: unknown[];
-	// Shape lives in game.js's enhancement-purchase tracking.
-	purchasedEnhancements: unknown[];
-	// Shape lives in game.js's quiz-part tracking.
-	currentQuizPart: unknown;
+	earnedParts: string[];
+	purchasedEnhancements: string[];
+	currentQuizPart: LinacPartData | null;
 	// Callback installed by main.js; shape lives there.
 	bdSyncFromMachine: unknown;
-	// Shape lives in game.js's bonus-question data.
-	bonusQuestionDeck: unknown[];
+	bonusQuestionDeck: number[];
 	recentScenarioKeys: string[];
 	allCorePartsEarned: boolean;
 	jawOffset: number;

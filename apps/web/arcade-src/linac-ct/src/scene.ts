@@ -174,7 +174,8 @@ const couchAccordionMaterial = new THREE.MeshStandardMaterial({
 // RTApps (#77 phase 2 task 18): fields beyond `sil`/`position`/`rotation`/`group`/`id` are
 // optional — the last ("target") entry omits name/level/cost/quiz, and threeJSObject /
 // silhouetteObject / _preIVVis are populated later by createLinacPart3D / toggleSimpleInternals.
-interface LinacPartData {
+// Exported: state.ts tightens `currentQuizPart` (owned by game.ts) to this type.
+export interface LinacPartData {
 	id: string;
 	name?: string;
 	level?: number;
