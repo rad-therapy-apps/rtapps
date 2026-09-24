@@ -43,9 +43,8 @@ import type { LinacPartData } from './scene';
 
 // RTApps (#77 phase 2 task 18): typed boundary for `S`. Unions/types derived from
 // every actual assignment site across the linac-ct modules (grep `S.<member> =`).
-// Nested workflow objects whose fields are only ever read/written from still-JS
-// modules (`@ts-nocheck`'d, PR 4 scope) keep those specific fields as `unknown` —
-// tighten when that module converts, per the sim-hub Room/Travel precedent.
+// A handful of nested workflow fields remain `unknown` (opaque object payloads);
+// tightening them to structural types is a recorded #77 follow-up.
 
 interface CameraTravel {
 	mode: 'vault' | 'control';

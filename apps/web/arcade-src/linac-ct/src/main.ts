@@ -2892,7 +2892,8 @@ window.RTAppsLinacMirrorBridge = {
 						? !!allTreatmentFieldsCompleted()
 						: false
 			};
-			// eslint-disable-next-line no-unreachable -- pre-existing bug: statement placed after return, never executes; tracked in #77 phase 2 report
+			// Pre-existing bug: statement placed after return, never executes; tracked in #77
+			// phase 2 report. (The JS-era `no-unreachable` disable directive is unused on .ts.)
 			window.dispatchEvent(new CustomEvent('rtapps-linac-bridge-ready'));
 		} catch (err) {
 			console.warn('RTApps mirror bridge snapshot unavailable.', err);
