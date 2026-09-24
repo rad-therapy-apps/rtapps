@@ -7291,7 +7291,7 @@ export function loadTreatmentCase(index) {
 	renderOISPanel();
 }
 
-export function isFixedElectronField(field = deliveryCasePlan()) {
+export function isFixedElectronField(field: TreatmentField = deliveryCasePlan()) {
 	return !!field?.electron && String(field?.mode || 'STATIC').toUpperCase() === 'STATIC';
 }
 

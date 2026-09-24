@@ -90,7 +90,7 @@ interface TreatmentDeliveryState {
 
 // Shapes mutated almost entirely by linac-safety.js.
 interface ClearanceOverrideState {
-	byField: Record<string, unknown>;
+	byField: Record<string, ClearanceOverrideRecord>;
 }
 
 // Shapes mutated almost entirely by linac-delivery.js.

@@ -111,10 +111,21 @@ export const deliveryRecheck = document.getElementById('deliveryRecheck');
 export const deliveryArm = document.getElementById('deliveryArm') as HTMLButtonElement | null;
 export const clearanceOverrideCard = document.getElementById('clearanceOverrideCard');
 export const clearanceOverrideReason = document.getElementById('clearanceOverrideReason');
-export const clearanceOverrideRationale = document.getElementById('clearanceOverrideRationale');
-export const clearanceOverrideAck = document.getElementById('clearanceOverrideAck');
-export const clearanceOverrideApply = document.getElementById('clearanceOverrideApply');
-export const clearanceOverrideWithdraw = document.getElementById('clearanceOverrideWithdraw');
+// RTApps (#77 phase 2 task 19): cast to HTMLTextAreaElement/HTMLInputElement/
+// HTMLButtonElement (not just HTMLElement): linac-safety.ts reads/sets
+// `.value`/`.checked`/`.disabled` on these.
+export const clearanceOverrideRationale = document.getElementById(
+	'clearanceOverrideRationale'
+) as HTMLTextAreaElement | null;
+export const clearanceOverrideAck = document.getElementById(
+	'clearanceOverrideAck'
+) as HTMLInputElement | null;
+export const clearanceOverrideApply = document.getElementById(
+	'clearanceOverrideApply'
+) as HTMLButtonElement | null;
+export const clearanceOverrideWithdraw = document.getElementById(
+	'clearanceOverrideWithdraw'
+) as HTMLButtonElement | null;
 export const clearanceOverrideStatus = document.getElementById('clearanceOverrideStatus');
 // RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
 // linac-delivery.ts sets `.disabled` on these.
