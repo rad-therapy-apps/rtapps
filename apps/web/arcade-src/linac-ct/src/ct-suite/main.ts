@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import { initThree } from './room';
 import { log, setProto, setStatus, wire } from './console';
 import { attachBridgeListener, sendReady } from './bridge';
