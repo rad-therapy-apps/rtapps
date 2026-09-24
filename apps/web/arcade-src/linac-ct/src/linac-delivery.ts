@@ -265,6 +265,9 @@ export interface TreatmentCase {
 	// Legacy fallback shape read by getTreatmentFields() when `fields` is absent; never
 	// set on any of the 32 cases (dead code kept from before the `fields` array existed).
 	delivery?: { field?: string; mu?: number; doseRate?: number };
+	// Legacy fallback read by main.ts (`siteLabel || site`); never set on any of the 32
+	// cases (dead code kept from before `siteLabel` existed).
+	site?: string;
 }
 
 // `deliveryCasePlan()`'s return: a `TreatmentField` plus the two fields it always

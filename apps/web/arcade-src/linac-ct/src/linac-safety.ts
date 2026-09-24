@@ -61,19 +61,6 @@ import { renderClinicalIGRT } from './linac-igrt';
 import { saveGameState } from './game';
 import { setTextById, syncOperatorConsole, wrap360 } from './main';
 
-// RTApps (#77 phase 2 task 19): interim `window.clinicalIGRTCouchShift`/
-// `window.imagingCouchShift` typing — same rationale as linac-igrt.ts's interim
-// `clinicalIGRTActive` declaration (consolidated declare-global lives in main.ts,
-// which converts last in this task); `imagingCouchShift` is a 4th window global found
-// by grep during this conversion, beyond the 3 named in the task plan, with the same
-// need. Removed from here and folded into main.ts's block when main.ts converts.
-declare global {
-	interface Window {
-		clinicalIGRTCouchShift: (axis: string, delta: number) => boolean;
-		imagingCouchShift: (axis: string, delta: number) => boolean;
-	}
-}
-
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return S.clearanceOverrideState.byField?.[idx] || null;
 }

@@ -43,18 +43,6 @@ export interface CouchShift6D {
 	yaw: number;
 }
 
-// RTApps (#77 phase 2 task 19): interim `window.clinicalIGRTActive` typing — the plan
-// puts the consolidated `declare global` for this app's window globals
-// (`RTAppsLinacMirrorBridge`, `clinicalIGRTActive`, `clinicalIGRTCouchShift`) in
-// main.ts's conversion (last in this task); until then this member needs a home so
-// this module's own `window.clinicalIGRTActive = ...` assignments type-check. Removed
-// from here and folded into main.ts's block when main.ts converts.
-declare global {
-	interface Window {
-		clinicalIGRTActive: boolean;
-	}
-}
-
 function clinicalIGRTModeForCase() {
 	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();
 	return imaging.includes('mv') ? 'MV Pair' : 'CBCT';

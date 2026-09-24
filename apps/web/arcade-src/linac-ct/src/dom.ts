@@ -220,9 +220,11 @@ export const jawY1InButton = document.getElementById('jawY1InButton') as HTMLBut
 export const jawY1OutButton = document.getElementById('jawY1OutButton') as HTMLButtonElement | null;
 export const jawY2InButton = document.getElementById('jawY2InButton') as HTMLButtonElement | null;
 export const jawY2OutButton = document.getElementById('jawY2OutButton') as HTMLButtonElement | null;
-export const mlcOpenButton = document.getElementById('mlcOpenButton');
-export const mlcCloseButton = document.getElementById('mlcCloseButton');
-export const mlcShapeButton = document.getElementById('mlcShapeButton');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
+// main.ts sets `.disabled` on these.
+export const mlcOpenButton = document.getElementById('mlcOpenButton') as HTMLButtonElement | null;
+export const mlcCloseButton = document.getElementById('mlcCloseButton') as HTMLButtonElement | null;
+export const mlcShapeButton = document.getElementById('mlcShapeButton') as HTMLButtonElement | null;
 export const detectorToggleButton = document.getElementById(
 	'detectorToggleButton'
 ) as HTMLButtonElement | null;
@@ -232,7 +234,11 @@ export const beamOnButton = document.getElementById('beamOnButton') as HTMLButto
 export const lasersToggleButton = document.getElementById(
 	'lasersToggleButton'
 ) as HTMLButtonElement | null;
-export const odiToggleButton = document.getElementById('odiToggleButton');
+// RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
+// main.ts sets `.disabled` on this.
+export const odiToggleButton = document.getElementById(
+	'odiToggleButton'
+) as HTMLButtonElement | null;
 export const bonusChallengeButton = document.getElementById('bonusChallengeButton');
 export const roomLightsToggleButton = document.getElementById('roomLightsToggleButton');
 export const viewVaultButton = document.getElementById('viewVaultButton');
