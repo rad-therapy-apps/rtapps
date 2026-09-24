@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 // --- DOM Elements ---
 export const viewerContainer = document.getElementById('viewerContainer');
 export const taskSelect = document.getElementById('taskSelect');
