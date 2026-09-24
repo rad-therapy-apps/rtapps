@@ -23,6 +23,11 @@ import type {
 	ClearanceOverrideRecord,
 	ClearanceResult
 } from './linac-delivery';
+// RTApps (#77 phase 2 task 19, type-only follow-up): linac-igrt.ts now exports a
+// `CouchShift6D` interface for the literal `clinicalIGRT.baseline`/`.correction` are
+// always assigned from (built/consumed in linac-igrt.ts, which owns `ClinicalIGRTState`
+// per the comment below) — same type-only-import pattern as above.
+import type { CouchShift6D } from './linac-igrt';
 
 // RTApps (#77 phase 2 task 18): typed boundary for `S`. Unions/types derived from
 // every actual assignment site across the linac-ct modules (grep `S.<member> =`).
@@ -52,14 +57,17 @@ interface ClinicalIGRTState {
 	verified: boolean;
 	mode: 'CBCT' | 'MV Pair';
 	error: unknown;
-	correction: unknown;
-	baseline: unknown;
+	correction: CouchShift6D | null;
+	baseline: CouchShift6D | null;
 	attainable: boolean;
 	couchTopBasePos: unknown;
 	couchTopBaseRot: unknown;
-	clearance: unknown;
+	clearance: ClearanceResult | null;
 	alignmentWithinTolerance: boolean;
 	clearancePlacementOffset: number;
+	// RTApps (#77 phase 2 task 19): dynamically added by linac-igrt.ts's
+	// startClinicalIGRT (never in the initial literal, so optional).
+	clearancePending?: boolean;
 }
 
 // Shapes mutated almost entirely by linac-delivery.js.

@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import { S } from './state';
 import { igrtPanel } from './dom';
 import { GROUND_Y, renderTreatmentMonitor, updateCouchAccordion } from './scene';
@@ -30,6 +29,31 @@ import {
 	setPendantLCD,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
 } from './linac-safety';
+
+// RTApps (#77 phase 2 task 19): honest 6DOF couch-shift shape for
+// `S.clinicalIGRT.baseline`/`.correction`. Exported so state.ts can tighten those
+// members from `unknown` (type-only import, mirroring the sim-hub Room/Travel
+// precedent) — this module owns `ClinicalIGRTState` per state.ts's comment.
+export interface CouchShift6D {
+	lat: number;
+	lng: number;
+	vrt: number;
+	roll: number;
+	pitch: number;
+	yaw: number;
+}
+
+// RTApps (#77 phase 2 task 19): interim `window.clinicalIGRTActive` typing — the plan
+// puts the consolidated `declare global` for this app's window globals
+// (`RTAppsLinacMirrorBridge`, `clinicalIGRTActive`, `clinicalIGRTCouchShift`) in
+// main.ts's conversion (last in this task); until then this member needs a home so
+// this module's own `window.clinicalIGRTActive = ...` assignments type-check. Removed
+// from here and folded into main.ts's block when main.ts converts.
+declare global {
+	interface Window {
+		clinicalIGRTActive: boolean;
+	}
+}
 
 function clinicalIGRTModeForCase() {
 	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();
@@ -497,7 +521,7 @@ export function renderClinicalIGRT() {
 			const a = getIGRTApplied(),
 				c = S.clinicalIGRT.correction;
 			const it = activeIGRTTolerances();
-			const axes =
+			const axes: [string, string, string, number][] =
 				S.clinicalIGRT.mode === 'CBCT'
 					? [
 							['Lateral', 'lat', 'mm', it.translation],
