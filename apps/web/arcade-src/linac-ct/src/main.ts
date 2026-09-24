@@ -1359,7 +1359,7 @@ adaptiveApprove?.addEventListener('click', verifyAdaptivePlan);
 adaptiveNextFraction?.addEventListener('click', advanceAdaptiveFraction);
 adaptiveResetCourse?.addEventListener('click', resetAdaptiveCourseHistory);
 adaptivePanel?.addEventListener('click', (ev) => {
-	const btn = (ev.target as Element)?.closest('[data-adaptive-plan]') as HTMLElement | null;
+	const btn = (ev.target as Element).closest('[data-adaptive-plan]') as HTMLElement | null;
 	if (!btn || !adaptiveRequired()) return;
 	S.adaptiveWorkflow.approved = false;
 	applyAdaptivePlan(btn.dataset.adaptivePlan);
@@ -1466,7 +1466,7 @@ specialSetupContent?.addEventListener('change', () => {
 	updateElectronBolusMesh();
 });
 specialSetupContent?.addEventListener('click', (ev) => {
-	const btn = (ev.target as Element)?.closest('[data-special]') as HTMLElement | null;
+	const btn = (ev.target as Element).closest('[data-special]') as HTMLElement | null;
 	if (btn) handleSpecialSetupAction(btn.dataset.special);
 });
 deliveryLaunchButton?.addEventListener('click', () => {
