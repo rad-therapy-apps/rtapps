@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
 import { S } from './state';
 import { viewVaultButton, viewControlRoomButton } from './dom';
@@ -37,8 +36,8 @@ function beginTravelPath(toMode) {
 		S.vaultDoorTarget = 0;
 		return;
 	}
-	let positions = [S.camera.position.clone()];
-	let targets = [S.controls.target.clone()];
+	const positions = [S.camera.position.clone()];
+	const targets = [S.controls.target.clone()];
 	if (S.currentRoomView === 'vault' && toMode === 'control') {
 		positions.push(
 			new THREE.Vector3(4.8, 3.0, GANTRY_PLANE_Z_TARGET + 7.8),
