@@ -650,7 +650,11 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 		Math.abs(camera.position.z - lr.z) <= lr.d / 2;
 	const linacBecameNeeded = linacNeeded && !OPERATOR_CONSOLE.wasNeeded;
 	OPERATOR_CONSOLE.wasNeeded = linacNeeded;
-	if (linacNeeded && (linacBecameNeeded || nowMs - (OPERATOR_CONSOLE.lastRender || 0) > 110)) {
+	if (
+		linacNeeded &&
+		(linacBecameNeeded ||
+			nowMs - (OPERATOR_CONSOLE.lastRender || 0) > 110 / OPERATOR_CONSOLE.feeds.length)
+	) {
 		OPERATOR_CONSOLE.lastRender = nowMs;
 		const t = activeVaultPatientTarget();
 		/* One feed per tick; all five on the tick the console comes into play so no monitor
