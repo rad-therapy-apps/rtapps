@@ -627,6 +627,16 @@ function activeVaultPatientTarget() {
 	p.y = Math.max(1.45, p.y + 1.5);
 	return p;
 }
+/* Feed renders target a linear render target, so materials seen by both a feed and the screen
+   need a second (srgb-linear) program; build both now instead of on the first feed tick. */
+export function precompileShaders() {
+	renderer.compile(scene, camera);
+	const feed = OPERATOR_CONSOLE.feeds[0];
+	if (!feed) return;
+	renderer.setRenderTarget(feed.renderTarget);
+	renderer.compile(scene, feed.camera);
+	renderer.setRenderTarget(null);
+}
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass
 	   per feed; main.ts calls this right before the main render, which refreshes shadows. */

@@ -48,6 +48,7 @@ import {
 	updateStatusBeacons,
 	updateAmbulance,
 	renderOperatorLiveFeeds,
+	precompileShaders,
 	buildOperatorLiveConsole,
 	buildCtLiveConsole,
 	updateCtCouchMotion,
@@ -727,6 +728,7 @@ updateJourneyUI();
 procRenderSite();
 procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
+precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 setTimeout(() => document.getElementById('studentHelp')?.classList.add('show'), 1150);
