@@ -174,9 +174,14 @@ uploads `postgres/rtapps-<UTC timestamp>.dump.age` to `BACKUP_BUCKET` every nigh
 `BACKUP_HOUR_UTC`, pruning objects older than `BACKUP_RETENTION_DAYS` (30). Media lives in the
 S3 bucket; enable object versioning there.
 
-Take a backup now / check that uploads work:
+Take a backup now / check that uploads work. Run every command in this section from `/opt/rtapps`
+after `export IMAGE_TAG=$(cat .deployed)`: `compose.prod.yaml` builds image names from it, and
+without it compose fails with "invalid reference format". The `S3_ACCESS_KEY` token must have
+Object Read & Write on **both** `S3_BUCKET` and `BACKUP_BUCKET`. R2 answers `AccessDenied` if the
+token only covers the media bucket.
 
 ```bash
+export IMAGE_TAG=$(cat .deployed)
 docker compose --env-file .env -f compose.prod.yaml run --rm -e RUN_ONCE=1 backup
 docker compose --env-file .env -f compose.prod.yaml run --rm --entrypoint sh backup -c '. /usr/local/bin/rclone-remote.sh && rclone ls backup:rtapps-backups/postgres/'
 ```
