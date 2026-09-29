@@ -34,10 +34,11 @@ jobs:
   # FastAPI: ruff (lint + format), mypy --strict, pytest against a throwaway Postgres service on
   # host port 5433 (developer machines use 5434 via TEST_DATABASE_URL). The coverage threshold is
   # passed here explicitly so partial local runs never fail on coverage.
-  # Runs on the self-hosted Oracle A1 runner (rtapps-ci-runner): this ~40-minute job was the bulk
-  # of the hosted-minutes bill; the runner matches production's arm64 anyway.
+  # All jobs run on GitHub-hosted arm64 runners (`ubuntu-24.04-arm`), free for public repos and
+  # matching production's arm64. Self-hosted runners were retired when the repo went public: a fork
+  # PR can edit a workflow to target any runner registered to the repo.
   api:
-    runs-on: [self-hosted, oracle-arm64]
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         working-directory: apps/api
@@ -68,11 +69,7 @@ jobs:
 
   # Legacy migration tool: same uv toolchain, no database needed (pure HTML → JSON tests).
   tools:
-    # Self-hosted "light" runner (second runner process on the CI VM): hosted minutes hit
-    # 100% of the Free-plan quota on 2026-09-14, so every job now runs on the Oracle VM.
-    # Short jobs use the `light` runner so they never queue behind the ~1.3h api suite,
-    # which stays pinned to the first runner via its `oracle-arm64` label.
-    runs-on: [self-hosted, light]
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         working-directory: tools/migrate-legacy
@@ -90,7 +87,7 @@ jobs:
   # Drift guard: regenerate packages/api-client from the API's OpenAPI document and fail if the
   # committed client differs — an API change must ship with its regenerated client (`make client`).
   contract:
-    runs-on: [self-hosted, light] # see `tools` — all jobs self-hosted since 2026-09-14
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -106,7 +103,7 @@ jobs:
   # SvelteKit: prettier + eslint, svelte-check (types), vitest (Node project + Chromium browser
   # project, hence the Playwright chromium install).
   web:
-    runs-on: [self-hosted, light] # see `tools` — all jobs self-hosted since 2026-09-14
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -121,11 +118,9 @@ jobs:
 
   # Full-stack flow: boot the dev compose stack (same file as `make dev`), seed it, run the
   # Playwright test through Caddy on :8080, always upload the report and tear down volumes.
-  # Also self-hosted (see the api job): the second-heaviest job. Queues behind api on the single
-  # runner — serialization costs wall-clock but hosted minutes drop to ~0 for both.
   e2e:
-    runs-on: [self-hosted, oracle-arm64]
-    timeout-minutes: 35 # first runs build the compose images cold on 2 cores; local docker cache speeds later runs
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 35 # compose images build cold on every hosted run
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -160,7 +155,7 @@ jobs:
   # infra/compose.prod.yaml (both with and without the tunnel overlay) against the example env,
   # so a broken prod compose file fails a PR instead of the deploy in main.yml.
   images:
-    runs-on: [self-hosted, light] # see `tools` — all jobs self-hosted since 2026-09-14
+    runs-on: ubuntu-24.04-arm
     needs: [api, web]
     steps:
       - uses: actions/checkout@v7
