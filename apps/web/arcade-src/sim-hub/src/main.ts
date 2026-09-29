@@ -707,6 +707,8 @@ function animate(now) {
 	)
 		orbit.update();
 	renderOperatorLiveFeeds(now);
+	// After the feeds, so a feed render cannot consume the flag.
+	if (f % 4 === 1) renderer.shadowMap.needsUpdate = true;
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
 }
