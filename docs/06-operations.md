@@ -178,7 +178,7 @@ Take a backup now / check that uploads work:
 
 ```bash
 docker compose --env-file .env -f compose.prod.yaml run --rm -e RUN_ONCE=1 backup
-docker compose --env-file .env -f compose.prod.yaml run --rm --entrypoint mc backup ls backup/rtapps-backups/postgres/
+docker compose --env-file .env -f compose.prod.yaml run --rm --entrypoint sh backup -c '. /usr/local/bin/rclone-remote.sh && rclone ls backup:rtapps-backups/postgres/'
 ```
 
 **Monthly restore drill** (into a scratch database, never the live one):

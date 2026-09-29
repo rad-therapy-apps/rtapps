@@ -2,14 +2,14 @@
 # What this file does: the `backup` container's entrypoint — nightly, encrypts and
 #   uploads a Postgres dump, then prunes old ones past the retention window.
 # Used here and why: `pg_dump -Fc` (custom format, restorable with `pg_restore`) piped
-#   straight into `age` so the plaintext dump never touches disk; `mc` (not the AWS CLI)
-#   talks to whatever S3-compatible endpoint BACKUP_BUCKET lives on (R2/OCI/MinIO) with
-#   one alias, per ADR-0005's host-agnostic storage requirement. `RUN_ONCE=1` skips the
+#   straight into `age` so the plaintext dump never touches disk; `rclone` (not the AWS CLI)
+#   talks to whatever S3-compatible endpoint BACKUP_BUCKET lives on (R2/OCI/MinIO) through
+#   one env-configured remote, per ADR-0005's host-agnostic storage requirement. `RUN_ONCE=1` skips the
 #   scheduling loop for the restore drill and for a build-time smoke test
-#   (`docker run ... -c 'pg_dump --version && age --version && mc --version'`).
+#   (`docker run ... -c 'pg_dump --version && age --version && rclone version'`).
 # How it fits the project: ADR-0005 ("Backups": nightly pg_dump, age-encrypted, 30-day
 #   retention, weekly restore drill). The restore side is restore.sh.
-# Depends on: pg_dump, age, mc (installed in this image's Dockerfile); PGHOST/PGUSER/
+# Depends on: pg_dump, age, rclone (installed in this image's Dockerfile); PGHOST/PGUSER/
 #   PGPASSWORD/PGDATABASE (libpq env vars), S3_ENDPOINT/S3_ACCESS_KEY/S3_SECRET_KEY,
 #   BACKUP_BUCKET, BACKUP_AGE_RECIPIENT, BACKUP_RETENTION_DAYS, BACKUP_HOUR_UTC (all set
 #   by infra/compose.prod.yaml's `backup` service from infra/prod.env.example).
@@ -21,9 +21,9 @@ log() {
 	echo "[backup] $(date -u +%Y-%m-%dT%H:%M:%SZ) $*"
 }
 
-# Configure the S3-compatible endpoint once; every mc invocation below reuses this alias.
-mc alias set backup "$S3_ENDPOINT" "$S3_ACCESS_KEY" "$S3_SECRET_KEY" >/dev/null
-log "configured mc alias 'backup' for $S3_ENDPOINT"
+# Configure the S3-compatible endpoint once as the rclone remote `backup:`.
+. /usr/local/bin/rclone-remote.sh
+log "configured rclone remote 'backup:' for $S3_ENDPOINT"
 
 # One full backup cycle: dump, encrypt, upload, prune. Called once per night (or once
 # total under RUN_ONCE=1).
@@ -33,10 +33,10 @@ run_backup() {
 	log "starting pg_dump of ${PGDATABASE}"
 	pg_dump -Fc | age -r "$BACKUP_AGE_RECIPIENT" >"$tmp"
 	log "pg_dump encrypted to ${tmp}"
-	mc cp "$tmp" "backup/${BACKUP_BUCKET}/postgres/${object}"
-	log "uploaded ${object} to backup/${BACKUP_BUCKET}/postgres/"
+	rclone copyto "$tmp" "backup:${BACKUP_BUCKET}/postgres/${object}"
+	log "uploaded ${object} to backup:${BACKUP_BUCKET}/postgres/"
 	rm -f "$tmp"
-	mc rm --recursive --force --older-than "${BACKUP_RETENTION_DAYS}d" "backup/${BACKUP_BUCKET}/postgres/"
+	rclone delete --min-age "${BACKUP_RETENTION_DAYS}d" "backup:${BACKUP_BUCKET}/postgres/"
 	log "pruned backups older than ${BACKUP_RETENTION_DAYS}d"
 }
 

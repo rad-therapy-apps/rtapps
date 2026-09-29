@@ -31,11 +31,11 @@ log() {
 }
 
 # Configure the same S3-compatible endpoint backup.sh uploads to.
-mc alias set backup "$S3_ENDPOINT" "$S3_ACCESS_KEY" "$S3_SECRET_KEY" >/dev/null
-log "configured mc alias 'backup' for $S3_ENDPOINT"
+. /usr/local/bin/rclone-remote.sh
+log "configured rclone remote 'backup:' for $S3_ENDPOINT"
 
 tmp_enc="/tmp/$(basename "$OBJECT_NAME")"
-mc cp "backup/${BACKUP_BUCKET}/postgres/${OBJECT_NAME}" "$tmp_enc"
+rclone copyto "backup:${BACKUP_BUCKET}/postgres/${OBJECT_NAME}" "$tmp_enc"
 log "downloaded ${OBJECT_NAME} to ${tmp_enc}"
 
 tmp_dump="${tmp_enc%.age}"
