@@ -620,6 +620,10 @@ function activeVaultPatientTarget() {
 	return p;
 }
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
+	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass
+	   per feed; main.ts calls this right before the main render, which refreshes shadows. */
+	const shadowAutoUpdate = renderer.shadowMap.autoUpdate;
+	renderer.shadowMap.autoUpdate = false;
 	const linacNeeded =
 		OPERATOR_CONSOLE.built &&
 		(S.activeRoom?.id === 'linaccontrol' ||
@@ -663,6 +667,7 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 		}
 	}
 	renderer.setRenderTarget(null);
+	renderer.shadowMap.autoUpdate = shadowAutoUpdate;
 }
 
 /* ---- Ambulance drop-off choreography: pull up, unload, dwell, load, depart ---- */
