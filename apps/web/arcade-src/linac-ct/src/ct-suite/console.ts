@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import {
 	REAL_DATA,
 	REALV,
@@ -12,10 +11,34 @@ import {
 	repaintCurrent,
 	drawTopogram,
 	lerp
-} from './imaging.js';
-import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room.js';
+} from './imaging';
+import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room';
 /* ---------------- CT PROTOCOL LIBRARY ---------------- */
-export const PROTOCOLS = {
+// RTApps (#77 phase 2 task 20): typed shape for entries in `PROTOCOLS`. The demo
+// literal below carries `body` (never read once real data replaces it, see the
+// `delete` loop just after); `PROTO_SPEC`'s real entries carry `dataKey`/`defaultWL`/
+// `real`/`spanCm` instead, added by the `Object.assign` a few lines down — each set
+// is optional here since neither variant carries both.
+interface CtProtocol {
+	key: string;
+	name: string;
+	patient: string;
+	id: string;
+	region: string;
+	kv: number;
+	mas: number;
+	slice: number;
+	pitch: number | null;
+	dfov: number;
+	series: string;
+	body?: string;
+	dataKey?: string;
+	defaultWL?: string;
+	real?: boolean;
+	spanCm?: number;
+}
+
+export const PROTOCOLS: Record<string, CtProtocol> = {
 	pelvis: {
 		key: 'pelvis',
 		name: 'Pelvis',
@@ -212,7 +235,7 @@ export function updateTechniqueReadout() {
 export function updateAcquisitionGates() {
 	const dataReady = !!(S.proto && (!S.proto.real || REALV[S.proto.dataKey]?.loaded));
 	const ready = !!(S.proto && S.techniqueValidated && S.isoSet && dataReady && !S.scanning);
-	const b = document.getElementById('btnTopogram');
+	const b = document.getElementById('btnTopogram') as HTMLButtonElement | null;
 	if (b) b.disabled = !ready;
 }
 
@@ -230,12 +253,12 @@ export function resetTechniqueForProtocol() {
 	if (cue)
 		cue.innerHTML = `Measured patient size: <b>AP ${h.ap} cm</b> · <b>Lateral ${h.lat} cm</b>. Classify the body habitus, then adjust the technique.`;
 	document.querySelectorAll('[data-habitus]').forEach((b) => b.classList.remove('active'));
-	const kv = document.getElementById('kvSelect');
+	const kv = document.getElementById('kvSelect') as HTMLSelectElement | null;
 	if (kv) kv.value = String(S.techKv);
-	const ms = document.getElementById('masSlider'),
-		mi = document.getElementById('masInput');
-	if (ms) ms.value = S.techMas;
-	if (mi) mi.value = S.techMas;
+	const ms = document.getElementById('masSlider') as HTMLInputElement | null,
+		mi = document.getElementById('masInput') as HTMLInputElement | null;
+	if (ms) ms.value = String(S.techMas);
+	if (mi) mi.value = String(S.techMas);
 	const fb = document.getElementById('techFeedback');
 	if (fb) {
 		fb.className = 'tech-feedback';
@@ -256,7 +279,7 @@ export function selectHabitus(v) {
 	S.techniqueValidated = false;
 	document
 		.querySelectorAll('[data-habitus]')
-		.forEach((b) => b.classList.toggle('active', b.dataset.habitus === v));
+		.forEach((b) => b.classList.toggle('active', (b as HTMLElement).dataset.habitus === v));
 	const fb = document.getElementById('techFeedback');
 	if (fb) fb.className = 'tech-feedback';
 	const lock = document.getElementById('techLock');
@@ -271,12 +294,12 @@ export function selectHabitus(v) {
 export function setTechnique(kv, mas) {
 	S.techKv = Math.max(80, Math.min(140, Number(kv) || 120));
 	S.techMas = Math.max(40, Math.min(500, Math.round((Number(mas) || 220) / 5) * 5));
-	const ks = document.getElementById('kvSelect'),
-		ms = document.getElementById('masSlider'),
-		mi = document.getElementById('masInput');
+	const ks = document.getElementById('kvSelect') as HTMLSelectElement | null,
+		ms = document.getElementById('masSlider') as HTMLInputElement | null,
+		mi = document.getElementById('masInput') as HTMLInputElement | null;
 	if (ks) ks.value = String(S.techKv);
-	if (ms) ms.value = S.techMas;
-	if (mi) mi.value = S.techMas;
+	if (ms) ms.value = String(S.techMas);
+	if (mi) mi.value = String(S.techMas);
 	S.techniqueValidated = false;
 	updateTechniqueReadout();
 	updateAcquisitionGates();
@@ -319,7 +342,7 @@ export function validateTechnique() {
 	}
 	S.techniqueValidated = false;
 	updateAcquisitionGates();
-	let msg = [];
+	const msg = [];
 	if (!habitusOK) msg.push('body-habitus classification');
 	if (!kvOK) msg.push('kVp');
 	if (!masOK) msg.push('mAs');
@@ -340,7 +363,41 @@ export function validateTechnique() {
 }
 
 /* ---------------- GLOBAL STATE ---------------- */
-export const S = {
+// RTApps (#77 phase 2 task 20): typed boundary for `S`, mirroring the parent's
+// `LinacState` precedent (state.ts). Members and types come from every actual
+// assignment site across the ct-suite modules (grep `S.<member> =` in
+// console.ts/imaging.ts). `sliceHU` is never in the initial literal below — it's
+// first assigned (to `null`, then to an array) inside `setProto`/`startScan` — so
+// it's optional here, same treatment as LinacState's dynamically-added fields.
+interface CtSuiteState {
+	proto: CtProtocol | null;
+	ww: number;
+	wl: number;
+	selectedHabitus: string;
+	expectedHabitus: string;
+	habitusAttempts: number;
+	techniqueValidated: boolean;
+	techKv: number;
+	techMas: number;
+	couchZ: number;
+	isoSet: boolean;
+	scanning: boolean;
+	rotating: boolean;
+	motion: boolean;
+	motionAmp: number;
+	topoAcquired: boolean;
+	slices: unknown[];
+	sliceLevels: number[];
+	curSlice: number;
+	rangeStart: number;
+	rangeEnd: number;
+	step: number;
+	// RTApps (#77 phase 2 task 20): dynamically added by imaging.ts's setProto reset /
+	// startScan (never in the initial literal, so optional).
+	sliceHU?: Array<Float32Array | Int16Array> | null;
+}
+
+export const S: CtSuiteState = {
 	proto: null,
 	ww: 400,
 	wl: 40,
@@ -368,7 +425,13 @@ export const S = {
 /* ============================================================
    3) CONSOLE LOGIC / WORKFLOW
    ============================================================ */
-export const $ = (id) => document.getElementById(id);
+// RTApps (#77 phase 2 task 20): generic default keeps every existing untyped call
+// (`$('id')`) returning `HTMLElement` as before; call sites that read/write
+// element-specific members (`.value`/`.disabled`/`.checked`/`.max`) supply the
+// concrete element type, e.g. `$<HTMLInputElement>('sliceScroll')` — same erasing-cast
+// idiom already used at this codebase's `closest<HTMLElement>(...)` call sites.
+export const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+	document.getElementById(id) as T;
 export const log = (msg, cls = '') => {
 	const l = $('log');
 	const t = new Date().toLocaleTimeString([], { hour12: false });
@@ -441,7 +504,7 @@ export function setStep(n) {
 	$('conStep').textContent =
 		`Step ${n} · ${['', 'Protocol', 'Habitus / Technique', 'Position', 'Topogram', 'Range', 'Scan'][n]}`;
 	document.querySelectorAll('#workflowSteps .step').forEach((el) => {
-		const k = +el.dataset.step;
+		const k = +(el as HTMLElement).dataset.step;
 		el.classList.toggle('done', k < n);
 		el.classList.toggle('cur', k === n);
 	});
@@ -451,7 +514,9 @@ export function setProto(key) {
 	if (S.scanning) return;
 	const p = PROTOCOLS[key];
 	S.proto = p;
-	[...$('protoGrid').children].forEach((c) => c.classList.toggle('active', c.dataset.k === key));
+	[...$('protoGrid').children].forEach((c) =>
+		c.classList.toggle('active', (c as HTMLElement).dataset.k === key)
+	);
 	$('ptName').textContent = p.patient;
 	$('ptId').textContent = p.id;
 	$('ptProto').textContent = p.name;
@@ -470,13 +535,13 @@ export function setProto(key) {
 	S.curSlice = 0;
 	$('axHint').style.display = '';
 	$('topoHint').style.display = '';
-	$('sliceScroll').disabled = true;
-	$('sliceScroll').max = 0;
-	$('sliceScroll').value = 0;
+	$<HTMLInputElement>('sliceScroll').disabled = true;
+	$<HTMLInputElement>('sliceScroll').max = String(0);
+	$<HTMLInputElement>('sliceScroll').value = String(0);
 	$('sliceLabel').textContent = '— / —';
-	$('btnTopogram').disabled = true;
-	$('btnScan').disabled = true;
-	['rangeStart', 'rangeEnd'].forEach((id) => ($(id).disabled = true));
+	$<HTMLButtonElement>('btnTopogram').disabled = true;
+	$<HTMLButtonElement>('btnScan').disabled = true;
+	['rangeStart', 'rangeEnd'].forEach((id) => ($<HTMLInputElement>(id).disabled = true));
 	$('axMeta').textContent = '— HU';
 	$('acqSlices').textContent = '0';
 	$('progFill').style.width = '0%';
@@ -493,7 +558,7 @@ export function setProto(key) {
 	log(`Loaded protocol <b>${p.name}</b> — ${p.patient} (${p.id}).`, 'ok');
 	$('topoMeta').textContent = 'AP · LAT';
 	if (p.real && !REALV[p.dataKey].loaded) {
-		$('btnTopogram').disabled = true;
+		$<HTMLButtonElement>('btnTopogram').disabled = true;
 		setStatus('Loading real CT volume…', 'busy');
 		log('Decoding embedded CT series…', 'warn');
 		decodeRealVolume(p.dataKey)
@@ -519,10 +584,10 @@ let wlRepaintPending = false;
 export function setWL(ww, wl) {
 	S.ww = Math.max(20, Math.min(4000, Math.round(ww)));
 	S.wl = Math.max(-1200, Math.min(1600, Math.round(wl)));
-	$('wwSlider').value = S.ww;
-	$('wlSlider').value = S.wl;
-	$('wwLbl').textContent = S.ww;
-	$('wlLbl').textContent = S.wl;
+	$<HTMLInputElement>('wwSlider').value = String(S.ww);
+	$<HTMLInputElement>('wlSlider').value = String(S.wl);
+	$('wwLbl').textContent = String(S.ww);
+	$('wlLbl').textContent = String(S.wl);
 	if (!S.sliceHU || !S.sliceHU.length) return;
 	// RTApps perf pass: coalesce repaints to one per animation frame (pointermove during a
 	// WL drag can fire well over 60/sec); repaintCurrent() always reads the latest S.ww/S.wl,
@@ -541,12 +606,18 @@ export function updateRangeLabels() {
 	const [a, b] = spanOf(S.proto);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
 	const span = b - a;
-	const s = Math.min(+$('rangeStart').value, +$('rangeEnd').value - 4),
-		e = Math.max(+$('rangeEnd').value, +$('rangeStart').value + 4);
+	const s = Math.min(
+			+$<HTMLInputElement>('rangeStart').value,
+			+$<HTMLInputElement>('rangeEnd').value - 4
+		),
+		e = Math.max(
+			+$<HTMLInputElement>('rangeEnd').value,
+			+$<HTMLInputElement>('rangeStart').value + 4
+		);
 	S.rangeStart = s;
 	S.rangeEnd = e;
-	$('rangeStart').value = s;
-	$('rangeEnd').value = e;
+	$<HTMLInputElement>('rangeStart').value = String(s);
+	$<HTMLInputElement>('rangeEnd').value = String(e);
 	const cmS = lerp(a, b, s / 100),
 		cmE = lerp(a, b, e / 100),
 		len = cmE - cmS;
@@ -554,7 +625,7 @@ export function updateRangeLabels() {
 	$('rangeEndLbl').textContent = `S${cmE.toFixed(1)} cm`;
 	$('rangeLen').textContent = len.toFixed(1) + ' cm';
 	const nSlices = Math.max(1, Math.round((len * 10) / S.proto.slice));
-	$('rangeSlices').textContent = nSlices;
+	$('rangeSlices').textContent = String(nSlices);
 	if (S.topoAcquired) drawTopogram();
 }
 
@@ -594,7 +665,7 @@ export function wire() {
 	setStep(1);
 	document
 		.querySelectorAll('[data-view]')
-		.forEach((b) => (b.onclick = () => setView(b.dataset.view)));
+		.forEach((b) => ((b as HTMLElement).onclick = () => setView((b as HTMLElement).dataset.view)));
 	$('btnSkin').onclick = () => {
 		skinGroup.visible = !skinGroup.visible;
 		$('btnSkin').style.color = skinGroup.visible ? '' : 'var(--cyan)';
@@ -613,19 +684,21 @@ export function wire() {
 	$('rangeStart').oninput = updateRangeLabels;
 	$('rangeEnd').oninput = updateRangeLabels;
 	$('wwSlider').oninput = (e) => {
-		setWL(+e.target.value, S.wl);
+		setWL(+(e.target as HTMLInputElement).value, S.wl);
 		document.querySelectorAll('#wlGrid .chip').forEach((c) => c.classList.remove('active'));
 	};
 	$('wlSlider').oninput = (e) => {
-		setWL(S.ww, +e.target.value);
+		setWL(S.ww, +(e.target as HTMLInputElement).value);
 		document.querySelectorAll('#wlGrid .chip').forEach((c) => c.classList.remove('active'));
 	};
 	document
 		.querySelectorAll('[data-habitus]')
-		.forEach((b) => (b.onclick = () => selectHabitus(b.dataset.habitus)));
-	$('kvSelect').onchange = (e) => setTechnique(+e.target.value, S.techMas);
-	$('masSlider').oninput = (e) => setTechnique(S.techKv, +e.target.value);
-	$('masInput').onchange = (e) => setTechnique(S.techKv, +e.target.value);
+		.forEach(
+			(b) => ((b as HTMLElement).onclick = () => selectHabitus((b as HTMLElement).dataset.habitus))
+		);
+	$('kvSelect').onchange = (e) => setTechnique(+(e.target as HTMLInputElement).value, S.techMas);
+	$('masSlider').oninput = (e) => setTechnique(S.techKv, +(e.target as HTMLInputElement).value);
+	$('masInput').onchange = (e) => setTechnique(S.techKv, +(e.target as HTMLInputElement).value);
 	$('btnValidateTechnique').onclick = validateTechnique;
 	$('btnAutoWindow').onclick = autoWindow;
 	$('btnResetWindow').onclick = () => {
@@ -654,34 +727,36 @@ export function wire() {
 	axCanvas.addEventListener('pointerup', endWL);
 	axCanvas.addEventListener('pointercancel', endWL);
 	axCanvas.addEventListener('dblclick', () => $('btnResetWindow').click());
-	$('sliceScroll').oninput = (e) => reviewSlice(+e.target.value);
+	$<HTMLInputElement>('sliceScroll').oninput = (e) =>
+		reviewSlice(+(e.target as HTMLInputElement).value);
 	document.querySelectorAll('[data-couch]').forEach((b) => {
-		const m = b.dataset.couch;
+		const m = (b as HTMLElement).dataset.couch;
 		const ax = m[0],
 			sgn = m.slice(1) === '1' ? 1 : -1;
-		b.onclick = () => moveCouch(ax === 'x' ? sgn : 0, ax === 'y' ? sgn : 0, ax === 'z' ? sgn : 0);
+		(b as HTMLElement).onclick = () =>
+			moveCouch(ax === 'x' ? sgn : 0, ax === 'y' ? sgn : 0, ax === 'z' ? sgn : 0);
 	});
 	$('btnSetIso').onclick = setIso;
 	$('rotChk').onchange = (e) => {
-		S.rotating = e.target.checked;
+		S.rotating = (e.target as HTMLInputElement).checked;
 	};
 	$('motionChk').onchange = (e) => {
-		S.motion = e.target.checked;
+		S.motion = (e.target as HTMLInputElement).checked;
 	};
 	$('ampSlider').oninput = (e) => {
-		S.motionAmp = +e.target.value;
-		$('ampLbl').textContent = (+e.target.value).toFixed(1);
+		S.motionAmp = +(e.target as HTMLInputElement).value;
+		$('ampLbl').textContent = (+(e.target as HTMLInputElement).value).toFixed(1);
 	};
 	// initial slice-scroll keyboard
 	addEventListener('keydown', (e) => {
 		if (!S.sliceHU || !S.sliceHU.length) return;
 		if (e.key === 'ArrowUp') {
 			reviewSlice(S.curSlice + 1);
-			$('sliceScroll').value = S.curSlice;
+			$<HTMLInputElement>('sliceScroll').value = String(S.curSlice);
 		}
 		if (e.key === 'ArrowDown') {
 			reviewSlice(S.curSlice - 1);
-			$('sliceScroll').value = S.curSlice;
+			$<HTMLInputElement>('sliceScroll').value = String(S.curSlice);
 		}
 	});
 }

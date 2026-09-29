@@ -1,7 +1,6 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import { S } from './state.js';
-import { igrtPanel } from './dom.js';
-import { GROUND_Y, renderTreatmentMonitor, updateCouchAccordion } from './scene.js';
+import { S } from './state';
+import { igrtPanel } from './dom';
+import { GROUND_Y, renderTreatmentMonitor, updateCouchAccordion } from './scene';
 import {
 	activeIGRTTolerances,
 	canonicalCouchDisplay,
@@ -15,7 +14,7 @@ import {
 	oisLogEvent,
 	renderTreatmentDeliveryPanel,
 	srsRequired
-} from './linac-delivery.js';
+} from './linac-delivery';
 import {
 	captureCollisionPose,
 	COLLISION_PROXY_TOL,
@@ -29,7 +28,20 @@ import {
 	restoreCollisionPose,
 	setPendantLCD,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
-} from './linac-safety.js';
+} from './linac-safety';
+
+// RTApps (#77 phase 2 task 19): honest 6DOF couch-shift shape for
+// `S.clinicalIGRT.baseline`/`.correction`. Exported so state.ts can tighten those
+// members from `unknown` (type-only import, mirroring the sim-hub Room/Travel
+// precedent) — this module owns `ClinicalIGRTState` per state.ts's comment.
+export interface CouchShift6D {
+	lat: number;
+	lng: number;
+	vrt: number;
+	roll: number;
+	pitch: number;
+	yaw: number;
+}
 
 function clinicalIGRTModeForCase() {
 	const imaging = (S.activeTreatmentCase?.planned?.imaging || '').toLowerCase();
@@ -497,7 +509,7 @@ export function renderClinicalIGRT() {
 			const a = getIGRTApplied(),
 				c = S.clinicalIGRT.correction;
 			const it = activeIGRTTolerances();
-			const axes =
+			const axes: [string, string, string, number][] =
 				S.clinicalIGRT.mode === 'CBCT'
 					? [
 							['Lateral', 'lat', 'mm', it.translation],

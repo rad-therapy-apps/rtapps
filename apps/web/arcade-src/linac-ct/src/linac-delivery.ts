@@ -1,6 +1,5 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	adaptiveDoseCanvas,
 	adaptiveNextFraction,
@@ -41,7 +40,7 @@ import {
 	srsPanel,
 	srsVerifyTimeout,
 	treatmentCaseSelect
-} from './dom.js';
+} from './dom';
 import {
 	GROUND_Y,
 	applyDetectorCommandedPose,
@@ -53,16 +52,16 @@ import {
 	setODIState,
 	updateElectronApplicator3D,
 	updateMLCPositions
-} from './scene.js';
+} from './scene';
 import {
 	fmtIGRT,
 	getIGRTApplied,
 	getIGRTResidual,
 	renderClinicalIGRT,
 	resetClinicalIGRTForCase
-} from './linac-igrt.js';
-import { setTextById, wrap360 } from './main.js';
-import { renderTreatmentCompletionControls, resetTreatmentCompletion } from './sdk.js';
+} from './linac-igrt';
+import { setTextById, wrap360 } from './main';
+import { renderTreatmentCompletionControls, resetTreatmentCompletion } from './sdk';
 import {
 	allTreatmentFieldsCompleted,
 	clearanceOverrideActive,
@@ -82,7 +81,275 @@ import {
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN,
 	treatmentTrajectorySamples,
 	updateBEVInset
-} from './linac-safety.js';
+} from './linac-safety';
+
+// RTApps (#77 phase 2 task 19): honest shape for `TREATMENT_CASES` entries, derived
+// from every field actually present across the 32-entry literal below plus every
+// property read off `S.activeTreatmentCase` in this file. Exported so state.ts can
+// tighten `activeTreatmentCase` from `unknown` to `TreatmentCase | null` (type-only
+// import, mirroring the sim-hub Room/Travel precedent) — this is the only state.ts
+// member this task tightens; other `unknown` fields this module owns keep local
+// erasing casts at their access sites.
+interface FieldGeometry {
+	gantry: string;
+	collimator: string;
+	jaws: string;
+	mlcAperture: string;
+	mlcShape: string;
+	couchAngle?: string;
+	couch?: string;
+}
+
+interface FieldArc {
+	start: number;
+	stop: number;
+	direction: string;
+	fullArc: boolean;
+}
+
+interface ControlPoint {
+	muFraction: number;
+	mlcAperture: number;
+	mlcShape: string;
+	doseRate: number;
+}
+
+// Exported: console-patch.ts's bridge-snapshot mirror types `activeFields` off this.
+export interface TreatmentField {
+	name: string;
+	mu: number;
+	doseRate: number;
+	geometry: FieldGeometry;
+	mode?: string;
+	controlPoints?: ControlPoint[];
+	arc?: FieldArc;
+	targetRegion?: string;
+	station?: string;
+	electron?: boolean;
+}
+
+interface CaseBilling {
+	treatmentCode: string;
+	level: string;
+	reason: string;
+	igrtHandling?: string;
+	// Only ever read (`?.skipChargeCapture`); never set on any of the 32 cases.
+	skipChargeCapture?: boolean;
+}
+
+interface CaseImmobilization {
+	required: string[];
+	orderSummary: string;
+	instructions: string[];
+	// Only ever read defensively (`spec.xxx || []`/`|| fallback`); never set on any of
+	// the 32 cases — kept optional for the (currently dead) structured-instructions path.
+	keyNames?: string[];
+	positionInstructions?: string[];
+	indexingInstructions?: string[];
+	preparationInstructions?: string[];
+	optional?: string[];
+}
+
+interface PlannedParameters {
+	gantry: string;
+	collimator: string;
+	jaws: string;
+	mlcAperture: string;
+	mlcShape: string;
+	imaging: string;
+	odi: string;
+	couch: string;
+	couchAngle?: string;
+}
+
+interface MotionManagementSpec {
+	type: string;
+	label: string;
+	period: number;
+	siExcursion?: number;
+	apExcursion?: number;
+	lrExcursion?: number;
+	gateLow?: number;
+	gateHigh?: number;
+	dibhTarget?: number;
+	dibhTolerance?: number;
+	practiceHolds?: number;
+}
+
+interface StereotacticSpec {
+	type: string;
+	label: string;
+	translationTolerance: number;
+	rotationTolerance: number;
+	immobilization: string;
+}
+
+// Exported: scene.ts's updateElectronApplicator3D reads this off `activeSpecialSetupSpec()`.
+export interface SpecialSetupSpec {
+	type: string;
+	label: string;
+	toleranceMm?: number;
+	matchTechnique?: string;
+	junctionA?: string;
+	junctionB?: string;
+	shape?: string;
+	widthCm?: number;
+	heightCm?: number;
+	cone?: string;
+	ssdCm?: number;
+	bolusThicknessCm?: number;
+}
+
+interface AdaptiveSeedHistoryEntry {
+	fx: number;
+	scenarioIndex: number;
+	planKey: string;
+}
+
+interface AdaptiveCourseSpec {
+	prescriptionGy: number;
+	totalFractions: number;
+	dosePerFractionGy: number;
+	rectumTeachingReferenceGy?: number;
+	bowelTeachingReferenceGy?: number;
+	seedHistory?: AdaptiveSeedHistoryEntry[];
+}
+
+// Exported: state.ts tightens `AdaptiveWorkflowState.scenario` (owned by this module) to
+// this type.
+export interface AdaptiveScenario {
+	title: string;
+	summary: string;
+	findings: string[];
+	recommendedPlan: string;
+}
+
+interface AdaptivePlanSpec {
+	title: string;
+	summary?: string;
+	metrics?: string[];
+	planned: PlannedParameters;
+	fields: TreatmentField[];
+}
+
+interface AdaptiveSpec {
+	label: string;
+	defaultPlanKey: string;
+	course: AdaptiveCourseSpec;
+	scenarios: AdaptiveScenario[];
+	plans: Record<string, AdaptivePlanSpec>;
+}
+
+export interface TreatmentCase {
+	patient: string;
+	mrn: string;
+	siteLabel: string;
+	siteKey: string;
+	position: string;
+	positionLabel: string;
+	technique: string;
+	energy: string;
+	fraction: string;
+	billing: CaseBilling;
+	note: string;
+	immobilization: CaseImmobilization;
+	planned: PlannedParameters;
+	fields: TreatmentField[];
+	motionManagement?: MotionManagementSpec;
+	stereotactic?: StereotacticSpec;
+	setupSiteZ?: number;
+	setupBodyX?: number;
+	setupBodyY?: number;
+	specialSetup?: SpecialSetupSpec;
+	adaptive?: AdaptiveSpec;
+	// Legacy fallback shape read by getTreatmentFields() when `fields` is absent; never
+	// set on any of the 32 cases (dead code kept from before the `fields` array existed).
+	delivery?: { field?: string; mu?: number; doseRate?: number };
+	// Legacy fallback read by main.ts (`siteLabel || site`); never set on any of the 32
+	// cases (dead code kept from before `siteLabel` existed).
+	site?: string;
+}
+
+// `deliveryCasePlan()`'s return: a `TreatmentField` plus the two fields it always
+// computes and guarantees present (`field`, uppercased `mode`).
+interface DeliveryFieldPlan extends TreatmentField {
+	field: string;
+	mode: string;
+}
+
+// IGRT couch-shift coordinate convention used throughout this file (VRT/LNG/LAT).
+interface CoordinateShift {
+	vrt: number;
+	lng: number;
+	lat: number;
+}
+
+// Exported: state.ts tightens `MotionManagementState.phaseData` (owned by this module)
+// to this type. Shape of each entry built by motion4DPhaseData().
+export interface MotionPhaseSample {
+	phase: number;
+	si: number;
+	ap: number;
+	lr: number;
+}
+
+// Exported: state.ts tightens `OISSessionState.events` (owned by this module) to this
+// type. Shape built by oisLogEvent().
+export interface OISEvent {
+	ts: string;
+	time: string;
+	type: string;
+	title: string;
+	detail: string;
+	dedupe: string;
+}
+
+// Exported: state.ts tightens `OISSessionState.clearanceOverrides` (owned by this
+// module) to this type. Base shape built by linac-safety.js's applyClearanceOverride;
+// `dynamicEncounterLogged` is added dynamically by this file.
+export interface ClearanceOverrideRecord {
+	active: boolean;
+	used: boolean;
+	fieldIndex: number;
+	field: string;
+	rationale: string;
+	ack: boolean;
+	reason: string;
+	appliedAt: string;
+	mechanicalHold: boolean;
+	trajectoryHold: boolean;
+	scope: string[];
+	withdrawnAt?: string;
+	dynamicEncounterLogged?: boolean;
+}
+
+// Exported: state.ts tightens `SRSWorkflowState.lastClearance` (owned by this module) to
+// this type. Fields are the ones actually read off it in this file; linac-safety.js's
+// clearance-check helpers return objects with these fields plus others not read here.
+export interface ClearanceResult {
+	safe: boolean;
+	minMargin: number;
+	reason: string;
+	field: string;
+	angle: number;
+}
+
+// Exported: state.ts tightens `AdaptiveCourseState.history` (owned by this module) to
+// this type. Entries are built either from a seeded history (postedAt absent) or a
+// posted fraction (seeded absent).
+export interface AdaptiveHistoryEntry {
+	fx: number;
+	anatomy: string;
+	scenarioIndex: number;
+	planKey: string;
+	planTitle: string;
+	targetDoseGy: number;
+	ptvV95: number;
+	rectumGy: number;
+	bowelGy: number;
+	seeded?: boolean;
+	postedAt?: string;
+}
 
 const DELIVERY_SPEED_FACTOR = 4;
 
@@ -156,9 +423,15 @@ export function getIGRTExpectedAbsoluteCouch() {
 	)
 		return null;
 	return {
-		vrt: S.clinicalIGRT.baseline.vrt + S.clinicalIGRT.correction.vrt,
-		lng: S.clinicalIGRT.baseline.lng + S.clinicalIGRT.correction.lng,
-		lat: S.clinicalIGRT.baseline.lat + S.clinicalIGRT.correction.lat
+		vrt:
+			(S.clinicalIGRT.baseline as CoordinateShift).vrt +
+			(S.clinicalIGRT.correction as CoordinateShift).vrt,
+		lng:
+			(S.clinicalIGRT.baseline as CoordinateShift).lng +
+			(S.clinicalIGRT.correction as CoordinateShift).lng,
+		lat:
+			(S.clinicalIGRT.baseline as CoordinateShift).lat +
+			(S.clinicalIGRT.correction as CoordinateShift).lat
 	};
 }
 
@@ -208,7 +481,7 @@ export function treatmentParamMatches(key, plannedValue, actualValue) {
 	return canon(plannedValue) === canon(actualValue);
 }
 
-export function getTreatmentFields() {
+export function getTreatmentFields(): TreatmentField[] {
 	if (!S.activeTreatmentCase) return [];
 	if (Array.isArray(S.activeTreatmentCase.fields) && S.activeTreatmentCase.fields.length)
 		return S.activeTreatmentCase.fields;
@@ -222,12 +495,12 @@ export function getTreatmentFields() {
 			name: legacy.field || 'Static field',
 			mu: legacy.mu || 100,
 			doseRate: legacy.doseRate || 600,
-			geometry: {}
+			geometry: {} as FieldGeometry
 		}
 	];
 }
 
-export function deliveryCasePlan() {
+export function deliveryCasePlan(): DeliveryFieldPlan {
 	const fields = getTreatmentFields();
 	if (!fields.length)
 		return {
@@ -236,7 +509,7 @@ export function deliveryCasePlan() {
 			mu: 100,
 			doseRate: 600,
 			mode: 'STATIC',
-			geometry: {}
+			geometry: {} as FieldGeometry
 		};
 	const idx = Math.max(
 		0,
@@ -246,8 +519,8 @@ export function deliveryCasePlan() {
 	return {
 		...f,
 		mode: String(f.mode || 'STATIC').toUpperCase(),
-		field: f.name || f.field || `Field ${idx + 1}`,
-		geometry: f.geometry || {}
+		field: f.name || (f as TreatmentField & { field?: string }).field || `Field ${idx + 1}`,
+		geometry: (f.geometry || {}) as FieldGeometry
 	};
 }
 
@@ -356,7 +629,7 @@ export function getCurrentPlannedParameters() {
 			mlcShape: d.mlcShape
 		};
 	}
-	const merged = { ...base, ...geometry };
+	const merged = { ...base, ...geometry } as PlannedParameters & { electronAccessory?: string };
 	const ss = activeSpecialSetupSpec();
 	if (field?.electron && String(ss?.type || '').toUpperCase() === 'ELECTRON')
 		merged.electronAccessory = `${ss.shape} ${ss.widthCm} × ${ss.heightCm} cm · ${ss.cone}`;
@@ -419,7 +692,7 @@ function populateDeliveryFieldSelect() {
 					? ' · IMRT'
 					: '';
 		const done = S.treatmentDelivery.completedFields[i] ? ' ✓' : '';
-		opt.textContent = `${i + 1}. ${f.name || f.field || `Field ${i + 1}`}${gantry}${couch}${dyn}${done}`;
+		opt.textContent = `${i + 1}. ${f.name || (f as TreatmentField & { field?: string }).field || `Field ${i + 1}`}${gantry}${couch}${dyn}${done}`;
 		deliveryFieldSelect.appendChild(opt);
 	});
 	S.treatmentDelivery.activeFieldIndex = Math.max(
@@ -587,10 +860,10 @@ export function renderSpecialSetupPanel() {
 				'Design → template → safe simulated fabrication → mount / label. Bolus placement occurs later in Treatment Delivery.';
 		const e = S.specialSetupWorkflow.electron;
 		specialSetupContent.innerHTML = `${electronDiagram()}<div class="special-card"><h4>Prescription / accessory order</h4><p><b>${S.activeTreatmentCase.energy}</b> · ${s.cone} electron cone · ${s.shape} cutout ${s.widthCm} × ${s.heightCm} cm · nominal SSD ${s.ssdCm} cm.</p><p><b>Patient position:</b> breast-treatment posture with arms elevated; the left chest-wall scar is centered to the electron central ray. Use an en-face 0° beam so the cone/cutout face is parallel to the treated surface.</p><div class="special-grid"><div class="special-control"><label>Cutout shape</label><select id="electronShape"><option>Oval</option><option>Rectangle</option><option>Circle</option></select></div><div class="special-control"><label>Electron cone</label><select id="electronCone"><option>6 × 6 cm</option><option>10 × 10 cm</option><option>15 × 15 cm</option></select></div><div class="special-control"><label>Opening width</label><select id="electronWidth">${[4, 5, 6, 7, 8].map((v) => `<option value="${v}">${v} cm</option>`).join('')}</select></div><div class="special-control"><label>Opening height</label><select id="electronHeight">${[3, 4, 5, 6, 7].map((v) => `<option value="${v}">${v} cm</option>`).join('')}</select></div></div><div class="special-actions" style="margin-top:7px"><button data-special="electron-template">Create Template</button><button data-special="electron-fabricate">Fabricate Cutout</button><button data-special="electron-mount">Mount & Verify</button></div></div><div class="special-card"><h4>Fabrication / accessory safety verification</h4><div class="special-checks"><label><input id="electronCheckPPE" type="checkbox" ${S.specialSetupWorkflow.ePPE ? 'checked' : ''}> Required PPE, ventilation, and local low-melting-alloy handling procedure confirmed.</label><label><input id="electronCheckCool" type="checkbox" ${S.specialSetupWorkflow.eCool ? 'checked' : ''}> Insert completely cooled/solidified before handling and mounting.</label><label><input id="electronCheckLabel" type="checkbox" ${S.specialSetupWorkflow.eLabel ? 'checked' : ''}> Patient, site, energy/cone, orientation, and cutout identity labeled.</label><label><input id="electronCheckLight" type="checkbox" ${S.specialSetupWorkflow.eLight ? 'checked' : ''}> Light-field/skin-mark fit and cutout orientation verified before beam delivery.</label></div><p><b>ODI/SSD:</b> ${S.odiOn && S.lastODIcm != null ? `SSD ${S.lastODIcm.toFixed(1)} cm · active` : 'Turn ODI ON and obtain a valid surface reading before mounting the insert.'}</p><p>${e.mounted ? 'The 3D treatment head now shows the mounted electron applicator/cone and insert tray. Bolus has not yet been applied; that is a separate in-room task in Delivery.' : 'After successful mount & verify, the room view will display the mounted electron applicator/cone beneath the treatment head.'}</p><div class="special-step ${e.template ? 'done' : ''}">1 · Template ${e.template ? 'created' : 'pending'}</div><div class="special-step ${e.fabricated ? 'done' : ''}">2 · Cutout ${e.fabricated ? 'fabricated/cooled' : 'pending fabrication'}</div><div class="special-step ${e.mounted ? 'done' : ''}">3 · Insert ${e.mounted ? 'mounted and verified' : 'pending mount/verification'}</div><div class="special-step">4 · Bolus placement · performed at treatment delivery</div></div>`;
-		const sh = document.getElementById('electronShape'),
-			co = document.getElementById('electronCone'),
-			wi = document.getElementById('electronWidth'),
-			he = document.getElementById('electronHeight');
+		const sh = document.getElementById('electronShape') as HTMLSelectElement | null,
+			co = document.getElementById('electronCone') as HTMLSelectElement | null,
+			wi = document.getElementById('electronWidth') as HTMLSelectElement | null,
+			he = document.getElementById('electronHeight') as HTMLSelectElement | null;
 		if (sh) sh.value = e.shape || s.shape;
 		if (co) co.value = e.cone || s.cone;
 		if (wi) wi.value = String(e.width || s.widthCm);
@@ -611,7 +884,7 @@ export function renderSpecialSetupPanel() {
 }
 
 export function syncSpecialCheckboxes() {
-	const by = (id) => !!document.getElementById(id)?.checked;
+	const by = (id) => !!(document.getElementById(id) as HTMLInputElement | null)?.checked;
 	S.specialSetupWorkflow.indexChecked = by('specialCheckIndex');
 	S.specialSetupWorkflow.matchDoc = by('specialCheckMatchDoc');
 	S.specialSetupWorkflow.cranialIndex = by('specialCheckCranial');
@@ -623,10 +896,10 @@ export function syncSpecialCheckboxes() {
 	S.specialSetupWorkflow.eLight = by('electronCheckLight');
 	const e = S.specialSetupWorkflow.electron;
 	if (e) {
-		const sh = document.getElementById('electronShape'),
-			co = document.getElementById('electronCone'),
-			wi = document.getElementById('electronWidth'),
-			he = document.getElementById('electronHeight');
+		const sh = document.getElementById('electronShape') as HTMLSelectElement | null,
+			co = document.getElementById('electronCone') as HTMLSelectElement | null,
+			wi = document.getElementById('electronWidth') as HTMLSelectElement | null,
+			he = document.getElementById('electronHeight') as HTMLSelectElement | null;
 		if (sh) e.shape = sh.value;
 		if (co) e.cone = co.value;
 		if (wi) e.width = Number(wi.value) || 0;
@@ -687,10 +960,13 @@ export function handleSpecialSetupAction(action) {
 				S.specialSetupWorkflow.csiPlan;
 	} else if (type === 'ELECTRON') {
 		const e = S.specialSetupWorkflow.electron;
-		const shape = document.getElementById('electronShape')?.value || '';
-		const cone = document.getElementById('electronCone')?.value || '';
-		const width = Number(document.getElementById('electronWidth')?.value) || 0;
-		const height = Number(document.getElementById('electronHeight')?.value) || 0;
+		const shape =
+			(document.getElementById('electronShape') as HTMLSelectElement | null)?.value || '';
+		const cone = (document.getElementById('electronCone') as HTMLSelectElement | null)?.value || '';
+		const width =
+			Number((document.getElementById('electronWidth') as HTMLSelectElement | null)?.value) || 0;
+		const height =
+			Number((document.getElementById('electronHeight') as HTMLSelectElement | null)?.value) || 0;
 		e.shape = shape;
 		e.cone = cone;
 		e.width = width;
@@ -780,7 +1056,7 @@ function resetSRSWorkflowForCase() {
 		dryRunning: false
 	};
 	['srsCheckPatient', 'srsCheckRx', 'srsCheckMask', 'srsCheckTeam'].forEach((id) => {
-		const el = document.getElementById(id);
+		const el = document.getElementById(id) as HTMLInputElement | null;
 		if (el) el.checked = false;
 	});
 	srsLaunchButton?.classList.toggle('case-active', srsRequired());
@@ -1074,7 +1350,7 @@ export function verifySRSTimeout() {
 	if (!srsRequired()) return;
 	const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0;
 	const manual = ['srsCheckPatient', 'srsCheckRx', 'srsCheckMask', 'srsCheckTeam'].every(
-		(id) => !!document.getElementById(id)?.checked
+		(id) => !!(document.getElementById(id) as HTMLInputElement | null)?.checked
 	);
 	const auto =
 		igrtAlignmentReadyForDelivery() &&
@@ -2077,7 +2353,7 @@ function drawAdaptiveDoseChart() {
 	ctx.fillRect(0, 0, w, h);
 	const a = accumulatedAdaptiveMetrics(),
 		spec = adaptiveSpec(),
-		course = spec?.course || {};
+		course = (spec?.course || {}) as AdaptiveCourseSpec;
 	ctx.font = '700 22px Segoe UI, Arial';
 	ctx.fillStyle = '#e7f2f8';
 	ctx.fillText('Accumulated course dose · simplified teaching model', 24, 32);
@@ -2220,8 +2496,8 @@ function resetAdaptiveWorkflowForCase() {
 		basePlanKey: String(spec?.defaultPlanKey || ''),
 		caseBase: null
 	};
-	const d = document.getElementById('adaptiveCheckDose'),
-		a = document.getElementById('adaptiveCheckApprove');
+	const d = document.getElementById('adaptiveCheckDose') as HTMLInputElement | null,
+		a = document.getElementById('adaptiveCheckApprove') as HTMLInputElement | null;
 	if (d) d.checked = false;
 	if (a) a.checked = false;
 	if (!spec) {
@@ -2255,8 +2531,12 @@ function resetAdaptiveWorkflowForCase() {
 
 export function verifyAdaptivePlan() {
 	if (!adaptiveRequired()) return;
-	S.adaptiveWorkflow.doseChecked = !!document.getElementById('adaptiveCheckDose')?.checked;
-	S.adaptiveWorkflow.finalApproved = !!document.getElementById('adaptiveCheckApprove')?.checked;
+	S.adaptiveWorkflow.doseChecked = !!(
+		document.getElementById('adaptiveCheckDose') as HTMLInputElement | null
+	)?.checked;
+	S.adaptiveWorkflow.finalApproved = !!(
+		document.getElementById('adaptiveCheckApprove') as HTMLInputElement | null
+	)?.checked;
 	const recommended = String(S.adaptiveWorkflow.scenario?.recommendedPlan || '');
 	const correct =
 		S.adaptiveWorkflow.assessed &&
@@ -2351,8 +2631,8 @@ export function advanceAdaptiveFraction() {
 	S.adaptiveWorkflow.approved = false;
 	S.adaptiveWorkflow.doseChecked = false;
 	S.adaptiveWorkflow.finalApproved = false;
-	const d = document.getElementById('adaptiveCheckDose'),
-		a = document.getElementById('adaptiveCheckApprove');
+	const d = document.getElementById('adaptiveCheckDose') as HTMLInputElement | null,
+		a = document.getElementById('adaptiveCheckApprove') as HTMLInputElement | null;
 	if (d) d.checked = false;
 	if (a) a.checked = false;
 	S.adaptiveWorkflow.scenario = chooseNewAdaptiveScenario(prev);
@@ -2421,7 +2701,7 @@ export function renderAdaptivePanel() {
 		renderAdaptiveCourse();
 		return;
 	}
-	const scen = S.adaptiveWorkflow.scenario || {};
+	const scen = (S.adaptiveWorkflow.scenario || {}) as AdaptiveScenario;
 	if (anatomyCard)
 		anatomyCard.innerHTML = `<h4>Today’s anatomy assessment</h4><p><b>${scen.title || 'Daily CBCT / on-table review'}</b></p><p style="margin-top:6px">${scen.summary || 'Review the daily anatomy, compare the available adaptive plans, then approve the most appropriate one.'}</p><ul class="adaptive-findings">${(scen.findings || []).map((x) => `<li>${x}</li>`).join('')}</ul>`;
 	if (planGrid) {
@@ -2519,7 +2799,7 @@ export function electronBolusDeliveryRequired() {
 
 export function electronBolusDeliveryOK() {
 	if (!electronBolusDeliveryRequired()) return true;
-	const e = S.specialSetupWorkflow?.electron || {};
+	const e = (S.specialSetupWorkflow?.electron || {}) as typeof S.specialSetupWorkflow.electron;
 	return !!(
 		S.specialSetupWorkflow.verified &&
 		e.mounted &&
@@ -2546,7 +2826,7 @@ function renderElectronBolusDeliveryTask() {
 		return;
 	}
 	host.hidden = false;
-	const e = S.specialSetupWorkflow.electron || {};
+	const e = (S.specialSetupWorkflow.electron || {}) as typeof S.specialSetupWorkflow.electron;
 	if (!Number.isFinite(Number(e.bolusDragX))) e.bolusDragX = 54;
 	if (!Number.isFinite(Number(e.bolusDragY))) e.bolusDragY = 92;
 	if (!Number.isFinite(Number(e.bolusContactY))) e.bolusContactY = 38;
@@ -2858,7 +3138,7 @@ export function renderImmobilizationPanel() {
 				? `<span class="immo-key"><b>Immobilization key — required for this patient:</b> ${keyNames.join('  +  ')}</span>`
 				: '');
 	}
-	const structured = [
+	const structured: [string, string[]][] = [
 		['Position / orientation', spec.positionInstructions || []],
 		['Indexing / reproducibility', spec.indexingInstructions || []],
 		['Pre-treatment preparation', spec.preparationInstructions || []]
@@ -2924,7 +3204,7 @@ function wireImmobilizationVerificationChecks() {
 		['immoIndexCheck', 'indexingChecked'],
 		['immoPrepCheck', 'preparationChecked']
 	].forEach(([id, key]) => {
-		const el = document.getElementById(id);
+		const el = document.getElementById(id) as HTMLInputElement | null;
 		if (!el) return;
 		el.addEventListener('change', () => {
 			S.immobilizationWorkflow[key] = !!el.checked;
@@ -2940,8 +3220,8 @@ function wireImmobilizationVerificationChecks() {
 function wireImmobilizationDragDrop() {
 	document
 		.querySelectorAll('.immo-device[draggable="true"],.immo-placed-device[draggable="true"]')
-		.forEach((el) => {
-			el.addEventListener('dragstart', (ev) => {
+		.forEach((el: HTMLElement) => {
+			el.addEventListener('dragstart', (ev: DragEvent) => {
 				el.classList.add('dragging');
 				ev.dataTransfer.setData('text/immo-id', el.dataset.immoId);
 				ev.dataTransfer.setData(
@@ -2953,7 +3233,7 @@ function wireImmobilizationDragDrop() {
 		});
 	document
 		.querySelectorAll('.immo-placed-device')
-		.forEach((el) =>
+		.forEach((el: HTMLElement) =>
 			el.addEventListener('dblclick', () => removeImmobilizationDevice(el.dataset.immoId))
 		);
 }
@@ -3537,7 +3817,7 @@ function deliveryTick(now) {
 				return;
 			}
 			const idx = Number(S.treatmentDelivery.activeFieldIndex) || 0,
-				rec = clearanceOverrideRecord(idx);
+				rec = clearanceOverrideRecord(idx) as ClearanceOverrideRecord | null;
 			if (rec && !rec.dynamicEncounterLogged) {
 				rec.dynamicEncounterLogged = true;
 				const saved = (S.oisSession.clearanceOverrides || []).find(
@@ -3681,7 +3961,7 @@ export const IMAGING_SITES = [
 	{ key: 'femur', name: 'Femur (leg)', z: 0.58, orient: ['FFS', 'FFP'] }
 ];
 
-export const TREATMENT_CASES = [
+export const TREATMENT_CASES: TreatmentCase[] = [
 	{
 		patient: 'Michael Carter',
 		mrn: 'AU-24031',
@@ -7015,7 +7295,7 @@ export function loadTreatmentCase(index) {
 	renderOISPanel();
 }
 
-export function isFixedElectronField(field = deliveryCasePlan()) {
+export function isFixedElectronField(field: TreatmentField = deliveryCasePlan()) {
 	return !!field?.electron && String(field?.mode || 'STATIC').toUpperCase() === 'STATIC';
 }
 
@@ -7110,7 +7390,7 @@ export function updateElectronBolusMesh() {
 	const s = activeSpecialSetupSpec();
 	const isElectronCase =
 		!!S.activeTreatmentCase && String(s?.type || '').toUpperCase() === 'ELECTRON';
-	const e = S.specialSetupWorkflow?.electron || {};
+	const e = (S.specialSetupWorkflow?.electron || {}) as typeof S.specialSetupWorkflow.electron;
 	S.electronBolusMesh.visible = isElectronCase && !!e.bolusPlaced;
 	if (!S.electronBolusMesh.visible) return;
 	const w = Number(e.bolusWidth || s?.widthCm || 6);

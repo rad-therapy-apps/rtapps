@@ -1,10 +1,9 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
-import { S } from './state.js';
-import { viewVaultButton, viewControlRoomButton } from './dom.js';
-import { ISOCENTER_Y_TARGET, GANTRY_PLANE_Z_TARGET, controlRoomAccentMats } from './scene.js';
-import { syncOperatorConsole } from './main.js';
-import { setPendantLCD } from './linac-safety.js';
+import { S } from './state';
+import { viewVaultButton, viewControlRoomButton } from './dom';
+import { ISOCENTER_Y_TARGET, GANTRY_PLANE_Z_TARGET, controlRoomAccentMats } from './scene';
+import { syncOperatorConsole } from './main';
+import { setPendantLCD } from './linac-safety';
 
 export function syncRoomViewButtons(mode = S.currentRoomView) {
 	if (viewVaultButton) viewVaultButton.classList.toggle('active-function', mode === 'vault');
@@ -37,8 +36,8 @@ function beginTravelPath(toMode) {
 		S.vaultDoorTarget = 0;
 		return;
 	}
-	let positions = [S.camera.position.clone()];
-	let targets = [S.controls.target.clone()];
+	const positions = [S.camera.position.clone()];
+	const targets = [S.controls.target.clone()];
 	if (S.currentRoomView === 'vault' && toMode === 'control') {
 		positions.push(
 			new THREE.Vector3(4.8, 3.0, GANTRY_PLANE_Z_TARGET + 7.8),

@@ -1,7 +1,6 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import './console-patch.js';
-import './workspace.js';
-import { S } from './state.js';
+import './console-patch';
+import './workspace';
+import { S } from './state';
 import {
 	adaptiveApprove,
 	adaptiveAssess,
@@ -218,7 +217,7 @@ import {
 	treatmentCaseSelect,
 	viewControlRoomButton,
 	viewVaultButton
-} from './dom.js';
+} from './dom';
 import {
 	beamStageStep,
 	CORE_PART_IDS,
@@ -244,15 +243,15 @@ import {
 	updateElectronApplicator3D,
 	updateJawPositions,
 	updateMLCPositions
-} from './scene.js';
-import { cctvFeeds, updateCCTVFeeds } from './cctv.js';
+} from './scene';
+import { cctvFeeds, updateCCTVFeeds } from './cctv';
 import {
 	syncRoomViewButtons,
 	travelToRoomView,
 	updateCameraTravel,
 	updateTravelWorkflow,
 	updateVaultAesthetics
-} from './travel.js';
+} from './travel';
 import {
 	acquireMotionCharacterization,
 	adaptiveRequired,
@@ -309,13 +308,13 @@ import {
 	verifyImmobilizationSelection,
 	verifyMotionManagement,
 	verifySRSTimeout
-} from './linac-delivery.js';
+} from './linac-delivery';
 import {
 	acquireClinicalIGRT,
 	renderClinicalIGRT,
 	startClinicalIGRT,
 	verifyClinicalIGRT
-} from './linac-igrt.js';
+} from './linac-igrt';
 import {
 	allTreatmentFieldsCompleted,
 	applyClearanceOverride,
@@ -341,7 +340,7 @@ import {
 	syncLegacyJawValue,
 	updateBEVInset,
 	withdrawClearanceOverride
-} from './linac-safety.js';
+} from './linac-safety';
 import {
 	completeFractionWithoutCurrentCPTModule,
 	openChargeCapture,
@@ -349,7 +348,7 @@ import {
 	resolveHubUrl,
 	updateChargeEducation,
 	verifyChargeCapture
-} from './sdk.js';
+} from './sdk';
 import {
 	checkAllCorePartsEarned,
 	displayBonusChallenge,
@@ -362,7 +361,69 @@ import {
 	resetGame,
 	saveGameState,
 	updateUI
-} from './game.js';
+} from './game';
+import type { TreatmentField } from './linac-delivery';
+
+// RTApps (#77 phase 2 task 19): consolidated `declare global` for this app's window
+// globals — folds in the interim per-module declarations previously carried by
+// console-patch.ts, linac-igrt.ts, and linac-safety.ts (removed there; this module
+// owns the actual `window.*` assignments below and converts last in this task).
+// `BridgeSnapshot` fields are the ones actually read by console-patch.ts's mirror
+// (not the full state shape this module's snapshot() builds below) — moved here
+// verbatim from console-patch.ts's interim declaration, which is why fields stay
+// all-optional: console-patch.ts falls back to `bs.x || {}`-shaped defaults whose
+// empty-literal type must stay union-compatible with each field here.
+interface BridgeSnapshot {
+	activeTreatmentCase: typeof S.activeTreatmentCase;
+	treatmentDelivery: {
+		muDelivered?: number;
+		activeFieldIndex?: number;
+		delivering?: boolean;
+		armed?: boolean;
+		completed?: boolean;
+		held?: boolean;
+		completedFields?: Record<number, boolean>;
+	};
+	treatmentCompletion: { posted?: boolean };
+	specialSetupWorkflow: {
+		electron?: { bolusRequired?: boolean; bolusPlaced?: boolean };
+	};
+	fundamentalState: {
+		gantry?: number;
+		collimator?: number;
+		couchAngle?: number;
+		jawX1?: number;
+		jawX2?: number;
+		jawY1?: number;
+		jawY2?: number;
+		vrt?: number;
+		lng?: number;
+		lat?: number;
+		pitch?: number;
+		roll?: number;
+		yaw?: number;
+	};
+	plan: {
+		mu?: number;
+		doseRate?: number;
+		mode?: string;
+		electron?: boolean;
+		geometry?: { jaws?: string; gantry?: string; collimator?: string; couchAngle?: string };
+	};
+	readyInfo: { ready: boolean; checks: { name: string; ok: boolean; detail: string }[] };
+	dyn: { doseRate?: number } | null;
+	activeFields: (TreatmentField & { field?: string })[];
+	allFieldsCompleted?: boolean;
+}
+
+declare global {
+	interface Window {
+		clinicalIGRTActive: boolean;
+		clinicalIGRTCouchShift: (axis: string, delta: number) => boolean;
+		imagingCouchShift: (axis: string, delta: number) => boolean;
+		RTAppsLinacMirrorBridge: { snapshot: () => BridgeSnapshot | null };
+	}
+}
 
 // RTApps (plan 4c): prefetch the hub's player URL once; the back-link control only
 // renders/enables when it resolves (activity unseeded/unpublished, or offline leaves
@@ -724,6 +785,17 @@ export function syncOperatorConsole() {
 		consoleCameraCInfo.textContent = `Room lights ${S.roomLightsOn ? 'ON' : 'OFF'} · ${S.currentRoomView === 'control' ? 'console occupied' : 'vault occupied'}`;
 }
 
+// Ad-hoc memo state stashed on `animate` itself (mirrors sim-hub's adaptive-quality
+// precedent) rather than a module-scope variable, so it persists across the function's
+// own definition without another top-level binding.
+interface AnimateQualityFloor {
+	done: boolean;
+	last: number;
+	n: number;
+	acc: number;
+	bad: number;
+}
+
 export function animate() {
 	requestAnimationFrame(animate);
 	// RTApps perf pass: the vault kept rendering underneath the full-screen CT
@@ -734,8 +806,8 @@ export function animate() {
 	// Adaptive quality floor (mirror of sim-hub, shadows only): after 5s below ~26 FPS,
 	// turn shadows off for good. `?hq` bypasses for demos.
 	const P =
-		animate._floor ||
-		(animate._floor = {
+		(animate as unknown as { _floor?: AnimateQualityFloor })._floor ||
+		((animate as unknown as { _floor?: AnimateQualityFloor })._floor = {
 			done: new URLSearchParams(location.search).has('hq'),
 			last: now,
 			n: 0,
@@ -1287,7 +1359,7 @@ adaptiveApprove?.addEventListener('click', verifyAdaptivePlan);
 adaptiveNextFraction?.addEventListener('click', advanceAdaptiveFraction);
 adaptiveResetCourse?.addEventListener('click', resetAdaptiveCourseHistory);
 adaptivePanel?.addEventListener('click', (ev) => {
-	const btn = ev.target.closest('[data-adaptive-plan]');
+	const btn = (ev.target as Element).closest('[data-adaptive-plan]') as HTMLElement | null;
 	if (!btn || !adaptiveRequired()) return;
 	S.adaptiveWorkflow.approved = false;
 	applyAdaptivePlan(btn.dataset.adaptivePlan);
@@ -1297,8 +1369,12 @@ adaptivePanel?.addEventListener('click', (ev) => {
 	document.getElementById(id)?.addEventListener('change', () => {
 		if (!adaptiveRequired()) return;
 		S.adaptiveWorkflow.approved = false;
-		S.adaptiveWorkflow.doseChecked = !!document.getElementById('adaptiveCheckDose')?.checked;
-		S.adaptiveWorkflow.finalApproved = !!document.getElementById('adaptiveCheckApprove')?.checked;
+		S.adaptiveWorkflow.doseChecked = !!(
+			document.getElementById('adaptiveCheckDose') as HTMLInputElement | null
+		)?.checked;
+		S.adaptiveWorkflow.finalApproved = !!(
+			document.getElementById('adaptiveCheckApprove') as HTMLInputElement | null
+		)?.checked;
 		renderAdaptivePanel();
 		renderTreatmentDeliveryPanel();
 	})
@@ -1390,7 +1466,7 @@ specialSetupContent?.addEventListener('change', () => {
 	updateElectronBolusMesh();
 });
 specialSetupContent?.addEventListener('click', (ev) => {
-	const btn = ev.target.closest('[data-special]');
+	const btn = (ev.target as Element).closest('[data-special]') as HTMLElement | null;
 	if (btn) handleSpecialSetupAction(btn.dataset.special);
 });
 deliveryLaunchButton?.addEventListener('click', () => {
@@ -1494,7 +1570,9 @@ syncFundamentalReadouts();
 loadTreatmentCase(0);
 setSafetyHUD(false);
 syncOperatorConsole();
-document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
+(
+	document.querySelector('.tab-button[data-tab="divergenceContent"]') as HTMLElement | null
+)?.click();
 
 // ================= Beam Divergence Lab (integrated exercise) =================
 (function () {
@@ -1505,31 +1583,39 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 		probJaw = 10,
 		probSid = 150,
 		probError = 0,
-		trueAnswers = {};
+		trueAnswers: {
+			ssd?: number;
+			actualSsd?: number;
+			fsSkin?: number;
+			doseSkin?: number;
+			actualDose?: number;
+			fsRec?: number;
+			doseRec?: number;
+		} = {};
 	let bdScenCount = 0,
 		probPos = 'HFS';
 	let bdLive = false; // gate machine-driving to user interaction (not the initial load)
 	const $ = (id) => document.getElementById(id);
 	const ui = {
-		mode: $('bd-quiz-mode'),
-		gantry: $('bd-gantry'),
-		jaw: $('bd-jaw'),
-		sid: $('bd-sid'),
-		err: $('bd-setup-error'),
+		mode: $('bd-quiz-mode') as HTMLSelectElement | null,
+		gantry: $('bd-gantry') as HTMLInputElement | null,
+		jaw: $('bd-jaw') as HTMLInputElement | null,
+		sid: $('bd-sid') as HTMLInputElement | null,
+		err: $('bd-setup-error') as HTMLInputElement | null,
 		rowError: $('bd-row-error'),
 		scenText: $('bd-scenario-text'),
 		formBox: $('bd-formula-box'),
-		rows: document.querySelectorAll('#divergenceContent .bd-quiz-row')
+		rows: document.querySelectorAll<HTMLElement>('#divergenceContent .bd-quiz-row')
 	};
 	if (!ui.mode) return;
 	const ans = {
-		ssd: $('bd-ans-ssd'),
-		actualSsd: $('bd-ans-actual-ssd'),
-		fsSkin: $('bd-ans-fs-skin'),
-		doseSkin: $('bd-ans-dose-skin'),
-		actualDose: $('bd-ans-actual-dose'),
-		fsRec: $('bd-ans-fs-rec'),
-		doseRec: $('bd-ans-dose-rec')
+		ssd: $('bd-ans-ssd') as HTMLInputElement | null,
+		actualSsd: $('bd-ans-actual-ssd') as HTMLInputElement | null,
+		fsSkin: $('bd-ans-fs-skin') as HTMLInputElement | null,
+		doseSkin: $('bd-ans-dose-skin') as HTMLInputElement | null,
+		actualDose: $('bd-ans-actual-dose') as HTMLInputElement | null,
+		fsRec: $('bd-ans-fs-rec') as HTMLInputElement | null,
+		doseRec: $('bd-ans-dose-rec') as HTMLInputElement | null
 	};
 	const fb = {
 		ssd: $('bd-fb-ssd'),
@@ -1682,11 +1768,11 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 		});
 		Object.values(fb).forEach((f) => (f.textContent = ''));
 		$('bd-final-feedback').textContent = '';
-		ui.gantry.value = 0;
-		ui.jaw.value = 10;
-		ui.sid.value = probSid;
-		ui.err.value = probError;
-		if (typeof runPatientSetup === 'function') runPatientSetup(probPos); // auto 3-point localization to iso
+		ui.gantry.value = String(0);
+		ui.jaw.value = String(10);
+		ui.sid.value = String(probSid);
+		ui.err.value = String(probError);
+		if (typeof runPatientSetup === 'function') (runPatientSetup as (pos: string) => void)(probPos); // auto 3-point localization to iso
 		updateVisualizer();
 	}
 	function updateVisualizer() {
@@ -1717,21 +1803,21 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 			'points',
 			'400,100 ' + (400 + sidHalfPx) + ',' + sidY + ' ' + (400 - sidHalfPx) + ',' + sidY
 		);
-		$('bd-svg-sid').setAttribute('y1', sidY);
-		$('bd-svg-sid').setAttribute('y2', sidY);
+		$('bd-svg-sid').setAttribute('y1', String(sidY));
+		$('bd-svg-sid').setAttribute('y2', String(sidY));
 		const planY = 100 + plannedSsd * scale;
-		$('bd-svg-planned-ssd').setAttribute('y1', planY);
-		$('bd-svg-planned-ssd').setAttribute('y2', planY);
-		$('bd-lbl-planned-ssd').setAttribute('y', planY - 5);
+		$('bd-svg-planned-ssd').setAttribute('y1', String(planY));
+		$('bd-svg-planned-ssd').setAttribute('y2', String(planY));
+		$('bd-lbl-planned-ssd').setAttribute('y', String(planY - 5));
 		const actY = 100 + actualSsd * scale,
 			svgAct = $('bd-svg-actual-ssd'),
 			lblAct = $('bd-lbl-actual-ssd');
 		if (err !== 0) {
 			svgAct.style.display = 'block';
 			lblAct.style.display = 'block';
-			svgAct.setAttribute('y1', actY);
-			svgAct.setAttribute('y2', actY);
-			lblAct.setAttribute('y', actY + 15);
+			svgAct.setAttribute('y1', String(actY));
+			svgAct.setAttribute('y2', String(actY));
+			lblAct.setAttribute('y', String(actY + 15));
 		} else {
 			svgAct.style.display = 'none';
 			lblAct.style.display = 'none';
@@ -1782,10 +1868,10 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 	}
 	function playRecap() {
 		// snap the lab to the scenario's correct settings, then animate the readout into place
-		ui.gantry.value = probGantry;
-		ui.jaw.value = probJaw;
-		ui.sid.value = probSid;
-		ui.err.value = probError;
+		ui.gantry.value = String(probGantry);
+		ui.jaw.value = String(probJaw);
+		ui.sid.value = String(probSid);
+		ui.err.value = String(probError);
 		updateVisualizer();
 		const mode = ui.mode.value,
 			depthVal = 100 - trueAnswers.ssd;
@@ -1811,7 +1897,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 			const [id, target, unit, dec, lineId, errOnly] = item;
 			if (errOnly && mode !== 'error') return;
 			const el = $(id);
-			if (el) el.textContent = (0).toFixed(dec) + unit; // reset before its turn
+			if (el) el.textContent = (0).toFixed(dec as number) + unit; // reset before its turn
 			setTimeout(() => {
 				animateCount($(id), target, unit, dec, 470);
 				flashLine(lineId);
@@ -1927,8 +2013,8 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 		$('bd-guided-formula').textContent = st.f;
 		$('bd-guided-explain').textContent = st.x;
 		$('bd-guided-progress').textContent = 'Step ' + (guidedIdx + 1) + ' of ' + guidedSteps.length;
-		$('bd-guided-prev').disabled = guidedIdx === 0;
-		$('bd-guided-next').disabled = guidedIdx === guidedSteps.length - 1;
+		($('bd-guided-prev') as HTMLButtonElement).disabled = guidedIdx === 0;
+		($('bd-guided-next') as HTMLButtonElement).disabled = guidedIdx === guidedSteps.length - 1;
 	}
 	function stopGuidedAuto() {
 		if (guidedTimer) {
@@ -2004,11 +2090,13 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 		if (control === 'gantry') {
 			let v = (parseFloat(ui.gantry.value) + delta) % 360;
 			if (v < 0) v += 360;
-			ui.gantry.value = v;
+			ui.gantry.value = String(v);
 		} else if (control === 'jaw') {
-			ui.jaw.value = Math.max(
-				parseFloat(ui.jaw.min),
-				Math.min(parseFloat(ui.jaw.max), parseFloat(ui.jaw.value) + delta)
+			ui.jaw.value = String(
+				Math.max(
+					parseFloat(ui.jaw.min),
+					Math.min(parseFloat(ui.jaw.max), parseFloat(ui.jaw.value) + delta)
+				)
 			);
 		}
 		updateVisualizer();
@@ -2061,12 +2149,14 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 // ================= Start screen and compact controls =================
 (function () {
 	const screen = document.getElementById('startScreen');
-	const skip = document.getElementById('skipStartNextTime');
+	const skip = document.getElementById('skipStartNextTime') as HTMLInputElement | null;
 	const closeStart = (tabId) => {
 		localStorage.setItem('linacSkipStartScreen', skip && skip.checked ? 'true' : 'false');
 		if (screen) screen.style.display = 'none';
 		if (tabId) {
-			const btn = document.querySelector('.tab-button[data-tab="' + tabId + '"]');
+			const btn = document.querySelector(
+				'.tab-button[data-tab="' + tabId + '"]'
+			) as HTMLElement | null;
 			if (btn) btn.click();
 		}
 		if (typeof onWindowResize === 'function') setTimeout(onWindowResize, 20);
@@ -2139,27 +2229,27 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 // ================= IGRT Imaging Lab (CBCT + orthogonal kV pair) =================
 (function () {
 	const $ = (id) => document.getElementById(id);
-	const modeSel = $('img-mode'),
-		runBtn = $('img-run'),
+	const modeSel = $('img-mode') as HTMLSelectElement | null,
+		runBtn = $('img-run') as HTMLButtonElement | null,
 		progBar = $('img-prog-bar'),
 		statusEl = $('img-status');
 	const display = $('img-display'),
 		viewNote = $('img-view-note');
-	const inLat = $('img-lat'),
-		inLng = $('img-lng'),
-		inVrt = $('img-vrt');
+	const inLat = $('img-lat') as HTMLInputElement | null,
+		inLng = $('img-lng') as HTMLInputElement | null,
+		inVrt = $('img-vrt') as HTMLInputElement | null;
 	const fbLat = $('img-fb-lat'),
 		fbLng = $('img-fb-lng'),
 		fbVrt = $('img-fb-vrt');
-	const inRoll = $('img-roll'),
-		inPitch = $('img-pitch'),
-		inYaw = $('img-yaw');
+	const inRoll = $('img-roll') as HTMLInputElement | null,
+		inPitch = $('img-pitch') as HTMLInputElement | null,
+		inYaw = $('img-yaw') as HTMLInputElement | null;
 	const fbRoll = $('img-fb-roll'),
 		fbPitch = $('img-fb-pitch'),
 		fbYaw = $('img-fb-yaw');
-	const checkBtn = $('img-check'),
+	const checkBtn = $('img-check') as HTMLButtonElement | null,
 		finalMsg = $('img-final'),
-		newBtn = $('img-new');
+		newBtn = $('img-new') as HTMLButtonElement | null;
 	if (!modeSel) return;
 	const transIn = [inLat, inLng, inVrt],
 		rotIn = [inRoll, inPitch, inYaw],
@@ -2236,7 +2326,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 	}
 
 	function sweepGantry(fromRad, toRad, dur, onProgress) {
-		return new Promise((resolve) => {
+		return new Promise<void>((resolve) => {
 			if (typeof S.gantryRotatingGroup === 'undefined' || !S.gantryRotatingGroup) {
 				resolve();
 				return;
@@ -2254,7 +2344,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 		});
 	}
 	const rotGantryTo = (targetRad, dur) =>
-		new Promise((resolve) => {
+		new Promise<void>((resolve) => {
 			if (typeof S.gantryRotatingGroup === 'undefined' || !S.gantryRotatingGroup) {
 				resolve();
 				return;
@@ -2590,7 +2680,7 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 
 	const dicomBtn = $('img-dicom-launch'),
 		dicomModal = document.getElementById('dicomModal'),
-		dicomFrame = document.getElementById('dicomFrame'),
+		dicomFrame = document.getElementById('dicomFrame') as HTMLIFrameElement | null,
 		dicomClose = document.getElementById('dicomClose');
 	if (dicomBtn && dicomModal && dicomFrame) {
 		dicomBtn.addEventListener('click', () => {
@@ -2773,10 +2863,11 @@ document.querySelector('.tab-button[data-tab="divergenceContent"]')?.click();
 window.RTAppsLinacMirrorBridge = {
 	snapshot() {
 		try {
-			const plan =
+			const plan = (
 				typeof deliveryCasePlan === 'function'
 					? deliveryCasePlan()
-					: { mu: 0, doseRate: 0, mode: 'STATIC', geometry: {} };
+					: { mu: 0, doseRate: 0, mode: 'STATIC', geometry: {} }
+			) as ReturnType<typeof deliveryCasePlan>;
 			const readyInfo =
 				typeof getDeliveryReadiness === 'function'
 					? getDeliveryReadiness()
@@ -2788,7 +2879,7 @@ window.RTAppsLinacMirrorBridge = {
 			const activeFields = typeof getTreatmentFields === 'function' ? getTreatmentFields() : [];
 			return {
 				activeTreatmentCase: S.activeTreatmentCase,
-				treatmentDelivery: S.treatmentDelivery,
+				treatmentDelivery: S.treatmentDelivery as BridgeSnapshot['treatmentDelivery'],
 				treatmentCompletion: S.treatmentCompletion,
 				specialSetupWorkflow: S.specialSetupWorkflow,
 				fundamentalState,
@@ -2801,7 +2892,8 @@ window.RTAppsLinacMirrorBridge = {
 						? !!allTreatmentFieldsCompleted()
 						: false
 			};
-			// eslint-disable-next-line no-unreachable -- pre-existing bug: statement placed after return, never executes; tracked in #77 phase 2 report
+			// Pre-existing bug: statement placed after return, never executes; tracked in #77
+			// phase 2 report. (The JS-era `no-unreachable` disable directive is unused on .ts.)
 			window.dispatchEvent(new CustomEvent('rtapps-linac-bridge-ready'));
 		} catch (err) {
 			console.warn('RTApps mirror bridge snapshot unavailable.', err);

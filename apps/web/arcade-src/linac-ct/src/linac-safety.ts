@@ -1,6 +1,5 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	bevFieldGroup,
 	bevFieldLight,
@@ -17,7 +16,7 @@ import {
 	consoleMotionEnable,
 	mlcShapeButton,
 	pendantMotionEnable
-} from './dom.js';
+} from './dom';
 import {
 	applyDetectorCommandedPose,
 	getTreatmentMonitorActual,
@@ -26,7 +25,7 @@ import {
 	updateCouchAccordion,
 	updateJawPositions,
 	updateODIReadout
-} from './scene.js';
+} from './scene';
 import {
 	activeElectronBolusSpec,
 	activeSpecialSetupSpec,
@@ -57,10 +56,10 @@ import {
 	srsRequired,
 	stereotacticCaseLabel,
 	treatmentParamMatches
-} from './linac-delivery.js';
-import { renderClinicalIGRT } from './linac-igrt.js';
-import { saveGameState } from './game.js';
-import { setTextById, syncOperatorConsole, wrap360 } from './main.js';
+} from './linac-delivery';
+import { renderClinicalIGRT } from './linac-igrt';
+import { saveGameState } from './game';
+import { setTextById, syncOperatorConsole, wrap360 } from './main';
 
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return S.clearanceOverrideState.byField?.[idx] || null;
@@ -337,7 +336,7 @@ export function getDeliveryReadiness() {
 			: 'Not prescribed'
 	});
 	if (electronBolusDeliveryRequired()) {
-		const e = S.specialSetupWorkflow.electron || {},
+		const e = (S.specialSetupWorkflow.electron || {}) as typeof S.specialSetupWorkflow.electron,
 			bolusOK = electronBolusDeliveryOK();
 		const detail = !specialOK
 			? 'Complete electron cutout / cone setup first'
@@ -497,7 +496,7 @@ export function evaluateTreatmentTrajectoryClearance(
 						score,
 						margin,
 						reason: c?.reason || 'Mechanical clearance',
-						field: field?.name || field?.field || 'Treatment field',
+						field: field?.name || (field as { field?: string })?.field || 'Treatment field',
 						angle: s.angle,
 						requiredMargin: fieldRequiredMargin,
 						fixedElectron
@@ -735,20 +734,20 @@ export function updateBEVInset() {
 		'transform',
 		`rotate(${wrap360(fundamentalState.collimator)} ${cx} ${cy})`
 	);
-	bevJawOutline.setAttribute('x', jawX);
-	bevJawOutline.setAttribute('y', jawY);
-	bevJawOutline.setAttribute('width', jawPx);
-	bevJawOutline.setAttribute('height', jawPy);
+	bevJawOutline.setAttribute('x', jawX as unknown as string);
+	bevJawOutline.setAttribute('y', jawY as unknown as string);
+	bevJawOutline.setAttribute('width', jawPx as unknown as string);
+	bevJawOutline.setAttribute('height', jawPy as unknown as string);
 	const activelyDelivering = !!(
 		S.treatmentDelivery?.delivering &&
 		!S.treatmentDelivery?.held &&
 		!S.treatmentDelivery?.gateHeld
 	);
 	if (bevFieldLight) {
-		bevFieldLight.setAttribute('x', jawX);
-		bevFieldLight.setAttribute('y', jawY);
-		bevFieldLight.setAttribute('width', jawPx);
-		bevFieldLight.setAttribute('height', jawPy);
+		bevFieldLight.setAttribute('x', jawX as unknown as string);
+		bevFieldLight.setAttribute('y', jawY as unknown as string);
+		bevFieldLight.setAttribute('width', jawPx as unknown as string);
+		bevFieldLight.setAttribute('height', jawPy as unknown as string);
 		bevFieldLight.setAttribute('opacity', activelyDelivering ? '.34' : '.14');
 		bevFieldLight.setAttribute('stroke-width', activelyDelivering ? '2' : '1');
 	}
@@ -808,10 +807,10 @@ export function updateBEVInset() {
 			pJawW = Math.max(4, Math.min(160, (jp.x1 + jp.x2) * pxPerCm)),
 			pJawH = Math.max(4, Math.min(160, (jp.y1 + jp.y2) * pxPerCm));
 		if (planJaw) {
-			planJaw.setAttribute('x', pLeft);
-			planJaw.setAttribute('y', pTop);
-			planJaw.setAttribute('width', pJawW);
-			planJaw.setAttribute('height', pJawH);
+			planJaw.setAttribute('x', pLeft as unknown as string);
+			planJaw.setAttribute('y', pTop as unknown as string);
+			planJaw.setAttribute('width', pJawW as unknown as string);
+			planJaw.setAttribute('height', pJawH as unknown as string);
 			planJaw.style.display = '';
 		}
 		const pAperture = parseFirstNumber(planned.mlcAperture) ?? fundamentalState.mlc;
@@ -842,7 +841,7 @@ export function updateBEVInset() {
 	if (accessory) {
 		const s = activeSpecialSetupSpec();
 		if (field?.electron && String(s?.type || '').toUpperCase() === 'ELECTRON') {
-			const e = S.specialSetupWorkflow.electron || {},
+			const e = (S.specialSetupWorkflow.electron || {}) as typeof S.specialSetupWorkflow.electron,
 				w = (Number(e.width) || Number(s.widthCm) || 6) * pxPerCm,
 				h = (Number(e.height) || Number(s.heightCm) || 4) * pxPerCm,
 				shape = String(e.shape || s.shape || 'Oval'),
@@ -948,7 +947,7 @@ export function updateBEVInset() {
 	setTextById('bevMlcValue', `${fundamentalState.mlc} cm · ${fundamentalState.mlcShape}`);
 }
 
-export function syncFundamentalReadouts(label, value) {
+export function syncFundamentalReadouts(label?, value?) {
 	// Mechanical controls may move the gantry/couch/head, but the EPID extension
 	// state is independent and remains exactly where the MV key commanded it.
 	applyDetectorCommandedPose();

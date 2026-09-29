@@ -1,8 +1,7 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import * as THREE from 'three-linac';
 import { OrbitControls } from 'three-linac/examples/jsm/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three-linac/addons/geometries/RoundedBoxGeometry.js';
-import { S } from './state.js';
+import { S } from './state';
 import {
 	viewerContainer,
 	loadingScreen,
@@ -23,10 +22,10 @@ import {
 	lasersToggleButton,
 	odiToggleButton,
 	roomLightsToggleButton
-} from './dom.js';
-import { setupCCTVFeeds } from './cctv.js';
-import { animate, setTextById, syncOperatorConsole, wrap360 } from './main.js';
-import { allTreatmentFieldsCompleted, fundamentalState, setPendantLCD } from './linac-safety.js';
+} from './dom';
+import { setupCCTVFeeds } from './cctv';
+import { animate, setTextById, syncOperatorConsole, wrap360 } from './main';
+import { allTreatmentFieldsCompleted, fundamentalState, setPendantLCD } from './linac-safety';
 import {
 	createImmobilizationShelf3D,
 	createImmobilizationPatientGroup,
@@ -47,8 +46,9 @@ import {
 	motionRequired,
 	srsRequired,
 	renderTreatmentDeliveryPanel
-} from './linac-delivery.js';
-import { renderClinicalIGRT } from './linac-igrt.js';
+} from './linac-delivery';
+import type { SpecialSetupSpec } from './linac-delivery';
+import { renderClinicalIGRT } from './linac-igrt';
 
 const roomCeilingFixtureMats = [];
 export const controlRoomAccentMats = [];
@@ -171,7 +171,28 @@ const couchAccordionMaterial = new THREE.MeshStandardMaterial({
 	roughness: 0.6
 });
 
-export const linacPartsData = [
+// RTApps (#77 phase 2 task 18): fields beyond `sil`/`position`/`rotation`/`group`/`id` are
+// optional — the last ("target") entry omits name/level/cost/quiz, and threeJSObject /
+// silhouetteObject / _preIVVis are populated later by createLinacPart3D / toggleSimpleInternals.
+// Exported: state.ts tightens `currentQuizPart` (owned by game.ts) to this type.
+export interface LinacPartData {
+	id: string;
+	name?: string;
+	level?: number;
+	cost?: number;
+	quiz?: { question: string; options: string[]; correctAnswerIndex: number };
+	position: number[];
+	rotation: number[];
+	group: string;
+	sil: { type: string; size: number[]; offset?: number[]; rot?: number[] };
+	isSubComponent?: boolean;
+	parentPart?: string;
+	threeJSObject?: THREE.Object3D;
+	silhouetteObject?: THREE.Object3D;
+	_preIVVis?: boolean;
+}
+
+export const linacPartsData: LinacPartData[] = [
 	{
 		id: 'drivestand',
 		name: 'Drivestand',
@@ -1215,8 +1236,26 @@ export function monitorPlannedDisplay(key, value) {
 	}
 	return String(value ?? '—');
 }
+// RTApps (#77 phase 2 task 18): jawX1/X2/Y1/Y2 are optional because the fallback branch
+// below (used only if fundamentalState is unavailable) omits them, same as the original
+// object literal — `Number.isFinite(fs.jawX1)` already treated that as "absent".
+interface TreatmentMonitorActualSource {
+	gantry: number;
+	collimator: number;
+	jaw: number;
+	jawX1?: number;
+	jawX2?: number;
+	jawY1?: number;
+	jawY2?: number;
+	mlc: number;
+	mlcShape: string;
+	vrt: number;
+	lng: number;
+	lat: number;
+	couchAngle: number;
+}
 export function getTreatmentMonitorActual() {
-	const fs =
+	const fs: TreatmentMonitorActualSource =
 		typeof fundamentalState !== 'undefined' && fundamentalState
 			? fundamentalState
 			: {
@@ -1257,7 +1296,7 @@ export function getTreatmentMonitorActual() {
 		electronAccessory: (() => {
 			const ss = activeSpecialSetupSpec();
 			if (String(ss?.type || '').toUpperCase() !== 'ELECTRON') return 'N/A';
-			const e = S.specialSetupWorkflow.electron || {};
+			const e = (S.specialSetupWorkflow.electron || {}) as typeof S.specialSetupWorkflow.electron;
 			return e.mounted
 				? `${e.shape} ${e.width} × ${e.height} cm · ${e.cone}${e.bolusPlaced ? ` · bolus ${Number(e.bolusThickness || ss?.bolusThicknessCm || 0.5).toFixed(1)} cm` : ''}`
 				: 'Not mounted';
@@ -1274,7 +1313,18 @@ function monitorFitFont(ctx, text, maxWidth, startPx = 40, minPx = 25, mono = fa
 	}
 	return `${weight} ${px}px ${family}`;
 }
-function drawMonitorCell(ctx, x, y, w, h, opts = {}) {
+interface MonitorCellOptions {
+	fill?: string;
+	stroke?: string;
+	text?: string;
+	color?: string;
+	align?: CanvasTextAlign;
+	mono?: boolean;
+	fontSize?: number;
+	weight?: number;
+	status?: 'ok' | 'bad' | null;
+}
+function drawMonitorCell(ctx, x, y, w, h, opts: MonitorCellOptions = {}) {
 	const {
 		fill = '#111a23',
 		stroke = '#26394a',
@@ -1322,6 +1372,19 @@ function drawMonitorCell(ctx, x, y, w, h, opts = {}) {
 	ctx.textBaseline = 'middle';
 	ctx.fillText(String(text), textX, y + h / 2 + 1);
 }
+// Shape lives in linac-delivery.js / game.js case data; only the display fields this
+// treatment monitor reads off `S.activeTreatmentCase` are named here.
+interface TreatmentMonitorCaseDisplay {
+	patient?: string;
+	mrn?: string;
+	siteLabel?: string;
+	positionLabel?: string;
+	position?: string;
+	technique?: string;
+	energy?: string;
+	fraction?: string;
+	planned?: unknown;
+}
 export function renderTreatmentMonitor() {
 	if (!S.treatmentMonitorCtx || !S.treatmentMonitorTexture) return;
 	const ctx = S.treatmentMonitorCtx,
@@ -1344,16 +1407,17 @@ export function renderTreatmentMonitor() {
 	ctx.font = '600 22px Segoe UI, Arial';
 	ctx.fillText('PLANNED vs ACTUAL · independent machine parameter verification', 54, 94);
 
-	const planned = S.activeTreatmentCase || {
-		patient: 'No case loaded',
-		mrn: '—',
-		siteLabel: '—',
-		positionLabel: '—',
-		technique: '—',
-		energy: '—',
-		fraction: '—',
-		planned: {}
-	};
+	const planned: TreatmentMonitorCaseDisplay =
+		(S.activeTreatmentCase as TreatmentMonitorCaseDisplay | null) || {
+			patient: 'No case loaded',
+			mrn: '—',
+			siteLabel: '—',
+			positionLabel: '—',
+			technique: '—',
+			energy: '—',
+			fraction: '—',
+			planned: {}
+		};
 	const plannedParams = S.activeTreatmentCase ? getCurrentPlannedParameters() : {};
 	const activeField = S.activeTreatmentCase ? deliveryCasePlan() : null;
 	const actual = getTreatmentMonitorActual();
@@ -1905,7 +1969,14 @@ function mkHighlight() {
 	return h;
 }
 // orient a thin tube between two points a,b (used for pipes / flow segments)
-function tube(group, a, b, r, mat, minStage) {
+function tube(
+	group: THREE.Group,
+	a: number[],
+	b: number[],
+	r: number,
+	mat: THREE.Material,
+	minStage?: number
+) {
 	const dir = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
 	const len = dir.length() || 0.001;
 	const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 14), mat);
@@ -2510,7 +2581,7 @@ export function initThreeJS() {
 }
 
 // ---------- Detailed part builders (each returns a Group; the whole group is toggled) ----------
-function rbox(w, h, d, mat, r) {
+function rbox(w: number, h: number, d: number, mat: THREE.Material, r?: number) {
 	const rad = Math.min(r === undefined ? 0.06 : r, Math.min(w, h, d) / 2 - 0.001);
 	const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 4, Math.max(0.01, rad)), mat);
 	m.castShadow = true;
@@ -3083,8 +3154,8 @@ export function updateElectronApplicator3D() {
 	const mounted = !!S.specialSetupWorkflow?.electron?.mounted;
 	S.electronApplicatorGroup.visible = isElectronCase && mounted;
 	if (!S.electronApplicatorGroup.visible) return;
-	const e = S.specialSetupWorkflow?.electron || {};
-	const s = activeSpecialSetupSpec() || {};
+	const e = (S.specialSetupWorkflow?.electron || {}) as typeof S.specialSetupWorkflow.electron;
+	const s = (activeSpecialSetupSpec() || {}) as SpecialSetupSpec;
 	const cone = String(e.cone || s.cone || '10 × 10 cm');
 	const coneScale = cone.includes('6 × 6') ? 0.82 : cone.includes('15 × 15') ? 1.08 : 0.94;
 	S.electronApplicatorGroup.scale.set(coneScale, 1.0, coneScale);

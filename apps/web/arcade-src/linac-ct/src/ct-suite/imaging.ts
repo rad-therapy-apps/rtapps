@@ -1,4 +1,3 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
 import {
 	S,
 	setStatus,
@@ -9,7 +8,7 @@ import {
 	updateRangeLabels,
 	setWL,
 	spanOf
-} from './console.js';
+} from './console';
 /* ---------------- EMBEDDED REAL CT SERIES (all de-identified) ----------------
    Five real planning CTs, each downsampled to the 220^2 recon matrix and
    subsampled in slices. HU are packed loss-lessly into a PNG sprite (16-bit
@@ -186,7 +185,7 @@ export async function decodeRealVolume(key) {
    2) PROCEDURAL CT RECONSTRUCTION ENGINE
    ============================================================ */
 export const REC = 220; // recon matrix
-export const axCanvas = document.getElementById('axCanvas');
+export const axCanvas = document.getElementById('axCanvas') as HTMLCanvasElement;
 axCanvas.width = REC;
 axCanvas.height = REC;
 export const axCtx = axCanvas.getContext('2d');
@@ -435,7 +434,7 @@ export function levelToTablePos(t) {
 }
 
 /* ---- topogram (scout) : stylised AP projection with scan-range brackets + slice line ---- */
-export const topoCanvas = document.getElementById('topoCanvas'),
+export const topoCanvas = document.getElementById('topoCanvas') as HTMLCanvasElement,
 	topoCtx = topoCanvas.getContext('2d');
 export const TOPO_W = topoCanvas.width,
 	TOPO_H = topoCanvas.height;
@@ -663,7 +662,7 @@ export function acquireTopogram() {
 	setStatus('Acquiring topogram…', 'busy');
 	setXray(true);
 	log('Topogram (scout) acquisition…', 'warn');
-	$('btnTopogram').disabled = true;
+	($('btnTopogram') as HTMLButtonElement).disabled = true;
 	let p = 0;
 	const iv = setInterval(() => {
 		p += 0.12;
@@ -673,9 +672,9 @@ export function acquireTopogram() {
 			setXray(false);
 			S.topoAcquired = true;
 			$('topoHint').style.display = 'none';
-			['rangeStart', 'rangeEnd'].forEach((id) => ($(id).disabled = false));
-			$('btnScan').disabled = false;
-			$('btnTopogram').disabled = false;
+			['rangeStart', 'rangeEnd'].forEach((id) => (($(id) as HTMLInputElement).disabled = false));
+			($('btnScan') as HTMLButtonElement).disabled = false;
+			($('btnTopogram') as HTMLButtonElement).disabled = false;
 			drawTopogram();
 			updateRangeLabels();
 			setStatus('Topogram ready — plan range', 'rdy');
@@ -696,7 +695,7 @@ export function startScan() {
 	}
 	const t0 = S.rangeStart / 100,
 		t1 = S.rangeEnd / 100;
-	let plan = [];
+	const plan = [];
 	if (S.proto.real) {
 		const V = REALV[S.proto.dataKey],
 			N = V.meta.n;
@@ -722,11 +721,13 @@ export function startScan() {
 	setStep(6);
 	setStatus('Scanning…', 'busy');
 	setXray(true);
-	$('btnScan').disabled = true;
-	$('btnStop').disabled = false;
-	$('btnTopogram').disabled = true;
-	document.querySelectorAll('.mb,[data-couch]').forEach((b) => (b.disabled = true));
-	$('btnSetIso').disabled = true;
+	($('btnScan') as HTMLButtonElement).disabled = true;
+	($('btnStop') as HTMLButtonElement).disabled = false;
+	($('btnTopogram') as HTMLButtonElement).disabled = true;
+	document
+		.querySelectorAll('.mb,[data-couch]')
+		.forEach((b) => ((b as HTMLButtonElement).disabled = true));
+	($('btnSetIso') as HTMLButtonElement).disabled = true;
 	$('axHint').style.display = 'none';
 	$('progFill').classList.add('live');
 	log(
@@ -757,7 +758,7 @@ export function startScan() {
 			$('progFill').style.width = pct + '%';
 			$('progPct').textContent = pct + '%';
 			$('progText').textContent = `Acquiring slice ${i + 1} / ${n}`;
-			$('acqSlices').textContent = S.sliceHU.length;
+			$('acqSlices').textContent = String(S.sliceHU.length);
 			i++;
 			if (i >= n) {
 				clearInterval(scanTimer);
@@ -772,15 +773,17 @@ export function finishScan() {
 	S.scanning = false;
 	setXray(false);
 	$('progFill').classList.remove('live');
-	$('btnStop').disabled = true;
-	$('btnScan').disabled = false;
-	$('btnTopogram').disabled = false;
-	$('btnSetIso').disabled = false;
-	document.querySelectorAll('.mb,[data-couch]').forEach((b) => (b.disabled = false));
+	($('btnStop') as HTMLButtonElement).disabled = true;
+	($('btnScan') as HTMLButtonElement).disabled = false;
+	($('btnTopogram') as HTMLButtonElement).disabled = false;
+	($('btnSetIso') as HTMLButtonElement).disabled = false;
+	document
+		.querySelectorAll('.mb,[data-couch]')
+		.forEach((b) => ((b as HTMLButtonElement).disabled = false));
 	const n = S.sliceHU.length;
-	$('sliceScroll').disabled = false;
-	$('sliceScroll').max = n - 1;
-	$('sliceScroll').value = n - 1;
+	($('sliceScroll') as HTMLInputElement).disabled = false;
+	($('sliceScroll') as HTMLInputElement).max = String(n - 1);
+	($('sliceScroll') as HTMLInputElement).value = String(n - 1);
 	S.curSlice = n - 1;
 	$('sliceLabel').textContent = `${n} / ${n}`;
 	repaintCurrent();
@@ -807,16 +810,18 @@ export function stopScan() {
 	if (scanTimer) clearInterval(scanTimer);
 	setXray(false);
 	$('progFill').classList.remove('live');
-	$('btnStop').disabled = true;
-	$('btnScan').disabled = false;
-	$('btnTopogram').disabled = false;
-	$('btnSetIso').disabled = false;
-	document.querySelectorAll('.mb,[data-couch]').forEach((b) => (b.disabled = false));
+	($('btnStop') as HTMLButtonElement).disabled = true;
+	($('btnScan') as HTMLButtonElement).disabled = false;
+	($('btnTopogram') as HTMLButtonElement).disabled = false;
+	($('btnSetIso') as HTMLButtonElement).disabled = false;
+	document
+		.querySelectorAll('.mb,[data-couch]')
+		.forEach((b) => ((b as HTMLButtonElement).disabled = false));
 	const n = S.sliceHU ? S.sliceHU.length : 0;
 	if (n > 0) {
-		$('sliceScroll').disabled = false;
-		$('sliceScroll').max = n - 1;
-		$('sliceScroll').value = n - 1;
+		($('sliceScroll') as HTMLInputElement).disabled = false;
+		($('sliceScroll') as HTMLInputElement).max = String(n - 1);
+		($('sliceScroll') as HTMLInputElement).value = String(n - 1);
 		S.curSlice = n - 1;
 		$('sliceLabel').textContent = `${n} / ${n}`;
 		repaintCurrent();

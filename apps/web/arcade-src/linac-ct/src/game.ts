@@ -1,5 +1,4 @@
-// @ts-nocheck -- verbatim legacy move; removed at TS conversion (PR 4)
-import { S } from './state.js';
+import { S } from './state';
 import {
 	balanceDisplay,
 	beamOnButton,
@@ -44,7 +43,7 @@ import {
 	tabButtons,
 	tabContentPanels,
 	taskSelect
-} from './dom.js';
+} from './dom';
 import {
 	CORE_PART_IDS,
 	linacPartsData,
@@ -55,8 +54,18 @@ import {
 	setLaserState,
 	updateCouchAccordion,
 	updateJawPositions
-} from './scene.js';
-import { fundamentalState, setCenteredJawField, syncLegacyJawValue } from './linac-safety.js';
+} from './scene';
+import { fundamentalState, setCenteredJawField, syncLegacyJawValue } from './linac-safety';
+
+// RTApps (#77 phase 2 task 19): honest shape for `BONUS_QUESTIONS` entries (matches
+// scene.ts's `LinacPartData.quiz` inline type structurally). Exported so state.ts can
+// tighten `activeBonus` (owned by this module) from `unknown`, mirroring the sim-hub
+// Room/Travel precedent.
+export interface BonusQuestion {
+	question: string;
+	options: string[];
+	correctAnswerIndex: number;
+}
 
 export const enhancementsData = [
 	{
@@ -336,7 +345,7 @@ const BONUS_QUESTIONS = [
 
 export function openTab(event) {
 	const tabId = event.currentTarget.dataset.tab;
-	tabContentPanels.forEach((panel) => {
+	tabContentPanels.forEach((panel: HTMLElement) => {
 		panel.classList.remove('active');
 		panel.style.display = 'none';
 	});
@@ -451,7 +460,9 @@ export function displayBonusChallenge() {
 }
 
 export function handleSubmitAnswer() {
-	const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+	const selectedOption = document.querySelector<HTMLInputElement>(
+		'input[name="quizOption"]:checked'
+	);
 	if (!selectedOption) {
 		showMessage('Please select an answer.', 'info');
 		return;
