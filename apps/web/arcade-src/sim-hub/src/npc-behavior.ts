@@ -57,7 +57,10 @@ const EXCHANGE_TRIGGER_DIST = 15;
    "an actor whose exchange conversation is active is ALWAYS inside the full-rate radius"
    holds by construction: exchanges only activate when the camera (== player in walk mode)
    is within EXCHANGE_TRIGGER_DIST of the pair midpoint, and partners stand within a couple
-   of units of that midpoint — so 2x the trigger distance always covers both actors.
+   of units of that midpoint — so 2x the trigger distance always covers both actors. The
+   stride gate measures from the same point as the trigger: `camera.position` in guided mode
+   (the player body is stale while the camera flies the journey) and `player.pos` in walk
+   mode, where the camera is the player.
    Raising EXCHANGE_TRIGGER_DIST automatically widens this radius; do not decouple them. */
 const NEAR_RADIUS = Math.max(30, EXCHANGE_TRIGGER_DIST * 2);
 const NEAR_RADIUS_SQ = NEAR_RADIUS * NEAR_RADIUS;
@@ -75,9 +78,10 @@ function journeyInvolved(actor) {
 	return journeyActorSet.has(actor);
 }
 function actorUpdateStride(objWorldPos, actor) {
-	if (S.mode !== 'walk') return 1;
+	if (S.mode === 'overview') return 1;
 	if (journeyInvolved(actor)) return 1;
-	return objWorldPos.distanceToSquared(player.pos) < NEAR_RADIUS_SQ ? 1 : 4;
+	const ref = S.mode === 'guided' ? camera.position : player.pos;
+	return objWorldPos.distanceToSquared(ref) < NEAR_RADIUS_SQ ? 1 : 4;
 }
 export function registerDutyActor(group, mode = 'idle', offset = Math.random()) {
 	dutyActors.push({ group, mode, offset });
