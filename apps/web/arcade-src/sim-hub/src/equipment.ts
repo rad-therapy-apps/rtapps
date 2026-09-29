@@ -639,15 +639,16 @@ export function precompileShaders() {
 }
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass
-	   per feed; main.ts calls this right before the main render, which refreshes shadows. */
+	   per feed; main.ts calls this before the main render, which refreshes shadows every 4th frame. */
 	const shadowAutoUpdate = renderer.shadowMap.autoUpdate;
 	renderer.shadowMap.autoUpdate = false;
 	const lr = roomById('linaccontrol');
 	const linacNeeded =
 		OPERATOR_CONSOLE.built &&
 		!!lr &&
-		Math.abs(camera.position.x - lr.x) <= lr.w / 2 &&
-		Math.abs(camera.position.z - lr.z) <= lr.d / 2;
+		((Math.abs(camera.position.x - lr.x) <= lr.w / 2 &&
+			Math.abs(camera.position.z - lr.z) <= lr.d / 2) ||
+			(S.mode === 'overview' && S.activeRoom?.id === 'linaccontrol'));
 	const linacBecameNeeded = linacNeeded && !OPERATOR_CONSOLE.wasNeeded;
 	OPERATOR_CONSOLE.wasNeeded = linacNeeded;
 	if (
