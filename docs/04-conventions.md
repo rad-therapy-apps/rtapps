@@ -22,6 +22,7 @@ Status: draft (Phase 0). Finalised with the first deployment in Phase 2. These a
 |---|---|---|
 | Python (`apps/api`, `tools/`) | `ruff` (lint + format), `mypy --strict` on `app/` | Python 3.12; type hints everywhere; async SQLAlchemy sessions; Pydantic models at the API boundary only; no business logic in route functions (routes call services) |
 | TypeScript (`apps/web`, `packages/`) | `eslint`, `prettier`, `svelte-check` | `strict` TS; no `any` without a comment; no `{@html}` anywhere in `apps/web` (lint rule) |
+| Arcade apps (`apps/web/arcade-src/`, `apps/web/arcade/`) | `tsc -p tsconfig.arcade.json` (in `check`), `eslint`, `build:arcade` | Application-scale arcade apps (sim-hub, linac-ct) are modular TypeScript under `apps/web/arcade-src/`; the small single-activity games stay single-file by policy |
 | SQL / migrations | Alembic, one migration per PR that changes the model, autogenerate then hand-review | Never edit a merged migration; write a new one |
 | JSON Schemas (`packages/schemas`) | `ajv` + `jsonschema` tests with shared fixtures | The schema is the contract; change it first, then editor, validator, renderer |
 | API contract | `openapi.json` exported in CI; `packages/api-client` regenerated; diff must be empty | Never hand-edit the generated client |
