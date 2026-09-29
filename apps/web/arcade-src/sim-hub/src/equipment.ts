@@ -362,7 +362,7 @@ function operatorLabel(g, x, y, z, rot, text, sub = 'LIVE') {
 	return m;
 }
 function createOperatorFeed(name, pos, target, fov = 42) {
-	const rt = new THREE.WebGLRenderTarget(960, 540);
+	const rt = new THREE.WebGLRenderTarget(800, 450);
 	rt.texture.colorSpace = THREE.SRGBColorSpace;
 	const cam = new THREE.PerspectiveCamera(fov, 16 / 9, 0.1, 260);
 	cam.position.copy(pos);
@@ -620,6 +620,10 @@ function activeVaultPatientTarget() {
 	return p;
 }
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
+	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass
+	   per feed; main.ts calls this right before the main render, which refreshes shadows. */
+	const shadowAutoUpdate = renderer.shadowMap.autoUpdate;
+	renderer.shadowMap.autoUpdate = false;
 	const linacNeeded =
 		OPERATOR_CONSOLE.built &&
 		(S.activeRoom?.id === 'linaccontrol' ||
@@ -663,6 +667,7 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 		}
 	}
 	renderer.setRenderTarget(null);
+	renderer.shadowMap.autoUpdate = shadowAutoUpdate;
 }
 
 /* ---- Ambulance drop-off choreography: pull up, unload, dwell, load, depart ---- */

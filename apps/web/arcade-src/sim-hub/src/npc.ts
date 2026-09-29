@@ -299,19 +299,19 @@ export function faceNpcToward(a, b) {
 const LABEL_FADE_DIST = 3.4;
 const LABEL_RECHECK_STRIDE = 10;
 let labelFrameCount = 0;
-/* RTApps perf task 2: in walk mode, a label already known to be past the fade-out distance
+/* RTApps perf task 2: in walk and guided modes, a label already known to be past the fade-out distance
    skips the world-position/distance/DOM work most frames — it's re-checked every 10th frame so
    an approaching NPC regains its label promptly. Skipped labels leave their DOM state (opacity,
    visibility) exactly as it was, so a hidden label never flickers. Overview mode is unchanged:
    every label is recomputed every frame there, same as before this gating existed. */
 export function updateNpcLabels() {
 	labelFrameCount++;
-	const walkGated = S.mode === 'walk';
+	const distanceGated = S.mode !== 'overview';
 	const cam = new THREE.Vector3();
 	camera.getWorldPosition(cam);
 	const wp = new THREE.Vector3();
 	for (const n of npcRoleLabels) {
-		if (walkGated && n.farAway && labelFrameCount % LABEL_RECHECK_STRIDE !== 0) continue;
+		if (distanceGated && n.farAway && labelFrameCount % LABEL_RECHECK_STRIDE !== 0) continue;
 		n.group.getWorldPosition(wp);
 		const d = cam.distanceTo(wp);
 		const near = d < LABEL_FADE_DIST;
