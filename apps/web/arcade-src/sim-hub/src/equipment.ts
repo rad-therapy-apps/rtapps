@@ -362,7 +362,7 @@ function operatorLabel(g, x, y, z, rot, text, sub = 'LIVE') {
 	return m;
 }
 function createOperatorFeed(name, pos, target, fov = 42) {
-	const rt = new THREE.WebGLRenderTarget(960, 540);
+	const rt = new THREE.WebGLRenderTarget(800, 450);
 	rt.texture.colorSpace = THREE.SRGBColorSpace;
 	const cam = new THREE.PerspectiveCamera(fov, 16 / 9, 0.1, 260);
 	cam.position.copy(pos);
