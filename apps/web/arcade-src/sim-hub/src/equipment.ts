@@ -20,6 +20,7 @@
    imported back into those. */
 import * as THREE from 'three';
 import { S } from './state';
+import { applyVisibility } from './visibility';
 import {
 	box,
 	std,
@@ -666,6 +667,7 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 		for (const feed of feeds) {
 			feed.camera.lookAt(t);
 			feed.camera.updateMatrixWorld();
+			applyVisibility(feed.camera);
 			renderer.setRenderTarget(feed.renderTarget);
 			renderer.render(scene, feed.camera);
 		}
@@ -683,6 +685,7 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 		for (const feed of CT_OPERATOR_CONSOLE.feeds) {
 			feed.camera.lookAt(t);
 			feed.camera.updateMatrixWorld();
+			applyVisibility(feed.camera);
 			renderer.setRenderTarget(feed.renderTarget);
 			renderer.render(scene, feed.camera);
 		}

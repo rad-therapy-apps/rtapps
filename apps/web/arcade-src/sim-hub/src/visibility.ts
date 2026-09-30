@@ -10,9 +10,11 @@ import { ROOMS } from './rooms';
 import { ROOM_CAST } from './main';
 import { movers, interactionScenes } from './npc-behavior';
 import { JOURNEY } from './journey';
-import { buildPortals, computeVisible, roomAt as roomAtIn } from './portals';
+import { S } from './state';
+import { OUTSIDE, buildPortals, computeVisible, roomAt as roomAtIn } from './portals';
 
 export const ROOM_CONTENT = new Map<string, THREE.Group>();
+const cullActors: THREE.Object3D[] = [];
 
 /* Room rect is centre-based (x,z centre; w,d full extents). Shrunk by 0.05 m, which is less than
    the thinnest wall's half-thickness (0.08), so wall slabs, which straddle the room edge, are never
@@ -44,6 +46,7 @@ export function groupRoomContents() {
 		scene.add(g);
 	}
 	scene.updateMatrixWorld(true);
+	cullActors.push(...protectedActors);
 	const groups = new Set<THREE.Object3D>(ROOM_CONTENT.values());
 	const box = new THREE.Box3();
 	for (const child of [...scene.children]) {
@@ -60,8 +63,9 @@ export function groupRoomContents() {
 /* Portal culling: the visible-room set for a camera. Contains room ids plus OUTSIDE when the outside
    cell (hallways, lobby circulation, exterior) is visible. The returned Set is reused across calls,
    so consume it before calling again. */
-export { OUTSIDE } from './portals';
-const PORTALS = buildPortals(ROOMS);
+export { OUTSIDE };
+// Built on first use: equipment.ts imports this module before rooms.ts has evaluated.
+let portals: ReturnType<typeof buildPortals> | null = null;
 const visible = new Set<string>();
 
 export function roomAt(x: number, z: number) {
@@ -69,5 +73,54 @@ export function roomAt(x: number, z: number) {
 }
 
 export function visibleRooms(camera: THREE.Camera) {
-	return computeVisible(camera, ROOMS, PORTALS, visible);
+	return computeVisible(camera, ROOMS, (portals ??= buildPortals(ROOMS)), visible);
+}
+
+/* Actors are culled per frame by world position, not by reparenting. Game logic (journey, npc)
+   owns their `visible` flag and reads it back, so culling must not touch it: a culled actor moves
+   to layer 1, which no camera enables, on the actor and every descendant (three tests layers per
+   object, not per subtree). Layers are rewritten only when an actor's state flips. */
+const SEEN_MASK = 1;
+const CULLED_MASK = 2;
+const actorCulled = new Map<THREE.Object3D, boolean>();
+const actorPos = new THREE.Vector3();
+let layerMask = SEEN_MASK;
+const setLayerMask = (o: THREE.Object3D) => {
+	o.layers.mask = layerMask;
+};
+// Actors straddling a doorway count as seen if either side is (0.4 m probe) so nobody pops in a door.
+const PROBE = 0.4;
+function roomSeen(x: number, z: number, seen: Set<string>) {
+	const r = roomAtIn(ROOMS, x, z);
+	return seen.has(r ? r.id : OUTSIDE);
+}
+
+/* Sets group and actor visibility for the camera about to render. Overview shows everything. */
+export function applyVisibility(camera: THREE.Camera) {
+	const all = S.mode === 'overview';
+	let seen = visible;
+	if (!all) {
+		// three refreshes matrixWorldInverse only inside render(); cull with this frame's view.
+		camera.updateMatrixWorld();
+		camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+		seen = visibleRooms(camera);
+	}
+	for (const [id, g] of ROOM_CONTENT) g.visible = all || seen.has(id);
+	for (const a of cullActors) {
+		let show = all;
+		if (!show) {
+			a.getWorldPosition(actorPos);
+			const { x, z } = actorPos;
+			show =
+				roomSeen(x, z, seen) ||
+				roomSeen(x + PROBE, z, seen) ||
+				roomSeen(x - PROBE, z, seen) ||
+				roomSeen(x, z + PROBE, seen) ||
+				roomSeen(x, z - PROBE, seen);
+		}
+		if (actorCulled.get(a) === !show) continue;
+		actorCulled.set(a, !show);
+		layerMask = show ? SEEN_MASK : CULLED_MASK;
+		a.traverse(setLayerMask);
+	}
 }
