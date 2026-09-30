@@ -82,6 +82,7 @@ export function visibleRooms(camera: THREE.Camera) {
    object, not per subtree). Layers are rewritten only when an actor's state flips. */
 const SEEN_MASK = 1;
 const CULLED_MASK = 2;
+let cullingEnabled = true;
 const actorCulled = new Map<THREE.Object3D, boolean>();
 const actorPos = new THREE.Vector3();
 let layerMask = SEEN_MASK;
@@ -97,7 +98,7 @@ function roomSeen(x: number, z: number, seen: Set<string>) {
 
 /* Sets group and actor visibility for the camera about to render. Overview shows everything. */
 export function applyVisibility(camera: THREE.Camera) {
-	const all = S.mode === 'overview';
+	const all = S.mode === 'overview' || !cullingEnabled;
 	let seen = visible;
 	if (!all) {
 		// three refreshes matrixWorldInverse only inside render(); cull with this frame's view.
@@ -123,4 +124,26 @@ export function applyVisibility(camera: THREE.Camera) {
 		layerMask = show ? SEEN_MASK : CULLED_MASK;
 		a.traverse(setLayerMask);
 	}
+}
+
+/* Test hook for apps/web/scripts/sim-hub-visibility-check.mjs. Present only when the page is opened
+   with `?visibilitycheck`; otherwise nothing is exposed and culling cannot be switched off. */
+if (
+	typeof location !== 'undefined' &&
+	new URLSearchParams(location.search).has('visibilitycheck')
+) {
+	Object.assign(window, {
+		__simHubVisibility: {
+			applyVisibility,
+			setCulling: (on: boolean) => {
+				cullingEnabled = on;
+			},
+			// Getter: this module can evaluate before rooms.ts (import cycle).
+			get rooms() {
+				return ROOMS;
+			},
+			WebGLRenderTarget: THREE.WebGLRenderTarget,
+			MeshBasicMaterial: THREE.MeshBasicMaterial
+		}
+	});
 }
