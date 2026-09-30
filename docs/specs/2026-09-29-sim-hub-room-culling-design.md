@@ -29,8 +29,10 @@ camera is in measured vault-1 JS time 44.5 â†’ 8.6 ms/frame and the lobby 11.4 â
   This is conservative: it may draw a hidden room, never hide a visible one.
 - **Overview mode is exempt** (bird's-eye with ceilings hidden sees everything): all groups visible.
 - The **hub lobby** is treated like any room, and its wall gaps (`lobbyWallWithGap`) are its portals.
-- **Moving actors are never reparented**: registered movers, journey actors (`JOURNEY` Object3D
-  values), and anything with `userData.inHandoff` stay scene-level and are always drawn.
+- **Actors are never reparented** (any cast actor can be picked for a handoff and walk out of its
+  room): movers, cast/duty actors, journey actors and `userData.inHandoff` stay scene-level. They
+  are ~38% of all meshes, so they are culled **per frame by position**: an actor is visible if the
+  room containing its world position is visible (the outside cell if it stands in no room).
 - **Console feed renders** apply visibility computed from the feed camera (the LINAC feed cameras
   sit inside vault 1), then restore the main camera's visibility.
 - **Shadows** need no special handling: three.js skips invisible objects in the shadow pass.
