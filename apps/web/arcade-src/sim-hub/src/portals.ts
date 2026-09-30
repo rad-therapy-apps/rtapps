@@ -65,11 +65,79 @@ const camPos = new THREE.Vector3();
    near plane, which the frustum test would miss, so proximity counts as in view. */
 const NEAR_MARGIN = 0.5;
 
-function anyInView(boxes: readonly THREE.Box3[] | undefined) {
+const corner = new THREE.Vector4();
+/* Screen-space (NDC) bounding rect scratch: minX, minY, maxX, maxY. */
+const rect = new Float64Array(4);
+const aperture = new Float64Array(4);
+
+/* Projects a portal box's 8 corners into `rect`, clamped to [-1,1]. Any corner at or behind the
+   camera plane (w <= 0) makes it the full screen, which is conservative. */
+function projectRect(b: THREE.Box3) {
+	let x0 = Infinity,
+		y0 = Infinity,
+		x1 = -Infinity,
+		y1 = -Infinity;
+	for (let i = 0; i < 8; i++) {
+		corner.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z, 1);
+		corner.applyMatrix4(projView);
+		if (corner.w <= 0) {
+			rect[0] = rect[1] = -1;
+			rect[2] = rect[3] = 1;
+			return;
+		}
+		const nx = corner.x / corner.w,
+			ny = corner.y / corner.w;
+		if (nx < x0) x0 = nx;
+		if (nx > x1) x1 = nx;
+		if (ny < y0) y0 = ny;
+		if (ny > y1) y1 = ny;
+	}
+	rect[0] = Math.max(-1, x0);
+	rect[1] = Math.max(-1, y0);
+	rect[2] = Math.min(1, x1);
+	rect[3] = Math.min(1, y1);
+}
+
+/* Fills `rect` for a portal in view: full screen when the camera is within NEAR_MARGIN of it. */
+function portalRect(b: THREE.Box3) {
+	if (b.distanceToPoint(camPos) <= NEAR_MARGIN) {
+		rect[0] = rect[1] = -1;
+		rect[2] = rect[3] = 1;
+	} else projectRect(b);
+}
+
+function inView(b: THREE.Box3) {
+	return frustum.intersectsBox(b) || b.distanceToPoint(camPos) <= NEAR_MARGIN;
+}
+
+/* True when any portal is in the frustum. With `narrow`, its screen rect must also overlap the
+   aperture. With `collect`, the union of the in-view rects is written to `aperture`. */
+function anyInView(boxes: readonly THREE.Box3[] | undefined, narrow: boolean, collect: boolean) {
 	if (!boxes) return false;
-	for (const b of boxes)
-		if (frustum.intersectsBox(b) || b.distanceToPoint(camPos) <= NEAR_MARGIN) return true;
-	return false;
+	let any = false;
+	for (const b of boxes) {
+		if (!inView(b)) continue;
+		portalRect(b);
+		if (
+			narrow &&
+			(rect[0] > aperture[2] ||
+				rect[2] < aperture[0] ||
+				rect[1] > aperture[3] ||
+				rect[3] < aperture[1])
+		)
+			continue;
+		if (collect) {
+			if (!any) aperture.set(rect);
+			else {
+				aperture[0] = Math.min(aperture[0], rect[0]);
+				aperture[1] = Math.min(aperture[1], rect[1]);
+				aperture[2] = Math.max(aperture[2], rect[2]);
+				aperture[3] = Math.max(aperture[3], rect[3]);
+			}
+		}
+		any = true;
+	}
+	return any;
 }
 
 /* Fills `out` (cleared first) with the ids of visible rooms, plus OUTSIDE when the outside cell is
@@ -87,13 +155,18 @@ export function computeVisible(
 	camPos.setFromMatrixPosition(camera.matrixWorld);
 	const cur = roomAt(rooms, camPos.x, camPos.z);
 	let outside = true;
+	// Outside every room the aperture is the whole screen; inside one it is the union of that room's
+	// in-view portal rects, so other rooms count only if seen through the opening.
+	aperture[0] = aperture[1] = -1;
+	aperture[2] = aperture[3] = 1;
 	if (cur) {
 		out.add(cur.id);
-		outside = anyInView(portals.get(cur.id));
+		outside = anyInView(portals.get(cur.id), false, true);
 	}
 	if (outside) {
 		out.add(OUTSIDE);
-		for (const r of rooms) if (r !== cur && anyInView(portals.get(r.id))) out.add(r.id);
+		for (const r of rooms)
+			if (r !== cur && anyInView(portals.get(r.id), true, false)) out.add(r.id);
 	}
 	return out;
 }

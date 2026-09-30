@@ -104,3 +104,28 @@ describe('computeVisible', () => {
 		expect(out.has('stale')).toBe(false);
 	});
 });
+
+describe('computeVisible aperture narrowing', () => {
+	const D = room({ id: 'D', x: 10, z: 16, w: 10, d: 10, doorSide: 'zmin' });
+	const X = room({ id: 'X', x: 50, z: 0, w: 10, d: 10, windowSide: 'zmax' });
+	const Y = room({ id: 'Y', x: 50, z: 10, w: 10, d: 10, windowSide: 'zmin' });
+	const ALL = [A, B, D, X, Y];
+	const portals = buildPortals(ALL);
+	const visAll = (c: THREE.Camera) =>
+		[...computeVisible(c, ALL, portals, new Set<string>())].sort();
+
+	it('sees a room whose portal is inside the door screen rect', () => {
+		expect(visAll(cam(0, 0, 0, 20))).toContain('B');
+	});
+	it('hides a room whose portal is in the frustum but outside the door screen rect', () => {
+		const got = visAll(cam(0, 0, 0, 20));
+		expect(got).toContain(OUTSIDE);
+		expect(got).not.toContain('D');
+	});
+	it('a camera within 0.5 m of its door gets a full-screen aperture', () => {
+		expect(visAll(cam(0, 4.7, 20, 4.7))).toContain('D');
+	});
+	it('sees the room across a shared window', () => {
+		expect(visAll(cam(50, -3, 50, 20))).toEqual(['X', 'Y', OUTSIDE]);
+	});
+});
