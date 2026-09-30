@@ -10,6 +10,16 @@
 //   - every room: walk pose (room centre, eye height 1.65) and guided pose (the room's `cam`/`look`),
 //     four headings each (0/90/180/270 degrees about the vertical axis)
 //   - 6 hallway points (2.5 m outside a room door), four headings each
+//   - elevated cameras (culling is switched off above the wall tops, so all must match exactly):
+//       * the overview->guided descent: beginTravel starts at (12,82,92) and makeRouteToApproach
+//         runs through (0,7.2,15) and (0,2.2,5.2) to the lobby hub. Its Catmull-Rom curve is not
+//         exposed, so the two elevated legs are sampled as straight lines (they bound the curve),
+//         8 points each, aimed at the destination room and along the direction of travel, for
+//         vault1, consult and the room nearest the lobby
+//       * synthetic poses at y = 6, 12, 20 over the building, looking down and oblique
+//       * high guided-orbit poses inside rooms (just above their wall tops), looking down
+//       * the LINAC 'Overhead' feed camera (79.6,5.4,-24.8; under the 5.7 m vault walls), which
+//         must still be culled correctly
 //   - 2 poses in linaccontrol looking at the wall monitors, 1 in ctcontrol looking through the glass
 //     into ctsim
 //
@@ -415,6 +425,79 @@ const report = await page.evaluate(
 			room: 'ctcontrol',
 			pos: [cc.x, 1.65, cc.z],
 			look: [cc.x + 8, 1.5, cc.z]
+		});
+
+		// Elevated poses (see header).
+		const lobbyRoom = ROOMS.find((x) => x.hub);
+		const near = ROOMS.filter((x) => !x.hub && x.id !== 'consult' && x.id !== 'vault1').sort(
+			(a, b) =>
+				Math.hypot(a.x - lobbyRoom.x, a.z - lobbyRoom.z) -
+				Math.hypot(b.x - lobbyRoom.x, b.z - lobbyRoom.z)
+		)[0];
+		const legs = [
+			[
+				[12, 82, 92],
+				[0, 7.2, 15]
+			],
+			[
+				[0, 7.2, 15],
+				[0, 2.2, 5.2]
+			]
+		];
+		for (const id of ['vault1', 'consult', near.id]) {
+			const q = ROOMS.find((x) => x.id === id);
+			legs.forEach(([a, b], li) => {
+				for (let k = 0; k < 8; k++) {
+					const t = k / 8;
+					const pos = a.map((v, i) => v + (b[i] - v) * t);
+					poses.push({
+						name: `descent->${id} leg${li} t${t.toFixed(2)} to-room`,
+						room: roomAt(pos[0], pos[2]),
+						pos,
+						look: [q.x, 1.5, q.z]
+					});
+					poses.push({
+						name: `descent->${id} leg${li} t${t.toFixed(2)} forward`,
+						room: roomAt(pos[0], pos[2]),
+						pos,
+						look: b.map((v, i) => pos[i] + (v - a[i]))
+					});
+				}
+			});
+		}
+		for (const y of [6, 12, 20]) {
+			for (const [tag, tx, tz] of [
+				['down', 0, 0],
+				['oblique-e', 60, 0],
+				['oblique-w', -40, -7]
+			]) {
+				const pos = [tag === 'down' ? 0 : 10, y, tag === 'down' ? 0.01 : 12];
+				poses.push({
+					name: `synthetic y${y} ${tag}`,
+					room: roomAt(pos[0], pos[2]),
+					pos,
+					look: tag === 'down' ? [0, 0, 0] : [tx, 0, tz]
+				});
+			}
+		}
+		for (const id of ['consult', 'vault1', near.id]) {
+			const q = ROOMS.find((x) => x.id === id);
+			const top = q.vault ? 5.7 : 3.75;
+			for (const h of headings) {
+				const a = (h * Math.PI) / 180;
+				poses.push({
+					name: `${id} high orbit h${h}`,
+					room: id,
+					pos: [q.x - Math.sin(a) * q.w * 0.3, top + 1.5, q.z - Math.cos(a) * q.d * 0.3],
+					look: [q.x, 1.0, q.z]
+				});
+			}
+		}
+		poses.push({
+			name: 'vault1 LINAC Overhead feed camera',
+			room: 'vault1',
+			pos: [79.6, 5.4, -24.8],
+			look: [79.55, 1.5, -18.05]
 		});
 
 		const out = [];
