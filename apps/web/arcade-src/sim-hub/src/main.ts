@@ -105,6 +105,7 @@ import {
 	updateJourneyRoomTiming,
 	updateJourneyCameraFollow
 } from './journey';
+import { groupRoomContents } from './visibility';
 import './sdk-bridge';
 
 const clock = new THREE.Clock();
@@ -730,6 +731,7 @@ updateJourneyUI();
 procRenderSite();
 procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
+groupRoomContents();
 precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
