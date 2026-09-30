@@ -48,6 +48,7 @@ import {
 	updateStatusBeacons,
 	updateAmbulance,
 	renderOperatorLiveFeeds,
+	precompileShaders,
 	buildOperatorLiveConsole,
 	buildCtLiveConsole,
 	updateCtCouchMotion,
@@ -706,6 +707,8 @@ function animate(now) {
 	)
 		orbit.update();
 	renderOperatorLiveFeeds(now);
+	// After the feeds, so a feed render cannot consume the flag.
+	if (f % 4 === 1) renderer.shadowMap.needsUpdate = true;
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
 }
@@ -727,6 +730,7 @@ updateJourneyUI();
 procRenderSite();
 procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
+precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 setTimeout(() => document.getElementById('studentHelp')?.classList.add('show'), 1150);

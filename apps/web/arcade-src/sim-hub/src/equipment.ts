@@ -298,8 +298,16 @@ interface OperatorConsoleState {
 	feeds: OperatorFeed[];
 	screens: THREE.Mesh[];
 	lastRender?: number;
+	wasNeeded: boolean;
+	next: number;
 }
-const OPERATOR_CONSOLE: OperatorConsoleState = { built: false, feeds: [], screens: [] };
+const OPERATOR_CONSOLE: OperatorConsoleState = {
+	built: false,
+	feeds: [],
+	screens: [],
+	wasNeeded: false,
+	next: 0
+};
 function createOperatorMonitor(
 	g,
 	x,
@@ -619,30 +627,43 @@ function activeVaultPatientTarget() {
 	p.y = Math.max(1.45, p.y + 1.5);
 	return p;
 }
+/* Feed renders target a linear render target, so materials seen by both a feed and the screen
+   need a second (srgb-linear) program; build both now instead of on the first feed tick. */
+export function precompileShaders() {
+	renderer.compile(scene, camera);
+	const feed = OPERATOR_CONSOLE.feeds[0];
+	if (!feed) return;
+	renderer.setRenderTarget(feed.renderTarget);
+	renderer.compile(scene, feed.camera);
+	renderer.setRenderTarget(null);
+}
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass
-	   per feed; main.ts calls this right before the main render, which refreshes shadows. */
+	   per feed; main.ts calls this before the main render, which refreshes shadows every 4th frame. */
 	const shadowAutoUpdate = renderer.shadowMap.autoUpdate;
 	renderer.shadowMap.autoUpdate = false;
+	const lr = roomById('linaccontrol');
 	const linacNeeded =
 		OPERATOR_CONSOLE.built &&
-		(S.activeRoom?.id === 'linaccontrol' ||
-			S.activeRoom?.id === 'vault1' ||
-			(typeof JOURNEY !== 'undefined' &&
-				JOURNEY.active &&
-				[
-					'treatment',
-					'firstimaging',
-					'firsttreatment',
-					'firstcomplete',
-					'setup',
-					'imaging',
-					'returning'
-				].some((s) => String(JOURNEY.stage).includes(s))));
-	if (linacNeeded && nowMs - (OPERATOR_CONSOLE.lastRender || 0) > 110) {
+		!!lr &&
+		((Math.abs(camera.position.x - lr.x) <= lr.w / 2 &&
+			Math.abs(camera.position.z - lr.z) <= lr.d / 2) ||
+			(S.mode === 'overview' && S.activeRoom?.id === 'linaccontrol'));
+	const linacBecameNeeded = linacNeeded && !OPERATOR_CONSOLE.wasNeeded;
+	OPERATOR_CONSOLE.wasNeeded = linacNeeded;
+	if (
+		linacNeeded &&
+		(linacBecameNeeded ||
+			nowMs - (OPERATOR_CONSOLE.lastRender || 0) > 110 / OPERATOR_CONSOLE.feeds.length)
+	) {
 		OPERATOR_CONSOLE.lastRender = nowMs;
 		const t = activeVaultPatientTarget();
-		for (const feed of OPERATOR_CONSOLE.feeds) {
+		/* One feed per tick; all five on the tick the console comes into play so no monitor
+		   shows a black or stale frame. */
+		const feeds = linacBecameNeeded
+			? OPERATOR_CONSOLE.feeds
+			: [OPERATOR_CONSOLE.feeds[OPERATOR_CONSOLE.next++ % OPERATOR_CONSOLE.feeds.length]];
+		for (const feed of feeds) {
 			feed.camera.lookAt(t);
 			feed.camera.updateMatrixWorld();
 			renderer.setRenderTarget(feed.renderTarget);
