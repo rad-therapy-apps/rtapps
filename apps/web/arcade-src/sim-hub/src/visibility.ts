@@ -96,17 +96,31 @@ function roomSeen(x: number, z: number, seen: Set<string>) {
 	return seen.has(r ? r.id : OUTSIDE);
 }
 
-/* Sets group and actor visibility for the camera about to render. Overview shows everything. */
+/* Culling assumes an eye-level camera; above the walls roofs and ceilings are on screen. Wall tops
+   mirror buildRoom (3.75 m rooms, 5.7 m vaults) and buildLobby (4.15 m); the margin keeps a camera
+   just under the top (LINAC 'Overhead' feed, y 5.4 in a 5.7 m vault) culling. Inside a room its own
+   wall top applies; outside every room the lowest (3.75 m) does. */
+const WALL_TOP_MARGIN = 0.25;
+const LOWEST_WALL_TOP = 3.75;
+function aboveWalls(camera: THREE.Camera) {
+	const p = camera.matrixWorld.elements;
+	const r = roomAtIn(ROOMS, p[12], p[14]);
+	const top = r ? (r.vault ? 5.7 : r.hub ? 4.15 : LOWEST_WALL_TOP) : LOWEST_WALL_TOP;
+	return p[13] > top - WALL_TOP_MARGIN;
+}
+
+/* Sets group and actor visibility for the camera about to render. Overview and cameras above the
+   wall tops show everything. */
 export function applyVisibility(camera: THREE.Camera) {
-	const all = S.mode === 'overview' || !cullingEnabled;
+	// Camera.updateMatrixWorld also refreshes matrixWorldInverse; three otherwise does so only inside
+	// render(), and culling must use this frame's view.
+	camera.updateMatrixWorld();
+	const all = S.mode === 'overview' || !cullingEnabled || aboveWalls(camera);
 	let seen = visible;
-	if (!all) {
-		// three refreshes matrixWorldInverse only inside render(); cull with this frame's view.
-		camera.updateMatrixWorld();
-		camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
-		seen = visibleRooms(camera);
-	}
-	for (const [id, g] of ROOM_CONTENT) g.visible = all || seen.has(id);
+	if (!all) seen = visibleRooms(camera);
+	ROOM_CONTENT.forEach((g, id) => {
+		g.visible = all || seen.has(id);
+	});
 	for (const a of cullActors) {
 		let show = all;
 		if (!show) {
