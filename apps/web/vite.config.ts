@@ -65,7 +65,7 @@ export default defineConfig({
 				test: {
 					name: 'server',
 					environment: 'node',
-					include: ['src/**/*.{test,spec}.{js,ts}'],
+					include: ['src/**/*.{test,spec}.{js,ts}', 'arcade-src/sim-hub/src/**/*.spec.ts'],
 					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/arcade/**/*.spec.ts']
 				}
 			}

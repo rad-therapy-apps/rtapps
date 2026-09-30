@@ -105,6 +105,7 @@ import {
 	updateJourneyRoomTiming,
 	updateJourneyCameraFollow
 } from './journey';
+import { applyVisibility, groupRoomContents } from './visibility';
 import './sdk-bridge';
 
 const clock = new THREE.Clock();
@@ -709,6 +710,7 @@ function animate(now) {
 	renderOperatorLiveFeeds(now);
 	// After the feeds, so a feed render cannot consume the flag.
 	if (f % 4 === 1) renderer.shadowMap.needsUpdate = true;
+	applyVisibility(camera);
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
 }
@@ -730,6 +732,7 @@ updateJourneyUI();
 procRenderSite();
 procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
+groupRoomContents();
 precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);

@@ -59,8 +59,10 @@ projects) so the spec runs under `pnpm --filter web test`.
 ### Task 3: apply culling per render pass
 
 **Files:** `visibility.ts`, `main.ts`, `equipment.ts`.
-- `applyVisibility(camera)`: sets `group.visible` for every content group. In overview, all are
-  visible.
+- `applyVisibility(camera)`: sets `group.visible` for every content group, and sets each
+  scene-level actor (the protected set from Task 1: movers, ROOM_CAST actors, JOURNEY actors,
+  interaction-scene actors) visible iff `roomAt(actor world x,z)` is visible (the outside cell when
+  null). No per-call allocation. In overview, everything is visible.
 - main.ts calls `applyVisibility(camera)` immediately before the main `renderer.render`.
 - `renderOperatorLiveFeeds` calls `applyVisibility(feed.camera)` before each feed render, for both
   LINAC and CT, then re-applies the main camera's visibility at the end.
