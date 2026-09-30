@@ -10,6 +10,7 @@ import { ROOMS } from './rooms';
 import { ROOM_CAST } from './main';
 import { movers, interactionScenes } from './npc-behavior';
 import { JOURNEY } from './journey';
+import { buildPortals, computeVisible, roomAt as roomAtIn } from './portals';
 
 export const ROOM_CONTENT = new Map<string, THREE.Group>();
 
@@ -54,4 +55,19 @@ export function groupRoomContents() {
 		);
 		if (hits.length === 1) ROOM_CONTENT.get(hits[0].id)!.attach(child);
 	}
+}
+
+/* Portal culling: the visible-room set for a camera. Contains room ids plus OUTSIDE when the outside
+   cell (hallways, lobby circulation, exterior) is visible. The returned Set is reused across calls,
+   so consume it before calling again. */
+export { OUTSIDE } from './portals';
+const PORTALS = buildPortals(ROOMS);
+const visible = new Set<string>();
+
+export function roomAt(x: number, z: number) {
+	return roomAtIn(ROOMS, x, z);
+}
+
+export function visibleRooms(camera: THREE.Camera) {
+	return computeVisible(camera, ROOMS, PORTALS, visible);
 }
