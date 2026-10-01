@@ -70,7 +70,7 @@ flowchart LR
     web[web<br/>SvelteKit SSR<br/>adapter-node]
     api[api<br/>FastAPI + Uvicorn<br/>Python 3.12]
     db[(db<br/>PostgreSQL 16)]
-    minio[(storage<br/>MinIO — dev only)]
+    minio[(storage<br/>SeaweedFS — dev only)]
     backup[backup<br/>nightly pg_dump]
   end
   r2[(R2 / OCI Object Storage<br/>production)]
@@ -93,7 +93,7 @@ flowchart LR
 | `web` | SvelteKit (TypeScript), `adapter-node`, TipTap for authoring | Server-side rendering, route guards by role, forms, the lesson/activity renderers, the authoring UI | Access the database; grade anything; decide permissions |
 | `api` | FastAPI, Pydantic v2, SQLAlchemy 2 (async), Alembic, Authlib, argon2 | Authentication and sessions; authorization; content model and publishing; grading; attempts and results; analytics; audit log; media presigning; OpenAPI | Render HTML; stream large files |
 | `db` | PostgreSQL 16 | All state. JSONB for documents; SQL views for analytics | — |
-| `storage` | MinIO (dev) / Cloudflare R2 or OCI Object Storage (prod), S3 API | Media (images, audio), DICOM zips, 3-D models | Be accessed with long-lived credentials from the browser |
+| `storage` | SeaweedFS (dev) / Cloudflare R2 or OCI Object Storage (prod), S3 API | Media (images, audio), DICOM zips, 3-D models | Be accessed with long-lived credentials from the browser |
 | `backup` | Alpine cron container | Nightly `pg_dump` to object storage, 30-day retention | — |
 
 A background worker (queue + Redis) is **deliberately absent** in Release 1: grading is synchronous and takes milliseconds. The API package reserves `app/tasks/` so a worker can be added without restructuring when media processing or nightly roll-ups need it.
@@ -382,7 +382,7 @@ rtapps/
 
 ### 10.1 Development
 
-`make dev` → `docker compose up --build` brings up `db`, `storage` (MinIO with a bucket-init job), `api` (Uvicorn with reload, source bind-mounted, runs `alembic upgrade head` on start), `web` (Vite dev server with HMR), `proxy` (Caddy on `http://localhost:8080`, same routing rules as production) and `mailpit` (catches auth e-mails). `make seed` loads an admin, an educator, one cohort, one subject with a published lesson and quiz, and ten fake students with attempts. `.env` is copied from `.env.example`; only `SESSION_SECRET` and Google OAuth keys differ per machine.
+`make dev` → `docker compose up --build` brings up `db`, `storage` (SeaweedFS with an rclone bucket-init job), `api` (Uvicorn with reload, source bind-mounted, runs `alembic upgrade head` on start), `web` (Vite dev server with HMR), `proxy` (Caddy on `http://localhost:8080`, same routing rules as production) and `mailpit` (catches auth e-mails). `make seed` loads an admin, an educator, one cohort, one subject with a published lesson and quiz, and ten fake students with attempts. `.env` is copied from `.env.example`; only `SESSION_SECRET` and Google OAuth keys differ per machine.
 
 ### 10.2 Test and production
 

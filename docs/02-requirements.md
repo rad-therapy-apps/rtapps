@@ -209,7 +209,7 @@ Each NFR has a verification method that runs in CI or is recorded in `docs/05-se
 
 | ID | Requirement | Pri | Phase | Verification |
 |---|---|---|---|---|
-| NFR-24 | Object storage accessed only through the S3 API (MinIO in dev, R2 / OCI in prod); `compose.prod.yaml` runs on any Docker host; images multi-arch (arm64 + amd64). | M | 2 | CI builds both archs; MinIO in CI |
+| NFR-24 | Object storage accessed only through the S3 API (SeaweedFS in dev, R2 / OCI in prod); `compose.prod.yaml` runs on any Docker host; images multi-arch (arm64 + amd64). | M | 2 | CI builds both archs; MinIO in CI |
 | NFR-25 | Schema managed by Alembic; `alembic upgrade head` runs as a one-shot deploy step; every migration has a downgrade and a dry-run on a throwaway DB in `main.yml`. | M | 1 | CI job |
 | NFR-27 | Migrated workbook content displays its CC BY-NC 4.0 notice; Sketchfab credit lines rendered wherever a model is shown; the unlicensed human-body model is not included until provenance is documented. | M | 3 | Review; migration test asserts notice block |
 

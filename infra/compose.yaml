@@ -1,5 +1,5 @@
 # What this file does: defines the local development stack for `make dev` (docker compose):
-#   Postgres, MinIO (S3-compatible object storage) + a one-shot bucket initialiser, the FastAPI
+#   Postgres, SeaweedFS (S3-compatible object storage) + a one-shot bucket initialiser, the FastAPI
 #   `api` (source bind-mounted, auto-reload), the SvelteKit `web` dev server (Vite, HMR), Caddy
 #   as the single origin on :8080, and Mailpit to catch outgoing e-mail.
 # Used here and why: one compose file so the whole system starts with one command and the dev
@@ -32,39 +32,54 @@ services:
       timeout: 3s
       retries: 10
 
-  # MinIO stands in for S3/R2 locally (ADR-0005); the API only ever speaks the S3 API to it.
-  # :9000 = S3 API, :9001 = web console. quay.io, not Docker Hub: MinIO removed its Docker
-  # Hub repositories (discovered 2026-09-12); quay.io/minio publishes the same images.
+  # SeaweedFS stands in for S3/R2 locally (ADR-0005); the API only ever speaks the S3 API to it.
+  # It replaced MinIO on 2026-10-01: MinIO withdrew its public images (Docker Hub 404, quay.io
+  # 401, dl.min.io 410), and CI only kept passing because the self-hosted runner had a stale
+  # cached copy. :9000 = S3 API, the same port MinIO used, so S3_ENDPOINT / S3_PUBLIC_ENDPOINT
+  # are unchanged (there is no :9001 console any more). The MINIO_ROOT_USER / _PASSWORD names
+  # are kept so no .env needs editing; SeaweedFS only takes static credentials from an identity
+  # file, so the entrypoint writes them into one before starting (`$$` is compose's escape for
+  # a literal `$`, so the shell — not compose — expands the variables).
   storage:
-    image: quay.io/minio/minio:latest
-    command: server /data --console-address ":9001"
+    image: chrislusf/seaweedfs:4.48
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        printf '{"identities":[{"name":"root","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' \
+          "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" > /tmp/s3.json
+        exec weed server -dir=/data -ip=storage -ip.bind=0.0.0.0 -volume.max=0 \
+          -s3 -s3.port=9000 -s3.config=/tmp/s3.json
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - minio-data:/data
+      - storage-data:/data
     ports:
       - "9000:9000"
-      - "9001:9001"
+    # Healthy = the S3 port accepts connections (the image ships no S3 client; busybox nc does).
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9000"]
       interval: 5s
       timeout: 3s
       retries: 10
 
-  # One-shot job: creates the bucket once MinIO is healthy, then exits 0. Nothing depends on
+  # One-shot job: creates the bucket once storage is healthy, then exits 0. Nothing depends on
   # it, which is why the CI e2e job waits only on proxy/web/api (an exited one-shot would
-  # otherwise make `compose up --wait` report a failure).
+  # otherwise make `compose up --wait` report a failure). rclone with an env-var remote, the
+  # same approach as infra/backup/rclone-remote.sh; `mkdir` on an S3 remote is CreateBucket
+  # and is a no-op when the bucket already exists.
   storage-init:
-    image: quay.io/minio/mc:latest # quay.io: see the storage service's comment
+    image: rclone/rclone:1.68
     depends_on:
       storage:
         condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      mc alias set local http://storage:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
-      mc mb --ignore-existing local/${S3_BUCKET}
-      "
+    environment:
+      RCLONE_CONFIG_LOCAL_TYPE: s3
+      RCLONE_CONFIG_LOCAL_PROVIDER: Other
+      RCLONE_CONFIG_LOCAL_ENDPOINT: http://storage:9000
+      RCLONE_CONFIG_LOCAL_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      RCLONE_CONFIG_LOCAL_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+    command: ["mkdir", "local:${S3_BUCKET}"]
 
   # FastAPI in dev mode: the `base` image stage (deps only) with the source bind-mounted so
   # uvicorn --reload picks up edits; entrypoint.dev.sh runs `alembic upgrade head` first.
@@ -167,7 +182,7 @@ services:
 # Named volumes: database files, object storage, the API venv, and the two node_modules trees.
 volumes:
   pgdata:
-  minio-data:
+  storage-data: # SeaweedFS data; the old `minio-data` volume is orphaned and can be pruned
   api-venv:
   web-node-modules:
   web-app-node-modules:

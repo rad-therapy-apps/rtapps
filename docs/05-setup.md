@@ -11,7 +11,6 @@ make dev                 # creates .env from infra/.env.example, builds and star
 ```
 Open http://localhost:8080 — the status page shows web and API health.
 - API docs: http://localhost:8080/api/v1/docs
-- MinIO console: http://localhost:9001 (user/password from `.env`)
 - Mailpit (outgoing mail in dev): http://localhost:8025
 
 ## Day to day
@@ -66,7 +65,7 @@ See `docs/03-architecture.md` §9. Short version: `apps/api` (FastAPI), `apps/we
 ## Troubleshooting
 - **`web` container loops on `pnpm install`** — run `pnpm install` once on the host so `pnpm-lock.yaml` matches, then `make dev` again.
 - **`api` unhealthy** — `make logs`; usually the DB isn't ready yet on first boot; the healthcheck allows ~2.5 minutes (30 s start period + 12 retries × 10 s) before marking it unhealthy.
-- **Port in use** — 8080 (proxy), 5173 (web), 8000 is internal, 5442 (db; container internal port 5432), 9000/9001 (MinIO), 8025 (Mailpit).
+- **Port in use** — 8080 (proxy), 5173 (web), 8000 is internal, 5442 (db; container internal port 5432), 9000 (SeaweedFS S3 API), 8025 (Mailpit).
 
 ## Deploying
 Test/production VM, deploy workflows, backups and restore: see `docs/06-operations.md`.
