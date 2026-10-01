@@ -23,7 +23,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign in — RTApps</title>
+	<title>Sign in — RTTLearn</title>
 </svelte:head>
 
 <h1>Sign in</h1>

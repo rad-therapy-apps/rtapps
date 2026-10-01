@@ -63,7 +63,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.matching.title} — Author — RTApps</title>
+	<title>{data.matching.title} — Author — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.matching.title}</h1>

@@ -151,7 +151,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.quiz.title} — Author — RTApps</title>
+	<title>{data.quiz.title} — Author — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.quiz.title}</h1>

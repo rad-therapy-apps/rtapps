@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Change password — RTApps</title>
+	<title>Change password — RTTLearn</title>
 </svelte:head>
 
 <h1>Change password</h1>

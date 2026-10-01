@@ -40,7 +40,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.subject.title} — RTApps</title>
+	<title>{data.subject.title} — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.subject.title}</h1>

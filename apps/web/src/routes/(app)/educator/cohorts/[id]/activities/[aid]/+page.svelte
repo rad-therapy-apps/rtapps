@@ -33,7 +33,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.stats.title} — RTApps</title>
+	<title>{data.stats.title} — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.stats.title}</h1>

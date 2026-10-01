@@ -21,7 +21,7 @@
 </script>
 
 <svelte:head>
-	<title>My cohorts — RTApps</title>
+	<title>My cohorts — RTTLearn</title>
 </svelte:head>
 
 <h1>My cohorts</h1>
