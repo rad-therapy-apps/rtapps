@@ -20,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>Admin audit log — RTApps</title>
+	<title>Admin audit log — RTTLearn</title>
 </svelte:head>
 
 <h1>Admin audit log</h1>

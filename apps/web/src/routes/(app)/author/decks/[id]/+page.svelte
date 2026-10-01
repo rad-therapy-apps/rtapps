@@ -65,7 +65,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.deck.title} — Author — RTApps</title>
+	<title>{data.deck.title} — Author — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.deck.title}</h1>

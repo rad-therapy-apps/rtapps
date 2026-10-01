@@ -29,7 +29,7 @@
 </script>
 
 <svelte:head>
-	<title>{snapshot.lesson.title} — RTApps</title>
+	<title>{snapshot.lesson.title} — RTTLearn</title>
 </svelte:head>
 
 <LessonPager lesson={data.lesson} attempt={data.attempt} />

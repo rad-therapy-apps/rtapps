@@ -99,7 +99,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.sequencing.title} — Author — RTApps</title>
+	<title>{data.sequencing.title} — Author — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.sequencing.title}</h1>

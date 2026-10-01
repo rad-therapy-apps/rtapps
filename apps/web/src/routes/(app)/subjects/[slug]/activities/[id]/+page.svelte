@@ -45,7 +45,7 @@
 </script>
 
 <svelte:head>
-	<title>{snapshot.activity.title} — RTApps</title>
+	<title>{snapshot.activity.title} — RTTLearn</title>
 </svelte:head>
 
 <!-- Keying on the activity id forces the player to be destroyed and recreated when client-side

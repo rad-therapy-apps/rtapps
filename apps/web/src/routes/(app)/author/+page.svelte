@@ -64,7 +64,7 @@
 </script>
 
 <svelte:head>
-	<title>Author — RTApps</title>
+	<title>Author — RTTLearn</title>
 </svelte:head>
 
 <h1>Author</h1>

@@ -23,7 +23,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign in — RTApps</title>
+	<title>Sign in — RTTLearn</title>
 </svelte:head>
 
 <h1>Sign in</h1>
@@ -73,6 +73,6 @@
 		gap: 0.25rem;
 	}
 	.error {
-		color: #b00020;
+		color: var(--danger);
 	}
 </style>

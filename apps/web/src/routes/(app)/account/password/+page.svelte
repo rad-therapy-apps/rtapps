@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Change password — RTApps</title>
+	<title>Change password — RTTLearn</title>
 </svelte:head>
 
 <h1>Change password</h1>
@@ -101,6 +101,6 @@
 		gap: 0.25rem;
 	}
 	.error {
-		color: #b00020;
+		color: var(--danger);
 	}
 </style>

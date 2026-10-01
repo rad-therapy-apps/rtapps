@@ -24,7 +24,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.detail.student.display_name} — RTApps</title>
+	<title>{data.detail.student.display_name} — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.detail.student.display_name}</h1>

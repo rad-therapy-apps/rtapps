@@ -23,7 +23,7 @@
 </script>
 
 <svelte:head>
-	<title>Outcomes — RTApps</title>
+	<title>Outcomes — RTTLearn</title>
 </svelte:head>
 
 <h1>Outcomes</h1>

@@ -197,7 +197,7 @@
 </script>
 
 <svelte:head>
-	<title>Data tables — Author — RTApps</title>
+	<title>Data tables — Author — RTTLearn</title>
 </svelte:head>
 
 <h1>Data tables</h1>

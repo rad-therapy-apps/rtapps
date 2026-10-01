@@ -24,7 +24,7 @@
 </script>
 
 <svelte:head>
-	<title>Home — RTApps</title>
+	<title>Home — RTTLearn</title>
 </svelte:head>
 
 <h1>Welcome, {data.user.display_name}</h1>

@@ -8,7 +8,7 @@ Status: draft (Phase 0). Finalised with the first deployment in Phase 2. These a
 - `main` is always deployable. It is protected: pull request required, CI (`pr.yml`) required, no force-push, linear history (squash merge).
 - Branch names: `<type>/<short-kebab-summary>` — `feat/lesson-renderer`, `fix/attempt-idempotency`, `docs/adr-0006`, `chore/bump-sveltekit`, `infra/backup-cron`.
 - One pull request per logical change. Small is good; a PR that touches `apps/api` and `apps/web` together is fine when the change is one feature (that is the point of the monorepo).
-- Every PR description states *what* and *why*, links the issue, and lists how it was tested. The PR template enforces the headings.
+- Every PR description states _what_ and _why_, links the issue, and lists how it was tested. The PR template enforces the headings.
 
 ## 2. Commits
 
@@ -18,15 +18,16 @@ Status: draft (Phase 0). Finalised with the first deployment in Phase 2. These a
 
 ## 3. Code standards
 
-| Area | Tooling (enforced in CI) | Rules |
-|---|---|---|
-| Python (`apps/api`, `tools/`) | `ruff` (lint + format), `mypy --strict` on `app/` | Python 3.12; type hints everywhere; async SQLAlchemy sessions; Pydantic models at the API boundary only; no business logic in route functions (routes call services) |
-| TypeScript (`apps/web`, `packages/`) | `eslint`, `prettier`, `svelte-check` | `strict` TS; no `any` without a comment; no `{@html}` anywhere in `apps/web` (lint rule) |
-| Arcade apps (`apps/web/arcade-src/`, `apps/web/arcade/`) | `tsc -p tsconfig.arcade.json` (in `check`), `eslint`, `build:arcade` | Application-scale arcade apps (sim-hub, linac-ct) are modular TypeScript under `apps/web/arcade-src/`; the small single-activity games stay single-file by policy |
-| SQL / migrations | Alembic, one migration per PR that changes the model, autogenerate then hand-review | Never edit a merged migration; write a new one |
-| JSON Schemas (`packages/schemas`) | `ajv` + `jsonschema` tests with shared fixtures | The schema is the contract; change it first, then editor, validator, renderer |
-| API contract | `openapi.json` exported in CI; `packages/api-client` regenerated; diff must be empty | Never hand-edit the generated client |
-| Secrets | GitHub push protection; `.env*` git-ignored; `.env.example` documents every variable | A secret in a PR is a blocking review comment and a rotation |
+| Area                                                     | Tooling (enforced in CI)                                                             | Rules                                                                                                                                                                                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Python (`apps/api`, `tools/`)                            | `ruff` (lint + format), `mypy --strict` on `app/`                                    | Python 3.12; type hints everywhere; async SQLAlchemy sessions; Pydantic models at the API boundary only; no business logic in route functions (routes call services)                                                                                              |
+| TypeScript (`apps/web`, `packages/`)                     | `eslint`, `prettier`, `svelte-check`                                                 | `strict` TS; no `any` without a comment; no `{@html}` anywhere in `apps/web` (lint rule)                                                                                                                                                                          |
+| Platform UI (`apps/web/src`)                             | `tokens.test.ts`, `no-hex.test.ts`, axe in `ui.e2e.ts`                               | Colours only as tokens in `src/app.css` (no hex elsewhere except `Logo.svelte`, the favicon svg and `app.html`'s theme-color); icons from `@lucide/svelte` via `$lib/ui/Icon.svelte`, no emoji; shared pieces in `src/lib/ui/`; Svelte scoped styles, no Tailwind |
+| Arcade apps (`apps/web/arcade-src/`, `apps/web/arcade/`) | `tsc -p tsconfig.arcade.json` (in `check`), `eslint`, `build:arcade`                 | Application-scale arcade apps (sim-hub, linac-ct) are modular TypeScript under `apps/web/arcade-src/`; the small single-activity games stay single-file by policy                                                                                                 |
+| SQL / migrations                                         | Alembic, one migration per PR that changes the model, autogenerate then hand-review  | Never edit a merged migration; write a new one                                                                                                                                                                                                                    |
+| JSON Schemas (`packages/schemas`)                        | `ajv` + `jsonschema` tests with shared fixtures                                      | The schema is the contract; change it first, then editor, validator, renderer                                                                                                                                                                                     |
+| API contract                                             | `openapi.json` exported in CI; `packages/api-client` regenerated; diff must be empty | Never hand-edit the generated client                                                                                                                                                                                                                              |
+| Secrets                                                  | GitHub push protection; `.env*` git-ignored; `.env.example` documents every variable | A secret in a PR is a blocking review comment and a rotation                                                                                                                                                                                                      |
 
 Formatting is never discussed in review — the formatters decide.
 
@@ -78,4 +79,5 @@ make client     # regenerate packages/api-client from the running API
 make prod-config # validate infra/compose.prod.yaml (+ tunnel overlay) against the env template
 make migrate m="add data_table"   # alembic revision --autogenerate
 ```
+
 (All targets exist as of v0.1.0; `make test-tools` / `make lint-tools` cover `tools/migrate-legacy`. The coverage threshold applies to full-suite runs only — `pytest tests/test_x.py` never fails on coverage.)

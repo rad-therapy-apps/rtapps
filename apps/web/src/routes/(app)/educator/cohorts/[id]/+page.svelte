@@ -34,7 +34,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.overview.cohort.name} — RTApps</title>
+	<title>{data.overview.cohort.name} — RTTLearn</title>
 </svelte:head>
 
 <h1>{data.overview.cohort.name}</h1>
@@ -152,6 +152,6 @@
 <style>
 	/* Highlights an activity/student row below the cohort's threshold percent. */
 	tr.below {
-		background: #fff3f3;
+		background: var(--danger-bg);
 	}
 </style>

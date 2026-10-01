@@ -417,6 +417,7 @@ Single VM is expected to serve a program of a few hundred students comfortably. 
 | Shared schemas | JSON fixture files (valid + invalid) run by both Python and TypeScript tests | ProseMirror documents, question bodies, attempt payloads |
 | Web units | vitest + @testing-library/svelte | `ProseNode` renders every node type and rejects unknown ones; activity components emit the right response shapes |
 | End-to-end | Playwright against the compose stack | register → join cohort → open lesson → answer → see score → educator sees it; educator fixes a needs-review lesson (edit → preview → publish, with an image upload) → student sees the published edit; student computes MU from the seeded calculator |
+| Platform UI | Playwright + @axe-core/playwright; vitest | `e2e/ui.e2e.ts` runs axe-core WCAG 2.1 A/AA scans (serious and critical fail) and a no-sideways-scroll check over the main signed-out, student and educator pages; Playwright projects are desktop Chromium (all specs), `mobile-360`, Firefox and WebKit (UI checks plus the lesson flow); `src/lib/ui/tokens.test.ts` checks every token colour pair against AA and `no-hex.test.ts` keeps colours in `src/app.css` |
 | Migration tool | pytest golden files | Three legacy pages → expected JSON |
 | Contract | CI job | `openapi.json` → regenerated client must match the committed one |
 

@@ -34,7 +34,7 @@
 </script>
 
 <svelte:head>
-	<title>Admin users — RTApps</title>
+	<title>Admin users — RTTLearn</title>
 </svelte:head>
 
 <h1>Admin users</h1>

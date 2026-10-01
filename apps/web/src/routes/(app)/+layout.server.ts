@@ -12,8 +12,8 @@
  * `load` and markup can assume a signed-in `App.User` without re-checking. `docs/03-architecture.md`
  * §4, ADR-0002.
  *
- * Works with: `app.d.ts` (`App.Locals.user`). Used by: `(app)/+layout.svelte` and, transitively,
- * every page under `(app)/`.
+ * Works with: `app.d.ts` (`App.Locals.user`). Used by: the root `+layout.svelte` shell (the `(app)` svelte
+ * layout is gone) and, transitively, every page under `(app)/`.
  */
 import { redirect } from '@sveltejs/kit';
 import { resolve } from '$app/paths';

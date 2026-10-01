@@ -1,24 +1,32 @@
 <!--
-	What this file does: Root layout markup wrapping every page — the header/nav bar plus the
-	sign-out form — and renders the current page via `{@render children()}`.
+	What this file does: Root layout markup wrapping every page. Signed-in users get the AppShell
+	(sidebar on desktop, top bar and drawer on phones); signed-out visitors get a plain public bar
+	with the brand and Sign in / Register links. Renders the page via `{@render children()}`.
 
 	Used here and why: Svelte 5 runes (`$props()`) for `data`/`children`; `resolve()` from
-	`$app/paths` for every `href` because the `svelte/no-navigation-without-resolve` lint rule
-	requires route names to be resolved rather than hand-written strings; `use:enhance` on the
-	sign-out form for progressive enhancement (works without JS, upgrades to a fetch when JS is
-	present) without changing where the request goes.
+	`$app/paths` for every `href` (`svelte/no-navigation-without-resolve`); `use:enhance` on the
+	sign-out form for progressive enhancement. The form stays here and is handed to AppShell as a
+	snippet so AppShell does not depend on `$app/forms`.
 
 	How it fits the project: `data.user` comes from `+layout.server.ts`, which just forwards
 	`locals.user` set by `hooks.server.ts`; this file only decides what to show, not who is
-	signed in. `docs/03-architecture.md` §4.
+	signed in. The layout owns the page's single `<main>`. `docs/03-architecture.md` §4.
 
-	Works with: `$app/forms`, `$app/paths`, `$lib/assets/favicon.svg`. Used by: every route
-	(this is the root layout); the sign-out form posts to `(auth)/logout/+page.server.ts`.
+	Works with: `$app/forms`, `$app/paths`, `$app/state`, `$lib/ui/AppShell.svelte`,
+	`$lib/assets/rttlearn-icon.svg`. Used by: every route (this is the root layout); the sign-out
+	form posts to `(auth)/logout/+page.server.ts`.
 -->
 <script lang="ts">
+	import '../app.css';
+	import '@fontsource-variable/inter';
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
-	import favicon from '$lib/assets/favicon.svg';
+	import { page } from '$app/state';
+	import LogOut from '@lucide/svelte/icons/log-out';
+	import favicon from '$lib/assets/rttlearn-icon.svg';
+	import AppShell from '$lib/ui/AppShell.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Logo from '$lib/ui/Logo.svelte';
 	import type { Snippet } from 'svelte';
 	import type { LayoutData } from './$types';
 
@@ -29,49 +37,58 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<header>
-	<a href={resolve('/')} class="brand">RTApps</a>
-	<nav>
-		<!-- Signed in: display name and a sign-out form (the Subjects link lives in the
-			     role-gated nav below, added by (app)/+layout.svelte, to avoid duplicating it). -->
-		{#if data.user}
-			<span>{data.user.display_name}</span>
-			<a href={resolve('/(app)/account/password')}>Account</a>
-			<form method="POST" action="/logout" use:enhance>
-				<button type="submit">Sign out</button>
-			</form>
-		{:else}
-			<!-- Signed out: sign-in / register links only. -->
+<!-- The sign-out form stays here (it needs $app/forms' enhance) and is handed to AppShell. -->
+{#snippet signOut()}
+	<form method="POST" action="/logout" use:enhance>
+		<Button type="submit" variant="ghost" icon={LogOut}>Sign out</Button>
+	</form>
+{/snippet}
+
+{#if data.user}
+	<AppShell user={data.user} currentPath={page.url.pathname} {signOut}>
+		{@render children()}
+	</AppShell>
+{:else}
+	<!-- Signed out: brand plus sign-in / register links only. -->
+	<header class="public-bar">
+		<a href={resolve('/')} class="brand"><Logo size={28} /><span>RTTLearn</span></a>
+		<nav aria-label="Account">
 			<a href={resolve('/(auth)/login')}>Sign in</a>
 			<a href={resolve('/(auth)/register')}>Register</a>
-		{/if}
-	</nav>
-</header>
-
-{@render children()}
+		</nav>
+	</header>
+	<main id="main" class="public-main">
+		{@render children()}
+	</main>
+{/if}
 
 <style>
-	/* Header bar: brand on the left, nav on the right. */
-	header {
+	.public-bar {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		padding: 1rem;
-		border-bottom: 1px solid #ddd;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-5);
+		background: var(--surface);
+		border-bottom: 1px solid var(--border);
 	}
 	.brand {
-		font-weight: bold;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		color: var(--text);
 		text-decoration: none;
+		font-size: var(--text-lg);
+		font-weight: 700;
 	}
-	/* Nav row: links/name/sign-out form laid out inline. */
 	nav {
 		display: flex;
-		align-items: center;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
-	/* display: contents lets the sign-out <form> sit inline with the other nav items,
-	   as if the form element itself weren't there. */
-	nav form {
-		display: contents;
+	.public-main {
+		max-width: 32rem;
+		margin-inline: auto;
+		padding: var(--space-6) var(--space-4);
 	}
 </style>

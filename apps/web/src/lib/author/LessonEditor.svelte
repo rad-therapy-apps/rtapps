@@ -358,12 +358,12 @@
 	.page {
 		margin-block-end: 2rem;
 		padding: 1rem;
-		border: 1px solid var(--border-color, #ccc);
+		border: 1px solid var(--border);
 	}
 	.block {
 		margin-block: 1rem;
 		padding-block-start: 1rem;
-		border-block-start: 1px dashed var(--border-color, #ccc);
+		border-block-start: 1px dashed var(--border);
 	}
 	.page-controls,
 	.block-controls,
