@@ -16,6 +16,8 @@
 	(this is the root layout); the sign-out form posts to `(auth)/logout/+page.server.ts`.
 -->
 <script lang="ts">
+	import '../app.css';
+	import '@fontsource-variable/inter';
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
@@ -57,7 +59,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem;
-		border-bottom: 1px solid #ddd;
+		border-bottom: 1px solid var(--border);
 	}
 	.brand {
 		font-weight: bold;
