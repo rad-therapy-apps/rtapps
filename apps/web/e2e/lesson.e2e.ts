@@ -16,8 +16,10 @@ import { test, expect } from '@playwright/test';
 import { registerStudent } from './helpers';
 
 test('register, complete a lesson, answer a question, and see the score', async ({ page }) => {
-	// Fresh identity per run: registration must succeed even when the stack was reused.
-	const email = `e2e-${Date.now()}@example.edu`;
+	// Fresh identity per run: registration must succeed even when the stack was reused. The random
+	// suffix keeps the Firefox, WebKit and Chromium projects (which all run this spec) from
+	// colliding when two start in the same millisecond.
+	const email = `e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.edu`;
 	const password = 'password-1234';
 	const displayName = 'E2E Student';
 

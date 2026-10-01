@@ -138,6 +138,9 @@ body {
 	margin: 0;
 	min-height: 100vh;
 	min-height: 100dvh;
+	/* Long unbreakable strings (URLs in import notes, slugs, ids) wrap instead of widening the
+	   page — NFR-18 says no page scrolls sideways at 360px, and ui.e2e.ts checks it. */
+	overflow-wrap: break-word;
 }
 
 h1,

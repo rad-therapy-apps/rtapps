@@ -6,7 +6,7 @@
 	How it fits the project: a copy of Kevin Kindle's legacy mark `RadTherapyPlatform/public/rtapps-icon.svg`, which stays read-only. Shared UI kit, docs/specs/2026-10-01-ui-restyle-design.md.
 
 	Depends on: nothing.
-	Used by: the root layout brand and the login page.
+	Used by: `AppShell.svelte` (signed-in sidebar brand) and the root layout's signed-out public bar.
 -->
 
 <script lang="ts">

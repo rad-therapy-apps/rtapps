@@ -5,7 +5,9 @@
  * the reading-panel switch and the AA contrast test (`tokens.test.ts`) cover the whole UI; a
  * stray literal would bypass all three. Only CSS is scanned — `.css` files and `.svelte`
  * `<style>` blocks plus `style=`/`fill=`/`stroke=` attributes — with comments stripped, so issue
- * numbers like `#123` in comments or `href="#main"` fragments never trip it.
+ * numbers like `#123` in comments or `href="#main"` fragments never trip it. Two files outside
+ * the scan also carry hex on purpose: `src/app.html` (the `theme-color` meta cannot read a CSS
+ * token) and `src/lib/assets/rttlearn-icon.svg` (the favicon copy of the logo).
  * How it fits the project: docs/specs/2026-10-01-ui-restyle-design.md; docs/04-conventions.md
  * "Platform UI" row.
  * Depends on: node:fs. Used by: `pnpm --filter web test` (node project).
