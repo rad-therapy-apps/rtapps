@@ -88,6 +88,6 @@
 		gap: 0.25rem;
 	}
 	.error {
-		color: #b00020;
+		color: var(--danger);
 	}
 </style>

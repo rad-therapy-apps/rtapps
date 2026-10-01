@@ -330,7 +330,7 @@
 	.question-row {
 		margin-block: 1rem;
 		padding-block-start: 1rem;
-		border-block-start: 1px dashed var(--border-color, #ccc);
+		border-block-start: 1px dashed var(--border);
 	}
 	.question-summary,
 	.question-controls {

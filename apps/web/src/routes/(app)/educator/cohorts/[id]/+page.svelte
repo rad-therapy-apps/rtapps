@@ -152,6 +152,6 @@
 <style>
 	/* Highlights an activity/student row below the cohort's threshold percent. */
 	tr.below {
-		background: #fff3f3;
+		background: var(--danger-bg);
 	}
 </style>
