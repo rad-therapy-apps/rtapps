@@ -43,6 +43,7 @@
 		"three-linac": "npm:three@0.160.1"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.13.0",
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.60.0",
 		"@rtapps/schemas": "workspace:*",

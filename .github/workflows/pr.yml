@@ -132,7 +132,7 @@ jobs:
         with: { node-version: 24 }
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm --filter web exec playwright install --with-deps chromium firefox webkit
       - run: cp infra/.env.example .env # dev-only values; no secrets involved
       - run: docker compose -f infra/compose.yaml --env-file .env up -d --build
       # --wait only on long-running services: the one-shot storage-init container exits 0,

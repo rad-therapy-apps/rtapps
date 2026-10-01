@@ -31,6 +31,30 @@ export default defineConfig({
 	// One retry in CI to absorb flakiness against a real, shared stack; none locally, so a failure
 	// surfaces immediately during development.
 	retries: process.env.CI ? 1 : 0,
-	// Chromium only, matching the vitest browser project's provider.
-	projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]
+	// Desktop Chromium runs every spec. The other three run the UI checks (axe, 360px, drawer)
+	// plus the lesson flow as a cross-browser smoke — the full suite in every engine would
+	// triple e2e time for little extra signal (docs/specs/2026-10-01-ui-restyle-design.md).
+	projects: [
+		{ name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+		{
+			name: 'mobile-360',
+			testMatch: '**/ui.e2e.ts',
+			use: {
+				...devices['Desktop Chrome'],
+				viewport: { width: 360, height: 780 },
+				isMobile: true,
+				hasTouch: true
+			}
+		},
+		{
+			name: 'firefox',
+			testMatch: ['**/ui.e2e.ts', '**/lesson.e2e.ts'],
+			use: { ...devices['Desktop Firefox'] }
+		},
+		{
+			name: 'webkit',
+			testMatch: ['**/ui.e2e.ts', '**/lesson.e2e.ts'],
+			use: { ...devices['Desktop Safari'] }
+		}
+	]
 });
