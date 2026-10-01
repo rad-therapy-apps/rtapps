@@ -75,7 +75,7 @@ Every task implicitly includes these. They are copied from the spec.
 **Gates (run from the repo root, all must pass before each commit)**
 
 ```bash
-pnpm --filter web exec prettier --check src e2e ../../docs/plans/2026-10-01-ui-restyle.md ../../docs/04-conventions.md ../../docs/03-architecture.md
+pnpm --filter web exec prettier --check src e2e ../../docs/plans/2026-10-01-ui-restyle.md ../../docs/04-conventions.md
 pnpm --filter web exec eslint .
 pnpm --filter web check
 pnpm --filter web test
