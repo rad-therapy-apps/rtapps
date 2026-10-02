@@ -17,7 +17,7 @@ name: rtapps
 services:
   # Postgres 16 — the only database; data persists in the `pgdata` volume across restarts.
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
