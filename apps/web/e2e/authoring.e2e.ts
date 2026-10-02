@@ -6,7 +6,7 @@
  * route) and the lesson drops off the needs-review queue. A second, independent test drives the
  * seeded MU calculator as a student.
  * Used here and why: Playwright against the running compose stack (baseURL http://localhost:8080,
- * see playwright.config.ts) with real MinIO, so the presign → PUT → confirm media flow actually
+ * see playwright.config.ts) with real S3 storage (SeaweedFS), so the presign → PUT → confirm media flow actually
  * writes an object; role/label/testid locators (no CSS selectors) except for the two places with
  * no accessible name to hook into — the TipTap contenteditable stem editor (no aria-label; see
  * `$lib/author/RichTextEditor.svelte`) and the page-section scoping for the lesson editor's Edit

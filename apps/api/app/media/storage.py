@@ -6,7 +6,7 @@ What this file does: defines the `MediaStorage` protocol the media router codes 
 override `get_media_storage` with a fake, so no test ever talks to real object storage.
 
 Used here and why: the `minio` SDK because it's a typed, small client that works against
-any S3-compatible endpoint (MinIO in dev/CI, R2 or OCI in prod) without AWS-specific
+any S3-compatible endpoint (SeaweedFS in dev/CI, R2 or OCI in prod) without AWS-specific
 dependencies; a `Protocol` (not an ABC) so a test fake needs no inheritance, just the same
 method shapes.
 

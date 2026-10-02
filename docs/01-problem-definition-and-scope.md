@@ -119,7 +119,7 @@ Release 1 = the end of Phase 3 (Milestone M3): everything a student and an educa
 |---|---|---|
 | A1 | Single institution for the foreseeable future; every row carries `program_id` so multi-program is a data change, not a schema change | Add program-scoped authorization to every query; already planned as a dependency |
 | A2 | Student PII is limited to display name, email and cohort membership | Adding fields means revisiting the privacy section and the erase endpoint |
-| A3 | Object storage is always reached through the S3 API (MinIO locally, R2/OCI in production) | None; this is the lock-in guard |
+| A3 | Object storage is always reached through the S3 API (SeaweedFS locally, R2/OCI in production) | None; this is the lock-in guard |
 | A4 | Caddy or Cloudflare Tunnel is the single public origin; browser and server both talk to `/api/v1` on that origin | A split-origin deployment would need CORS and a different cookie policy |
 | A5 | No background worker in Release 1; grading is synchronous and fast (pure functions) | Media processing or bulk export would need `api/app/tasks/` filled in |
 | A6 | Release 1 = end of Phase 3; Phase 4 (SDK, games, simulators, EMR, DICOM) is 2027 | If the mentor ranks simulators above authoring, Phase 3 and 4 swap content |

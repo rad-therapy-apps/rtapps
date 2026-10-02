@@ -1,0 +1,35 @@
+RTTLearn (rtapps) — Source-Available License
+
+Copyright (c) 2026 Kevin Kindle and Christopher Guzman. All rights reserved.
+
+This repository is made publicly viewable so that its code, documentation and
+history can be read and evaluated. No other rights are granted.
+
+Permission is NOT granted to copy, modify, merge, publish, distribute,
+sublicense, sell, host, or otherwise use this software or any part of it, in
+source or binary form, for any purpose, without prior written permission from
+the copyright holders. Viewing the source and forking it on GitHub for the sole
+purpose of reading or submitting a pull request back to this repository are
+permitted; any other use of a fork requires the same written permission.
+
+Contributions submitted to this repository (for example, as pull requests) are
+provided under these same terms, and the contributor grants the copyright
+holders a perpetual, irrevocable, royalty-free right to use, modify and
+distribute the contribution as part of this software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Third-party components keep their own licenses, which are not affected by this
+notice. In particular, vendored libraries under `apps/web/static/arcade/vendor/`
+(three.js, dicom-parser, JSZip — see `MANIFEST.md` there) and the npm and
+Python dependencies declared in the package manifests are used under their
+respective open-source licenses. The CT images in the simulators are
+de-identified data from a public dataset, credited in the README.
+
+For licensing enquiries, contact the copyright holders through the GitHub
+organisation rad-therapy-apps.
