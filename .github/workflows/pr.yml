@@ -143,6 +143,10 @@ jobs:
       # On failure, container logs are the fastest way to see what the API/web answered.
       - if: failure()
         run: docker compose -f infra/compose.yaml --env-file .env logs --no-color | tail -n 300
+      # The api's request log crowds the tail above; storage errors (an upload answered 500)
+      # would otherwise never be visible from the run page.
+      - if: failure()
+        run: docker compose -f infra/compose.yaml --env-file .env logs --no-color storage storage-init | tail -n 120
       # The HTML report (with traces on failure) is downloadable from the run page for 7 days.
       - if: always()
         uses: actions/upload-artifact@v4
