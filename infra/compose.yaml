@@ -44,7 +44,11 @@ services:
   # each other, so they advertise loopback. Advertising the service name instead made the S3
   # gateway resolve its own name through DNS on every upload, which failed on the CI runner
   # (every PUT answered 500) while working on a laptop. Nothing outside the container needs
-  # the volume server's address — clients only speak S3 on :9000.
+  # the volume server's address — clients only speak S3 on :9000. `-volume.max=8` with 1 GB
+  # volumes (`-master.volumeSizeLimitMB=1024`): SeaweedFS writes into fixed-size volumes and
+  # by default sizes them at 30 GB with the count derived from free disk, which on the CI
+  # runner came out as zero volumes ("failed to find writable volumes", every upload 500).
+  # Eight 1 GB volumes is far more than dev/CI media needs and fits any disk.
   storage:
     image: chrislusf/seaweedfs:4.48
     entrypoint: ["/bin/sh", "-c"]
@@ -52,7 +56,8 @@ services:
       - |
         printf '{"identities":[{"name":"root","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' \
           "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" > /tmp/s3.json
-        exec weed server -dir=/data -ip=127.0.0.1 -ip.bind=0.0.0.0 -volume.max=0 \
+        exec weed server -dir=/data -ip=127.0.0.1 -ip.bind=0.0.0.0 \
+          -volume.max=8 -master.volumeSizeLimitMB=1024 \
           -s3 -s3.port=9000 -s3.config=/tmp/s3.json
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
