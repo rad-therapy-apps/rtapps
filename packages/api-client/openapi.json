@@ -3345,6 +3345,49 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/activities/by-arcade-slug/{slug}": {
+      "get": {
+        "description": "The `by-sdk-slug` resolver for plain arcade games, which carry only an\n`arcade_slug` in their config (no SDK scoring, so no `sdk_slug`). Same filters and\nsame 404 contract; added for the Simulator page, whose gantry-game entry is one of\nthese. If several published externals share an `arcade_slug` (linac-ct does), the\nfirst row wins \u2014 callers that need a specific one use `by-sdk-slug`.",
+        "operationId": "resolve_arcade_slug_api_v1_activities_by_arcade_slug__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdkSlugOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Arcade Slug",
+        "tags": [
+          "content"
+        ]
+      }
+    },
     "/api/v1/activities/by-sdk-slug/{slug}": {
       "get": {
         "description": "Plan 4c: name \u2192 activity for the simulator SDK. Matches on the LIVE activity\nconfig (not a snapshot): the slug is an addressing convention, and only published\nexternal activities resolve.\n\nADR-0006: only `access == \"practice\"` activities resolve here \u2014 simulators are\npractice-only per plan 4c, and unlike `get_activity` this route 404s uniformly\nregardless of the caller's role, so the guard belongs in the query filter itself\nrather than a post-fetch role check.\n\nFilters in Python rather than with a JSONB `->>` SQL comparison: there is no existing\nprecedent in this codebase for querying `Activity.config` on the SQL side (every other\ncall site reads it as a plain Python dict after fetching the row), and external\nactivities number in the dozens at most, so a Python-side filter over that small set \u2014\nbounded in SQL by `kind` and `status` before ever touching `config` \u2014 is simpler than\nintroducing a new query idiom.\n\nDuplicate-`sdk_slug` contract: if two published externals share a slug, whichever\nrow the query returns first wins (no `ORDER BY`, so this is arbitrary, not\ndeterministic); uniqueness across `sdk_slug` is asserted by a later task's seed\ntest, not enforced here.",

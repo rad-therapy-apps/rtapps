@@ -24,6 +24,7 @@
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
 	import House from '@lucide/svelte/icons/house';
 	import Menu from '@lucide/svelte/icons/menu';
+	import Monitor from '@lucide/svelte/icons/monitor';
 	import PenLine from '@lucide/svelte/icons/pen-line';
 	import ScrollText from '@lucide/svelte/icons/scroll-text';
 	import UserCog from '@lucide/svelte/icons/user-cog';
@@ -99,6 +100,14 @@
 							aria-current={isCurrent(resolve('/(app)/subjects'))}
 						>
 							<Icon icon={BookOpen} />Subjects
+						</a>
+					</li>
+					<li>
+						<a
+							href={resolve('/(app)/simulator')}
+							aria-current={isCurrent(resolve('/(app)/simulator'))}
+						>
+							<Icon icon={Monitor} />Simulator
 						</a>
 					</li>
 					<!-- Educators and admins both get the educator and author areas; students don't.

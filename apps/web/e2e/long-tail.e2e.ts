@@ -140,9 +140,8 @@ test('the console door round-trip', async ({ page }) => {
 	await page.getByRole('button', { name: 'Join cohort' }).click();
 	await expect(page.getByText('Joined Demo cohort')).toBeVisible();
 
-	// The live Simulator entry is on any subject page — Radiation Biology, same as simulator.e2e.ts.
-	await page.getByRole('link', { name: 'Subjects', exact: true }).click();
-	await page.getByRole('link', { name: 'Radiation Biology' }).click();
+	// The live Simulator entry is on the Simulator tab, same as simulator.e2e.ts.
+	await page.getByRole('link', { name: 'Simulator', exact: true }).click();
 	await page.waitForLoadState('networkidle');
 	await expect(page.getByTestId('simulator-entry')).toBeVisible();
 	await page.getByTestId('simulator-entry').click();
@@ -332,8 +331,7 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 	await page.getByRole('button', { name: 'Join cohort' }).click();
 	await expect(page.getByText('Joined Demo cohort')).toBeVisible();
 
-	await page.getByRole('link', { name: 'Subjects', exact: true }).click();
-	await page.getByRole('link', { name: 'Radiation Biology' }).click();
+	await page.getByRole('link', { name: 'Simulator', exact: true }).click();
 	await page.waitForLoadState('networkidle');
 	await expect(page.getByTestId('simulator-entry')).toBeVisible();
 	await page.getByTestId('simulator-entry').click();

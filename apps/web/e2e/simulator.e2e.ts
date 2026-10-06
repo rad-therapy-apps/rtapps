@@ -84,10 +84,8 @@ test.describe
 		await studentPage.getByRole('button', { name: 'Join cohort' }).click();
 		await expect(studentPage.getByText('Joined Demo cohort')).toBeVisible();
 
-		// Any subject page carries the live Simulator entry — Radiation Biology, the same first
-		// subject arcade.e2e.ts/quiz.e2e.ts use.
-		await studentPage.getByRole('link', { name: 'Subjects', exact: true }).click();
-		await studentPage.getByRole('link', { name: 'Radiation Biology' }).click();
+		// The live Simulator entry is on the Simulator tab (its own page since 2026-10-06).
+		await studentPage.getByRole('link', { name: 'Simulator', exact: true }).click();
 		// Wait for hydration (module requests to finish) before clicking: a click on the
 		// server-rendered link can race Svelte's own re-render of this section, same rationale
 		// as helpers.ts's registerStudent/signIn.

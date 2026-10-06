@@ -382,3 +382,44 @@ class TestSdkSlugResolver:
 
         r = await client.get("/api/v1/activities/by-sdk-slug/test-sim")
         assert r.status_code == 404
+
+
+class TestArcadeSlugResolver:
+    """`GET /activities/by-arcade-slug/{slug}`: the same resolver for plain arcade games
+    (config `arcade_slug`, no `sdk_slug`), added for the Simulator page's gantry entry.
+    """
+
+    async def test_arcade_slug_resolves_published_external(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        activity = await _publish_sdk_slug_activity(db)  # config arcade_slug: cell-defender
+        subject = await db.get(Subject, activity.subject_id)
+        assert subject is not None
+        await register(client, email="student@example.edu")
+
+        r = await client.get("/api/v1/activities/by-arcade-slug/cell-defender")
+        assert r.status_code == 200, r.text
+        assert r.json() == {
+            "activity_id": str(activity.id),
+            "subject_slug": subject.slug,
+            "completion_only": False,
+            "max_score": 5000,
+        }
+
+    async def test_arcade_slug_resolver_404s(self, client: AsyncClient, db: AsyncSession) -> None:
+        await make_educator(client, db, "edu@example.edu")
+        await register(client, email="student@example.edu")
+
+        # unknown slug
+        r = await client.get("/api/v1/activities/by-arcade-slug/no-such-game")
+        assert r.status_code == 404
+
+        # a DRAFT external activity's arcade_slug
+        await _publish_sdk_slug_activity(db, status="draft")
+        r = await client.get("/api/v1/activities/by-arcade-slug/cell-defender")
+        assert r.status_code == 404
+
+        # an sdk_slug is not an arcade_slug: the two keys never cross-match
+        r = await client.get("/api/v1/activities/by-arcade-slug/test-sim")
+        assert r.status_code == 404
