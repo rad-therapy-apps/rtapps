@@ -407,6 +407,13 @@ class TestArcadeSlugResolver:
             "max_score": 5000,
         }
 
+        # The two keys never cross-match, even with the published activity present: its
+        # sdk_slug is not an arcade_slug, and its arcade_slug is not an sdk_slug.
+        r = await client.get("/api/v1/activities/by-arcade-slug/test-sim")
+        assert r.status_code == 404
+        r = await client.get("/api/v1/activities/by-sdk-slug/cell-defender")
+        assert r.status_code == 404
+
     async def test_arcade_slug_resolver_404s(self, client: AsyncClient, db: AsyncSession) -> None:
         await make_educator(client, db, "edu@example.edu")
         await register(client, email="student@example.edu")
@@ -418,8 +425,4 @@ class TestArcadeSlugResolver:
         # a DRAFT external activity's arcade_slug
         await _publish_sdk_slug_activity(db, status="draft")
         r = await client.get("/api/v1/activities/by-arcade-slug/cell-defender")
-        assert r.status_code == 404
-
-        # an sdk_slug is not an arcade_slug: the two keys never cross-match
-        r = await client.get("/api/v1/activities/by-arcade-slug/test-sim")
         assert r.status_code == 404

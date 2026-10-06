@@ -2341,6 +2341,7 @@ export interface components {
      * @description Resolution of an external activity's config `sdk_slug` (plan 4c): simulator apps
      *     address activities by stable name — never by embedded UUID — and learn whether to
      *     submit a score or a completion. 404 for anything not a PUBLISHED external activity.
+     *     Also the response of `by-arcade-slug`, the same lookup keyed on `arcade_slug`.
      */
     SdkSlugOut: {
       /**

@@ -40,10 +40,10 @@ async function resolveEntry(event: RequestEvent, path: string): Promise<Simulato
 }
 
 export const load: PageServerLoad = async (event) => {
-	const [hub, console, gantry] = await Promise.all([
+	const [hub, linacConsole, gantry] = await Promise.all([
 		resolveEntry(event, '/activities/by-sdk-slug/sim-hub-qa'),
 		resolveEntry(event, '/activities/by-sdk-slug/sim-linac-fraction'),
 		resolveEntry(event, '/activities/by-arcade-slug/gantry-game')
 	]);
-	return { hub, console, gantry };
+	return { hub, linacConsole, gantry };
 };

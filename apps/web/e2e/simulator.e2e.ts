@@ -30,10 +30,10 @@
  * and Success criterion (the phase-4 vision's core loop, closed); `app/seed.py`'s three seeded
  * external activities (config `sdk_slug` "sim-hub-qa" scored max 4, "sim-linac-fraction" and
  * "sim-ct-scan" completion-only); the `GET /activities/by-sdk-slug/{slug}` resolver; the live
- * Simulator entry on subject pages (`data-testid="simulator-entry"`); the arcade media cache
- * header (`cacheControlFor` in `$lib/server/arcade.ts`).
+ * Simulator entry on the Simulator tab, `(app)/simulator` (`data-testid="simulator-entry"`);
+ * the arcade media cache header (`cacheControlFor` in `$lib/server/arcade.ts`).
  * Works with: `./helpers` (registerStudent, signIn); the pages under apps/web/src/routes
- * ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id], (app)/educator/cohorts/[id],
+ * ((app)/simulator, (app)/subjects/[slug]/activities/[id], (app)/educator/cohorts/[id],
  * (app)/educator/cohorts/[id]/activities/[aid]) and `$lib/activity/ExternalPlayer.svelte`; the
  * static `apps/web/static/arcade/rtapps-sdk.js` and the `apps/web/arcade/sim-hub`/`linac-ct` apps
  * it's embedded in. Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.

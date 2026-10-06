@@ -14,7 +14,7 @@
 	subject. Each link opens `(app)/subjects/[slug]/activities/[id]`, the same player route the
 	Games shelf uses, so attempts and SDK scoring are unchanged.
 
-	Works with: `$app/paths`, `$lib/ui/*`, `./+page.server.ts` (`hub`, `console`, `gantry`).
+	Works with: `$app/paths`, `$lib/ui/*`, `./+page.server.ts` (`hub`, `linacConsole`, `gantry`).
 	Used by: `AppShell.svelte`'s "Simulator" nav link; `apps/web/e2e/simulator.e2e.ts`,
 	`long-tail.e2e.ts`, `ui.e2e.ts`.
 -->
@@ -66,10 +66,10 @@
 			Deliver a treatment fraction from the console: image guidance, couch corrections and beam-on.
 			The CT simulation suite is one door away.
 		</p>
-		{#if data.console}
+		{#if data.linacConsole}
 			<a
 				class="entry"
-				href={resolve('/(app)/subjects/[slug]/activities/[id]', data.console)}
+				href={resolve('/(app)/subjects/[slug]/activities/[id]', data.linacConsole)}
 				data-testid="console-entry">Open the console</a
 			>
 		{:else}
