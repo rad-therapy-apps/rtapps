@@ -33,7 +33,7 @@ afterEach(async () => {
 });
 
 describe('AppShell on desktop', () => {
-	it('shows only Home and Subjects to a student', async () => {
+	it('shows Home, Subjects and Simulator to a student', async () => {
 		await page.viewport(1280, 800);
 		await render(AppShell, props('student'));
 		await expect.element(page.getByRole('link', { name: 'Subjects', exact: true })).toBeVisible();
@@ -41,7 +41,7 @@ describe('AppShell on desktop', () => {
 			navLinks()
 				.elements()
 				.map((a) => a.textContent?.trim())
-		).toEqual(['Home', 'Subjects']);
+		).toEqual(['Home', 'Subjects', 'Simulator']);
 	});
 
 	it('shows every area to an admin', async () => {
@@ -52,7 +52,7 @@ describe('AppShell on desktop', () => {
 			navLinks()
 				.elements()
 				.map((a) => a.textContent?.trim())
-		).toEqual(['Home', 'Subjects', 'Educator', 'Author', 'Admin', 'Audit log']);
+		).toEqual(['Home', 'Subjects', 'Simulator', 'Educator', 'Author', 'Admin', 'Audit log']);
 	});
 
 	it('marks the current section with aria-current', async () => {

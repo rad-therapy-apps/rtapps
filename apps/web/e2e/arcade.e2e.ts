@@ -53,7 +53,6 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 	await page.getByRole('link', { name: 'Subjects', exact: true }).click();
 	await page.getByRole('link', { name: 'Radiation Biology' }).click();
 	await expect(page.getByRole('heading', { name: 'Games' })).toBeVisible();
-	await expect(page.getByRole('heading', { name: 'Simulator' })).toBeVisible();
 	await page.getByRole('link', { name: 'Cell Defender' }).click();
 
 	// The real game (with the real shim) loads in the iframe; drive the shim directly instead of

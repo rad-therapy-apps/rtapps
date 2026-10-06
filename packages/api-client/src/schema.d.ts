@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+  "/api/v1/activities/by-arcade-slug/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Resolve Arcade Slug
+     * @description The `by-sdk-slug` resolver for plain arcade games, which carry only an
+     *     `arcade_slug` in their config (no SDK scoring, so no `sdk_slug`). Same filters and
+     *     same 404 contract; added for the Simulator page, whose gantry-game entry is one of
+     *     these. If several published externals share an `arcade_slug` (linac-ct does), the
+     *     first row wins — callers that need a specific one use `by-sdk-slug`.
+     */
+    get: operations["resolve_arcade_slug_api_v1_activities_by_arcade_slug__slug__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/activities/by-sdk-slug/{slug}": {
     parameters: {
       query?: never;
@@ -2317,6 +2341,7 @@ export interface components {
      * @description Resolution of an external activity's config `sdk_slug` (plan 4c): simulator apps
      *     address activities by stable name — never by embedded UUID — and learn whether to
      *     submit a score or a completion. 404 for anything not a PUBLISHED external activity.
+     *     Also the response of `by-arcade-slug`, the same lookup keyed on `arcade_slug`.
      */
     SdkSlugOut: {
       /**
@@ -2600,6 +2625,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  resolve_arcade_slug_api_v1_activities_by_arcade_slug__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SdkSlugOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   resolve_sdk_slug_api_v1_activities_by_sdk_slug__slug__get: {
     parameters: {
       query?: never;

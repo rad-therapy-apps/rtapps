@@ -1,21 +1,18 @@
 /**
  * What this file does: SSR `load` for `(app)/subjects/[slug]`. Fetches one subject's detail —
- * summary and its lesson list — by slug (`GET /subjects/{slug}`), plus (plan 4c) the simulator
- * hub's player route params via the `sim-hub-qa` SDK slug resolver.
+ * summary and its lesson list — by slug (`GET /subjects/{slug}`).
  *
  * Used here and why: `+page.server.ts` runs only on the server, so `apiFetch(event, …)` forwards
  * the session cookie; `error()` distinguishes a genuinely missing subject (404, e.g. a bad or
- * stale slug) from an API/network failure (502), so the error page shown matches the cause. The
- * simulator hub resolver is best-effort: a 404 (unseeded/unpublished) degrades `simulatorUrl` to
- * `null` rather than failing the page load.
+ * stale slug) from an API/network failure (502), so the error page shown matches the cause.
  *
  * How it fits the project: `(app)/+layout.server.ts` guarantees a signed-in user before this
- * runs. `docs/03-architecture.md` §7 (`GET subjects/{slug}`); Task 1's
- * `GET /activities/by-sdk-slug/{slug}` resolver.
+ * runs. `docs/03-architecture.md` §7 (`GET subjects/{slug}`). The simulator entries that used
+ * to be resolved here live on `(app)/simulator` now.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SubjectDetailOut`,
- * `SdkSlugOut`). Used by: `+page.svelte` (this route), reached from
- * `(app)/subjects/+page.svelte`; driven by `apps/web/e2e/lesson.e2e.ts`.
+ * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SubjectDetailOut`).
+ * Used by: `+page.svelte` (this route), reached from `(app)/subjects/+page.svelte`; driven by
+ * `apps/web/e2e/lesson.e2e.ts`.
  */
 import { error } from '@sveltejs/kit';
 import { apiFetch } from '$lib/server/api';
@@ -31,22 +28,5 @@ export const load: PageServerLoad = async (event) => {
 	// Any other non-2xx (API down, 500, etc): a 502, since the subject may well exist.
 	if (!res.ok) error(502, 'Could not load the subject');
 	const subject: SubjectDetailOut = await res.json();
-
-	// Plan 4c: resolve the simulator hub's player route params for the Simulator section. A 404
-	// (hub not seeded/unpublished) degrades to the disabled placeholder, never an error. Route
-	// params (not a built URL) are returned so `+page.svelte` can build the href with `resolve()`,
-	// same as the Games links.
-	let simulatorUrl: { slug: string; id: string } | null = null;
-	try {
-		const sim = await apiFetch(event, '/activities/by-sdk-slug/sim-hub-qa');
-		if (sim.ok) {
-			const info: components['schemas']['SdkSlugOut'] = await sim.json();
-			simulatorUrl = { slug: info.subject_slug, id: info.activity_id };
-		}
-	} catch {
-		// Best-effort by contract: a network-level failure on this one call must degrade to
-		// the placeholder, not take down the whole subject page (the subject fetch above is
-		// the only load-fatal call).
-	}
-	return { subject, simulatorUrl };
+	return { subject };
 };

@@ -52,6 +52,8 @@ test('signed-out pages are accessible and fit the viewport', async ({ page }) =>
 });
 
 test('student pages are accessible and fit the viewport', async ({ page }) => {
+	// Seven full-page axe scans in one test against the dev server: triple the default timeout.
+	test.slow();
 	const stamp = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 	await registerStudent(page, {
 		email: `e2e-ui-${stamp}@example.edu`,
@@ -62,6 +64,7 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 		'/home',
 		'/subjects',
 		'/subjects/radiation-biology',
+		'/simulator',
 		'/lessons/rbe-and-oer',
 		'/account/password'
 	]) {
@@ -76,6 +79,9 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 });
 
 test('educator pages are accessible and fit the viewport', async ({ page }) => {
+	// Two scans, but the authoring hub is heavy: 28 s on the dev server with one worker, right
+	// at the 30 s default.
+	test.slow();
 	await signIn(page, EDUCATOR.email, EDUCATOR.password);
 	for (const path of ['/educator', '/author']) await check(page, path);
 });
