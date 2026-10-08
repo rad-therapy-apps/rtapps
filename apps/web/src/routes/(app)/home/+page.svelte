@@ -18,6 +18,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -27,8 +31,7 @@
 	<title>Home — RTTLearn</title>
 </svelte:head>
 
-<h1>Welcome, {data.user.display_name}</h1>
-<p>Role: {data.user.role}</p>
+<PageHeader title="Welcome, {data.user.display_name}" subtitle="Role: {data.user.role}" />
 
 <p><a href={resolve('/(app)/subjects')}>Browse subjects</a></p>
 
@@ -46,55 +49,73 @@
 	{/if}
 
 	<form method="POST" action="?/join" use:enhance>
-		<label for="code">Join code</label>
-		<input
-			id="code"
-			name="code"
-			required
-			minlength="6"
-			maxlength="12"
-			autocapitalize="characters"
-			value={form?.code ?? ''}
-		/>
-		<button>Join cohort</button>
+		<Field label="Join code" id="code">
+			<input
+				id="code"
+				name="code"
+				required
+				minlength="6"
+				maxlength="12"
+				autocapitalize="characters"
+				value={form?.code ?? ''}
+			/>
+		</Field>
+		<Button type="submit" variant="primary">Join cohort</Button>
 	</form>
 
 	<!-- Server-rendered result from the last join attempt: success (polite live region) or error. -->
 	{#if form?.joined}
-		<p aria-live="polite">Joined {form.joined}</p>
+		<Alert tone="success" role="status">Joined {form.joined}</Alert>
 	{/if}
 	{#if form?.error}
-		<p role="alert">{form.error}</p>
+		<Alert tone="danger" role="alert">{form.error}</Alert>
 	{/if}
 {/if}
 
 <h2>Your results</h2>
 <!-- Three mutually exclusive states: load error, no results yet, or the results table. -->
 {#if data.error}
-	<p>{data.error}</p>
+	<Alert tone="danger">{data.error}</Alert>
 {:else if data.results.length === 0}
 	<p>No results yet — pick a subject to start.</p>
 {:else}
-	<table>
-		<thead>
-			<tr>
-				<th>Lesson</th>
-				<th>Score</th>
-				<th>Percent</th>
-				<th>Passed</th>
-				<th>Date</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.results as result (result.attempt_id)}
+	<div class="table-scroll">
+		<table>
+			<thead>
 				<tr>
-					<td>{result.activity_title}</td>
-					<td>{result.score ?? '—'} / {result.max_score ?? '—'}</td>
-					<td>{result.percent ?? '—'}</td>
-					<td>{result.passed ? 'Yes' : 'No'}</td>
-					<td>{result.submitted_at ?? '—'}</td>
+					<th>Lesson</th>
+					<th>Score</th>
+					<th>Percent</th>
+					<th>Passed</th>
+					<th>Date</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{#each data.results as result (result.attempt_id)}
+					<tr>
+						<td>{result.activity_title}</td>
+						<td>{result.score ?? '—'} / {result.max_score ?? '—'}</td>
+						<td>{result.percent ?? '—'}</td>
+						<td>{result.passed ? 'Yes' : 'No'}</td>
+						<td>{result.submitted_at ?? '—'}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
 {/if}
+
+<style>
+	form {
+		display: grid;
+		gap: var(--space-3);
+		max-width: 20rem;
+		margin-block: var(--space-4);
+	}
+	form :global(.btn) {
+		justify-self: start;
+	}
+	.table-scroll {
+		overflow-x: auto;
+	}
+</style>

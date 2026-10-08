@@ -29,6 +29,7 @@
 		type PostFn
 	} from '$lib/activity/attempts';
 	import type { ExternalSnapshot } from '$lib/activity/types';
+	import Alert from '$lib/ui/Alert.svelte';
 
 	let {
 		activityId,
@@ -112,7 +113,7 @@
 </header>
 
 {#if status === 'error'}
-	<p role="alert">{errorMessage}</p>
+	<Alert tone="danger" role="alert">{errorMessage}</Alert>
 	{#if reportedScore !== null}
 		{#if snapshot.external.completion_only}
 			<button onclick={() => void submitCompletion()}>Retry</button>
@@ -145,11 +146,20 @@
 <style>
 	.arcade-frame {
 		width: 100%;
-		height: calc(100vh - 6rem);
-		border: 0;
+		height: calc(100dvh - 9rem);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+	}
+	@media (max-width: 50rem) {
+		.arcade-frame {
+			height: calc(100dvh - 10rem);
+		}
+	}
+	.player-bar {
+		margin-bottom: var(--space-3);
 	}
 	.player-bar h1 {
-		margin: 0 0 0.5rem;
-		font-size: 1.25rem;
+		margin: 0;
+		font-size: var(--text-xl);
 	}
 </style>

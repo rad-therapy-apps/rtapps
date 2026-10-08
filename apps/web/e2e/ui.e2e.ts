@@ -76,6 +76,15 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 	await expect(page.getByText('Question 1 of 4')).toBeVisible();
 	await expectAccessible(page, 'quiz activity');
 	await expectNoSidewaysScroll(page, 'quiz activity');
+	// The arcade frame fits the viewport: the page itself never scrolls.
+	await page.goto('/subjects/radiation-biology');
+	await page.getByRole('link', { name: 'Cell Defender' }).click();
+	await expect(page.locator('iframe.arcade-frame')).toBeVisible();
+	await expectNoSidewaysScroll(page, 'arcade frame');
+	const overflowY = await page.evaluate(
+		() => document.documentElement.scrollHeight - window.innerHeight
+	);
+	expect(overflowY, `arcade page scrolls vertically by ${overflowY}px`).toBeLessThanOrEqual(1);
 });
 
 test('light reading panel is applied before hydration and is accessible', async ({ page }) => {
