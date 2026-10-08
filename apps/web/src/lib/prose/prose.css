@@ -30,6 +30,11 @@
 .reading-panel a {
 	color: var(--paper-link);
 }
+/* Outranks app.css's global `a:hover` (which uses the dark theme's text colour) whatever
+   order the two stylesheets load in, so a hovered link stays readable on light paper. */
+.reading-panel a:hover {
+	color: var(--paper-text);
+}
 
 /* Light page: reassign every --paper-* token to its light counterpart; nothing else reads them. */
 :root[data-reading='light'] .reading-panel {
