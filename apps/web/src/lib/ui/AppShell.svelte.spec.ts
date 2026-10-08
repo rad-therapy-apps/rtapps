@@ -113,4 +113,18 @@ describe('AppShell on a 360px phone', () => {
 			.element(page.getByRole('button', { name: 'Open menu' }))
 			.toHaveAttribute('aria-expanded', 'false');
 	});
+
+	it('closes when a link to the page already open is tapped', async () => {
+		await page.viewport(360, 780);
+		await render(AppShell, props('student', '/home'));
+		await page.getByRole('button', { name: 'Open menu' }).click();
+		// The path doesn't change, so only the tap itself can close the drawer. Stop the real
+		// navigation so the test page stays put.
+		const home = page.getByRole('link', { name: 'Home', exact: true });
+		home.element().addEventListener('click', (event) => event.preventDefault());
+		await home.click();
+		await expect
+			.element(page.getByRole('button', { name: 'Open menu' }))
+			.toHaveAttribute('aria-expanded', 'false');
+	});
 });

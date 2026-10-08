@@ -52,6 +52,25 @@ def test_error_message_names_the_path() -> None:
         validate_prose({"type": "doc", "content": [{"type": "iframe"}]})
 
 
+@pytest.mark.parametrize("union", ["block", "inline"])
+def test_union_type_lists_agree(union: str) -> None:
+    """The block/inline unions dispatch on `type` (if/then, not oneOf — see the schema
+    package README), so each node type is named in two places: the union's `enum` and its
+    if/then entry. They must list the same types, in the same order, and each `then` must
+    point at the definition whose `type` const matches its `if`. A type added to only one
+    list would be silently unchecked (enum only) or always rejected (if/then only)."""
+    from app.content.prose import PROSE_SCHEMA
+
+    defs = PROSE_SCHEMA["$defs"]
+    spec = defs[union]
+    enum = spec["properties"]["type"]["enum"]
+    dispatched = [branch["if"]["properties"]["type"]["const"] for branch in spec["allOf"]]
+    assert dispatched == enum
+    for branch in spec["allOf"]:
+        target = defs[branch["then"]["$ref"].removeprefix("#/$defs/")]
+        assert target["properties"]["type"]["const"] == branch["if"]["properties"]["type"]["const"]
+
+
 def test_env_override_is_first_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
     """`PROSE_SCHEMA_PATH` (the dev-compose bind-mount override) must win over every
     other candidate when set, and every other candidate must still point somewhere
