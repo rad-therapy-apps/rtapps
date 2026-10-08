@@ -1,6 +1,7 @@
 /*
  * What this file does: styling for the elements ProseDoc/ProseNode/ProseInline render — layout,
- * spacing, and the three callout-kind color variants.
+ * spacing, and the three callout-kind color variants — plus the lesson `.reading-panel` and its
+ * light-page token swap.
  * Used here and why: plain CSS, imported once from ProseDoc.svelte (`import './prose.css'`) so
  * it's scoped to wherever prose content is mounted, not a Svelte `<style>` block, since the
  * classes here are applied by ProseNode/ProseInline dynamically (e.g. `callout-{kind}`).
@@ -10,6 +11,41 @@
  * Depends on: nothing.
  * Used by: ProseDoc.svelte (only importer).
  */
+
+/* The lesson reading surface: counter, page title, blocks and pager controls on one "paper". */
+.reading-panel {
+	background: var(--paper-bg);
+	color: var(--paper-text);
+	border-radius: var(--radius-lg);
+	padding: var(--space-6);
+}
+
+@media (max-width: 50rem) {
+	.reading-panel {
+		padding: var(--space-5) var(--space-4);
+	}
+}
+
+/* Plain links on the panel (e.g. "Back to home") follow the panel's link colour. */
+.reading-panel a {
+	color: var(--paper-link);
+}
+
+/* Light page: reassign every --paper-* token to its light counterpart; nothing else reads them. */
+:root[data-reading='light'] .reading-panel {
+	--paper-bg: var(--paper-light-bg);
+	--paper-text: var(--paper-light-text);
+	--paper-muted: var(--paper-light-muted);
+	--paper-link: var(--paper-light-link);
+	--paper-rule: var(--paper-light-rule);
+	--paper-th-bg: var(--paper-light-th-bg);
+	--paper-callout-kp-bg: var(--paper-light-callout-kp-bg);
+	--paper-callout-kp-bar: var(--paper-light-callout-kp-bar);
+	--paper-callout-cn-bg: var(--paper-light-callout-cn-bg);
+	--paper-callout-cn-bar: var(--paper-light-callout-cn-bar);
+	--paper-callout-warn-bg: var(--paper-light-callout-warn-bg);
+	--paper-callout-warn-bar: var(--paper-light-callout-warn-bar);
+}
 
 /* Root container: readable measure and line height for body text. */
 .prose {

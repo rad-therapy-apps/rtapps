@@ -78,6 +78,29 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 	await expectNoSidewaysScroll(page, 'quiz activity');
 });
 
+test('light reading panel is applied before hydration and is accessible', async ({ page }) => {
+	const stamp = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+	await registerStudent(page, {
+		email: `e2e-ui-light-${stamp}@example.edu`,
+		password: 'e2e-ui-password-1',
+		name: 'Light Check'
+	});
+	await page.evaluate(() => localStorage.setItem('rttlearn:reading', 'light'));
+	await page.goto('/lessons/rbe-and-oer', { waitUntil: 'domcontentloaded' });
+	// Read right after DOM-ready: the head script, not the toggle component, has set the mode.
+	const background = await page.evaluate(
+		() => getComputedStyle(document.querySelector('.reading-panel')!).backgroundColor
+	);
+	expect(background).toBe('rgb(247, 249, 252)'); // --paper-light-bg
+	await page.waitForLoadState('networkidle');
+	await expect(page.getByRole('button', { name: 'Light page' })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expectAccessible(page, 'light lesson panel');
+	await expectNoSidewaysScroll(page, 'light lesson panel');
+});
+
 test('educator pages are accessible and fit the viewport', async ({ page }) => {
 	// Two scans, but the authoring hub is heavy: 28 s on the dev server with one worker, right
 	// at the 30 s default.
