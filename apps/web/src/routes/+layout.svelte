@@ -65,20 +65,6 @@
 {/if}
 
 <style>
-	.skip-link {
-		position: absolute;
-		left: var(--space-4);
-		top: -4rem;
-		z-index: 20;
-		padding: var(--space-2) var(--space-4);
-		background: var(--accent);
-		color: var(--accent-contrast);
-		border-radius: var(--radius-sm);
-		font-weight: 600;
-	}
-	.skip-link:focus {
-		top: var(--space-4);
-	}
 	.public-bar {
 		display: flex;
 		flex-wrap: wrap;

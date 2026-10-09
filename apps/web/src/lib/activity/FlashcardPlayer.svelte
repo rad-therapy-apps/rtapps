@@ -138,7 +138,7 @@
 		background: var(--surface-raised);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
-		font-size: 1.25rem;
+		font-size: var(--text-xl);
 		text-align: center;
 		overflow-wrap: anywhere;
 	}

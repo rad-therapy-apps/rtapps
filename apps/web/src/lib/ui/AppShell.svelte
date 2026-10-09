@@ -181,21 +181,6 @@
 </div>
 
 <style>
-	.skip-link {
-		position: absolute;
-		left: var(--space-4);
-		top: -4rem;
-		z-index: 20;
-		padding: var(--space-2) var(--space-4);
-		background: var(--accent);
-		color: var(--accent-contrast);
-		border-radius: var(--radius-sm);
-		font-weight: 600;
-	}
-	.skip-link:focus {
-		top: var(--space-4);
-	}
-
 	.shell {
 		display: grid;
 		grid-template-columns: var(--sidebar-width) minmax(0, 1fr);

@@ -74,8 +74,7 @@
 
 <PageHeader title="Author">
 	{#snippet actions()}
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- /author/data-tables lands in a later task, not yet a known route id -->
-		<a class="link-button" href="/author/data-tables">Data tables</a>
+		<Button href={resolve('/(app)/author/data-tables')}>Data tables</Button>
 	{/snippet}
 </PageHeader>
 
@@ -183,21 +182,6 @@
 <style>
 	section {
 		margin-block-end: var(--space-6);
-	}
-	.link-button {
-		display: inline-flex;
-		align-items: center;
-		min-height: var(--control-height);
-		padding: var(--space-2) var(--space-4);
-		border: 1px solid var(--border-strong);
-		border-radius: var(--radius-sm);
-		background: var(--surface-raised);
-		color: var(--text);
-		font-weight: 600;
-		text-decoration: none;
-	}
-	.link-button:hover {
-		border-color: var(--accent);
 	}
 	.rows,
 	.activities,

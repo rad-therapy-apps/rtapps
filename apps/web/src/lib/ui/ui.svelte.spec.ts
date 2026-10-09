@@ -57,6 +57,22 @@ describe('Button', () => {
 		await expect.element(button).toBeDisabled();
 	});
 
+	it('with href renders a link with btn classes and no type', async () => {
+		render(Button, { children: text('Data tables'), href: '/author/data-tables' });
+		const link = page.getByRole('link', { name: 'Data tables' });
+		await expect.element(link).toHaveAttribute('href', '/author/data-tables');
+		await expect.element(link).toHaveClass('btn', 'btn-secondary');
+		await expect.element(link).not.toHaveAttribute('type');
+	});
+
+	it('without href is still a type="button" button', async () => {
+		render(Button, { children: text('Save') });
+		await expect
+			.element(page.getByRole('button', { name: 'Save' }))
+			.toHaveAttribute('type', 'button');
+		await expect.element(page.getByRole('link')).not.toBeInTheDocument();
+	});
+
 	it('keeps the accessible name to the text when an icon is set', async () => {
 		render(Button, {
 			children: text('Sign out'),

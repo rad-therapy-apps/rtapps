@@ -30,7 +30,7 @@
 <ul class="grid">
 	{#each data.subjects as subject (subject.slug)}
 		<Card as="li">
-			<SubjectTag slug={subject.slug} label={subject.title} />
+			<SubjectTag slug={subject.slug} label={subject.title} decorative />
 			<h2>
 				<a href={resolve('/(app)/subjects/[slug]', { slug: subject.slug })}>{subject.title}</a>
 			</h2>

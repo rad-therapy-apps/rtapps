@@ -21,7 +21,9 @@
 
 <style>
 	/* minmax(0, 1fr), not the implicit auto column: a <select> is as wide as its longest
-	   option, which would otherwise widen the page past a 360px screen. */
+	   option, which would otherwise widen the page past a 360px screen. The catch: with
+	   minmax(0, 1fr) a Field can shrink below its content, so inside a flex row give it a
+	   min-width or flex-basis. */
 	.field {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr);
