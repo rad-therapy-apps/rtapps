@@ -190,9 +190,9 @@ Each NFR has a verification method that runs in CI or is recorded in `docs/05-se
 
 | ID | Requirement | Pri | Phase | Verification |
 |---|---|---|---|---|
-| NFR-16 | Student-facing pages meet WCAG 2.1 AA: semantic headings, contrast ≥ 4.5:1, alt text required on images, visible focus, no information by colour alone. | M | 1 (lesson), 3 (all types) | axe-core in Playwright; manual keyboard pass per type |
+| NFR-16 | Student-facing pages meet WCAG 2.1 AA: semantic headings, contrast ≥ 4.5:1, alt text required on images, visible focus, no information by colour alone. | M | 1 (lesson), 3 (all types) | axe-core in Playwright; manual keyboard pass per type — verified by `apps/web/e2e/ui.e2e.ts` (axe scans of every route reachable with seeded data) and `apps/web/src/lib/ui/tokens.test.ts` (token contrast) |
 | NFR-17 | Every activity is fully keyboard operable, including matching and sequencing (select-then-place alternative to drag-drop); screen-reader announcements for feedback. | M | 3 | Playwright keyboard-only scenario per type |
-| NFR-18 | Last two major versions of Chrome, Edge, Firefox and Safari on desktop; current iOS Safari and Android Chrome for reading and quizzes; no IE. Layout usable from 360 px width. | M | 1 | Playwright projects (Chromium, Firefox, WebKit); manual mobile check |
+| NFR-18 | Last two major versions of Chrome, Edge, Firefox and Safari on desktop; current iOS Safari and Android Chrome for reading and quizzes; no IE. Layout usable from 360 px width. | M | 1 | Playwright projects (Chromium, Firefox, WebKit); manual mobile check — verified by `apps/web/e2e/ui.e2e.ts` (no sideways scroll at 360 px, `mobile-360` project) |
 | NFR-29 | English only; UI strings kept in one place per app so translation is a data change later. | C | 3 | Review |
 
 ### 3.6 Maintainability and observability

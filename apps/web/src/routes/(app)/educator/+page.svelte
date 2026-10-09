@@ -48,7 +48,7 @@
 {#if data.error}
 	<Alert tone="danger">{data.error}</Alert>
 {:else if data.cohorts.length === 0}
-	<p>No cohorts yet — create one above.</p>
+	<Card><p class="muted">No cohorts yet — create one above.</p></Card>
 {:else}
 	<ul class="grid">
 		{#each data.cohorts as c (c.id)}
@@ -64,6 +64,11 @@
 {/if}
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	form {
 		display: grid;
 		gap: var(--space-3);

@@ -22,6 +22,7 @@
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { ActionData, PageData } from './$types';
@@ -67,7 +68,7 @@
 {#if data.error}
 	<Alert tone="danger">{data.error}</Alert>
 {:else if data.page.items.length === 0}
-	<p>No users found.</p>
+	<Card><p class="muted">No users found.</p></Card>
 {:else}
 	<div class="table-wrap">
 		<table>
@@ -124,6 +125,11 @@
 {/if}
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	.search {
 		display: flex;
 		flex-wrap: wrap;

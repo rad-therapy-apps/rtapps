@@ -16,6 +16,7 @@
 <script lang="ts">
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
@@ -40,7 +41,7 @@
 {#if data.error}
 	<Alert tone="danger">{data.error}</Alert>
 {:else if data.rows.length === 0}
-	<p>No audit rows found.</p>
+	<Card><p class="muted">No audit rows found.</p></Card>
 {:else}
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div class="table-wrap" role="region" aria-label="Audit log" tabindex="0">
@@ -76,6 +77,11 @@
 {/if}
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	.filter {
 		display: flex;
 		flex-wrap: wrap;

@@ -20,6 +20,7 @@
 	import { resolve } from '$app/paths';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { ActionData, PageData } from './$types';
@@ -39,7 +40,7 @@
 {#if data.user.role === 'student'}
 	<h2>Your cohorts</h2>
 	{#if data.cohorts.length === 0}
-		<p>You are not in a cohort yet.</p>
+		<Card><p class="muted">You are not in a cohort yet.</p></Card>
 	{:else}
 		<ul>
 			{#each data.cohorts as c (c.id)}
@@ -77,7 +78,7 @@
 {#if data.error}
 	<Alert tone="danger">{data.error}</Alert>
 {:else if data.results.length === 0}
-	<p>No results yet — pick a subject to start.</p>
+	<Card><p class="muted">No results yet — pick a subject to start.</p></Card>
 {:else}
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div class="table-scroll" role="region" aria-label="Your results" tabindex="0">
@@ -107,6 +108,11 @@
 {/if}
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	form {
 		display: grid;
 		gap: var(--space-3);

@@ -52,7 +52,7 @@ async function check(page: Page, path: string) {
 }
 
 test('signed-out pages are accessible and fit the viewport', async ({ page }) => {
-	for (const path of ['/login', '/register']) await check(page, path);
+	for (const path of ['/', '/login', '/register']) await check(page, path);
 });
 
 test('the error page is accessible and fits the viewport', async ({ page }) => {
@@ -165,6 +165,57 @@ test('educator pages are accessible and fit the viewport', async ({ page }) => {
 	await page.waitForLoadState('networkidle');
 	await expectAccessible(page, 'cohort page');
 	await expectNoSidewaysScroll(page, 'cohort page');
+});
+
+test('cohort analytics pages are accessible and fit the viewport', async ({ page }) => {
+	test.slow();
+	await signIn(page, EDUCATOR.email, EDUCATOR.password);
+	const toCohort = async () => {
+		await page.goto('/educator');
+		await page.getByRole('link', { name: 'Demo cohort' }).click();
+		await expect(page.getByRole('heading', { name: 'Demo cohort' })).toBeVisible();
+	};
+	await toCohort();
+	await page.getByRole('link', { name: 'Stats' }).first().click();
+	await expect(page).toHaveURL(/\/activities\//);
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'activity stats');
+	await expectNoSidewaysScroll(page, 'activity stats');
+	await toCohort();
+	await page.getByRole('link', { name: 'Outcomes' }).click();
+	await expect(page).toHaveURL(/\/outcomes$/);
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'cohort outcomes');
+	await expectNoSidewaysScroll(page, 'cohort outcomes');
+	await toCohort();
+	await page
+		.getByRole('row')
+		.filter({ hasText: 'student01@example.com' })
+		.getByRole('link')
+		.click();
+	await expect(page).toHaveURL(/\/students\//);
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'student detail');
+	await expectNoSidewaysScroll(page, 'student detail');
+});
+
+test('deck and matching editors are accessible and fit the viewport', async ({ page }) => {
+	test.slow();
+	await signIn(page, EDUCATOR.email, EDUCATOR.password);
+	// Seeded activities, reached the way an educator does: from the authoring hub. No sequencing
+	// activity is seeded, so that editor is not scanned here.
+	await page.goto('/author');
+	await page.getByRole('link', { name: 'Terminology Challenge: Flashcards' }).first().click();
+	await expect(page).toHaveURL(/\/author\/decks\//);
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'deck editor');
+	await expectNoSidewaysScroll(page, 'deck editor');
+	await page.goto('/author');
+	await page.getByRole('link', { name: 'Cell & Molecular Biology: Matching' }).first().click();
+	await expect(page).toHaveURL(/\/author\/matching\//);
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'matching editor');
+	await expectNoSidewaysScroll(page, 'matching editor');
 });
 
 test('admin pages are accessible and fit the viewport', async ({ page }) => {

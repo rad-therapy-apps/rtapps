@@ -81,7 +81,7 @@
 <section>
 	<h2>Needs review ({data.needsReview.length})</h2>
 	{#if data.needsReview.length === 0}
-		<p class="muted">Nothing needs review.</p>
+		<Card><p class="muted">Nothing needs review.</p></Card>
 	{:else}
 		<ul class="rows">
 			{#each data.needsReview as row (row.activity_id)}

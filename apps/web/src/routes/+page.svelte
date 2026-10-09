@@ -19,6 +19,10 @@
 	let { data } = $props();
 </script>
 
+<svelte:head>
+	<title>RTTLearn</title>
+</svelte:head>
+
 <div class="welcome">
 	<Logo size={64} />
 	<h1>RTTLearn</h1>
