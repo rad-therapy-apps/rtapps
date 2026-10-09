@@ -21,6 +21,9 @@
 	import PublishPanel from '$lib/author/PublishPanel.svelte';
 	import { api } from '$lib/author/api';
 	import ProseDoc from '$lib/prose/ProseDoc.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { AuthorPage } from '$lib/author/types';
 	import type { LessonSnapshot, KnowledgeCheckBlock } from '$lib/lesson/types';
 	import type { PageData } from './$types';
@@ -71,9 +74,9 @@
 	<title>{data.lesson.title} — Author — RTTLearn</title>
 </svelte:head>
 
-<h1>{data.lesson.title}</h1>
+<PageHeader title={data.lesson.title} />
 
-<div role="tablist" aria-label="Lesson editor tabs">
+<div class="tabs" role="tablist" aria-label="Lesson editor tabs">
 	<button
 		type="button"
 		role="tab"
@@ -110,7 +113,7 @@
 			<p>Loading preview…</p>
 		{/if}
 		{#if previewError}
-			<p role="alert">{previewError}</p>
+			<Alert tone="danger" role="alert">{previewError}</Alert>
 		{/if}
 		{#if previewSnapshot}
 			{@const page = previewSnapshot.lesson.pages[previewPageIndex]}
@@ -124,16 +127,15 @@
 				{/if}
 			{/each}
 			<div class="pager-controls">
-				<button type="button" disabled={previewPageIndex === 0} onclick={() => previewPageIndex--}>
+				<Button disabled={previewPageIndex === 0} onclick={() => previewPageIndex--}>
 					Previous
-				</button>
-				<button
-					type="button"
+				</Button>
+				<Button
 					disabled={previewPageIndex === previewSnapshot.lesson.pages.length - 1}
 					onclick={() => previewPageIndex++}
 				>
 					Next
-				</button>
+				</Button>
 			</div>
 		{/if}
 	</div>
@@ -161,9 +163,31 @@
 {/snippet}
 
 <style>
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+		margin-block-end: var(--space-5);
+		border-block-end: 1px solid var(--border-strong);
+	}
+	.tabs button {
+		border-color: transparent;
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
+		background: transparent;
+		color: var(--text-muted);
+		margin-block-end: -1px;
+	}
+	/* Selected tab: accent underline plus bold text, so colour is not the only signal. */
+	.tabs button[aria-selected='true'] {
+		background: var(--accent-soft);
+		border-block-end: 3px solid var(--accent);
+		color: var(--text);
+		font-weight: 700;
+	}
 	.pager-controls {
 		display: flex;
-		gap: 1rem;
-		margin: 1rem 0;
+		gap: var(--space-4);
+		margin: var(--space-4) 0;
 	}
 </style>

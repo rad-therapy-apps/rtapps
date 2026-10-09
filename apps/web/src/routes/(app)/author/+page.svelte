@@ -24,6 +24,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { components } from '@rtapps/api-client';
 	import type { ActionData, PageData } from './$types';
 
@@ -67,20 +72,22 @@
 	<title>Author — RTTLearn</title>
 </svelte:head>
 
-<h1>Author</h1>
-
-<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- /author/data-tables lands in a later task, not yet a known route id -->
-<p><a href="/author/data-tables">Data tables</a></p>
+<PageHeader title="Author">
+	{#snippet actions()}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- /author/data-tables lands in a later task, not yet a known route id -->
+		<a class="link-button" href="/author/data-tables">Data tables</a>
+	{/snippet}
+</PageHeader>
 
 <section>
 	<h2>Needs review ({data.needsReview.length})</h2>
 	{#if data.needsReview.length === 0}
-		<p>Nothing needs review.</p>
+		<p class="muted">Nothing needs review.</p>
 	{:else}
-		<ul>
+		<ul class="rows">
 			{#each data.needsReview as row (row.activity_id)}
 				{@const href = editorHref(row)}
-				<li>
+				<Card as="li">
 					{#if href}
 						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- editor route lands in Task 15/16, not yet a known route id -->
 						<a {href}>{row.subject.title} / {row.title}</a>
@@ -88,7 +95,7 @@
 						{row.subject.title} / {row.title}
 					{/if}
 					{#if row.import_notes.length > 0}
-						<ul>
+						<ul class="notes">
 							<!-- Keyed on position, not `note` itself (Task 18): the same converter note
 								 text legitimately repeats per occurrence on a real migrated lesson, and a
 								 keyed-each requires unique keys — keying on the value threw
@@ -98,10 +105,10 @@
 							{/each}
 						</ul>
 						{#if row.import_notes.length > 2}
-							<p>+{row.import_notes.length - 2} more</p>
+							<p class="muted">+{row.import_notes.length - 2} more</p>
 						{/if}
 					{/if}
-				</li>
+				</Card>
 			{/each}
 		</ul>
 	{/if}
@@ -109,59 +116,127 @@
 
 <section>
 	<h2>New lesson</h2>
-	<form method="POST" action="?/createLesson" use:enhance>
-		<label for="title">Title</label>
-		<input id="title" name="title" required value={form?.title ?? ''} />
+	<Card>
+		<form method="POST" action="?/createLesson" use:enhance>
+			<Field label="Title" id="title">
+				<input id="title" name="title" required value={form?.title ?? ''} />
+			</Field>
 
-		<label for="slug">Slug</label>
-		<input id="slug" name="slug" required value={form?.slug ?? ''} />
+			<Field label="Slug" id="slug">
+				<input id="slug" name="slug" required value={form?.slug ?? ''} />
+			</Field>
 
-		<label for="subject_slug">Subject</label>
-		<select id="subject_slug" name="subject_slug" required>
-			{#each data.bySubject as entry (entry.subject.id)}
-				<option value={entry.subject.slug} selected={form?.subject_slug === entry.subject.slug}>
-					{entry.subject.title}
-				</option>
-			{/each}
-		</select>
+			<Field label="Subject" id="subject_slug">
+				<select id="subject_slug" name="subject_slug" required>
+					{#each data.bySubject as entry (entry.subject.id)}
+						<option value={entry.subject.slug} selected={form?.subject_slug === entry.subject.slug}>
+							{entry.subject.title}
+						</option>
+					{/each}
+				</select>
+			</Field>
 
-		<button>Create lesson</button>
-	</form>
-	{#if form?.error}
-		<p role="alert">{form.error}</p>
-	{/if}
+			<Button type="submit" variant="primary">Create lesson</Button>
+		</form>
+		{#if form?.error}
+			<Alert tone="danger" role="alert">{form.error}</Alert>
+		{/if}
+	</Card>
 </section>
 
 <section>
 	<h2>Subjects</h2>
-	{#each data.bySubject as entry (entry.subject.id)}
-		<article>
-			<h3>
-				<a href={resolve('/(app)/subjects/[slug]', { slug: entry.subject.slug })}
-					>{entry.subject.title}</a
-				>
-				({entry.activities.length})
-			</h3>
-			{#each Object.entries(kindLabels) as [kind, label] (kind)}
-				{@const activities = entry.activities.filter((a) => a.kind === kind)}
-				{#if activities.length > 0}
-					<h4>{label} ({activities.length})</h4>
-					<ul>
-						{#each activities as activity (activity.activity_id)}
-							{@const href = editorHref(activity)}
-							<li>
-								{#if href}
-									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- editor route lands in Task 15/16, not yet a known route id -->
-									<a {href}>{activity.title}</a>
-								{:else}
-									{activity.title}
-								{/if}
-								({activity.status})
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			{/each}
-		</article>
-	{/each}
+	<div class="subjects">
+		{#each data.bySubject as entry (entry.subject.id)}
+			<Card as="article">
+				<h3>
+					<a href={resolve('/(app)/subjects/[slug]', { slug: entry.subject.slug })}
+						>{entry.subject.title}</a
+					>
+					({entry.activities.length})
+				</h3>
+				{#each Object.entries(kindLabels) as [kind, label] (kind)}
+					{@const activities = entry.activities.filter((a) => a.kind === kind)}
+					{#if activities.length > 0}
+						<h4>{label} ({activities.length})</h4>
+						<ul class="activities">
+							{#each activities as activity (activity.activity_id)}
+								{@const href = editorHref(activity)}
+								<li>
+									{#if href}
+										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- editor route lands in Task 15/16, not yet a known route id -->
+										<a {href}>{activity.title}</a>
+									{:else}
+										{activity.title}
+									{/if}
+									<span class="muted">({activity.status})</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				{/each}
+			</Card>
+		{/each}
+	</div>
 </section>
+
+<style>
+	section {
+		margin-block-end: var(--space-6);
+	}
+	.link-button {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--control-height);
+		padding: var(--space-2) var(--space-4);
+		border: 1px solid var(--border-strong);
+		border-radius: var(--radius-sm);
+		background: var(--surface-raised);
+		color: var(--text);
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.link-button:hover {
+		border-color: var(--accent);
+	}
+	.rows,
+	.activities,
+	.notes {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.rows {
+		display: grid;
+		gap: var(--space-3);
+	}
+	.notes {
+		margin-block-start: var(--space-2);
+		color: var(--text-muted);
+		font-size: var(--text-sm);
+	}
+	.activities li {
+		padding-block: var(--space-1);
+	}
+	.subjects {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+		gap: var(--space-4);
+	}
+	.subjects h4 {
+		margin-block: var(--space-4) var(--space-1);
+		color: var(--text-muted);
+		font-size: var(--text-sm);
+	}
+	form {
+		display: grid;
+		gap: var(--space-3);
+		max-width: 20rem;
+	}
+	form :global(.btn) {
+		justify-self: start;
+	}
+	.muted {
+		color: var(--text-muted);
+	}
+</style>

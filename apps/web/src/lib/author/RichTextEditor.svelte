@@ -13,6 +13,8 @@
 	recompute after each transaction).
 	How it fits the project: the component half of Task 14 (closed-schema TipTap editor); Task
 	15/16's lesson/knowledge-check editors embed this directly.
+	Toolbar buttons are icon-only: each carries `aria-label` (and a matching `title` tooltip) with
+	the same words the text buttons had, so the accessible names are unchanged.
 	Depends on: `@tiptap/core` (`Editor`), `./extensions` (`authorExtensions`), `./prosemap`
 	(`toEditor`/`fromEditor`), `../prose/types` (`ProseDoc`, `CalloutKind`).
 	Used by: Task 15/16 authoring routes (not yet built), `RichTextEditor.svelte.spec.ts`.
@@ -23,6 +25,26 @@
 	import { authorExtensions } from './extensions';
 	import { toEditor, fromEditor } from './prosemap';
 	import type { ProseDoc, CalloutKind } from '../prose/types';
+	import '../prose/prose.css';
+	import type { Component } from 'svelte';
+	import type { LucideProps } from '@lucide/svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import Bold from '@lucide/svelte/icons/bold';
+	import Italic from '@lucide/svelte/icons/italic';
+	import Underline from '@lucide/svelte/icons/underline';
+	import Subscript from '@lucide/svelte/icons/subscript';
+	import Superscript from '@lucide/svelte/icons/superscript';
+	import Code from '@lucide/svelte/icons/code';
+	import Heading2 from '@lucide/svelte/icons/heading-2';
+	import Heading3 from '@lucide/svelte/icons/heading-3';
+	import Heading4 from '@lucide/svelte/icons/heading-4';
+	import List from '@lucide/svelte/icons/list';
+	import ListOrdered from '@lucide/svelte/icons/list-ordered';
+	import TextQuote from '@lucide/svelte/icons/text-quote';
+	import Info from '@lucide/svelte/icons/info';
+	import LinkIcon from '@lucide/svelte/icons/link';
+	import Table from '@lucide/svelte/icons/table';
+	import ImageIcon from '@lucide/svelte/icons/image';
 
 	let {
 		doc,
@@ -53,6 +75,9 @@
 			element,
 			extensions: authorExtensions(),
 			content: toEditor(initialDoc),
+			// `prose` reuses prose.css's paper look for the editable surface (same classes as the
+			// student reader), so authors see what students will.
+			editorProps: { attributes: { class: 'prose' } },
 			onUpdate: () => onchange(fromEditor(instance.getJSON())),
 			onTransaction: () => {
 				version += 1;
@@ -107,109 +132,196 @@
 	}
 </script>
 
+<!-- One icon-only toolbar button. `pressed` undefined omits aria-pressed (non-toggle actions). -->
+{#snippet tool(
+	label: string,
+	icon: Component<LucideProps>,
+	onclick: () => void,
+	pressed?: boolean,
+	disabled?: boolean
+)}
+	<button
+		type="button"
+		aria-label={label}
+		title={label}
+		aria-pressed={pressed}
+		{onclick}
+		{disabled}
+	>
+		<Icon {icon} size={18} />
+	</button>
+{/snippet}
+
 <div class="richtext-editor">
 	<div class="toolbar" role="toolbar" aria-label="Formatting">
-		<button
-			type="button"
-			aria-pressed={activeState.bold}
-			onclick={() => editor?.chain().focus().toggleBold().run()}>Bold</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.italic}
-			onclick={() => editor?.chain().focus().toggleItalic().run()}>Italic</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.underline}
-			onclick={() => editor?.chain().focus().toggleUnderline().run()}>Underline</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.subscript}
-			onclick={() => editor?.chain().focus().toggleSubscript().run()}>Sub</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.superscript}
-			onclick={() => editor?.chain().focus().toggleSuperscript().run()}>Sup</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.code}
-			onclick={() => editor?.chain().focus().toggleCode().run()}>Code</button
-		>
+		{@render tool('Bold', Bold, () => editor?.chain().focus().toggleBold().run(), activeState.bold)}
+		{@render tool(
+			'Italic',
+			Italic,
+			() => editor?.chain().focus().toggleItalic().run(),
+			activeState.italic
+		)}
+		{@render tool(
+			'Underline',
+			Underline,
+			() => editor?.chain().focus().toggleUnderline().run(),
+			activeState.underline
+		)}
+		{@render tool(
+			'Sub',
+			Subscript,
+			() => editor?.chain().focus().toggleSubscript().run(),
+			activeState.subscript
+		)}
+		{@render tool(
+			'Sup',
+			Superscript,
+			() => editor?.chain().focus().toggleSuperscript().run(),
+			activeState.superscript
+		)}
+		{@render tool('Code', Code, () => editor?.chain().focus().toggleCode().run(), activeState.code)}
 
-		<button
-			type="button"
-			aria-pressed={activeState.h2}
-			onclick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>H2</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.h3}
-			onclick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>H3</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.h4}
-			onclick={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}>H4</button
-		>
+		<span class="sep" aria-hidden="true"></span>
+		{@render tool(
+			'H2',
+			Heading2,
+			() => editor?.chain().focus().toggleHeading({ level: 2 }).run(),
+			activeState.h2
+		)}
+		{@render tool(
+			'H3',
+			Heading3,
+			() => editor?.chain().focus().toggleHeading({ level: 3 }).run(),
+			activeState.h3
+		)}
+		{@render tool(
+			'H4',
+			Heading4,
+			() => editor?.chain().focus().toggleHeading({ level: 4 }).run(),
+			activeState.h4
+		)}
 
-		<button
-			type="button"
-			aria-pressed={activeState.bulletList}
-			onclick={() => editor?.chain().focus().toggleBulletList().run()}>Bullet list</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.orderedList}
-			onclick={() => editor?.chain().focus().toggleOrderedList().run()}>Numbered list</button
-		>
-		<button
-			type="button"
-			aria-pressed={activeState.blockquote}
-			onclick={() => editor?.chain().focus().toggleBlockquote().run()}>Quote</button
-		>
+		<span class="sep" aria-hidden="true"></span>
+		{@render tool(
+			'Bullet list',
+			List,
+			() => editor?.chain().focus().toggleBulletList().run(),
+			activeState.bulletList
+		)}
+		{@render tool(
+			'Numbered list',
+			ListOrdered,
+			() => editor?.chain().focus().toggleOrderedList().run(),
+			activeState.orderedList
+		)}
+		{@render tool(
+			'Quote',
+			TextQuote,
+			() => editor?.chain().focus().toggleBlockquote().run(),
+			activeState.blockquote
+		)}
 
+		<span class="sep" aria-hidden="true"></span>
 		<label for="callout-kind">Callout kind</label>
 		<select id="callout-kind" bind:value={calloutKind}>
 			<option value="key-principle">Key principle</option>
 			<option value="clinical-note">Clinical note</option>
 			<option value="warning">Warning</option>
 		</select>
-		<button
-			type="button"
-			aria-pressed={activeState.callout}
-			onclick={() => editor?.chain().focus().toggleCallout(calloutKind).run()}>Callout</button
-		>
+		{@render tool(
+			'Callout',
+			Info,
+			() => editor?.chain().focus().toggleCallout(calloutKind).run(),
+			activeState.callout
+		)}
 
+		<span class="sep" aria-hidden="true"></span>
 		<label for="link-url">Link URL</label>
 		<input id="link-url" type="text" placeholder="https://" bind:value={linkUrl} />
-		<button type="button" onclick={applyLink}>Link</button>
+		{@render tool('Link', LinkIcon, applyLink)}
 		{#if linkError}
 			<p role="alert">{linkError}</p>
 		{/if}
 
-		<button
-			type="button"
-			onclick={() =>
-				editor?.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()}
-			>Insert table</button
-		>
-
-		<button type="button" onclick={insertImage} disabled={!oninsertimage}>Image</button>
+		<span class="sep" aria-hidden="true"></span>
+		{@render tool('Insert table', Table, () =>
+			editor?.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()
+		)}
+		{@render tool('Image', ImageIcon, insertImage, undefined, !oninsertimage)}
 	</div>
 
-	<div bind:this={element}></div>
+	<div class="surface" bind:this={element}></div>
 </div>
 
 <style>
+	.richtext-editor {
+		border: 1px solid var(--border-strong);
+		border-radius: var(--radius-md);
+		overflow: hidden;
+	}
 	.toolbar {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem;
-		margin-block-end: 0.5rem;
+		gap: var(--space-1);
+		padding: var(--space-2);
+		background: var(--surface-raised);
+		border-block-end: 1px solid var(--border-strong);
+	}
+	.toolbar button {
+		width: 2.25rem;
+		height: 2.25rem;
+		min-height: 2.25rem;
+		padding: 0;
+		background: transparent;
+		border-color: transparent;
+		color: var(--text-muted);
+	}
+	.toolbar button:hover:not(:disabled) {
+		background: var(--surface);
+		border-color: transparent;
+		color: var(--text);
+	}
+	/* Pressed is a fill plus an inset ring, so it never relies on colour alone. */
+	.toolbar button[aria-pressed='true'] {
+		background: var(--accent-soft);
+		color: var(--accent);
+		box-shadow: inset 0 0 0 2px var(--accent);
+	}
+	.toolbar label {
+		font-size: var(--text-sm);
+		color: var(--text-muted);
+	}
+	.toolbar select,
+	.toolbar input {
+		min-height: 2.25rem;
+		padding-block: var(--space-1);
+	}
+	.toolbar input {
+		width: 10rem;
+	}
+	.toolbar p[role='alert'] {
+		flex-basis: 100%;
+		margin: 0;
+		color: var(--danger);
+		font-size: var(--text-sm);
+	}
+	.sep {
+		width: 1px;
+		height: 1.5rem;
+		margin-inline: var(--space-1);
+		background: var(--border-strong);
+	}
+	/* The editable area is the same dark paper the reader uses. */
+	.surface :global(.ProseMirror) {
+		max-width: none;
+		min-height: 8rem;
+		padding: var(--space-4);
+		background: var(--paper-bg);
+		color: var(--paper-text);
+	}
+	.surface :global(.ProseMirror:focus-visible) {
+		outline: 2px solid var(--paper-link);
+		outline-offset: -2px;
 	}
 </style>

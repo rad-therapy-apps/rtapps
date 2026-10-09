@@ -18,6 +18,9 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { api } from './api';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
 	import type { components } from '@rtapps/api-client';
 
 	type VersionOut = components['schemas']['VersionOut'];
@@ -65,7 +68,7 @@
 </script>
 
 <div class="publish-panel">
-	<section>
+	<Card as="section">
 		<h2>Needs review ({importNotes.length})</h2>
 		{#if importNotes.length === 0}
 			<p>Nothing flagged.</p>
@@ -81,21 +84,21 @@
 				{/each}
 			</ul>
 		{/if}
-	</section>
+	</Card>
 
-	<section>
+	<Card as="section">
 		<h2>Publish</h2>
 		<label>
 			Change note
 			<textarea bind:value={changeNote}></textarea>
 		</label>
-		<button type="button" onclick={publish} disabled={publishing}>Publish</button>
+		<Button variant="primary" onclick={publish} disabled={publishing}>Publish</Button>
 		{#if publishError}
-			<p role="alert">{publishError}</p>
+			<Alert tone="danger" role="alert">{publishError}</Alert>
 		{/if}
-	</section>
+	</Card>
 
-	<section>
+	<Card as="section">
 		<h2>Version history</h2>
 		{#if versions.length === 0}
 			<p>Never published.</p>
@@ -111,5 +114,24 @@
 				{/each}
 			</ul>
 		{/if}
-	</section>
+	</Card>
 </div>
+
+<style>
+	.publish-panel {
+		display: grid;
+		gap: var(--space-4);
+	}
+	.publish-panel label {
+		display: grid;
+		gap: var(--space-1);
+		max-width: 36rem;
+		margin-block-end: var(--space-3);
+		font-weight: 600;
+		font-size: var(--text-sm);
+	}
+	.publish-panel ul {
+		margin: 0;
+		padding-inline-start: var(--space-5);
+	}
+</style>
