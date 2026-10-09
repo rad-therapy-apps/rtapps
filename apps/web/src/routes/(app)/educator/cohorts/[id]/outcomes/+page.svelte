@@ -17,6 +17,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { formatPercent } from '$lib/cohort/format';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -26,60 +27,71 @@
 	<title>Outcomes — RTTLearn</title>
 </svelte:head>
 
-<h1>Outcomes</h1>
+<PageHeader title="Outcomes" />
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- API URL (CSV download), not a SvelteKit route -->
 <a href={`/api/v1/cohorts/${data.cohortId}/outcomes.csv`} data-testid="csv-link">Download CSV</a>
 
-<table>
-	<thead>
-		<tr>
-			<th>Code</th>
-			<th>Title</th>
-			<th>Questions</th>
-			<th>Answered</th>
-			<th>% Correct</th>
-			<th>Below threshold</th>
-			<th>Students</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each data.mastery.outcomes as o (o.code)}
+<div class="table-wrap">
+	<table>
+		<thead>
 			<tr>
-				<td>{o.code}</td>
-				<td>{o.title}</td>
-				<td>{o.questions}</td>
-				<td>{o.answered}</td>
-				<td>{formatPercent(o.percent_correct)}</td>
-				<td>{o.students_below_threshold}</td>
-				<td>
-					<details>
-						<summary>{o.students.length} students</summary>
-						<table>
-							<thead>
-								<tr>
-									<th>Student</th>
-									<th>Answered</th>
-									<th>% Correct</th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each o.students as s (s.user_id)}
-									<tr>
-										<td>{s.display_name}</td>
-										<td>{s.answered}</td>
-										<td>{formatPercent(s.percent_correct)}</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</details>
-				</td>
+				<th>Code</th>
+				<th>Title</th>
+				<th>Questions</th>
+				<th>Answered</th>
+				<th>% Correct</th>
+				<th>Below threshold</th>
+				<th>Students</th>
 			</tr>
-		{/each}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			{#each data.mastery.outcomes as o (o.code)}
+				<tr>
+					<td>{o.code}</td>
+					<td>{o.title}</td>
+					<td class="num">{o.questions}</td>
+					<td class="num">{o.answered}</td>
+					<td class="num">{formatPercent(o.percent_correct)}</td>
+					<td class="num">{o.students_below_threshold}</td>
+					<td>
+						<details>
+							<summary>{o.students.length} students</summary>
+							<table>
+								<thead>
+									<tr>
+										<th>Student</th>
+										<th>Answered</th>
+										<th>% Correct</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each o.students as s (s.user_id)}
+										<tr>
+											<td>{s.display_name}</td>
+											<td class="num">{s.answered}</td>
+											<td class="num">{formatPercent(s.percent_correct)}</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</details>
+					</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+</div>
 
 <p>
 	<a href={resolve('/(app)/educator/cohorts/[id]', { id: data.cohortId })}>Back to cohort</a>
 </p>
+
+<style>
+	.table-wrap {
+		overflow-x: auto;
+	}
+	.num {
+		font-variant-numeric: tabular-nums;
+	}
+</style>

@@ -143,6 +143,13 @@ test('educator pages are accessible and fit the viewport', async ({ page }) => {
 	test.slow();
 	await signIn(page, EDUCATOR.email, EDUCATOR.password);
 	for (const path of ['/educator', '/author']) await check(page, path);
+	// A cohort page, reached the way an educator does.
+	await page.goto('/educator');
+	await page.getByRole('link', { name: 'Demo cohort' }).click();
+	await expect(page.getByRole('heading', { name: 'Demo cohort' })).toBeVisible();
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'cohort page');
+	await expectNoSidewaysScroll(page, 'cohort page');
 });
 
 test('phone drawer opens, navigates and closes', async ({ page, viewport }) => {
