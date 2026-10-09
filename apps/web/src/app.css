@@ -300,8 +300,10 @@ hr {
 	border: 0;
 }
 
-/* Skip link: off-screen until focused (AppShell and the public layout both render one). */
-.skip-link {
+/* Skip link: off-screen until focused (AppShell and the public layout both render one).
+   `a.skip-link`, not `.skip-link`: it must outrank `a:hover` above, or hovering the focused
+   link turns its text --text on --accent (about 1.5:1). */
+a.skip-link {
 	position: absolute;
 	left: var(--space-4);
 	top: -4rem;
@@ -312,7 +314,7 @@ hr {
 	border-radius: var(--radius-sm);
 	font-weight: 600;
 }
-.skip-link:focus {
+a.skip-link:focus {
 	top: var(--space-4);
 }
 
