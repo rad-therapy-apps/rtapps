@@ -60,7 +60,7 @@ test('the error page is accessible and fits the viewport', async ({ page }) => {
 	// 404 is only reachable with a session.
 	await signIn(page, EDUCATOR.email, EDUCATOR.password);
 	await page.goto('/this-page-does-not-exist');
-	await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: '404', exact: true })).toBeVisible();
 	await page.waitForLoadState('networkidle');
 	await expectAccessible(page, 'error page');
 	await expectNoSidewaysScroll(page, 'error page');

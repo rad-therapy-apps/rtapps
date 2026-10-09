@@ -28,7 +28,7 @@
 <PageHeader title={String(page.status)} />
 <p class="message">
 	<Icon icon={CircleAlert} size={20} />
-	<span>{page.error?.message}</span>
+	<span>{page.error?.message ?? 'Something went wrong.'}</span>
 </p>
 <p><Button href={resolve('/')}>Back to home</Button></p>
 
