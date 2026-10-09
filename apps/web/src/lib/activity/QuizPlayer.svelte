@@ -18,6 +18,7 @@
 <script lang="ts">
 	import Award from '@lucide/svelte/icons/award';
 	import ProseDoc from '$lib/prose/ProseDoc.svelte';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import Button from '$lib/ui/Button.svelte';
 	import Feedback from '$lib/ui/Feedback.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -135,7 +136,10 @@
 		<!-- Start/grade/submit request failed: surfaced as polite live-region text so screen readers
 			 announce it without stealing focus; cleared at the start of every attempt. -->
 		{#if error}
-			<p aria-live="polite" data-testid="player-error">{error}</p>
+			<p class="player-error" aria-live="polite" data-testid="player-error">
+				<Icon icon={CircleAlert} />
+				<span>{error}</span>
+			</p>
 		{/if}
 		<!-- Graded (or resumed) result for this question: verdict, explanation if any, and Next/Finish. -->
 		{#if answers[q.key]}

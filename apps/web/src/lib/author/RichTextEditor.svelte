@@ -331,6 +331,14 @@
 		max-width: 100%;
 		height: auto;
 	}
+	/* TipTap's gap cursor is hard-coded black; colour it from the paper text so it shows on dark paper. */
+	.surface :global(.ProseMirror-gapcursor:after) {
+		border-top-color: var(--paper-text);
+	}
+	/* Selected table cells: a tinted fill; text stays at the paper-text contrast on it. */
+	.surface :global(.ProseMirror .selectedCell) {
+		background: var(--paper-selected-bg);
+	}
 	.surface :global(.ProseMirror:focus-visible) {
 		outline: 2px solid var(--paper-link);
 		outline-offset: -2px;

@@ -48,6 +48,7 @@
 	--paper-link: #67e8f9;
 	--paper-rule: #4c6383; /* table/blockquote rules, decorative */
 	--paper-th-bg: #1f3150;
+	--paper-selected-bg: #264a73; /* selected table cells in the editor */
 	--paper-callout-kp-bg: #1b2d4a;
 	--paper-callout-kp-bar: #60a5fa;
 	--paper-callout-cn-bg: #16302c;
@@ -215,6 +216,22 @@ a.btn:hover {
 button:disabled {
 	opacity: 0.55;
 	cursor: not-allowed;
+}
+
+/* Student player request errors: the Alert danger look on the existing live-region <p>. */
+.player-error {
+	display: flex;
+	gap: var(--space-3);
+	align-items: flex-start;
+	padding: var(--space-3) var(--space-4);
+	border: 1px solid var(--danger);
+	border-radius: var(--radius-sm);
+	background: var(--danger-bg);
+	color: var(--danger);
+}
+.player-error svg {
+	flex: none;
+	margin-top: 0.15em;
 }
 
 input:not([type='radio'], [type='checkbox'], [type='range'], [type='file']),

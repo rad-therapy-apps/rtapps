@@ -47,6 +47,9 @@ const PAIRS: [string, string, number][] = [
 		[s, 'surface-raised', TEXT],
 		['text', `${s}-bg`, TEXT]
 	]),
+	// Editor: selected table cells sit on dark paper only (the editor is never in a .reading-panel)
+	['paper-text', 'paper-selected-bg', TEXT],
+	['paper-link', 'paper-selected-bg', TEXT],
 	// Reading panel: dark paper (default) and light paper
 	...['paper', 'paper-light'].flatMap((p): [string, string, number][] => [
 		[`${p}-text`, `${p}-bg`, TEXT],

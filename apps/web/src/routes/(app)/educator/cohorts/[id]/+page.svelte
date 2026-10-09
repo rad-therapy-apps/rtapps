@@ -155,7 +155,7 @@
 					<td>
 						<form method="POST" action="?/remove" use:enhance>
 							<input type="hidden" name="user_id" value={s.user_id} />
-							<Button type="submit">Remove</Button>
+							<Button type="submit" variant="danger">Remove</Button>
 						</form>
 					</td>
 				</tr>
