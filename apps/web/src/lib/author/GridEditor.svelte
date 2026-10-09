@@ -21,6 +21,8 @@
 	Used by: `routes/(app)/author/data-tables/+page.svelte`, `GridEditor.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import type { Grid, GridRow } from './types';
 
 	let { initialGrid, onchange }: { initialGrid: Grid; onchange: (next: Grid) => void } = $props();
@@ -172,14 +174,16 @@
 </script>
 
 <div class="grid-editor">
-	<label>
-		Row axis label
-		<input value={grid.row_label} oninput={(e) => setRowLabel(e.currentTarget.value)} />
-	</label>
-	<label>
-		Column axis label
-		<input value={grid.col_label} oninput={(e) => setColLabel(e.currentTarget.value)} />
-	</label>
+	<div class="axis-labels">
+		<label>
+			Row axis label
+			<input value={grid.row_label} oninput={(e) => setRowLabel(e.currentTarget.value)} />
+		</label>
+		<label>
+			Column axis label
+			<input value={grid.col_label} oninput={(e) => setColLabel(e.currentTarget.value)} />
+		</label>
+	</div>
 
 	<div class="grid-table-wrap">
 		<table class="grid-table">
@@ -197,9 +201,13 @@
 								}}
 								aria-label={`Column ${ci + 1} value`}
 							/>
-							<button type="button" onclick={() => removeCol(ci)} disabled={grid.cols.length <= 1}>
+							<Button
+								variant="ghost"
+								onclick={() => removeCol(ci)}
+								disabled={grid.cols.length <= 1}
+							>
 								Remove column
-							</button>
+							</Button>
 						</th>
 					{/each}
 				</tr>
@@ -217,9 +225,13 @@
 								}}
 								aria-label={`Row ${ri + 1} key`}
 							/>
-							<button type="button" onclick={() => removeRow(ri)} disabled={grid.rows.length <= 1}>
+							<Button
+								variant="ghost"
+								onclick={() => removeRow(ri)}
+								disabled={grid.rows.length <= 1}
+							>
 								Remove row
-							</button>
+							</Button>
 						</th>
 						{#each row.values as value, ci (ci)}
 							<td>
@@ -241,15 +253,15 @@
 	</div>
 
 	<div class="grid-controls">
-		<button type="button" onclick={addRow}>Add row</button>
-		<button type="button" onclick={addCol}>Add column</button>
+		<Button onclick={addRow}>Add row</Button>
+		<Button onclick={addCol}>Add column</Button>
 	</div>
 
 	{#if !colsAscending}
-		<p role="alert">Column values must be strictly ascending.</p>
+		<Alert tone="warning" role="alert">Column values must be strictly ascending.</Alert>
 	{/if}
 	{#if !rowKeysAscending}
-		<p role="alert">Row keys must be strictly ascending.</p>
+		<Alert tone="warning" role="alert">Row keys must be strictly ascending.</Alert>
 	{/if}
 
 	<div class="paste-controls">
@@ -259,29 +271,98 @@
 				first)
 				<textarea bind:value={pasteText}></textarea>
 			</label>
-			<button type="button" onclick={applyPaste}>Apply paste</button>
-			<button type="button" onclick={() => (showPaste = false)}>Cancel</button>
+			<div class="paste-buttons">
+				<Button onclick={applyPaste}>Apply paste</Button>
+				<Button variant="ghost" onclick={() => (showPaste = false)}>Cancel</Button>
+			</div>
 			{#if pasteError}
-				<p role="alert">{pasteError}</p>
+				<Alert tone="danger" role="alert">{pasteError}</Alert>
 			{/if}
 		{:else}
-			<button type="button" onclick={() => (showPaste = true)}>Paste from spreadsheet</button>
+			<Button onclick={() => (showPaste = true)}>Paste from spreadsheet</Button>
 		{/if}
 	</div>
 </div>
 
 <style>
+	.grid-editor {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--space-3);
+	}
+	.grid-editor label {
+		display: grid;
+		gap: var(--space-1);
+		font-weight: 600;
+		font-size: var(--text-sm);
+	}
+	.axis-labels {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+	}
+	.axis-labels label {
+		flex: 1 1 12rem;
+	}
+	/* The grid scrolls inside its own wrapper so the page never scrolls sideways. */
 	.grid-table-wrap {
 		overflow-x: auto;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
 	}
+	.grid-table {
+		width: max-content;
+		min-width: 100%;
+		font-variant-numeric: tabular-nums;
+	}
+	/* Compact cells: the shared 2.5rem control height is too tall for a dense matrix. */
 	.grid-table input {
 		width: 6rem;
+		min-height: 2rem;
+		padding: var(--space-1) var(--space-2);
+	}
+	.grid-table :global(button) {
+		min-height: 2rem;
+		padding: var(--space-1) var(--space-2);
+		font-size: var(--text-sm);
+	}
+	.grid-table input:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 1px;
+	}
+	/* Sticky header row; every cell gets an opaque background so scrolled cells do not show through. */
+	.grid-table thead th {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: var(--surface-raised);
+	}
+	/* Sticky first column: the row-key column labels each row, so it is the one worth pinning. */
+	.grid-table tbody th {
+		position: sticky;
+		inset-inline-start: 0;
+		z-index: 1;
+		background: var(--surface-raised);
+	}
+	.grid-table thead th:first-child {
+		inset-inline-start: 0;
+		z-index: 2;
 	}
 	.grid-controls,
-	.paste-controls {
+	.paste-controls,
+	.paste-buttons {
 		display: flex;
-		gap: 0.5rem;
-		margin-block: 0.5rem;
+		gap: var(--space-2);
 		flex-wrap: wrap;
+	}
+	.paste-controls {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.paste-controls label {
+		width: 100%;
+	}
+	.paste-controls textarea {
+		width: 100%;
 	}
 </style>

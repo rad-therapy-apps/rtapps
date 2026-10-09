@@ -142,7 +142,7 @@ test('educator pages are accessible and fit the viewport', async ({ page }) => {
 	// at the 30 s default.
 	test.slow();
 	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	for (const path of ['/educator', '/author']) await check(page, path);
+	for (const path of ['/educator', '/author', '/author/data-tables']) await check(page, path);
 	// A cohort page, reached the way an educator does.
 	await page.goto('/educator');
 	await page.getByRole('link', { name: 'Demo cohort' }).click();
@@ -150,6 +150,21 @@ test('educator pages are accessible and fit the viewport', async ({ page }) => {
 	await page.waitForLoadState('networkidle');
 	await expectAccessible(page, 'cohort page');
 	await expectNoSidewaysScroll(page, 'cohort page');
+});
+
+test('quiz editor is accessible and fits the viewport', async ({ page }) => {
+	test.slow();
+	await signIn(page, EDUCATOR.email, EDUCATOR.password);
+	// The seeded "Demo quiz", reached the way an educator does: from the authoring hub.
+	await page.goto('/author');
+	await page
+		.getByRole('link', { name: /Demo quiz/ })
+		.first()
+		.click();
+	await expect(page.getByRole('tab', { name: 'Edit' })).toBeVisible();
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'quiz editor');
+	await expectNoSidewaysScroll(page, 'quiz editor');
 });
 
 test('phone drawer opens, navigates and closes', async ({ page, viewport }) => {

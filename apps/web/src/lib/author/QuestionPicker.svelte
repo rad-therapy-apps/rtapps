@@ -17,6 +17,8 @@
 	Used by: `routes/(app)/author/quizzes/[id]/+page.svelte`.
 -->
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import BankQuestionForm, { type BankQuestionValue } from './BankQuestionForm.svelte';
 	import { api } from './api';
 	import { problemDetail } from './problem';
@@ -105,32 +107,78 @@
 			Search question bank
 			<input value={query} oninput={(e) => (query = e.currentTarget.value)} />
 		</label>
-		<button type="button" onclick={search} disabled={searching}>Search</button>
-		{#if searchError}
-			<p role="alert">{searchError}</p>
-		{/if}
-		{#if results.length > 0}
-			<ul>
-				{#each results as q (q.id)}
-					<li>
-						{q.stem}
-						<button type="button" onclick={() => onadd(q)}>Add</button>
-					</li>
-				{/each}
-			</ul>
-		{/if}
+		<Button onclick={search} disabled={searching}>Search</Button>
 	</div>
+	{#if searchError}
+		<Alert tone="danger" role="alert">{searchError}</Alert>
+	{/if}
+	{#if results.length > 0}
+		<ul class="results">
+			{#each results as q (q.id)}
+				<li>
+					<span>{q.stem}</span>
+					<Button onclick={() => onadd(q)}>Add</Button>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 
 	<div class="create">
 		{#if showCreate}
 			<BankQuestionForm value={draft} onchange={(next) => (draft = next)} />
-			<button type="button" onclick={createQuestion} disabled={creating}>Create question</button>
-			<button type="button" onclick={() => (showCreate = false)}>Cancel</button>
+			<div class="create-controls">
+				<Button variant="primary" onclick={createQuestion} disabled={creating}>
+					Create question
+				</Button>
+				<Button variant="ghost" onclick={() => (showCreate = false)}>Cancel</Button>
+			</div>
 			{#if createError}
-				<p role="alert">{createError}</p>
+				<Alert tone="danger" role="alert">{createError}</Alert>
 			{/if}
 		{:else}
-			<button type="button" onclick={() => (showCreate = true)}>New question</button>
+			<Button onclick={() => (showCreate = true)}>New question</Button>
 		{/if}
 	</div>
 </div>
+
+<style>
+	.question-picker {
+		display: grid;
+		gap: var(--space-3);
+	}
+	.search {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		gap: var(--space-3);
+	}
+	.search label {
+		display: grid;
+		flex: 1 1 14rem;
+		gap: var(--space-1);
+		font-weight: 600;
+		font-size: var(--text-sm);
+	}
+	.results {
+		display: grid;
+		gap: var(--space-2);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.results li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+	}
+	.create-controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+</style>
