@@ -25,6 +25,8 @@
 	import MatchingPlayer from '$lib/activity/MatchingPlayer.svelte';
 	import SequencingPlayer from '$lib/activity/SequencingPlayer.svelte';
 	import ExternalPlayer from '$lib/activity/ExternalPlayer.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Card from '$lib/ui/Card.svelte';
 	import { registry } from '$lib/calc/registry';
 	import { activitySnapshot } from '$lib/activity/types';
 	import type {
@@ -52,27 +54,38 @@
 	 navigation moves from one activity to another, so a previous activity's in-progress state
 	 (index, answers, busy) never bleeds into the next one; mirrors `{#key pageIndex}` in
 	 `LessonPager.svelte`. -->
+{#if snapshot.activity.kind !== 'external'}
+	<PageHeader title={snapshot.activity.title} />
+{/if}
 {#key data.activity.activity_id}
 	{#if snapshot.activity.kind === 'quiz'}
 		<!-- svelte-check doesn't carry the `snapshot.activity.kind` narrowing above across the
 			 component-prop boundary, so the discriminated union is cast explicitly here; the check
 			 above is what actually guarantees the shape at runtime. -->
-		<QuizPlayer activityId={data.activity.activity_id} snapshot={snapshot as QuizSnapshot} />
+		<Card>
+			<QuizPlayer activityId={data.activity.activity_id} snapshot={snapshot as QuizSnapshot} />
+		</Card>
 	{:else if snapshot.activity.kind === 'flashcards'}
-		<FlashcardPlayer
-			activityId={data.activity.activity_id}
-			snapshot={snapshot as FlashcardsSnapshot}
-		/>
+		<Card>
+			<FlashcardPlayer
+				activityId={data.activity.activity_id}
+				snapshot={snapshot as FlashcardsSnapshot}
+			/>
+		</Card>
 	{:else if snapshot.activity.kind === 'matching'}
-		<MatchingPlayer
-			activityId={data.activity.activity_id}
-			snapshot={snapshot as MatchingSnapshot}
-		/>
+		<Card>
+			<MatchingPlayer
+				activityId={data.activity.activity_id}
+				snapshot={snapshot as MatchingSnapshot}
+			/>
+		</Card>
 	{:else if snapshot.activity.kind === 'sequencing'}
-		<SequencingPlayer
-			activityId={data.activity.activity_id}
-			snapshot={snapshot as SequencingSnapshot}
-		/>
+		<Card>
+			<SequencingPlayer
+				activityId={data.activity.activity_id}
+				snapshot={snapshot as SequencingSnapshot}
+			/>
+		</Card>
 	{:else if snapshot.activity.kind === 'calculator'}
 		<!-- No player import here: which component to render depends on `calc_type`, looked up in
 			 the registry below. No attempt is started for calculators (Task 11's 409 guard is the

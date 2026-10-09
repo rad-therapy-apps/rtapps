@@ -76,6 +76,18 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 	await expect(page.getByText('Question 1 of 4')).toBeVisible();
 	await expectAccessible(page, 'quiz activity');
 	await expectNoSidewaysScroll(page, 'quiz activity');
+	// Matching (Radiation Biology) and flashcards (Clinical Practice), the same way. No sequencing
+	// activity is seeded, so that player is covered by its component spec only.
+	await page.goto('/subjects/radiation-biology');
+	await page.getByRole('link', { name: 'Cell & Molecular Biology: Matching' }).click();
+	await expect(page.getByTestId('matching-terms')).toBeVisible();
+	await expectAccessible(page, 'matching activity');
+	await expectNoSidewaysScroll(page, 'matching activity');
+	await page.goto('/subjects/clinical-practice');
+	await page.getByRole('link', { name: 'Terminology Challenge: Flashcards' }).click();
+	await expect(page.getByText('Card 1 of')).toBeVisible();
+	await expectAccessible(page, 'flashcards activity');
+	await expectNoSidewaysScroll(page, 'flashcards activity');
 	// The arcade frame fits the viewport: the page itself never scrolls.
 	await page.goto('/subjects/radiation-biology');
 	await page.getByRole('link', { name: 'Cell Defender' }).click();

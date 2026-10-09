@@ -16,7 +16,11 @@
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `SequencingPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import Check from '@lucide/svelte/icons/check';
+	import X from '@lucide/svelte/icons/x';
 	import { api } from '$lib/lesson/api';
+	import Button from '$lib/ui/Button.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
 	import { gradeItem, startAttempt, submitAttempt } from './attempts';
 	import type { SequencingSnapshot } from './types';
 
@@ -116,24 +120,28 @@
 				{#if item?.detail}
 					<span class="detail">{item.detail}</span>
 				{/if}
-				<button
-					type="button"
+				<Button
 					aria-label={`Move up ${item?.label}`}
 					disabled={busy || index === 0}
 					onclick={() => moveUp(index)}
 				>
 					Move up
-				</button>
-				<button
-					type="button"
+				</Button>
+				<Button
 					aria-label={`Move down ${item?.label}`}
 					disabled={busy || index === order.length - 1}
 					onclick={() => moveDown(index)}
 				>
 					Move down
-				</button>
+				</Button>
 				{#if answers[key]}
-					<span data-testid={`seq-feedback-${key}`}>{answers[key].correct ? '✓' : '✗'}</span>
+					<span data-testid={`seq-feedback-${key}`}>
+						{#if answers[key].correct}
+							<Icon icon={Check} label="Correct" />
+						{:else}
+							<Icon icon={X} label="Incorrect" />
+						{/if}
+					</span>
 				{/if}
 			</li>
 		{/each}
@@ -143,7 +151,7 @@
 	{#if error}
 		<p aria-live="polite" data-testid="player-error">{error}</p>
 	{/if}
-	<button type="button" disabled={!attemptId || busy} onclick={checkOrder}>Check order</button>
+	<Button variant="primary" disabled={!attemptId || busy} onclick={checkOrder}>Check order</Button>
 {/if}
 
 <style>
@@ -151,5 +159,17 @@
 	ol {
 		list-style: none;
 		padding: 0;
+	}
+	/* Each row wraps its label and buttons so it never overflows a 360px screen. */
+	li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		margin-bottom: var(--space-2);
+	}
+	li > span:first-child {
+		flex: 1 1 10rem;
+		min-width: 0;
 	}
 </style>

@@ -16,7 +16,11 @@
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `QuizPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import Award from '@lucide/svelte/icons/award';
 	import ProseDoc from '$lib/prose/ProseDoc.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Feedback from '$lib/ui/Feedback.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
 	import { api } from '$lib/lesson/api';
 	import { gradeItem, startAttempt, submitAttempt } from './attempts';
 	import type { QuizSnapshot } from './types';
@@ -105,7 +109,7 @@
 {#if result}
 	<section aria-live="polite" data-testid="quiz-result">
 		{#if result.passed}
-			<p class="badge" data-testid="quiz-badge">🏅 Badge earned!</p>
+			<p class="badge" data-testid="quiz-badge"><Icon icon={Award} /> Badge earned!</p>
 		{/if}
 		<p>Score: {result.percent ?? 0}%</p>
 	</section>
@@ -116,7 +120,7 @@
 		<ProseDoc doc={q.stem} />
 		<!-- One radio per option; `i` as the key/value since options have no id of their own and the list is static per question. -->
 		{#each q.body.options as option, i (i)}
-			<label>
+			<label class="option">
 				<input
 					type="radio"
 					name={q.key}
@@ -136,15 +140,17 @@
 		<!-- Graded (or resumed) result for this question: verdict, explanation if any, and Next/Finish. -->
 		{#if answers[q.key]}
 			{@const a = answers[q.key]}
-			<p data-testid="feedback">{a.correct ? 'Correct!' : 'Not quite.'}</p>
+			<div data-testid="feedback">
+				<Feedback correct={!!a.correct}>{a.correct ? 'Correct!' : 'Not quite.'}</Feedback>
+			</div>
 			{#if a.explanation}
 				<ProseDoc doc={a.explanation} />
 			{/if}
 			{#if index < questions.length - 1}
-				<button type="button" onclick={() => (index += 1)}>Next question</button>
+				<Button variant="primary" onclick={() => (index += 1)}>Next question</Button>
 			{:else}
-				<button type="button" onclick={finish} disabled={answered < questions.length || busy}
-					>Finish quiz</button
+				<Button variant="primary" onclick={finish} disabled={answered < questions.length || busy}
+					>Finish quiz</Button
 				>
 			{/if}
 		{/if}
@@ -152,8 +158,18 @@
 {/if}
 
 <style>
-	/* Draws attention to a passed badge without relying on color alone (the emoji carries it). */
+	/* Draws attention to a passed badge without relying on color alone (the award icon carries it). */
 	.badge {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
 		font-weight: bold;
+	}
+	/* One radio per row, at least a control-height touch target. */
+	.option {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-height: var(--control-height);
 	}
 </style>
