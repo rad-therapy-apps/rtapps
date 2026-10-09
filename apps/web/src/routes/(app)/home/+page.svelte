@@ -79,7 +79,8 @@
 {:else if data.results.length === 0}
 	<p>No results yet — pick a subject to start.</p>
 {:else}
-	<div class="table-scroll">
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-scroll" role="region" aria-label="Your results" tabindex="0">
 		<table>
 			<thead>
 				<tr>

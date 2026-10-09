@@ -29,6 +29,11 @@
 	import { beforeNavigate } from '$app/navigation';
 	import GridEditor from '$lib/author/GridEditor.svelte';
 	import PublishPanel from '$lib/author/PublishPanel.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import { api } from '$lib/author/api';
 	import { errorTitle, problemDetail } from '$lib/author/problem';
 	import type { Grid } from '$lib/author/types';
@@ -200,109 +205,168 @@
 	<title>Data tables — Author — RTTLearn</title>
 </svelte:head>
 
-<h1>Data tables</h1>
+<PageHeader title="Data tables" />
 
-<section>
-	<h2>Tables ({tables.length})</h2>
-	{#if tables.length === 0}
-		<p>No data tables yet.</p>
-	{:else}
-		<ul>
-			{#each tables as table (table.key)}
-				<li>
-					<button type="button" onclick={() => editTable(table)}>{table.title}</button>
-					(<code>{table.key}</code>)
-				</li>
-			{/each}
-		</ul>
-	{/if}
-	<button type="button" onclick={newTable}>New table</button>
-</section>
-
-{#if editing}
-	<section>
-		<h2>{editing.isNew ? 'New table' : `Edit ${editing.title}`}</h2>
-		<label>
-			Key
-			<input
-				value={editing.key}
-				disabled={!editing.isNew}
-				oninput={(e) => setKey(e.currentTarget.value)}
-			/>
-		</label>
-		<label>
-			Title
-			<input value={editing.title} oninput={(e) => setTitle(e.currentTarget.value)} />
-		</label>
-
-		{#key editing.session}
-			<GridEditor initialGrid={editing.grid} onchange={setGrid} />
-		{/key}
-
-		<div class="save-controls">
-			<button type="button" onclick={saveTable} disabled={saving}>Save table</button>
-			<button type="button" onclick={cancelEdit}>Cancel</button>
-			{#if saveError}
-				<p role="alert">{saveError}</p>
-			{/if}
-		</div>
-	</section>
-{/if}
-
-<section>
-	<h2>New calculator</h2>
-	<label>
-		Title
-		<input value={calcTitle} oninput={(e) => (calcTitle = e.currentTarget.value)} />
-	</label>
-	<label>
-		Subject
-		<select value={calcSubjectSlug} onchange={(e) => (calcSubjectSlug = e.currentTarget.value)}>
-			{#each data.subjects as subject (subject.id)}
-				<option value={subject.slug}>{subject.title}</option>
-			{/each}
-		</select>
-	</label>
-	<fieldset>
-		<legend>Table keys</legend>
+<div class="sections">
+	<Card as="section">
+		<h2>Tables ({tables.length})</h2>
 		{#if tables.length === 0}
-			<p>No data tables to reference yet.</p>
+			<p>No data tables yet.</p>
 		{:else}
-			{#each tables as table (table.key)}
-				<label>
-					<input
-						type="checkbox"
-						checked={calcTableKeys.includes(table.key)}
-						onchange={(e) => toggleTableKey(table.key, e.currentTarget.checked)}
-					/>
-					{table.key} — {table.title}
-				</label>
-			{/each}
+			<ul class="table-list">
+				{#each tables as table (table.key)}
+					<li>
+						<Button onclick={() => editTable(table)}>{table.title}</Button>
+						(<code>{table.key}</code>)
+					</li>
+				{/each}
+			</ul>
 		{/if}
-	</fieldset>
-	<label>
-		Calc type
-		<select value={calcType} onchange={(e) => (calcType = e.currentTarget.value)}>
-			{#each CALC_TYPES as type (type)}
-				<option value={type}>{type}</option>
-			{/each}
-		</select>
-	</label>
-	<button type="button" onclick={createCalculator} disabled={calcSaving}>Create calculator</button>
-	{#if calcError}
-		<p role="alert">{calcError}</p>
-	{/if}
-</section>
+		<Button variant="primary" onclick={newTable}>New table</Button>
+	</Card>
 
-{#if createdCalculator}
-	<section>
-		<h3>
-			{createdCalculator.title} ({createdCalculator.subject_slug}) — {createdCalculator.status}
-		</h3>
-		<PublishPanel
-			activityId={createdCalculator.activity_id}
-			importNotes={[]}
-			versions={calcVersions}
-		/>
-	</section>
-{/if}
+	{#if editing}
+		<Card as="section">
+			<div class="stack">
+				<h2>{editing.isNew ? 'New table' : `Edit ${editing.title}`}</h2>
+				<Field label="Key" id="dt-key">
+					<input
+						id="dt-key"
+						value={editing.key}
+						disabled={!editing.isNew}
+						oninput={(e) => setKey(e.currentTarget.value)}
+					/>
+				</Field>
+				<Field label="Title" id="dt-title">
+					<input
+						id="dt-title"
+						value={editing.title}
+						oninput={(e) => setTitle(e.currentTarget.value)}
+					/>
+				</Field>
+
+				{#key editing.session}
+					<GridEditor initialGrid={editing.grid} onchange={setGrid} />
+				{/key}
+
+				<div class="save-controls">
+					<Button variant="primary" onclick={saveTable} disabled={saving}>Save table</Button>
+					<Button variant="ghost" onclick={cancelEdit}>Cancel</Button>
+					{#if saveError}
+						<Alert tone="danger" role="alert">{saveError}</Alert>
+					{/if}
+				</div>
+			</div>
+		</Card>
+	{/if}
+
+	<Card as="section">
+		<div class="stack">
+			<h2>New calculator</h2>
+			<Field label="Title" id="calc-title">
+				<input
+					id="calc-title"
+					value={calcTitle}
+					oninput={(e) => (calcTitle = e.currentTarget.value)}
+				/>
+			</Field>
+			<Field label="Subject" id="calc-subject">
+				<select
+					id="calc-subject"
+					value={calcSubjectSlug}
+					onchange={(e) => (calcSubjectSlug = e.currentTarget.value)}
+				>
+					{#each data.subjects as subject (subject.id)}
+						<option value={subject.slug}>{subject.title}</option>
+					{/each}
+				</select>
+			</Field>
+			<fieldset>
+				<legend>Table keys</legend>
+				{#if tables.length === 0}
+					<p>No data tables to reference yet.</p>
+				{:else}
+					<div class="checks">
+						{#each tables as table (table.key)}
+							<label class="check">
+								<input
+									type="checkbox"
+									checked={calcTableKeys.includes(table.key)}
+									onchange={(e) => toggleTableKey(table.key, e.currentTarget.checked)}
+								/>
+								{table.key} — {table.title}
+							</label>
+						{/each}
+					</div>
+				{/if}
+			</fieldset>
+			<Field label="Calc type" id="calc-type">
+				<select
+					id="calc-type"
+					value={calcType}
+					onchange={(e) => (calcType = e.currentTarget.value)}
+				>
+					{#each CALC_TYPES as type (type)}
+						<option value={type}>{type}</option>
+					{/each}
+				</select>
+			</Field>
+			<div class="save-controls">
+				<Button variant="primary" onclick={createCalculator} disabled={calcSaving}>
+					Create calculator
+				</Button>
+				{#if calcError}
+					<Alert tone="danger" role="alert">{calcError}</Alert>
+				{/if}
+			</div>
+		</div>
+	</Card>
+
+	{#if createdCalculator}
+		<Card as="section">
+			<h3>
+				{createdCalculator.title} ({createdCalculator.subject_slug}) — {createdCalculator.status}
+			</h3>
+			<PublishPanel
+				activityId={createdCalculator.activity_id}
+				importNotes={[]}
+				versions={calcVersions}
+			/>
+		</Card>
+	{/if}
+</div>
+
+<style>
+	.sections {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--space-5);
+	}
+	.stack {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--space-4);
+	}
+	.table-list {
+		display: grid;
+		gap: var(--space-2);
+		margin: 0 0 var(--space-4);
+		padding: 0;
+		list-style: none;
+	}
+	.checks {
+		display: grid;
+		gap: var(--space-2);
+	}
+	.check {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+	.save-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-3);
+	}
+</style>

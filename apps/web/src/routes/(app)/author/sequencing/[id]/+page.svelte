@@ -22,6 +22,12 @@
 	import PublishPanel from '$lib/author/PublishPanel.svelte';
 	import { api } from '$lib/author/api';
 	import { problemDetail } from '$lib/author/problem';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -102,9 +108,9 @@
 	<title>{data.sequencing.title} — Author — RTTLearn</title>
 </svelte:head>
 
-<h1>{data.sequencing.title}</h1>
+<PageHeader title={data.sequencing.title} />
 
-<div role="tablist" aria-label="Sequencing editor tabs">
+<div class="tabs" role="tablist" aria-label="Sequencing editor tabs">
 	<button
 		type="button"
 		role="tab"
@@ -125,61 +131,80 @@
 
 {#if activeTab === 'edit'}
 	<div role="tabpanel">
-		<label>
-			Title
-			<input
-				value={title}
-				oninput={(e) => {
-					title = e.currentTarget.value;
-					markDirty();
-				}}
-			/>
-		</label>
-
-		<p class="hint">
-			The order below IS the correct answer -- students must drag/arrange items to match this
-			sequence exactly.
-		</p>
-
-		<ol class="sequencing-list">
-			{#each items as item, i (i)}
-				<li class="sequencing-row">
+		<Card as="section">
+			<div class="stack">
+				<Field label="Title" id="seq-title">
 					<input
-						value={item.label}
-						oninput={(e) => setLabel(i, e.currentTarget.value)}
-						aria-invalid={duplicateLabels.has(item.label)}
-						aria-label={`Item ${i + 1} label`}
+						id="seq-title"
+						value={title}
+						oninput={(e) => {
+							title = e.currentTarget.value;
+							markDirty();
+						}}
 					/>
-					<input
-						value={item.detail ?? ''}
-						oninput={(e) => setDetail(i, e.currentTarget.value)}
-						placeholder="Detail (optional)"
-						aria-label={`Item ${i + 1} detail`}
-					/>
-					<button type="button" onclick={() => moveItem(i, -1)} disabled={i === 0}>
-						Move up
-					</button>
-					<button type="button" onclick={() => moveItem(i, 1)} disabled={i === items.length - 1}>
-						Move down
-					</button>
-					<button type="button" onclick={() => removeItem(i)} disabled={items.length <= 2}>
-						Remove
-					</button>
-				</li>
-			{/each}
-		</ol>
-		<button type="button" onclick={addItem}>Add item</button>
+				</Field>
 
-		{#if duplicateLabels.size > 0}
-			<p role="alert">Duplicate labels: {[...duplicateLabels].join(', ')}</p>
-		{/if}
+				<p class="hint">
+					The order below IS the correct answer -- students must drag/arrange items to match this
+					sequence exactly.
+				</p>
 
-		<div class="save-controls">
-			<button type="button" onclick={save} disabled={!dirty || saving}>Save</button>
-			{#if saveError}
-				<p role="alert">{saveError}</p>
-			{/if}
-		</div>
+				<ol class="sequencing-list">
+					{#each items as item, i (i)}
+						<li class="sequencing-row">
+							<input
+								value={item.label}
+								oninput={(e) => setLabel(i, e.currentTarget.value)}
+								aria-invalid={duplicateLabels.has(item.label)}
+								aria-label={`Item ${i + 1} label`}
+							/>
+							<input
+								value={item.detail ?? ''}
+								oninput={(e) => setDetail(i, e.currentTarget.value)}
+								placeholder="Detail (optional)"
+								aria-label={`Item ${i + 1} detail`}
+							/>
+							<div class="row-actions">
+								<Button variant="ghost" onclick={() => moveItem(i, -1)} disabled={i === 0}>
+									Move up
+								</Button>
+								<Button
+									variant="ghost"
+									onclick={() => moveItem(i, 1)}
+									disabled={i === items.length - 1}
+								>
+									Move down
+								</Button>
+								<Button
+									variant="danger"
+									icon={Trash2}
+									onclick={() => removeItem(i)}
+									disabled={items.length <= 2}
+								>
+									Remove
+								</Button>
+							</div>
+						</li>
+					{/each}
+				</ol>
+				<div>
+					<Button onclick={addItem}>Add item</Button>
+				</div>
+
+				{#if duplicateLabels.size > 0}
+					<Alert tone="warning" role="alert"
+						>Duplicate labels: {[...duplicateLabels].join(', ')}</Alert
+					>
+				{/if}
+
+				<div class="save-controls">
+					<Button variant="primary" onclick={save} disabled={!dirty || saving}>Save</Button>
+					{#if saveError}
+						<Alert tone="danger" role="alert">{saveError}</Alert>
+					{/if}
+				</div>
+			</div>
+		</Card>
 	</div>
 {:else}
 	<div role="tabpanel">
@@ -192,14 +217,62 @@
 {/if}
 
 <style>
-	.sequencing-row {
+	.tabs {
 		display: flex;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+		margin-block-end: var(--space-5);
+		border-block-end: 1px solid var(--border-strong);
+	}
+	.tabs button {
+		border-color: transparent;
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
+		background: transparent;
+		color: var(--text-muted);
+		margin-block-end: -1px;
+	}
+	/* Selected tab: accent underline plus bold text, so colour is not the only signal. */
+	.tabs button[aria-selected='true'] {
+		background: var(--accent-soft);
+		border-block-end: 3px solid var(--accent);
+		color: var(--text);
+		font-weight: 700;
+	}
+	.stack {
+		display: grid;
+		gap: var(--space-4);
+	}
+	.save-controls {
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		margin-block: 0.5rem;
+		gap: var(--space-3);
 	}
 	.hint {
-		font-size: 0.9em;
-		opacity: 0.8;
+		margin: 0;
+		font-size: var(--text-sm);
+		color: var(--text-muted);
+	}
+	.sequencing-list {
+		display: grid;
+		gap: var(--space-3);
+		margin: 0;
+		padding-inline-start: var(--space-5);
+	}
+	.sequencing-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		align-items: center;
+	}
+	.sequencing-row input {
+		flex: 1 1 12rem;
+		min-width: 0;
+	}
+	.row-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
 	}
 </style>

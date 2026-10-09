@@ -44,6 +44,22 @@ function pasteTextarea(container: HTMLElement): HTMLTextAreaElement {
 }
 
 describe('GridEditor', () => {
+	// Scenario: the data-tables page passes `editing.grid`, which is a Svelte `$state` proxy.
+	// `structuredClone` throws DataCloneError on any Proxy, so the editor never rendered there.
+	// A plain Proxy stands in for the `$state` one here.
+	// Invariant: the editor renders from a proxied grid and edits don't write back into it.
+	it('renders from a reactive (proxied) grid without mutating it', async () => {
+		const source = fixture();
+		const { container } = await render(GridEditor, {
+			initialGrid: new Proxy(source, {}),
+			onchange: vi.fn()
+		});
+
+		await expect.element(container.querySelector('table')!).toBeInTheDocument();
+		await userEvent.click(gridButtons(container)[0]);
+		expect(source.rows).toHaveLength(2);
+	});
+
 	// Scenario: paste a valid TSV block (header row of columns, then one row per line with its
 	// key first) and apply it.
 	// Invariant: `onchange` receives the original row/col axis labels unchanged, plus the pasted

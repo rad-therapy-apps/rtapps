@@ -30,6 +30,12 @@
 	import { api } from '$lib/author/api';
 	import { problemDetail } from '$lib/author/problem';
 	import type { components } from '@rtapps/api-client';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import type { PageData } from './$types';
 
 	type QuestionAuthorOut = components['schemas']['QuestionAuthorOut'];
@@ -154,9 +160,9 @@
 	<title>{data.quiz.title} — Author — RTTLearn</title>
 </svelte:head>
 
-<h1>{data.quiz.title}</h1>
+<PageHeader title={data.quiz.title} />
 
-<div role="tablist" aria-label="Quiz editor tabs">
+<div class="tabs" role="tablist" aria-label="Quiz editor tabs">
 	<button
 		type="button"
 		role="tab"
@@ -177,142 +183,155 @@
 
 {#if activeTab === 'edit'}
 	<div role="tabpanel" class="quiz-editor">
-		<label>
-			Title
-			<input
-				value={title}
-				oninput={(e) => {
-					title = e.currentTarget.value;
-					markDirty();
-				}}
-			/>
-		</label>
+		<Card as="section">
+			<div class="stack">
+				<Field label="Title" id="quiz-title">
+					<input
+						id="quiz-title"
+						value={title}
+						oninput={(e) => {
+							title = e.currentTarget.value;
+							markDirty();
+						}}
+					/>
+				</Field>
 
-		<label>
-			Access
-			<select
-				value={access}
-				onchange={(e) => {
-					access = e.currentTarget.value;
-					markDirty();
-				}}
-			>
-				<option value="practice">Practice</option>
-				<option value="assessment">Assessment</option>
-			</select>
-		</label>
-		<p class="hint">
-			Assessment activities are hidden from students entirely -- reserved for a future
-			educator-assigned quiz pool (ADR-0006). Use Practice unless that's what you mean.
-		</p>
+				<Field label="Access" id="quiz-access">
+					<select
+						id="quiz-access"
+						value={access}
+						onchange={(e) => {
+							access = e.currentTarget.value;
+							markDirty();
+						}}
+					>
+						<option value="practice">Practice</option>
+						<option value="assessment">Assessment</option>
+					</select>
+				</Field>
+				<p class="hint">
+					Assessment activities are hidden from students entirely -- reserved for a future
+					educator-assigned quiz pool (ADR-0006). Use Practice unless that's what you mean.
+				</p>
 
-		<label>
-			Pass percent
-			<input
-				type="number"
-				min="1"
-				max="100"
-				value={passPercent}
-				oninput={(e) => {
-					const n = e.currentTarget.valueAsNumber;
-					if (!Number.isNaN(n)) {
-						passPercent = n;
-						markDirty();
-					}
-				}}
-			/>
-		</label>
+				<Field label="Pass percent" id="quiz-pass-percent">
+					<input
+						id="quiz-pass-percent"
+						type="number"
+						min="1"
+						max="100"
+						value={passPercent}
+						oninput={(e) => {
+							const n = e.currentTarget.valueAsNumber;
+							if (!Number.isNaN(n)) {
+								passPercent = n;
+								markDirty();
+							}
+						}}
+					/>
+				</Field>
 
-		<label>
-			<input
-				type="checkbox"
-				checked={shuffle}
-				onchange={(e) => {
-					shuffle = e.currentTarget.checked;
-					markDirty();
-				}}
-			/>
-			Shuffle question order
-		</label>
+				<label class="check">
+					<input
+						type="checkbox"
+						checked={shuffle}
+						onchange={(e) => {
+							shuffle = e.currentTarget.checked;
+							markDirty();
+						}}
+					/>
+					Shuffle question order
+				</label>
 
-		<label>
-			Present N questions (optional -- leave blank to show every question)
-			<input
-				type="number"
-				min="1"
-				value={presentN ?? ''}
-				oninput={(e) => {
-					const value = e.currentTarget.value;
-					const n = e.currentTarget.valueAsNumber;
-					if (value === '') {
-						presentN = null;
-						markDirty();
-					} else if (!Number.isNaN(n)) {
-						presentN = n;
-						markDirty();
-					}
-				}}
-			/>
-		</label>
+				<Field
+					label="Present N questions (optional -- leave blank to show every question)"
+					id="quiz-present-n"
+				>
+					<input
+						id="quiz-present-n"
+						type="number"
+						min="1"
+						value={presentN ?? ''}
+						oninput={(e) => {
+							const value = e.currentTarget.value;
+							const n = e.currentTarget.valueAsNumber;
+							if (value === '') {
+								presentN = null;
+								markDirty();
+							} else if (!Number.isNaN(n)) {
+								presentN = n;
+								markDirty();
+							}
+						}}
+					/>
+				</Field>
+			</div>
+		</Card>
 
-		<h2>Questions ({questions.length})</h2>
-		<ol class="question-list">
-			{#each questions as question, i (question.id)}
-				<li class="question-row">
-					<div class="question-summary">
-						<button
-							type="button"
-							onclick={() => (expandedId = expandedId === question.id ? null : question.id)}
-						>
-							{expandedId === question.id ? 'Collapse' : 'Expand'}
-						</button>
-						<span>{question.stem}</span>
-					</div>
-					<div class="question-controls">
-						<button type="button" onclick={() => moveQuestion(i, -1)} disabled={i === 0}>
-							Move up
-						</button>
-						<button
-							type="button"
-							onclick={() => moveQuestion(i, 1)}
-							disabled={i === questions.length - 1}
-						>
-							Move down
-						</button>
-						<button type="button" onclick={() => removeQuestion(i)}>Remove from quiz</button>
-					</div>
-					{#if expandedId === question.id}
-						<BankQuestionForm
-							value={{
-								stem: question.stem,
-								options: question.options,
-								answer: question.answer,
-								explanation: question.explanation
-							}}
-							onchange={(next) => updateQuestionDraft(i, next)}
-						/>
-						<button
-							type="button"
-							onclick={() => saveQuestion(i)}
-							disabled={questionSaving !== null}
-						>
-							Save question
-						</button>
-						{#if questionSaveError}
-							<p role="alert">{questionSaveError}</p>
+		<Card as="section">
+			<h2>Questions ({questions.length})</h2>
+			<ol class="question-list">
+				{#each questions as question, i (question.id)}
+					<li class="question-row">
+						<div class="question-summary">
+							<Button
+								variant="secondary"
+								onclick={() => (expandedId = expandedId === question.id ? null : question.id)}
+							>
+								{expandedId === question.id ? 'Collapse' : 'Expand'}
+							</Button>
+							<span>{question.stem}</span>
+						</div>
+						<div class="question-controls">
+							<Button variant="ghost" onclick={() => moveQuestion(i, -1)} disabled={i === 0}>
+								Move up
+							</Button>
+							<Button
+								variant="ghost"
+								onclick={() => moveQuestion(i, 1)}
+								disabled={i === questions.length - 1}
+							>
+								Move down
+							</Button>
+							<Button variant="danger" icon={Trash2} onclick={() => removeQuestion(i)}>
+								Remove from quiz
+							</Button>
+						</div>
+						{#if expandedId === question.id}
+							<BankQuestionForm
+								value={{
+									stem: question.stem,
+									options: question.options,
+									answer: question.answer,
+									explanation: question.explanation
+								}}
+								onchange={(next) => updateQuestionDraft(i, next)}
+							/>
+							<Button
+								variant="primary"
+								onclick={() => saveQuestion(i)}
+								disabled={questionSaving !== null}
+							>
+								Save question
+							</Button>
+							{#if questionSaveError}
+								<Alert tone="danger" role="alert">{questionSaveError}</Alert>
+							{/if}
 						{/if}
-					{/if}
-				</li>
-			{/each}
-		</ol>
+					</li>
+				{/each}
+			</ol>
+		</Card>
 
-		<h3>Add a question</h3>
-		<QuestionPicker onadd={addQuestion} />
+		<Card as="section">
+			<h3>Add a question</h3>
+			<QuestionPicker onadd={addQuestion} />
+		</Card>
 
 		<div class="save-controls">
-			<button type="button" onclick={save} disabled={!dirty || saving}>Save</button>
+			<Button variant="primary" onclick={save} disabled={!dirty || saving}>Save</Button>
 			{#if saveError}
-				<p role="alert">{saveError}</p>
+				<Alert tone="danger" role="alert">{saveError}</Alert>
 			{/if}
 		</div>
 	</div>
@@ -327,20 +346,70 @@
 {/if}
 
 <style>
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+		margin-block-end: var(--space-5);
+		border-block-end: 1px solid var(--border-strong);
+	}
+	.tabs button {
+		border-color: transparent;
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
+		background: transparent;
+		color: var(--text-muted);
+		margin-block-end: -1px;
+	}
+	/* Selected tab: accent underline plus bold text, so colour is not the only signal. */
+	.tabs button[aria-selected='true'] {
+		background: var(--accent-soft);
+		border-block-end: 3px solid var(--accent);
+		color: var(--text);
+		font-weight: 700;
+	}
+	.stack {
+		display: grid;
+		gap: var(--space-4);
+	}
+	.save-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-3);
+	}
+	.hint {
+		margin: 0;
+		font-size: var(--text-sm);
+		color: var(--text-muted);
+	}
+	.quiz-editor {
+		display: grid;
+		gap: var(--space-5);
+	}
+	.question-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
 	.question-row {
-		margin-block: 1rem;
-		padding-block-start: 1rem;
-		border-block-start: 1px dashed var(--border);
+		margin-block: var(--space-3);
+		padding-block-start: var(--space-3);
+		border-block-start: 1px dashed var(--border-strong);
 	}
 	.question-summary,
 	.question-controls {
 		display: flex;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		gap: var(--space-2);
 		align-items: center;
-		margin-block: 0.25rem;
+		margin-block: var(--space-1);
 	}
-	.hint {
-		font-size: 0.9em;
-		opacity: 0.8;
+	.check {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		font-weight: 600;
+		font-size: var(--text-sm);
 	}
 </style>

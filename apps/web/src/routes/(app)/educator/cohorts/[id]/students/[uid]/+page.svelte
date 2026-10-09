@@ -18,6 +18,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { formatPercent } from '$lib/cohort/format';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -27,63 +28,81 @@
 	<title>{data.detail.student.display_name} — RTTLearn</title>
 </svelte:head>
 
-<h1>{data.detail.student.display_name}</h1>
+<PageHeader title={data.detail.student.display_name} />
 <p>{data.detail.student.email} · joined {data.detail.student.joined_at}</p>
 
 <h2>Results</h2>
-<table>
-	<thead>
-		<tr>
-			<th>Activity</th>
-			<th>Best</th>
-			<th>Latest</th>
-			<th>Attempts</th>
-			<th>Mastery</th>
-			<th>Time spent</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each data.detail.results as r (r.activity_id)}
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="table-wrap" role="region" aria-label="Results" tabindex="0">
+	<table>
+		<thead>
 			<tr>
-				<td>{r.title}</td>
-				<td>{formatPercent(r.best_percent)}</td>
-				<td>{formatPercent(r.latest_percent)}</td>
-				<td>{r.attempts}</td>
-				<td>{r.mastery}</td>
-				<td>{Math.round(r.time_spent_s / 60)} min</td>
+				<th>Activity</th>
+				<th>Best</th>
+				<th>Latest</th>
+				<th>Attempts</th>
+				<th>Mastery</th>
+				<th>Time spent</th>
 			</tr>
-		{/each}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			{#each data.detail.results as r (r.activity_id)}
+				<tr>
+					<td>{r.title}</td>
+					<td class="num">{formatPercent(r.best_percent)}</td>
+					<td class="num">{formatPercent(r.latest_percent)}</td>
+					<td class="num">{r.attempts}</td>
+					<td>{r.mastery}</td>
+					<td>{Math.round(r.time_spent_s / 60)} min</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+</div>
 
 <h2>Attempts</h2>
 <!-- One <details> per attempt, open by default, with its items in a nested table. -->
 {#each data.detail.attempts as a (a.attempt_id)}
 	<details open>
 		<summary>{a.title} — {formatPercent(a.percent)} — {a.submitted_at}</summary>
-		<table>
-			<thead>
-				<tr>
-					<th>Item</th>
-					<th>Response</th>
-					<th>Correct</th>
-					<th>Score</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each a.items as i (i.item_key)}
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="table-wrap" role="region" aria-label="{a.title} responses" tabindex="0">
+			<table>
+				<thead>
 					<tr>
-						<td>{i.item_key}</td>
-						<td>{JSON.stringify(i.response)}</td>
-						<td>{i.correct ? 'Yes' : 'No'}</td>
-						<td>{i.score ?? '—'}</td>
+						<th>Item</th>
+						<th>Response</th>
+						<th>Correct</th>
+						<th>Score</th>
 					</tr>
-				{/each}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					{#each a.items as i (i.item_key)}
+						<tr>
+							<td>{i.item_key}</td>
+							<td class="response">{JSON.stringify(i.response)}</td>
+							<td>{i.correct ? 'Yes' : 'No'}</td>
+							<td class="num">{i.score ?? '—'}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 	</details>
 {/each}
 
 <p>
 	<a href={resolve('/(app)/educator/cohorts/[id]', { id: data.cohortId })}>Back to cohort</a>
 </p>
+
+<style>
+	.table-wrap {
+		overflow-x: auto;
+	}
+	.response {
+		overflow-wrap: anywhere;
+	}
+	.num {
+		font-variant-numeric: tabular-nums;
+	}
+</style>

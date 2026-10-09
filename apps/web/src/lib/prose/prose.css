@@ -9,7 +9,7 @@
  * to a node type or attribute value the renderer emits — no class exists that the renderer
  * doesn't produce.
  * Depends on: nothing.
- * Used by: ProseDoc.svelte (only importer).
+ * Used by: ProseDoc.svelte and RichTextEditor.svelte (the authoring editor reuses the paper look).
  */
 
 /* The lesson reading surface: counter, page title, blocks and pager controls on one "paper". */

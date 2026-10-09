@@ -15,6 +15,9 @@
 	Used by: `QuestionPicker.svelte`, `routes/(app)/author/quizzes/[id]/+page.svelte`.
 -->
 <script lang="ts">
+	import Button from '$lib/ui/Button.svelte';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+
 	export type BankQuestionValue = {
 		stem: string;
 		options: string[];
@@ -90,12 +93,17 @@
 					oninput={(e) => setOption(i, e.currentTarget.value)}
 					aria-label={`Option ${i + 1}`}
 				/>
-				<button type="button" onclick={() => removeOption(i)} disabled={value.options.length <= 2}>
+				<Button
+					variant="danger"
+					icon={Trash2}
+					onclick={() => removeOption(i)}
+					disabled={value.options.length <= 2}
+				>
 					Remove option
-				</button>
+				</Button>
 			</div>
 		{/each}
-		<button type="button" onclick={addOption}>Add option</button>
+		<div><Button onclick={addOption}>Add option</Button></div>
 	</div>
 
 	<div class="field">
@@ -105,25 +113,42 @@
 				<textarea value={value.explanation} oninput={(e) => setExplanation(e.currentTarget.value)}
 				></textarea>
 			</label>
-			<button type="button" onclick={removeExplanation}>Remove explanation</button>
+			<div><Button variant="ghost" onclick={removeExplanation}>Remove explanation</Button></div>
 		{:else}
-			<button type="button" onclick={addExplanation}>Add explanation</button>
+			<Button onclick={addExplanation}>Add explanation</Button>
 		{/if}
 	</div>
 </fieldset>
 
 <style>
 	.bank-question-form {
-		margin: 1rem 0;
-		padding: 1rem;
+		margin-block: var(--space-4);
+		background: var(--surface);
+	}
+	.bank-question-form label {
+		display: grid;
+		gap: var(--space-1);
+		font-weight: 600;
+		font-size: var(--text-sm);
 	}
 	.field {
-		margin-block: 0.75rem;
+		display: grid;
+		gap: var(--space-2);
+		margin-block: var(--space-3);
+	}
+	.options p {
+		margin: 0;
+		font-weight: 600;
+		font-size: var(--text-sm);
 	}
 	.option {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem;
-		margin-block-end: 0.25rem;
+		gap: var(--space-2);
+	}
+	.option input[type='text'] {
+		flex: 1 1 10rem;
+		min-width: 0;
 	}
 </style>

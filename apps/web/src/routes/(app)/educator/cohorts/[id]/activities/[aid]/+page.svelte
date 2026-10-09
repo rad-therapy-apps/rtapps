@@ -18,6 +18,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { formatPercent } from '$lib/cohort/format';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -36,7 +37,7 @@
 	<title>{data.stats.title} — RTTLearn</title>
 </svelte:head>
 
-<h1>{data.stats.title}</h1>
+<PageHeader title={data.stats.title} />
 <p>
 	Attempts: {data.stats.attempts} · Students attempted: {data.stats.students_attempted} · Pass rate: {formatPercent(
 		data.stats.pass_rate
@@ -47,69 +48,87 @@
 <a href={csvHref} data-testid="csv-link">Download CSV</a>
 
 <h2>Score distribution</h2>
-<table>
-	<thead>
-		<tr>
-			<th>Range</th>
-			<th>Count</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each data.stats.distribution as bucket (bucket.label)}
-			<tr>
-				<td>{bucket.label}</td>
-				<td>{bucket.count}</td>
-			</tr>
-		{/each}
-	</tbody>
-</table>
-
-{#if data.stats.attempt_rows.length > 0}
-	<h2>Attempts</h2>
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="table-wrap" role="region" aria-label="Score distribution" tabindex="0">
 	<table>
 		<thead>
 			<tr>
-				<th>Student</th>
-				<th>Score</th>
-				<th>Percent</th>
+				<th>Range</th>
+				<th>Count</th>
 			</tr>
 		</thead>
 		<tbody>
-			{#each data.stats.attempt_rows as row (row.submitted_at + row.display_name)}
+			{#each data.stats.distribution as bucket (bucket.label)}
 				<tr>
-					<td>{row.display_name}</td>
-					<td>{row.score === null ? '—' : `${row.score} / ${row.max_score}`}</td>
-					<td>{row.percent === null ? 'Completed' : formatPercent(row.percent)}</td>
+					<td>{bucket.label}</td>
+					<td class="num">{bucket.count}</td>
 				</tr>
 			{/each}
 		</tbody>
 	</table>
+</div>
+
+{#if data.stats.attempt_rows.length > 0}
+	<h2>Attempts</h2>
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-wrap" role="region" aria-label="Attempts" tabindex="0">
+		<table>
+			<thead>
+				<tr>
+					<th>Student</th>
+					<th>Score</th>
+					<th>Percent</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each data.stats.attempt_rows as row (row.submitted_at + row.display_name)}
+					<tr>
+						<td>{row.display_name}</td>
+						<td class="num">{row.score === null ? '—' : `${row.score} / ${row.max_score}`}</td>
+						<td class="num">{row.percent === null ? 'Completed' : formatPercent(row.percent)}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
 {/if}
 
 <h2>Items</h2>
-<table>
-	<thead>
-		<tr>
-			<th>Item</th>
-			<th>Answered</th>
-			<th>Correct</th>
-			<th>% Correct</th>
-			<th>Top wrong answers</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each data.stats.items as item (item.key)}
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="table-wrap" role="region" aria-label="Items" tabindex="0">
+	<table>
+		<thead>
 			<tr>
-				<td>{item.label}</td>
-				<td>{item.answered}</td>
-				<td>{item.correct}</td>
-				<td>{formatPercent(item.percent_correct)}</td>
-				<td>{topWrong(item)}</td>
+				<th>Item</th>
+				<th>Answered</th>
+				<th>Correct</th>
+				<th>% Correct</th>
+				<th>Top wrong answers</th>
 			</tr>
-		{/each}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			{#each data.stats.items as item (item.key)}
+				<tr>
+					<td>{item.label}</td>
+					<td class="num">{item.answered}</td>
+					<td class="num">{item.correct}</td>
+					<td class="num">{formatPercent(item.percent_correct)}</td>
+					<td>{topWrong(item)}</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+</div>
 
 <p>
 	<a href={resolve('/(app)/educator/cohorts/[id]', { id: data.cohortId })}>Back to cohort</a>
 </p>
+
+<style>
+	.table-wrap {
+		overflow-x: auto;
+	}
+	.num {
+		font-variant-numeric: tabular-nums;
+	}
+</style>

@@ -19,6 +19,11 @@
 	import PublishPanel from '$lib/author/PublishPanel.svelte';
 	import { api } from '$lib/author/api';
 	import { problemDetail } from '$lib/author/problem';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -66,9 +71,9 @@
 	<title>{data.matching.title} — Author — RTTLearn</title>
 </svelte:head>
 
-<h1>{data.matching.title}</h1>
+<PageHeader title={data.matching.title} />
 
-<div role="tablist" aria-label="Matching editor tabs">
+<div class="tabs" role="tablist" aria-label="Matching editor tabs">
 	<button
 		type="button"
 		role="tab"
@@ -89,34 +94,38 @@
 
 {#if activeTab === 'edit'}
 	<div role="tabpanel">
-		<label>
-			Title
-			<input
-				value={title}
-				oninput={(e) => {
-					title = e.currentTarget.value;
-					markDirty();
-				}}
-			/>
-		</label>
+		<Card as="section">
+			<div class="stack">
+				<Field label="Title" id="matching-title">
+					<input
+						id="matching-title"
+						value={title}
+						oninput={(e) => {
+							title = e.currentTarget.value;
+							markDirty();
+						}}
+					/>
+				</Field>
 
-		<PairsEditor
-			rows={pairs}
-			onchange={(next) => {
-				pairs = next;
-				markDirty();
-			}}
-			termLabel="Term"
-			definitionLabel="Definition"
-			minRows={2}
-		/>
+				<PairsEditor
+					rows={pairs}
+					onchange={(next) => {
+						pairs = next;
+						markDirty();
+					}}
+					termLabel="Term"
+					definitionLabel="Definition"
+					minRows={2}
+				/>
 
-		<div class="save-controls">
-			<button type="button" onclick={save} disabled={!dirty || saving}>Save</button>
-			{#if saveError}
-				<p role="alert">{saveError}</p>
-			{/if}
-		</div>
+				<div class="save-controls">
+					<Button variant="primary" onclick={save} disabled={!dirty || saving}>Save</Button>
+					{#if saveError}
+						<Alert tone="danger" role="alert">{saveError}</Alert>
+					{/if}
+				</div>
+			</div>
+		</Card>
 	</div>
 {:else}
 	<div role="tabpanel">
@@ -127,3 +136,38 @@
 		/>
 	</div>
 {/if}
+
+<style>
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+		margin-block-end: var(--space-5);
+		border-block-end: 1px solid var(--border-strong);
+	}
+	.tabs button {
+		border-color: transparent;
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
+		background: transparent;
+		color: var(--text-muted);
+		margin-block-end: -1px;
+	}
+	/* Selected tab: accent underline plus bold text, so colour is not the only signal. */
+	.tabs button[aria-selected='true'] {
+		background: var(--accent-soft);
+		border-block-end: 3px solid var(--accent);
+		color: var(--text);
+		font-weight: 700;
+	}
+	.stack {
+		display: grid;
+		gap: var(--space-4);
+	}
+	.save-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-3);
+	}
+</style>

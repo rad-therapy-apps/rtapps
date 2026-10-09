@@ -18,6 +18,7 @@
 	import RichTextEditor from './RichTextEditor.svelte';
 	import type { ClientKnowledgeCheckBlock } from './types';
 	import type { ProseDoc } from '../prose/types';
+	import Button from '$lib/ui/Button.svelte';
 
 	let {
 		block,
@@ -78,7 +79,7 @@
 	<div class="field">
 		<p>Question</p>
 		{#key block.instanceId}
-			<RichTextEditor doc={block.stem} onchange={setStem} />
+			<RichTextEditor doc={block.stem} label="Question" onchange={setStem} />
 		{/key}
 	</div>
 
@@ -99,39 +100,49 @@
 					oninput={(e) => setOption(i, e.currentTarget.value)}
 					aria-label={`Option ${i + 1}`}
 				/>
-				<button type="button" onclick={() => removeOption(i)} disabled={block.options.length <= 2}>
+				<Button onclick={() => removeOption(i)} disabled={block.options.length <= 2}>
 					Remove option
-				</button>
+				</Button>
 			</div>
 		{/each}
-		<button type="button" onclick={addOption}>Add option</button>
+		<Button onclick={addOption}>Add option</Button>
 	</div>
 
 	<div class="field">
 		{#if block.explanation !== null}
 			<p>Explanation</p>
 			{#key `${block.instanceId}:explanation`}
-				<RichTextEditor doc={block.explanation} onchange={setExplanation} />
+				<RichTextEditor doc={block.explanation} label="Explanation" onchange={setExplanation} />
 			{/key}
-			<button type="button" onclick={removeExplanation}>Remove explanation</button>
+			<Button onclick={removeExplanation}>Remove explanation</Button>
 		{:else}
-			<button type="button" onclick={addExplanation}>Add explanation</button>
+			<Button onclick={addExplanation}>Add explanation</Button>
 		{/if}
 	</div>
 </fieldset>
 
 <style>
 	.kc-form {
-		margin: 1rem 0;
-		padding: 1rem;
+		margin: var(--space-4) 0;
+		padding: var(--space-4);
+		background: var(--surface);
 	}
 	.field {
-		margin-block: 0.75rem;
+		margin-block: var(--space-3);
+	}
+	.field > p {
+		margin-block-end: var(--space-2);
+		font-weight: 600;
+		font-size: var(--text-sm);
 	}
 	.option {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem;
-		margin-block-end: 0.25rem;
+		gap: var(--space-2);
+		margin-block-end: var(--space-2);
+	}
+	.option input[type='text'] {
+		flex: 1 1 12rem;
 	}
 </style>

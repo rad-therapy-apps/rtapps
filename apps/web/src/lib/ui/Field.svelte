@@ -20,8 +20,11 @@
 </div>
 
 <style>
+	/* minmax(0, 1fr), not the implicit auto column: a <select> is as wide as its longest
+	   option, which would otherwise widen the page past a 360px screen. */
 	.field {
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: var(--space-1);
 	}
 	label {

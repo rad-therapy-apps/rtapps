@@ -47,6 +47,8 @@
 		ClientBlock
 	} from './types';
 	import type { ProseDoc } from '../prose/types';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import type { components } from '@rtapps/api-client';
 
 	type PagesIn = components['schemas']['PagesIn'];
@@ -293,13 +295,11 @@
 				<input value={page.title} oninput={(e) => retitlePage(pi, e.currentTarget.value)} />
 			</label>
 			<div class="page-controls">
-				<button type="button" onclick={() => movePage(pi, -1)} disabled={pi === 0}
-					>Move page up</button
+				<Button onclick={() => movePage(pi, -1)} disabled={pi === 0}>Move page up</Button>
+				<Button onclick={() => movePage(pi, 1)} disabled={pi === pages.length - 1}
+					>Move page down</Button
 				>
-				<button type="button" onclick={() => movePage(pi, 1)} disabled={pi === pages.length - 1}
-					>Move page down</button
-				>
-				<button type="button" onclick={() => deletePage(pi)}>Delete page</button>
+				<Button variant="danger" onclick={() => deletePage(pi)}>Delete page</Button>
 			</div>
 
 			{#each page.blocks as block, bi (block.instanceId)}
@@ -308,6 +308,7 @@
 						{#key block.instanceId}
 							<RichTextEditor
 								doc={block.body}
+								label={`Page ${pi + 1} text block ${bi + 1}`}
 								onchange={(body) => updateBlock(pi, bi, { ...block, body })}
 								oninsertimage={uploading ? undefined : insertImage}
 							/>
@@ -316,60 +317,72 @@
 						<KnowledgeCheckForm {block} onchange={(next) => updateBlock(pi, bi, next)} />
 					{/if}
 					<div class="block-controls">
-						<button type="button" onclick={() => moveBlock(pi, bi, -1)} disabled={bi === 0}
-							>Move block up</button
+						<Button onclick={() => moveBlock(pi, bi, -1)} disabled={bi === 0}>Move block up</Button>
+						<Button onclick={() => moveBlock(pi, bi, 1)} disabled={bi === page.blocks.length - 1}
+							>Move block down</Button
 						>
-						<button
-							type="button"
-							onclick={() => moveBlock(pi, bi, 1)}
-							disabled={bi === page.blocks.length - 1}>Move block down</button
-						>
-						<button
-							type="button"
+						<Button
+							variant="danger"
 							onclick={() => deleteBlock(pi, bi)}
 							disabled={page.blocks.length <= 1}
 							title={page.blocks.length <= 1 ? 'A page must have at least one block' : undefined}
-							>Delete block</button
+							>Delete block</Button
 						>
 					</div>
 				</div>
 			{/each}
 
 			<div class="add-block-controls">
-				<button type="button" onclick={() => addBlock(pi, 'rich_text')}>Add text block</button>
-				<button type="button" onclick={() => addBlock(pi, 'knowledge_check')}
-					>Add knowledge check</button
-				>
+				<Button onclick={() => addBlock(pi, 'rich_text')}>Add text block</Button>
+				<Button onclick={() => addBlock(pi, 'knowledge_check')}>Add knowledge check</Button>
 			</div>
 		</section>
 	{/each}
 
-	<button type="button" onclick={addPage}>Add page</button>
+	<Button onclick={addPage}>Add page</Button>
 
 	<div class="save-controls">
-		<button type="button" onclick={save} disabled={!dirty || saving}>Save</button>
+		<Button variant="primary" onclick={save} disabled={!dirty || saving}>Save</Button>
 		{#if saveError}
-			<p role="alert">{saveError}</p>
+			<Alert tone="danger" role="alert">{saveError}</Alert>
 		{/if}
 	</div>
 </div>
 
 <style>
+	/* Same raised look as the kit Card; a plain section because tests select `.page`. */
 	.page {
-		margin-block-end: 2rem;
-		padding: 1rem;
+		margin-block-end: var(--space-6);
+		padding: var(--space-5);
+		background: var(--surface);
 		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-1);
+	}
+	.lesson-editor label {
+		display: grid;
+		gap: var(--space-1);
+		font-weight: 600;
+		font-size: var(--text-sm);
 	}
 	.block {
-		margin-block: 1rem;
-		padding-block-start: 1rem;
-		border-block-start: 1px dashed var(--border);
+		margin-block: var(--space-4);
+		padding-block-start: var(--space-4);
+		border-block-start: 1px dashed var(--border-strong);
 	}
 	.page-controls,
 	.block-controls,
 	.add-block-controls {
 		display: flex;
-		gap: 0.5rem;
-		margin-block: 0.5rem;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-block: var(--space-3);
+	}
+	.save-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-3);
+		margin-block-start: var(--space-5);
 	}
 </style>

@@ -15,6 +15,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -24,42 +29,64 @@
 	<title>My cohorts — RTTLearn</title>
 </svelte:head>
 
-<h1>My cohorts</h1>
+<PageHeader title="My cohorts" />
 
 <!-- Create-cohort form: posts to the `create` action, which redirects on success. -->
 <form method="POST" action="?/create" use:enhance>
-	<label for="name">Cohort name</label>
-	<input id="name" name="name" required value={form?.name ?? ''} />
-	<button>Create cohort</button>
+	<Field label="Cohort name" id="name">
+		<input id="name" name="name" required value={form?.name ?? ''} />
+	</Field>
+	<Button type="submit" variant="primary">Create cohort</Button>
 </form>
 
 <!-- Server-rendered error from the last failed create (e.g. validation, API down). -->
 {#if form?.error}
-	<p role="alert">{form.error}</p>
+	<Alert tone="danger" role="alert">{form.error}</Alert>
 {/if}
 
 <!-- Three mutually exclusive states: load error, no cohorts yet, or the cohorts table. -->
 {#if data.error}
-	<p>{data.error}</p>
+	<Alert tone="danger">{data.error}</Alert>
 {:else if data.cohorts.length === 0}
 	<p>No cohorts yet — create one above.</p>
 {:else}
-	<table>
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Students</th>
-				<th>Join code</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.cohorts as c (c.id)}
-				<tr>
-					<td><a href={resolve('/(app)/educator/cohorts/[id]', { id: c.id })}>{c.name}</a></td>
-					<td>{c.student_count}</td>
-					<td>{c.join_code ?? '—'}</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+	<ul class="grid">
+		{#each data.cohorts as c (c.id)}
+			<Card as="li">
+				<h2>
+					<a href={resolve('/(app)/educator/cohorts/[id]', { id: c.id })}>{c.name}</a>
+				</h2>
+				<p>{c.student_count} {c.student_count === 1 ? 'student' : 'students'}</p>
+				<p>Join code: {c.join_code ?? '—'}</p>
+			</Card>
+		{/each}
+	</ul>
 {/if}
+
+<style>
+	form {
+		display: grid;
+		gap: var(--space-3);
+		max-width: 20rem;
+		margin-block: var(--space-4);
+	}
+	form :global(.btn) {
+		justify-self: start;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+		gap: var(--space-4);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	h2 {
+		margin: 0 0 var(--space-1);
+		font-size: var(--text-lg);
+	}
+	p {
+		margin: 0;
+		color: var(--text-muted);
+	}
+</style>

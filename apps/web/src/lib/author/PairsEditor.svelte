@@ -19,6 +19,9 @@
 	`routes/(app)/author/matching/[id]/+page.svelte`, `PairsEditor.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { duplicates } from './duplicates';
 
 	type Pair = { term: string; definition: string };
@@ -82,38 +85,59 @@
 				/>
 			</label>
 			<div class="pair-controls">
-				<button type="button" onclick={() => moveRow(i, -1)} disabled={i === 0}>Move up</button>
-				<button type="button" onclick={() => moveRow(i, 1)} disabled={i === rows.length - 1}>
+				<Button variant="ghost" onclick={() => moveRow(i, -1)} disabled={i === 0}>Move up</Button>
+				<Button variant="ghost" onclick={() => moveRow(i, 1)} disabled={i === rows.length - 1}>
 					Move down
-				</button>
-				<button type="button" onclick={() => removeRow(i)} disabled={rows.length <= minRows}>
+				</Button>
+				<Button
+					variant="danger"
+					icon={Trash2}
+					onclick={() => removeRow(i)}
+					disabled={rows.length <= minRows}
+				>
 					Remove
-				</button>
+				</Button>
 			</div>
 		</div>
 	{/each}
 
-	<button type="button" onclick={addRow}>Add {termLabel.toLowerCase()}</button>
+	<div>
+		<Button onclick={addRow}>Add {termLabel.toLowerCase()}</Button>
+	</div>
 
 	{#if duplicateTerms.size > 0}
-		<p role="alert">Duplicate {termLabel.toLowerCase()}s: {[...duplicateTerms].join(', ')}</p>
+		<Alert tone="warning" role="alert">
+			Duplicate {termLabel.toLowerCase()}s: {[...duplicateTerms].join(', ')}
+		</Alert>
 	{/if}
 	{#if duplicateDefinitions.size > 0}
-		<p role="alert">
+		<Alert tone="warning" role="alert">
 			Duplicate {definitionLabel.toLowerCase()}s: {[...duplicateDefinitions].join(', ')}
-		</p>
+		</Alert>
 	{/if}
 </div>
 
 <style>
+	.pairs-editor {
+		display: grid;
+		gap: var(--space-3);
+	}
 	.pair-row {
 		display: flex;
-		gap: 1rem;
+		flex-wrap: wrap;
+		gap: var(--space-3);
 		align-items: flex-end;
-		margin-block: 0.5rem;
+	}
+	.pair-row label {
+		display: grid;
+		flex: 1 1 12rem;
+		gap: var(--space-1);
+		font-weight: 600;
+		font-size: var(--text-sm);
 	}
 	.pair-controls {
 		display: flex;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		gap: var(--space-1);
 	}
 </style>
