@@ -7,7 +7,7 @@
  * Depends on: `vitest/browser`, `vitest-browser-svelte`, the kit components.
  * Used by: `pnpm --filter web test` (client project).
  */
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { createRawSnippet } from 'svelte';
@@ -20,6 +20,7 @@ import Field from './Field.svelte';
 import Icon from './Icon.svelte';
 import PageHeader from './PageHeader.svelte';
 import SubjectTag from './SubjectTag.svelte';
+import Tabs from './Tabs.svelte';
 
 const text = (t: string) => createRawSnippet(() => ({ render: () => `<span>${t}</span>` }));
 
@@ -145,5 +146,54 @@ describe('Card and SubjectTag', () => {
 			label: 'Radiation Biology'
 		});
 		await expect.element(page.getByText('Radiation Biology')).toBeVisible();
+	});
+});
+
+describe('Tabs', () => {
+	const tabs = [
+		{ id: 'edit', label: 'Edit' },
+		{ id: 'preview', label: 'Preview' },
+		{ id: 'publish', label: 'Publish' }
+	];
+
+	it('renders a tablist with the selected tab marked and the only tab stop', async () => {
+		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
+		await expect.element(page.getByRole('tablist', { name: 'Editor tabs' })).toBeVisible();
+		const edit = page.getByRole('tab', { name: 'Edit' });
+		const preview = page.getByRole('tab', { name: 'Preview' });
+		await expect.element(edit).toHaveAttribute('aria-selected', 'true');
+		await expect.element(edit).toHaveAttribute('tabindex', '0');
+		await expect.element(preview).toHaveAttribute('aria-selected', 'false');
+		await expect.element(preview).toHaveAttribute('tabindex', '-1');
+	});
+
+	it('clicking selects and reports the id', async () => {
+		const onselect = vi.fn();
+		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await page.getByRole('tab', { name: 'Publish' }).click();
+		expect(onselect).toHaveBeenCalledWith('publish');
+		await expect
+			.element(page.getByRole('tab', { name: 'Publish' }))
+			.toHaveAttribute('aria-selected', 'true');
+	});
+
+	it('arrows wrap, Home/End jump, and moving focus does not select', async () => {
+		const onselect = vi.fn();
+		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		const edit = page.getByRole('tab', { name: 'Edit' });
+		await edit.click();
+		onselect.mockClear();
+		await userEvent.keyboard('{ArrowLeft}');
+		await expect.element(page.getByRole('tab', { name: 'Publish' })).toHaveFocus();
+		await userEvent.keyboard('{ArrowRight}');
+		await expect.element(edit).toHaveFocus();
+		await userEvent.keyboard('{ArrowRight}');
+		await expect.element(page.getByRole('tab', { name: 'Preview' })).toHaveFocus();
+		await userEvent.keyboard('{End}');
+		await expect.element(page.getByRole('tab', { name: 'Publish' })).toHaveFocus();
+		await userEvent.keyboard('{Home}');
+		await expect.element(edit).toHaveFocus();
+		expect(onselect).not.toHaveBeenCalled();
+		await expect.element(edit).toHaveAttribute('aria-selected', 'true');
 	});
 });

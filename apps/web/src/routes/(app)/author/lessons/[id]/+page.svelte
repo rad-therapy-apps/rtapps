@@ -23,6 +23,7 @@
 	import ProseDoc from '$lib/prose/ProseDoc.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Tabs from '$lib/ui/Tabs.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { AuthorPage } from '$lib/author/types';
 	import type { LessonSnapshot, KnowledgeCheckBlock } from '$lib/lesson/types';
@@ -63,11 +64,6 @@
 			previewLoading = false;
 		}
 	}
-
-	function selectTab(tab: 'edit' | 'preview' | 'publish') {
-		activeTab = tab;
-		if (tab === 'preview') loadPreview();
-	}
 </script>
 
 <svelte:head>
@@ -76,32 +72,16 @@
 
 <PageHeader title={data.lesson.title} />
 
-<div class="tabs" role="tablist" aria-label="Lesson editor tabs">
-	<button
-		type="button"
-		role="tab"
-		aria-selected={activeTab === 'edit'}
-		onclick={() => selectTab('edit')}
-	>
-		Edit
-	</button>
-	<button
-		type="button"
-		role="tab"
-		aria-selected={activeTab === 'preview'}
-		onclick={() => selectTab('preview')}
-	>
-		Preview
-	</button>
-	<button
-		type="button"
-		role="tab"
-		aria-selected={activeTab === 'publish'}
-		onclick={() => selectTab('publish')}
-	>
-		Publish
-	</button>
-</div>
+<Tabs
+	tabs={[
+		{ id: 'edit', label: 'Edit' },
+		{ id: 'preview', label: 'Preview' },
+		{ id: 'publish', label: 'Publish' }
+	]}
+	bind:selected={activeTab}
+	label="Lesson editor tabs"
+	onselect={(id) => id === 'preview' && loadPreview()}
+/>
 
 {#if activeTab === 'edit'}
 	<div role="tabpanel">
@@ -163,28 +143,6 @@
 {/snippet}
 
 <style>
-	.tabs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-1);
-		margin-block-end: var(--space-5);
-		border-block-end: 1px solid var(--border-strong);
-	}
-	.tabs button {
-		border-color: transparent;
-		border-end-start-radius: 0;
-		border-end-end-radius: 0;
-		background: transparent;
-		color: var(--text-muted);
-		margin-block-end: -1px;
-	}
-	/* Selected tab: accent underline plus bold text, so colour is not the only signal. */
-	.tabs button[aria-selected='true'] {
-		background: var(--accent-soft);
-		border-block-end: 3px solid var(--accent);
-		color: var(--text);
-		font-weight: 700;
-	}
 	.pager-controls {
 		display: flex;
 		gap: var(--space-4);

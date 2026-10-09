@@ -24,6 +24,7 @@
 	import { problemDetail } from '$lib/author/problem';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Tabs from '$lib/ui/Tabs.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -110,24 +111,14 @@
 
 <PageHeader title={data.sequencing.title} />
 
-<div class="tabs" role="tablist" aria-label="Sequencing editor tabs">
-	<button
-		type="button"
-		role="tab"
-		aria-selected={activeTab === 'edit'}
-		onclick={() => (activeTab = 'edit')}
-	>
-		Edit
-	</button>
-	<button
-		type="button"
-		role="tab"
-		aria-selected={activeTab === 'publish'}
-		onclick={() => (activeTab = 'publish')}
-	>
-		Publish
-	</button>
-</div>
+<Tabs
+	tabs={[
+		{ id: 'edit', label: 'Edit' },
+		{ id: 'publish', label: 'Publish' }
+	]}
+	bind:selected={activeTab}
+	label="Sequencing editor tabs"
+/>
 
 {#if activeTab === 'edit'}
 	<div role="tabpanel">
@@ -217,28 +208,6 @@
 {/if}
 
 <style>
-	.tabs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-1);
-		margin-block-end: var(--space-5);
-		border-block-end: 1px solid var(--border-strong);
-	}
-	.tabs button {
-		border-color: transparent;
-		border-end-start-radius: 0;
-		border-end-end-radius: 0;
-		background: transparent;
-		color: var(--text-muted);
-		margin-block-end: -1px;
-	}
-	/* Selected tab: accent underline plus bold text, so colour is not the only signal. */
-	.tabs button[aria-selected='true'] {
-		background: var(--accent-soft);
-		border-block-end: 3px solid var(--accent);
-		color: var(--text);
-		font-weight: 700;
-	}
 	.stack {
 		display: grid;
 		gap: var(--space-4);
