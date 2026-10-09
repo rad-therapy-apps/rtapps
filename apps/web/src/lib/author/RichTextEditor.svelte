@@ -277,7 +277,7 @@
 		border-color: transparent;
 		color: var(--text-muted);
 	}
-	.toolbar button:hover:not(:disabled) {
+	.toolbar button:hover:not(:disabled):not([aria-pressed='true']) {
 		background: var(--surface);
 		border-color: transparent;
 		color: var(--text);
