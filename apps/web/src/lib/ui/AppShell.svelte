@@ -42,11 +42,25 @@
 
 	let menuOpen = $state(false);
 	let menuButton: HTMLButtonElement | undefined = $state();
+	let drawer: HTMLDivElement | undefined = $state();
 
 	// Any navigation closes the phone drawer.
 	$effect(() => {
 		void currentPath;
 		menuOpen = false;
+	});
+
+	// So does tapping any link in it, including one to the page already open, which leaves
+	// `currentPath` unchanged. One listener on the drawer, attached in script rather than as
+	// a template handler on a non-interactive element.
+	$effect(() => {
+		const el = drawer;
+		if (!el) return;
+		const closeOnLink = (event: MouseEvent) => {
+			if (event.target instanceof Element && event.target.closest('a')) menuOpen = false;
+		};
+		el.addEventListener('click', closeOnLink);
+		return () => el.removeEventListener('click', closeOnLink);
 	});
 
 	function isCurrent(href: string): 'page' | undefined {
@@ -86,7 +100,7 @@
 			</button>
 		</div>
 
-		<div id="app-nav" class="sidebar-body" class:open={menuOpen}>
+		<div id="app-nav" class="sidebar-body" class:open={menuOpen} bind:this={drawer}>
 			<nav aria-label="Main">
 				<ul>
 					<li>

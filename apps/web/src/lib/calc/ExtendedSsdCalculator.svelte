@@ -8,10 +8,12 @@
 	ADR/Task 11).
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `extended_ssd` entry; formula in `./formulas` (Task 1, audit §4).
-	Depends on: `./formulas` (`extendedSsd`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`extendedSsd`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import CalcShell from './CalcShell.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
 	import { extendedSsd } from './formulas';
 	import type { CalcTables } from './registry';
 
@@ -27,13 +29,17 @@
 	const result = $derived(extendedSsd(ssd0, ssdE, depth));
 </script>
 
-<div class="calc">
+<CalcShell cls="calc">
 	<label>Reference SSD, SSD0 (cm) <input type="number" bind:value={ssd0} min="1" step="1" /></label>
 	<label>Extended SSD, SSDe (cm) <input type="number" bind:value={ssdE} min="1" step="1" /></label>
 	<label>Depth (cm) <input type="number" bind:value={depth} min="0" step="0.5" /></label>
 
 	{#if result === null}
-		<p class="calc-message">Enter a positive reference SSD and a positive SSDe + depth.</p>
+		<Alert tone="info"
+			><p class="calc-message">
+				Enter a positive reference SSD and a positive SSDe + depth.
+			</p></Alert
+		>
 	{:else}
 		<p class="calc-formula">ISF = ((SSD0+d)/(SSDe+d))²</p>
 		<p class="calc-result">ISF: <strong>{result.isf.toFixed(4)}</strong></p>
@@ -41,4 +47,4 @@
 		<p class="calc-result">MU multiplier: <strong>{result.muMult.toFixed(4)}</strong></p>
 		<p class="calc-result">Field factor: {result.fieldF.toFixed(2)}</p>
 	{/if}
-</div>
+</CalcShell>

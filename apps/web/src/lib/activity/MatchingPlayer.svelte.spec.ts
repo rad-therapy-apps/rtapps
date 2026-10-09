@@ -67,7 +67,7 @@ async function waitForAttemptStart(post: Post) {
 describe('MatchingPlayer', () => {
 	// Scenario: select a term, then click a definition to pair it.
 	// Invariant: the grade request body is exactly {item_key: <term key>, response: {choice: <definition index>}},
-	// and the term's ✓/✗ feedback renders.
+	// and the term's Correct/Incorrect icon feedback renders.
 	it('pairs a selected term with a definition and grades it', async () => {
 		const post: Post = vi.fn(
 			async (
@@ -103,7 +103,9 @@ describe('MatchingPlayer', () => {
 			params: { path: { attempt_id: 'attempt-1' } },
 			body: { item_key: 't1', response: { choice: 1 } }
 		});
-		await expect.element(page.getByTestId('match-feedback-t1')).toHaveTextContent('✓');
+		await expect
+			.element(page.getByTestId('match-feedback-t1').getByRole('img', { name: 'Correct' }))
+			.toBeVisible();
 	});
 
 	// Scenario: a term already paired is re-selected and paired with a different definition.
@@ -138,7 +140,9 @@ describe('MatchingPlayer', () => {
 
 		await page.getByRole('button', { name: 'RBE' }).click();
 		await page.getByRole('button', { name: 'Definition B' }).click();
-		await expect.element(page.getByTestId('match-feedback-t1')).toHaveTextContent('✗');
+		await expect
+			.element(page.getByTestId('match-feedback-t1').getByRole('img', { name: 'Incorrect' }))
+			.toBeVisible();
 
 		await page.getByRole('button', { name: 'RBE' }).click();
 		await page.getByRole('button', { name: 'Definition A' }).click();
@@ -147,7 +151,9 @@ describe('MatchingPlayer', () => {
 			params: { path: { attempt_id: 'attempt-1' } },
 			body: { item_key: 't1', response: { choice: 0 } }
 		});
-		await expect.element(page.getByTestId('match-feedback-t1')).toHaveTextContent('✓');
+		await expect
+			.element(page.getByTestId('match-feedback-t1').getByRole('img', { name: 'Correct' }))
+			.toBeVisible();
 	});
 
 	// Scenario: both terms are paired and "Check results" is clicked.

@@ -16,10 +16,11 @@
 	scatter factors, wedge/tray, Mayneord/ISF) — the calculator branch of the student activity
 	route (`(app)/subjects/[slug]/activities/[id]/+page.svelte`) renders this via
 	`./registry`, passing `snapshot.calculator.data_tables` verbatim as `tables`.
-	Depends on: `./interpolate` (`interpolate2d`, `Grid`), `./formulas` (`mayneordF`, `ssdIsf`).
+	Depends on: `./CalcShell.svelte`, `./interpolate` (`interpolate2d`, `Grid`), `./formulas` (`mayneordF`, `ssdIsf`).
 	Used by: `./registry`, `./MuCalculator.svelte.spec.ts`, the student activity route.
 -->
 <script lang="ts">
+	import CalcShell from './CalcShell.svelte';
 	import { interpolate2d, type Grid } from './interpolate';
 	import { mayneordF, ssdIsf } from './formulas';
 
@@ -146,7 +147,7 @@
 	});
 </script>
 
-<div class="mu-calculator">
+<CalcShell cls="mu-calculator">
 	<label>
 		Prescribed dose (cGy)
 		<input type="number" bind:value={dose} />
@@ -243,4 +244,4 @@
 			<p data-testid="mu-undefined">MU is undefined for a zero table value</p>
 		{/if}
 	</section>
-</div>
+</CalcShell>

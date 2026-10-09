@@ -12,11 +12,13 @@
 	final submit happen client-side over the same session cookie (ADR-0002, ADR-0004).
 	`docs/03-architecture.md` §4.3–4.4.
 
-	Works with: `$lib/lesson/LessonPager.svelte`, `$lib/lesson/snapshot` (`lessonSnapshot`). Used
+	Works with: `$lib/lesson/LessonPager.svelte`, `$lib/lesson/ReadingToggle.svelte`, `$lib/ui/PageHeader.svelte`, `$lib/lesson/snapshot` (`lessonSnapshot`). Used
 	by: reached from `(app)/subjects/[slug]/+page.svelte`; driven end-to-end by
 	`apps/web/e2e/lesson.e2e.ts`.
 -->
 <script lang="ts">
+	import ReadingToggle from '$lib/lesson/ReadingToggle.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import LessonPager from '$lib/lesson/LessonPager.svelte';
 	import { lessonSnapshot } from '$lib/lesson/snapshot';
 	import type { PageData } from './$types';
@@ -25,11 +27,15 @@
 
 	// The API types `LessonOut.snapshot` as an opaque object (it's untyped JSON to the schema);
 	// lessonSnapshot() casts it to the actual lesson content shape this page renders.
-	const snapshot = lessonSnapshot(data.lesson);
+	const snapshot = $derived(lessonSnapshot(data.lesson));
 </script>
 
 <svelte:head>
 	<title>{snapshot.lesson.title} — RTTLearn</title>
 </svelte:head>
+
+<PageHeader title={snapshot.lesson.title}>
+	{#snippet actions()}<ReadingToggle />{/snippet}
+</PageHeader>
 
 <LessonPager lesson={data.lesson} attempt={data.attempt} />

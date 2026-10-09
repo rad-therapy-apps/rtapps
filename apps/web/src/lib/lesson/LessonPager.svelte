@@ -17,7 +17,7 @@
 	each item and the final submit both call the API directly from the client over the session
 	cookie (ADR-0002); the pages/blocks themselves are ADR-0003's snapshot shape. See
 	`docs/03-architecture.md` §4.3/§4.4.
-	Depends on: `$lib/prose/ProseDoc.svelte`, `./KnowledgeCheck.svelte`, `./api`, `./score`
+	Depends on: `$lib/prose/ProseDoc.svelte`, `$lib/ui/Button.svelte` (pager controls), `./KnowledgeCheck.svelte`, `./api`, `./score`
 	(`formatScore`), `./snapshot` (`lessonSnapshot`), `$app/paths` (`resolve`), `@rtapps/api-client`.
 	Used by: `apps/web/src/routes/(app)/lessons/[slug]/+page.svelte`,
 	`LessonPager.svelte.spec.ts`, driven end-to-end by `apps/web/e2e/lesson.e2e.ts`.
@@ -29,6 +29,9 @@
 	import { formatScore } from './score';
 	import { lessonSnapshot } from './snapshot';
 	import { resolve } from '$app/paths';
+	import Button from '$lib/ui/Button.svelte';
+	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { components } from '@rtapps/api-client';
 	import type { RichTextBlock } from './types';
 
@@ -131,53 +134,61 @@
 	}
 </script>
 
-<p>Page {pageIndex + 1} of {pages.length}</p>
-<h2>{currentPage.title}</h2>
+<!-- One reading panel holds the counter, page title, blocks and pager controls (styled in prose.css). -->
+<div class="reading-panel">
+	<p>Page {pageIndex + 1} of {pages.length}</p>
+	<h2>{currentPage.title}</h2>
 
-<!-- Keying the whole block list on `pageIndex` forces every child (including KnowledgeCheck) to
+	<!-- Keying the whole block list on `pageIndex` forces every child (including KnowledgeCheck) to
 	 be destroyed and recreated on navigation, so a radio selection or grading state from the
 	 previous page never bleeds into the next one. -->
-{#key pageIndex}
-	<!-- Knowledge checks are keyed by their stable `key` so a re-render doesn't remount them
+	{#key pageIndex}
+		<!-- Knowledge checks are keyed by their stable `key` so a re-render doesn't remount them
 		 unnecessarily; rich-text blocks have no such id, so `rt-${i}` (position) is used instead. -->
-	{#each currentPage.blocks as block, i (block.type === 'knowledge_check' ? block.key : `rt-${i}`)}
-		{#if block.type === 'rich_text'}
-			<ProseDoc doc={block.body} {images} />
-		{:else}
-			<KnowledgeCheck
-				{block}
-				attemptId={attempt.id}
-				{post}
-				onGraded={recordGrade}
-				initial={gradedResults[block.key]}
-			/>
-		{/if}
-	{/each}
-{/key}
+		{#each currentPage.blocks as block, i (block.type === 'knowledge_check' ? block.key : `rt-${i}`)}
+			{#if block.type === 'rich_text'}
+				<ProseDoc doc={block.body} {images} />
+			{:else}
+				<KnowledgeCheck
+					{block}
+					attemptId={attempt.id}
+					{post}
+					onGraded={recordGrade}
+					initial={gradedResults[block.key]}
+				/>
+			{/if}
+		{/each}
+	{/key}
 
-<!-- Previous/Next navigation between pages. -->
-<div class="pager-controls">
-	<button type="button" disabled={pageIndex === 0} onclick={() => pageIndex--}>Previous</button>
-	<!-- "Next" is hidden (not just disabled) on the last page, since Finish takes over from there. -->
-	{#if !isLastPage}
-		<button type="button" onclick={() => pageIndex++}>Next</button>
+	<!-- Previous/Next navigation between pages. -->
+	<div class="pager-controls">
+		<Button
+			variant="secondary"
+			icon={ChevronLeft}
+			disabled={pageIndex === 0}
+			onclick={() => pageIndex--}>Previous</Button
+		>
+		<!-- "Next" is hidden (not just disabled) on the last page, since Finish takes over from there. -->
+		{#if !isLastPage}
+			<Button variant="primary" icon={ChevronRight} onclick={() => pageIndex++}>Next</Button>
+		{/if}
+	</div>
+
+	<!-- Last-page-only controls: Finish button until submitted, then the score summary. -->
+	{#if isLastPage}
+		{#if !submitResult}
+			<Button variant="primary" disabled={submitting} onclick={finish}>Finish lesson</Button>
+		{:else}
+			<p aria-live="polite">Score: {formatScore(submitResult)}</p>
+			<a href={resolve('/(app)/home')}>Back to home</a>
+		{/if}
+		<!-- Submit failed: `finish()` clears this before every attempt, so in practice it only ever
+		 appears alongside the still-visible Finish button, letting the student retry. -->
+		{#if submitError}
+			<p aria-live="polite">{submitError}</p>
+		{/if}
 	{/if}
 </div>
-
-<!-- Last-page-only controls: Finish button until submitted, then the score summary. -->
-{#if isLastPage}
-	{#if !submitResult}
-		<button type="button" disabled={submitting} onclick={finish}>Finish lesson</button>
-	{:else}
-		<p aria-live="polite">Score: {formatScore(submitResult)}</p>
-		<a href={resolve('/(app)/home')}>Back to home</a>
-	{/if}
-	<!-- Submit failed: `finish()` clears this before every attempt, so in practice it only ever
-		 appears alongside the still-visible Finish button, letting the student retry. -->
-	{#if submitError}
-		<p aria-live="polite">{submitError}</p>
-	{/if}
-{/if}
 
 <style>
 	/* Lays the Previous/Next buttons out side by side with spacing. */

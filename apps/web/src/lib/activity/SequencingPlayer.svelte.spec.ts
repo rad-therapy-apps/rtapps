@@ -1,7 +1,7 @@
 /**
  * What this file does: component-level tests for `SequencingPlayer.svelte` — move-up reordering
  * of the rendered list, the final score once every item is graded at its current position and the
- * attempt is submitted, and the per-row ✓/✗ feedback marks rendered after "Check order".
+ * attempt is submitted, and the per-row Correct/Incorrect icon marks rendered after "Check order".
  * Used here and why: vitest `client` browser project (real Chromium via
  * `@vitest/browser-playwright`) so the click-to-reorder flow is exercised for real; the `post`
  * prop is replaced with a `vi.fn` fake that dispatches on the request path (start/grade/submit),
@@ -149,7 +149,7 @@ describe('SequencingPlayer', () => {
 	// Scenario: "Check order" grades every row (mixed correct/incorrect per the stub below); the
 	// submit call is left unstubbed (rejects) so the list stays rendered instead of switching to
 	// the score summary, letting the per-row marks be asserted deterministically.
-	// Invariant: every row's per-item feedback mark renders '✓'/'✗' once grading resolves.
+	// Invariant: every row's per-item feedback mark renders a Correct/Incorrect icon once grading resolves.
 	it('marks every row with feedback after Check order', async () => {
 		const post: Post = vi.fn(
 			async (
@@ -180,8 +180,14 @@ describe('SequencingPlayer', () => {
 
 		await page.getByRole('button', { name: 'Check order' }).click();
 
-		await expect.element(page.getByTestId('seq-feedback-s1')).toHaveTextContent('✓');
-		await expect.element(page.getByTestId('seq-feedback-s2')).toHaveTextContent('✗');
-		await expect.element(page.getByTestId('seq-feedback-s3')).toHaveTextContent('✓');
+		await expect
+			.element(page.getByTestId('seq-feedback-s1').getByRole('img', { name: 'Correct' }))
+			.toBeVisible();
+		await expect
+			.element(page.getByTestId('seq-feedback-s2').getByRole('img', { name: 'Incorrect' }))
+			.toBeVisible();
+		await expect
+			.element(page.getByTestId('seq-feedback-s3').getByRole('img', { name: 'Correct' }))
+			.toBeVisible();
 	});
 });

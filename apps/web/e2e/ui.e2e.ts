@@ -76,6 +76,65 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 	await expect(page.getByText('Question 1 of 4')).toBeVisible();
 	await expectAccessible(page, 'quiz activity');
 	await expectNoSidewaysScroll(page, 'quiz activity');
+	// Matching (Radiation Biology) and flashcards (Clinical Practice), the same way. No sequencing
+	// activity is seeded, so that player is covered by its component spec only.
+	await page.goto('/subjects/radiation-biology');
+	await page.getByRole('link', { name: 'Cell & Molecular Biology: Matching' }).click();
+	await expect(page.getByTestId('matching-terms')).toBeVisible();
+	await expectAccessible(page, 'matching activity');
+	await expectNoSidewaysScroll(page, 'matching activity');
+	await page.goto('/subjects/clinical-practice');
+	await page.getByRole('link', { name: 'Terminology Challenge: Flashcards' }).click();
+	await expect(page.getByText('Card 1 of')).toBeVisible();
+	await expectAccessible(page, 'flashcards activity');
+	await expectNoSidewaysScroll(page, 'flashcards activity');
+	// A calculator activity (the seeded MU calculator, which has the most inputs).
+	await page.goto('/subjects/radiation-biology');
+	await page.getByRole('link', { name: 'MU calculator', exact: true }).click();
+	await expect(page.getByLabel('Prescribed dose (cGy)')).toBeVisible();
+	await expectAccessible(page, 'calculator activity');
+	await expectNoSidewaysScroll(page, 'calculator activity');
+	// The arcade frame fits the viewport: the page itself never scrolls.
+	await page.goto('/subjects/radiation-biology');
+	await page.getByRole('link', { name: 'Cell Defender' }).click();
+	await expect(page.locator('iframe.arcade-frame')).toBeVisible();
+	await expectNoSidewaysScroll(page, 'arcade frame');
+	const overflowY = await page.evaluate(
+		() => document.documentElement.scrollHeight - window.innerHeight
+	);
+	expect(overflowY, `arcade page scrolls vertically by ${overflowY}px`).toBeLessThanOrEqual(1);
+});
+
+test('light reading panel is applied before hydration and is accessible', async ({ page }) => {
+	const stamp = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+	await registerStudent(page, {
+		email: `e2e-ui-light-${stamp}@example.edu`,
+		password: 'e2e-ui-password-1',
+		name: 'Light Check'
+	});
+	await page.evaluate(() => localStorage.setItem('rttlearn:reading', 'light'));
+	await page.goto('/lessons/rbe-and-oer', { waitUntil: 'domcontentloaded' });
+	// Read right after DOM-ready: the head script, not the toggle component, has set the mode.
+	const background = await page.evaluate(
+		() => getComputedStyle(document.querySelector('.reading-panel')!).backgroundColor
+	);
+	expect(background).toBe('rgb(247, 249, 252)'); // --paper-light-bg
+	await page.waitForLoadState('networkidle');
+	await expect(page.getByRole('button', { name: 'Light page' })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expectAccessible(page, 'light lesson panel');
+	await expectNoSidewaysScroll(page, 'light lesson panel');
+	// Page 3 of medical-terminology holds a prose table and a knowledge check (radios): the
+	// table header and radio colours are what the light panel must keep readable.
+	await page.goto('/lessons/medical-terminology', { waitUntil: 'networkidle' });
+	const next = page.getByRole('button', { name: 'Next', exact: true });
+	await next.click();
+	await next.click();
+	await expect(page.getByText('Page 3 of')).toBeVisible();
+	await expect(page.locator('.prose th').first()).toBeVisible();
+	await expectAccessible(page, 'light lesson panel with table');
 });
 
 test('educator pages are accessible and fit the viewport', async ({ page }) => {

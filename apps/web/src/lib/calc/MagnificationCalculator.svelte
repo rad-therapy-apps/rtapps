@@ -7,10 +7,12 @@
 	ADR/Task 11).
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `magnification` entry; formula in `./formulas` (Task 1, audit §7).
-	Depends on: `./formulas` (`magnification`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`magnification`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import CalcShell from './CalcShell.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
 	import { magnification } from './formulas';
 	import type { CalcTables } from './registry';
 
@@ -26,7 +28,7 @@
 	const result = $derived(magnification(sid, sod, obj));
 </script>
 
-<div class="calc">
+<CalcShell cls="calc">
 	<label
 		>Source-to-image distance, SID (cm) <input
 			type="number"
@@ -46,11 +48,13 @@
 	<label>Object size (cm) <input type="number" bind:value={obj} min="0.1" step="0.5" /></label>
 
 	{#if result === null}
-		<p class="calc-message">Enter a positive source-to-object distance.</p>
+		<Alert tone="info"
+			><p class="calc-message">Enter a positive source-to-object distance.</p></Alert
+		>
 	{:else}
 		<p class="calc-formula">M = SID/SOD; image size = object size × M</p>
 		<p class="calc-result">Magnification: <strong>{result.m.toFixed(2)}</strong></p>
 		<p class="calc-result">Image size: {result.imgSize.toFixed(2)} cm</p>
 		<p class="calc-result">Enlargement: {result.pctEnlarge.toFixed(2)}%</p>
 	{/if}
-</div>
+</CalcShell>

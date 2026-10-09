@@ -9,13 +9,15 @@
 	posts to `/api/v1/attempts/{attempt_id}/items` over the session cookie (ADR-0002) and renders
 	whatever the server decides, never a client-computed answer. See `docs/03-architecture.md`
 	§4.4.
-	Depends on: `$lib/prose/ProseDoc.svelte` (renders the stem/explanation), `./api`, `./types`
+	Depends on: `$lib/prose/ProseDoc.svelte` (renders the stem/explanation), `$lib/ui/Feedback.svelte` (verdict line), `$lib/ui/Button.svelte`, `./api`, `./types`
 	(`KnowledgeCheckBlock`), `@rtapps/api-client` (`ItemGradeOut`), `$lib/prose/types`.
 	Used by: `LessonPager.svelte` (one instance per knowledge_check block),
 	`KnowledgeCheck.svelte.spec.ts`.
 -->
 <script lang="ts">
 	import ProseDoc from '$lib/prose/ProseDoc.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Feedback from '$lib/ui/Feedback.svelte';
 	import { api } from './api';
 	import type { KnowledgeCheckBlock } from './types';
 	import type { components } from '@rtapps/api-client';
@@ -88,16 +90,18 @@
 			{option}
 		</label>
 	{/each}
-	<button type="button" disabled={choice === undefined || checking} onclick={checkAnswer}>
+	<Button variant="primary" disabled={choice === undefined || checking} onclick={checkAnswer}>
 		{result ? 'Check again' : 'Check answer'}
-	</button>
+	</Button>
 	<!-- Grading request failed: surfaced as polite live-region text so screen readers announce it without stealing focus. -->
 	{#if error}
 		<p aria-live="polite">{error}</p>
 	{/if}
 	<!-- Graded result: correct/incorrect verdict, plus an explanation if the question has one. -->
 	{#if result}
-		<p aria-live="polite">{result.correct ? 'Correct' : 'Not quite'}</p>
+		<div aria-live="polite">
+			<Feedback correct={result.correct}>{result.correct ? 'Correct' : 'Not quite'}</Feedback>
+		</div>
 		{#if result.explanation}
 			<!-- OpenAPI types the explanation as a plain object; it is a validated prose doc (packages/schemas) -->
 			<ProseDoc doc={result.explanation as unknown as ProseDocType} />
@@ -113,6 +117,9 @@
 	}
 	/* One option per line rather than inline radios. */
 	label {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-height: var(--control-height);
 	}
 </style>

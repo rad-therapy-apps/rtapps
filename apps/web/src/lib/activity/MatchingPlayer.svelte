@@ -13,11 +13,16 @@
 	each term/definition pairing grades immediately, and "Check results" submits for a final score.
 	See `docs/03-architecture.md` §4.4.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`gradeItem`/
-	`submitAttempt`), `./types` (`MatchingSnapshot`).
+	`submitAttempt`), `./types` (`MatchingSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Icon.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `MatchingPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import Award from '@lucide/svelte/icons/award';
+	import Check from '@lucide/svelte/icons/check';
+	import X from '@lucide/svelte/icons/x';
 	import { api } from '$lib/lesson/api';
+	import Button from '$lib/ui/Button.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
 	import { gradeItem, startAttempt, submitAttempt } from './attempts';
 	import type { MatchingSnapshot } from './types';
 
@@ -109,7 +114,7 @@
 {#if result}
 	<section aria-live="polite" data-testid="matching-result">
 		{#if result.passed}
-			<p class="badge" data-testid="matching-badge">🏅 Badge earned!</p>
+			<p class="badge" data-testid="matching-badge"><Icon icon={Award} /> Badge earned!</p>
 		{/if}
 		<p>Score: {result.percent ?? 0}%</p>
 	</section>
@@ -121,6 +126,7 @@
 				<li>
 					<button
 						type="button"
+						class="choice"
 						aria-pressed={selectedTermKey === t.key}
 						disabled={busy}
 						onclick={() => selectTerm(t.key)}
@@ -128,8 +134,13 @@
 						{t.term}
 					</button>
 					{#if answers[t.key]}
-						<span data-testid={`match-feedback-${t.key}`}>{answers[t.key].correct ? '✓' : '✗'}</span
-						>
+						<span data-testid={`match-feedback-${t.key}`}>
+							{#if answers[t.key].correct}
+								<Icon icon={Check} label="Correct" />
+							{:else}
+								<Icon icon={X} label="Incorrect" />
+							{/if}
+						</span>
 					{/if}
 				</li>
 			{/each}
@@ -139,7 +150,9 @@
 				 doubles as the each-block key (the list itself is static per snapshot). -->
 			{#each definitions as definition, i (i)}
 				<li>
-					<button type="button" disabled={busy} onclick={() => pair(i)}>{definition}</button>
+					<button type="button" class="choice" disabled={busy} onclick={() => pair(i)}
+						>{definition}</button
+					>
 				</li>
 			{/each}
 		</ul>
@@ -149,17 +162,47 @@
 	{#if error}
 		<p aria-live="polite" data-testid="player-error">{error}</p>
 	{/if}
-	<button type="button" disabled={!allPaired || busy} onclick={finish}>Check results</button>
+	<Button variant="primary" disabled={!allPaired || busy} onclick={finish}>Check results</Button>
 {/if}
 
 <style>
 	/* Lays the terms/definitions columns out side by side. */
 	.columns {
 		display: flex;
-		gap: 2rem;
+		flex-wrap: wrap;
+		gap: var(--space-5);
+		margin-bottom: var(--space-4);
 	}
-	/* Draws attention to a passed badge without relying on color alone (the emoji carries it). */
+	.columns ul {
+		flex: 1 1 14rem;
+		min-width: 0;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.columns li {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-bottom: var(--space-2);
+	}
+	/* Full-width, wrapping choice buttons. */
+	.choice {
+		flex: 1;
+		justify-content: flex-start;
+		text-align: start;
+		height: auto;
+	}
+	/* The selected term: accent fill and border; aria-pressed carries the state for assistive tech. */
+	.choice[aria-pressed='true'] {
+		background: var(--accent-soft);
+		border-color: var(--accent);
+	}
+	/* Draws attention to a passed badge without relying on color alone (the award icon carries it). */
 	.badge {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
 		font-weight: bold;
 	}
 </style>

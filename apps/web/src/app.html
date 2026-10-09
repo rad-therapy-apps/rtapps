@@ -5,6 +5,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#0a1420" />
 		<meta name="text-scale" content="scale" />
+		<!-- No flash: apply the saved "Light page" choice before first paint, so a light reader never
+			sees the dark panel flicker on load. A future Content-Security-Policy must hash or allow
+			this one inline script. -->
+		<script>
+			try {
+				if (localStorage.getItem('rttlearn:reading') === 'light') {
+					document.documentElement.dataset.reading = 'light';
+				}
+			} catch {
+				/* storage unavailable: stay dark */
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

@@ -12,11 +12,13 @@
 	3a Task 14) — start and submit both happen client-side over the session cookie (ADR-0002),
 	deferred until the student reaches the end of the deck. See `docs/03-architecture.md` §4.4.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`submitAttempt`),
-	`./types` (`FlashcardsSnapshot`).
+	`./types` (`FlashcardsSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Feedback.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`.
 -->
 <script lang="ts">
 	import { api } from '$lib/lesson/api';
+	import Button from '$lib/ui/Button.svelte';
+	import Feedback from '$lib/ui/Feedback.svelte';
 	import { startAttempt, submitAttempt } from './attempts';
 	import type { FlashcardsSnapshot } from './types';
 
@@ -37,6 +39,8 @@
 	let index = $state(0);
 	// Whether the current card shows its definition (flipped) or its term (front).
 	let flipped = $state(false);
+	// True only after the student flips, so the 150 ms fade plays on a flip and not when a card appears.
+	let fade = $state(false);
 	// Set once the completion attempt is submitted; presence switches the UI to "Deck complete".
 	let done = $state(false);
 	// True while the finish request is in flight, to disable the button against double-submits.
@@ -52,6 +56,7 @@
 		if (index === 0) return;
 		index -= 1;
 		flipped = false;
+		fade = false;
 	}
 
 	// Moves to the next card, reset to its front.
@@ -59,11 +64,13 @@
 		if (isLastCard) return;
 		index += 1;
 		flipped = false;
+		fade = false;
 	}
 
 	// Toggles between the current card's term and definition.
 	function flip() {
 		flipped = !flipped;
+		fade = true;
 	}
 
 	// Starts a completion attempt and submits it immediately (flashcards have nothing to grade).
@@ -84,19 +91,24 @@
 </script>
 
 {#if done}
-	<p aria-live="polite" data-testid="deck-complete">Deck complete</p>
+	<div aria-live="polite" data-testid="deck-complete">
+		<Feedback correct={true}>Deck complete</Feedback>
+	</div>
 {:else if cards[index]}
 	{@const card = cards[index]}
 	<section>
 		<p>Card {index + 1} of {cards.length}</p>
-		<p>{flipped ? card.definition : card.term}</p>
+		<!-- Keyed on the face so each flip fades in over 150 ms (no other motion). -->
+		{#key flipped}
+			<p class="face" class:fade>{flipped ? card.definition : card.term}</p>
+		{/key}
 		<div class="controls">
-			<button type="button" disabled={index === 0} onclick={previous}>Previous</button>
-			<button type="button" onclick={flip}>Flip</button>
+			<Button disabled={index === 0} onclick={previous}>Previous</Button>
+			<Button variant="primary" onclick={flip}>Flip</Button>
 			{#if isLastCard}
-				<button type="button" disabled={busy} onclick={finish}>Finish deck</button>
+				<Button variant="primary" disabled={busy} onclick={finish}>Finish deck</Button>
 			{:else}
-				<button type="button" onclick={next}>Next</button>
+				<Button variant="primary" onclick={next}>Next</Button>
 			{/if}
 		</div>
 		<!-- Completion attempt failed: surfaced as polite live-region text so screen readers announce
@@ -111,7 +123,39 @@
 	/* Lays the Previous/Flip/Next-or-Finish buttons out side by side with spacing. */
 	.controls {
 		display: flex;
-		gap: 1rem;
-		margin: 1rem 0;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+		margin: var(--space-4) 0;
+	}
+	/* The card face: a raised panel at least 12rem high, text centred. */
+	.face {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 12rem;
+		margin: 0;
+		padding: var(--space-5);
+		background: var(--surface-raised);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		font-size: 1.25rem;
+		text-align: center;
+		overflow-wrap: anywhere;
+	}
+	.face.fade {
+		animation: face-in 150ms linear;
+	}
+	@keyframes face-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.face.fade {
+			animation: none;
+		}
 	}
 </style>

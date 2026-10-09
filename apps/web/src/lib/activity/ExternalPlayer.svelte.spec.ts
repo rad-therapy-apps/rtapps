@@ -123,7 +123,7 @@ describe('ExternalPlayer', () => {
 		await expect.element(page.getByLabelText('result')).toBeInTheDocument();
 		await expect.element(page.getByText('24%', { exact: false })).toBeInTheDocument();
 		expect(submitBody).toEqual({ score: 1200 });
-		// Codebase badge idiom is <p class="badge" data-testid="quiz-badge">🏅 Badge earned!</p>;
+		// Codebase badge idiom is <p class="badge" data-testid="quiz-badge"> (Lucide award icon + "Badge earned!");
 		// games show no badge (practice semantics in 4a), so both must be absent.
 		expect(page.getByTestId('quiz-badge').elements().length).toBe(0);
 		expect(page.getByText(/badge earned/i).elements().length).toBe(0);

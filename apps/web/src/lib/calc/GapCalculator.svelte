@@ -7,10 +7,12 @@
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `gap` entry; legacy source Treatment_Planning/Gap_Calculation; formula
 	`gapCalc()` in `./formulas` (Task 1, audit §5).
-	Depends on: `./formulas` (`gapCalc`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`gapCalc`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import CalcShell from './CalcShell.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
 	import { gapCalc } from './formulas';
 	import type { CalcTables } from './registry';
 
@@ -27,16 +29,18 @@
 	const gap = $derived(gapCalc(l1, l2, depth, ssd));
 </script>
 
-<div class="calc">
+<CalcShell cls="calc">
 	<label>Field length 1 (cm) <input type="number" bind:value={l1} min="1" step="0.5" /></label>
 	<label>Field length 2 (cm) <input type="number" bind:value={l2} min="1" step="0.5" /></label>
 	<label>Match depth (cm) <input type="number" bind:value={depth} min="0.5" step="0.5" /></label>
 	<label>SSD (cm) <input type="number" bind:value={ssd} min="50" step="1" /></label>
 
 	{#if gap === null}
-		<p class="calc-message">Enter positive field lengths, depth and SSD.</p>
+		<Alert tone="info"
+			><p class="calc-message">Enter positive field lengths, depth and SSD.</p></Alert
+		>
 	{:else}
 		<p class="calc-formula">gap = ½·L1·(d/SSD) + ½·L2·(d/SSD)</p>
 		<p class="calc-result">Skin gap: <strong>{gap.toFixed(2)} cm</strong></p>
 	{/if}
-</div>
+</CalcShell>

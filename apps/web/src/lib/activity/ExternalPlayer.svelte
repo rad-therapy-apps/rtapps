@@ -16,7 +16,8 @@
 	against the pinned snapshot's max_score, see `attempts.ts`'s `submitExternalAttempt`). No
 	pass/fail badge is shown: 4a treats games as practice, not assessment.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/
-	`submitExternalAttempt`), `./types` (`ExternalSnapshot`).
+	`submitExternalAttempt`), `./types` (`ExternalSnapshot`), `$lib/ui/Alert.svelte`,
+	`$lib/ui/Button.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `ExternalPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
@@ -29,6 +30,8 @@
 		type PostFn
 	} from '$lib/activity/attempts';
 	import type { ExternalSnapshot } from '$lib/activity/types';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 
 	let {
 		activityId,
@@ -112,12 +115,14 @@
 </header>
 
 {#if status === 'error'}
-	<p role="alert">{errorMessage}</p>
+	<Alert tone="danger" role="alert">{errorMessage}</Alert>
 	{#if reportedScore !== null}
 		{#if snapshot.external.completion_only}
-			<button onclick={() => void submitCompletion()}>Retry</button>
+			<Button variant="primary" onclick={() => void submitCompletion()}>Retry</Button>
 		{:else}
-			<button onclick={() => void submitScore(reportedScore as number)}>Retry</button>
+			<Button variant="primary" onclick={() => void submitScore(reportedScore as number)}
+				>Retry</Button
+			>
 		{/if}
 	{/if}
 {:else if status === 'done'}
@@ -143,13 +148,24 @@
 {/if}
 
 <style>
+	/* Frame height = viewport minus the app chrome: 9rem on desktop, 10rem on a phone, where the
+	   top bar plus padding overflowed 8rem by 31px at 360px (ui.e2e's no-page-scroll check guards it). */
 	.arcade-frame {
 		width: 100%;
-		height: calc(100vh - 6rem);
-		border: 0;
+		height: calc(100dvh - 9rem);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+	}
+	@media (max-width: 50rem) {
+		.arcade-frame {
+			height: calc(100dvh - 10rem);
+		}
+	}
+	.player-bar {
+		margin-bottom: var(--space-3);
 	}
 	.player-bar h1 {
-		margin: 0 0 0.5rem;
-		font-size: 1.25rem;
+		margin: 0;
+		font-size: var(--text-xl);
 	}
 </style>
