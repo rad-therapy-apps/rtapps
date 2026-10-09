@@ -48,13 +48,19 @@
 
 	let {
 		doc,
+		label,
 		onchange,
 		oninsertimage
 	}: {
 		doc: ProseDoc;
+		/** Accessible name of the editable surface, so several editors on a page can be told apart. */
+		label: string;
 		onchange: (doc: ProseDoc) => void;
 		oninsertimage?: () => Promise<{ mediaAssetId: string; alt: string } | null>;
 	} = $props();
+
+	// Unique per mounted editor: a lesson editor mounts several, so fixed ids would collide.
+	const uid = $props.id();
 
 	let element: HTMLDivElement | undefined = $state();
 	let editor: Editor | undefined = $state();
@@ -76,8 +82,9 @@
 			extensions: authorExtensions(),
 			content: toEditor(initialDoc),
 			// `prose` reuses prose.css's paper look for the editable surface (same classes as the
-			// student reader), so authors see what students will.
-			editorProps: { attributes: { class: 'prose' } },
+			// student reader), so authors see what students get by default (the dark paper; students can
+			// switch to the light paper).
+			editorProps: { attributes: { class: 'prose', 'aria-label': untrack(() => label) } },
 			onUpdate: () => onchange(fromEditor(instance.getJSON())),
 			onTransaction: () => {
 				version += 1;
@@ -222,8 +229,8 @@
 		)}
 
 		<span class="sep" aria-hidden="true"></span>
-		<label for="callout-kind">Callout kind</label>
-		<select id="callout-kind" bind:value={calloutKind}>
+		<label for="{uid}-callout-kind">Callout kind</label>
+		<select id="{uid}-callout-kind" bind:value={calloutKind}>
 			<option value="key-principle">Key principle</option>
 			<option value="clinical-note">Clinical note</option>
 			<option value="warning">Warning</option>
@@ -236,8 +243,8 @@
 		)}
 
 		<span class="sep" aria-hidden="true"></span>
-		<label for="link-url">Link URL</label>
-		<input id="link-url" type="text" placeholder="https://" bind:value={linkUrl} />
+		<label for="{uid}-link-url">Link URL</label>
+		<input id="{uid}-link-url" type="text" placeholder="https://" bind:value={linkUrl} />
 		{@render tool('Link', LinkIcon, applyLink)}
 		{#if linkError}
 			<p role="alert">{linkError}</p>
@@ -319,6 +326,10 @@
 		padding: var(--space-4);
 		background: var(--paper-bg);
 		color: var(--paper-text);
+	}
+	.surface :global(.ProseMirror img) {
+		max-width: 100%;
+		height: auto;
 	}
 	.surface :global(.ProseMirror:focus-visible) {
 		outline: 2px solid var(--paper-link);

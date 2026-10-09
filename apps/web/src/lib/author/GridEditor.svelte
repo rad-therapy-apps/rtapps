@@ -304,9 +304,16 @@
 	.axis-labels label {
 		flex: 1 1 12rem;
 	}
-	/* The grid scrolls inside its own wrapper so the page never scrolls sideways. */
+	/* The wrapper is the scroll container in both axes: the height cap makes it scroll vertically,
+	   which is what lets the header row stick (top: 0 is relative to this box), and the page never
+	   scrolls sideways. Scroll padding keeps a focused cell clear of the pinned header and, on wide
+	   screens, the pinned key column. */
 	.grid-table-wrap {
-		overflow-x: auto;
+		--grid-key-col: 14rem;
+		max-height: min(70vh, 40rem);
+		overflow: auto;
+		scroll-padding-block-start: 5.5rem;
+		scroll-padding-inline-start: var(--grid-key-col);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-sm);
 	}
@@ -330,14 +337,21 @@
 		outline: 2px solid var(--accent);
 		outline-offset: 1px;
 	}
-	/* Sticky header row; every cell gets an opaque background so scrolled cells do not show through. */
+	/* Sticky header row; sticky cells keep an opaque background so scrolled cells do not show through. */
 	.grid-table thead th {
 		position: sticky;
 		top: 0;
 		z-index: 1;
 		background: var(--surface-raised);
 	}
-	/* Sticky first column: the row-key column labels each row, so it is the one worth pinning. */
+	/* Sticky first column: the row-key column labels each row, so it is the one worth pinning. Its
+	   width is fixed to --grid-key-col (the key input plus "Remove row") so the scroll padding above
+	   matches it. The corner cell is sticky both ways and sits above both. */
+	.grid-table tbody th,
+	.grid-table thead th:first-child {
+		width: var(--grid-key-col);
+		min-width: var(--grid-key-col);
+	}
 	.grid-table tbody th {
 		position: sticky;
 		inset-inline-start: 0;
@@ -347,6 +361,26 @@
 	.grid-table thead th:first-child {
 		inset-inline-start: 0;
 		z-index: 2;
+	}
+	/* Phones: a 14rem pinned column would leave almost no room for value cells, so the key column
+	   scrolls with the row instead (the header row and corner cell still stick vertically). */
+	@media (max-width: 50rem) {
+		.grid-table-wrap {
+			scroll-padding-inline-start: 0;
+		}
+		.grid-table tbody th {
+			position: static;
+		}
+		.grid-table thead th:first-child {
+			position: sticky;
+			inset-inline-start: auto;
+			width: auto;
+			min-width: 0;
+		}
+		.grid-table tbody th {
+			width: auto;
+			min-width: 0;
+		}
 	}
 	.grid-controls,
 	.paste-controls,

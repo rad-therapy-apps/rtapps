@@ -48,7 +48,8 @@
 <a href={csvHref} data-testid="csv-link">Download CSV</a>
 
 <h2>Score distribution</h2>
-<div class="table-wrap">
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="table-wrap" role="region" aria-label="Score distribution" tabindex="0">
 	<table>
 		<thead>
 			<tr>
@@ -69,7 +70,8 @@
 
 {#if data.stats.attempt_rows.length > 0}
 	<h2>Attempts</h2>
-	<div class="table-wrap">
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-wrap" role="region" aria-label="Attempts" tabindex="0">
 		<table>
 			<thead>
 				<tr>
@@ -92,7 +94,8 @@
 {/if}
 
 <h2>Items</h2>
-<div class="table-wrap">
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="table-wrap" role="region" aria-label="Items" tabindex="0">
 	<table>
 		<thead>
 			<tr>

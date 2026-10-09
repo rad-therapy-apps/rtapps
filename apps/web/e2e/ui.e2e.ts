@@ -138,7 +138,7 @@ test('light reading panel is applied before hydration and is accessible', async 
 });
 
 test('educator pages are accessible and fit the viewport', async ({ page }) => {
-	// Two scans, but the authoring hub is heavy: 28 s on the dev server with one worker, right
+	// Four scans, but the authoring hub is heavy: 28 s on the dev server with one worker, right
 	// at the 30 s default.
 	test.slow();
 	await signIn(page, EDUCATOR.email, EDUCATOR.password);
@@ -165,6 +165,20 @@ test('quiz editor is accessible and fits the viewport', async ({ page }) => {
 	await page.waitForLoadState('networkidle');
 	await expectAccessible(page, 'quiz editor');
 	await expectNoSidewaysScroll(page, 'quiz editor');
+});
+
+test('lesson editor is accessible and fits the viewport', async ({ page }) => {
+	test.slow();
+	await signIn(page, EDUCATOR.email, EDUCATOR.password);
+	// A seeded lesson, reached the way an educator does: from the authoring hub.
+	await page.goto('/author');
+	await page.getByRole('link', { name: 'RBE and OER' }).first().click();
+	await expect(page).toHaveURL(/\/author\/lessons\//);
+	await expect(page.getByRole('tab', { name: 'Edit' })).toBeVisible();
+	await expect(page.getByRole('toolbar', { name: 'Formatting' }).first()).toBeVisible();
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'lesson editor');
+	await expectNoSidewaysScroll(page, 'lesson editor');
 });
 
 test('phone drawer opens, navigates and closes', async ({ page, viewport }) => {

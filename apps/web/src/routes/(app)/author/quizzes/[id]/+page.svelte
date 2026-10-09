@@ -307,7 +307,11 @@
 								}}
 								onchange={(next) => updateQuestionDraft(i, next)}
 							/>
-							<Button onclick={() => saveQuestion(i)} disabled={questionSaving !== null}>
+							<Button
+								variant="primary"
+								onclick={() => saveQuestion(i)}
+								disabled={questionSaving !== null}
+							>
 								Save question
 							</Button>
 							{#if questionSaveError}

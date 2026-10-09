@@ -79,7 +79,7 @@
 	<div class="field">
 		<p>Question</p>
 		{#key block.instanceId}
-			<RichTextEditor doc={block.stem} onchange={setStem} />
+			<RichTextEditor doc={block.stem} label="Question" onchange={setStem} />
 		{/key}
 	</div>
 
@@ -112,7 +112,7 @@
 		{#if block.explanation !== null}
 			<p>Explanation</p>
 			{#key `${block.instanceId}:explanation`}
-				<RichTextEditor doc={block.explanation} onchange={setExplanation} />
+				<RichTextEditor doc={block.explanation} label="Explanation" onchange={setExplanation} />
 			{/key}
 			<Button onclick={removeExplanation}>Remove explanation</Button>
 		{:else}

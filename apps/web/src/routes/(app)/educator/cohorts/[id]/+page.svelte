@@ -57,7 +57,7 @@
 </form>
 
 <!-- Below-threshold percent: the cutoff used to flag activities/students below it. -->
-<form method="POST" action="?/threshold" use:enhance>
+<form class="threshold-form" method="POST" action="?/threshold" use:enhance>
 	<Field label="Below-threshold mark (%)" id="threshold_percent">
 		<input
 			id="threshold_percent"
@@ -176,6 +176,16 @@
 	}
 	.table-wrap {
 		overflow-x: auto;
+	}
+	/* Cap the form like the dashboard's create-cohort form so the number input does not stretch. */
+	.threshold-form {
+		display: grid;
+		gap: var(--space-3);
+		max-width: 20rem;
+		margin-block: var(--space-4);
+	}
+	.threshold-form :global(.btn) {
+		justify-self: start;
 	}
 	.num {
 		font-variant-numeric: tabular-nums;

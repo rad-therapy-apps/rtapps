@@ -308,6 +308,7 @@
 						{#key block.instanceId}
 							<RichTextEditor
 								doc={block.body}
+								label={`Page ${pi + 1} text block ${bi + 1}`}
 								onchange={(body) => updateBlock(pi, bi, { ...block, body })}
 								oninsertimage={uploading ? undefined : insertImage}
 							/>

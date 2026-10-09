@@ -32,7 +32,8 @@
 <p>{data.detail.student.email} · joined {data.detail.student.joined_at}</p>
 
 <h2>Results</h2>
-<div class="table-wrap">
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="table-wrap" role="region" aria-label="Results" tabindex="0">
 	<table>
 		<thead>
 			<tr>
@@ -64,7 +65,8 @@
 {#each data.detail.attempts as a (a.attempt_id)}
 	<details open>
 		<summary>{a.title} — {formatPercent(a.percent)} — {a.submitted_at}</summary>
-		<div class="table-wrap">
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="table-wrap" role="region" aria-label="{a.title} responses" tabindex="0">
 			<table>
 				<thead>
 					<tr>
@@ -78,7 +80,7 @@
 					{#each a.items as i (i.item_key)}
 						<tr>
 							<td>{i.item_key}</td>
-							<td>{JSON.stringify(i.response)}</td>
+							<td class="response">{JSON.stringify(i.response)}</td>
 							<td>{i.correct ? 'Yes' : 'No'}</td>
 							<td class="num">{i.score ?? '—'}</td>
 						</tr>
@@ -96,6 +98,9 @@
 <style>
 	.table-wrap {
 		overflow-x: auto;
+	}
+	.response {
+		overflow-wrap: anywhere;
 	}
 	.num {
 		font-variant-numeric: tabular-nums;

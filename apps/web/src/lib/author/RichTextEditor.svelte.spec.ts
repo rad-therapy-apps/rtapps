@@ -50,7 +50,11 @@ describe('RichTextEditor', () => {
 	// valid per the closed prose schema (proves `fromEditor` never leaks an editor-only shape).
 	it('typing text fires onchange with a schema-valid doc', async () => {
 		const onchange = vi.fn();
-		const { container } = await render(RichTextEditor, { doc: emptyDoc, onchange });
+		const { container } = await render(RichTextEditor, {
+			doc: emptyDoc,
+			label: 'Test editor',
+			onchange
+		});
 
 		const el = editable(container);
 		await userEvent.click(el);
@@ -68,7 +72,11 @@ describe('RichTextEditor', () => {
 	// Invariant: the emitted doc's text run carries a `bold` mark.
 	it('toggling Bold from the toolbar applies the mark', async () => {
 		const onchange = vi.fn();
-		const { container } = await render(RichTextEditor, { doc: emptyDoc, onchange });
+		const { container } = await render(RichTextEditor, {
+			doc: emptyDoc,
+			label: 'Test editor',
+			onchange
+		});
 
 		const el = editable(container);
 		await userEvent.click(el);
@@ -88,7 +96,11 @@ describe('RichTextEditor', () => {
 	// Invariant: the emitted doc wraps the paragraph in a real `callout` node with that kind.
 	it('inserting a callout wraps the current block in a callout node', async () => {
 		const onchange = vi.fn();
-		const { container } = await render(RichTextEditor, { doc: emptyDoc, onchange });
+		const { container } = await render(RichTextEditor, {
+			doc: emptyDoc,
+			label: 'Test editor',
+			onchange
+		});
 
 		const el = editable(container);
 		await userEvent.click(el);
@@ -108,7 +120,11 @@ describe('RichTextEditor', () => {
 	// Invariant: a visible error appears, and no link mark (or `<a>` element) is produced.
 	it('rejects an http:// link with a visible error and no mark', async () => {
 		const onchange = vi.fn();
-		const { container } = await render(RichTextEditor, { doc: emptyDoc, onchange });
+		const { container } = await render(RichTextEditor, {
+			doc: emptyDoc,
+			label: 'Test editor',
+			onchange
+		});
 
 		const el = editable(container);
 		await userEvent.click(el);
