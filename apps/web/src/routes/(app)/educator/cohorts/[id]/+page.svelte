@@ -25,6 +25,7 @@
 	import { belowThresholdClass, formatPercent } from '$lib/cohort/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -82,89 +83,102 @@
 </p>
 
 <h2>Activities</h2>
-<div class="table-wrap">
-	<table>
-		<thead>
-			<tr>
-				<th>Activity</th>
-				<th>Attempted</th>
-				<th>Passed</th>
-				<th>Mean best</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.overview.activities as a (a.activity_id)}
-				<tr class={belowThresholdClass(a.below_threshold)}>
-					<td>
-						{#if a.below_threshold}<Icon icon={TriangleAlert} label="Below threshold" />{/if}
-						{a.title}
-					</td>
-					<td class="num">{a.attempted}</td>
-					<td class="num">{a.passed}</td>
-					<td class="num">{formatPercent(a.mean_best_percent)}</td>
-					<td>
-						<a
-							href={resolve('/(app)/educator/cohorts/[id]/activities/[aid]', {
-								id: data.overview.cohort.id,
-								aid: a.activity_id
-							})}>Stats</a
-						>
-					</td>
+{#if data.overview.activities.length === 0}
+	<Card><p class="muted">No attempts yet.</p></Card>
+{:else}
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Activity</th>
+					<th>Attempted</th>
+					<th>Passed</th>
+					<th>Mean best</th>
+					<th></th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-</div>
+			</thead>
+			<tbody>
+				{#each data.overview.activities as a (a.activity_id)}
+					<tr class={belowThresholdClass(a.below_threshold)}>
+						<td>
+							{#if a.below_threshold}<Icon icon={TriangleAlert} label="Below threshold" />{/if}
+							{a.title}
+						</td>
+						<td class="num">{a.attempted}</td>
+						<td class="num">{a.passed}</td>
+						<td class="num">{formatPercent(a.mean_best_percent)}</td>
+						<td>
+							<a
+								href={resolve('/(app)/educator/cohorts/[id]/activities/[aid]', {
+									id: data.overview.cohort.id,
+									aid: a.activity_id
+								})}>Stats</a
+							>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}
 
 <h2>Students</h2>
-<div class="table-wrap">
-	<table>
-		<thead>
-			<tr>
-				<th>Student</th>
-				<th>Email</th>
-				<th>Joined</th>
-				<th>Attempted</th>
-				<th>Passed</th>
-				<th>Mean best</th>
-				<th>Last activity</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.overview.students as s (s.user_id)}
-				<tr class={belowThresholdClass(s.below_threshold)}>
-					<td>
-						{#if s.below_threshold}<Icon icon={TriangleAlert} label="Below threshold" />{/if}
-						<a
-							href={resolve('/(app)/educator/cohorts/[id]/students/[uid]', {
-								id: data.overview.cohort.id,
-								uid: s.user_id
-							})}
-						>
-							{s.display_name}
-						</a>
-					</td>
-					<td>{s.email}</td>
-					<td>{joinedAt(s.user_id)}</td>
-					<td class="num">{s.attempted}</td>
-					<td class="num">{s.passed}</td>
-					<td class="num">{formatPercent(s.mean_best_percent)}</td>
-					<td>{s.last_activity_at ?? '—'}</td>
-					<td>
-						<form method="POST" action="?/remove" use:enhance>
-							<input type="hidden" name="user_id" value={s.user_id} />
-							<Button type="submit" variant="danger">Remove</Button>
-						</form>
-					</td>
+{#if data.overview.students.length === 0}
+	<Card><p class="muted">No students have joined yet. Share the join code above.</p></Card>
+{:else}
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Student</th>
+					<th>Email</th>
+					<th>Joined</th>
+					<th>Attempted</th>
+					<th>Passed</th>
+					<th>Mean best</th>
+					<th>Last activity</th>
+					<th></th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-</div>
+			</thead>
+			<tbody>
+				{#each data.overview.students as s (s.user_id)}
+					<tr class={belowThresholdClass(s.below_threshold)}>
+						<td>
+							{#if s.below_threshold}<Icon icon={TriangleAlert} label="Below threshold" />{/if}
+							<a
+								href={resolve('/(app)/educator/cohorts/[id]/students/[uid]', {
+									id: data.overview.cohort.id,
+									uid: s.user_id
+								})}
+							>
+								{s.display_name}
+							</a>
+						</td>
+						<td>{s.email}</td>
+						<td>{joinedAt(s.user_id)}</td>
+						<td class="num">{s.attempted}</td>
+						<td class="num">{s.passed}</td>
+						<td class="num">{formatPercent(s.mean_best_percent)}</td>
+						<td>{s.last_activity_at ?? '—'}</td>
+						<td>
+							<form method="POST" action="?/remove" use:enhance>
+								<input type="hidden" name="user_id" value={s.user_id} />
+								<Button type="submit" variant="danger">Remove</Button>
+							</form>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	/* Highlights an activity/student row below the cohort's threshold percent. */
 	tr.below {
 		background: var(--danger-bg);

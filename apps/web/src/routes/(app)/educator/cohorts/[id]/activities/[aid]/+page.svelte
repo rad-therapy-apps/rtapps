@@ -18,6 +18,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { formatPercent } from '$lib/cohort/format';
+	import Card from '$lib/ui/Card.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
@@ -48,25 +49,29 @@
 <a href={csvHref} data-testid="csv-link">Download CSV</a>
 
 <h2>Score distribution</h2>
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div class="table-wrap" role="region" aria-label="Score distribution" tabindex="0">
-	<table>
-		<thead>
-			<tr>
-				<th>Range</th>
-				<th>Count</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.stats.distribution as bucket (bucket.label)}
+{#if data.stats.distribution.length === 0}
+	<Card><p class="muted">No attempts yet.</p></Card>
+{:else}
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-wrap" role="region" aria-label="Score distribution" tabindex="0">
+		<table>
+			<thead>
 				<tr>
-					<td>{bucket.label}</td>
-					<td class="num">{bucket.count}</td>
+					<th>Range</th>
+					<th>Count</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-</div>
+			</thead>
+			<tbody>
+				{#each data.stats.distribution as bucket (bucket.label)}
+					<tr>
+						<td>{bucket.label}</td>
+						<td class="num">{bucket.count}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}
 
 {#if data.stats.attempt_rows.length > 0}
 	<h2>Attempts</h2>
@@ -94,37 +99,46 @@
 {/if}
 
 <h2>Items</h2>
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div class="table-wrap" role="region" aria-label="Items" tabindex="0">
-	<table>
-		<thead>
-			<tr>
-				<th>Item</th>
-				<th>Answered</th>
-				<th>Correct</th>
-				<th>% Correct</th>
-				<th>Top wrong answers</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.stats.items as item (item.key)}
+{#if data.stats.items.length === 0}
+	<Card><p class="muted">No attempts yet.</p></Card>
+{:else}
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-wrap" role="region" aria-label="Items" tabindex="0">
+		<table>
+			<thead>
 				<tr>
-					<td>{item.label}</td>
-					<td class="num">{item.answered}</td>
-					<td class="num">{item.correct}</td>
-					<td class="num">{formatPercent(item.percent_correct)}</td>
-					<td>{topWrong(item)}</td>
+					<th>Item</th>
+					<th>Answered</th>
+					<th>Correct</th>
+					<th>% Correct</th>
+					<th>Top wrong answers</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-</div>
+			</thead>
+			<tbody>
+				{#each data.stats.items as item (item.key)}
+					<tr>
+						<td>{item.label}</td>
+						<td class="num">{item.answered}</td>
+						<td class="num">{item.correct}</td>
+						<td class="num">{formatPercent(item.percent_correct)}</td>
+						<td>{topWrong(item)}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}
 
 <p>
 	<a href={resolve('/(app)/educator/cohorts/[id]', { id: data.cohortId })}>Back to cohort</a>
 </p>
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	.table-wrap {
 		overflow-x: auto;
 	}

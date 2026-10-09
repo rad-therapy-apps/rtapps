@@ -18,6 +18,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { formatPercent } from '$lib/cohort/format';
+	import Card from '$lib/ui/Card.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
@@ -32,36 +33,43 @@
 <p>{data.detail.student.email} · joined {data.detail.student.joined_at}</p>
 
 <h2>Results</h2>
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div class="table-wrap" role="region" aria-label="Results" tabindex="0">
-	<table>
-		<thead>
-			<tr>
-				<th>Activity</th>
-				<th>Best</th>
-				<th>Latest</th>
-				<th>Attempts</th>
-				<th>Mastery</th>
-				<th>Time spent</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.detail.results as r (r.activity_id)}
+{#if data.detail.results.length === 0}
+	<Card><p class="muted">No attempts yet.</p></Card>
+{:else}
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-wrap" role="region" aria-label="Results" tabindex="0">
+		<table>
+			<thead>
 				<tr>
-					<td>{r.title}</td>
-					<td class="num">{formatPercent(r.best_percent)}</td>
-					<td class="num">{formatPercent(r.latest_percent)}</td>
-					<td class="num">{r.attempts}</td>
-					<td>{r.mastery}</td>
-					<td>{Math.round(r.time_spent_s / 60)} min</td>
+					<th>Activity</th>
+					<th>Best</th>
+					<th>Latest</th>
+					<th>Attempts</th>
+					<th>Mastery</th>
+					<th>Time spent</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-</div>
+			</thead>
+			<tbody>
+				{#each data.detail.results as r (r.activity_id)}
+					<tr>
+						<td>{r.title}</td>
+						<td class="num">{formatPercent(r.best_percent)}</td>
+						<td class="num">{formatPercent(r.latest_percent)}</td>
+						<td class="num">{r.attempts}</td>
+						<td>{r.mastery}</td>
+						<td>{Math.round(r.time_spent_s / 60)} min</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}
 
 <h2>Attempts</h2>
 <!-- One <details> per attempt, open by default, with its items in a nested table. -->
+{#if data.detail.attempts.length === 0}
+	<Card><p class="muted">No attempts yet.</p></Card>
+{/if}
 {#each data.detail.attempts as a (a.attempt_id)}
 	<details open>
 		<summary>{a.title} — {formatPercent(a.percent)} — {a.submitted_at}</summary>
@@ -96,6 +104,11 @@
 </p>
 
 <style>
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
 	.table-wrap {
 		overflow-x: auto;
 	}
