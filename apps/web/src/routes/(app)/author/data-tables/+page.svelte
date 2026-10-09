@@ -347,10 +347,6 @@
 		grid-template-columns: minmax(0, 1fr);
 		gap: var(--space-4);
 	}
-	/* Let a long select option shrink the control instead of widening the page. */
-	.stack :global(.field) {
-		grid-template-columns: minmax(0, 1fr);
-	}
 	.table-list {
 		display: grid;
 		gap: var(--space-2);

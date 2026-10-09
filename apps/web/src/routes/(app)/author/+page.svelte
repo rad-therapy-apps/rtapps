@@ -210,10 +210,13 @@
 		display: grid;
 		gap: var(--space-3);
 	}
+	/* Converter notes carry long unbroken tokens ("highlight→bold"); `anywhere` lets them wrap
+	   inside the card at 360px instead of widening the page. */
 	.notes {
 		margin-block-start: var(--space-2);
 		color: var(--text-muted);
 		font-size: var(--text-sm);
+		overflow-wrap: anywhere;
 	}
 	.activities li {
 		padding-block: var(--space-1);
