@@ -7,7 +7,7 @@
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `gap` entry; legacy source Treatment_Planning/Gap_Calculation; formula
 	`gapCalc()` in `./formulas` (Task 1, audit §5).
-	Depends on: `./formulas` (`gapCalc`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`gapCalc`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">

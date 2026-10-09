@@ -7,7 +7,7 @@
 	ADR/Task 11).
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `magnification` entry; formula in `./formulas` (Task 1, audit §7).
-	Depends on: `./formulas` (`magnification`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`magnification`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">

@@ -12,7 +12,7 @@
 	"Check order" grades every item at its current index, then submits for a final score. See
 	`docs/03-architecture.md` §4.4.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`gradeItem`/
-	`submitAttempt`), `./types` (`SequencingSnapshot`).
+	`submitAttempt`), `./types` (`SequencingSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Icon.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `SequencingPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">

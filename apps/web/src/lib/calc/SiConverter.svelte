@@ -11,7 +11,7 @@
 	How it fits the project: plan 3c Task 3 — registered via `./registry`'s `si_convert` entry;
 	legacy source `Radiation_Physics/units_of_measurement/index.html`; units/factors in
 	`./siUnits` (`UNITS`), conversion in `./formulas` (`siConvert`, Task 1, audit §11).
-	Depends on: `./siUnits` (`UNITS`), `./formulas` (`siConvert`), `./registry` (`CalcTables`, type
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./siUnits` (`UNITS`), `./formulas` (`siConvert`), `./registry` (`CalcTables`, type
 	only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->

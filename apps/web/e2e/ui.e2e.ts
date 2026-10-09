@@ -126,6 +126,15 @@ test('light reading panel is applied before hydration and is accessible', async 
 	);
 	await expectAccessible(page, 'light lesson panel');
 	await expectNoSidewaysScroll(page, 'light lesson panel');
+	// Page 3 of medical-terminology holds a prose table and a knowledge check (radios): the
+	// table header and radio colours are what the light panel must keep readable.
+	await page.goto('/lessons/medical-terminology', { waitUntil: 'networkidle' });
+	const next = page.getByRole('button', { name: 'Next', exact: true });
+	await next.click();
+	await next.click();
+	await expect(page.getByText('Page 3 of')).toBeVisible();
+	await expect(page.locator('.prose th').first()).toBeVisible();
+	await expectAccessible(page, 'light lesson panel with table');
 });
 
 test('educator pages are accessible and fit the viewport', async ({ page }) => {

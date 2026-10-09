@@ -16,7 +16,7 @@
 	scatter factors, wedge/tray, Mayneord/ISF) — the calculator branch of the student activity
 	route (`(app)/subjects/[slug]/activities/[id]/+page.svelte`) renders this via
 	`./registry`, passing `snapshot.calculator.data_tables` verbatim as `tables`.
-	Depends on: `./interpolate` (`interpolate2d`, `Grid`), `./formulas` (`mayneordF`, `ssdIsf`).
+	Depends on: `./CalcShell.svelte`, `./interpolate` (`interpolate2d`, `Grid`), `./formulas` (`mayneordF`, `ssdIsf`).
 	Used by: `./registry`, `./MuCalculator.svelte.spec.ts`, the student activity route.
 -->
 <script lang="ts">

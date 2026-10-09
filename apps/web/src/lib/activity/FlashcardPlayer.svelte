@@ -12,7 +12,7 @@
 	3a Task 14) — start and submit both happen client-side over the session cookie (ADR-0002),
 	deferred until the student reaches the end of the deck. See `docs/03-architecture.md` §4.4.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`submitAttempt`),
-	`./types` (`FlashcardsSnapshot`).
+	`./types` (`FlashcardsSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Feedback.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`.
 -->
 <script lang="ts">

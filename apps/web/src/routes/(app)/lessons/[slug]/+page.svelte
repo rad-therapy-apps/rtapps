@@ -27,7 +27,7 @@
 
 	// The API types `LessonOut.snapshot` as an opaque object (it's untyped JSON to the schema);
 	// lessonSnapshot() casts it to the actual lesson content shape this page renders.
-	const snapshot = lessonSnapshot(data.lesson);
+	const snapshot = $derived(lessonSnapshot(data.lesson));
 </script>
 
 <svelte:head>

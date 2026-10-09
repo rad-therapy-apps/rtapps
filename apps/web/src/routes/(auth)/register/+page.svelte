@@ -11,7 +11,7 @@
 	a round trip — the API is still the source of truth and re-validates on submit.
 	`docs/03-architecture.md` §4.2.
 
-	Works with: `$app/forms`, `$app/paths`. Used by: linked from `+layout.svelte` ("Register")
+	Works with: `$app/forms`, `$app/paths`, `$lib/ui/{Alert,Button,Card,Field}.svelte`. Used by: linked from `+layout.svelte` ("Register")
 	and from the login page ("Need an account?"); driven by `apps/web/e2e/lesson.e2e.ts`.
 -->
 <script lang="ts">

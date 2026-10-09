@@ -17,7 +17,7 @@
 	Works with: `$lib/activity/QuizPlayer.svelte`, `$lib/activity/FlashcardPlayer.svelte`,
 	`$lib/activity/MatchingPlayer.svelte`, `$lib/activity/SequencingPlayer.svelte`,
 	`$lib/activity/ExternalPlayer.svelte`, `$lib/calc/registry`, `$lib/activity/types`
-	(`activitySnapshot`). Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
+	(`activitySnapshot`), `$lib/ui/PageHeader.svelte`, `$lib/ui/Card.svelte`. Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
 -->
 <script lang="ts">
 	import QuizPlayer from '$lib/activity/QuizPlayer.svelte';
@@ -54,6 +54,7 @@
 	 navigation moves from one activity to another, so a previous activity's in-progress state
 	 (index, answers, busy) never bleeds into the next one; mirrors `{#key pageIndex}` in
 	 `LessonPager.svelte`. -->
+<!-- ExternalPlayer renders its own h1, so the route skips PageHeader for that kind. -->
 {#if snapshot.activity.kind !== 'external'}
 	<PageHeader title={snapshot.activity.title} />
 {/if}

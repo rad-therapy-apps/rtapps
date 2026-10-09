@@ -13,7 +13,7 @@
 	each term/definition pairing grades immediately, and "Check results" submits for a final score.
 	See `docs/03-architecture.md` §4.4.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`gradeItem`/
-	`submitAttempt`), `./types` (`MatchingSnapshot`).
+	`submitAttempt`), `./types` (`MatchingSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Icon.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `MatchingPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">

@@ -11,7 +11,7 @@
 	the hidden `next` field round-trips the validated (safeNext-checked) redirect target back to
 	the action on submit. `docs/03-architecture.md` §4.2.
 
-	Works with: `$app/forms`, `$app/paths`. Used by: linked from `+layout.svelte` ("Sign in") and
+	Works with: `$app/forms`, `$app/paths`, `$lib/ui/{Alert,Button,Card,Field}.svelte`. Used by: linked from `+layout.svelte` ("Sign in") and
 	from the register page ("Already have an account?").
 -->
 <script lang="ts">

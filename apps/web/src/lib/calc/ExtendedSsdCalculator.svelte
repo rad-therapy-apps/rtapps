@@ -8,7 +8,7 @@
 	ADR/Task 11).
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `extended_ssd` entry; formula in `./formulas` (Task 1, audit §4).
-	Depends on: `./formulas` (`extendedSsd`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`extendedSsd`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">

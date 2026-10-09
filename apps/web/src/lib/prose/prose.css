@@ -36,6 +36,14 @@
 	color: var(--paper-text);
 }
 
+/* Focus ring and checked radios use the panel's link colour: cyan --accent fails on light paper. */
+.reading-panel :focus-visible {
+	outline-color: var(--paper-link);
+}
+.reading-panel input[type='radio'] {
+	accent-color: var(--paper-link);
+}
+
 /* Light page: reassign every --paper-* token to its light counterpart; nothing else reads them. */
 :root[data-reading='light'] .reading-panel {
 	--paper-bg: var(--paper-light-bg);
@@ -129,6 +137,8 @@
 
 .prose th {
 	background: var(--paper-th-bg);
+	/* Without this, app.css's global `th` muted colour is 2.14:1 on the light header fill. */
+	color: inherit;
 	font-weight: 600;
 }
 

@@ -16,7 +16,8 @@
 	against the pinned snapshot's max_score, see `attempts.ts`'s `submitExternalAttempt`). No
 	pass/fail badge is shown: 4a treats games as practice, not assessment.
 	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/
-	`submitExternalAttempt`), `./types` (`ExternalSnapshot`).
+	`submitExternalAttempt`), `./types` (`ExternalSnapshot`), `$lib/ui/Alert.svelte`,
+	`$lib/ui/Button.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `ExternalPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
@@ -30,6 +31,7 @@
 	} from '$lib/activity/attempts';
 	import type { ExternalSnapshot } from '$lib/activity/types';
 	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 
 	let {
 		activityId,
@@ -116,9 +118,11 @@
 	<Alert tone="danger" role="alert">{errorMessage}</Alert>
 	{#if reportedScore !== null}
 		{#if snapshot.external.completion_only}
-			<button onclick={() => void submitCompletion()}>Retry</button>
+			<Button variant="primary" onclick={() => void submitCompletion()}>Retry</Button>
 		{:else}
-			<button onclick={() => void submitScore(reportedScore as number)}>Retry</button>
+			<Button variant="primary" onclick={() => void submitScore(reportedScore as number)}
+				>Retry</Button
+			>
 		{/if}
 	{/if}
 {:else if status === 'done'}
@@ -144,6 +148,8 @@
 {/if}
 
 <style>
+	/* Frame height = viewport minus the app chrome: 9rem on desktop, 10rem on a phone, where the
+	   top bar plus padding overflowed 8rem by 31px at 360px (ui.e2e's no-page-scroll check guards it). */
 	.arcade-frame {
 		width: 100%;
 		height: calc(100dvh - 9rem);
