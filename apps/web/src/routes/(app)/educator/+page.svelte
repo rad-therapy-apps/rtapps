@@ -56,7 +56,7 @@
 				<h2>
 					<a href={resolve('/(app)/educator/cohorts/[id]', { id: c.id })}>{c.name}</a>
 				</h2>
-				<p>{c.student_count} students</p>
+				<p>{c.student_count} {c.student_count === 1 ? 'student' : 'students'}</p>
 				<p>Join code: {c.join_code ?? '—'}</p>
 			</Card>
 		{/each}
