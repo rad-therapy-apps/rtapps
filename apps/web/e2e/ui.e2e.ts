@@ -167,6 +167,21 @@ test('quiz editor is accessible and fits the viewport', async ({ page }) => {
 	await expectNoSidewaysScroll(page, 'quiz editor');
 });
 
+test('data-table editor opens, is accessible and fits the viewport', async ({ page }) => {
+	test.slow();
+	await signIn(page, EDUCATOR.email, EDUCATOR.password);
+	await page.goto('/author/data-tables');
+	await page.waitForLoadState('networkidle');
+	// The grid editor used to throw on open (structuredClone of a $state proxy), so assert it
+	// renders before scanning.
+	await page.getByRole('button', { name: 'New table' }).click();
+	await expect(page.getByRole('heading', { name: 'New table' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Add row' })).toBeVisible();
+	await expect(page.locator('table')).toBeVisible();
+	await expectAccessible(page, 'data-table editor');
+	await expectNoSidewaysScroll(page, 'data-table editor');
+});
+
 test('lesson editor is accessible and fits the viewport', async ({ page }) => {
 	test.slow();
 	await signIn(page, EDUCATOR.email, EDUCATOR.password);

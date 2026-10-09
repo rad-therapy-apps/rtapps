@@ -27,7 +27,9 @@
 
 	let { initialGrid, onchange }: { initialGrid: Grid; onchange: (next: Grid) => void } = $props();
 
-	let grid = $state<Grid>(structuredClone(initialGrid));
+	// `$state.snapshot`, not `structuredClone`: the data-tables page passes a `$state` proxy,
+	// which `structuredClone` cannot copy (DataCloneError). The snapshot is a deep plain copy.
+	let grid = $state<Grid>($state.snapshot(initialGrid));
 
 	// The API requires cols/row keys strictly ascending (`GridIn`'s model-level validator) --
 	// surfaced here the same way `PairsEditor.svelte`'s duplicate warning is, so a hand-typed
