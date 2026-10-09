@@ -338,6 +338,8 @@
 	/* Selected table cells: a tinted fill; text stays at the paper-text contrast on it. */
 	.surface :global(.ProseMirror .selectedCell) {
 		background: var(--paper-selected-bg);
+		outline: 2px solid var(--paper-link);
+		outline-offset: -2px;
 	}
 	.surface :global(.ProseMirror:focus-visible) {
 		outline: 2px solid var(--paper-link);

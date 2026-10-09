@@ -34,7 +34,7 @@
 <a href={`/api/v1/cohorts/${data.cohortId}/outcomes.csv`} data-testid="csv-link">Download CSV</a>
 
 {#if data.mastery.outcomes.length === 0}
-	<Card><p class="muted">No results yet.</p></Card>
+	<Card><p class="muted">No learning outcomes yet.</p></Card>
 {:else}
 	<div class="table-wrap">
 		<table>

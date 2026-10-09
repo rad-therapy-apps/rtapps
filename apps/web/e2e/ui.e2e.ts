@@ -182,7 +182,7 @@ test('cohort analytics pages are accessible and fit the viewport', async ({ page
 	await expectAccessible(page, 'activity stats');
 	await expectNoSidewaysScroll(page, 'activity stats');
 	await toCohort();
-	await page.getByRole('link', { name: 'Outcomes' }).click();
+	await page.getByRole('main').getByRole('link', { name: 'Outcomes', exact: true }).click();
 	await expect(page).toHaveURL(/\/outcomes$/);
 	await page.waitForLoadState('networkidle');
 	await expectAccessible(page, 'cohort outcomes');

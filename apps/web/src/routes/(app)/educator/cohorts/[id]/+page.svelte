@@ -84,7 +84,7 @@
 
 <h2>Activities</h2>
 {#if data.overview.activities.length === 0}
-	<Card><p class="muted">No attempts yet.</p></Card>
+	<Card><p class="muted">No published activities yet.</p></Card>
 {:else}
 	<div class="table-wrap">
 		<table>

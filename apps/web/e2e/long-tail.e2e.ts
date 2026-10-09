@@ -255,11 +255,13 @@ test('forced password change', async ({ browser }) => {
 		await studentPage.getByLabel('Password').fill(tempPassword!);
 		await studentPage.getByRole('button', { name: 'Sign in' }).click();
 		await expect(studentPage).toHaveURL(/\/account\/password$/);
+		await studentPage.waitForLoadState('networkidle');
 
 		// Stuck there: any other navigation bounces straight back (hooks.server.ts leaves only
 		// /account/password and /logout reachable while the flag is set).
 		await studentPage.goto('/subjects');
 		await expect(studentPage).toHaveURL(/\/account\/password$/);
+		await studentPage.waitForLoadState('networkidle');
 
 		// Change the password for real, through the form.
 		const newPassword = 'brand-new-password-5678';

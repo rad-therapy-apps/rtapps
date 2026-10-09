@@ -95,20 +95,26 @@
 									<option value="educator" selected={u.role === 'educator'}>educator</option>
 									<option value="admin" selected={u.role === 'admin'}>admin</option>
 								</select>
-								<Button type="submit">Save</Button>
+								<Button type="submit"
+									>Save<span class="visually-hidden"> for {u.email}</span></Button
+								>
 							</form>
 						</td>
 						<td>{u.deactivated_at ?? 'No'}</td>
 						<td>
 							<form method="POST" action="?/deactivate" use:enhance>
 								<input type="hidden" name="user_id" value={u.id} />
-								<Button type="submit" variant="danger">Deactivate</Button>
+								<Button type="submit" variant="danger"
+									>Deactivate<span class="visually-hidden"> for {u.email}</span></Button
+								>
 							</form>
 						</td>
 						<td>
 							<form method="POST" action="?/reset" use:enhance>
 								<input type="hidden" name="user_id" value={u.id} />
-								<Button type="submit">Reset password</Button>
+								<Button type="submit"
+									>Reset password<span class="visually-hidden"> for {u.email}</span></Button
+								>
 							</form>
 						</td>
 					</tr>
@@ -142,6 +148,8 @@
 		max-width: 20rem;
 	}
 	.table-wrap {
+		/* Contains the absolutely-positioned visually-hidden row-button suffixes inside the scroller. */
+		position: relative;
 		overflow-x: auto;
 	}
 	.inline {

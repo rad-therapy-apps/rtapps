@@ -48,10 +48,10 @@
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- API URL (CSV download), not a SvelteKit route -->
 <a href={csvHref} data-testid="csv-link">Download CSV</a>
 
-<h2>Score distribution</h2>
-{#if data.stats.distribution.length === 0}
+{#if data.stats.attempts === 0}
 	<Card><p class="muted">No attempts yet.</p></Card>
 {:else}
+	<h2>Score distribution</h2>
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div class="table-wrap" role="region" aria-label="Score distribution" tabindex="0">
 		<table>
@@ -71,62 +71,60 @@
 			</tbody>
 		</table>
 	</div>
-{/if}
 
-{#if data.stats.attempt_rows.length > 0}
-	<h2>Attempts</h2>
-	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-	<div class="table-wrap" role="region" aria-label="Attempts" tabindex="0">
-		<table>
-			<thead>
-				<tr>
-					<th>Student</th>
-					<th>Score</th>
-					<th>Percent</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each data.stats.attempt_rows as row (row.submitted_at + row.display_name)}
+	{#if data.stats.attempt_rows.length > 0}
+		<h2>Attempts</h2>
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="table-wrap" role="region" aria-label="Attempts" tabindex="0">
+			<table>
+				<thead>
 					<tr>
-						<td>{row.display_name}</td>
-						<td class="num">{row.score === null ? '—' : `${row.score} / ${row.max_score}`}</td>
-						<td class="num">{row.percent === null ? 'Completed' : formatPercent(row.percent)}</td>
+						<th>Student</th>
+						<th>Score</th>
+						<th>Percent</th>
 					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
-{/if}
+				</thead>
+				<tbody>
+					{#each data.stats.attempt_rows as row (row.submitted_at + row.display_name)}
+						<tr>
+							<td>{row.display_name}</td>
+							<td class="num">{row.score === null ? '—' : `${row.score} / ${row.max_score}`}</td>
+							<td class="num">{row.percent === null ? 'Completed' : formatPercent(row.percent)}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{/if}
 
-<h2>Items</h2>
-{#if data.stats.items.length === 0}
-	<Card><p class="muted">No attempts yet.</p></Card>
-{:else}
-	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-	<div class="table-wrap" role="region" aria-label="Items" tabindex="0">
-		<table>
-			<thead>
-				<tr>
-					<th>Item</th>
-					<th>Answered</th>
-					<th>Correct</th>
-					<th>% Correct</th>
-					<th>Top wrong answers</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each data.stats.items as item (item.key)}
+	{#if data.stats.items.length > 0}
+		<h2>Items</h2>
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="table-wrap" role="region" aria-label="Items" tabindex="0">
+			<table>
+				<thead>
 					<tr>
-						<td>{item.label}</td>
-						<td class="num">{item.answered}</td>
-						<td class="num">{item.correct}</td>
-						<td class="num">{formatPercent(item.percent_correct)}</td>
-						<td>{topWrong(item)}</td>
+						<th>Item</th>
+						<th>Answered</th>
+						<th>Correct</th>
+						<th>% Correct</th>
+						<th>Top wrong answers</th>
 					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
+				</thead>
+				<tbody>
+					{#each data.stats.items as item (item.key)}
+						<tr>
+							<td>{item.label}</td>
+							<td class="num">{item.answered}</td>
+							<td class="num">{item.correct}</td>
+							<td class="num">{formatPercent(item.percent_correct)}</td>
+							<td>{topWrong(item)}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{/if}
 {/if}
 
 <p>
