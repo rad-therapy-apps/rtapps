@@ -20,6 +20,7 @@
 	Used by: `./registry`, `./MuCalculator.svelte.spec.ts`, the student activity route.
 -->
 <script lang="ts">
+	import CalcShell from './CalcShell.svelte';
 	import { interpolate2d, type Grid } from './interpolate';
 	import { mayneordF, ssdIsf } from './formulas';
 
@@ -146,7 +147,7 @@
 	});
 </script>
 
-<div class="mu-calculator">
+<CalcShell cls="mu-calculator">
 	<label>
 		Prescribed dose (cGy)
 		<input type="number" bind:value={dose} />
@@ -243,4 +244,4 @@
 			<p data-testid="mu-undefined">MU is undefined for a zero table value</p>
 		{/if}
 	</section>
-</div>
+</CalcShell>

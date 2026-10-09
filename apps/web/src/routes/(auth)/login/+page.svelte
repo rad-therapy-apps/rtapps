@@ -17,6 +17,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -26,53 +30,58 @@
 	<title>Sign in — RTTLearn</title>
 </svelte:head>
 
-<h1>Sign in</h1>
+<div class="auth">
+	<Card>
+		<h1>Sign in</h1>
 
-<form method="POST" use:enhance aria-describedby={form?.error ? 'login-error' : undefined}>
-	<!-- Server-rendered error from the last failed submit (bad credentials, API down, etc). -->
-	{#if form?.error}
-		<p id="login-error" aria-live="polite" class="error">{form.error}</p>
+		<form method="POST" use:enhance aria-describedby={form?.error ? 'login-error' : undefined}>
+			<!-- Server-rendered error from the last failed submit (bad credentials, API down, etc). -->
+			{#if form?.error}
+				<Alert tone="danger" id="login-error" role="status">{form.error}</Alert>
+			{/if}
+
+			<Field label="Email" id="email">
+				<input id="email" name="email" type="email" required value={form?.email ?? ''} />
+			</Field>
+
+			<Field label="Password" id="password">
+				<!-- current-password (not new-password) tells the browser/password manager this is a
+			     login, not an account-creation form. -->
+				<input
+					id="password"
+					name="password"
+					type="password"
+					required
+					autocomplete="current-password"
+				/>
+			</Field>
+
+			<!-- Carries the safeNext-validated redirect target through to the server action. -->
+			<input type="hidden" name="next" value={data.next} />
+
+			<Button type="submit" variant="primary">Sign in</Button>
+		</form>
+	</Card>
+
+	<!-- Google sign-in link, shown only when the API reports the provider is configured. -->
+	{#if data.googleEnabled}
+		<p><a href="/api/v1/auth/google/start" rel="external">Continue with Google</a></p>
 	{/if}
 
-	<div class="field">
-		<label for="email">Email</label>
-		<input id="email" name="email" type="email" required value={form?.email ?? ''} />
-	</div>
-
-	<div class="field">
-		<label for="password">Password</label>
-		<!-- current-password (not new-password) tells the browser/password manager this is a
-		     login, not an account-creation form. -->
-		<input id="password" name="password" type="password" required autocomplete="current-password" />
-	</div>
-
-	<!-- Carries the safeNext-validated redirect target through to the server action. -->
-	<input type="hidden" name="next" value={data.next} />
-
-	<button type="submit">Sign in</button>
-</form>
-
-<!-- Google sign-in link, shown only when the API reports the provider is configured. -->
-{#if data.googleEnabled}
-	<p><a href="/api/v1/auth/google/start" rel="external">Continue with Google</a></p>
-{/if}
-
-<p><a href={resolve('/(auth)/register')}>Need an account? Register</a></p>
+	<p><a href={resolve('/(auth)/register')}>Need an account? Register</a></p>
+</div>
 
 <style>
-	/* Form layout: stacked fields, capped width. */
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+	/* Centred card, capped width. */
+	.auth {
 		max-width: 24rem;
+		margin-inline: auto;
 	}
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
+	h1 {
+		margin-top: 0;
 	}
-	.error {
-		color: var(--danger);
+	form {
+		display: grid;
+		gap: var(--space-4);
 	}
 </style>

@@ -50,6 +50,8 @@
 	</AppShell>
 {:else}
 	<!-- Signed out: brand plus sign-in / register links only. -->
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- in-page fragment, not a route -->
+	<a class="skip-link" href="#main">Skip to content</a>
 	<header class="public-bar">
 		<a href={resolve('/')} class="brand"><Logo size={28} /><span>RTTLearn</span></a>
 		<nav aria-label="Account">
@@ -63,6 +65,20 @@
 {/if}
 
 <style>
+	.skip-link {
+		position: absolute;
+		left: var(--space-4);
+		top: -4rem;
+		z-index: 20;
+		padding: var(--space-2) var(--space-4);
+		background: var(--accent);
+		color: var(--accent-contrast);
+		border-radius: var(--radius-sm);
+		font-weight: 600;
+	}
+	.skip-link:focus {
+		top: var(--space-4);
+	}
 	.public-bar {
 		display: flex;
 		flex-wrap: wrap;

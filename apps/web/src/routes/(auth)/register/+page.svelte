@@ -17,6 +17,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -26,68 +30,66 @@
 	<title>Register — RTTLearn</title>
 </svelte:head>
 
-<h1>Create an account</h1>
+<div class="auth">
+	<Card>
+		<h1>Create an account</h1>
 
-<form method="POST" use:enhance aria-describedby={form?.error ? 'register-error' : undefined}>
-	<!-- Server-rendered error from the last failed submit (e.g. email taken, API down). -->
-	{#if form?.error}
-		<p id="register-error" aria-live="polite" class="error">{form.error}</p>
-	{/if}
+		<form method="POST" use:enhance aria-describedby={form?.error ? 'register-error' : undefined}>
+			<!-- Server-rendered error from the last failed submit (e.g. email taken, API down). -->
+			{#if form?.error}
+				<Alert tone="danger" id="register-error" role="status">{form.error}</Alert>
+			{/if}
 
-	<div class="field">
-		<label for="email">Email</label>
-		<input id="email" name="email" type="email" required value={form?.email ?? ''} />
-	</div>
+			<Field label="Email" id="email">
+				<input id="email" name="email" type="email" required value={form?.email ?? ''} />
+			</Field>
 
-	<div class="field">
-		<label for="display_name">Display name</label>
-		<input
-			id="display_name"
-			name="display_name"
-			type="text"
-			required
-			maxlength="120"
-			value={form?.display_name ?? ''}
-		/>
-	</div>
+			<Field label="Display name" id="display_name">
+				<input
+					id="display_name"
+					name="display_name"
+					type="text"
+					required
+					maxlength="120"
+					value={form?.display_name ?? ''}
+				/>
+			</Field>
 
-	<div class="field">
-		<label for="password">Password</label>
-		<!-- new-password (not current-password) tells the browser/password manager this creates
-		     a new credential; minlength/maxlength mirror the API's password length limits. -->
-		<input
-			id="password"
-			name="password"
-			type="password"
-			required
-			minlength="10"
-			maxlength="256"
-			autocomplete="new-password"
-		/>
-	</div>
+			<Field label="Password" id="password">
+				<!-- new-password (not current-password) tells the browser/password manager this creates
+			     a new credential; minlength/maxlength mirror the API's password length limits. -->
+				<input
+					id="password"
+					name="password"
+					type="password"
+					required
+					minlength="10"
+					maxlength="256"
+					autocomplete="new-password"
+				/>
+			</Field>
 
-	<!-- Carries the safeNext-validated redirect target through to the server action. -->
-	<input type="hidden" name="next" value={data.next} />
+			<!-- Carries the safeNext-validated redirect target through to the server action. -->
+			<input type="hidden" name="next" value={data.next} />
 
-	<button type="submit">Register</button>
-</form>
+			<Button type="submit" variant="primary">Register</Button>
+		</form>
+	</Card>
 
-<p><a href={resolve('/(auth)/login')}>Already have an account? Sign in</a></p>
+	<p><a href={resolve('/(auth)/login')}>Already have an account? Sign in</a></p>
+</div>
 
 <style>
-	/* Form layout: stacked fields, capped width. */
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+	/* Centred card, capped width. */
+	.auth {
 		max-width: 24rem;
+		margin-inline: auto;
 	}
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
+	h1 {
+		margin-top: 0;
 	}
-	.error {
-		color: var(--danger);
+	form {
+		display: grid;
+		gap: var(--space-4);
 	}
 </style>

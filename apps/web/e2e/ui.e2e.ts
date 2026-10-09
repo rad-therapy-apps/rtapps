@@ -88,6 +88,12 @@ test('student pages are accessible and fit the viewport', async ({ page }) => {
 	await expect(page.getByText('Card 1 of')).toBeVisible();
 	await expectAccessible(page, 'flashcards activity');
 	await expectNoSidewaysScroll(page, 'flashcards activity');
+	// A calculator activity (the seeded MU calculator, which has the most inputs).
+	await page.goto('/subjects/radiation-biology');
+	await page.getByRole('link', { name: 'MU calculator', exact: true }).click();
+	await expect(page.getByLabel('Prescribed dose (cGy)')).toBeVisible();
+	await expectAccessible(page, 'calculator activity');
+	await expectNoSidewaysScroll(page, 'calculator activity');
 	// The arcade frame fits the viewport: the page itself never scrolls.
 	await page.goto('/subjects/radiation-biology');
 	await page.getByRole('link', { name: 'Cell Defender' }).click();

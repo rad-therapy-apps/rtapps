@@ -16,6 +16,10 @@
 -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Card from '$lib/ui/Card.svelte';
+	import Field from '$lib/ui/Field.svelte';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -31,76 +35,74 @@
 	<title>Change password — RTTLearn</title>
 </svelte:head>
 
-<h1>Change password</h1>
+<div class="auth">
+	<Card>
+		<h1>Change password</h1>
 
-<form method="POST" use:enhance aria-describedby={form?.error ? 'password-error' : undefined}>
-	<!-- Server-rendered error from the last failed submit (wrong current password, Google-only
+		<form method="POST" use:enhance aria-describedby={form?.error ? 'password-error' : undefined}>
+			<!-- Server-rendered error from the last failed submit (wrong current password, Google-only
 	     account, weak new password, API down, etc). -->
-	{#if form?.error}
-		<p id="password-error" aria-live="polite" class="error">{form.error}</p>
-	{/if}
+			{#if form?.error}
+				<Alert tone="danger" id="password-error" role="status">{form.error}</Alert>
+			{/if}
 
-	<div class="field">
-		<label for="current_password">Current password</label>
-		<input
-			id="current_password"
-			name="current_password"
-			type="password"
-			required
-			autocomplete="current-password"
-		/>
-	</div>
+			<Field label="Current password" id="current_password">
+				<input
+					id="current_password"
+					name="current_password"
+					type="password"
+					required
+					autocomplete="current-password"
+				/>
+			</Field>
 
-	<div class="field">
-		<label for="new_password">New password</label>
-		<input
-			id="new_password"
-			name="new_password"
-			type="password"
-			required
-			minlength="10"
-			maxlength="256"
-			autocomplete="new-password"
-			bind:value={newPassword}
-		/>
-	</div>
+			<Field label="New password" id="new_password">
+				<input
+					id="new_password"
+					name="new_password"
+					type="password"
+					required
+					minlength="10"
+					maxlength="256"
+					autocomplete="new-password"
+					bind:value={newPassword}
+				/>
+			</Field>
 
-	<div class="field">
-		<label for="confirm_password">Confirm new password</label>
-		<input
-			id="confirm_password"
-			name="confirm_password"
-			type="password"
-			required
-			minlength="10"
-			maxlength="256"
-			autocomplete="new-password"
-			bind:value={confirmPassword}
-		/>
-	</div>
+			<Field label="Confirm new password" id="confirm_password">
+				<input
+					id="confirm_password"
+					name="confirm_password"
+					type="password"
+					required
+					minlength="10"
+					maxlength="256"
+					autocomplete="new-password"
+					bind:value={confirmPassword}
+				/>
+			</Field>
 
-	<!-- Client-side-only mismatch notice; the server action rejects a mismatch too. -->
-	{#if mismatch}
-		<p class="error" aria-live="polite">New passwords do not match</p>
-	{/if}
+			<!-- Client-side-only mismatch notice; the server action rejects a mismatch too. -->
+			{#if mismatch}
+				<Alert tone="danger" role="status">New passwords do not match</Alert>
+			{/if}
 
-	<button type="submit" disabled={mismatch}>Change password</button>
-</form>
+			<Button type="submit" variant="primary" disabled={mismatch}>Change password</Button>
+		</form>
+	</Card>
+</div>
 
 <style>
-	/* Form layout: stacked fields, capped width. */
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+	/* Centred card, capped width. */
+	.auth {
 		max-width: 24rem;
+		margin-inline: auto;
 	}
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
+	h1 {
+		margin-top: 0;
 	}
-	.error {
-		color: var(--danger);
+	form {
+		display: grid;
+		gap: var(--space-4);
 	}
 </style>

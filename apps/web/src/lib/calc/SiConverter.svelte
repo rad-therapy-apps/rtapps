@@ -16,6 +16,8 @@
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">
+	import CalcShell from './CalcShell.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
 	import { siConvert } from './formulas';
 	import { UNITS } from './siUnits';
 	import type { CalcTables } from './registry';
@@ -55,7 +57,7 @@
 	}
 </script>
 
-<div class="calc">
+<CalcShell cls="calc">
 	<label
 		>Quantity
 		<select bind:value={quantity}>
@@ -83,9 +85,9 @@
 	</label>
 
 	{#if result === null}
-		<p class="calc-message">Enter a valid numeric value.</p>
+		<Alert tone="info"><p class="calc-message">Enter a valid numeric value.</p></Alert>
 	{:else}
 		<p class="calc-formula">result = value × (fromFactor / toFactor)</p>
 		<p class="calc-result">Result: <strong>{formatResult(result)} {toUnit}</strong></p>
 	{/if}
-</div>
+</CalcShell>
