@@ -20,6 +20,10 @@ const EDUCATOR = {
 	email: 'educator@example.com',
 	password: 'rtapps-dev-password'
 };
+const ADMIN = {
+	email: 'admin@example.com',
+	password: 'rtapps-dev-password'
+};
 const PHONE_MAX = 800; // px; the shell's 50rem breakpoint
 
 async function expectAccessible(page: Page, label: string) {
@@ -49,6 +53,17 @@ async function check(page: Page, path: string) {
 
 test('signed-out pages are accessible and fit the viewport', async ({ page }) => {
 	for (const path of ['/login', '/register']) await check(page, path);
+});
+
+test('the error page is accessible and fits the viewport', async ({ page }) => {
+	// Signed in: the route guard sends signed-out visitors from unknown paths to /login, so a
+	// 404 is only reachable with a session.
+	await signIn(page, EDUCATOR.email, EDUCATOR.password);
+	await page.goto('/this-page-does-not-exist');
+	await expect(page.getByRole('heading', { name: '404' })).toBeVisible();
+	await page.waitForLoadState('networkidle');
+	await expectAccessible(page, 'error page');
+	await expectNoSidewaysScroll(page, 'error page');
 });
 
 test('student pages are accessible and fit the viewport', async ({ page }) => {
@@ -150,6 +165,12 @@ test('educator pages are accessible and fit the viewport', async ({ page }) => {
 	await page.waitForLoadState('networkidle');
 	await expectAccessible(page, 'cohort page');
 	await expectNoSidewaysScroll(page, 'cohort page');
+});
+
+test('admin pages are accessible and fit the viewport', async ({ page }) => {
+	test.slow();
+	await signIn(page, ADMIN.email, ADMIN.password);
+	for (const path of ['/admin/users', '/admin/audit']) await check(page, path);
 });
 
 test('quiz editor is accessible and fits the viewport', async ({ page }) => {

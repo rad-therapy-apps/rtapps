@@ -2,7 +2,7 @@
 	What this file does: Admin audit log page at `(app)/admin/audit`. Lists audit rows, filterable
 	by action.
 
-	Used here and why: a plain `GET` form for the action filter so it's a shareable/bookmarkable
+	Used here and why: the `$lib/ui` kit (PageHeader, Field, Button, Alert); a plain `GET` form for the action filter so it's a shareable/bookmarkable
 	URL; Svelte 5 runes (`$props()`); no `use:enhance`/`resolve()` needed — this page has no POST
 	actions or internal links.
 
@@ -14,6 +14,10 @@
 	directly at `/admin/audit`.
 -->
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -23,46 +27,70 @@
 	<title>Admin audit log — RTTLearn</title>
 </svelte:head>
 
-<h1>Admin audit log</h1>
+<PageHeader title="Admin audit log" />
 
 <!-- Plain GET filter form: keeps the action filter in the URL, so it's shareable. -->
-<form method="GET">
-	<label for="action">Action</label>
-	<input id="action" name="action" value={data.action} />
-	<button>Filter</button>
+<form method="GET" class="filter">
+	<Field label="Action" id="action">
+		<input id="action" name="action" value={data.action} />
+	</Field>
+	<Button type="submit">Filter</Button>
 </form>
 
 {#if data.error}
-	<p>{data.error}</p>
+	<Alert tone="danger">{data.error}</Alert>
 {:else if data.rows.length === 0}
 	<p>No audit rows found.</p>
 {:else}
-	<table>
-		<thead>
-			<tr>
-				<th>Time</th>
-				<th>Actor</th>
-				<th>Action</th>
-				<th>Target</th>
-				<th>Cohort</th>
-				<th>IP</th>
-				<th>Request id</th>
-				<th>Detail</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.rows as row (row.id)}
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="table-wrap" role="region" aria-label="Audit log" tabindex="0">
+		<table>
+			<thead>
 				<tr>
-					<td>{row.at}</td>
-					<td>{row.actor_email ?? row.actor_id ?? '—'}</td>
-					<td>{row.action}</td>
-					<td>{row.target_type} {row.target_id ?? '—'}</td>
-					<td>{row.cohort_id ?? '—'}</td>
-					<td>{row.ip ?? '—'}</td>
-					<td>{row.request_id ?? '—'}</td>
-					<td>{JSON.stringify(row.detail)}</td>
+					<th>Time</th>
+					<th>Actor</th>
+					<th>Action</th>
+					<th>Target</th>
+					<th>Cohort</th>
+					<th>IP</th>
+					<th>Request id</th>
+					<th>Detail</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{#each data.rows as row (row.id)}
+					<tr>
+						<td class="num">{row.at}</td>
+						<td>{row.actor_email ?? row.actor_id ?? '—'}</td>
+						<td>{row.action}</td>
+						<td>{row.target_type} {row.target_id ?? '—'}</td>
+						<td>{row.cohort_id ?? '—'}</td>
+						<td>{row.ip ?? '—'}</td>
+						<td>{row.request_id ?? '—'}</td>
+						<td>{JSON.stringify(row.detail)}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
 {/if}
+
+<style>
+	.filter {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		gap: var(--space-3);
+		margin-block-end: var(--space-4);
+	}
+	.filter :global(.field) {
+		flex: 1 1 14rem;
+		max-width: 20rem;
+	}
+	.table-wrap {
+		overflow-x: auto;
+	}
+	.num {
+		font-variant-numeric: tabular-nums;
+	}
+</style>
