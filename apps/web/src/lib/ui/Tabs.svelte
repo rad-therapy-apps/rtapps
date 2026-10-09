@@ -30,6 +30,8 @@
 	}
 
 	function onkeydown(event: KeyboardEvent, index: number) {
+		// Modified arrows belong to the browser (Alt+Left/Right is Back/Forward).
+		if (event.altKey || event.ctrlKey || event.metaKey) return;
 		let next: number;
 		if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
 		else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;

@@ -196,4 +196,30 @@ describe('Tabs', () => {
 		expect(onselect).not.toHaveBeenCalled();
 		await expect.element(edit).toHaveAttribute('aria-selected', 'true');
 	});
+
+	it('Enter selects the focused tab', async () => {
+		const onselect = vi.fn();
+		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await page.getByRole('tab', { name: 'Edit' }).click();
+		await userEvent.keyboard('{ArrowRight}{Enter}');
+		expect(onselect).toHaveBeenLastCalledWith('preview');
+		await expect
+			.element(page.getByRole('tab', { name: 'Preview' }))
+			.toHaveAttribute('aria-selected', 'true');
+	});
+
+	it('leaves modified arrows alone (Alt+Left is browser Back)', async () => {
+		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
+		const edit = page.getByRole('tab', { name: 'Edit' });
+		await edit.click();
+		const event = new KeyboardEvent('keydown', {
+			key: 'ArrowLeft',
+			altKey: true,
+			bubbles: true,
+			cancelable: true
+		});
+		edit.element().dispatchEvent(event);
+		expect(event.defaultPrevented).toBe(false);
+		await expect.element(edit).toHaveFocus();
+	});
 });
