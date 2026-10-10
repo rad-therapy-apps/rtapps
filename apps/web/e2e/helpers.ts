@@ -11,6 +11,10 @@
  */
 import { expect, type Page } from '@playwright/test';
 
+/** Session files written once per run by `auth.setup.ts` and reused via `test.use({ storageState })`. */
+export const educatorState = 'e2e/.auth/educator.json';
+export const adminState = 'e2e/.auth/admin.json';
+
 /** Registers a brand-new student account via `/register` and waits for the signed-in home page. */
 export async function registerStudent(
 	page: Page,

@@ -53,7 +53,7 @@
 
 <PageHeader title={data.subject.title} subtitle={data.subject.summary ?? undefined}>
 	{#snippet actions()}
-		<SubjectTag slug={data.subject.slug} label={data.subject.title} />
+		<SubjectTag slug={data.subject.slug} label={data.subject.title} decorative />
 	{/snippet}
 </PageHeader>
 <ul class="rows lessons">

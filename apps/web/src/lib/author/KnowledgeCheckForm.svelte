@@ -19,12 +19,16 @@
 	import type { ClientKnowledgeCheckBlock } from './types';
 	import type { ProseDoc } from '../prose/types';
 	import Button from '$lib/ui/Button.svelte';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	let {
 		block,
+		name = 'Knowledge check',
 		onchange
 	}: {
 		block: ClientKnowledgeCheckBlock;
+		/** Accessible-name prefix for the two editors, so several checks on one page stay distinct. */
+		name?: string;
 		onchange: (next: ClientKnowledgeCheckBlock) => void;
 	} = $props();
 
@@ -79,7 +83,7 @@
 	<div class="field">
 		<p>Question</p>
 		{#key block.instanceId}
-			<RichTextEditor doc={block.stem} label="Question" onchange={setStem} />
+			<RichTextEditor doc={block.stem} label={`${name} question`} onchange={setStem} />
 		{/key}
 	</div>
 
@@ -100,7 +104,12 @@
 					oninput={(e) => setOption(i, e.currentTarget.value)}
 					aria-label={`Option ${i + 1}`}
 				/>
-				<Button onclick={() => removeOption(i)} disabled={block.options.length <= 2}>
+				<Button
+					variant="danger"
+					icon={Trash2}
+					onclick={() => removeOption(i)}
+					disabled={block.options.length <= 2}
+				>
 					Remove option
 				</Button>
 			</div>
@@ -112,7 +121,11 @@
 		{#if block.explanation !== null}
 			<p>Explanation</p>
 			{#key `${block.instanceId}:explanation`}
-				<RichTextEditor doc={block.explanation} label="Explanation" onchange={setExplanation} />
+				<RichTextEditor
+					doc={block.explanation}
+					label={`${name} explanation`}
+					onchange={setExplanation}
+				/>
 			{/key}
 			<Button onclick={removeExplanation}>Remove explanation</Button>
 		{:else}

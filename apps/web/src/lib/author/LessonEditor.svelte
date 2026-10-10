@@ -314,7 +314,11 @@
 							/>
 						{/key}
 					{:else}
-						<KnowledgeCheckForm {block} onchange={(next) => updateBlock(pi, bi, next)} />
+						<KnowledgeCheckForm
+							{block}
+							name={`Page ${pi + 1} knowledge check ${bi + 1}`}
+							onchange={(next) => updateBlock(pi, bi, next)}
+						/>
 					{/if}
 					<div class="block-controls">
 						<Button onclick={() => moveBlock(pi, bi, -1)} disabled={bi === 0}>Move block up</Button>

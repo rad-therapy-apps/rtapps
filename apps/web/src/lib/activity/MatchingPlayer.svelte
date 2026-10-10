@@ -21,6 +21,7 @@
 	import Check from '@lucide/svelte/icons/check';
 	import X from '@lucide/svelte/icons/x';
 	import { api } from '$lib/lesson/api';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import Button from '$lib/ui/Button.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { gradeItem, startAttempt, submitAttempt } from './attempts';
@@ -160,7 +161,10 @@
 	<!-- Start/grade/submit request failed: surfaced as polite live-region text so screen readers
 		 announce it without stealing focus; cleared at the start of every attempt. -->
 	{#if error}
-		<p aria-live="polite" data-testid="player-error">{error}</p>
+		<p class="player-error" aria-live="polite" data-testid="player-error">
+			<Icon icon={CircleAlert} />
+			<span>{error}</span>
+		</p>
 	{/if}
 	<Button variant="primary" disabled={!allPaired || busy} onclick={finish}>Check results</Button>
 {/if}

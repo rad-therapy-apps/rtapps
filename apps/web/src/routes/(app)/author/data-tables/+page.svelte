@@ -323,7 +323,8 @@
 	</Card>
 
 	{#if createdCalculator}
-		<Card as="section">
+		<!-- A plain section, not a Card: PublishPanel renders its own Cards, so this avoids nesting. -->
+		<section>
 			<h3>
 				{createdCalculator.title} ({createdCalculator.subject_slug}) — {createdCalculator.status}
 			</h3>
@@ -332,7 +333,7 @@
 				importNotes={[]}
 				versions={calcVersions}
 			/>
-		</Card>
+		</section>
 	{/if}
 </div>
 

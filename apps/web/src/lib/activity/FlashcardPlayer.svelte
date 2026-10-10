@@ -17,7 +17,9 @@
 -->
 <script lang="ts">
 	import { api } from '$lib/lesson/api';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import Button from '$lib/ui/Button.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
 	import Feedback from '$lib/ui/Feedback.svelte';
 	import { startAttempt, submitAttempt } from './attempts';
 	import type { FlashcardsSnapshot } from './types';
@@ -114,7 +116,10 @@
 		<!-- Completion attempt failed: surfaced as polite live-region text so screen readers announce
 			 it without stealing focus; cleared at the start of every attempt. -->
 		{#if error}
-			<p aria-live="polite" data-testid="player-error">{error}</p>
+			<p class="player-error" aria-live="polite" data-testid="player-error">
+				<Icon icon={CircleAlert} />
+				<span>{error}</span>
+			</p>
 		{/if}
 	</section>
 {/if}

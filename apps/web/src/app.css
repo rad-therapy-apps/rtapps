@@ -48,6 +48,7 @@
 	--paper-link: #67e8f9;
 	--paper-rule: #4c6383; /* table/blockquote rules, decorative */
 	--paper-th-bg: #1f3150;
+	--paper-selected-bg: #264a73; /* selected table cells in the editor */
 	--paper-callout-kp-bg: #1b2d4a;
 	--paper-callout-kp-bar: #60a5fa;
 	--paper-callout-cn-bg: #16302c;
@@ -190,7 +191,8 @@ textarea {
 	color: inherit;
 }
 
-button {
+button,
+a.btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -204,12 +206,32 @@ button {
 	font-weight: 600;
 	cursor: pointer;
 }
-button:hover:not(:disabled) {
+a.btn {
+	text-decoration: none;
+}
+button:hover:not(:disabled),
+a.btn:hover {
 	border-color: var(--accent);
 }
 button:disabled {
 	opacity: 0.55;
 	cursor: not-allowed;
+}
+
+/* Student player request errors: the Alert danger look on the existing live-region <p>. */
+.player-error {
+	display: flex;
+	gap: var(--space-3);
+	align-items: flex-start;
+	padding: var(--space-3) var(--space-4);
+	border: 1px solid var(--danger);
+	border-radius: var(--radius-sm);
+	background: var(--danger-bg);
+	color: var(--danger);
+}
+.player-error svg {
+	flex: none;
+	margin-top: 0.15em;
 }
 
 input:not([type='radio'], [type='checkbox'], [type='range'], [type='file']),
@@ -293,6 +315,24 @@ hr {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* Skip link: off-screen until focused (AppShell and the public layout both render one).
+   `a.skip-link`, not `.skip-link`: it must outrank `a:hover` above, or hovering the focused
+   link turns its text --text on --accent (about 1.5:1). */
+a.skip-link {
+	position: absolute;
+	left: var(--space-4);
+	top: -4rem;
+	z-index: 20;
+	padding: var(--space-2) var(--space-4);
+	background: var(--accent);
+	color: var(--accent-contrast);
+	border-radius: var(--radius-sm);
+	font-weight: 600;
+}
+a.skip-link:focus {
+	top: var(--space-4);
 }
 
 @media (prefers-reduced-motion: reduce) {
