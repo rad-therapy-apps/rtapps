@@ -17,7 +17,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
 	testDir: 'e2e',
-	testMatch: '**/*.e2e.ts',
+	testMatch: '**/*.e2e.ts', // the setup project overrides this to match only auth.setup.ts
 	use: {
 		// The already-running compose stack's origin (the proxy, not `web` directly) — falls back
 		// to the local dev compose port when E2E_BASE_URL isn't set.
@@ -34,10 +34,17 @@ export default defineConfig({
 	// Desktop Chromium runs every spec. The other three run the UI checks (axe, 360px, drawer)
 	// plus the lesson flow as a cross-browser smoke — the full suite in every engine would
 	// triple e2e time for little extra signal (docs/specs/2026-10-01-ui-restyle-design.md).
+	// `setup` signs the educator and admin in once (e2e/auth.setup.ts) and every browser project
+	// depends on it, so Playwright runs it once per run. Why: all e2e logins share one API login
+	// rate-limit bucket (burst 10, one token per 6 s, keyed by the web container's IP), and
+	// ui.e2e.ts in four projects used to exhaust it ("Too many requests"). ui.e2e.ts reuses the
+	// saved sessions via `storageState`; the limiter itself stays on.
 	projects: [
-		{ name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+		{ name: 'setup', testMatch: /auth\.setup\.ts/ },
+		{ name: 'chromium', dependencies: ['setup'], use: { ...devices['Desktop Chrome'] } },
 		{
 			name: 'mobile-360',
+			dependencies: ['setup'],
 			testMatch: '**/ui.e2e.ts',
 			use: {
 				...devices['Desktop Chrome'],
@@ -48,11 +55,13 @@ export default defineConfig({
 		},
 		{
 			name: 'firefox',
+			dependencies: ['setup'],
 			testMatch: ['**/ui.e2e.ts', '**/lesson.e2e.ts'],
 			use: { ...devices['Desktop Firefox'] }
 		},
 		{
 			name: 'webkit',
+			dependencies: ['setup'],
 			testMatch: ['**/ui.e2e.ts', '**/lesson.e2e.ts'],
 			use: { ...devices['Desktop Safari'] }
 		}

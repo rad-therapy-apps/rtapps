@@ -24,3 +24,6 @@ vite.config.ts.timestamp-*
 # Playwright
 test-results
 playwright-report
+
+# Playwright signed-in sessions (session cookies: never commit)
+e2e/.auth
