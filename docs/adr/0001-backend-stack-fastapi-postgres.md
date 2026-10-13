@@ -150,3 +150,4 @@ Python 3.12 · FastAPI ≥ 0.115 · Pydantic 2.x · SQLAlchemy 2.0.x (asyncio ex
 - **Revisit toward Node** only if the imaging and PDF features are dropped from the roadmap *and* a maintainer arrives who is TS-only. If imaging stays, Python stays.
 - **Revisit Supabase** never for the core; it may still host RT-Games presenter data until games adopt the SDK (ADR-0004).
 - **SQLite** may return for `tools/migrate-legacy` scratch state or for unit tests that do not need JSONB operators; never as the system of record.
+- 2026-10: upgraded to PostgreSQL 18 (docs/specs/2026-10-13-postgres-18-upgrade-design.md).

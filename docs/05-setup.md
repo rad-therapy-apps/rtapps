@@ -28,13 +28,15 @@ Open http://localhost:8080 — the status page shows web and API health.
 ### API tests outside compose
 The API tests need a PostgreSQL. Either use the compose `db` (`TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5442/rtapps_test` after `createdb rtapps_test`; the host publishes on 5442, container internal port remains 5432), or a throwaway container:
 ```bash
-docker run -d --name rtapps-test-pg -e POSTGRES_USER=rtapps -e POSTGRES_PASSWORD=rtapps -e POSTGRES_DB=rtapps_test -p 5433:5432 postgres:16
+docker run -d --name rtapps-test-pg -e POSTGRES_USER=rtapps -e POSTGRES_PASSWORD=rtapps -e POSTGRES_DB=rtapps_test -p 5433:5432 postgres:18
 export TEST_DATABASE_URL=postgresql+asyncpg://rtapps:rtapps@localhost:5433/rtapps_test
 cd apps/api && uv run pytest
 ```
 If 5433 is taken on your machine, use another host port and set `TEST_DATABASE_URL` to match — CI uses 5433.
 
 ## Seed data
+**After the Postgres 18 upgrade (2026-10) the dev database starts empty:** compose now uses a new `pgdata18` volume (mounted at `/var/lib/postgresql`). Run `make dev`, then `make seed` to recreate the dev data. The old 16 dev volume can be removed with `docker volume rm rtapps_pgdata`.
+
 `make seed` (stack running) creates accounts, all with password `rtapps-dev-password`: `admin@example.com` (admin), `educator@example.com` (educator), `student@example.com` (student), and `student01@example.com` … `student10@example.com` (ten students enrolled in the demo cohort); imports + publishes the lessons in `apps/api/seed/lessons/`, the full migrated legacy corpus in `apps/api/seed/content/` (one subdirectory per subject) and the hand-written activity fixtures in `apps/api/seed/activities/` (e.g. the demo quiz); and creates a demo cohort (join code `DEMO42`) owned by `educator@example.com` with the ten `studentNN@example.com` accounts enrolled, plus attempts and rollups on both a lesson and the demo quiz. Safe to re-run; it refuses when `ENV=prod`.
 
 All migrated content under `apps/api/seed/content/` is attributed here, once, to the legacy RTApps e-workbook (CC BY-NC 4.0) rather than per-document — this statement is the mechanism satisfying NFR-27's notice requirement for activity documents (quiz/flashcards/matching/sequencing have no in-content notice block of their own). Migrated *lessons* are the exception: they keep the in-content notice the phase-1 converter (`tools/migrate-legacy convert`) already writes into the page.
