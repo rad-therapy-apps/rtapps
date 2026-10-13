@@ -33,7 +33,7 @@
 		"@tiptap/extension-table": "^3.31.4",
 		"@tiptap/pm": "^3.31.4",
 		"@tiptap/starter-kit": "^3.31.4",
-		"three": "0.160.0",
+		"three": "0.160.1",
 		"three-ct": "npm:three@0.163.0",
 		"three-linac": "npm:three@0.160.1"
 	},
