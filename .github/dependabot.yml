@@ -21,32 +21,96 @@ updates:
   - package-ecosystem: uv
     directory: /apps/api
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # Python dependencies for the legacy migration tool (its own pyproject.toml + uv.lock).
   - package-ecosystem: uv
     directory: /tools/migrate-legacy
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # JS/TS dependencies for the whole pnpm workspace (single root lockfile covers
   # apps/web and packages/*, per pnpm-workspace.yaml).
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # Pinned action versions (e.g. actions/checkout@vN) used in .github/workflows/*.
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # Base image in apps/api's Dockerfile.
   - package-ecosystem: docker
     directory: /apps/api
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # Base image in apps/web's Dockerfile.
   - package-ecosystem: docker
     directory: /apps/web
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # Base images in infra/backup's Dockerfile (minio/mc build stage, alpine runtime).
   - package-ecosystem: docker
     directory: /infra/backup
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   # Digest-pinned images in infra/compose.prod.yaml (postgres, caddy) — issue #14.
   - package-ecosystem: docker-compose
     directory: /infra
     schedule: { interval: weekly }
+    # Wait a week after a release before proposing it (supply-chain safety); security
+    # updates are not delayed by this.
+    cooldown: { default-days: 7 }
+    # Minor and patch bumps arrive as one PR per ecosystem; majors stay separate so each
+    # gets a deliberate look.
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
