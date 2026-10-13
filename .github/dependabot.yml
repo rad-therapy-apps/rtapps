@@ -45,6 +45,14 @@ updates:
   # apps/web and packages/*, per pnpm-workspace.yaml).
   - package-ecosystem: npm
     directory: /
+    ignore:
+      # three.js is 0.x, so every "minor" release can break the simulators; it is pinned exactly
+      # (0.160.0, the owner-verified perf baseline) and upgraded deliberately, not in the weekly group.
+      - dependency-name: three
+        update-types: [version-update:semver-minor, version-update:semver-major]
+      # @types/node tracks the Node runtime (24 LTS); its major moves with the Node upgrade.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
     schedule: { interval: weekly }
     # Wait a week after a release before proposing it (supply-chain safety); security
     # updates are not delayed by this.

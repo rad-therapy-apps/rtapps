@@ -20,3 +20,6 @@ allowBuilds:
   # @sentry/sveltekit pulls in @sentry/cli (source-map upload) as an optional dep; its
   # postinstall isn't needed since we don't run its CLI (no upload step configured).
   '@sentry/cli': false
+# Supply-chain hygiene: never resolve a package version published less than 7 days ago
+# (in minutes). Matches the 7-day cooldown in .github/dependabot.yml.
+minimumReleaseAge: 10080
