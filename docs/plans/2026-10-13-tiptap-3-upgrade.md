@@ -136,6 +136,8 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - [ ] **Step 1: Write the failing link test**
 
+> **Correction (found during implementation):** TipTap 3's `isAllowedUri` does not apply to JSON loaded through `content`. It applies only to HTML parsing (paste, `insertContent`) and to `setLink`/`toggleLink`. The committed test is therefore `drops non-https links in pasted HTML`: it inserts HTML through `editor.commands.insertContent`, with `keeps https links in pasted HTML` as a positive control. The code below is the original draft and is kept for the record.
+
 Append inside `describe('authorExtensions', …)` in `extensions.svelte.spec.ts`:
 
 ```ts
