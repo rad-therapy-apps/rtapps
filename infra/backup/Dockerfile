@@ -10,9 +10,9 @@
 # Used by: infra/compose.prod.yaml (`backup` service, `build: ./backup`).
 
 FROM alpine:3.24
-# postgresql16-client: pg_dump/pg_restore/pg_isready; age: backup encryption; rclone: S3 transfers;
+# postgresql18-client (must match the server's major version): pg_dump/pg_restore/pg_isready; age: backup encryption; rclone: S3 transfers;
 # bash: scripts use bash-isms; coreutils: GNU `date -u` flags the scripts rely on.
-RUN apk add --no-cache postgresql16-client age rclone bash coreutils
+RUN apk add --no-cache postgresql18-client age rclone bash coreutils
 COPY backup.sh restore.sh rclone-remote.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/backup.sh /usr/local/bin/restore.sh
 ENTRYPOINT ["/usr/local/bin/backup.sh"]

@@ -69,7 +69,7 @@ flowchart LR
     proxy[proxy<br/>Caddy or cloudflared<br/>one origin]
     web[web<br/>SvelteKit SSR<br/>adapter-node]
     api[api<br/>FastAPI + Uvicorn<br/>Python 3.12]
-    db[(db<br/>PostgreSQL 16)]
+    db[(db<br/>PostgreSQL 18)]
     minio[(storage<br/>SeaweedFS — dev only)]
     backup[backup<br/>nightly pg_dump]
   end
@@ -92,7 +92,7 @@ flowchart LR
 | `proxy` | Caddy 2 (automatic TLS) **or** `cloudflared` tunnel + Caddy on plain HTTP | Single public origin; routes `/api/*` to the API and everything else to the web app; compression; security headers | Hold any application logic |
 | `web` | SvelteKit (TypeScript), `adapter-node`, TipTap for authoring | Server-side rendering, route guards by role, forms, the lesson/activity renderers, the authoring UI | Access the database; grade anything; decide permissions |
 | `api` | FastAPI, Pydantic v2, SQLAlchemy 2 (async), Alembic, Authlib, argon2 | Authentication and sessions; authorization; content model and publishing; grading; attempts and results; analytics; audit log; media presigning; OpenAPI | Render HTML; stream large files |
-| `db` | PostgreSQL 16 | All state. JSONB for documents; SQL views for analytics | — |
+| `db` | PostgreSQL 18 | All state. JSONB for documents; SQL views for analytics | — |
 | `storage` | SeaweedFS (dev) / Cloudflare R2 or OCI Object Storage (prod), S3 API | Media (images, audio), DICOM zips, 3-D models | Be accessed with long-lived credentials from the browser |
 | `backup` | Alpine cron container | Nightly `pg_dump` to object storage, 30-day retention | — |
 

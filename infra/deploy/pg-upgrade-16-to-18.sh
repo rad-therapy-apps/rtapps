@@ -177,6 +177,13 @@ FREE="$(df -Pk "$WORK" | awk 'NR == 2 { print $4 * 1024 }')"
 [ "$FREE" -gt $((SIZE * 3)) ] || die "not enough free disk in $WORK (need 3x the $SIZE-byte database)"
 log "preflight ok: Postgres $VER, database $SIZE bytes, $FREE bytes free, deployed tag $TAG"
 
+# Pull the new database image now, while the site is still up: in the rehearsal the download added
+# ~80 s to the paused window when it happened at the switch instead.
+STAGED_DB_IMAGE="$(grep -E '^[[:space:]]*image:[[:space:]]*["'\'']?(docker\.io/(library/)?)?postgres:' "$STAGE/compose.prod.yaml" | head -n 1 | sed -E 's/^[[:space:]]*image:[[:space:]]*//; s/["'\'']//g; s/[[:space:]]+$//')"
+[ -n "$STAGED_DB_IMAGE" ] || die "could not read the db image from the staged compose.prod.yaml"
+log "pulling $STAGED_DB_IMAGE ahead of the pause"
+docker pull --quiet "$STAGED_DB_IMAGE" >/dev/null || die "could not pull $STAGED_DB_IMAGE"
+
 # 2. Off-site backup with the current (16-client) backup image.
 if [ "${SKIP_OFFSITE_BACKUP:-0}" = "1" ]; then
 	log "SKIP_OFFSITE_BACKUP=1 — skipping the off-site backup (rehearsal only)"

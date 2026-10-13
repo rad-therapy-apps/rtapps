@@ -21,16 +21,18 @@
 name: rtapps
 
 services:
-  # Postgres 16, pinned by digest — the only database; data persists on the volume
-  # (or the mounted block volume, via PGDATA_PATH) across restarts and deploys.
+  # Postgres 18, pinned by digest — the only database. The 18 image keeps its data under
+  # /var/lib/postgresql/18/docker, so the volume mounts at /var/lib/postgresql (not .../data).
+  # The 16 data stays on the old `pgdata` volume until it is removed by hand after the upgrade
+  # (docs/06-operations.md, Postgres major upgrade).
   db:
-    image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+    image: postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ${PGDATA_PATH:-pgdata}:/var/lib/postgresql/data
+      - ${PGDATA18_PATH:-pgdata18}:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -135,6 +137,7 @@ services:
 
 # Named volumes: database files and Caddy's certificate/config state.
 volumes:
-  pgdata:
+  pgdata: # Postgres 16 data, kept until removed by hand after the 18 upgrade
+  pgdata18:
   caddy-data:
   caddy-config:
