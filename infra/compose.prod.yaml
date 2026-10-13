@@ -94,7 +94,7 @@ services:
   # routing lives in Caddyfile.prod; SITE_ADDRESS picks which. Ports are removed entirely
   # by infra/compose.tunnel.yaml when running behind Cloudflare Tunnel.
   proxy:
-    image: caddy:2@sha256:df7f1c2fb114453b951de51a98efc010db1655a92c2e86be6706714e2417a78d
+    image: caddy:2@sha256:f2a1290d0463aad60660d4ec134943f183ee2a5f6c3eb7bf32dd984f2f020772
     volumes:
       - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
       - caddy-data:/data

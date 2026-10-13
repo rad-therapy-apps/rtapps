@@ -9,7 +9,7 @@
 # Depends on: backup.sh, restore.sh, rclone-remote.sh (this directory).
 # Used by: infra/compose.prod.yaml (`backup` service, `build: ./backup`).
 
-FROM alpine:3.21
+FROM alpine:3.24
 # postgresql16-client: pg_dump/pg_restore/pg_isready; age: backup encryption; rclone: S3 transfers;
 # bash: scripts use bash-isms; coreutils: GNU `date -u` flags the scripts rely on.
 RUN apk add --no-cache postgresql16-client age rclone bash coreutils
