@@ -14,7 +14,7 @@
 # Used by: `docker compose build web` / `docker-compose.yml`; CI's image-build step.
 
 # --- build stage: full workspace install + SvelteKit build + pnpm deploy to a self-contained dir ---
-FROM node:24-bookworm-slim AS build
+FROM node:26-bookworm-slim AS build
 RUN corepack enable
 WORKDIR /repo
 # Manifests only (no source yet), so `pnpm install` below is cached unless a dependency changes.
@@ -34,7 +34,7 @@ COPY packages/schemas packages/schemas
 RUN pnpm --filter web build && pnpm --filter web --prod deploy /out --legacy
 
 # --- runtime stage: just the deployed output, run as a non-root user ---
-FROM node:24-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 ENV NODE_ENV=production PORT=3000
 RUN useradd --create-home --uid 10001 app
 WORKDIR /app
