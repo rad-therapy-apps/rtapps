@@ -1,0 +1,108 @@
+# What this file does: the one-off Postgres 16 -> 18 move for an environment, started by hand.
+#   Stages the dispatched ref's compose files, backup/ and deploy/ on the VM, starts
+#   infra/deploy/pg-upgrade-16-to-18.sh there detached (setsid nohup, so a cancelled job or a
+#   dropped SSH connection can't kill it mid-move), then polls it every 10 s — printing its log —
+#   until it records its exit code, for at most 30 minutes. Then it smoke-tests; on failure a last
+#   step reports whether the site is up.
+# Used here and why: workflow_dispatch only — a database major upgrade must never happen as a side
+#   effect of a merge. `confirm` must be typed as "upgrade". Same concurrency group as deploy.yml
+#   so it can't overlap a deploy; deploy.sh also refuses to run while the script holds
+#   pg-upgrade/lock (e.g. after this job was cancelled). Run it with the ref that carries the
+#   Postgres 18 compose file.
+# How it fits the project: docs/specs/2026-10-13-postgres-18-upgrade-design.md; runbook in
+#   docs/06-operations.md ("Postgres major upgrade").
+# Works with: infra/deploy/pg-upgrade-16-to-18.sh (writes pg-upgrade/EXIT-<ts>, holds
+#   pg-upgrade/lock while running), deploy.yml's Environment secrets DEPLOY_HOST, DEPLOY_USER,
+#   DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and variable PUBLIC_URL.
+# Used by: humans, via the Actions tab or `gh workflow run pg-upgrade --ref <branch> -f environment=test -f confirm=upgrade`.
+name: pg-upgrade
+on:
+  workflow_dispatch:
+    inputs:
+      environment: { type: choice, options: [test, prod], default: test }
+      confirm: { type: string, description: 'Type "upgrade" to move the database from Postgres 16 to 18', required: true }
+permissions:
+  contents: read
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+jobs:
+  upgrade:
+    runs-on: ubuntu-24.04-arm
+    environment: ${{ inputs.environment }}
+    # The wait below gives up after 30 minutes; this caps the whole job. The script carries on on
+    # the VM either way.
+    timeout-minutes: 45
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      PUBLIC_URL: ${{ vars.PUBLIC_URL }}
+      W: /opt/rtapps/pg-upgrade
+    steps:
+      - name: Require confirmation
+        if: inputs.confirm != 'upgrade'
+        run: |
+          echo "::error::Type 'upgrade' in the confirm input to run this."
+          exit 1
+      - uses: actions/checkout@v7
+      - name: Require a configured host
+        run: |
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "::error::Environment ${{ inputs.environment }} has no DEPLOY_HOST secret."
+            exit 1
+          fi
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/deploy_key" && chmod 600 "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/deploy_known_hosts"
+      - name: Stage the new files
+        run: |
+          OPTS=(-i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts")
+          # Never re-stage under a run that is still going (e.g. after a cancelled job): it reads stage/.
+          # shellcheck disable=SC2029 # $W is meant to expand here, on the runner
+          ssh "${OPTS[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "mkdir -p $W && { flock -n $W/lock true || { echo 'an earlier upgrade run is still going on the VM' >&2; exit 1; }; } && rm -rf $W/stage && mkdir -p $W/stage"
+          scp "${OPTS[@]}" -r infra/compose.prod.yaml infra/compose.tunnel.yaml infra/backup infra/deploy \
+            "$DEPLOY_USER@$DEPLOY_HOST:$W/stage/"
+      - name: Upgrade (runs detached on the VM; this step watches it)
+        run: |
+          SSH=(ssh -i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts"
+            -o ConnectTimeout=20 -o ServerAliveInterval=15 "$DEPLOY_USER@$DEPLOY_HOST")
+          TS=$(date -u +%Y%m%dT%H%M%SZ)
+          LOG="$W/run-$TS.log"
+          "${SSH[@]}" "PG_UPGRADE_TS=$TS setsid nohup bash $W/stage/deploy/pg-upgrade-16-to-18.sh $W/stage > $LOG 2>&1 < /dev/null & echo \$! > $W/PID-$TS"
+          echo "Started on the VM. Log: $LOG; exit code: $W/EXIT-$TS"
+          # Each poll: "running" while the script holds $W/lock, else its exit code from EXIT-<ts>,
+          # else "vanished" (it died without writing one). A failed poll (dropped SSH) just retries.
+          off=0
+          status=running
+          end=$((SECONDS + 1800)) # a time deadline: slow SSH polls can't stretch the 30 minutes
+          while [ "$SECONDS" -lt "$end" ]; do
+            sleep 10
+            status=$("${SSH[@]}" "if flock -n $W/lock true; then cat $W/EXIT-$TS 2>/dev/null || echo vanished; else echo running; fi") || status=running
+            if "${SSH[@]}" "cat $LOG" > "$RUNNER_TEMP/run.log"; then
+              tail -c +"$((off + 1))" "$RUNNER_TEMP/run.log"
+              off=$(wc -c < "$RUNNER_TEMP/run.log")
+            fi
+            [ "$status" = running ] || break
+          done
+          case "$status" in
+            0) echo "Upgrade finished: Postgres 18 is live and verified." ;;
+            1) echo "::error::The upgrade failed; the site was put back on Postgres 16 (the log above names the step)."; exit 1 ;;
+            2) echo "::error::The upgrade failed AND its automatic recovery did not complete: the site may be down. Run the manual commands at the end of the log (docs/06-operations.md, Postgres major upgrade)."; exit 1 ;;
+            running) echo "::error::Still running on the VM after 30 minutes; it carries on there. Watch $LOG and $W/EXIT-$TS."; exit 1 ;;
+            *) echo "::error::The upgrade ended without a normal exit code ($status). Check the site and $LOG."; exit 1 ;;
+          esac
+      - name: Smoke test
+        run: curl --fail --silent --show-error --max-time 20 "$PUBLIC_URL/api/v1/health"
+      - name: Report whether the site is up
+        if: (failure() || cancelled()) && inputs.confirm == 'upgrade'
+        run: |
+          if curl --fail --silent --show-error --max-time 20 "$PUBLIC_URL/api/v1/health"; then
+            echo "::notice::After the failed run the site answers /api/v1/health."
+          else
+            echo "::error::After the failed run the site does NOT answer /api/v1/health. See docs/06-operations.md, Postgres major upgrade, 'If it fails'."
+          fi
