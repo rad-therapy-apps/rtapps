@@ -28,8 +28,6 @@ set -Eeuo pipefail
 
 STAGE="${1:?usage: pg-upgrade-16-to-18.sh STAGE_DIR}"
 ROOT="${RTAPPS_ROOT:-/opt/rtapps}"
-PROJECT="${COMPOSE_PROJECT_NAME:-rtapps}"
-export COMPOSE_PROJECT_NAME="$PROJECT"
 cd "$ROOT"
 WORK="$ROOT/pg-upgrade"
 TS="${PG_UPGRADE_TS:-$(date -u +%Y%m%dT%H%M%SZ)}"
@@ -43,6 +41,9 @@ set -a
 # shellcheck disable=SC1091
 . ./.env
 set +a
+# After .env (as in deploy.sh) so a COMPOSE_PROJECT_NAME set there is honoured everywhere.
+PROJECT="${COMPOSE_PROJECT_NAME:-rtapps}"
+export COMPOSE_PROJECT_NAME="$PROJECT"
 FILES=(-f compose.prod.yaml)
 [ "${USE_TUNNEL:-0}" = "1" ] && FILES+=(-f compose.tunnel.yaml)
 COMPOSE=(docker compose --env-file .env "${FILES[@]}")
@@ -161,7 +162,10 @@ DB_CTR="$("${COMPOSE[@]}" ps -q db)"
 [ -n "$DB_CTR" ] || die "the db service is not running"
 VER="$(q "$DB_CTR" -c 'show server_version_num')"
 [ "${VER:0:2}" = "16" ] || die "running db is version $VER, expected 16"
-grep -q 'image: postgres:18' "$STAGE/compose.prod.yaml" || die "staged compose.prod.yaml is not the Postgres 18 one"
+# Version detection as in deploy.sh: "16" only if the db image line says postgres:16.
+IS16='^[[:space:]]*image:[[:space:]]*["'\'']?(docker\.io/(library/)?)?postgres:16([@:"'\''[:space:]-]|$)'
+grep -Eq "$IS16" compose.prod.yaml || die "the live compose.prod.yaml is not the Postgres 16 one"
+if grep -Eq "$IS16" "$STAGE/compose.prod.yaml"; then die "staged compose.prod.yaml is not the Postgres 18 one"; fi
 grep -Eq 'PGDATA18_PATH:-pgdata18\}:/var/lib/postgresql[[:space:]]*$' "$STAGE/compose.prod.yaml" ||
 	die "staged compose.prod.yaml must mount the 18 data at /var/lib/postgresql (not .../data)"
 case "${PGDATA_PATH:-pgdata}" in

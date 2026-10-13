@@ -117,6 +117,9 @@ green, so `main.yml` stays green before the VM exists. GHCR access on the VM use
   SHA in `/opt/rtapps/.deployed`. If `up --wait` fails, it restarts the previous SHA and exits
   non-zero; the workflow then fails visibly. Migrations never run on container start (ADR-0005),
   so a bad migration can never loop a restarting container.
+- **Dispatch `deploy.yml` only from `main`.** After the Postgres 18 move (§9), never dispatch it
+  from a ref or tag older than the guard: that `deploy.yml` copies its files straight into
+  `/opt/rtapps`, bypassing the guard.
 
 ### First deploy on `test`
 
@@ -222,6 +225,10 @@ Migrations are forward-only in practice: if a release added a migration, restori
 image without running `alembic downgrade` is fine as long as the migration was additive (all of
 ours are so far); otherwise restore last night's backup first (§7).
 
+Run the rollback deploy from `main` too: the `image_tag` picks the old images, while the
+workflow ref must still carry the guard (§5, §9). Never dispatch `deploy.yml` from a ref older
+than the guard.
+
 ## 9. Postgres major upgrade (16 → 18)
 
 A one-off, one-button move of an environment's database from Postgres 16 to 18 (a 16 data
@@ -239,7 +246,12 @@ The check keys on `/opt/rtapps/pg-upgrade/DONE-<ts>`, which only a successful up
 - a Postgres 18 compose file is refused while 16 data exists and there is no `DONE` marker. An
   empty or half-restored 18 volume left by a failed run does not count as moved;
 - a Postgres 16 compose file is refused once a `DONE` marker exists, because it would bring 16
-  back on the pre-upgrade data;
+  back on the pre-upgrade data. It is also refused when 18 data exists (`rtapps_pgdata18`, or
+  data at `PGDATA18_PATH`) and 16 data does not, which is a VM that started fresh on 18. A failed
+  upgrade run leaves both, and that still passes;
+- a compose file counts as Postgres 16 only if its db `image:` line says `postgres:16` (quoted,
+  `docker.io/` or `docker.io/library/` prefixed, and tag or digest forms all match). Anything
+  else is treated as Postgres 18;
 - nothing deploys while an upgrade run holds `pg-upgrade/lock`.
 
 A refused deploy fails red and leaves the live files in `/opt/rtapps` untouched. A host data path
@@ -265,8 +277,8 @@ but the site is on 16, 2 recovery incomplete).
 **What it does.** `infra/deploy/pg-upgrade-16-to-18.sh` runs on the VM, in nine steps:
 
 1. Preflight. It checks:
-   - the running db is 16;
-   - the staged compose file uses 18 and mounts `${PGDATA18_PATH:-pgdata18}:/var/lib/postgresql`;
+   - the running db is 16, and so is the live `compose.prod.yaml`;
+   - the staged compose file is not 16 and mounts `${PGDATA18_PATH:-pgdata18}:/var/lib/postgresql`;
    - the 18 target is empty;
    - `.deployed` names the current tag;
    - free disk in `pg-upgrade/` is more than 3 × the database. Only that filesystem is checked, so
@@ -297,6 +309,9 @@ end of the log says which case applies:
   the next preflight refuses it, so reset it before a retry: `docker volume rm rtapps_pgdata18`,
   or for a host path, `sudo find <PGDATA18_PATH> -mindepth 1 -delete`. Check first that it is not
   `PGDATA_PATH`.
+- **After a rollback from step 8 onward** (the backup-image build or later), the local backup
+  image for the current tag was rebuilt with the 18 client. It still backs up 16 fine, because
+  `pg_dump` 18 dumps older servers, and the next deploy pulls the official image.
 - **`INCOMPLETE — site may be down`** (exit 2): the automatic recovery failed at the step it
   names. Run the commands printed below that line on the VM. The 16 data is never touched.
 - **Still running after 30 minutes:** the job gives up, but the script carries on. Watch the log

@@ -50,6 +50,8 @@
 
 - [ ] **Step 1: Write the script**
 
+> **Superseded:** the committed `infra/deploy/pg-upgrade-16-to-18.sh` is authoritative. Two review rounds reworked it (phase handlers, detached launch, lock, marker-keyed two-way guard, `incoming/` deploy staging). The draft below is kept only for the record.
+
 `infra/deploy/pg-upgrade-16-to-18.sh`:
 
 ```bash
@@ -412,24 +414,37 @@ Commit only fixes to `infra/deploy/pg-upgrade-16-to-18.sh` or `infra/deploy/depl
 **Runs:**
 
 - **Run A, rollback path:**
-  - Command: `RTAPPS_ROOT=$R COMPOSE_PROJECT_NAME=rtrehearse SKIP_OFFSITE_BACKUP=1 FORCE_COUNT_MISMATCH=1 bash $S/deploy/pg-upgrade-16-to-18.sh $S`
+  - Command: `RTAPPS_ROOT=$R COMPOSE_PROJECT_NAME=rtrehearse PG_UPGRADE_TS=runA SKIP_OFFSITE_BACKUP=1 FORCE_COUNT_MISMATCH=1 bash $S/deploy/pg-upgrade-16-to-18.sh $S`
+  - The rehearsal runs the script in the foreground. In production `pg-upgrade.yml` launches it detached and sets `PG_UPGRADE_TS`; here you set it yourself so the exit code lands in a known file, `$R/pg-upgrade/EXIT-runA`, which the workflow reads the same way.
   - Expect:
-    - exit 1, with "rolling back to Postgres 16";
+    - exit 1 (and `EXIT-runA` containing `1`), with "rolling back to Postgres 16";
     - afterwards, the running db reports 16;
     - the row counts equal those before the run;
     - the api answers `/api/v1/health` (through the proxy, or with `docker compose exec api` curl);
     - `$R/compose.prod.yaml` is the 16 one again.
   - Then `docker volume rm rtrehearse_pgdata18`.
-- **Run B, deploy guard:** copy the staged (18) `compose.prod.yaml` into `$R`, then run `RTAPPS_ROOT`-equivalent logic of `deploy.sh` up to the guard. Either run `deploy.sh` with `cd` redirected (use a copy with `cd /opt/rtapps` replaced by `cd $R`), or extract the guard block into a test harness. Expect it to exit 1 with the "Run the 'pg-upgrade' workflow first" message, and the db still 16. Restore the 16 compose file afterwards.
+- **Run B, deploy guard refuses:**
+  - Stage the 18 files as `deploy.yml` does: copy `compose.prod.yaml`, `compose.tunnel.yaml`, `Caddyfile.prod`, `backup/` and `deploy/` from the `deps/pg18` working tree into `$R/incoming/`. Leave the live files in `$R` as the 16 ones.
+  - Run `$R/incoming/deploy/deploy.sh <tag>` (it must run from `<root>/incoming/deploy/`, and it works out `$R` from its own location, so no `cd` copy is needed). It sources `$R/.env` and runs `docker login ghcr.io` unconditionally, using `GHCR_USER` and `GHCR_TOKEN`, which `set -u` requires. Without credentials: export dummy `GHCR_USER` and `GHCR_TOKEN`, and put a `docker` wrapper first on `PATH` that passes everything through except `login`:
+    ```bash
+    mkdir -p $SCRATCH/bin && cat > $SCRATCH/bin/docker <<'EOF'
+    #!/usr/bin/env bash
+    [ "${1:-}" = login ] && exit 0
+    exec /usr/local/bin/docker "$@"   # the real docker; adjust the path (`command -v docker`)
+    EOF
+    chmod +x $SCRATCH/bin/docker
+    PATH=$SCRATCH/bin:$PATH GHCR_USER=x GHCR_TOKEN=x COMPOSE_PROJECT_NAME=rtrehearse $R/incoming/deploy/deploy.sh <tag>
+    ```
+  - Expect: exit 1 with the "Run the 'pg-upgrade' workflow first" message, before `docker login` is reached; `$R/compose.prod.yaml` is still the 16 file, and the db still reports 16. Clear `$R/incoming/` afterwards.
 - **Run C, happy path:**
-  - Command: the same as Run A, without `FORCE_COUNT_MISMATCH`.
+  - Command: the same as Run A with `PG_UPGRADE_TS=runC`, without `FORCE_COUNT_MISMATCH`.
   - Expect:
-    - exit 0, with "row counts match for every table";
+    - exit 0 (and `EXIT-runC` containing `0`), with "row counts and sequence values match";
     - the db reports 18, and the counts equal the pre-run counts;
     - api health is OK;
     - `rtrehearse_pgdata` still exists, untouched;
     - `$R/pg-upgrade/DONE-*` exists.
-- **Run D, guard after the upgrade:** run the guard again with the 18 compose file. Expect it to pass, because `pgdata18` now has data.
+- **Run D, guard after the upgrade:** stage the 18 files in `$R/incoming/` again and run `$R/incoming/deploy/deploy.sh <tag>` with the same `docker` wrapper. Expect the guard to pass, because the `DONE` marker exists: the 18 files are installed into `$R`, and the script goes on to `login` (stubbed), `pull`, migrate and `up`. If ports 80/443 are busy the final `up` fails at the proxy. That is fine for this run: the assertion is that the guard passed and the files were installed. Also check the reverse: staging the 16 file now must be refused ("moved to 18").
 
 **Cleanup:** `docker compose -p rtrehearse ... down -v`, remove the rehearsal images you built and the scratch directories.
 

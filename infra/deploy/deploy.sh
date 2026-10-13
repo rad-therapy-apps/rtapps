@@ -43,7 +43,8 @@ PREV="$(cat .deployed 2>/dev/null || true)"
 # - a Postgres 18 compose file is refused while 16 data exists and no marker does (an empty or
 #   half-restored 18 volume left by a failed run doesn't count as moved);
 # - a Postgres 16 compose file is refused once a marker exists (it would bring 16 back on the
-#   pre-upgrade data: split brain);
+#   pre-upgrade data: split brain), and when 18 data exists with no 16 data (a VM that started
+#   fresh on 18);
 # - nothing deploys while an upgrade run holds pg-upgrade/lock.
 # Fails closed: a host path that exists but can't be listed (Postgres makes its data dir 0700 for
 # its own user), or whose parent can't be searched, counts as holding data.
@@ -60,11 +61,19 @@ if [ -e pg-upgrade/lock ] && ! flock -n pg-upgrade/lock true; then
   exit 1
 fi
 upgraded=$(compgen -G 'pg-upgrade/DONE-*' >/dev/null && echo 1 || echo 0)
-if grep -q 'image: postgres:18' "$SRC/compose.prod.yaml"; then
-  case "${PGDATA_PATH:-pgdata}" in
-    /*) old_present=$(path_has_data "$PGDATA_PATH" && echo 1 || echo 0) ;;
-    *) old_present=$(docker volume inspect "${PROJECT}_pgdata" >/dev/null 2>&1 && echo 1 || echo 0) ;;
-  esac
+# Version detection fails safe: a compose file counts as Postgres 16 only if its db image line says
+# so (quoted, docker.io/ or docker.io/library/ prefixed, tag or digest forms all match); anything
+# else is treated as Postgres 18. The db image is the only `postgres:` image line in the file.
+if grep -Eq '^[[:space:]]*image:[[:space:]]*["'\'']?(docker\.io/(library/)?)?postgres:16([@:"'\''[:space:]-]|$)' "$SRC/compose.prod.yaml"; then
+  staged16=1
+else
+  staged16=0
+fi
+case "${PGDATA_PATH:-pgdata}" in
+  /*) old_present=$(path_has_data "$PGDATA_PATH" && echo 1 || echo 0) ;;
+  *) old_present=$(docker volume inspect "${PROJECT}_pgdata" >/dev/null 2>&1 && echo 1 || echo 0) ;;
+esac
+if [ "$staged16" = 0 ]; then
   if [ "$old_present" = 1 ] && [ "$upgraded" = 0 ]; then
     echo "Postgres 18 is configured but the 16 data has not been moved yet." >&2
     echo "Run the 'pg-upgrade' workflow first (docs/06-operations.md, Postgres major upgrade)." >&2
@@ -74,6 +83,19 @@ elif [ "$upgraded" = 1 ]; then
   echo "This compose file runs Postgres 16, but the database was moved to 18 (pg-upgrade/DONE-* exists)." >&2
   echo "Deploy the Postgres 18 compose file instead (docs/06-operations.md, Postgres major upgrade)." >&2
   exit 1
+else
+  # No marker, but this VM may have started fresh on 18: 18 data and no 16 data. (A failed upgrade
+  # run leaves both, which passes.)
+  if [ -n "${PGDATA18_PATH:-}" ]; then
+    new_present=$(path_has_data "$PGDATA18_PATH" && echo 1 || echo 0)
+  else
+    new_present=$(docker volume inspect "${PROJECT}_pgdata18" >/dev/null 2>&1 && echo 1 || echo 0)
+  fi
+  if [ "$new_present" = 1 ] && [ "$old_present" = 0 ]; then
+    echo "This compose file runs Postgres 16, but this VM holds Postgres 18 data and no 16 data." >&2
+    echo "Deploy the Postgres 18 compose file instead (docs/06-operations.md, Postgres major upgrade)." >&2
+    exit 1
+  fi
 fi
 # Install the checked files. cp, not mv: the proxy bind-mounts Caddyfile.prod, so it must be
 # rewritten in place; cp -R merges into backup/ and deploy/ as the old scp did.

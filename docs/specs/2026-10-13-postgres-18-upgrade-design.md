@@ -32,7 +32,7 @@ Called as `pg-upgrade-16-to-18.sh STAGE_DIR`. `STAGE_DIR` holds the **new** `com
 
 1. **Preflight.** Abort without changing anything if any of these fails:
    - the running `db` reports `server_version_num` 16xxxx;
-   - the staged compose file uses `image: postgres:18`;
+   - the live compose file's db image is Postgres 16, and the staged one is not ("16" means the db `image:` line matches `postgres:16`, in quoted, `docker.io/`-prefixed, tag or digest form; anything else counts as 18), and it mounts the 18 data at `/var/lib/postgresql`;
    - the 18 target is empty: the volume `${PROJECT}_pgdata18` doesn't exist, or `PGDATA18_PATH`, if set, is empty or missing;
    - if the 16 data is on a host path (`PGDATA_PATH` starts with `/`), `PGDATA18_PATH` must be set;
    - free disk at `/opt/rtapps/pg-upgrade` is greater than 3 × `pg_database_size`.
@@ -79,7 +79,13 @@ The old `pgdata` volume and the dump file are never deleted by the script. Remov
 
 ### 3. Safety guard in `deploy.sh`
 
-Before `up -d --wait db`: if `compose.prod.yaml` uses `postgres:18` **and** 16 data exists (`${PROJECT}_pgdata` volume, or a non-empty `PGDATA_PATH` host path) **and** the 18 target is missing or empty, abort with "run the Postgres upgrade workflow first". That makes it impossible to launch an empty 18 database next to real 16 data by accident.
+`deploy.yml` stages the files in `/opt/rtapps/incoming/` and runs `incoming/deploy/deploy.sh <tag>`. Before installing anything into `/opt/rtapps`, that script checks the staged `compose.prod.yaml` against the database's state. The guard is keyed on the marker `pg-upgrade/DONE-<ts>`, which only a fully successful upgrade writes, and it works in both directions, plus the lock:
+
+- **Postgres 18 file, no marker, 16 data exists** (`${PROJECT}_pgdata` volume, or a non-empty `PGDATA_PATH`): refuse with "run the Postgres upgrade workflow first". An empty or half-restored 18 volume left by a failed run does not count as moved.
+- **Postgres 16 file, marker exists:** refuse, because it would bring 16 back on the pre-upgrade data (split brain). Also refuse when 18 data exists and 16 data does not (a VM that started fresh on 18). A failed run leaves both, which passes.
+- **`pg-upgrade/lock` held:** refuse, because an upgrade is running.
+
+Version detection fails safe: a file is "16" only if its db image line matches `postgres:16`; anything else is treated as 18. A host path that can't be listed counts as holding data. A refused deploy leaves the live files untouched.
 
 ### 4. Version flip (second PR)
 
@@ -100,7 +106,7 @@ Before `up -d --wait db`: if `compose.prod.yaml` uses `postgres:18` **and** 16 d
 
 ### Order of events
 
-1. **PR 1 (tooling):** the script, the workflow, the deploy guard and the runbook. Merging it changes nothing on the server.
+1. **PR 1 (tooling):** the script, the workflow, the deploy guard and the runbook. Merging it changes only the deploy mechanics: files are staged in `incoming/` and installed after the guard passes.
 2. **PR 2 (version flip)** on `deps/pg18`, with a **local rehearsal** of the script on a prod-like local stack using PR 2's files. The rehearsal covers:
    - the happy path;
    - a forced count mismatch, which must roll back to 16 with the data intact;
