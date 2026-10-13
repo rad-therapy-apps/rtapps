@@ -3,10 +3,10 @@
  * `RichTextEditor.svelte` builds its `Editor` with, restricting the editor to precisely the
  * node/mark set `packages/schemas/prose-doc.schema.json` allows.
  * Used here and why: `StarterKit.configure(...)` disables everything the schema lacks
- * (`codeBlock`, `horizontalRule`, `strike`) and pins heading levels to 2-4 (history stays on —
- * the schema doesn't constrain editor history, only the document shape); `Underline`/
- * `Subscript`/`Superscript`/`Link` add the remaining marks; the `Table` family (resizing off, so
- * no colwidth churn) adds tables. Three block/inline nodes have no off-the-shelf TipTap
+ * (`codeBlock`, `horizontalRule`, `strike`), pins heading levels to 2-4, configures the Link and
+ * Underline marks it bundles in TipTap 3, and turns off `trailingNode` (undo/redo stays on — the
+ * schema doesn't constrain editor history, only the document shape); `Subscript`/`Superscript`
+ * add the remaining marks; the `Table` family (resizing off, so no colwidth churn) adds tables. Three block/inline nodes have no off-the-shelf TipTap
  * extension and are defined inline: `AuthorImage` (schema's `mediaAssetId`/`alt` attrs, not
  * TipTap's `src`/`title`), `Callout` (the schema's `key-principle`/`clinical-note`/`warning`
  * aside), and `MathSource` (a read-only KaTeX-source span — inserted only by pasting/API content,
@@ -111,13 +111,16 @@ export function authorExtensions(): Extensions {
 			link: {
 				openOnClick: false,
 				autolink: false,
-				// Matches the schema's `href` pattern (^https://). In TipTap 3 this also applies on
-				// paste/HTML parsing and setLink, so a non-https link becomes plain text instead of a 422
-				// on save (JSON from the API is already https-only via the schema).
-				isAllowedUri: (url) => url.startsWith('https://')
+				// Both match the schema's `href` pattern (^https://), so a non-https link becomes plain
+				// text instead of a 422 on save. `isAllowedUri` covers HTML parsing (paste,
+				// insertContent) and setLink/toggleLink; pasting a bare URL over selected text goes
+				// through `shouldAutoLink` instead. Neither applies to JSON loaded via `content` — JSON
+				// from the API is already https-only via the schema.
+				isAllowedUri: (url) => url.startsWith('https://'),
+				shouldAutoLink: (url) => url.startsWith('https://')
 			},
-			// TipTap 3 would otherwise append an empty paragraph to every document, changing the
-			// saved ProseDoc. `listKeymap` (new in 3) stays on: owner-approved, nicer list editing.
+			// TipTap 3 would otherwise append an empty paragraph after the first edit to any document
+			// whose last node isn't a paragraph, changing the saved ProseDoc. `listKeymap` (new in 3) stays on: owner-approved, nicer list editing.
 			trailingNode: false
 		}),
 		Subscript,

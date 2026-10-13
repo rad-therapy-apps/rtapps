@@ -2,8 +2,10 @@
  * What this file does: proves the author editor's extension set round-trips every shared prose
  * fixture unchanged — load `toEditor(doc)` into a real TipTap `Editor` built from
  * `authorExtensions()`, read it back with `fromEditor(editor.getJSON())`, expect the fixture.
- * Used here and why: a real Editor (browser project) because the TipTap schema, default attrs and
- * StarterKit members (e.g. v3's `trailingNode`) only show up when the editor parses content.
+ * Used here and why: a real Editor (browser project) because the TipTap schema and default attrs
+ * only show up when the editor parses content, and plugin-driven StarterKit members (e.g. v3's
+ * `trailingNode`, an `appendTransaction` plugin) only act once a transaction is dispatched — so
+ * `load()` dispatches one, as the first keystroke in the real editor would before `onUpdate`.
  * Written on TipTap 2 as the baseline for the TipTap 3 upgrade
  * (docs/specs/2026-10-13-tiptap-3-upgrade-design.md): it must pass unchanged on both.
  * How it fits the project: guards ADR-0003's closed prose schema at the editor boundary — saved
@@ -31,6 +33,9 @@ describe('authorExtensions', () => {
 			extensions: authorExtensions(),
 			content: toEditor(doc)
 		});
+		// One no-op transaction: appendTransaction plugins (TipTap 3's trailingNode) only run on a
+		// dispatch, and in the app every save (`onUpdate`) follows one.
+		editor.view.dispatch(editor.state.tr);
 		return editor;
 	}
 
@@ -49,7 +54,7 @@ describe('authorExtensions', () => {
 	// API would reject with a 422 on save. `isAllowedUri` applies to HTML parsing (paste,
 	// insertContent) and to setLink/toggleLink, but not to JSON loaded via `content`; JSON from the
 	// API is already https-only via the schema.
-	it('drops non-https links in pasted HTML', () => {
+	it('drops non-https links in inserted or pasted HTML', () => {
 		const doc = {
 			type: 'doc',
 			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'start' }] }]
@@ -61,7 +66,7 @@ describe('authorExtensions', () => {
 		expect(json).not.toContain('http://example.com');
 	});
 
-	it('keeps https links in pasted HTML', () => {
+	it('keeps https links in inserted or pasted HTML', () => {
 		const doc = {
 			type: 'doc',
 			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'start' }] }]
@@ -69,6 +74,32 @@ describe('authorExtensions', () => {
 		const ed = load(doc);
 		ed.commands.insertContent('<p>see <a href="https://example.com">here</a></p>');
 		expect(JSON.stringify(ed.getJSON())).toContain('https://example.com');
+	});
+
+	// Scenario: an author selects a word and pastes a bare URL over it (Link's linkOnPaste).
+	// Invariant: only https URLs become links — that path checks `shouldAutoLink`, not
+	// `isAllowedUri`, so without the https-only `shouldAutoLink` an http link would be created and
+	// then rejected with a 422 on save.
+	function pasteUrlOverWord(url: string): string {
+		const doc = {
+			type: 'doc',
+			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'see here' }] }]
+		} as unknown as ProseDoc;
+		const ed = load(doc);
+		ed.commands.setTextSelection({ from: 5, to: 9 }); // "here"
+		ed.view.pasteText(url);
+		return JSON.stringify(ed.getJSON());
+	}
+
+	it('does not link a pasted http URL over selected text', () => {
+		// Not linked, so the ordinary paste replaces the selected word with the URL as plain text.
+		const json = pasteUrlOverWord('http://example.com');
+		expect(json).toContain('see http://example.com');
+		expect(json).not.toContain('"link"');
+	});
+
+	it('links a pasted https URL over selected text', () => {
+		expect(pasteUrlOverWord('https://example.com')).toContain('https://example.com');
 	});
 
 	// Scenario: a callout with a non-default kind.
