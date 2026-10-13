@@ -79,7 +79,7 @@ services:
   # same approach as infra/backup/rclone-remote.sh; `mkdir` on an S3 remote is CreateBucket
   # and is a no-op when the bucket already exists.
   storage-init:
-    image: rclone/rclone:1.68
+    image: rclone/rclone:1.75
     depends_on:
       storage:
         condition: service_healthy
