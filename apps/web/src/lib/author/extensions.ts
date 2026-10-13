@@ -13,21 +13,16 @@
  * never from the toolbar, since there's no math input UI yet).
  * How it fits the project: the extension-list half of Task 14; `prosemap.ts` is the other half
  * (translating between this editor's `JSONContent` and the closed schema JSON).
- * Depends on: `@tiptap/core`, `@tiptap/starter-kit`, `@tiptap/extension-underline`,
- * `@tiptap/extension-subscript`, `@tiptap/extension-superscript`, `@tiptap/extension-link`,
- * `@tiptap/extension-table(-row|-cell|-header)`.
+ * Depends on: `@tiptap/core`, `@tiptap/starter-kit` (incl. its Link and Underline in TipTap 3),
+ * `@tiptap/extension-subscript`, `@tiptap/extension-superscript`, `@tiptap/extension-table`
+ * (Table, TableRow, TableCell, TableHeader), `@tiptap/extension-image`.
  * Used by: `RichTextEditor.svelte`.
  */
 import { Node, type Extensions } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
-import Link from '@tiptap/extension-link';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import Image from '@tiptap/extension-image';
 import type { CalloutKind } from '../prose/types';
 
@@ -110,16 +105,23 @@ export function authorExtensions(): Extensions {
 			strike: false,
 			heading: { levels: [2, 3, 4] },
 			blockquote: {},
-			code: {}
+			code: {},
+			// TipTap 3 bundles Link and Underline into StarterKit.
+			underline: {},
+			link: {
+				openOnClick: false,
+				autolink: false,
+				// Matches the schema's `href` pattern (^https://). In TipTap 3 this also applies on
+				// paste/HTML parsing and setLink, so a non-https link becomes plain text instead of a 422
+				// on save (JSON from the API is already https-only via the schema).
+				isAllowedUri: (url) => url.startsWith('https://')
+			},
+			// TipTap 3 would otherwise append an empty paragraph to every document, changing the
+			// saved ProseDoc. `listKeymap` (new in 3) stays on: owner-approved, nicer list editing.
+			trailingNode: false
 		}),
-		Underline,
 		Subscript,
 		Superscript,
-		Link.configure({
-			openOnClick: false,
-			autolink: false,
-			validate: (href: string) => href.startsWith('https://')
-		}),
 		Table.configure({ resizable: false }),
 		TableRow,
 		TableCell,

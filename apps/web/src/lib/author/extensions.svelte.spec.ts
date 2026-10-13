@@ -43,4 +43,59 @@ describe('authorExtensions', () => {
 			expect(out).toEqual(doc);
 		});
 	}
+
+	// Scenario: HTML with a non-https link is pasted/inserted (the schema only allows ^https://).
+	// Invariant: the editor drops the link mark (keeping the text) instead of carrying a link the
+	// API would reject with a 422 on save. `isAllowedUri` applies to HTML parsing (paste,
+	// insertContent) and to setLink/toggleLink, but not to JSON loaded via `content`; JSON from the
+	// API is already https-only via the schema.
+	it('drops non-https links in pasted HTML', () => {
+		const doc = {
+			type: 'doc',
+			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'start' }] }]
+		} as unknown as ProseDoc;
+		const ed = load(doc);
+		ed.commands.insertContent('<p>see <a href="http://example.com">here</a></p>');
+		const json = JSON.stringify(ed.getJSON());
+		expect(json).toContain('here');
+		expect(json).not.toContain('http://example.com');
+	});
+
+	it('keeps https links in pasted HTML', () => {
+		const doc = {
+			type: 'doc',
+			content: [{ type: 'paragraph', content: [{ type: 'text', text: 'start' }] }]
+		} as unknown as ProseDoc;
+		const ed = load(doc);
+		ed.commands.insertContent('<p>see <a href="https://example.com">here</a></p>');
+		expect(JSON.stringify(ed.getJSON())).toContain('https://example.com');
+	});
+
+	// Scenario: a callout with a non-default kind.
+	// Invariant: the kind survives the round trip (the only fixture callout uses the default).
+	it('round-trips a non-default callout kind', () => {
+		const doc = {
+			type: 'doc',
+			content: [
+				{
+					type: 'callout',
+					attrs: { kind: 'warning' },
+					content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Mind the dose' }] }]
+				}
+			]
+		} as unknown as ProseDoc;
+		expect(fromEditor(load(doc).getJSON())).toEqual(doc);
+	});
+
+	// Guard: the round-trip loop above really covers every expected fixture.
+	it('loads the expected fixtures', () => {
+		expect(Object.keys(fixtures.valid)).toEqual([
+			'paragraph_with_marks',
+			'heading_levels',
+			'lists_and_quote',
+			'table',
+			'callout_image_math',
+			'empty_paragraph'
+		]);
+	});
 });
