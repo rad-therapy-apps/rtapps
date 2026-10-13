@@ -3,31 +3,26 @@
  * `RichTextEditor.svelte` builds its `Editor` with, restricting the editor to precisely the
  * node/mark set `packages/schemas/prose-doc.schema.json` allows.
  * Used here and why: `StarterKit.configure(...)` disables everything the schema lacks
- * (`codeBlock`, `horizontalRule`, `strike`) and pins heading levels to 2-4 (history stays on —
- * the schema doesn't constrain editor history, only the document shape); `Underline`/
- * `Subscript`/`Superscript`/`Link` add the remaining marks; the `Table` family (resizing off, so
- * no colwidth churn) adds tables. Three block/inline nodes have no off-the-shelf TipTap
+ * (`codeBlock`, `horizontalRule`, `strike`), pins heading levels to 2-4, configures the Link and
+ * Underline marks it bundles in TipTap 3, and turns off `trailingNode` (undo/redo stays on — the
+ * schema doesn't constrain editor history, only the document shape); `Subscript`/`Superscript`
+ * add the remaining marks; the `Table` family (resizing off, so no colwidth churn) adds tables. Three block/inline nodes have no off-the-shelf TipTap
  * extension and are defined inline: `AuthorImage` (schema's `mediaAssetId`/`alt` attrs, not
  * TipTap's `src`/`title`), `Callout` (the schema's `key-principle`/`clinical-note`/`warning`
  * aside), and `MathSource` (a read-only KaTeX-source span — inserted only by pasting/API content,
  * never from the toolbar, since there's no math input UI yet).
  * How it fits the project: the extension-list half of Task 14; `prosemap.ts` is the other half
  * (translating between this editor's `JSONContent` and the closed schema JSON).
- * Depends on: `@tiptap/core`, `@tiptap/starter-kit`, `@tiptap/extension-underline`,
- * `@tiptap/extension-subscript`, `@tiptap/extension-superscript`, `@tiptap/extension-link`,
- * `@tiptap/extension-table(-row|-cell|-header)`.
+ * Depends on: `@tiptap/core`, `@tiptap/starter-kit` (incl. its Link and Underline in TipTap 3),
+ * `@tiptap/extension-subscript`, `@tiptap/extension-superscript`, `@tiptap/extension-table`
+ * (Table, TableRow, TableCell, TableHeader), `@tiptap/extension-image`.
  * Used by: `RichTextEditor.svelte`.
  */
 import { Node, type Extensions } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
-import Link from '@tiptap/extension-link';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import Image from '@tiptap/extension-image';
 import type { CalloutKind } from '../prose/types';
 
@@ -110,16 +105,26 @@ export function authorExtensions(): Extensions {
 			strike: false,
 			heading: { levels: [2, 3, 4] },
 			blockquote: {},
-			code: {}
+			code: {},
+			// TipTap 3 bundles Link and Underline into StarterKit.
+			underline: {},
+			link: {
+				openOnClick: false,
+				autolink: false,
+				// Both match the schema's `href` pattern (^https://), so a non-https link becomes plain
+				// text instead of a 422 on save. `isAllowedUri` covers HTML parsing (paste,
+				// insertContent) and setLink/toggleLink; pasting a bare URL over selected text goes
+				// through `shouldAutoLink` instead. Neither applies to JSON loaded via `content` — JSON
+				// from the API is already https-only via the schema.
+				isAllowedUri: (url) => url.startsWith('https://'),
+				shouldAutoLink: (url) => url.startsWith('https://')
+			},
+			// TipTap 3 would otherwise append an empty paragraph after the first edit to any document
+			// whose last node isn't a paragraph, changing the saved ProseDoc. `listKeymap` (new in 3) stays on: owner-approved, nicer list editing.
+			trailingNode: false
 		}),
-		Underline,
 		Subscript,
 		Superscript,
-		Link.configure({
-			openOnClick: false,
-			autolink: false,
-			validate: (href: string) => href.startsWith('https://')
-		}),
 		Table.configure({ resizable: false }),
 		TableRow,
 		TableCell,
