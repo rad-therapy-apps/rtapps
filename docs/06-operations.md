@@ -62,7 +62,7 @@ age-keygen -o rtapps-backup.key        # keep this file OFFLINE (password manage
 grep 'public key' rtapps-backup.key    # → BACKUP_AGE_RECIPIENT in .env
 ```
 
-Losing the private key means the backups cannot be decrypted. Rotate it yearly (§9).
+Losing the private key means the backups cannot be decrypted. Rotate it yearly (§10).
 
 ## 3. Choose the ingress
 
@@ -220,7 +220,51 @@ Migrations are forward-only in practice: if a release added a migration, restori
 image without running `alembic downgrade` is fine as long as the migration was additive (all of
 ours are so far); otherwise restore last night's backup first (§7).
 
-## 9. Monthly checklist
+## 9. Postgres major upgrade (16 → 18)
+
+A one-off, one-button move of an environment's database from Postgres 16 to 18 (a 16 data
+directory cannot be opened by 18); design in `docs/specs/2026-10-13-postgres-18-upgrade-design.md`.
+
+**When to run it.** Once per environment, using the branch or ref whose `infra/compose.prod.yaml`
+uses Postgres 18, *before* that ref is deployed. The deploy guard in `deploy.sh` refuses to deploy a
+Postgres 18 compose file next to unmoved 16 data.
+
+**How to run it.** Actions → pg-upgrade → Run workflow, choosing the ref, environment `test` and
+confirm `upgrade`. Or:
+
+```bash
+gh workflow run pg-upgrade --ref deps/pg18 -f environment=test -f confirm=upgrade
+```
+
+**What it does.** `infra/deploy/pg-upgrade-16-to-18.sh` runs on the VM, in eight steps:
+
+1. Backup: an off-site backup with the current 16 client.
+2. Pause: stops `api`, `web` and `backup` so nothing writes during the move.
+3. Export: `pg_dump` from 16 and an exact row count of every table.
+4. Switch: swaps in the staged compose files, so 18 starts on a new, empty volume (`pgdata18`).
+5. Import: `pg_restore` into 18.
+6. Verify counts: every table's row count must equal the 16 count.
+7. Prove backup: builds the 18-client backup image and runs one off-site backup against 18.
+8. Resume: starts the whole site again, then the workflow smoke-tests `/api/v1/health`.
+
+**Expected downtime.** Under a minute for the current data size.
+
+**If it fails.**
+
+- **Before the switch:** nothing changed.
+- **After the switch:** it rolled back to 16 automatically. Read the job log; the 18 volume
+  `rtapps_pgdata18` was left for inspection, and `docker volume rm rtapps_pgdata18` resets it
+  before a retry.
+
+**Manual rollback after a successful run**, if a problem appears later:
+`cp /opt/rtapps/pg-upgrade/old-<ts>/{compose.prod.yaml,compose.tunnel.yaml} /opt/rtapps/`, restore
+`backup/` and `deploy/` from there, then `docker compose ... up -d`. Writes made on 18 since the
+switch would be lost; export them first.
+
+**Cleanup after about a week.** `docker volume rm rtapps_pgdata`, and delete
+`/opt/rtapps/pg-upgrade/rtapps-pg16-*.dump` and `old-*`.
+
+## 10. Monthly checklist
 
 - `apt-get upgrade` + reboot in a quiet window (unattended-upgrades handles security patches).
 - Confirm last night's backup object exists and run the restore drill (§7).
@@ -231,7 +275,7 @@ ours are so far); otherwise restore last night's backup first (§7).
 - Yearly: rotate the `age` key (new key → `.env` → next backup is encrypted to it; keep the old
   private key until its backups expire).
 
-## 10. Retention
+## 11. Retention
 
 | Data | Retention |
 |---|---|
@@ -240,7 +284,7 @@ ours are so far); otherwise restore last night's backup first (§7).
 | Sessions | purged 30 days after expiry — `app.tasks.purge_sessions`, scheduled per §5 |
 | Attempts, content versions | indefinitely (pseudonymised after erase; `POST admin/users/{id}/erase`) |
 
-## 11. Security notes
+## 12. Security notes
 
 - **Per-IP rate limiting assumes the proxy is the only path to the API.** `login`, `register`,
   password-reset and `join` are rate-limited by the caller's IP as the API sees it (NFR-13). In

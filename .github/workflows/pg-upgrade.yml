@@ -1,0 +1,57 @@
+# What this file does: the one-off Postgres 16 -> 18 move for an environment, started by hand.
+#   Stages the dispatched ref's compose files, backup/ and deploy/ on the VM, then runs
+#   infra/deploy/pg-upgrade-16-to-18.sh there over the deploy SSH credentials, then smoke-tests.
+# Used here and why: workflow_dispatch only — a database major upgrade must never happen as a side
+#   effect of a merge. `confirm` must be typed as "upgrade". Same concurrency group as deploy.yml
+#   so it can't overlap a deploy. Run it with the ref that carries the Postgres 18 compose file.
+# How it fits the project: docs/specs/2026-10-13-postgres-18-upgrade-design.md; runbook in
+#   docs/06-operations.md ("Postgres major upgrade").
+# Works with: infra/deploy/pg-upgrade-16-to-18.sh, deploy.yml's Environment secrets DEPLOY_HOST,
+#   DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS and variable PUBLIC_URL.
+# Used by: humans, via the Actions tab or `gh workflow run pg-upgrade --ref <branch> -f environment=test -f confirm=upgrade`.
+name: pg-upgrade
+on:
+  workflow_dispatch:
+    inputs:
+      environment: { type: choice, options: [test, prod], default: test }
+      confirm: { type: string, description: 'Type "upgrade" to move the database from Postgres 16 to 18', required: true }
+permissions:
+  contents: read
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+jobs:
+  upgrade:
+    runs-on: ubuntu-24.04-arm
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Require confirmation
+        if: inputs.confirm != 'upgrade'
+        run: |
+          echo "::error::Type 'upgrade' in the confirm input to run this."
+          exit 1
+      - uses: actions/checkout@v7
+      - name: Require a configured host
+        run: |
+          if [ -z "${{ secrets.DEPLOY_HOST }}" ]; then
+            echo "::error::Environment ${{ inputs.environment }} has no DEPLOY_HOST secret."
+            exit 1
+          fi
+      - name: Configure SSH
+        run: |
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > "$RUNNER_TEMP/deploy_key" && chmod 600 "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > "$RUNNER_TEMP/deploy_known_hosts"
+      - name: Stage the new files
+        run: |
+          SSH=(ssh -i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}")
+          "${SSH[@]}" 'rm -rf /opt/rtapps/pg-upgrade/stage && mkdir -p /opt/rtapps/pg-upgrade/stage'
+          scp -i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts" \
+            -r infra/compose.prod.yaml infra/compose.tunnel.yaml infra/backup infra/deploy \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/rtapps/pg-upgrade/stage/"
+      - name: Upgrade
+        run: |
+          ssh -i "$RUNNER_TEMP/deploy_key" -o UserKnownHostsFile="$RUNNER_TEMP/deploy_known_hosts" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "bash /opt/rtapps/pg-upgrade/stage/deploy/pg-upgrade-16-to-18.sh /opt/rtapps/pg-upgrade/stage"
+      - name: Smoke test
+        run: curl --fail --silent --show-error --max-time 20 "${{ vars.PUBLIC_URL }}/api/v1/health"

@@ -33,6 +33,25 @@ echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 # The db is started (or left running) first: `--no-deps` below assumes a previous deploy's db
 # is still up, which is false on a brand-new VM — the 2026-09-10 first test deploy failed on
 # exactly that (migration's getaddrinfo("db") had nothing to resolve).
+# Postgres 16 -> 18 guard: never start an empty 18 database next to existing 16 data. The move is
+# done by .github/workflows/pg-upgrade.yml (infra/deploy/pg-upgrade-16-to-18.sh), not by a deploy.
+PROJECT="${COMPOSE_PROJECT_NAME:-rtapps}"
+if grep -q 'image: postgres:18' compose.prod.yaml; then
+  if [ -n "${PGDATA18_PATH:-}" ]; then
+    new_empty=$([ ! -e "$PGDATA18_PATH" ] || [ -z "$(ls -A "$PGDATA18_PATH")" ] && echo 1 || echo 0)
+  else
+    new_empty=$(docker volume inspect "${PROJECT}_pgdata18" >/dev/null 2>&1 && echo 0 || echo 1)
+  fi
+  case "${PGDATA_PATH:-pgdata}" in
+    /*) old_present=$([ -n "$(ls -A "$PGDATA_PATH" 2>/dev/null)" ] && echo 1 || echo 0) ;;
+    *) old_present=$(docker volume inspect "${PROJECT}_pgdata" >/dev/null 2>&1 && echo 1 || echo 0) ;;
+  esac
+  if [ "$new_empty" = 1 ] && [ "$old_present" = 1 ]; then
+    echo "Postgres 18 is configured but the 16 data has not been moved yet." >&2
+    echo "Run the 'pg-upgrade' workflow first (docs/06-operations.md, Postgres major upgrade)." >&2
+    exit 1
+  fi
+fi
 "${COMPOSE[@]}" up -d --wait db
 "${COMPOSE[@]}" run --rm --no-deps api alembic upgrade head
 if "${COMPOSE[@]}" up -d --remove-orphans --wait --wait-timeout 180; then

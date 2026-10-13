@@ -175,7 +175,7 @@ Each NFR has a verification method that runs in CI or is recorded in `docs/05-se
 | NFR-10 | Secrets only in `/opt/rtapps/.env` on the VM and GitHub Environment secrets; never in images, logs or the repo; `.env.example` documents every key. | M | 2 | Secret-scan step in CI; review |
 | NFR-11 | Authorization is a FastAPI dependency; cohort ownership and program scope are checked in the SQL query; a permission matrix test covers every route × role. | M | 1 | pytest permission matrix |
 | NFR-12 | Dependabot for uv, pnpm and GitHub Actions; security updates merged within 14 days *target*; no runtime CDN scripts (all JS bundled and pinned) — contrast ARCHITECTURE §7.4. | M | 1 | Repo settings; `pnpm audit` / uv audit step in CI |
-| NFR-13 | Rate limits on `login`, `register`, password reset and `join` (*target* 10 / min / IP) with 429 problem responses. | S | 2 | pytest — implemented v0.3.0 (per-IP; see docs/06-operations.md §11 for the X-Forwarded-For caveat) |
+| NFR-13 | Rate limits on `login`, `register`, password reset and `join` (*target* 10 / min / IP) with 429 problem responses. | S | 2 | pytest — implemented v0.3.0 (per-IP; see docs/06-operations.md §12 for the X-Forwarded-For caveat) |
 | NFR-30 | Cross-window messaging (if any simulator iframe remains in Phase 4) shall set an explicit `targetOrigin` and check `event.origin`; `'*'` is banned by lint. | M | 4 | eslint rule; review (BRIDGES §7, AUDIT F7) |
 
 ### 3.4 Privacy and data retention
