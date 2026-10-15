@@ -18,7 +18,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 
 const API_BASE = `${env.API_INTERNAL_URL ?? 'http://api:8000'}/api/v1`;
-const ORIGIN = env.ORIGIN ?? 'http://localhost:8080';
+const ORIGIN_HEADER = env.ORIGIN ?? 'http://localhost:8080';
 
 export type ApiInit = RequestInit & { cookie?: string };
 
@@ -64,7 +64,7 @@ export async function apiFetch(
 	h.set('x-request-id', event.locals.requestId);
 	if (!h.has('accept')) h.set('accept', 'application/json');
 	// The API's CSRF check (ADR-0002) allow-lists Origin on non-GET requests only; GET is never mutating by convention.
-	if ((rest.method ?? 'GET').toUpperCase() !== 'GET') h.set('origin', ORIGIN);
+	if ((rest.method ?? 'GET').toUpperCase() !== 'GET') h.set('origin', ORIGIN_HEADER);
 	return event.fetch(`${API_BASE}${path}`, { ...rest, headers: h });
 }
 
