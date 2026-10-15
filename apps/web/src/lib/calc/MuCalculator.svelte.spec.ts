@@ -347,6 +347,62 @@ describe('MuCalculator', () => {
 			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
+	// Scenario (#48): a SECOND pdd/tmr key that also contains a 1D-role substring ('pdd_sc_alt'
+	// after 'pdd-6mv' claimed pdd; 'tmr_sp_alt' after 'tmr-6mv' claimed tmr), with no genuine sp
+	// table configured.
+	// Invariant: no pdd/tmr key is ever picked up by the sc/sp search — Sc reads sc-6mv and Sp
+	// stays 1.0000 "not configured"; MU uses only pdd-6mv and sc-6mv.
+	it('never assigns a 1D role to any pdd/tmr key, not just the claimed one', async () => {
+		await render(MuCalculator, {
+			tables: {
+				'pdd-6mv': { title: 'PDD 6MV', grid: PDD_GRID },
+				pdd_sc_alt: { title: 'PDD alt', grid: SP_GRID },
+				'tmr-6mv': { title: 'TMR 6MV', grid: TMR_GRID },
+				tmr_sp_alt: { title: 'TMR alt', grid: SP_GRID },
+				'sc-6mv': { title: 'Sc 6MV', grid: SC_GRID }
+			}
+		});
+
+		await setInputs('200', '10', '10');
+
+		const sc = interpolate2d(SC_GRID, SC_GRID.rows[0].key, 10)!;
+		const pdd = interpolate2d(PDD_GRID, 10, 10)!;
+		const isf = ssdIsf(100, 1.5, 10)!;
+		const expectedMu = 200 / (1 * (pdd / 100) * sc * isf);
+
+		await expect
+			.element(page.getByTestId('mu-factor-sc'))
+			.toHaveTextContent(`${sc.toFixed(4)} (table: sc-6mv)`);
+		await expect
+			.element(page.getByTestId('mu-factor-sp'))
+			.toHaveTextContent('1.0000 (not configured)');
+		await expect
+			.element(page.getByTestId('mu-result'))
+			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+	});
+
+	// Scenario (#48 review): a wedge table whose own name happens to contain "sp" ('wedge-spec')
+	// alongside genuine sc and sp tables.
+	// Invariant: the wedge role still resolves to it — only the claimed sc/sp keys leave the pool.
+	it('still finds a wedge table whose name contains a 1D-role substring', async () => {
+		await render(MuCalculator, {
+			tables: {
+				'pdd-6mv': { title: 'PDD 6MV', grid: PDD_GRID },
+				'sc-6mv': { title: 'Sc 6MV', grid: SC_GRID },
+				'sp-6mv': { title: 'Sp 6MV', grid: SP_GRID },
+				'wedge-spec': { title: 'Wedge', grid: WEDGE_GRID }
+			}
+		});
+
+		await setInputs('200', '10', '10');
+		await userEvent.fill(page.getByLabelText('Wedge angle (deg)').element(), '45');
+
+		const wf = interpolate2d(WEDGE_GRID, WEDGE_GRID.rows[0].key, 45)!;
+		await expect
+			.element(page.getByTestId('mu-factor-wedge'))
+			.toHaveTextContent(`${wf.toFixed(4)} (table: wedge-spec)`);
+	});
+
 	// Scenario (minor/cheap case): wedge lookup is requested at an angle outside the wedge table's
 	// range (e.g., angle 90 on a 0–60 grid). The interpolation returns null (out of range), and the
 	// UI shows a factor-out-of-range message, never "Infinity" or "NaN".

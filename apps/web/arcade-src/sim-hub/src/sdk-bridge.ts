@@ -38,6 +38,7 @@ import {
 } from './interact';
 import { roomById } from './main';
 import { JOURNEY, clearJourneyCameraFollow } from './journey';
+import { createQaLock } from './qa-lock';
 
 // RTApps (#77 phase 2 task 16): typed boundary for the SDK integration surface. `RTApps`
 // mirrors the real shipped contract (static/arcade/rtapps-sdk.js, verified against
@@ -280,10 +281,13 @@ async function runCtQaSequence() {
 /* ===== v43 · CT/QA top-level UI wiring ===== */
 document.getElementById('procedureLabClose')?.addEventListener('click', closeProcedureLab);
 document.getElementById('ctQaClose')?.addEventListener('click', () => showCtQaDock(false));
-document.getElementById('ctQaLaunch')?.addEventListener('click', runCtQaSequence);
-document.getElementById('ctQaQuickStartup')?.addEventListener('click', ctQaAnimateStartup);
-document.getElementById('ctQaQuickLaser')?.addEventListener('click', ctQaAnimateLaser);
-document.getElementById('ctQaQuickWater')?.addEventListener('click', ctQaAnimateWater);
+const qaExclusive = createQaLock(); // #76: one QA run at a time across all four buttons
+document.getElementById('ctQaLaunch')?.addEventListener('click', qaExclusive(runCtQaSequence));
+document
+	.getElementById('ctQaQuickStartup')
+	?.addEventListener('click', qaExclusive(ctQaAnimateStartup));
+document.getElementById('ctQaQuickLaser')?.addEventListener('click', qaExclusive(ctQaAnimateLaser));
+document.getElementById('ctQaQuickWater')?.addEventListener('click', qaExclusive(ctQaAnimateWater));
 document.getElementById('ctQaGoRoom')?.addEventListener('click', () => {
 	if (S.activeRoom?.id !== 'ctsim' && !S.travel) beginTravel(roomById('ctsim'));
 	else showCtQaDock(true);
