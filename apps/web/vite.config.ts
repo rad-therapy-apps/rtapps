@@ -52,7 +52,11 @@ export default defineConfig({
 					browser: {
 						enabled: true,
 						provider: playwright(),
-						instances: [{ browser: 'chromium', headless: true }]
+						instances: [{ browser: 'chromium', headless: true }],
+						// vitest 5 made locators exact by default; keep vitest 4's substring matching.
+						// Inputs nested inside their <label> get the field's current value appended to
+						// their accessible name ("Depth (cm) 5"), so getByLabelText('Depth (cm)') needs it.
+						locators: { exact: false }
 					},
 					include: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/arcade/**/*.spec.ts'],
 					exclude: ['src/lib/server/**']
