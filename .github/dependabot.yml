@@ -46,10 +46,10 @@ updates:
   - package-ecosystem: npm
     directory: /
     ignore:
-      # three.js is 0.x, so every "minor" release can break the simulators; it is pinned exactly
-      # (0.160.0, the owner-verified perf baseline) and upgraded deliberately, not in the weekly group.
+      # three.js is pinned exactly (0.160.0, the owner-verified perf baseline) and upgraded
+      # deliberately, never in the weekly group — patches included, since any change to it needs
+      # a simulator perf re-check.
       - dependency-name: three
-        update-types: [version-update:semver-minor, version-update:semver-major]
       # @types/node tracks the Node runtime (24 LTS); its major moves with the Node upgrade.
       - dependency-name: '@types/node'
         update-types: [version-update:semver-major]
@@ -89,6 +89,11 @@ updates:
   # Base image in apps/web's Dockerfile.
   - package-ecosystem: docker
     directory: /apps/web
+    # Odd Node majors (25, 27, 29) are never LTS; even majors are still proposed and held open
+    # until they reach LTS.
+    ignore:
+      - dependency-name: node
+        versions: ['>= 25, < 26', '>= 27, < 28', '>= 29, < 30']
     schedule: { interval: weekly }
     # Wait a week after a release before proposing it (supply-chain safety); security
     # updates are not delayed by this.
@@ -113,6 +118,11 @@ updates:
   # Digest-pinned images in infra/compose.prod.yaml (postgres, caddy) — issue #14.
   - package-ecosystem: docker-compose
     directory: /infra
+    # Odd Node majors (25, 27, 29) are never LTS; even majors are still proposed and held open
+    # until they reach LTS.
+    ignore:
+      - dependency-name: node
+        versions: ['>= 25, < 26', '>= 27, < 28', '>= 29, < 30']
     schedule: { interval: weekly }
     # Wait a week after a release before proposing it (supply-chain safety); security
     # updates are not delayed by this.
