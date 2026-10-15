@@ -17,7 +17,7 @@
 	each item and the final submit both call the API directly from the client over the session
 	cookie (ADR-0002); the pages/blocks themselves are ADR-0003's snapshot shape. See
 	`docs/03-architecture.md` §4.3/§4.4.
-	Depends on: `#lib/prose/ProseDoc.svelte`, `$lib/ui/Button.svelte` (pager controls), `./KnowledgeCheck.svelte`, `./api`, `./score`
+	Depends on: `#lib/prose/ProseDoc.svelte`, `#lib/ui/Button.svelte` (pager controls), `./KnowledgeCheck.svelte`, `./api`, `./score`
 	(`formatScore`), `./snapshot` (`lessonSnapshot`), `$app/paths` (`resolve`), `@rtapps/api-client`.
 	Used by: `apps/web/src/routes/(app)/lessons/[slug]/+page.svelte`,
 	`LessonPager.svelte.spec.ts`, driven end-to-end by `apps/web/e2e/lesson.e2e.ts`.

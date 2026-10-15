@@ -66,7 +66,7 @@
 	reused verbatim for the Publish tab. `MatchingPair`'s wire shape (`term`/`definition`) is
 	exactly `PairsEditor`'s row shape.
 	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/PairsEditor.svelte`,
-	`#lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`).
+	`#lib/author/PublishPanel.svelte`, `#lib/author/api` (`api`).
 	Used by: reached from `(app)/author`'s dashboard.
 -->
 <svelte:head><title>{data.matching.title} — Author — RTTLearn</title></svelte:head>

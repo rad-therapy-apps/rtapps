@@ -11,8 +11,8 @@
 	How it fits the project: generalizes ADR-0004's attempt flow from lessons to quizzes (plan 3a
 	Task 14) — starts (or resumes) an attempt, grades each item, and submits for a final score, all
 	client-side over the session cookie (ADR-0002). See `docs/03-architecture.md` §4.4.
-	Depends on: `#lib/prose/ProseDoc.svelte` (stems/explanations), `$lib/lesson/api` (`api.POST`),
-	`./attempts` (`startAttempt`/`gradeItem`/`submitAttempt`), `./types` (`QuizSnapshot`), `#lib/ui/Button.svelte`, `$lib/ui/Feedback.svelte`, `$lib/ui/Icon.svelte`.
+	Depends on: `#lib/prose/ProseDoc.svelte` (stems/explanations), `#lib/lesson/api` (`api.POST`),
+	`./attempts` (`startAttempt`/`gradeItem`/`submitAttempt`), `./types` (`QuizSnapshot`), `#lib/ui/Button.svelte`, `#lib/ui/Feedback.svelte`, `#lib/ui/Icon.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `QuizPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">

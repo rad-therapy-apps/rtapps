@@ -14,10 +14,10 @@
 	How it fits the project: `data.activity` comes from this route's `load`
 	(`GET /activities/{id}`, answers stripped per ADR-0006). `docs/03-architecture.md` §4.4, plan
 	3a Task 14/15, plan 3b Task 17.
-	Works with: `#lib/activity/QuizPlayer.svelte`, `$lib/activity/FlashcardPlayer.svelte`,
-	`#lib/activity/MatchingPlayer.svelte`, `$lib/activity/SequencingPlayer.svelte`,
-	`#lib/activity/ExternalPlayer.svelte`, `$lib/calc/registry`, `$lib/activity/types`
-	(`activitySnapshot`), `#lib/ui/PageHeader.svelte`, `$lib/ui/Card.svelte`. Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
+	Works with: `#lib/activity/QuizPlayer.svelte`, `#lib/activity/FlashcardPlayer.svelte`,
+	`#lib/activity/MatchingPlayer.svelte`, `#lib/activity/SequencingPlayer.svelte`,
+	`#lib/activity/ExternalPlayer.svelte`, `#lib/calc/registry`, `#lib/activity/types`
+	(`activitySnapshot`), `#lib/ui/PageHeader.svelte`, `#lib/ui/Card.svelte`. Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
 -->
 <script lang="ts">
 	import QuizPlayer from '#lib/activity/QuizPlayer.svelte';

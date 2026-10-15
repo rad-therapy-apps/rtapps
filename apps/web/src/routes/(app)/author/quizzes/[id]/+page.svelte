@@ -154,7 +154,7 @@
 	`load`; `QuizPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15) is reused
 	verbatim for the Publish tab.
 	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/BankQuestionForm.svelte`,
-	`#lib/author/QuestionPicker.svelte`, `$lib/author/PublishPanel.svelte`, `$lib/author/api`
+	`#lib/author/QuestionPicker.svelte`, `#lib/author/PublishPanel.svelte`, `#lib/author/api`
 	(`api`).
 	Used by: reached from `(app)/author`'s dashboard.
 -->

@@ -12,7 +12,7 @@
  * this runs, so `/me/results` and `/cohorts` are scoped to that user by the API itself (no id is
  * passed from the client). `docs/03-architecture.md` §7 (`GET me/results`, `GET/POST cohorts`).
  *
- * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `#lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`ResultOut`, `CohortOut`). Used by: `+page.svelte`
  * (this route); the "Back to home" link from the lesson pager
  * (`#lib/lesson/LessonPager.svelte`) returns here, and `apps/web/e2e/lesson.e2e.ts` asserts the

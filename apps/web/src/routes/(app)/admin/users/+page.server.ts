@@ -13,7 +13,7 @@
  * page assumes the caller is an admin. `docs/03-architecture.md` §7 (`GET/PATCH/POST admin
  * users`).
  *
- * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `#lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`UserPage`, `ResetPasswordOut`). Used by:
  * `+page.svelte` (this route).
  */

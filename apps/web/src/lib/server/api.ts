@@ -9,7 +9,7 @@
  * sessions) — `web` calls `api:8000` directly over the Docker network and relays the session
  * cookie both directions so the browser only ever talks to one origin. See
  * `docs/03-architecture.md` §4.1/§4.2.
- * Depends on: `@sveltejs/kit` (`RequestEvent`), `$env/dynamic/private` (`API_INTERNAL_URL`,
+ * Depends on: `@sveltejs/kit` (`RequestEvent`), `$app/env/private` (`API_INTERNAL_URL`,
  * `ORIGIN`).
  * Used by: `hooks.server.ts` and every `+layout.server.ts`/`+page.server.ts` under
  * `apps/web/src/routes` that calls the API (auth, subjects, lessons, health).

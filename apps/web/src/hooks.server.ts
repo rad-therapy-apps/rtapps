@@ -13,8 +13,8 @@ import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
  * never touches the database itself; `decideAccess` (guard.ts) enforces the role-gated route
  * groups. See `docs/03-architecture.md` §4.2/§9. Sentry is opt-in (blank `SENTRY_DSN` is a
  * no-op) and server-side only for now — client-side Sentry is deliberately deferred.
- * Depends on: `#lib/server/api` (apiFetch), `$lib/server/guard` (decideAccess), `@sveltejs/kit`,
- * `$env/dynamic/private` (SENTRY_DSN), `@sentry/sveltekit`.
+ * Depends on: `#lib/server/api` (apiFetch), `#lib/server/guard` (decideAccess), `@sveltejs/kit`,
+ * `$app/env/private` (SENTRY_DSN), `@sentry/sveltekit`.
  * Used by: SvelteKit itself (framework convention — no explicit importer; every request in the
  * app runs through this file).
  */

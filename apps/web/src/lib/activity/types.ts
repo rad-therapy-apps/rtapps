@@ -14,7 +14,7 @@
  * JSON object (it's untyped JSON to the API); `activitySnapshot()` casts it to `ActivitySnapshot`
  * at this one boundary, mirroring `lib/lesson/snapshot.ts`'s `lessonSnapshot()`. See ADR-0003,
  * ADR-0006, and `docs/03-architecture.md` §4.4/§5.
- * Depends on: `#lib/prose/types` (`ProseDoc`, embedded as the quiz stem), `$lib/calc/interpolate`
+ * Depends on: `#lib/prose/types` (`ProseDoc`, embedded as the quiz stem), `#lib/calc/interpolate`
  * (`Grid`, the calculator data table's wire shape).
  * Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `QuizPlayer.svelte`,
  * `FlashcardPlayer.svelte`, `ExternalPlayer.svelte`, `QuizPlayer.svelte.spec.ts`.

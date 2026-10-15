@@ -10,7 +10,7 @@
  * signed-in educator/admin before this route runs (FR-E-01). `docs/03-architecture.md` §7
  * (`GET/POST cohorts`).
  *
- * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `#lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`CohortOut`). Used by: `+page.svelte` (this route).
  */
 import { fail, redirect } from '@sveltejs/kit';

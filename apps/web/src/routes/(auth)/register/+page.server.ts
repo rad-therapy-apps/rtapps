@@ -12,7 +12,7 @@
  * doubles as sign-in — there is no separate "log in after registering" step.
  * `docs/03-architecture.md` §4.2, §7 (`auth/register`).
  *
- * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`), `#lib/server/auth-forms`
  * (`problemMessage`, `safeNext`). Used by: `+page.svelte` (this route); driven end-to-end by
  * `apps/web/e2e/lesson.e2e.ts`, which registers a fresh account before exercising a lesson.
  */

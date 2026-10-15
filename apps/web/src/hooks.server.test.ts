@@ -2,8 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 // A stand-in Sentry and a made-up DSN, so importing the hook runs its Sentry.init branch.
 vi.mock('@sentry/sveltekit', () => ({ init: vi.fn(), captureException: vi.fn() }));
-vi.mock('$env/dynamic/private', () => ({
-	env: { SENTRY_DSN: 'https://public@example.invalid/1' }
+// API_INTERNAL_URL and ORIGIN are read by #lib/server/api (imported by the hook); left unset.
+vi.mock('$app/env/private', () => ({
+	SENTRY_DSN: 'https://public@example.invalid/1',
+	API_INTERNAL_URL: undefined,
+	ORIGIN: undefined
 }));
 
 describe('hooks.server Sentry setup', () => {

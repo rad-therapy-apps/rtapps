@@ -12,8 +12,8 @@
 	How it fits the project: `data.lesson`/`data.versions` come from this route's `load`
 	(`docs/03-architecture.md` §7); `data.lesson.pages` is opaque JSON to the generated schema, so
 	it's cast to `AuthorPage[]` at this one boundary (same pattern as `#lib/lesson/snapshot.ts`).
-	Works with: `#lib/author/LessonEditor.svelte`, `$lib/author/PublishPanel.svelte`,
-	`#lib/author/api` (`api.GET`), `$lib/prose/ProseDoc.svelte`, `$lib/lesson/types`
+	Works with: `#lib/author/LessonEditor.svelte`, `#lib/author/PublishPanel.svelte`,
+	`#lib/author/api` (`api.GET`), `#lib/prose/ProseDoc.svelte`, `#lib/lesson/types`
 	(`LessonSnapshot`, `KnowledgeCheckBlock`). Used by: reached from `(app)/author`'s dashboard.
 -->
 <script lang="ts">

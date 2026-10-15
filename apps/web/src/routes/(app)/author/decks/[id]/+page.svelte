@@ -68,7 +68,7 @@
 	reused verbatim for the Publish tab. `FlashcardCard`'s wire shape (`term`/`definition`) is
 	exactly `PairsEditor`'s row shape, so no mapping is needed either direction.
 	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/PairsEditor.svelte`,
-	`#lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`).
+	`#lib/author/PublishPanel.svelte`, `#lib/author/api` (`api`).
 	Used by: reached from `(app)/author`'s dashboard.
 -->
 <svelte:head><title>{data.deck.title} — Author — RTTLearn</title></svelte:head>

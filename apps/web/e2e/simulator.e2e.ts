@@ -215,7 +215,7 @@ test('signed-out access to the simulator redirects to login, and an authed asset
 	// assets/ct-1.png is one of the five CT scan PNGs the linac-ct app's own index.html
 	// references relatively (Task 7's byte-for-byte extraction) — a real, page-referenced asset
 	// URL, not an arbitrary path. Non-HTML arcade files get an hour of private caching
-	// (cacheControlFor in $lib/server/arcade.ts); HTML itself stays uncached.
+	// (cacheControlFor in #lib/server/arcade.ts); HTML itself stays uncached.
 	const res = await page.request.get('/arcade/linac-ct/assets/ct-1.png');
 	expect(res.status()).toBe(200);
 	expect(res.headers()['cache-control']).toBe('private, max-age=3600');

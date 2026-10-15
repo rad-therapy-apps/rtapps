@@ -103,7 +103,7 @@
 	route's `load`; `SequencingPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15)
 	is reused verbatim for the Publish tab.
 	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/duplicates` (`duplicates`),
-	`#lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`).
+	`#lib/author/PublishPanel.svelte`, `#lib/author/api` (`api`).
 	Used by: reached from `(app)/author`'s dashboard.
 -->
 <svelte:head><title>{data.sequencing.title} — Author — RTTLearn</title></svelte:head>

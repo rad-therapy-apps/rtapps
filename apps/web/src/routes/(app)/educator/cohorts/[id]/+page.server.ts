@@ -13,7 +13,7 @@
  * enforces the 403 (this page just surfaces it) (FR-E-02, FR-E-03). `docs/03-architecture.md`
  * §7 (`cohorts/{id}/overview`, `cohorts/{id}/members`, `cohorts/{id}/rotate-code`).
  *
- * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `#lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`CohortOverviewOut`, `MemberOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/educator/+page.svelte`.
  */

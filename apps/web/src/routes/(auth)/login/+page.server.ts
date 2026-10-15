@@ -15,7 +15,7 @@
  * `relaySetCookie` before the redirect fires — the browser never sees a redirect without also
  * getting the cookie in the same response. `docs/03-architecture.md` §4.2.
  *
- * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`), `#lib/server/auth-forms`
  * (`problemMessage`, `safeNext`). Used by: `+page.svelte` (this route).
  */
 import { fail, redirect } from '@sveltejs/kit';
