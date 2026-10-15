@@ -10,7 +10,7 @@
 	whatever the server decides, never a client-computed answer. See `docs/03-architecture.md`
 	§4.4.
 	Depends on: `#lib/prose/ProseDoc.svelte` (renders the stem/explanation), `#lib/ui/Feedback.svelte` (verdict line), `#lib/ui/Button.svelte`, `./api`, `./types`
-	(`KnowledgeCheckBlock`), `@rtapps/api-client` (`ItemGradeOut`), `#lib/prose/types.js`.
+	(`KnowledgeCheckBlock`), `@rtapps/api-client` (`ItemGradeOut`), `#lib/prose/types`.
 	Used by: `LessonPager.svelte` (one instance per knowledge_check block),
 	`KnowledgeCheck.svelte.spec.ts`.
 -->

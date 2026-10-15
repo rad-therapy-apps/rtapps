@@ -1,3 +1,37 @@
+<!--
+	What this file does: the Edit tab of a lesson's editor — a page/block tree editor (rich-text
+	blocks via RichTextEditor, knowledge-check blocks via KnowledgeCheckForm), image insertion,
+	dirty tracking, and a save button that PUTs the whole page tree back.
+	Used here and why: editor state is one `$state` array of `ClientPage` (the `AuthorPage` shape
+	plus a per-page and per-block `instanceId` — see `./types.ts`); every mutation handler sets
+	`dirty = true` directly rather than deriving it via a deep-compare (cheap, and matches the
+	brief). `put` defaults to the real API client (`#lib/author/api`'s `api.PUT`) but is
+	overridable, the same injectable-client pattern `#lib/activity/attempts.ts`'s players use for
+	`post`, so `LessonEditor.svelte.spec.ts` can assert on the exact PUT body without a network
+	call. `save` is busy-guarded with try/catch/finally so a failed request can never wedge the
+	button (the plan-3a players' rule — see `KnowledgeCheck.svelte`/`LessonPager.svelte`). The
+	outer pages `{#each}` is keyed on `page.instanceId` (never array index) so `movePage`/
+	`deletePage` move a page's whole DOM subtree instead of remounting it in place; each
+	RichTextEditor mount is further wrapped in `{#key block.instanceId}` so TipTap's one-time-mount
+	contract (Task 14) survives reordering a block. A page's last remaining block can't be deleted
+	(the API's `PageImport.blocks` requires at least one), so `deleteBlock`'s control disables
+	itself the same way `KnowledgeCheckForm`'s remove-option button does at its own two-option
+	floor. Image insertion is guarded by an `uploading` flag: busy-guarded so only one upload runs
+	at a time (every block's Image button is disabled meanwhile, via `oninsertimage` going
+	undefined), and a failed upload surfaces in the same error banner `save` uses rather than
+	rejecting silently. `beforeNavigate` blocks leaving the page with unsaved changes.
+	`normalizeBlock` (Task 18) reconciles a real drift between the GET and PUT wire shapes: the
+	authoring GET (`build_snapshot` reused verbatim) nests a knowledge_check's options/answer
+	under `body`, but the PUT (`KnowledgeCheckImport`) and this editor's own state are flat — an
+	existing lesson's knowledge checks rendered with zero options before this normalization.
+	How it fits the project: the core of Task 15's lesson editor; `+page.svelte` renders this for
+	the Edit tab. `PagesIn`/`KnowledgeCheckImport`/`RichTextImport` are Task 8's authoring wire
+	shapes; `replace_lesson_pages` (apps/api) is what actually persists the PUT.
+	Depends on: `$app/navigation` (`beforeNavigate`), `./RichTextEditor.svelte`,
+	`./KnowledgeCheckForm.svelte`, `./uploadImage` (`uploadImage`, `AuthorApi`), `./api` (`api`),
+	`./types` (`AuthorPage`, `ClientPage`, `ClientBlock`).
+	Used by: `+page.svelte` (Edit tab), `LessonEditor.svelte.spec.ts`.
+-->
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import RichTextEditor from './RichTextEditor.svelte';
@@ -257,41 +291,6 @@
 		}
 	}
 </script>
-
-<!--
-	What this file does: the Edit tab of a lesson's editor — a page/block tree editor (rich-text
-	blocks via RichTextEditor, knowledge-check blocks via KnowledgeCheckForm), image insertion,
-	dirty tracking, and a save button that PUTs the whole page tree back.
-	Used here and why: editor state is one `$state` array of `ClientPage` (the `AuthorPage` shape
-	plus a per-page and per-block `instanceId` — see `./types.ts`); every mutation handler sets
-	`dirty = true` directly rather than deriving it via a deep-compare (cheap, and matches the
-	brief). `put` defaults to the real API client (`#lib/author/api`'s `api.PUT`) but is
-	overridable, the same injectable-client pattern `#lib/activity/attempts.ts`'s players use for
-	`post`, so `LessonEditor.svelte.spec.ts` can assert on the exact PUT body without a network
-	call. `save` is busy-guarded with try/catch/finally so a failed request can never wedge the
-	button (the plan-3a players' rule — see `KnowledgeCheck.svelte`/`LessonPager.svelte`). The
-	outer pages `{#each}` is keyed on `page.instanceId` (never array index) so `movePage`/
-	`deletePage` move a page's whole DOM subtree instead of remounting it in place; each
-	RichTextEditor mount is further wrapped in `{#key block.instanceId}` so TipTap's one-time-mount
-	contract (Task 14) survives reordering a block. A page's last remaining block can't be deleted
-	(the API's `PageImport.blocks` requires at least one), so `deleteBlock`'s control disables
-	itself the same way `KnowledgeCheckForm`'s remove-option button does at its own two-option
-	floor. Image insertion is guarded by an `uploading` flag: busy-guarded so only one upload runs
-	at a time (every block's Image button is disabled meanwhile, via `oninsertimage` going
-	undefined), and a failed upload surfaces in the same error banner `save` uses rather than
-	rejecting silently. `beforeNavigate` blocks leaving the page with unsaved changes.
-	`normalizeBlock` (Task 18) reconciles a real drift between the GET and PUT wire shapes: the
-	authoring GET (`build_snapshot` reused verbatim) nests a knowledge_check's options/answer
-	under `body`, but the PUT (`KnowledgeCheckImport`) and this editor's own state are flat — an
-	existing lesson's knowledge checks rendered with zero options before this normalization.
-	How it fits the project: the core of Task 15's lesson editor; `+page.svelte` renders this for
-	the Edit tab. `PagesIn`/`KnowledgeCheckImport`/`RichTextImport` are Task 8's authoring wire
-	shapes; `replace_lesson_pages` (apps/api) is what actually persists the PUT.
-	Depends on: `$app/navigation` (`beforeNavigate`), `./RichTextEditor.svelte`,
-	`./KnowledgeCheckForm.svelte`, `./uploadImage` (`uploadImage`, `AuthorApi`), `./api` (`api`),
-	`./types` (`AuthorPage`, `ClientPage`, `ClientBlock`).
-	Used by: `+page.svelte` (Edit tab), `LessonEditor.svelte.spec.ts`.
--->
 
 <div class="lesson-editor">
 	{#each pages as page, pi (page.instanceId)}

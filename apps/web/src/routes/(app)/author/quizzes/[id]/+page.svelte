@@ -1,3 +1,27 @@
+<!--
+	What this file does: the quiz editor at `(app)/author/quizzes/[id]` -- two tabs (Edit/Publish)
+	over one quiz working copy: settings (title/access/pass_percent/shuffle/present_n), the
+	ordered question list (reorder/remove, expandable to edit a question's own bank content
+	in place), a question-bank picker to add more, and the shared `PublishPanel`.
+	Used here and why: Svelte 5 runes for the active-tab/editor state; every quiz-level edit
+	(title, settings, question add/move/remove) sets `dirty = true` directly, same as
+	`LessonEditor.svelte`; `save()` is busy-guarded with try/catch/finally so a failed request can
+	never wedge the Save button, and `beforeNavigate` blocks leaving with unsaved changes. Editing
+	an *existing* bank question's own stem/options/answer/explanation is a separate action
+	(`PUT /authoring/questions/{id}`, busy-guarded per-row via `questionSaving`) from saving the
+	quiz itself -- that write changes the bank question everywhere it's referenced (per that
+	route's own docstring), not just this quiz, so it doesn't fold into `dirty`/`save()`.
+	`config` is untyped JSON on the wire (`QuizAuthorOut.config`), so `pass_percent`/`shuffle`/
+	`present_n` are read out of it with a cast at load time, same pattern as `AuthorPage`'s cast in
+	`LessonEditor.svelte`.
+	How it fits the project: `data.quiz`/`data.versions`/`data.importNotes` come from this route's
+	`load`; `QuizPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15) is reused
+	verbatim for the Publish tab.
+	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/BankQuestionForm.svelte`,
+	`#lib/author/QuestionPicker.svelte`, `#lib/author/PublishPanel.svelte`, `#lib/author/api`
+	(`api`).
+	Used by: reached from `(app)/author`'s dashboard.
+-->
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import BankQuestionForm from '#lib/author/BankQuestionForm.svelte';
@@ -134,30 +158,6 @@
 	}
 </script>
 
-<!--
-	What this file does: the quiz editor at `(app)/author/quizzes/[id]` -- two tabs (Edit/Publish)
-	over one quiz working copy: settings (title/access/pass_percent/shuffle/present_n), the
-	ordered question list (reorder/remove, expandable to edit a question's own bank content
-	in place), a question-bank picker to add more, and the shared `PublishPanel`.
-	Used here and why: Svelte 5 runes for the active-tab/editor state; every quiz-level edit
-	(title, settings, question add/move/remove) sets `dirty = true` directly, same as
-	`LessonEditor.svelte`; `save()` is busy-guarded with try/catch/finally so a failed request can
-	never wedge the Save button, and `beforeNavigate` blocks leaving with unsaved changes. Editing
-	an *existing* bank question's own stem/options/answer/explanation is a separate action
-	(`PUT /authoring/questions/{id}`, busy-guarded per-row via `questionSaving`) from saving the
-	quiz itself -- that write changes the bank question everywhere it's referenced (per that
-	route's own docstring), not just this quiz, so it doesn't fold into `dirty`/`save()`.
-	`config` is untyped JSON on the wire (`QuizAuthorOut.config`), so `pass_percent`/`shuffle`/
-	`present_n` are read out of it with a cast at load time, same pattern as `AuthorPage`'s cast in
-	`LessonEditor.svelte`.
-	How it fits the project: `data.quiz`/`data.versions`/`data.importNotes` come from this route's
-	`load`; `QuizPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15) is reused
-	verbatim for the Publish tab.
-	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/BankQuestionForm.svelte`,
-	`#lib/author/QuestionPicker.svelte`, `#lib/author/PublishPanel.svelte`, `#lib/author/api`
-	(`api`).
-	Used by: reached from `(app)/author`'s dashboard.
--->
 <svelte:head><title>{data.quiz.title} — Author — RTTLearn</title></svelte:head>
 <PageHeader title={data.quiz.title} />
 

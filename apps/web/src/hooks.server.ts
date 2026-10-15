@@ -1,6 +1,3 @@
-import { redirect } from '@sveltejs/kit';
-import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
-
 /**
  * What this file does: SvelteKit's server-only request hook. Runs before every request:
  * resolves who the caller is (by asking the API) and redirects away from pages the caller
@@ -14,12 +11,14 @@ import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
  * groups. See `docs/03-architecture.md` §4.2/§9. Sentry is opt-in (blank `SENTRY_DSN` is a
  * no-op) and server-side only for now — client-side Sentry is deliberately deferred.
  * Depends on: `#lib/server/api` (apiFetch), `#lib/server/guard` (decideAccess), `@sveltejs/kit`,
- * `$app/env/private` (SENTRY_DSN), `@sentry/sveltekit`.
+ * `@sveltejs/kit/hooks` (`Handle`, `HandleServerError` types), `$app/env/private` (SENTRY_DSN),
+ * `@sentry/sveltekit`.
  * Used by: SvelteKit itself (framework convention — no explicit importer; every request in the
  * app runs through this file).
  */
+import { redirect } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
 import * as Sentry from '@sentry/sveltekit';
-
 import { SENTRY_DSN } from '$app/env/private';
 import { apiFetch } from '#lib/server/api.js';
 import { decideAccess } from '#lib/server/guard.js';
