@@ -2,7 +2,7 @@
  * What this file does: TypeScript types for the lesson working-copy page/block shape
  * (`LessonAuthorOut.pages` / `PagesIn.pages`), plus the client-only editor state that adds one
  * extra field on top of the wire shape.
- * Used here and why: hand-written types mirroring `$lib/lesson/types.ts`'s pattern — the
+ * Used here and why: hand-written types mirroring `#lib/lesson/types.ts`'s pattern — the
  * generated OpenAPI schema types `LessonAuthorOut.pages`/`PagesIn.pages` as opaque JSON (the API
  * treats page/block content as untyped JSONB), so `+page.server.ts` casts the loaded array to
  * `AuthorPage[]` at one boundary and everything downstream uses these types instead of
@@ -15,7 +15,7 @@
  * `ClientPage` carries the same per-instance `instanceId` pattern as `ClientBlock`: the stable
  * identity the outer pages `{#each}` keys on, so `movePage`/`deletePage` moves a page's whole DOM
  * subtree (including its already block-keyed children) instead of remounting it in place.
- * Depends on: `$lib/prose/types` (`ProseDoc`).
+ * Depends on: `#lib/prose/types` (`ProseDoc`).
  * Used by: `LessonEditor.svelte`, `KnowledgeCheckForm.svelte`,
  * `routes/(app)/author/lessons/[id]/+page.server.ts`, `LessonEditor.svelte.spec.ts`.
  *
@@ -26,11 +26,11 @@
  * boundary; `DataTablePutIn.grid`'s wire type (`GridIn`) already matches this shape structurally,
  * so no cast is needed on the way back out.
  */
-import type { ProseDoc } from '$lib/prose/types';
+import type { ProseDoc } from '#lib/prose/types.js';
 
 // --- Wire shapes: LessonAuthorOut.pages (GET) and PagesIn.pages (PUT), which share one shape
 // per the API's docstring ("Task 15's editor consumes this verbatim"). Unlike the student-facing
-// `$lib/lesson/types.ts` block shapes, the knowledge-check block here is unstripped: it carries
+// `#lib/lesson/types.ts` block shapes, the knowledge-check block here is unstripped: it carries
 // `answer`/`explanation`, the author's own working copy.
 export type AuthorRichTextBlock = { type: 'rich_text'; body: ProseDoc };
 

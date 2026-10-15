@@ -9,19 +9,19 @@
 	posts to `/api/v1/attempts/{attempt_id}/items` over the session cookie (ADR-0002) and renders
 	whatever the server decides, never a client-computed answer. See `docs/03-architecture.md`
 	§4.4.
-	Depends on: `$lib/prose/ProseDoc.svelte` (renders the stem/explanation), `$lib/ui/Feedback.svelte` (verdict line), `$lib/ui/Button.svelte`, `./api`, `./types`
-	(`KnowledgeCheckBlock`), `@rtapps/api-client` (`ItemGradeOut`), `$lib/prose/types`.
+	Depends on: `#lib/prose/ProseDoc.svelte` (renders the stem/explanation), `$lib/ui/Feedback.svelte` (verdict line), `$lib/ui/Button.svelte`, `./api`, `./types`
+	(`KnowledgeCheckBlock`), `@rtapps/api-client` (`ItemGradeOut`), `#lib/prose/types.js`.
 	Used by: `LessonPager.svelte` (one instance per knowledge_check block),
 	`KnowledgeCheck.svelte.spec.ts`.
 -->
 <script lang="ts">
-	import ProseDoc from '$lib/prose/ProseDoc.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Feedback from '$lib/ui/Feedback.svelte';
+	import ProseDoc from '#lib/prose/ProseDoc.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Feedback from '#lib/ui/Feedback.svelte';
 	import { api } from './api';
 	import type { KnowledgeCheckBlock } from './types';
 	import type { components } from '@rtapps/api-client';
-	import type { ProseDoc as ProseDocType } from '$lib/prose/types';
+	import type { ProseDoc as ProseDocType } from '#lib/prose/types.js';
 
 	type ItemGradeOut = components['schemas']['ItemGradeOut'];
 

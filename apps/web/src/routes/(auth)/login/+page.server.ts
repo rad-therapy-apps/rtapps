@@ -15,13 +15,13 @@
  * `relaySetCookie` before the redirect fires — the browser never sees a redirect without also
  * getting the cookie in the same response. `docs/03-architecture.md` §4.2.
  *
- * Works with: `$lib/server/api` (`apiFetch`, `relaySetCookie`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`), `$lib/server/auth-forms`
  * (`problemMessage`, `safeNext`). Used by: `+page.svelte` (this route).
  */
 import { fail, redirect } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
-import { apiFetch, relaySetCookie } from '$lib/server/api';
-import { problemMessage, safeNext } from '$lib/server/auth-forms';
+import { apiFetch, relaySetCookie } from '#lib/server/api.js';
+import { problemMessage, safeNext } from '#lib/server/auth-forms.js';
 import type { Actions, PageServerLoad } from './$types';
 
 // Renders the login form, pre-filling `googleEnabled` and a validated `next` redirect target.

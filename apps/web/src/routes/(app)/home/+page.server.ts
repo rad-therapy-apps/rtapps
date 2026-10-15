@@ -12,15 +12,15 @@
  * this runs, so `/me/results` and `/cohorts` are scoped to that user by the API itself (no id is
  * passed from the client). `docs/03-architecture.md` §7 (`GET me/results`, `GET/POST cohorts`).
  *
- * Works with: `$lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`ResultOut`, `CohortOut`). Used by: `+page.svelte`
  * (this route); the "Back to home" link from the lesson pager
- * (`$lib/lesson/LessonPager.svelte`) returns here, and `apps/web/e2e/lesson.e2e.ts` asserts the
+ * (`#lib/lesson/LessonPager.svelte`) returns here, and `apps/web/e2e/lesson.e2e.ts` asserts the
  * completed lesson's row and score appear in this page's results table.
  */
 import { fail } from '@sveltejs/kit';
-import { apiFetch, apiJson } from '$lib/server/api';
-import { problemMessage } from '$lib/server/auth-forms';
+import { apiFetch, apiJson } from '#lib/server/api.js';
+import { problemMessage } from '#lib/server/auth-forms.js';
 import type { components } from '@rtapps/api-client';
 import type { Actions, PageServerLoad } from './$types';
 

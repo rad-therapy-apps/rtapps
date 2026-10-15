@@ -10,12 +10,12 @@
  * runs. `docs/03-architecture.md` §7 (`GET subjects/{slug}`). The simulator entries that used
  * to be resolved here live on `(app)/simulator` now.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SubjectDetailOut`).
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SubjectDetailOut`).
  * Used by: `+page.svelte` (this route), reached from `(app)/subjects/+page.svelte`; driven by
  * `apps/web/e2e/lesson.e2e.ts`.
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

@@ -1,43 +1,16 @@
-<!--
-	What this file does: the data-tables page at `(app)/author/data-tables` -- lists every
-	author-editable numeric lookup table, edits one at a time (title + `GridEditor`, `PUT`
-	upsert), and a "New calculator" form (title, subject, table-keys multi-select, `calc_type`
-	select fed by `CALC_TYPES`) that creates a calculator activity and publishes it from its own row.
-	Used here and why: `editing` (null | { key, title, grid, isNew }) holds the one table being
-	worked on; selecting a different table (or "New table") re-seeds it, guarded by the same
-	dirty-discard confirm `beforeNavigate` uses so a mid-edit switch can't silently drop work.
-	`GridEditor` is wrapped in `{#key editing.key}` (using a `session` counter for "new table" so
-	two successive "New table" clicks each get a fresh seed) so switching tables reseeds
-	`GridEditor`'s own working copy instead of merging two tables' state -- the same reason
-	`LessonEditor.svelte` keys each block's `RichTextEditor` on `instanceId`. `DataTableOut.grid`
-	is untyped JSON on the wire (same reason `LessonAuthorOut.pages` is), cast to `Grid` once at
-	selection time. There is no `GET /authoring/calculators` (list) route (Task 11 never added
-	one -- calculators aren't otherwise browsable), so a created calculator's `PublishPanel` only
-	ever shows the version(s) published in *this* session's `calcVersions`; the calculator itself
-	still shows up on the `(app)/author` dashboard afterwards (as plain text -- that page has no
-	editor route for calculators either).
-	How it fits the project: `data.tables`/`data.subjects` come from this route's `load`;
-	`DataTablePutIn` (Task 11) is what a table save PUTs; `CalculatorCreateIn`/`POST
-	/authoring/calculators` (Task 11) is what the calculator form posts; `PublishPanel` (Task
-	10/15) is reused verbatim.
-	Depends on: `$app/navigation` (`beforeNavigate`), `$lib/author/GridEditor.svelte`,
-	`$lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`), `$lib/author/types` (`Grid`),
-	`$lib/calc/registry` (`CALC_TYPES`).
-	Used by: reached from `(app)/author`'s dashboard ("Data tables" link).
--->
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
-	import GridEditor from '$lib/author/GridEditor.svelte';
-	import PublishPanel from '$lib/author/PublishPanel.svelte';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import { api } from '$lib/author/api';
-	import { errorTitle, problemDetail } from '$lib/author/problem';
-	import type { Grid } from '$lib/author/types';
-	import { CALC_TYPES } from '$lib/calc/registry';
+	import GridEditor from '#lib/author/GridEditor.svelte';
+	import PublishPanel from '#lib/author/PublishPanel.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
+	import { api } from '#lib/author/api.js';
+	import { errorTitle, problemDetail } from '#lib/author/problem.js';
+	import type { Grid } from '#lib/author/types.js';
+	import { CALC_TYPES } from '#lib/calc/registry.js';
 	import type { components } from '@rtapps/api-client';
 	import type { PageData } from './$types';
 
@@ -64,7 +37,8 @@
 	let saving = $state(false);
 	let saveError = $state<string | undefined>(undefined);
 
-	beforeNavigate(({ cancel }) => {
+	beforeNavigate(({ cancel, shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (dirty && !confirm('Discard unsaved changes?')) cancel();
 	});
 
@@ -201,10 +175,34 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Data tables — Author — RTTLearn</title>
-</svelte:head>
-
+<!--
+	What this file does: the data-tables page at `(app)/author/data-tables` -- lists every
+	author-editable numeric lookup table, edits one at a time (title + `GridEditor`, `PUT`
+	upsert), and a "New calculator" form (title, subject, table-keys multi-select, `calc_type`
+	select fed by `CALC_TYPES`) that creates a calculator activity and publishes it from its own row.
+	Used here and why: `editing` (null | { key, title, grid, isNew }) holds the one table being
+	worked on; selecting a different table (or "New table") re-seeds it, guarded by the same
+	dirty-discard confirm `beforeNavigate` uses so a mid-edit switch can't silently drop work.
+	`GridEditor` is wrapped in `{#key editing.key}` (using a `session` counter for "new table" so
+	two successive "New table" clicks each get a fresh seed) so switching tables reseeds
+	`GridEditor`'s own working copy instead of merging two tables' state -- the same reason
+	`LessonEditor.svelte` keys each block's `RichTextEditor` on `instanceId`. `DataTableOut.grid`
+	is untyped JSON on the wire (same reason `LessonAuthorOut.pages` is), cast to `Grid` once at
+	selection time. There is no `GET /authoring/calculators` (list) route (Task 11 never added
+	one -- calculators aren't otherwise browsable), so a created calculator's `PublishPanel` only
+	ever shows the version(s) published in *this* session's `calcVersions`; the calculator itself
+	still shows up on the `(app)/author` dashboard afterwards (as plain text -- that page has no
+	editor route for calculators either).
+	How it fits the project: `data.tables`/`data.subjects` come from this route's `load`;
+	`DataTablePutIn` (Task 11) is what a table save PUTs; `CalculatorCreateIn`/`POST
+	/authoring/calculators` (Task 11) is what the calculator form posts; `PublishPanel` (Task
+	10/15) is reused verbatim.
+	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/GridEditor.svelte`,
+	`#lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`), `$lib/author/types` (`Grid`),
+	`#lib/calc/registry` (`CALC_TYPES`).
+	Used by: reached from `(app)/author`'s dashboard ("Data tables" link).
+-->
+<svelte:head><title>Data tables — Author — RTTLearn</title></svelte:head>
 <PageHeader title="Data tables" />
 
 <div class="sections">

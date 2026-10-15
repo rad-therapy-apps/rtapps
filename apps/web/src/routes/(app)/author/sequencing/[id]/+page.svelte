@@ -1,33 +1,15 @@
-<!--
-	What this file does: the sequencing activity editor at `(app)/author/sequencing/[id]` --
-	ordered label/detail rows with move up/down (the on-screen order IS the correct answer),
-	title, and the shared `PublishPanel`.
-	Used here and why: Svelte 5 runes; no `PairsEditor` here -- a sequencing item's shape
-	(`label`/`detail`) isn't a term/definition pair, so the duplicate-label warning is done
-	directly against `$lib/author/duplicates` (the same rule `_SequencingContentMixin
-	._unique_labels` enforces server-side as a 422, surfaced here before saving instead).
-	`access`/`config` have no UI here but are still echoed back verbatim in the save PUT, same
-	reason as the deck/matching routes (`SequencingPutIn` replaces them wholesale).
-	`dirty`/`saving`/`saveError`/`beforeNavigate` mirror `LessonEditor.svelte`'s idiom.
-	How it fits the project: `data.sequencing`/`data.versions`/`data.importNotes` come from this
-	route's `load`; `SequencingPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15)
-	is reused verbatim for the Publish tab.
-	Depends on: `$app/navigation` (`beforeNavigate`), `$lib/author/duplicates` (`duplicates`),
-	`$lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`).
-	Used by: reached from `(app)/author`'s dashboard.
--->
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
-	import { duplicates } from '$lib/author/duplicates';
-	import PublishPanel from '$lib/author/PublishPanel.svelte';
-	import { api } from '$lib/author/api';
-	import { problemDetail } from '$lib/author/problem';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Tabs from '$lib/ui/Tabs.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import { duplicates } from '#lib/author/duplicates.js';
+	import PublishPanel from '#lib/author/PublishPanel.svelte';
+	import { api } from '#lib/author/api.js';
+	import { problemDetail } from '#lib/author/problem.js';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Tabs from '#lib/ui/Tabs.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import type { PageData } from './$types';
 
@@ -44,7 +26,8 @@
 
 	const duplicateLabels = $derived(duplicates(items.map((i) => i.label)));
 
-	beforeNavigate(({ cancel }) => {
+	beforeNavigate(({ cancel, shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (dirty && !confirm('Discard unsaved changes?')) cancel();
 	});
 
@@ -105,10 +88,25 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.sequencing.title} — Author — RTTLearn</title>
-</svelte:head>
-
+<!--
+	What this file does: the sequencing activity editor at `(app)/author/sequencing/[id]` --
+	ordered label/detail rows with move up/down (the on-screen order IS the correct answer),
+	title, and the shared `PublishPanel`.
+	Used here and why: Svelte 5 runes; no `PairsEditor` here -- a sequencing item's shape
+	(`label`/`detail`) isn't a term/definition pair, so the duplicate-label warning is done
+	directly against `#lib/author/duplicates` (the same rule `_SequencingContentMixin
+	._unique_labels` enforces server-side as a 422, surfaced here before saving instead).
+	`access`/`config` have no UI here but are still echoed back verbatim in the save PUT, same
+	reason as the deck/matching routes (`SequencingPutIn` replaces them wholesale).
+	`dirty`/`saving`/`saveError`/`beforeNavigate` mirror `LessonEditor.svelte`'s idiom.
+	How it fits the project: `data.sequencing`/`data.versions`/`data.importNotes` come from this
+	route's `load`; `SequencingPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15)
+	is reused verbatim for the Publish tab.
+	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/duplicates` (`duplicates`),
+	`#lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`).
+	Used by: reached from `(app)/author`'s dashboard.
+-->
+<svelte:head><title>{data.sequencing.title} — Author — RTTLearn</title></svelte:head>
 <PageHeader title={data.sequencing.title} />
 
 <Tabs
@@ -156,9 +154,10 @@
 								aria-label={`Item ${i + 1} detail`}
 							/>
 							<div class="row-actions">
-								<Button variant="ghost" onclick={() => moveItem(i, -1)} disabled={i === 0}>
-									Move up
-								</Button>
+								<Button variant="ghost" onclick={() => moveItem(i, -1)} disabled={i === 0}
+									>Move up</Button
+								>
+
 								<Button
 									variant="ghost"
 									onclick={() => moveItem(i, 1)}

@@ -18,7 +18,7 @@
 	import RichTextEditor from './RichTextEditor.svelte';
 	import type { ClientKnowledgeCheckBlock } from './types';
 	import type { ProseDoc } from '../prose/types';
-	import Button from '$lib/ui/Button.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	let {

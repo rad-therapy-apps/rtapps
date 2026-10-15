@@ -27,7 +27,7 @@
  * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under
  * apps/web/src/routes ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id],
  * (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/activities/[aid]) and
- * `$lib/activity/ExternalPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
+ * `#lib/activity/ExternalPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
  * .github/workflows/pr.yml.
  */
 import { test, expect } from '@playwright/test';

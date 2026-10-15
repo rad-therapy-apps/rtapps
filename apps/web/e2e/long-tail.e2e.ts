@@ -41,7 +41,7 @@
  * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under
  * apps/web/src/routes ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id],
  * (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/activities/[aid],
- * (app)/admin/users, (app)/account/password) and `$lib/activity/ExternalPlayer.svelte`; the
+ * (app)/admin/users, (app)/account/password) and `#lib/activity/ExternalPlayer.svelte`; the
  * static `apps/web/static/arcade/rtapps-shim.js`/`rtapps-sdk.js` and the
  * `three-point-setup`/`sim-hub`/`linac-console` apps embedded in. Used by: `make e2e` and the CI
  * `e2e` job in .github/workflows/pr.yml.

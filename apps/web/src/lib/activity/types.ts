@@ -14,13 +14,13 @@
  * JSON object (it's untyped JSON to the API); `activitySnapshot()` casts it to `ActivitySnapshot`
  * at this one boundary, mirroring `lib/lesson/snapshot.ts`'s `lessonSnapshot()`. See ADR-0003,
  * ADR-0006, and `docs/03-architecture.md` §4.4/§5.
- * Depends on: `$lib/prose/types` (`ProseDoc`, embedded as the quiz stem), `$lib/calc/interpolate`
+ * Depends on: `#lib/prose/types` (`ProseDoc`, embedded as the quiz stem), `$lib/calc/interpolate`
  * (`Grid`, the calculator data table's wire shape).
  * Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `QuizPlayer.svelte`,
  * `FlashcardPlayer.svelte`, `ExternalPlayer.svelte`, `QuizPlayer.svelte.spec.ts`.
  */
-import type { ProseDoc } from '$lib/prose/types';
-import type { Grid } from '$lib/calc/interpolate';
+import type { ProseDoc } from '#lib/prose/types.js';
+import type { Grid } from '#lib/calc/interpolate.js';
 
 // Subject reference embedded in every non-lesson activity snapshot (or null if unassigned).
 type SubjectRef = { slug: string; title: string } | null;
@@ -81,7 +81,7 @@ export type CalculatorSnapshot = {
 	activity: { id: string; kind: 'calculator'; title: string };
 	calculator: {
 		calc_type: string;
-		// Keyed by the data table's authoring key (e.g. "pdd-6mv"); `$lib/calc/registry`'s
+		// Keyed by the data table's authoring key (e.g. "pdd-6mv"); `#lib/calc/registry`'s
 		// components consume this map verbatim as their `tables` prop.
 		data_tables: Record<string, { title: string; grid: Grid }>;
 	};

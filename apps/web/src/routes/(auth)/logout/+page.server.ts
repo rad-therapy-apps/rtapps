@@ -11,11 +11,11 @@
  * then clears the cookie locally regardless of whether that call succeeded, so a user can always
  * sign out even if the API is unreachable. `docs/03-architecture.md` §4.2.
  *
- * Works with: `$lib/server/api` (`apiFetch`, `relaySetCookie`). Used by: the sign-out `<form>`
+ * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`). Used by: the sign-out `<form>`
  * in `+layout.svelte` (`action="/logout"`).
  */
 import { redirect } from '@sveltejs/kit';
-import { apiFetch, relaySetCookie } from '$lib/server/api';
+import { apiFetch, relaySetCookie } from '#lib/server/api.js';
 import type { Actions } from './$types';
 
 export const actions: Actions = {

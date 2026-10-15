@@ -8,12 +8,12 @@
 	`mu-calculator`) on the element tests select. Colours come from tokens only.
 	How it fits the project: shared by the six calculators in this folder, docs/specs/2026-10-01-ui-restyle-design.md
 	(Task 9). The activity route page renders calculators without its own Card, so this supplies it.
-	Depends on: `$lib/ui/Card.svelte`.
+	Depends on: `#lib/ui/Card.svelte`.
 	Used by: every `*Calculator.svelte` and `SiConverter.svelte` in this folder.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import Card from '$lib/ui/Card.svelte';
+	import Card from '#lib/ui/Card.svelte';
 
 	let { cls, children }: { cls: 'calc' | 'mu-calculator'; children: Snippet } = $props();
 </script>

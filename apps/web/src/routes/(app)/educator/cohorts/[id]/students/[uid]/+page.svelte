@@ -12,14 +12,14 @@
 	(`GET cohorts/{id}/students/{uid}`) (FR-E-03). Attempt items render `response` as raw JSON
 	since its shape varies per item type (multiple-choice vs free-text, etc).
 
-	Works with: `$app/paths`, `$lib/cohort/format` (`formatPercent`). Used by: reached from
+	Works with: `$app/paths`, `#lib/cohort/format` (`formatPercent`). Used by: reached from
 	`(app)/educator/cohorts/[id]/+page.svelte`.
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { formatPercent } from '$lib/cohort/format';
-	import Card from '$lib/ui/Card.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import { formatPercent } from '#lib/cohort/format.js';
+	import Card from '#lib/ui/Card.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

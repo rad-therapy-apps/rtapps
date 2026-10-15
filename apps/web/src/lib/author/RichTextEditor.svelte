@@ -28,7 +28,7 @@
 	import '../prose/prose.css';
 	import type { Component } from 'svelte';
 	import type { LucideProps } from '@lucide/svelte';
-	import Icon from '$lib/ui/Icon.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
 	import Bold from '@lucide/svelte/icons/bold';
 	import Italic from '@lucide/svelte/icons/italic';
 	import Underline from '@lucide/svelte/icons/underline';

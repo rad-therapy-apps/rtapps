@@ -14,7 +14,7 @@
 	percent get the `below` css class via `belowThresholdClass` (FR-E-02, FR-E-03). The stats/
 	outcomes links are plan 3a Task 15.
 
-	Works with: `$app/forms`, `$app/paths`, `$lib/cohort/format` (`formatPercent`,
+	Works with: `$app/forms`, `$app/paths`, `#lib/cohort/format` (`formatPercent`,
 	`belowThresholdClass`). Used by: reached from `(app)/educator/+page.svelte`; links into
 	`(app)/educator/cohorts/[id]/students/[uid]`,
 	`(app)/educator/cohorts/[id]/activities/[aid]`, `(app)/educator/cohorts/[id]/outcomes`.
@@ -22,13 +22,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
-	import { belowThresholdClass, formatPercent } from '$lib/cohort/format';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import Icon from '$lib/ui/Icon.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import { belowThresholdClass, formatPercent } from '#lib/cohort/format.js';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import type { ActionData, PageData } from './$types';
 

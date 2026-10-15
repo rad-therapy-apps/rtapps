@@ -12,8 +12,8 @@
 	`locals.user` set by `hooks.server.ts`; this file only decides what to show, not who is
 	signed in. The layout owns the page's single `<main>`. `docs/03-architecture.md` §4.
 
-	Works with: `$app/forms`, `$app/paths`, `$app/state`, `$lib/ui/AppShell.svelte`,
-	`$lib/assets/rttlearn-icon.svg`. Used by: every route (this is the root layout); the sign-out
+	Works with: `$app/forms`, `$app/paths`, `$app/state`, `#lib/ui/AppShell.svelte`,
+	`#lib/assets/rttlearn-icon.svg`. Used by: every route (this is the root layout); the sign-out
 	form posts to `(auth)/logout/+page.server.ts`.
 -->
 <script lang="ts">
@@ -23,10 +23,10 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import LogOut from '@lucide/svelte/icons/log-out';
-	import favicon from '$lib/assets/rttlearn-icon.svg';
-	import AppShell from '$lib/ui/AppShell.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Logo from '$lib/ui/Logo.svelte';
+	import favicon from '#lib/assets/rttlearn-icon.svg';
+	import AppShell from '#lib/ui/AppShell.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Logo from '#lib/ui/Logo.svelte';
 	import type { Snippet } from 'svelte';
 	import type { LayoutData } from './$types';
 

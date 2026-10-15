@@ -1,3 +1,6 @@
+import { redirect } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
+
 /**
  * What this file does: SvelteKit's server-only request hook. Runs before every request:
  * resolves who the caller is (by asking the API) and redirects away from pages the caller
@@ -10,24 +13,24 @@
  * never touches the database itself; `decideAccess` (guard.ts) enforces the role-gated route
  * groups. See `docs/03-architecture.md` §4.2/§9. Sentry is opt-in (blank `SENTRY_DSN` is a
  * no-op) and server-side only for now — client-side Sentry is deliberately deferred.
- * Depends on: `$lib/server/api` (apiFetch), `$lib/server/guard` (decideAccess), `@sveltejs/kit`,
+ * Depends on: `#lib/server/api` (apiFetch), `$lib/server/guard` (decideAccess), `@sveltejs/kit`,
  * `$env/dynamic/private` (SENTRY_DSN), `@sentry/sveltekit`.
  * Used by: SvelteKit itself (framework convention — no explicit importer; every request in the
  * app runs through this file).
  */
 import * as Sentry from '@sentry/sveltekit';
-import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
-import { apiFetch } from '$lib/server/api';
-import { decideAccess } from '$lib/server/guard';
+
+import { SENTRY_DSN } from '$app/env/private';
+import { apiFetch } from '#lib/server/api.js';
+import { decideAccess } from '#lib/server/guard.js';
 
 // Initialized only when SENTRY_DSN is set; otherwise Sentry.init is never called and the
 // captureException call in handleError below is a no-op. Sentry 11 collects user info, cookies,
 // headers, bodies, query params and local variable values by default; every category is switched
 // off so the session cookie and login bodies (passwords) never leave the server.
-if (env.SENTRY_DSN) {
+if (SENTRY_DSN) {
 	Sentry.init({
-		dsn: env.SENTRY_DSN,
+		dsn: SENTRY_DSN,
 		dataCollection: {
 			userInfo: false,
 			cookies: false,
@@ -74,5 +77,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 // Reports unhandled server-side exceptions to Sentry when configured; a no-op when
 // SENTRY_DSN is unset (falls back to SvelteKit's default { message } error shape either way).
 export const handleError: HandleServerError = ({ error }) => {
-	if (env.SENTRY_DSN) Sentry.captureException(error);
+	if (SENTRY_DSN) Sentry.captureException(error);
 };

@@ -21,7 +21,7 @@
  * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under
  * apps/web/src/routes ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id],
  * (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/activities/[aid]) and
- * `$lib/activity/QuizPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
+ * `#lib/activity/QuizPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
  * .github/workflows/pr.yml.
  */
 import { test, expect, type Page } from '@playwright/test';

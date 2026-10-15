@@ -12,17 +12,17 @@
 	(`POST /cohorts/join`); this is the page `apps/web/e2e/lesson.e2e.ts` returns to after finishing
 	a lesson, to assert the new result row and score appear.
 
-	Works with: `$app/forms`, `$app/paths`, `$lib/ui/{Alert,Button,Field,PageHeader}.svelte`. Used by: linked from `+layout.svelte` implicitly (post
+	Works with: `$app/forms`, `$app/paths`, `#lib/ui/{Alert,Button,Field,PageHeader}.svelte`. Used by: linked from `+layout.svelte` implicitly (post
 	sign-in redirect target) and from the login/register `next` default.
 -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

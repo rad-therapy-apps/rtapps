@@ -15,10 +15,11 @@
  * `apps/web/src/routes` that calls the API (auth, subjects, lessons, health).
  */
 import type { RequestEvent } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 
-const API_BASE = `${env.API_INTERNAL_URL ?? 'http://api:8000'}/api/v1`;
-const ORIGIN_HEADER = env.ORIGIN ?? 'http://localhost:8080';
+import { API_INTERNAL_URL, ORIGIN } from '$app/env/private';
+
+const API_BASE = `${API_INTERNAL_URL ?? 'http://api:8000'}/api/v1`;
+const ORIGIN_HEADER = ORIGIN ?? 'http://localhost:8080';
 
 export type ApiInit = RequestInit & { cookie?: string };
 

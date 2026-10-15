@@ -14,17 +14,17 @@
 	already restricts `/admin/*` to the admin role. The reset action's temporary password is
 	rendered once, from the action result — it is never put in a URL, cookie, or console.log.
 
-	Works with: `$app/forms`, `$app/paths`, the `$lib/ui` kit. Used by: reached from the nav's "Admin" link.
+	Works with: `$app/forms`, `$app/paths`, the `#lib/ui` kit. Used by: reached from the nav's "Admin" link.
 -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

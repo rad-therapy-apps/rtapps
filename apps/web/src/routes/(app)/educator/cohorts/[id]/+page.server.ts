@@ -13,14 +13,14 @@
  * enforces the 403 (this page just surfaces it) (FR-E-02, FR-E-03). `docs/03-architecture.md`
  * §7 (`cohorts/{id}/overview`, `cohorts/{id}/members`, `cohorts/{id}/rotate-code`).
  *
- * Works with: `$lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`CohortOverviewOut`, `MemberOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/educator/+page.svelte`.
  */
 import { fail } from '@sveltejs/kit';
-import { apiFetch, apiJson } from '$lib/server/api';
-import { problemMessage } from '$lib/server/auth-forms';
-import { expectOk } from '$lib/server/expect';
+import { apiFetch, apiJson } from '#lib/server/api.js';
+import { problemMessage } from '#lib/server/auth-forms.js';
+import { expectOk } from '#lib/server/expect.js';
 import type { components } from '@rtapps/api-client';
 import type { Actions, PageServerLoad } from './$types';
 

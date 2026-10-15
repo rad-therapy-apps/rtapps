@@ -9,14 +9,14 @@
 	How it fits the project: `data.subjects` comes from this route's `load` (`GET /subjects`);
 	each link leads to `(app)/subjects/[slug]`. `docs/03-architecture.md` §4.3.
 
-	Works with: `$app/paths`, `$lib/ui/*`. Used by: linked from `+layout.svelte` and `(app)/home/+page.svelte`;
+	Works with: `$app/paths`, `#lib/ui/*`. Used by: linked from `+layout.svelte` and `(app)/home/+page.svelte`;
 	driven by `apps/web/e2e/lesson.e2e.ts`.
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import Card from '$lib/ui/Card.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import SubjectTag from '$lib/ui/SubjectTag.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
+	import SubjectTag from '#lib/ui/SubjectTag.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

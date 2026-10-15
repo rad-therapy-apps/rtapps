@@ -3,7 +3,7 @@
 	change-note input, a busy-guarded Publish button with a confirm dialog, and the version
 	history (version, date, author, note).
 	Used here and why: Svelte 5 runes (`$props`, `$state`); `post` defaults to the real API client
-	(`$lib/author/api`'s `api.POST`) but is overridable, same injectable pattern as
+	(`#lib/author/api`'s `api.POST`) but is overridable, same injectable pattern as
 	`LessonEditor.svelte`'s `put`. `publish()` is busy-guarded with try/catch/finally so a failed
 	request never wedges the button. On success it calls `invalidateAll()` (`$app/navigation`) so
 	`+page.server.ts`'s `load` reruns — the fresh `versions` list and any status change flow back
@@ -18,9 +18,9 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { api } from './api';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
 	import type { components } from '@rtapps/api-client';
 
 	type VersionOut = components['schemas']['VersionOut'];

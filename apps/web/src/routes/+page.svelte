@@ -2,7 +2,7 @@
 	What this file does: Public landing page at `/`. A centred welcome with the logo, the RTTLearn
 	wordmark, the web/API health lines returned by +page.server.ts's load, and a Sign in button.
 
-	Used here and why: the `$lib/ui` kit (Logo, Button as a link); `resolve()` for the Sign in
+	Used here and why: the `#lib/ui` kit (Logo, Button as a link); `resolve()` for the Sign in
 	href, per `svelte/no-navigation-without-resolve`; Svelte 5 runes (`$props()`).
 
 	How it fits the project: reachable without a session (see `guard.ts` public paths); signed-in
@@ -13,8 +13,8 @@
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import Button from '$lib/ui/Button.svelte';
-	import Logo from '$lib/ui/Logo.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Logo from '#lib/ui/Logo.svelte';
 
 	let { data } = $props();
 </script>

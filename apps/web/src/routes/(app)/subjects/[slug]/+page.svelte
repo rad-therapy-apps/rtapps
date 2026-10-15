@@ -11,17 +11,17 @@
 	(`GET /subjects/{slug}`); each lesson link leads to `(app)/lessons/[slug]`, each activity link
 	to `(app)/subjects/[slug]/activities/[id]` (plan 3a Task 14). `docs/03-architecture.md` §4.3/§4.4.
 
-	Works with: `$app/paths`, `$lib/ui/{Card,Icon,PageHeader,SubjectTag}.svelte`. Used by: reached from `(app)/subjects/+page.svelte`; driven by
+	Works with: `$app/paths`, `#lib/ui/{Card,Icon,PageHeader,SubjectTag}.svelte`. Used by: reached from `(app)/subjects/+page.svelte`; driven by
 	`apps/web/e2e/lesson.e2e.ts`.
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import BookOpen from '@lucide/svelte/icons/book-open';
 	import Gamepad2 from '@lucide/svelte/icons/gamepad-2';
-	import Card from '$lib/ui/Card.svelte';
-	import Icon from '$lib/ui/Icon.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import SubjectTag from '$lib/ui/SubjectTag.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
+	import SubjectTag from '#lib/ui/SubjectTag.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

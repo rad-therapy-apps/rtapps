@@ -7,33 +7,33 @@
 	student `ProseDoc`/`ProseNode` renderer (ADR-0003) plus a static, non-interactive `{#snippet}`
 	for knowledge checks (an options list, no grading — the preview response is answer-stripped
 	just like the published snapshot) with a simple page pager mirroring
-	`$lib/lesson/LessonPager.svelte`'s structure. Edit and Publish are each delegated whole to
+	`#lib/lesson/LessonPager.svelte`'s structure. Edit and Publish are each delegated whole to
 	`LessonEditor.svelte`/`PublishPanel.svelte`.
 	How it fits the project: `data.lesson`/`data.versions` come from this route's `load`
 	(`docs/03-architecture.md` §7); `data.lesson.pages` is opaque JSON to the generated schema, so
-	it's cast to `AuthorPage[]` at this one boundary (same pattern as `$lib/lesson/snapshot.ts`).
-	Works with: `$lib/author/LessonEditor.svelte`, `$lib/author/PublishPanel.svelte`,
-	`$lib/author/api` (`api.GET`), `$lib/prose/ProseDoc.svelte`, `$lib/lesson/types`
+	it's cast to `AuthorPage[]` at this one boundary (same pattern as `#lib/lesson/snapshot.ts`).
+	Works with: `#lib/author/LessonEditor.svelte`, `$lib/author/PublishPanel.svelte`,
+	`#lib/author/api` (`api.GET`), `$lib/prose/ProseDoc.svelte`, `$lib/lesson/types`
 	(`LessonSnapshot`, `KnowledgeCheckBlock`). Used by: reached from `(app)/author`'s dashboard.
 -->
 <script lang="ts">
-	import LessonEditor from '$lib/author/LessonEditor.svelte';
-	import PublishPanel from '$lib/author/PublishPanel.svelte';
-	import { api } from '$lib/author/api';
-	import ProseDoc from '$lib/prose/ProseDoc.svelte';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Tabs from '$lib/ui/Tabs.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import type { AuthorPage } from '$lib/author/types';
-	import type { LessonSnapshot, KnowledgeCheckBlock } from '$lib/lesson/types';
+	import LessonEditor from '#lib/author/LessonEditor.svelte';
+	import PublishPanel from '#lib/author/PublishPanel.svelte';
+	import { api } from '#lib/author/api.js';
+	import ProseDoc from '#lib/prose/ProseDoc.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Tabs from '#lib/ui/Tabs.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
+	import type { AuthorPage } from '#lib/author/types.js';
+	import type { LessonSnapshot, KnowledgeCheckBlock } from '#lib/lesson/types.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	// `LessonAuthorOut.pages` is opaque JSON to the generated schema (the API treats page/block
 	// content as untyped JSONB) — cast to the actual shape once, here, same pattern as
-	// `$lib/lesson/snapshot.ts`.
+	// `#lib/lesson/snapshot.ts`.
 	const initialPages = $derived(data.lesson.pages as unknown as AuthorPage[]);
 
 	let activeTab = $state<'edit' | 'preview' | 'publish'>('edit');

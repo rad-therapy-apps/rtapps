@@ -11,12 +11,12 @@
  * How it fits the project: `docs/03-architecture.md` §7; `SequencingAuthorOut`/`VersionOut` are
  * Task 9/10's wire shapes Task 16's sequencing builder consumes.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SequencingAuthorOut`,
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SequencingAuthorOut`,
  * `VersionOut`, `ActivityAuthorRow`).
  * Used by: `+page.svelte` (this route).
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

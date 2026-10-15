@@ -2,7 +2,7 @@
 	What this file does: a search box over the question bank (`GET /authoring/questions?q=`) with
 	an Add button per result, plus an inline "new question" form that creates one
 	(`POST /authoring/questions`) and adds it straight away.
-	Used here and why: `get`/`post` default to the real API client (`$lib/author/api`'s
+	Used here and why: `get`/`post` default to the real API client (`#lib/author/api`'s
 	`api.GET`/`api.POST`) but are overridable, the same injectable-client pattern
 	`LessonEditor.svelte`'s `put` uses -- both async actions (search, create) are busy-guarded
 	with try/catch/finally so a failed request can never wedge either button. The create form
@@ -17,8 +17,8 @@
 	Used by: `routes/(app)/author/quizzes/[id]/+page.svelte`.
 -->
 <script lang="ts">
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import BankQuestionForm, { type BankQuestionValue } from './BankQuestionForm.svelte';
 	import { api } from './api';
 	import { problemDetail } from './problem';

@@ -9,7 +9,7 @@
  * see playwright.config.ts) with real S3 storage (SeaweedFS), so the presign → PUT → confirm media flow actually
  * writes an object; role/label/testid locators (no CSS selectors) except for the two places with
  * no accessible name to hook into — the TipTap contenteditable stem editor (no aria-label; see
- * `$lib/author/RichTextEditor.svelte`) and the page-section scoping for the lesson editor's Edit
+ * `#lib/author/RichTextEditor.svelte`) and the page-section scoping for the lesson editor's Edit
  * tab (each page has no test id of its own) — both documented inline below. The knowledge check
  * this test edits is deliberately `lq_page5_1` (page index 4, "Why Tumor Hypoxia Matters
  * Clinically"), NOT `lq_page2_1` (page index 1) — `lesson.e2e.ts` answers `lq_page2_1` and

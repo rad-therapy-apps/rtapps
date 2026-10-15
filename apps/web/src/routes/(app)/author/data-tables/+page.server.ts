@@ -9,12 +9,12 @@
  * How it fits the project: `docs/03-architecture.md` §7; `DataTableOut`/`SubjectAuthorOut` are
  * Task 9/11's wire shapes Task 16's grid editor and calculator form consume.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`DataTableOut`,
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`DataTableOut`,
  * `SubjectAuthorOut`).
  * Used by: `+page.svelte` (this route).
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

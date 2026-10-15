@@ -15,13 +15,13 @@
  * before this runs. `needs_review`/`import_notes` are the migrated-content review queue (Task 4).
  * `docs/03-architecture.md` §7.
  *
- * Works with: `$lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `apiJson`), `$lib/server/auth-forms`
  * (`problemMessage`), `@rtapps/api-client` (`SubjectAuthorOut`, `ActivityAuthorRow`,
  * `LessonAuthorOut`). Used by: `+page.svelte` (this route).
  */
 import { error, fail, redirect } from '@sveltejs/kit';
-import { apiFetch, apiJson } from '$lib/server/api';
-import { problemMessage } from '$lib/server/auth-forms';
+import { apiFetch, apiJson } from '#lib/server/api.js';
+import { problemMessage } from '#lib/server/auth-forms.js';
 import type { components } from '@rtapps/api-client';
 import type { Actions, PageServerLoad } from './$types';
 
