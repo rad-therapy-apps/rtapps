@@ -34,3 +34,22 @@ describe('hooks.server Sentry setup', () => {
 		});
 	});
 });
+
+describe('hooks.server handleError', () => {
+	// SvelteKit 3 runs handleError for every server error, tagged with `kind`. Only a real crash
+	// ('unknown') goes to Sentry: our own error(404)s ('app') and SvelteKit's missing-route 404s
+	// ('framework') are expected and would only be noise.
+	it('reports only unknown (crash) errors to Sentry', async () => {
+		const Sentry = await import('@sentry/sveltekit');
+		const { handleError } = await import('./hooks.server');
+		const event = {} as Parameters<typeof handleError>[0]['event'];
+		const crash = new Error('boom');
+
+		await handleError({ kind: 'app', error: { status: 404, message: 'Not found' }, event });
+		await handleError({ kind: 'framework', error: { status: 404, message: 'Not Found' }, event });
+		expect(Sentry.captureException).not.toHaveBeenCalled();
+
+		await handleError({ kind: 'unknown', error: crash, event });
+		expect(Sentry.captureException).toHaveBeenCalledExactlyOnceWith(crash);
+	});
+});

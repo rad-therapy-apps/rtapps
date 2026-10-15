@@ -74,8 +74,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-// Reports unhandled server-side exceptions to Sentry when configured; a no-op when
-// SENTRY_DSN is unset (falls back to SvelteKit's default { message } error shape either way).
-export const handleError: HandleServerError = ({ error }) => {
-	if (SENTRY_DSN) Sentry.captureException(error);
+// Reports real crashes (kind 'unknown') to Sentry when configured. SvelteKit 3 also calls this
+// for our own error(...)s ('app') and its own 404s ('framework'); those are expected and skipped.
+// A no-op when SENTRY_DSN is unset (SvelteKit's default { message } error shape either way).
+export const handleError: HandleServerError = ({ kind, error }) => {
+	if (SENTRY_DSN && kind === 'unknown') Sentry.captureException(error);
 };
