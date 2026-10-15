@@ -48,7 +48,7 @@
 		return entries.find(([key]) => key.toLowerCase().includes(substr));
 	}
 
-	/** `entries` minus EVERY key containing `substr` — not just the first one a role claimed (#48). */
+	/** `entries` minus EVERY key containing `substr` — not just the first one claimed (#48). */
 	function withoutRole(entries: TableEntry[], substr: string): TableEntry[] {
 		return entries.filter(([key]) => !key.toLowerCase().includes(substr));
 	}
@@ -70,13 +70,14 @@
 	const grid = $derived(tableEntry ? tableEntry[1].grid : null);
 
 	const remainingEntries = $derived(withoutRole(withoutRole(allEntries, 'pdd'), 'tmr'));
-	// Progressive role exclusion: every key containing a role's substring is removed from the pool
-	// before the next role's search (order: sc, then sp, then wedge) — prevents a key matching
-	// multiple substrings from being assigned to a later role.
+	// Progressive role exclusion: each matched entry is removed from the pool before the next role's
+	// search (order: sc, then sp, then wedge) — prevents a key matching multiple substrings from
+	// being assigned to more than one role. Only the claimed key, not every "sc"/"sp" key: those
+	// substrings are loose enough to occur in a wedge table's own name (e.g. "wedge-spec").
 	const scEntry = $derived(findEntry(remainingEntries, 'sc'));
-	const scExcluded = $derived(withoutRole(remainingEntries, 'sc'));
+	const scExcluded = $derived(remainingEntries.filter(([key]) => key !== scEntry?.[0]));
 	const spEntry = $derived(findEntry(scExcluded, 'sp'));
-	const spExcluded = $derived(withoutRole(scExcluded, 'sp'));
+	const spExcluded = $derived(scExcluded.filter(([key]) => key !== spEntry?.[0]));
 	const wedgeEntry = $derived(findEntry(spExcluded, 'wedge'));
 
 	// null when out of range (interpolate2d's contract) or when there's no table to read from.
