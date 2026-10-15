@@ -22,9 +22,25 @@ import { apiFetch } from '$lib/server/api';
 import { decideAccess } from '$lib/server/guard';
 
 // Initialized only when SENTRY_DSN is set; otherwise Sentry.init is never called and the
-// captureException call in handleError below is a no-op.
+// captureException call in handleError below is a no-op. Sentry 11 collects user info, cookies,
+// headers, bodies, query params and local variable values by default; every category is switched
+// off so the session cookie and login bodies (passwords) never leave the server.
 if (env.SENTRY_DSN) {
-	Sentry.init({ dsn: env.SENTRY_DSN });
+	Sentry.init({
+		dsn: env.SENTRY_DSN,
+		dataCollection: {
+			userInfo: false,
+			cookies: false,
+			httpHeaders: false,
+			httpBodies: [],
+			urlQueryParams: false,
+			graphQL: { document: false, variables: false },
+			genAI: { inputs: false, outputs: false },
+			databaseQueryData: false,
+			queues: false,
+			stackFrameVariables: false
+		}
+	});
 }
 
 // Runs once per incoming request, before routing/load(): stamp a request id, resolve locals.user
