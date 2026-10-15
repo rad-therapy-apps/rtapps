@@ -6,8 +6,8 @@
 	value and source, the assembled formula, and the resulting MU) rather than just an answer.
 	Used here and why: everything is `$derived` from the inputs and the picked tables — there is
 	no submit button and nothing to attempt/grade (a calculator is not attemptable, ADR/Task 11);
-	role resolution matches pdd/tmr tables FIRST (by key substring) and excludes them from the
-	1D-role search, then finds the first REMAINING key containing "sc"/"sp"/"wedge" — mirroring
+	role resolution matches pdd/tmr tables FIRST (by key substring) and excludes every pdd/tmr key
+	from the 1D-role search, then finds the first REMAINING key containing "sc"/"sp"/"wedge" — mirroring
 	how `data_tables` is keyed in the authoring builder (Task 16) rather than a fixed slot. A
 	role's table being absent shows its factor as 1.0000 "not configured" rather than blocking the
 	calculation. `interpolate2d`/`lookup1d` returning `null` (out of range) is turned into a
@@ -48,6 +48,11 @@
 		return entries.find(([key]) => key.toLowerCase().includes(substr));
 	}
 
+	/** `entries` minus EVERY key containing `substr` — not just the first one a role claimed (#48). */
+	function withoutRole(entries: TableEntry[], substr: string): TableEntry[] {
+		return entries.filter(([key]) => !key.toLowerCase().includes(substr));
+	}
+
 	/** A single-row grid's factor-vs-x lookup: `interpolate2d` pinned to that one row's own key. */
 	function lookup1d(grid: Grid, x: number): number | null {
 		return grid.rows.length === 0 ? null : interpolate2d(grid, grid.rows[0].key, x);
@@ -64,16 +69,14 @@
 	const tableEntry = $derived(technique === 'ssd' ? pddEntry : tmrEntry);
 	const grid = $derived(tableEntry ? tableEntry[1].grid : null);
 
-	const remainingEntries = $derived(
-		allEntries.filter(([key]) => key !== pddEntry?.[0] && key !== tmrEntry?.[0])
-	);
-	// Progressive role exclusion: each matched entry is removed from the pool before the next role's
-	// search (order: sc, then sp, then wedge) — prevents a key matching multiple substrings from
-	// being assigned to more than one role.
+	const remainingEntries = $derived(withoutRole(withoutRole(allEntries, 'pdd'), 'tmr'));
+	// Progressive role exclusion: every key containing a role's substring is removed from the pool
+	// before the next role's search (order: sc, then sp, then wedge) — prevents a key matching
+	// multiple substrings from being assigned to a later role.
 	const scEntry = $derived(findEntry(remainingEntries, 'sc'));
-	const scExcluded = $derived(remainingEntries.filter(([key]) => key !== scEntry?.[0]));
+	const scExcluded = $derived(withoutRole(remainingEntries, 'sc'));
 	const spEntry = $derived(findEntry(scExcluded, 'sp'));
-	const spExcluded = $derived(scExcluded.filter(([key]) => key !== spEntry?.[0]));
+	const spExcluded = $derived(withoutRole(scExcluded, 'sp'));
 	const wedgeEntry = $derived(findEntry(spExcluded, 'wedge'));
 
 	// null when out of range (interpolate2d's contract) or when there's no table to read from.

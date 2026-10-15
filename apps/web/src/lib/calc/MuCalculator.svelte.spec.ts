@@ -347,6 +347,39 @@ describe('MuCalculator', () => {
 			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
+	// Scenario (#48): a SECOND key containing an already-claimed role's substring ('pdd_sc_alt'
+	// after 'pdd-6mv' claimed pdd; 'sc_sp_alt' after 'sc-6mv' claimed sc), with no genuine sp or
+	// wedge table configured.
+	// Invariant: neither leftover key is picked up by a later role's search — Sc reads sc-6mv,
+	// and Sp/WF stay 1.0000 "not configured"; MU uses only pdd-6mv and sc-6mv.
+	it('never assigns a later role to any key containing an already-claimed role substring', async () => {
+		await render(MuCalculator, {
+			tables: {
+				'pdd-6mv': { title: 'PDD 6MV', grid: PDD_GRID },
+				pdd_sc_alt: { title: 'PDD alt', grid: SP_GRID },
+				'sc-6mv': { title: 'Sc 6MV', grid: SC_GRID },
+				sc_sp_alt: { title: 'Sc alt', grid: SP_GRID }
+			}
+		});
+
+		await setInputs('200', '10', '10');
+
+		const sc = interpolate2d(SC_GRID, SC_GRID.rows[0].key, 10)!;
+		const pdd = interpolate2d(PDD_GRID, 10, 10)!;
+		const isf = ssdIsf(100, 1.5, 10)!;
+		const expectedMu = 200 / (1 * (pdd / 100) * sc * isf);
+
+		await expect
+			.element(page.getByTestId('mu-factor-sc'))
+			.toHaveTextContent(`${sc.toFixed(4)} (table: sc-6mv)`);
+		await expect
+			.element(page.getByTestId('mu-factor-sp'))
+			.toHaveTextContent('1.0000 (not configured)');
+		await expect
+			.element(page.getByTestId('mu-result'))
+			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+	});
+
 	// Scenario (minor/cheap case): wedge lookup is requested at an angle outside the wedge table's
 	// range (e.g., angle 90 on a 0–60 grid). The interpolation returns null (out of range), and the
 	// UI shows a factor-out-of-range message, never "Infinity" or "NaN".
