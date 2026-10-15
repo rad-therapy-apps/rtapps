@@ -31,7 +31,7 @@ describe('Icon', () => {
 	});
 
 	it('is an image with a name when labelled', async () => {
-		render(Icon, { icon: Check, label: 'Done' });
+		await render(Icon, { icon: Check, label: 'Done' });
 		await expect.element(page.getByRole('img', { name: 'Done' })).toBeVisible();
 	});
 });
@@ -39,7 +39,7 @@ describe('Icon', () => {
 describe('Button', () => {
 	it('defaults to type="button" and fires onclick', async () => {
 		const onclick = vi.fn();
-		render(Button, { children: text('Save'), onclick });
+		await render(Button, { children: text('Save'), onclick });
 		const button = page.getByRole('button', { name: 'Save' });
 		await expect.element(button).toHaveAttribute('type', 'button');
 		await button.click();
@@ -47,7 +47,7 @@ describe('Button', () => {
 	});
 
 	it('passes type="submit" and disabled through', async () => {
-		render(Button, {
+		await render(Button, {
 			children: text('Send'),
 			type: 'submit',
 			disabled: true,
@@ -59,7 +59,7 @@ describe('Button', () => {
 	});
 
 	it('with href renders a link with btn classes and no type', async () => {
-		render(Button, { children: text('Data tables'), href: '/author/data-tables' });
+		await render(Button, { children: text('Data tables'), href: '/author/data-tables' });
 		const link = page.getByRole('link', { name: 'Data tables' });
 		await expect.element(link).toHaveAttribute('href', '/author/data-tables');
 		await expect.element(link).toHaveClass('btn', 'btn-secondary');
@@ -67,7 +67,7 @@ describe('Button', () => {
 	});
 
 	it('without href is still a type="button" button', async () => {
-		render(Button, { children: text('Save') });
+		await render(Button, { children: text('Save') });
 		await expect
 			.element(page.getByRole('button', { name: 'Save' }))
 			.toHaveAttribute('type', 'button');
@@ -75,7 +75,7 @@ describe('Button', () => {
 	});
 
 	it('keeps the accessible name to the text when an icon is set', async () => {
-		render(Button, {
+		await render(Button, {
 			children: text('Sign out'),
 			icon: Check,
 			variant: 'ghost'
@@ -86,7 +86,7 @@ describe('Button', () => {
 
 describe('Alert', () => {
 	it('passes id and role through and shows its text', async () => {
-		render(Alert, {
+		await render(Alert, {
 			tone: 'danger',
 			id: 'login-error',
 			role: 'alert',
@@ -100,19 +100,19 @@ describe('Alert', () => {
 
 describe('Feedback', () => {
 	it('renders the caller’s exact text for a correct answer', async () => {
-		render(Feedback, { correct: true, children: text('Correct') });
+		await render(Feedback, { correct: true, children: text('Correct') });
 		await expect.element(page.getByText('Correct', { exact: true })).toBeVisible();
 	});
 
 	it('renders the caller’s exact text for an incorrect answer', async () => {
-		render(Feedback, { correct: false, children: text('Incorrect') });
+		await render(Feedback, { correct: false, children: text('Incorrect') });
 		await expect.element(page.getByText('Incorrect', { exact: true })).toBeVisible();
 	});
 });
 
 describe('PageHeader', () => {
 	it('renders one h1 with the title and the subtitle', async () => {
-		render(PageHeader, { title: 'Subjects', subtitle: 'Pick a subject' });
+		await render(PageHeader, { title: 'Subjects', subtitle: 'Pick a subject' });
 		await expect.element(page.getByRole('heading', { level: 1, name: 'Subjects' })).toBeVisible();
 		await expect.element(page.getByText('Pick a subject')).toBeVisible();
 	});
@@ -120,7 +120,7 @@ describe('PageHeader', () => {
 
 describe('Field', () => {
 	it('labels the control it wraps', async () => {
-		render(Field, {
+		await render(Field, {
 			label: 'Email',
 			id: 'email',
 			children: createRawSnippet(() => ({
@@ -141,7 +141,7 @@ describe('Card and SubjectTag', () => {
 	});
 
 	it('SubjectTag shows its label', async () => {
-		render(SubjectTag, {
+		await render(SubjectTag, {
 			slug: 'radiation-biology',
 			label: 'Radiation Biology'
 		});
@@ -157,7 +157,7 @@ describe('Tabs', () => {
 	];
 
 	it('renders a tablist with the selected tab marked and the only tab stop', async () => {
-		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
+		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
 		await expect.element(page.getByRole('tablist', { name: 'Editor tabs' })).toBeVisible();
 		const edit = page.getByRole('tab', { name: 'Edit' });
 		const preview = page.getByRole('tab', { name: 'Preview' });
@@ -169,7 +169,7 @@ describe('Tabs', () => {
 
 	it('clicking selects and reports the id', async () => {
 		const onselect = vi.fn();
-		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
 		await page.getByRole('tab', { name: 'Publish' }).click();
 		expect(onselect).toHaveBeenCalledWith('publish');
 		await expect
@@ -179,7 +179,7 @@ describe('Tabs', () => {
 
 	it('arrows wrap, Home/End jump, and moving focus does not select', async () => {
 		const onselect = vi.fn();
-		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
 		const edit = page.getByRole('tab', { name: 'Edit' });
 		await edit.click();
 		onselect.mockClear();
@@ -199,7 +199,7 @@ describe('Tabs', () => {
 
 	it('Enter selects the focused tab', async () => {
 		const onselect = vi.fn();
-		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
 		await page.getByRole('tab', { name: 'Edit' }).click();
 		await userEvent.keyboard('{ArrowRight}{Enter}');
 		expect(onselect).toHaveBeenLastCalledWith('preview');
@@ -209,7 +209,7 @@ describe('Tabs', () => {
 	});
 
 	it('leaves modified arrows alone (Alt+Left is browser Back)', async () => {
-		render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
+		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
 		const edit = page.getByRole('tab', { name: 'Edit' });
 		await edit.click();
 		const event = new KeyboardEvent('keydown', {
