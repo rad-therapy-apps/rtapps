@@ -96,22 +96,22 @@ describe('MuCalculator', () => {
 		const isf = ssdIsf(100, 1.5, 5)!;
 		const expectedMu = 200 / ((80 / 100) * isf);
 
-		await expect.element(page.getByTestId('mu-lookup')).toHaveTextContent('PDD: 80.0000');
+		await expect.element(page.getByTestId('mu-lookup')).toMatchTextContent('PDD: 80.0000');
 		await expect
 			.element(page.getByTestId('mu-factor-sc'))
-			.toHaveTextContent('1.0000 (not configured)');
+			.toMatchTextContent('1.0000 (not configured)');
 		await expect
 			.element(page.getByTestId('mu-factor-sp'))
-			.toHaveTextContent('1.0000 (not configured)');
+			.toMatchTextContent('1.0000 (not configured)');
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.toHaveTextContent('1.0000 (no wedge)');
+			.toMatchTextContent('1.0000 (no wedge)');
 		await expect
 			.element(page.getByTestId('mu-formula'))
-			.toHaveTextContent('MU = dose / (K · (PDD/100) · Sc · Sp · WF · TF · ISF)');
+			.toMatchTextContent('MU = dose / (K · (PDD/100) · Sc · Sp · WF · TF · ISF)');
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario: a depth below the grid's row range (rows are keyed 5 and 10; depth 1 is below 5).
@@ -123,7 +123,7 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-out-of-range'))
-			.toHaveTextContent("outside the table's range (depth 5–10 cm, field size 5–10 cm)");
+			.toMatchTextContent("outside the table's range (depth 5–10 cm, field size 5–10 cm)");
 	});
 
 	// Scenario: switching technique to SAD (TMR) at an exact grid point (depth 5, field size 10),
@@ -141,11 +141,11 @@ describe('MuCalculator', () => {
 		await page.getByRole('radio', { name: 'SAD (TMR)' }).click();
 		await setInputs('200', '5', '10');
 
-		await expect.element(page.getByTestId('mu-lookup')).toHaveTextContent('TMR: 0.9500');
+		await expect.element(page.getByTestId('mu-lookup')).toMatchTextContent('TMR: 0.9500');
 		await expect
 			.element(page.getByTestId('mu-formula'))
-			.toHaveTextContent('MU = dose / (K · TMR · Sc · Sp · WF · TF)');
-		await expect.element(page.getByTestId('mu-result')).toHaveTextContent('MU = 210.5');
+			.toMatchTextContent('MU = dose / (K · TMR · Sc · Sp · WF · TF)');
+		await expect.element(page.getByTestId('mu-result')).toMatchTextContent('MU = 210.5');
 	});
 
 	// Scenario: grid cell is exactly 0 at an exact grid point (depth 5, field size 5).
@@ -171,8 +171,8 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-undefined'))
-			.toHaveTextContent('MU is undefined for a zero table value');
-		await expect.element(page.getByTestId('mu-output')).not.toHaveTextContent('Infinity');
+			.toMatchTextContent('MU is undefined for a zero table value');
+		await expect.element(page.getByTestId('mu-output')).not.toMatchTextContent('Infinity');
 	});
 
 	// Scenario (plan 3c Task 4): full photon chain in SSD mode — pdd + sc + sp + wedge tables all
@@ -206,17 +206,17 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-factor-sc'))
-			.toHaveTextContent(`${sc.toFixed(4)} (table: sc-6mv)`);
+			.toMatchTextContent(`${sc.toFixed(4)} (table: sc-6mv)`);
 		await expect
 			.element(page.getByTestId('mu-factor-sp'))
-			.toHaveTextContent(`${sp.toFixed(4)} (table: sp-6mv)`);
+			.toMatchTextContent(`${sp.toFixed(4)} (table: sp-6mv)`);
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.toHaveTextContent(`${wf.toFixed(4)} (table: wedge-45)`);
-		await expect.element(page.getByTestId('mu-factor-isf')).toHaveTextContent(`(formula)`);
+			.toMatchTextContent(`${wf.toFixed(4)} (table: wedge-45)`);
+		await expect.element(page.getByTestId('mu-factor-isf')).toMatchTextContent(`(formula)`);
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario (plan 3c Task 4): Mayneord correction — SSD 120 with the toggle on multiplies PDD
@@ -238,10 +238,10 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-factor-mayneord'))
-			.toHaveTextContent(mFactor.toFixed(4));
+			.toMatchTextContent(mFactor.toFixed(4));
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario (plan 3c Task 4): full photon chain in SAD/TMR mode — pdd + tmr + sc + sp + wedge
@@ -275,7 +275,7 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario (FIX 2 — wedge label at angle 0): wedge table is configured and present, but wedge
@@ -300,11 +300,11 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.toHaveTextContent('1.0000 (no wedge)');
-		await expect.element(page.getByTestId('mu-factor-wedge')).not.toHaveTextContent('wedge-45');
+			.toMatchTextContent('1.0000 (no wedge)');
+		await expect.element(page.getByTestId('mu-factor-wedge')).not.toMatchTextContent('wedge-45');
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario (FIX 3 — progressive role exclusion): a single table key "sc_wedge_test" contains
@@ -332,19 +332,19 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-factor-sc'))
-			.toHaveTextContent(`${sc.toFixed(4)} (table: sc_wedge_test)`);
+			.toMatchTextContent(`${sc.toFixed(4)} (table: sc_wedge_test)`);
 		await expect
 			.element(page.getByTestId('mu-factor-sp'))
-			.toHaveTextContent('1.0000 (not configured)');
+			.toMatchTextContent('1.0000 (not configured)');
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.toHaveTextContent('1.0000 (not configured)');
+			.toMatchTextContent('1.0000 (not configured)');
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.not.toHaveTextContent('sc_wedge_test');
+			.not.toMatchTextContent('sc_wedge_test');
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario (#48): a SECOND pdd/tmr key that also contains a 1D-role substring ('pdd_sc_alt'
@@ -372,13 +372,13 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-factor-sc'))
-			.toHaveTextContent(`${sc.toFixed(4)} (table: sc-6mv)`);
+			.toMatchTextContent(`${sc.toFixed(4)} (table: sc-6mv)`);
 		await expect
 			.element(page.getByTestId('mu-factor-sp'))
-			.toHaveTextContent('1.0000 (not configured)');
+			.toMatchTextContent('1.0000 (not configured)');
 		await expect
 			.element(page.getByTestId('mu-result'))
-			.toHaveTextContent(`MU = ${expectedMu.toFixed(1)}`);
+			.toMatchTextContent(`MU = ${expectedMu.toFixed(1)}`);
 	});
 
 	// Scenario (#48 review): a wedge table whose own name happens to contain "sp" ('wedge-spec')
@@ -400,7 +400,7 @@ describe('MuCalculator', () => {
 		const wf = interpolate2d(WEDGE_GRID, WEDGE_GRID.rows[0].key, 45)!;
 		await expect
 			.element(page.getByTestId('mu-factor-wedge'))
-			.toHaveTextContent(`${wf.toFixed(4)} (table: wedge-spec)`);
+			.toMatchTextContent(`${wf.toFixed(4)} (table: wedge-spec)`);
 	});
 
 	// Scenario (minor/cheap case): wedge lookup is requested at an angle outside the wedge table's
@@ -421,10 +421,10 @@ describe('MuCalculator', () => {
 
 		await expect
 			.element(page.getByTestId('mu-factor-out-of-range'))
-			.toHaveTextContent(
+			.toMatchTextContent(
 				'one or more scatter, wedge, or correction factors are outside their table'
 			);
-		await expect.element(page.getByTestId('mu-output')).not.toHaveTextContent('Infinity');
-		await expect.element(page.getByTestId('mu-output')).not.toHaveTextContent('NaN');
+		await expect.element(page.getByTestId('mu-output')).not.toMatchTextContent('Infinity');
+		await expect.element(page.getByTestId('mu-output')).not.toMatchTextContent('NaN');
 	});
 });
