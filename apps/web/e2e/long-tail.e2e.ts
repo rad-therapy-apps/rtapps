@@ -307,8 +307,9 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 }) => {
 	test.setTimeout(180_000); // sim-hub is a heavy ~380KB inline three.js bundle; same headroom as simulator.e2e.ts
 
-	// Baseline: the shared stack's current Attempts count for Center QA walkthrough, before this
-	// run's student does anything — same summary text arcade.e2e.ts reads for its floor checks.
+	// The educator's stats page for Center QA walkthrough, read at the end. Attempts are counted per
+	// this run's stamp-unique student (one table row per attempt), not as a cohort-wide total:
+	// simulator.e2e.ts records Center QA attempts in the same cohort and can run concurrently.
 	const educator = await educatorPage(browser);
 	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
@@ -323,10 +324,6 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 	// synchronously right after `.click()` can freeze the *previous* (cohort overview) URL instead.
 	await expect(educator).toHaveURL(/\/activities\//);
 	const statsUrl = educator.url();
-	const baselineText = await educator
-		.getByText(/Attempts: \d+ · Students attempted: \d+/)
-		.textContent();
-	const baselineAttempts = Number(baselineText!.match(/Attempts: (\d+)/)![1]);
 
 	const stamp = Date.now();
 	const student = {
@@ -395,11 +392,7 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 	// loaded/shared stack.
 	await expect(async () => {
 		await educator.goto(statsUrl);
-		const newText = await educator
-			.getByText(/Attempts: \d+ · Students attempted: \d+/)
-			.textContent();
-		const newAttempts = Number(newText!.match(/Attempts: (\d+)/)![1]);
-		expect(newAttempts).toBe(baselineAttempts + 1);
+		await expect(educator.getByRole('row').filter({ hasText: student.name })).toHaveCount(1);
 	}).toPass({ timeout: 30_000 });
 	await educator.context().close();
 });

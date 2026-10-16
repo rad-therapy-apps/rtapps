@@ -94,8 +94,9 @@ test.describe
 		await studentPage.getByTestId('simulator-entry').click();
 
 		// Lands on the hub activity's player (the resolver's own subject_slug/activity_id, not
-		// hardcoded here) — asserted by URL shape.
-		await expect(studentPage).toHaveURL(/\/activities\//);
+		// hardcoded here) — asserted by URL shape. The URL changes only once that page's load has
+		// finished, which can pass the default 5s on CI while another spec runs sim-hub's WebGL.
+		await expect(studentPage).toHaveURL(/\/activities\//, { timeout: 15_000 });
 
 		// #watermark is static markup, present the instant the iframe's document parses — waiting
 		// on it confirms the iframe has actually navigated before reaching into its frame, the
