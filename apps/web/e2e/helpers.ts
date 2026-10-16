@@ -9,11 +9,22 @@
  * Depends on: `@playwright/test`.
  * Used by: `lesson.e2e.ts`, `cohort.e2e.ts` (and Task 17's `quiz.e2e.ts`).
  */
-import { expect, type Page } from '@playwright/test';
+import { expect, type Browser, type Page } from '@playwright/test';
 
 /** Session files written once per run by `auth.setup.ts` and reused via `test.use({ storageState })`. */
 export const educatorState = 'e2e/.auth/educator.json';
 export const adminState = 'e2e/.auth/admin.json';
+
+/**
+ * Opens a page in a NEW browser context that starts signed in as the seeded educator, from the
+ * session the `setup` project saved once per run (`educatorState`) — so educator steps cost no
+ * fresh login against the API's shared login rate limit. The session is shared by the whole run,
+ * so callers must never sign it out or change the educator's password, and should close the
+ * context (`page.context().close()`) when done.
+ */
+export async function educatorPage(browser: Browser): Promise<Page> {
+	return (await browser.newContext({ storageState: educatorState })).newPage();
+}
 
 /** Registers a brand-new student account via `/register` and waits for the signed-in home page. */
 export async function registerStudent(

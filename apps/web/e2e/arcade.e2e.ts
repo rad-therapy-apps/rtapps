@@ -24,18 +24,19 @@
  * config {arcade_slug:"cell-defender", max_score:5000}); plan 4b's #53 per-attempt Attempts table
  * and batch 5's completion-only "Beam Sculptor" (external, treatment-planning,
  * config {arcade_slug:"beam-sculptor", completion_only:true}).
- * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under
+ * Works with: `./helpers` (educatorPage, registerStudent, signOut); the pages under
  * apps/web/src/routes ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id],
  * (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/activities/[aid]) and
  * `#lib/activity/ExternalPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
  * .github/workflows/pr.yml.
  */
 import { test, expect } from '@playwright/test';
-import { registerStudent, signIn, signOut } from './helpers';
+import { educatorPage, registerStudent, signOut } from './helpers';
 
-const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
-
-test('a student plays the seeded arcade game and the educator sees the score', async ({ page }) => {
+test('a student plays the seeded arcade game and the educator sees the score', async ({
+	page,
+	browser
+}) => {
 	const stamp = Date.now();
 	const student = {
 		email: `e2e-arcade-${stamp}@example.edu`,
@@ -74,10 +75,11 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 	await signOut(page);
 
 	// Educator: Demo cohort → the Cell Defender row's Stats link (same navigation as quiz.e2e.ts).
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByRole('link', { name: 'Demo cohort' }).click();
-	await page
+	const educator = await educatorPage(browser);
+	await educator.goto('/home');
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByRole('link', { name: 'Demo cohort' }).click();
+	await educator
 		.getByRole('row')
 		.filter({ hasText: 'Cell Defender' })
 		.getByRole('link', { name: 'Stats' })
@@ -86,7 +88,7 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 	// Summary counts include this run's student, on top of whatever earlier arcade e2e runs left
 	// behind against the same shared stack (the seed itself creates no Cell Defender attempts —
 	// see file header) — assert a floor, not an exact total, mirroring quiz.e2e.ts's rationale.
-	const summary = await page.getByText(/Attempts: \d+ · Students attempted: \d+/).textContent();
+	const summary = await educator.getByText(/Attempts: \d+ · Students attempted: \d+/).textContent();
 	const attempts = Number(summary!.match(/Attempts: (\d+)/)![1]);
 	const studentsAttempted = Number(summary!.match(/Students attempted: (\d+)/)![1]);
 	expect(attempts).toBeGreaterThanOrEqual(1);
@@ -96,13 +98,15 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 	// percent "24.0%", per formatPercent's one-decimal rendering), not the 0-49% bucket floor
 	// check this replaces. student.name is stamp-unique, so filtering by it finds only this
 	// run's row even though the shared stack accumulates other runs' Cell Defender attempts too.
-	const attemptRow = page.getByRole('row').filter({ hasText: student.name });
+	const attemptRow = educator.getByRole('row').filter({ hasText: student.name });
 	await expect(attemptRow.locator('td').nth(1)).toHaveText('1200 / 5000');
 	await expect(attemptRow.locator('td').nth(2)).toHaveText('24.0%');
+	await educator.context().close();
 });
 
 test('a student completes the completion-only Beam Sculptor game and the educator sees "Completed"', async ({
-	page
+	page,
+	browser
 }) => {
 	const stamp = Date.now();
 	const student = {
@@ -145,10 +149,11 @@ test('a student completes the completion-only Beam Sculptor game and the educato
 
 	// Educator: Demo cohort → the Beam Sculptor row's Stats link (same navigation as the
 	// score-based test above).
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByRole('link', { name: 'Demo cohort' }).click();
-	await page
+	const educator = await educatorPage(browser);
+	await educator.goto('/home');
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByRole('link', { name: 'Demo cohort' }).click();
+	await educator
 		.getByRole('row')
 		.filter({ hasText: 'Beam Sculptor' })
 		.getByRole('link', { name: 'Stats' })
@@ -156,9 +161,10 @@ test('a student completes the completion-only Beam Sculptor game and the educato
 
 	// #53's Attempts table renders a completion-only row as score "—" / percent "Completed" —
 	// filtered by this run's stamp-unique student name, same rationale as the score-based test.
-	const attemptRow = page.getByRole('row').filter({ hasText: student.name });
+	const attemptRow = educator.getByRole('row').filter({ hasText: student.name });
 	await expect(attemptRow.locator('td').nth(1)).toHaveText('—');
 	await expect(attemptRow.locator('td').nth(2)).toHaveText('Completed');
+	await educator.context().close();
 });
 
 test('signed-out access to the arcade game redirects to login', async ({ page }) => {
