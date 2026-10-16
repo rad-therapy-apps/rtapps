@@ -21,9 +21,14 @@ export const adminState = 'e2e/.auth/admin.json';
  * fresh login against the API's shared login rate limit. The session is shared by the whole run,
  * so callers must never sign it out or change the educator's password, and should close the
  * context (`page.context().close()`) when done.
+ * Returns on the signed-in home page after hydration (network idle), like `signIn` does: a click
+ * or a fill on a server-rendered page before Svelte hydrates can be lost or reset.
  */
 export async function educatorPage(browser: Browser): Promise<Page> {
-	return (await browser.newContext({ storageState: educatorState })).newPage();
+	const page = await (await browser.newContext({ storageState: educatorState })).newPage();
+	await page.goto('/home');
+	await page.waitForLoadState('networkidle');
+	return page;
 }
 
 /** Registers a brand-new student account via `/register` and waits for the signed-in home page. */

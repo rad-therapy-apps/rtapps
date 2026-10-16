@@ -36,7 +36,6 @@ test('educator creates a cohort, a student joins and completes a lesson, the edu
 
 	// Educator: create the cohort and read its join code.
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByLabel('Cohort name').fill(cohortName);
 	await educator.getByRole('button', { name: 'Create cohort' }).click();

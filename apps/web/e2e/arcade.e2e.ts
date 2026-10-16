@@ -76,7 +76,6 @@ test('a student plays the seeded arcade game and the educator sees the score', a
 
 	// Educator: Demo cohort → the Cell Defender row's Stats link (same navigation as quiz.e2e.ts).
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByRole('link', { name: 'Demo cohort' }).click();
 	await educator
@@ -150,7 +149,6 @@ test('a student completes the completion-only Beam Sculptor game and the educato
 	// Educator: Demo cohort → the Beam Sculptor row's Stats link (same navigation as the
 	// score-based test above).
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByRole('link', { name: 'Demo cohort' }).click();
 	await educator

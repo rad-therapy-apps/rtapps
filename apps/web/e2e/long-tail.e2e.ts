@@ -109,7 +109,6 @@ test('an alignment set completion reaches the educator', async ({ page, browser 
 
 	// Educator: Demo cohort → the Three-point setup row's Stats link.
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByRole('link', { name: 'Demo cohort' }).click();
 	await educator
@@ -191,7 +190,6 @@ test('the console door round-trip', async ({ page, browser }) => {
 
 	// Educator: Demo cohort → the Treatment console row's Stats link.
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByRole('link', { name: 'Demo cohort' }).click();
 	await educator
@@ -311,7 +309,6 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 	// this run's stamp-unique student (one table row per attempt), not as a cohort-wide total:
 	// simulator.e2e.ts records Center QA attempts in the same cohort and can run concurrently.
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByRole('link', { name: 'Demo cohort' }).click();
 	await educator

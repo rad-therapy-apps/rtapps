@@ -74,7 +74,6 @@ test('a student answers the demo quiz, scores 50%, and the educator sees the sta
 
 	// Educator: Demo cohort → the Demo quiz row's Stats link.
 	const educator = await educatorPage(browser);
-	await educator.goto('/home');
 	await educator.getByRole('link', { name: 'Educator' }).click();
 	await educator.getByRole('link', { name: 'Demo cohort' }).click();
 	await educator
