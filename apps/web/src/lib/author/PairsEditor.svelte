@@ -19,8 +19,8 @@
 	`routes/(app)/author/matching/[id]/+page.svelte`, `PairsEditor.svelte.spec.ts`.
 -->
 <script lang="ts">
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { duplicates } from './duplicates';
 

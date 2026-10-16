@@ -11,21 +11,21 @@
 	How it fits the project: generalizes ADR-0004's attempt flow from lessons to quizzes (plan 3a
 	Task 14) — starts (or resumes) an attempt, grades each item, and submits for a final score, all
 	client-side over the session cookie (ADR-0002). See `docs/03-architecture.md` §4.4.
-	Depends on: `$lib/prose/ProseDoc.svelte` (stems/explanations), `$lib/lesson/api` (`api.POST`),
-	`./attempts` (`startAttempt`/`gradeItem`/`submitAttempt`), `./types` (`QuizSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Feedback.svelte`, `$lib/ui/Icon.svelte`.
+	Depends on: `#lib/prose/ProseDoc.svelte` (stems/explanations), `#lib/lesson/api` (`api.POST`),
+	`./attempts` (`startAttempt`/`gradeItem`/`submitAttempt`), `./types` (`QuizSnapshot`), `#lib/ui/Button.svelte`, `#lib/ui/Feedback.svelte`, `#lib/ui/Icon.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `QuizPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
 	import Award from '@lucide/svelte/icons/award';
-	import ProseDoc from '$lib/prose/ProseDoc.svelte';
+	import ProseDoc from '#lib/prose/ProseDoc.svelte';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
-	import Button from '$lib/ui/Button.svelte';
-	import Feedback from '$lib/ui/Feedback.svelte';
-	import Icon from '$lib/ui/Icon.svelte';
-	import { api } from '$lib/lesson/api';
+	import Button from '#lib/ui/Button.svelte';
+	import Feedback from '#lib/ui/Feedback.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
+	import { api } from '#lib/lesson/api.js';
 	import { gradeItem, startAttempt, submitAttempt } from './attempts';
 	import type { QuizSnapshot } from './types';
-	import type { ProseDoc as ProseDocType } from '$lib/prose/types';
+	import type { ProseDoc as ProseDocType } from '#lib/prose/types.js';
 
 	// `activityId` scopes attempt start/resume; `snapshot` is this quiz's stripped content; `post`
 	// defaults to the real API client but is overridable so specs can inject a fake.

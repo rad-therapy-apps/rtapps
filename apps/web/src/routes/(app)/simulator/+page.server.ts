@@ -15,12 +15,12 @@
  * How it fits the project: `(app)/+layout.server.ts` guarantees a signed-in user. Each entry
  * links to `(app)/subjects/[slug]/activities/[id]`, the same player route as the Games shelf.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SdkSlugOut`).
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SdkSlugOut`).
  * Used by: `+page.svelte` (this route); driven by `apps/web/e2e/simulator.e2e.ts`,
  * `long-tail.e2e.ts` and `ui.e2e.ts`.
  */
 import type { RequestEvent } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

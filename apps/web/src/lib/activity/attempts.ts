@@ -13,13 +13,13 @@
  * lessons to the four practice-activity kinds (plan 3a Task 14). `POST /activities/{id}/attempts`
  * resumes an in-progress attempt (with its saved items) rather than starting a second one. See
  * `docs/03-architecture.md` §4.4.
- * Depends on: `$lib/lesson/api` (`api.POST`'s type, for `PostFn`), `$lib/prose/types`
+ * Depends on: `#lib/lesson/api` (`api.POST`'s type, for `PostFn`), `#lib/prose/types`
  * (`ProseDoc`), `@rtapps/api-client`.
  * Used by: `QuizPlayer.svelte`, `FlashcardPlayer.svelte`, `ExternalPlayer.svelte`, `attempts.test.ts`.
  */
-import { api } from '$lib/lesson/api';
+import { api } from '#lib/lesson/api.js';
 import type { components } from '@rtapps/api-client';
-import type { ProseDoc } from '$lib/prose/types';
+import type { ProseDoc } from '#lib/prose/types.js';
 
 type AttemptOut = components['schemas']['AttemptOut'];
 type ItemGradeOut = components['schemas']['ItemGradeOut'];

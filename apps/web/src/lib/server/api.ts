@@ -9,16 +9,17 @@
  * sessions) — `web` calls `api:8000` directly over the Docker network and relays the session
  * cookie both directions so the browser only ever talks to one origin. See
  * `docs/03-architecture.md` §4.1/§4.2.
- * Depends on: `@sveltejs/kit` (`RequestEvent`), `$env/dynamic/private` (`API_INTERNAL_URL`,
+ * Depends on: `@sveltejs/kit` (`RequestEvent`), `$app/env/private` (`API_INTERNAL_URL`,
  * `ORIGIN`).
  * Used by: `hooks.server.ts` and every `+layout.server.ts`/`+page.server.ts` under
  * `apps/web/src/routes` that calls the API (auth, subjects, lessons, health).
  */
 import type { RequestEvent } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 
-const API_BASE = `${env.API_INTERNAL_URL ?? 'http://api:8000'}/api/v1`;
-const ORIGIN = env.ORIGIN ?? 'http://localhost:8080';
+import { API_INTERNAL_URL, ORIGIN } from '$app/env/private';
+
+const API_BASE = `${API_INTERNAL_URL ?? 'http://api:8000'}/api/v1`;
+const ORIGIN_HEADER = ORIGIN ?? 'http://localhost:8080';
 
 export type ApiInit = RequestInit & { cookie?: string };
 
@@ -64,7 +65,7 @@ export async function apiFetch(
 	h.set('x-request-id', event.locals.requestId);
 	if (!h.has('accept')) h.set('accept', 'application/json');
 	// The API's CSRF check (ADR-0002) allow-lists Origin on non-GET requests only; GET is never mutating by convention.
-	if ((rest.method ?? 'GET').toUpperCase() !== 'GET') h.set('origin', ORIGIN);
+	if ((rest.method ?? 'GET').toUpperCase() !== 'GET') h.set('origin', ORIGIN_HEADER);
 	return event.fetch(`${API_BASE}${path}`, { ...rest, headers: h });
 }
 

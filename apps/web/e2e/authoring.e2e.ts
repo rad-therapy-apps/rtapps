@@ -9,7 +9,7 @@
  * see playwright.config.ts) with real S3 storage (SeaweedFS), so the presign → PUT → confirm media flow actually
  * writes an object; role/label/testid locators (no CSS selectors) except for the two places with
  * no accessible name to hook into — the TipTap contenteditable stem editor (no aria-label; see
- * `$lib/author/RichTextEditor.svelte`) and the page-section scoping for the lesson editor's Edit
+ * `#lib/author/RichTextEditor.svelte`) and the page-section scoping for the lesson editor's Edit
  * tab (each page has no test id of its own) — both documented inline below. The knowledge check
  * this test edits is deliberately `lq_page5_1` (page index 4, "Why Tumor Hypoxia Matters
  * Clinically"), NOT `lq_page2_1` (page index 1) — `lesson.e2e.ts` answers `lq_page2_1` and
@@ -25,7 +25,7 @@
  * brief describes: it exercises the full authoring API + UI (dashboard, lesson editor, media
  * presign flow, publish) landed across Tasks 8-17, plus the seeded MU calculator (Task 11/17).
  * `docs/03-architecture.md` §7 (authoring), §11 (End-to-end row).
- * Works with: `./helpers` (signIn, signOut); `apps/api/app/seed.py` (`rbe-and-oer`'s import_notes
+ * Works with: `./helpers` (educatorPage, signIn); `apps/api/app/seed.py` (`rbe-and-oer`'s import_notes
  * and two knowledge checks, the seeded `pdd_6mv` data table and "MU calculator" activity);
  * `./fixtures/pixel.png` (a real 1x1 PNG, committed so the upload is a real file, not a fabricated
  * buffer). Used by: `make e2e` and the CI `e2e` job in `.github/workflows/pr.yml`.
@@ -33,9 +33,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
-import { signIn, signOut } from './helpers';
+import { educatorPage, signIn } from './helpers';
 
-const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
 const STUDENT = { email: 'student@example.com', password: 'rtapps-dev-password' };
 
 const FIXTURE_PNG = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/pixel.png');
@@ -45,27 +44,28 @@ const EDITED_STEM =
 const CHANGE_NOTE = 'Fixed the hypoxia knowledge check and added a figure (authoring e2e)';
 
 test('an educator fixes a needs-review lesson and a student sees the published edit', async ({
-	page
+	page,
+	browser
 }) => {
+	const educator = await educatorPage(browser);
 	// The only dialog this flow ever triggers is PublishPanel's `confirm()` before publishing.
-	page.on('dialog', (dialog) => dialog.accept());
+	educator.on('dialog', (dialog) => dialog.accept());
 
 	// --- Educator: open rbe-and-oer from the needs-review queue ---
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.goto('/author');
+	await educator.goto('/author');
 	// The seed's re-scanned migrated content always flags some pages (Task 5) — the queue is
 	// never empty, and rbe-and-oer (import_notes: highlight→bold) is always one of them.
-	await expect(page.getByRole('heading', { name: /Needs review \([1-9]\d*\)/ })).toBeVisible();
+	await expect(educator.getByRole('heading', { name: /Needs review \([1-9]\d*\)/ })).toBeVisible();
 	// The needs-review section's own link (not the "Subjects" section further down the same
 	// dashboard, which links the same lesson without the "first in queue" framing).
-	await page.getByRole('link', { name: 'RBE and OER' }).first().click();
-	await expect(page).toHaveURL(/\/author\/lessons\//);
+	await educator.getByRole('link', { name: 'RBE and OER' }).first().click();
+	await expect(educator).toHaveURL(/\/author\/lessons\//);
 
 	// Edit tab is active by default; each of the lesson's 7 pages is a direct-child <section
 	// class="page"> with no test id of its own (Task 15 predates the e2e), so page index is the
 	// only stable way to reach a specific one — matches lesson.e2e.ts's own reliance on the same
 	// fixed page order ("Page 1 of 7" ... "Page 7 of 7").
-	const editorPages = page.locator('.lesson-editor > .page');
+	const editorPages = educator.locator('.lesson-editor > .page');
 
 	// Page index 4 ("Why Tumor Hypoxia Matters Clinically") carries lq_page5_1, untouched by
 	// lesson.e2e.ts — pick a different correct answer (index 0 -> 1) and rewrite the stem.
@@ -79,13 +79,13 @@ test('an educator fixes a needs-review lesson and a student sees the published e
 		.locator('.field', { hasText: 'Question' })
 		.locator('[contenteditable="true"]');
 	await stemEditor.click();
-	await page.keyboard.press('ControlOrMeta+A');
-	await page.keyboard.type(EDITED_STEM);
+	await educator.keyboard.press('ControlOrMeta+A');
+	await educator.keyboard.type(EDITED_STEM);
 
 	// Page index 0 ("Not All Radiation Damages Equally") is rich_text-only — insert the fixture
 	// image into its one block.
 	const introPage = editorPages.nth(0);
-	const fileChooserPromise = page.waitForEvent('filechooser');
+	const fileChooserPromise = educator.waitForEvent('filechooser');
 	await introPage.getByRole('button', { name: 'Image' }).click();
 	const fileChooser = await fileChooserPromise;
 	await fileChooser.setFiles(FIXTURE_PNG);
@@ -96,38 +96,38 @@ test('an educator fixes a needs-review lesson and a student sees the published e
 	// on `saving`, not just `dirty`), so waiting for that alone races ahead of the request itself;
 	// waiting for the PUT's own response is what actually proves the save landed before Preview
 	// (below) reads the working copy.
-	const saveButton = page.getByRole('button', { name: 'Save' });
+	const saveButton = educator.getByRole('button', { name: 'Save' });
 	await expect(saveButton).toBeEnabled();
-	const savePut = page.waitForResponse(
+	const savePut = educator.waitForResponse(
 		(res) => res.request().method() === 'PUT' && res.url().endsWith('/pages')
 	);
 	await saveButton.click();
 	await savePut;
-	await expect(page.getByRole('alert')).toHaveCount(0);
+	await expect(educator.getByRole('alert')).toHaveCount(0);
 	await expect(saveButton).toBeDisabled(); // dirty -> false after the successful save above
 
 	// Preview: fetches the working copy's stripped snapshot fresh: page to index 4 and see the
 	// edited stem rendered through the same student ProseDoc renderer.
-	await page.getByRole('tab', { name: 'Preview' }).click();
+	await educator.getByRole('tab', { name: 'Preview' }).click();
 	for (let i = 0; i < 4; i++) {
-		await page.getByRole('button', { name: 'Next' }).click();
+		await educator.getByRole('button', { name: 'Next' }).click();
 	}
-	await expect(page.getByText(EDITED_STEM)).toBeVisible();
+	await expect(educator.getByText(EDITED_STEM)).toBeVisible();
 
 	// Publish with a change note; the dialog is auto-accepted at the top of this test.
-	await page.getByRole('tab', { name: 'Publish' }).click();
-	await page.getByLabel('Change note').fill(CHANGE_NOTE);
-	await page.getByRole('button', { name: 'Publish' }).click();
-	await expect(page.getByText(CHANGE_NOTE)).toBeVisible(); // now in the version history list
-	await expect(page.getByRole('alert')).toHaveCount(0);
+	await educator.getByRole('tab', { name: 'Publish' }).click();
+	await educator.getByLabel('Change note').fill(CHANGE_NOTE);
+	await educator.getByRole('button', { name: 'Publish' }).click();
+	await expect(educator.getByText(CHANGE_NOTE)).toBeVisible(); // now in the version history list
+	await expect(educator.getByRole('alert')).toHaveCount(0);
 
 	// The dashboard's needs-review queue no longer lists this lesson (publish clears import_notes).
-	await page.goto('/author');
-	const needsReviewSection = page
+	await educator.goto('/author');
+	const needsReviewSection = educator
 		.locator('section')
-		.filter({ has: page.getByRole('heading', { name: /Needs review/ }) });
+		.filter({ has: educator.getByRole('heading', { name: /Needs review/ }) });
 	await expect(needsReviewSection.getByRole('link', { name: 'RBE and OER' })).toHaveCount(0);
-	await signOut(page);
+	await educator.context().close();
 
 	// --- Student: the published edit, including the image resolving through /api/v1/media/ ---
 	await signIn(page, STUDENT.email, STUDENT.password);

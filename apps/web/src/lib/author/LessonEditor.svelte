@@ -5,8 +5,8 @@
 	Used here and why: editor state is one `$state` array of `ClientPage` (the `AuthorPage` shape
 	plus a per-page and per-block `instanceId` — see `./types.ts`); every mutation handler sets
 	`dirty = true` directly rather than deriving it via a deep-compare (cheap, and matches the
-	brief). `put` defaults to the real API client (`$lib/author/api`'s `api.PUT`) but is
-	overridable, the same injectable-client pattern `$lib/activity/attempts.ts`'s players use for
+	brief). `put` defaults to the real API client (`#lib/author/api`'s `api.PUT`) but is
+	overridable, the same injectable-client pattern `#lib/activity/attempts.ts`'s players use for
 	`post`, so `LessonEditor.svelte.spec.ts` can assert on the exact PUT body without a network
 	call. `save` is busy-guarded with try/catch/finally so a failed request can never wedge the
 	button (the plan-3a players' rule — see `KnowledgeCheck.svelte`/`LessonPager.svelte`). The
@@ -47,8 +47,8 @@
 		ClientBlock
 	} from './types';
 	import type { ProseDoc } from '../prose/types';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import type { components } from '@rtapps/api-client';
 
 	type PagesIn = components['schemas']['PagesIn'];
@@ -124,7 +124,8 @@
 	let saveError = $state<string | undefined>(undefined);
 	let uploading = $state(false);
 
-	beforeNavigate(({ cancel }) => {
+	beforeNavigate(({ cancel, shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (dirty && !confirm('Discard unsaved changes?')) cancel();
 	});
 
@@ -206,9 +207,13 @@
 	function updateBlock(pageIndex: number, blockIndex: number, next: ClientBlock) {
 		pages = pages.map((page, i) =>
 			i === pageIndex
-				? { ...page, blocks: page.blocks.map((b, bi) => (bi === blockIndex ? next : b)) }
+				? {
+						...page,
+						blocks: page.blocks.map((b, bi) => (bi === blockIndex ? next : b))
+					}
 				: page
 		);
+
 		markDirty();
 	}
 
@@ -322,9 +327,11 @@
 					{/if}
 					<div class="block-controls">
 						<Button onclick={() => moveBlock(pi, bi, -1)} disabled={bi === 0}>Move block up</Button>
+
 						<Button onclick={() => moveBlock(pi, bi, 1)} disabled={bi === page.blocks.length - 1}
 							>Move block down</Button
 						>
+
 						<Button
 							variant="danger"
 							onclick={() => deleteBlock(pi, bi)}

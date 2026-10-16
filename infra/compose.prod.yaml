@@ -77,6 +77,9 @@ services:
     image: ${IMAGE_REPO:-ghcr.io/rad-therapy-apps/rtapps}-web:${IMAGE_TAG:-latest}
     environment:
       API_INTERNAL_URL: http://api:8000
+      # Only for src/lib/server/api.ts (the Origin header it sends on server-side API POSTs, for the
+      # API's CSRF check). adapter-node 6 no longer reads ORIGIN: it derives the site origin from
+      # the Host header (preserved by Caddy) with an https default, which matches Cloudflare -> Caddy -> web.
       ORIGIN: ${PUBLIC_ORIGIN}
       PORT: "3000"
       SENTRY_DSN: ${SENTRY_DSN:-}  # empty default keeps Sentry disabled when unset

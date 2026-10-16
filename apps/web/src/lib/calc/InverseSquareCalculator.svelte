@@ -7,12 +7,12 @@
 	nothing-to-attempt/grade convention (a calculator is not attemptable, ADR/Task 11).
 	How it fits the project: plan 3c Task 2 — one of four formula-calculator players rendered via
 	`./registry`'s `inverse_square` entry; formula in `./formulas` (Task 1).
-	Depends on: `./CalcShell.svelte`, `$lib/ui/Alert.svelte`, `./formulas` (`inverseSquare`), `./registry` (`CalcTables`, type only).
+	Depends on: `./CalcShell.svelte`, `#lib/ui/Alert.svelte`, `./formulas` (`inverseSquare`), `./registry` (`CalcTables`, type only).
 	Used by: `./registry`, `./TrivialCalculators.svelte.spec.ts`.
 -->
 <script lang="ts">
 	import CalcShell from './CalcShell.svelte';
-	import Alert from '$lib/ui/Alert.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
 	import { inverseSquare } from './formulas';
 	import type { CalcTables } from './registry';
 

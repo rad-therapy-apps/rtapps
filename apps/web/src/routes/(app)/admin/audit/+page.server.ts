@@ -10,10 +10,10 @@
  * How it fits the project: `guard.ts` already restricts `/admin/*` to the admin role, so this
  * page assumes the caller is an admin. `docs/03-architecture.md` §7 (`GET admin audit-log`).
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`AuditOut`). Used by:
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`AuditOut`). Used by:
  * `+page.svelte` (this route).
  */
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

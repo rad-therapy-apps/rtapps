@@ -11,11 +11,11 @@
  * educator/admin before this route runs; the API's own membership check enforces the 403
  * (FR-E-03). `docs/03-architecture.md` §7 (`cohorts/{id}/students/{uid}`).
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`StudentDetailOut`). Used by:
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`StudentDetailOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/educator/cohorts/[id]/+page.svelte`.
  */
-import { apiFetch } from '$lib/server/api';
-import { expectOk } from '$lib/server/expect';
+import { apiFetch } from '#lib/server/api.js';
+import { expectOk } from '#lib/server/expect.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

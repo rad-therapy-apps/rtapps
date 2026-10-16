@@ -14,14 +14,14 @@
  * A successful change clears the flag API-side, so the next request's redirect check no longer
  * fires. `docs/03-architecture.md` §4.2, §7 (`auth/change-password`).
  *
- * Works with: `$lib/server/api` (`apiJson`), `$lib/server/auth-forms` (`problemMessage`),
+ * Works with: `#lib/server/api` (`apiJson`), `#lib/server/auth-forms` (`problemMessage`),
  * `@rtapps/api-client` (`ChangePasswordIn`). Used by: `+page.svelte` (this route); the
  * forced-change redirect in `../../../hooks.server.ts`.
  */
 import { fail, redirect } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
-import { apiJson } from '$lib/server/api';
-import { problemMessage } from '$lib/server/auth-forms';
+import { apiJson } from '#lib/server/api.js';
+import { problemMessage } from '#lib/server/auth-forms.js';
 import type { components } from '@rtapps/api-client';
 import type { Actions } from './$types';
 

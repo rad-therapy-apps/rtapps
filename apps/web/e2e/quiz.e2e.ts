@@ -18,16 +18,14 @@
  * attempt/grade/badge/resume), FR-E-06 (activity stats), FR-E-08 (CSV export). Requires
  * `make seed` first (the "Demo quiz" activity, the educator account, and the demo cohort); the
  * students are created here.
- * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under
+ * Works with: `./helpers` (educatorPage, registerStudent, signOut); the pages under
  * apps/web/src/routes ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id],
  * (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/activities/[aid]) and
- * `$lib/activity/QuizPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
+ * `#lib/activity/QuizPlayer.svelte`. Used by: `make e2e` and the CI `e2e` job in
  * .github/workflows/pr.yml.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { registerStudent, signIn, signOut } from './helpers';
-
-const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
+import { educatorPage, registerStudent, signOut } from './helpers';
 
 /** Navigates a signed-in student from /home to the seeded Demo quiz via Subjects → Radiation
  *  Biology → Quizzes, asserting the first question is showing. */
@@ -40,7 +38,8 @@ async function openDemoQuiz(page: Page): Promise<void> {
 }
 
 test('a student answers the demo quiz, scores 50%, and the educator sees the stats and CSV', async ({
-	page
+	page,
+	browser
 }) => {
 	const stamp = Date.now();
 	const student = {
@@ -74,10 +73,10 @@ test('a student answers the demo quiz, scores 50%, and the educator sees the sta
 	await signOut(page);
 
 	// Educator: Demo cohort → the Demo quiz row's Stats link.
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByRole('link', { name: 'Demo cohort' }).click();
-	await page
+	const educator = await educatorPage(browser);
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByRole('link', { name: 'Demo cohort' }).click();
+	await educator
 		.getByRole('row')
 		.filter({ hasText: 'Demo quiz' })
 		.getByRole('link', { name: 'Stats' })
@@ -85,7 +84,7 @@ test('a student answers the demo quiz, scores 50%, and the educator sees the sta
 
 	// Summary counts include this run's student, on top of the ten seed students (and whatever
 	// earlier e2e runs left behind) — assert a floor, not an exact total (see file header).
-	const summary = await page.getByText(/Attempts: \d+ · Students attempted: \d+/).textContent();
+	const summary = await educator.getByText(/Attempts: \d+ · Students attempted: \d+/).textContent();
 	const attempts = Number(summary!.match(/Attempts: (\d+)/)![1]);
 	const studentsAttempted = Number(summary!.match(/Students attempted: (\d+)/)![1]);
 	expect(attempts).toBeGreaterThanOrEqual(11);
@@ -93,15 +92,16 @@ test('a student answers the demo quiz, scores 50%, and the educator sees the sta
 
 	// The items table (the second of the page's two tables — see file header) has one row per
 	// question regardless of how many students have attempted.
-	const itemRows = page.locator('table').nth(1).locator('tbody tr');
+	const itemRows = educator.locator('table').nth(1).locator('tbody tr');
 	await expect(itemRows).toHaveCount(4);
 
 	// CSV export: fetch the download link directly and check the exact header row (Task 10).
-	const csvHref = await page.getByTestId('csv-link').getAttribute('href');
-	const csv = await page.request.get(csvHref!);
+	const csvHref = await educator.getByTestId('csv-link').getAttribute('href');
+	const csv = await educator.request.get(csvHref!);
 	expect(csv.status()).toBe(200);
 	const firstLine = (await csv.text()).split(/\r?\n/)[0];
 	expect(firstLine).toBe('item,label,answered,correct,percent_correct');
+	await educator.context().close();
 });
 
 test('reloading mid-quiz resumes the player at the next unanswered question', async ({ page }) => {

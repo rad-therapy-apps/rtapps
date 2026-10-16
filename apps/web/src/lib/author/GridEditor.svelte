@@ -21,8 +21,8 @@
 	Used by: `routes/(app)/author/data-tables/+page.svelte`, `GridEditor.svelte.spec.ts`.
 -->
 <script lang="ts">
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import type { Grid, GridRow } from './types';
 
 	let { initialGrid, onchange }: { initialGrid: Grid; onchange: (next: Grid) => void } = $props();

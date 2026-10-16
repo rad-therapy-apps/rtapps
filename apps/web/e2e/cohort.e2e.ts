@@ -12,18 +12,17 @@
  * How it fits the project: docs/03-architecture.md §11 (End-to-end row); FR-E-01/02/03 (cohort
  * create/join, analytics, student detail). Requires `make seed` first (the educator account and
  * the `rbe-and-oer` lesson); the students and cohort are created here.
- * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under apps/web/src/routes
+ * Works with: `./helpers` (educatorPage, registerStudent, signOut); the pages under apps/web/src/routes
  * ((app)/educator, (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/students/[uid],
  * (app)/home) and their form actions (create, join, rotate). Used by: `make e2e` and the CI `e2e`
  * job in .github/workflows/pr.yml.
  */
 import { test, expect } from '@playwright/test';
-import { registerStudent, signIn, signOut } from './helpers';
-
-const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
+import { educatorPage, registerStudent, signOut } from './helpers';
 
 test('educator creates a cohort, a student joins and completes a lesson, the educator sees it', async ({
-	page
+	page,
+	browser
 }) => {
 	const stamp = Date.now();
 	const cohortName = `E2E cohort ${stamp}`;
@@ -36,15 +35,14 @@ test('educator creates a cohort, a student joins and completes a lesson, the edu
 	};
 
 	// Educator: create the cohort and read its join code.
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByLabel('Cohort name').fill(cohortName);
-	await page.getByRole('button', { name: 'Create cohort' }).click();
-	await expect(page.getByRole('heading', { name: cohortName })).toBeVisible();
-	const code = (await page.getByTestId('join-code').textContent())!.trim();
+	const educator = await educatorPage(browser);
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByLabel('Cohort name').fill(cohortName);
+	await educator.getByRole('button', { name: 'Create cohort' }).click();
+	await expect(educator.getByRole('heading', { name: cohortName })).toBeVisible();
+	const code = (await educator.getByTestId('join-code').textContent())!.trim();
 	expect(code).toMatch(/^[A-Z2-9]{6}$/);
-	const cohortUrl = page.url();
-	await signOut(page);
+	const cohortUrl = educator.url();
 
 	// Student: register, join with the code, complete the lesson with one correct answer.
 	await registerStudent(page, student);
@@ -67,22 +65,21 @@ test('educator creates a cohort, a student joins and completes a lesson, the edu
 	await signOut(page);
 
 	// Educator: the overview shows the student at 50 %, and the detail shows the item response.
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.goto(cohortUrl);
-	const row = page.getByRole('row').filter({ hasText: student.email });
+	await educator.goto(cohortUrl);
+	const row = educator.getByRole('row').filter({ hasText: student.email });
 	await expect(row).toContainText('50.0%');
 	await row.getByRole('link', { name: student.name }).click();
-	await expect(page.getByRole('heading', { name: student.name })).toBeVisible();
+	await expect(educator.getByRole('heading', { name: student.name })).toBeVisible();
 	// `cell` (not `getByText`) because the activity title also appears in the attempts
 	// `<summary>` below, which would otherwise make this locator ambiguous.
-	await expect(page.getByRole('cell', { name: 'RBE and OER' })).toBeVisible();
-	await expect(page.getByText('lq_page2_1')).toBeVisible();
+	await expect(educator.getByRole('cell', { name: 'RBE and OER' })).toBeVisible();
+	await expect(educator.getByText('lq_page2_1')).toBeVisible();
 
 	// Rotate the code; the old one is refused for a second student.
-	await page.goto(cohortUrl);
-	await page.getByRole('button', { name: 'Rotate code' }).click();
-	await expect(page.getByTestId('join-code')).not.toHaveText(code);
-	await signOut(page);
+	await educator.goto(cohortUrl);
+	await educator.getByRole('button', { name: 'Rotate code' }).click();
+	await expect(educator.getByTestId('join-code')).not.toHaveText(code);
+	await educator.context().close();
 	await registerStudent(page, {
 		email: `e2e-cohort-b-${stamp}@example.edu`,
 		password: student.password,

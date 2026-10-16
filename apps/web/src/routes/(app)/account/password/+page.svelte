@@ -11,15 +11,15 @@
 	can change their password voluntarily via the nav's "Account" link.
 	`docs/03-architecture.md` §4.2, §7.
 
-	Works with: `$app/forms`, `$lib/ui/{Alert,Button,Card,Field}.svelte`. Used by: linked from `+layout.svelte` ("Account"); reached via the
+	Works with: `$app/forms`, `#lib/ui/{Alert,Button,Card,Field}.svelte`. Used by: linked from `+layout.svelte` ("Account"); reached via the
 	forced-change redirect in `hooks.server.ts`.
 -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();

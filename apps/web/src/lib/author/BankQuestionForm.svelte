@@ -15,7 +15,7 @@
 	Used by: `QuestionPicker.svelte`, `routes/(app)/author/quizzes/[id]/+page.svelte`.
 -->
 <script lang="ts">
-	import Button from '$lib/ui/Button.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	export type BankQuestionValue = {

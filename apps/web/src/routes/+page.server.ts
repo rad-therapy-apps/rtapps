@@ -9,11 +9,11 @@
  * never requires a user; this `load` still checks `locals.user` itself to bounce signed-in users
  * onward to `/home` rather than showing them the marketing/health page again.
  *
- * Works with: `$lib/server/api` (`apiFetch`). Used by: `+page.svelte` (this route).
+ * Works with: `#lib/server/api` (`apiFetch`). Used by: `+page.svelte` (this route).
  */
 import { redirect } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 
 export async function load({ fetch, locals }) {
 	// Already signed in: skip the landing page entirely.

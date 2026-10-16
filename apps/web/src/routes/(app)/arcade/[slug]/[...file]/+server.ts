@@ -7,13 +7,13 @@
  * How it fits the project: completes the arcade game serving feature started in Task 3 —
  * pairs with hooks.server.ts's deny-by-default guard to require user authentication before
  * serving any arcade files. Tasks 4/5/8 build on this route's URL shape `/arcade/<slug>/`.
- * Depends on: `$lib/server/arcade` (resolveArcadeFile, readArcadeFile), `@sveltejs/kit` (error,
+ * Depends on: `#lib/server/arcade` (resolveArcadeFile, readArcadeFile), `@sveltejs/kit` (error,
  * RequestHandler types), `node:path` (path resolution).
  * Used by: SvelteKit router, hooks.server.ts authorization flow.
  */
 import path from 'node:path';
 import { error } from '@sveltejs/kit';
-import { cacheControlFor, readArcadeFile, resolveArcadeFile } from '$lib/server/arcade';
+import { cacheControlFor, readArcadeFile, resolveArcadeFile } from '#lib/server/arcade.js';
 import type { RequestHandler } from './$types';
 
 // cwd is apps/web in dev/tests and /app in the production image (Dockerfile WORKDIR),

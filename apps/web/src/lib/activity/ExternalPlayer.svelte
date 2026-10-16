@@ -15,23 +15,23 @@
 	once, and this component submits that `score` (never a denominator — the server clamps
 	against the pinned snapshot's max_score, see `attempts.ts`'s `submitExternalAttempt`). No
 	pass/fail badge is shown: 4a treats games as practice, not assessment.
-	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/
-	`submitExternalAttempt`), `./types` (`ExternalSnapshot`), `$lib/ui/Alert.svelte`,
-	`$lib/ui/Button.svelte`.
+	Depends on: `#lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/
+	`submitExternalAttempt`), `./types` (`ExternalSnapshot`), `#lib/ui/Alert.svelte`,
+	`#lib/ui/Button.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `ExternalPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { api } from '$lib/lesson/api';
+	import { api } from '#lib/lesson/api.js';
 	import {
 		startAttempt,
 		submitAttempt,
 		submitExternalAttempt,
 		type PostFn
-	} from '$lib/activity/attempts';
-	import type { ExternalSnapshot } from '$lib/activity/types';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	} from '#lib/activity/attempts.js';
+	import type { ExternalSnapshot } from '#lib/activity/types.js';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
 
 	let {
 		activityId,

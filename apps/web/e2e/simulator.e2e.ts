@@ -31,10 +31,10 @@
  * external activities (config `sdk_slug` "sim-hub-qa" scored max 4, "sim-linac-fraction" and
  * "sim-ct-scan" completion-only); the `GET /activities/by-sdk-slug/{slug}` resolver; the live
  * Simulator entry on the Simulator tab, `(app)/simulator` (`data-testid="simulator-entry"`);
- * the arcade media cache header (`cacheControlFor` in `$lib/server/arcade.ts`).
+ * the arcade media cache header (`cacheControlFor` in `#lib/server/arcade.ts`).
  * Works with: `./helpers` (registerStudent, signIn); the pages under apps/web/src/routes
  * ((app)/simulator, (app)/subjects/[slug]/activities/[id], (app)/educator/cohorts/[id],
- * (app)/educator/cohorts/[id]/activities/[aid]) and `$lib/activity/ExternalPlayer.svelte`; the
+ * (app)/educator/cohorts/[id]/activities/[aid]) and `#lib/activity/ExternalPlayer.svelte`; the
  * static `apps/web/static/arcade/rtapps-sdk.js` and the `apps/web/arcade/sim-hub`/`linac-ct` apps
  * it's embedded in. Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.
  */
@@ -94,8 +94,9 @@ test.describe
 		await studentPage.getByTestId('simulator-entry').click();
 
 		// Lands on the hub activity's player (the resolver's own subject_slug/activity_id, not
-		// hardcoded here) — asserted by URL shape.
-		await expect(studentPage).toHaveURL(/\/activities\//);
+		// hardcoded here) — asserted by URL shape. The URL changes only once that page's load has
+		// finished, which can pass the default 5s on CI while another spec runs sim-hub's WebGL.
+		await expect(studentPage).toHaveURL(/\/activities\//, { timeout: 15_000 });
 
 		// #watermark is static markup, present the instant the iframe's document parses — waiting
 		// on it confirms the iframe has actually navigated before reaching into its frame, the
@@ -215,7 +216,7 @@ test('signed-out access to the simulator redirects to login, and an authed asset
 	// assets/ct-1.png is one of the five CT scan PNGs the linac-ct app's own index.html
 	// references relatively (Task 7's byte-for-byte extraction) — a real, page-referenced asset
 	// URL, not an arbitrary path. Non-HTML arcade files get an hour of private caching
-	// (cacheControlFor in $lib/server/arcade.ts); HTML itself stays uncached.
+	// (cacheControlFor in #lib/server/arcade.ts); HTML itself stays uncached.
 	const res = await page.request.get('/arcade/linac-ct/assets/ct-1.png');
 	expect(res.status()).toBe(200);
 	expect(res.headers()['cache-control']).toBe('private, max-age=3600');

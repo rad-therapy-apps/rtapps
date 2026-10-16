@@ -17,19 +17,19 @@
 	each item and the final submit both call the API directly from the client over the session
 	cookie (ADR-0002); the pages/blocks themselves are ADR-0003's snapshot shape. See
 	`docs/03-architecture.md` §4.3/§4.4.
-	Depends on: `$lib/prose/ProseDoc.svelte`, `$lib/ui/Button.svelte` (pager controls), `./KnowledgeCheck.svelte`, `./api`, `./score`
+	Depends on: `#lib/prose/ProseDoc.svelte`, `#lib/ui/Button.svelte` (pager controls), `./KnowledgeCheck.svelte`, `./api`, `./score`
 	(`formatScore`), `./snapshot` (`lessonSnapshot`), `$app/paths` (`resolve`), `@rtapps/api-client`.
 	Used by: `apps/web/src/routes/(app)/lessons/[slug]/+page.svelte`,
 	`LessonPager.svelte.spec.ts`, driven end-to-end by `apps/web/e2e/lesson.e2e.ts`.
 -->
 <script lang="ts">
-	import ProseDoc from '$lib/prose/ProseDoc.svelte';
+	import ProseDoc from '#lib/prose/ProseDoc.svelte';
 	import KnowledgeCheck from './KnowledgeCheck.svelte';
 	import { api } from './api';
 	import { formatScore } from './score';
 	import { lessonSnapshot } from './snapshot';
 	import { resolve } from '$app/paths';
-	import Button from '$lib/ui/Button.svelte';
+	import Button from '#lib/ui/Button.svelte';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import type { components } from '@rtapps/api-client';
@@ -72,7 +72,7 @@
 	}
 
 	// mediaAssetId -> `/api/v1/media/{id}`, the same authenticated redirect-to-storage route the
-	// TipTap editor's own `AuthorImage` renders (`$lib/author/extensions.ts`) — resolved here
+	// TipTap editor's own `AuthorImage` renders (`#lib/author/extensions.ts`) — resolved here
 	// (not by ProseDoc/ProseNode, which never fetch by id themselves) since this route is the
 	// only rich_text consumer that has images to resolve at all.
 	const images: Record<string, string> = Object.fromEntries(

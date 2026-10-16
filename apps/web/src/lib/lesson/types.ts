@@ -8,12 +8,12 @@
  * JSON object (it's untyped JSON to the API), so `snapshot.ts` casts it to `LessonSnapshot` at
  * one boundary; everything downstream of that cast uses these types. See ADR-0003 and
  * `docs/03-architecture.md` §4.3/§5.
- * Depends on: `$lib/prose/types` (`ProseDoc`, embedded as the rich-text body and the
+ * Depends on: `#lib/prose/types` (`ProseDoc`, embedded as the rich-text body and the
  * knowledge-check stem).
  * Used by: `snapshot.ts` (`lessonSnapshot` return type), `LessonPager.svelte`,
  * `KnowledgeCheck.svelte`, and both `.spec.ts` fixtures in this directory.
  */
-import type { ProseDoc } from '$lib/prose/types';
+import type { ProseDoc } from '#lib/prose/types.js';
 
 export type RichTextBlock = { type: 'rich_text'; body: ProseDoc };
 

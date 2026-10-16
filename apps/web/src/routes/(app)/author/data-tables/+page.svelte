@@ -20,24 +20,24 @@
 	`DataTablePutIn` (Task 11) is what a table save PUTs; `CalculatorCreateIn`/`POST
 	/authoring/calculators` (Task 11) is what the calculator form posts; `PublishPanel` (Task
 	10/15) is reused verbatim.
-	Depends on: `$app/navigation` (`beforeNavigate`), `$lib/author/GridEditor.svelte`,
-	`$lib/author/PublishPanel.svelte`, `$lib/author/api` (`api`), `$lib/author/types` (`Grid`),
-	`$lib/calc/registry` (`CALC_TYPES`).
+	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/GridEditor.svelte`,
+	`#lib/author/PublishPanel.svelte`, `#lib/author/api` (`api`), `#lib/author/types` (`Grid`),
+	`#lib/calc/registry` (`CALC_TYPES`).
 	Used by: reached from `(app)/author`'s dashboard ("Data tables" link).
 -->
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
-	import GridEditor from '$lib/author/GridEditor.svelte';
-	import PublishPanel from '$lib/author/PublishPanel.svelte';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import { api } from '$lib/author/api';
-	import { errorTitle, problemDetail } from '$lib/author/problem';
-	import type { Grid } from '$lib/author/types';
-	import { CALC_TYPES } from '$lib/calc/registry';
+	import GridEditor from '#lib/author/GridEditor.svelte';
+	import PublishPanel from '#lib/author/PublishPanel.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
+	import { api } from '#lib/author/api.js';
+	import { errorTitle, problemDetail } from '#lib/author/problem.js';
+	import type { Grid } from '#lib/author/types.js';
+	import { CALC_TYPES } from '#lib/calc/registry.js';
 	import type { components } from '@rtapps/api-client';
 	import type { PageData } from './$types';
 
@@ -64,7 +64,8 @@
 	let saving = $state(false);
 	let saveError = $state<string | undefined>(undefined);
 
-	beforeNavigate(({ cancel }) => {
+	beforeNavigate(({ cancel, shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (dirty && !confirm('Discard unsaved changes?')) cancel();
 	});
 
@@ -201,10 +202,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Data tables — Author — RTTLearn</title>
-</svelte:head>
-
+<svelte:head><title>Data tables — Author — RTTLearn</title></svelte:head>
 <PageHeader title="Data tables" />
 
 <div class="sections">

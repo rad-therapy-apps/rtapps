@@ -8,17 +8,17 @@
  *
  * How it fits the project: this is the one route in the group that starts an `attempt` — the
  * ADR-0004 integration spine — server-side, up front, so every subsequent grading call from the
- * browser (via `$lib/lesson/api`, used by `KnowledgeCheck.svelte` and `LessonPager.svelte`) has an
+ * browser (via `#lib/lesson/api`, used by `KnowledgeCheck.svelte` and `LessonPager.svelte`) has an
  * `attempt_id` to post against. The lesson snapshot has correct answers stripped by the API before
  * it ever reaches here (ADR-0003, `docs/03-architecture.md` §4.3–4.4).
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`LessonOut`, `AttemptOut`).
- * Used by: `+page.svelte` (this route), which renders `$lib/lesson/LessonPager.svelte`; reached
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`LessonOut`, `AttemptOut`).
+ * Used by: `+page.svelte` (this route), which renders `#lib/lesson/LessonPager.svelte`; reached
  * from `(app)/subjects/[slug]/+page.svelte`; driven end-to-end by
  * `apps/web/e2e/lesson.e2e.ts`.
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

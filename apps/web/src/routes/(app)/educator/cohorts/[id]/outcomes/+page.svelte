@@ -11,14 +11,14 @@
 	How it fits the project: `data.mastery` comes from this route's `load`
 	(`GET cohorts/{id}/outcomes`) (plan 3a Task 15).
 
-	Works with: `$app/paths`, `$lib/cohort/format` (`formatPercent`). Used by: reached from
+	Works with: `$app/paths`, `#lib/cohort/format` (`formatPercent`). Used by: reached from
 	`(app)/educator/cohorts/[id]/+page.svelte`.
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { formatPercent } from '$lib/cohort/format';
-	import Card from '$lib/ui/Card.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import { formatPercent } from '#lib/cohort/format.js';
+	import Card from '#lib/ui/Card.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

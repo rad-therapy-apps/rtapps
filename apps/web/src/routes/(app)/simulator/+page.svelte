@@ -14,7 +14,7 @@
 	subject. Each link opens `(app)/subjects/[slug]/activities/[id]`, the same player route the
 	Games shelf uses, so attempts and SDK scoring are unchanged.
 
-	Works with: `$app/paths`, `$lib/ui/*`, `./+page.server.ts` (`hub`, `linacConsole`, `gantry`).
+	Works with: `$app/paths`, `#lib/ui/*`, `./+page.server.ts` (`hub`, `linacConsole`, `gantry`).
 	Used by: `AppShell.svelte`'s "Simulator" nav link; `apps/web/e2e/simulator.e2e.ts`,
 	`long-tail.e2e.ts`, `ui.e2e.ts`.
 -->
@@ -23,9 +23,9 @@
 	import Building2 from '@lucide/svelte/icons/building-2';
 	import Monitor from '@lucide/svelte/icons/monitor';
 	import RotateCw from '@lucide/svelte/icons/rotate-cw';
-	import Card from '$lib/ui/Card.svelte';
-	import Icon from '$lib/ui/Icon.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

@@ -11,16 +11,16 @@
 	the hidden `next` field round-trips the validated (safeNext-checked) redirect target back to
 	the action on submit. `docs/03-architecture.md` §4.2.
 
-	Works with: `$app/forms`, `$app/paths`, `$lib/ui/{Alert,Button,Card,Field}.svelte`. Used by: linked from `+layout.svelte` ("Sign in") and
+	Works with: `$app/forms`, `$app/paths`, `#lib/ui/{Alert,Button,Card,Field}.svelte`. Used by: linked from `+layout.svelte` ("Sign in") and
 	from the register page ("Already have an account?").
 -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

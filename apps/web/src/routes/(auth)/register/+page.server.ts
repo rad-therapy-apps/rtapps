@@ -12,14 +12,14 @@
  * doubles as sign-in — there is no separate "log in after registering" step.
  * `docs/03-architecture.md` §4.2, §7 (`auth/register`).
  *
- * Works with: `$lib/server/api` (`apiFetch`, `relaySetCookie`), `$lib/server/auth-forms`
+ * Works with: `#lib/server/api` (`apiFetch`, `relaySetCookie`), `#lib/server/auth-forms`
  * (`problemMessage`, `safeNext`). Used by: `+page.svelte` (this route); driven end-to-end by
  * `apps/web/e2e/lesson.e2e.ts`, which registers a fresh account before exercising a lesson.
  */
 import { fail, redirect } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
-import { apiFetch, relaySetCookie } from '$lib/server/api';
-import { problemMessage, safeNext } from '$lib/server/auth-forms';
+import { apiFetch, relaySetCookie } from '#lib/server/api.js';
+import { problemMessage, safeNext } from '#lib/server/auth-forms.js';
 import type { Actions, PageServerLoad } from './$types';
 
 // Renders the registration form with a validated `next` redirect target.

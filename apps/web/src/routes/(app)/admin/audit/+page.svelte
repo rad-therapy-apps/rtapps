@@ -2,7 +2,7 @@
 	What this file does: Admin audit log page at `(app)/admin/audit`. Lists audit rows, filterable
 	by action.
 
-	Used here and why: the `$lib/ui` kit (PageHeader, Field, Button, Alert); a plain `GET` form for the action filter so it's a shareable/bookmarkable
+	Used here and why: the `#lib/ui` kit (PageHeader, Field, Button, Alert); a plain `GET` form for the action filter so it's a shareable/bookmarkable
 	URL; Svelte 5 runes (`$props()`); no `use:enhance`/`resolve()` needed — this page has no POST
 	actions or internal links.
 
@@ -14,11 +14,11 @@
 	directly at `/admin/audit`.
 -->
 <script lang="ts">
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

@@ -42,8 +42,8 @@
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.64.0",
 		"@rtapps/schemas": "workspace:*",
-		"@sveltejs/adapter-node": "^5.5.7",
-		"@sveltejs/kit": "^2.63.0",
+		"@sveltejs/adapter-node": "^6.0.0",
+		"@sveltejs/kit": "^3.0.1",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@types/node": "^24.19.1",
 		"@vitest/browser-playwright": "^5.0.3",
@@ -57,11 +57,15 @@
 		"prettier": "^3.9.9",
 		"prettier-plugin-svelte": "^4.1.0",
 		"svelte": "^5.57.2",
-		"svelte-check": "^4.6.0",
+		"svelte-check": "^4.7.5",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.71.1",
 		"vite": "^8.3.4",
 		"vitest": "^5.0.3",
 		"vitest-browser-svelte": "^3.1.0"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	}
 }

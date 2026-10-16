@@ -17,25 +17,25 @@
 	How it fits the project: `data.quiz`/`data.versions`/`data.importNotes` come from this route's
 	`load`; `QuizPutIn` (Task 9) is what `save()` PUTs; `PublishPanel` (Task 10/15) is reused
 	verbatim for the Publish tab.
-	Depends on: `$app/navigation` (`beforeNavigate`), `$lib/author/BankQuestionForm.svelte`,
-	`$lib/author/QuestionPicker.svelte`, `$lib/author/PublishPanel.svelte`, `$lib/author/api`
+	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/BankQuestionForm.svelte`,
+	`#lib/author/QuestionPicker.svelte`, `#lib/author/PublishPanel.svelte`, `#lib/author/api`
 	(`api`).
 	Used by: reached from `(app)/author`'s dashboard.
 -->
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
-	import BankQuestionForm from '$lib/author/BankQuestionForm.svelte';
-	import QuestionPicker from '$lib/author/QuestionPicker.svelte';
-	import PublishPanel from '$lib/author/PublishPanel.svelte';
-	import { api } from '$lib/author/api';
-	import { problemDetail } from '$lib/author/problem';
+	import BankQuestionForm from '#lib/author/BankQuestionForm.svelte';
+	import QuestionPicker from '#lib/author/QuestionPicker.svelte';
+	import PublishPanel from '#lib/author/PublishPanel.svelte';
+	import { api } from '#lib/author/api.js';
+	import { problemDetail } from '#lib/author/problem.js';
 	import type { components } from '@rtapps/api-client';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Tabs from '$lib/ui/Tabs.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Field from '$lib/ui/Field.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Tabs from '#lib/ui/Tabs.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import type { PageData } from './$types';
 
@@ -68,7 +68,8 @@
 	let questionSaving = $state<string | null>(null);
 	let questionSaveError = $state<string | undefined>(undefined);
 
-	beforeNavigate(({ cancel }) => {
+	beforeNavigate(({ cancel, shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (dirty && !confirm('Discard unsaved changes?')) cancel();
 	});
 
@@ -157,10 +158,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.quiz.title} — Author — RTTLearn</title>
-</svelte:head>
-
+<svelte:head><title>{data.quiz.title} — Author — RTTLearn</title></svelte:head>
 <PageHeader title={data.quiz.title} />
 
 <Tabs
@@ -268,15 +266,16 @@
 							<Button
 								variant="secondary"
 								onclick={() => (expandedId = expandedId === question.id ? null : question.id)}
+								>{expandedId === question.id ? 'Collapse' : 'Expand'}</Button
 							>
-								{expandedId === question.id ? 'Collapse' : 'Expand'}
-							</Button>
+
 							<span>{question.stem}</span>
 						</div>
 						<div class="question-controls">
-							<Button variant="ghost" onclick={() => moveQuestion(i, -1)} disabled={i === 0}>
-								Move up
-							</Button>
+							<Button variant="ghost" onclick={() => moveQuestion(i, -1)} disabled={i === 0}
+								>Move up</Button
+							>
+
 							<Button
 								variant="ghost"
 								onclick={() => moveQuestion(i, 1)}

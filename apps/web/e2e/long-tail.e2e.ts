@@ -38,18 +38,17 @@
  * Tasks 2-4: `POST /auth/change-password`, `POST /admin/users/{id}/reset-password`); the forced
  * redirect in `hooks.server.ts`; the CONSOLE_APP_URL hub-door prefetch and the verdict latch
  * (plan 4d Tasks 6/8, `apps/web/arcade/sim-hub/index.html`).
- * Works with: `./helpers` (registerStudent, signIn, signOut); the pages under
+ * Works with: `./helpers` (educatorPage, registerStudent, signIn, signOut); the pages under
  * apps/web/src/routes ((app)/subjects/[slug], (app)/subjects/[slug]/activities/[id],
  * (app)/educator/cohorts/[id], (app)/educator/cohorts/[id]/activities/[aid],
- * (app)/admin/users, (app)/account/password) and `$lib/activity/ExternalPlayer.svelte`; the
+ * (app)/admin/users, (app)/account/password) and `#lib/activity/ExternalPlayer.svelte`; the
  * static `apps/web/static/arcade/rtapps-shim.js`/`rtapps-sdk.js` and the
  * `three-point-setup`/`sim-hub`/`linac-console` apps embedded in. Used by: `make e2e` and the CI
  * `e2e` job in .github/workflows/pr.yml.
  */
 import { test, expect } from '@playwright/test';
-import { registerStudent, signIn, signOut } from './helpers';
+import { educatorPage, registerStudent, signIn, signOut } from './helpers';
 
-const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
 const ADMIN = { email: 'admin@example.com', password: 'rtapps-dev-password' };
 
 /** The shape a games'-shim app exposes (rtapps-shim.js) — completion-only, no numeric score. */
@@ -63,7 +62,7 @@ type SdkGlobal = {
 	CONSOLE_APP_URL?: string | null;
 };
 
-test('an alignment set completion reaches the educator', async ({ page }) => {
+test('an alignment set completion reaches the educator', async ({ page, browser }) => {
 	test.setTimeout(180_000); // three-point-setup loads three.js from a CDN import map; generous headroom for CI's 2-core runner
 
 	const stamp = Date.now();
@@ -109,10 +108,10 @@ test('an alignment set completion reaches the educator', async ({ page }) => {
 	await signOut(page);
 
 	// Educator: Demo cohort → the Three-point setup row's Stats link.
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByRole('link', { name: 'Demo cohort' }).click();
-	await page
+	const educator = await educatorPage(browser);
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByRole('link', { name: 'Demo cohort' }).click();
+	await educator
 		.getByRole('row')
 		.filter({ hasText: 'Three-point setup' })
 		.getByRole('link', { name: 'Stats' })
@@ -120,12 +119,13 @@ test('an alignment set completion reaches the educator', async ({ page }) => {
 
 	// Completion-only row: score "—", percent "Completed" — filtered by this run's stamp-unique
 	// student name, same rationale as the other specs' shared-stack Attempts tables.
-	const attemptRow = page.getByRole('row').filter({ hasText: student.name });
+	const attemptRow = educator.getByRole('row').filter({ hasText: student.name });
 	await expect(attemptRow.locator('td').nth(1)).toHaveText('—');
 	await expect(attemptRow.locator('td').nth(2)).toHaveText('Completed');
+	await educator.context().close();
 });
 
-test('the console door round-trip', async ({ page }) => {
+test('the console door round-trip', async ({ page, browser }) => {
 	test.setTimeout(180_000); // sim-hub is a heavy ~380KB inline three.js bundle; same headroom as simulator.e2e.ts
 
 	const stamp = Date.now();
@@ -189,18 +189,19 @@ test('the console door round-trip', async ({ page }) => {
 	await signOut(page);
 
 	// Educator: Demo cohort → the Treatment console row's Stats link.
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByRole('link', { name: 'Demo cohort' }).click();
-	await page
+	const educator = await educatorPage(browser);
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByRole('link', { name: 'Demo cohort' }).click();
+	await educator
 		.getByRole('row')
 		.filter({ hasText: 'Treatment console' })
 		.getByRole('link', { name: 'Stats' })
 		.click();
 
-	const attemptRow = page.getByRole('row').filter({ hasText: student.name });
+	const attemptRow = educator.getByRole('row').filter({ hasText: student.name });
 	await expect(attemptRow.locator('td').nth(1)).toHaveText('—');
 	await expect(attemptRow.locator('td').nth(2)).toHaveText('Completed');
+	await educator.context().close();
 });
 
 test('forced password change', async ({ browser }) => {
@@ -298,29 +299,28 @@ test('forced password change', async ({ browser }) => {
 	}
 });
 
-test('the QA verdict latch: a rapid double click records only one attempt', async ({ page }) => {
+test('the QA verdict latch: a rapid double click records only one attempt', async ({
+	page,
+	browser
+}) => {
 	test.setTimeout(180_000); // sim-hub is a heavy ~380KB inline three.js bundle; same headroom as simulator.e2e.ts
 
-	// Baseline: the shared stack's current Attempts count for Center QA walkthrough, before this
-	// run's student does anything — same summary text arcade.e2e.ts reads for its floor checks.
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
-	await page.getByRole('link', { name: 'Educator' }).click();
-	await page.getByRole('link', { name: 'Demo cohort' }).click();
-	await page
+	// The educator's stats page for Center QA walkthrough, read at the end. Attempts are counted per
+	// this run's stamp-unique student (one table row per attempt), not as a cohort-wide total:
+	// simulator.e2e.ts records Center QA attempts in the same cohort and can run concurrently.
+	const educator = await educatorPage(browser);
+	await educator.getByRole('link', { name: 'Educator' }).click();
+	await educator.getByRole('link', { name: 'Demo cohort' }).click();
+	await educator
 		.getByRole('row')
 		.filter({ hasText: 'Center QA walkthrough' })
 		.getByRole('link', { name: 'Stats' })
 		.click();
-	// Wait for the navigation to actually land before reading `page.url()` — SvelteKit's
+	// Wait for the navigation to actually land before reading `educator.url()` — SvelteKit's
 	// client-side routing means the URL bar can lag the click by a tick, so capturing it
 	// synchronously right after `.click()` can freeze the *previous* (cohort overview) URL instead.
-	await expect(page).toHaveURL(/\/activities\//);
-	const statsUrl = page.url();
-	const baselineText = await page
-		.getByText(/Attempts: \d+ · Students attempted: \d+/)
-		.textContent();
-	const baselineAttempts = Number(baselineText!.match(/Attempts: (\d+)/)![1]);
-	await signOut(page);
+	await expect(educator).toHaveURL(/\/activities\//);
+	const statsUrl = educator.url();
 
 	const stamp = Date.now();
 	const student = {
@@ -385,13 +385,11 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 	// navigation to /login can take noticeably longer than the default 5s.
 	await signOut(page, { timeout: 20_000 });
 
-	await signIn(page, EDUCATOR.email, EDUCATOR.password);
 	// Retrying poll, not a single read: the stats query can lag the submit above slightly under a
 	// loaded/shared stack.
 	await expect(async () => {
-		await page.goto(statsUrl);
-		const newText = await page.getByText(/Attempts: \d+ · Students attempted: \d+/).textContent();
-		const newAttempts = Number(newText!.match(/Attempts: (\d+)/)![1]);
-		expect(newAttempts).toBe(baselineAttempts + 1);
+		await educator.goto(statsUrl);
+		await expect(educator.getByRole('row').filter({ hasText: student.name })).toHaveCount(1);
 	}).toPass({ timeout: 30_000 });
+	await educator.context().close();
 });

@@ -11,17 +11,17 @@
 	How it fits the project: generalizes ADR-0004's attempt flow to sequencing (plan 3a Task 15) —
 	"Check order" grades every item at its current index, then submits for a final score. See
 	`docs/03-architecture.md` §4.4.
-	Depends on: `$lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`gradeItem`/
-	`submitAttempt`), `./types` (`SequencingSnapshot`), `$lib/ui/Button.svelte`, `$lib/ui/Icon.svelte`.
+	Depends on: `#lib/lesson/api` (`api.POST`), `./attempts` (`startAttempt`/`gradeItem`/
+	`submitAttempt`), `./types` (`SequencingSnapshot`), `#lib/ui/Button.svelte`, `#lib/ui/Icon.svelte`.
 	Used by: `(app)/subjects/[slug]/activities/[id]/+page.svelte`, `SequencingPlayer.svelte.spec.ts`.
 -->
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
 	import X from '@lucide/svelte/icons/x';
-	import { api } from '$lib/lesson/api';
+	import { api } from '#lib/lesson/api.js';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
-	import Button from '$lib/ui/Button.svelte';
-	import Icon from '$lib/ui/Icon.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
 	import { gradeItem, startAttempt, submitAttempt } from './attempts';
 	import type { SequencingSnapshot } from './types';
 

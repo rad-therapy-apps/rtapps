@@ -181,8 +181,9 @@ test.describe('as the seeded educator', () => {
 		for (const path of ['/educator', '/author', '/author/data-tables']) await check(page, path);
 		// A cohort page, reached the way an educator does.
 		await page.goto('/educator');
+		await page.waitForLoadState('networkidle');
 		await page.getByRole('link', { name: 'Demo cohort' }).click();
-		await expect(page.getByRole('heading', { name: 'Demo cohort' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Demo cohort', level: 1 })).toBeVisible();
 		await page.waitForLoadState('networkidle');
 		await expectAccessible(page, 'cohort page');
 		await expectNoSidewaysScroll(page, 'cohort page');
@@ -192,8 +193,11 @@ test.describe('as the seeded educator', () => {
 		test.slow();
 		const toCohort = async () => {
 			await page.goto('/educator');
+			// Hydrated before clicking, and the cohort page's own h1: the cohort list also has a
+			// "Demo cohort" (h2) heading, so a plain heading check passes before the click lands.
+			await page.waitForLoadState('networkidle');
 			await page.getByRole('link', { name: 'Demo cohort' }).click();
-			await expect(page.getByRole('heading', { name: 'Demo cohort' })).toBeVisible();
+			await expect(page.getByRole('heading', { name: 'Demo cohort', level: 1 })).toBeVisible();
 		};
 		await toCohort();
 		await page.getByRole('link', { name: 'Stats' }).first().click();

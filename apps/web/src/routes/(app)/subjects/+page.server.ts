@@ -9,12 +9,12 @@
  * How it fits the project: `(app)/+layout.server.ts` guarantees a signed-in user before this
  * runs. `docs/03-architecture.md` §7 (`GET subjects`).
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SubjectOut`). Used by:
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SubjectOut`). Used by:
  * `+page.svelte` (this route); linked from `+layout.svelte` and `(app)/home/+page.svelte`
  * ("Browse subjects"); driven by `apps/web/e2e/lesson.e2e.ts`.
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

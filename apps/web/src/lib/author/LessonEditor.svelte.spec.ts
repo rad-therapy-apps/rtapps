@@ -8,7 +8,7 @@
  * `window.confirm` is stubbed to auto-accept (Playwright otherwise auto-dismisses native dialogs,
  * which would make every delete/move-adjacent confirm silently no-op) so the delete-block
  * assertions are reachable. `put` is a `vi.fn` fake (same injectable-client pattern as
- * `$lib/activity/attempts.test.ts`'s `post`), so the emitted `PagesIn` body can be asserted
+ * `#lib/activity/attempts.test.ts`'s `post`), so the emitted `PagesIn` body can be asserted
  * without a network call. The third test's scenario was rewritten from an earlier version that
  * deleted a page's only block and asserted a `blocks: []` PUT as success — the API's
  * `PageImport.blocks` requires min_length=1, so that PUT would actually 422; the delete-block

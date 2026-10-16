@@ -5,7 +5,7 @@
 	`snapshot` JSON to its typed shape, and branching on `snapshot.activity.kind` (rather than
 	`data.activity.kind`) lets TypeScript narrow `ActivitySnapshot` to the exact variant each
 	player expects. The `calculator` branch (plan 3b Task 17) looks up
-	`$lib/calc/registry`[`calc_type`] instead of importing one fixed player, since which
+	`#lib/calc/registry`[`calc_type`] instead of importing one fixed player, since which
 	calculator component a given activity needs isn't known until the snapshot is read; an
 	unrecognized `calc_type` renders a plain "not supported yet" message rather than crashing.
 	Unlike the other four kinds, no attempt is ever started here: a calculator has no
@@ -14,21 +14,21 @@
 	How it fits the project: `data.activity` comes from this route's `load`
 	(`GET /activities/{id}`, answers stripped per ADR-0006). `docs/03-architecture.md` §4.4, plan
 	3a Task 14/15, plan 3b Task 17.
-	Works with: `$lib/activity/QuizPlayer.svelte`, `$lib/activity/FlashcardPlayer.svelte`,
-	`$lib/activity/MatchingPlayer.svelte`, `$lib/activity/SequencingPlayer.svelte`,
-	`$lib/activity/ExternalPlayer.svelte`, `$lib/calc/registry`, `$lib/activity/types`
-	(`activitySnapshot`), `$lib/ui/PageHeader.svelte`, `$lib/ui/Card.svelte`. Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
+	Works with: `#lib/activity/QuizPlayer.svelte`, `#lib/activity/FlashcardPlayer.svelte`,
+	`#lib/activity/MatchingPlayer.svelte`, `#lib/activity/SequencingPlayer.svelte`,
+	`#lib/activity/ExternalPlayer.svelte`, `#lib/calc/registry`, `#lib/activity/types`
+	(`activitySnapshot`), `#lib/ui/PageHeader.svelte`, `#lib/ui/Card.svelte`. Used by: reached from `(app)/subjects/[slug]/+page.svelte`.
 -->
 <script lang="ts">
-	import QuizPlayer from '$lib/activity/QuizPlayer.svelte';
-	import FlashcardPlayer from '$lib/activity/FlashcardPlayer.svelte';
-	import MatchingPlayer from '$lib/activity/MatchingPlayer.svelte';
-	import SequencingPlayer from '$lib/activity/SequencingPlayer.svelte';
-	import ExternalPlayer from '$lib/activity/ExternalPlayer.svelte';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import { registry } from '$lib/calc/registry';
-	import { activitySnapshot } from '$lib/activity/types';
+	import QuizPlayer from '#lib/activity/QuizPlayer.svelte';
+	import FlashcardPlayer from '#lib/activity/FlashcardPlayer.svelte';
+	import MatchingPlayer from '#lib/activity/MatchingPlayer.svelte';
+	import SequencingPlayer from '#lib/activity/SequencingPlayer.svelte';
+	import ExternalPlayer from '#lib/activity/ExternalPlayer.svelte';
+	import PageHeader from '#lib/ui/PageHeader.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import { registry } from '#lib/calc/registry.js';
+	import { activitySnapshot } from '#lib/activity/types.js';
 	import type {
 		QuizSnapshot,
 		FlashcardsSnapshot,
@@ -36,7 +36,7 @@
 		SequencingSnapshot,
 		CalculatorSnapshot,
 		ExternalSnapshot
-	} from '$lib/activity/types';
+	} from '#lib/activity/types.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

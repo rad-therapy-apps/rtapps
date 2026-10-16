@@ -12,11 +12,11 @@
  * `QuizPlayer.svelte`/`FlashcardPlayer.svelte`, not here. `docs/03-architecture.md` §4.4, plan 3a
  * Task 14.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`ActivityOut`). Used by:
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`ActivityOut`). Used by:
  * `+page.svelte` (this route), reached from `(app)/subjects/[slug]/+page.svelte`.
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 

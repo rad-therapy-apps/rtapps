@@ -3,24 +3,24 @@
 	change-note input, a busy-guarded Publish button with a confirm dialog, and the version
 	history (version, date, author, note).
 	Used here and why: Svelte 5 runes (`$props`, `$state`); `post` defaults to the real API client
-	(`$lib/author/api`'s `api.POST`) but is overridable, same injectable pattern as
+	(`#lib/author/api`'s `api.POST`) but is overridable, same injectable pattern as
 	`LessonEditor.svelte`'s `put`. `publish()` is busy-guarded with try/catch/finally so a failed
-	request never wedges the button. On success it calls `invalidateAll()` (`$app/navigation`) so
+	request never wedges the button. On success it calls `refreshAll()` (`$app/navigation`) so
 	`+page.server.ts`'s `load` reruns — the fresh `versions` list and any status change flow back
 	down through `data`/props rather than this component patching its own copy.
 	How it fits the project: the publish half of Task 15/10 — `POST /authoring/activities/{id}/publish`
 	freezes the working copy into the next immutable version; `import_notes` is the migrated-content
 	review queue (Task 4) so an educator sees what the importer flagged before publishing over it.
-	Depends on: `$app/navigation` (`invalidateAll`), `./api` (`api`), `@rtapps/api-client`
+	Depends on: `$app/navigation` (`refreshAll`), `./api` (`api`), `@rtapps/api-client`
 	(`components['schemas']['VersionOut']`).
 	Used by: `+page.svelte` (Publish tab).
 -->
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { api } from './api';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Card from '$lib/ui/Card.svelte';
+	import Alert from '#lib/ui/Alert.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
 	import type { components } from '@rtapps/api-client';
 
 	type VersionOut = components['schemas']['VersionOut'];
@@ -58,7 +58,7 @@
 				return;
 			}
 			changeNote = '';
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			publishError = 'Request failed';
 		} finally {

@@ -13,12 +13,12 @@
  * How it fits the project: `LessonAuthorOut.pages`/`VersionOut[]` back Task 15's three-tab editor
  * (Edit/Preview/Publish). `docs/03-architecture.md` §7.
  *
- * Works with: `$lib/server/api` (`apiFetch`), `@rtapps/api-client` (`LessonAuthorOut`,
+ * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`LessonAuthorOut`,
  * `VersionOut`).
  * Used by: `+page.svelte` (this route).
  */
 import { error } from '@sveltejs/kit';
-import { apiFetch } from '$lib/server/api';
+import { apiFetch } from '#lib/server/api.js';
 import type { components } from '@rtapps/api-client';
 import type { PageServerLoad } from './$types';
 
