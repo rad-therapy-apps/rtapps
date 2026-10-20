@@ -8,12 +8,16 @@
  * (`(app)/subjects/[slug]/activities/[id]/+page.svelte`) looks up
  * `registry[snapshot.calculator.calc_type]`, rendering a plain "not supported yet" message when
  * the key is missing (an authored calc_type this build doesn't (yet) have a player for).
+ * The keys must be exactly the API's `CalcType` (from `@rtapps/api-client`, generated from the
+ * API's Literal): `satisfies` fails the type check if a calc_type is added or removed on only one
+ * side (#47).
  * Depends on: `./MuCalculator.svelte`, `./InverseSquareCalculator.svelte`,
  * `./ExtendedSsdCalculator.svelte`, `./GapCalculator.svelte`, `./MagnificationCalculator.svelte`,
- * `./SiConverter.svelte`, `./interpolate` (`Grid`).
+ * `./SiConverter.svelte`, `./interpolate` (`Grid`), `@rtapps/api-client` (`components`).
  * Used by: the student activity route; `CALC_TYPES` by the authoring "New calculator" form.
  */
 import type { Component } from 'svelte';
+import type { components } from '@rtapps/api-client';
 import MuCalculator from './MuCalculator.svelte';
 import InverseSquareCalculator from './InverseSquareCalculator.svelte';
 import ExtendedSsdCalculator from './ExtendedSsdCalculator.svelte';
@@ -24,15 +28,22 @@ import type { Grid } from './interpolate';
 
 export type CalcTables = Record<string, { title: string; grid: Grid }>;
 
-export const registry: Record<string, Component<{ tables: CalcTables }>> = {
+export type CalcType = components['schemas']['CalculatorCreateIn']['calc_type'];
+type CalcPlayer = Component<{ tables: CalcTables }>;
+
+const players = {
 	mu: MuCalculator,
 	inverse_square: InverseSquareCalculator,
 	extended_ssd: ExtendedSsdCalculator,
 	gap: GapCalculator,
 	magnification: MagnificationCalculator,
 	si_convert: SiConverter
-};
+} satisfies Record<CalcType, CalcPlayer>;
+
+// Looked up by a snapshot's calc_type, which is a plain string, hence the string-keyed view.
+export const registry: Record<string, CalcPlayer> = players;
 
 // The authoritative list of calc_types this build can render — the authoring "New
-// calculator" form's select reads this, so form and registry can never drift.
-export const CALC_TYPES: string[] = Object.keys(registry);
+// calculator" form's select reads this, so form and registry can never drift. The cast is exact:
+// `satisfies` above pins `players`' keys to CalcType.
+export const CALC_TYPES = Object.keys(players) as CalcType[];

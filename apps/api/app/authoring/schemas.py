@@ -37,7 +37,7 @@ Used by: `app.authoring.router`.
 
 import uuid
 from datetime import datetime
-from typing import Annotated, Any, Self
+from typing import Annotated, Any, Literal, Self, get_args
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -395,24 +395,20 @@ class DataTablePutIn(BaseModel):
 # ---------------------------------------------------------------------------
 
 # Not a DB CHECK constraint like ACTIVITY_ACCESS: calc_type lives inside Activity.config
-# (free-form JSONB), so this closed set is enforced at the Pydantic layer only.
-# Matches the keys in apps/web/src/lib/calc/registry.ts so form and registry can never drift.
-CALC_TYPES = ("mu", "inverse_square", "extended_ssd", "gap", "magnification", "si_convert")
+# (free-form JSONB), so this closed set is enforced at the Pydantic layer only. As a Literal it
+# is published as an enum in openapi.json, so the generated @rtapps/api-client type is what
+# apps/web/src/lib/calc/registry.ts must cover exactly: a type added or removed on one side only
+# fails the web type check (#47). CALC_TYPES is derived from it, not a second copy.
+CalcType = Literal["mu", "inverse_square", "extended_ssd", "gap", "magnification", "si_convert"]
+CALC_TYPES: tuple[str, ...] = get_args(CalcType)
 
 
 class _CalculatorContentMixin(BaseModel):
     """`calc_type`/`data_tables` fields shared by the calculator's create and put bodies —
     together these two fields ARE `Activity.config` for a calculator activity."""
 
-    calc_type: str
+    calc_type: CalcType
     data_tables: list[str]
-
-    @field_validator("calc_type")
-    @classmethod
-    def _valid_calc_type(cls, v: str) -> str:
-        if v not in CALC_TYPES:
-            raise ValueError(f"calc_type must be one of {CALC_TYPES}")
-        return v
 
 
 class CalculatorCreateIn(_CalculatorContentMixin):

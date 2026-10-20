@@ -790,6 +790,14 @@
         "description": "`POST /authoring/calculators` body. No `access`/`slug`: a calculator has no\nper-activity working-copy row to slug (see `app.authoring.router._SLUG_MODELS`'s\ncomment) and is always `access=\"practice\"`.",
         "properties": {
           "calc_type": {
+            "enum": [
+              "mu",
+              "inverse_square",
+              "extended_ssd",
+              "gap",
+              "magnification",
+              "si_convert"
+            ],
             "title": "Calc Type",
             "type": "string"
           },
@@ -824,6 +832,14 @@
         "description": "`PUT /authoring/calculators/{activity_id}` body: title plus the same content fields\nas create.",
         "properties": {
           "calc_type": {
+            "enum": [
+              "mu",
+              "inverse_square",
+              "extended_ssd",
+              "gap",
+              "magnification",
+              "si_convert"
+            ],
             "title": "Calc Type",
             "type": "string"
           },
