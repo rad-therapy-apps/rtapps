@@ -338,7 +338,7 @@ Conventions:
 | Student data | Minimal PII (name, email, cohort membership); educators see only cohorts they are enrolled in; every educator read of student data is audit-logged; admin can deactivate and **erase** a user (attempts anonymised, PII nulled) |
 | Patient data | All patient records in the EMR content are fictional; the system stores no real PHI and is not a medical device |
 | Files | Browser uploads/downloads go straight to object storage with short-lived presigned URLs; the API validates MIME/size on `confirm` |
-| Dependencies | Dependabot on uv, pnpm and Actions; `pip-audit`/`pnpm audit` in CI |
+| Dependencies | Dependabot on uv, pnpm and Actions (7-day cooldown; Actions pinned to commit SHAs); `pip-audit`/`pnpm audit` in CI |
 | Rate limiting | `login`, `register`, password-reset and `join` are rate-limited per IP at the API (NFR-13); see docs/06-operations.md §12 for a known caveat about trusting the proxy as the only path in |
 | Error tracking | `sentry_sdk` in the API reports unhandled exceptions when `SENTRY_DSN` is set (NFR-23). v0.3.0 deviation: web only wires Sentry server-side, in `hooks.server.ts` — no browser-side `@sentry/sveltekit` instrumentation yet, so a client-only JS error (as opposed to a `load`/action failure) is not reported. |
 | Cross-origin clients (Phase 4) | `SameSite=Lax` cookies are not sent to a games site on another origin. Before the SDK ships, decide between hosting games under the same parent domain with a `Domain=` cookie, or issuing short-lived bearer tokens to the SDK (ADR-0002 follow-up). Not needed for Release 1, where every page is same-origin. |
