@@ -81,7 +81,7 @@
 <section>
 	<h2>Needs review ({data.needsReview.length})</h2>
 	{#if data.needsReview.length === 0}
-		<Card><p class="muted">Nothing needs review.</p></Card>
+		<Card><p class="subtle">Nothing needs review.</p></Card>
 	{:else}
 		<ul class="rows">
 			{#each data.needsReview as row (row.activity_id)}
@@ -104,7 +104,7 @@
 							{/each}
 						</ul>
 						{#if row.import_notes.length > 2}
-							<p class="muted">+{row.import_notes.length - 2} more</p>
+							<p class="subtle">+{row.import_notes.length - 2} more</p>
 						{/if}
 					{/if}
 				</Card>
@@ -168,7 +168,7 @@
 									{:else}
 										{activity.title}
 									{/if}
-									<span class="muted">({activity.status})</span>
+									<span class="subtle">({activity.status})</span>
 								</li>
 							{/each}
 						</ul>
@@ -223,7 +223,7 @@
 	form :global(.btn) {
 		justify-self: start;
 	}
-	.muted {
+	.subtle {
 		color: var(--text-muted);
 	}
 </style>

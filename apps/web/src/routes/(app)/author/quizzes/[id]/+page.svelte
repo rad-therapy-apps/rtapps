@@ -337,16 +337,6 @@
 {/if}
 
 <style>
-	.stack {
-		display: grid;
-		gap: var(--space-4);
-	}
-	.save-controls {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-3);
-	}
 	.hint {
 		margin: 0;
 		font-size: var(--text-sm);

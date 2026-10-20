@@ -131,11 +131,6 @@
 {/if}
 
 <style>
-	.muted {
-		margin: 0;
-		color: var(--text-muted);
-	}
-
 	.search {
 		display: flex;
 		flex-wrap: wrap;

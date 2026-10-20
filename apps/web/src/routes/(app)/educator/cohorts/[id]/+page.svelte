@@ -174,11 +174,6 @@
 {/if}
 
 <style>
-	.muted {
-		margin: 0;
-		color: var(--text-muted);
-	}
-
 	/* Highlights an activity/student row below the cohort's threshold percent. */
 	tr.below {
 		background: var(--danger-bg);

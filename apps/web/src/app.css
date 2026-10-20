@@ -335,6 +335,26 @@ a.skip-link:focus {
 	top: var(--space-4);
 }
 
+/* ---- Shared layout utilities ---- */
+
+/* Vertical form stack: the deck, matching, quiz and sequencing editors and data tables. */
+.stack {
+	display: grid;
+	gap: var(--space-4);
+}
+/* Save button + status row: the four editors, data tables and LessonEditor. */
+.save-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-3);
+}
+/* Empty-state text in a Card: home, admin and educator pages (the author hub uses `.subtle`). */
+.muted {
+	margin: 0;
+	color: var(--text-muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
