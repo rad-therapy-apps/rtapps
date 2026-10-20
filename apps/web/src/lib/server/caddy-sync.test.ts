@@ -17,8 +17,20 @@ import path from 'node:path';
 // This pins the two files' security-header lines to each other.
 const HEADERS = ['X-Frame-Options', 'X-Content-Type-Options', 'Referrer-Policy'];
 
+// Anchored at the repo root (the directory holding pnpm-workspace.yaml) rather than a fixed
+// number of `..` hops, so moving this file doesn't silently change the resolved path.
+function repoRoot(): string {
+	let dir = __dirname;
+	while (!fs.existsSync(path.join(dir, 'pnpm-workspace.yaml'))) {
+		const parent = path.dirname(dir);
+		if (parent === dir) throw new Error('pnpm-workspace.yaml not found above ' + __dirname);
+		dir = parent;
+	}
+	return dir;
+}
+
 function headerLines(file: string): string[] {
-	const text = fs.readFileSync(path.resolve(__dirname, '../../../../../infra', file), 'utf8');
+	const text = fs.readFileSync(path.join(repoRoot(), 'infra', file), 'utf8');
 	return HEADERS.map(
 		(h) =>
 			text

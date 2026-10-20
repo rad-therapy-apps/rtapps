@@ -128,4 +128,5 @@ async def test_reset_writes_audit_row(client: AsyncClient, db: AsyncSession) -> 
     log = (await client.get("/api/v1/admin/audit-log", params={"action": "reset_password"})).json()
     assert len(log) == 1
     assert log[0]["target_id"] == student["id"]
-    assert "sessions_revoked" in log[0]["detail"]
+    # The student's one registration session is the only one revoked.
+    assert log[0]["detail"]["sessions_revoked"] == 1

@@ -31,6 +31,10 @@ export default defineConfig({
 	// One retry in CI to absorb flakiness against a real, shared stack; none locally, so a failure
 	// surfaces immediately during development.
 	retries: process.env.CI ? 1 : 0,
+	// Pinned to 2 in CI (the GitHub-hosted runner's default, so this changes nothing today but
+	// stops a runner-size change from silently changing parallelism against the shared stack);
+	// locally Playwright picks its own default from the CPU count.
+	workers: process.env.CI ? 2 : undefined,
 	// Desktop Chromium runs every spec. The other three run the UI checks (axe, 360px, drawer)
 	// plus the lesson flow as a cross-browser smoke — the full suite in every engine would
 	// triple e2e time for little extra signal (docs/specs/2026-10-01-ui-restyle-design.md).

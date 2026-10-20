@@ -24,7 +24,7 @@
 	import { problemDetail } from '#lib/author/problem.js';
 	import Alert from '#lib/ui/Alert.svelte';
 	import Button from '#lib/ui/Button.svelte';
-	import Tabs from '#lib/ui/Tabs.svelte';
+	import Tabs, { tabPanel } from '#lib/ui/Tabs.svelte';
 	import Card from '#lib/ui/Card.svelte';
 	import Field from '#lib/ui/Field.svelte';
 	import PageHeader from '#lib/ui/PageHeader.svelte';
@@ -110,6 +110,7 @@
 <PageHeader title={data.sequencing.title} />
 
 <Tabs
+	id="sequencing-editor-tabs"
 	tabs={[
 		{ id: 'edit', label: 'Edit' },
 		{ id: 'publish', label: 'Publish' }
@@ -119,7 +120,7 @@
 />
 
 {#if activeTab === 'edit'}
-	<div role="tabpanel">
+	<div {...tabPanel('sequencing-editor-tabs', 'edit')}>
 		<Card as="section">
 			<div class="stack">
 				<Field label="Title" id="seq-title">
@@ -197,7 +198,7 @@
 		</Card>
 	</div>
 {:else}
-	<div role="tabpanel">
+	<div {...tabPanel('sequencing-editor-tabs', 'publish')}>
 		<PublishPanel
 			activityId={data.sequencing.activity_id}
 			importNotes={data.importNotes}
@@ -207,16 +208,6 @@
 {/if}
 
 <style>
-	.stack {
-		display: grid;
-		gap: var(--space-4);
-	}
-	.save-controls {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-3);
-	}
 	.hint {
 		margin: 0;
 		font-size: var(--text-sm);

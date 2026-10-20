@@ -1,6 +1,8 @@
 /*
  * What this file does: the platform's design tokens (CSS custom properties) and base element
- * styles — colour, type, spacing, radius, shadows, focus ring, reduced motion.
+ * styles — colour, type, spacing, radius, shadows, focus ring, reduced motion — plus three shared
+ * layout utilities (`.stack`, `.save-controls`, `.muted`), global, so any element using one of
+ * those class names picks the rule up.
  * Used here and why: plain CSS imported once from the root layout, so every page and component
  * shares one palette; components use Svelte scoped styles that read these tokens. Starting values
  * come from the legacy RadTherapyPlatform theme (navy surfaces, cyan accent), adjusted where a
@@ -333,6 +335,26 @@ a.skip-link {
 }
 a.skip-link:focus {
 	top: var(--space-4);
+}
+
+/* ---- Shared layout utilities ---- */
+
+/* Vertical form stack: the deck, matching, quiz and sequencing editors and data tables. */
+.stack {
+	display: grid;
+	gap: var(--space-4);
+}
+/* Save button + status row: the four editors, data tables and LessonEditor. */
+.save-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-3);
+}
+/* Empty-state text in a Card: home, admin and educator pages (the author hub uses `.subtle`). */
+.muted {
+	margin: 0;
+	color: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

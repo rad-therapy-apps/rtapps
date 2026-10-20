@@ -64,11 +64,6 @@
 {/if}
 
 <style>
-	.muted {
-		margin: 0;
-		color: var(--text-muted);
-	}
-
 	form {
 		display: grid;
 		gap: var(--space-3);

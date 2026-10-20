@@ -145,7 +145,9 @@ test('the console door round-trip', async ({ page, browser }) => {
 	await page.waitForLoadState('networkidle');
 	await expect(page.getByTestId('simulator-entry')).toBeVisible();
 	await page.getByTestId('simulator-entry').click();
-	await expect(page).toHaveURL(/\/activities\//);
+	// The URL changes only once the activity page's load finishes, which can pass the default 5s
+	// on CI while another spec runs sim-hub's WebGL (same wait as simulator.e2e.ts's entry step).
+	await expect(page).toHaveURL(/\/activities\//, { timeout: 15_000 });
 
 	const hubFrameLocator = page.frameLocator('iframe[title="Center QA walkthrough"]');
 	await expect(hubFrameLocator.locator('#watermark')).toBeAttached();
@@ -337,7 +339,9 @@ test('the QA verdict latch: a rapid double click records only one attempt', asyn
 	await page.waitForLoadState('networkidle');
 	await expect(page.getByTestId('simulator-entry')).toBeVisible();
 	await page.getByTestId('simulator-entry').click();
-	await expect(page).toHaveURL(/\/activities\//);
+	// The URL changes only once the activity page's load finishes, which can pass the default 5s
+	// on CI while another spec runs sim-hub's WebGL (same wait as simulator.e2e.ts's entry step).
+	await expect(page).toHaveURL(/\/activities\//, { timeout: 15_000 });
 
 	const hubFrameLocator = page.frameLocator('iframe[title="Center QA walkthrough"]');
 	await expect(hubFrameLocator.locator('#watermark')).toBeAttached();

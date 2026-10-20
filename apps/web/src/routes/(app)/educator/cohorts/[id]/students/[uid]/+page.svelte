@@ -104,11 +104,6 @@
 </p>
 
 <style>
-	.muted {
-		margin: 0;
-		color: var(--text-muted);
-	}
-
 	.table-wrap {
 		overflow-x: auto;
 	}

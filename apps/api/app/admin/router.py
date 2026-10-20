@@ -97,7 +97,7 @@ async def _target(
     db: AsyncSession, user_id: uuid.UUID, actor: User, *, guard_title: str | None = None
 ) -> User:
     # Shared 404 (unknown user) / 409 (last-active-admin guard) / 400 (acting on your own
-    # account) checks for the three mutating routes below. `guard_title` is the 409 Problem
+    # account) checks for the four mutating routes below. `guard_title` is the 409 Problem
     # title to raise when `target` is the sole active admin; pass None to skip that check
     # (change_role does this when the new role is still admin — that's not a demotion).
     # The guard fires before the self-modification check, same as before this was shared.
@@ -175,8 +175,9 @@ async def reset_password(
     actor: User = Depends(require_user),
     db: AsyncSession = Depends(get_session),
 ) -> ResetPasswordOut:
-    # No last-active-admin guard here (unlike deactivate/erase): resetting an admin's own
-    # password doesn't demote or disable them, so there's nothing to protect against.
+    # No last-active-admin guard here (unlike deactivate/erase): resetting another user's
+    # password doesn't demote or disable anyone. An admin resetting their OWN password is
+    # not allowed: _target rejects it with a 400 (they use /auth/change-password instead).
     target = await _target(db, user_id, actor)
     if target.deactivated_at is not None:
         raise Problem(409, "Cannot reset a deactivated user's password")

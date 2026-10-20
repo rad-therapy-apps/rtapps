@@ -77,11 +77,6 @@
 {/if}
 
 <style>
-	.muted {
-		margin: 0;
-		color: var(--text-muted);
-	}
-
 	.filter {
 		display: flex;
 		flex-wrap: wrap;
