@@ -233,6 +233,7 @@ class TestExternalActivitySubmit:
             f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
         )
         assert r.status_code == 422
+        assert r.json()["title"] == "External activities require a score payload"
 
     async def test_score_payload_rejected_for_graded_kinds(
         self, client: AsyncClient, db: AsyncSession
@@ -246,6 +247,7 @@ class TestExternalActivitySubmit:
             json={"score": 3},
         )
         assert r.status_code == 422
+        assert r.json()["title"] == "A score payload is only valid for external activities"
 
     async def test_completion_only_submit_records_null_scores(
         self, client: AsyncClient, db: AsyncSession
@@ -283,6 +285,7 @@ class TestExternalActivitySubmit:
             json={"score": 50},
         )
         assert r.status_code == 422
+        assert r.json()["title"] == "Completion-only activities do not take a score"
 
     async def test_external_submit_rejects_zero_max_config(
         self, client: AsyncClient, db: AsyncSession
@@ -298,6 +301,7 @@ class TestExternalActivitySubmit:
             json={"score": 10},
         )
         assert r.status_code == 422
+        assert r.json()["title"] == "Activity has no max_score configured"
 
     async def test_external_submit_rejects_negative_score(
         self, client: AsyncClient, db: AsyncSession
@@ -313,6 +317,9 @@ class TestExternalActivitySubmit:
             json={"score": -5},
         )
         assert r.status_code == 422
+        body = r.json()
+        assert body["title"] == "Validation failed"
+        assert body["errors"][0]["loc"] == ["body", "score"]
 
     async def test_scored_external_still_requires_payload(
         self, client: AsyncClient, db: AsyncSession
@@ -326,6 +333,7 @@ class TestExternalActivitySubmit:
             f"/api/v1/attempts/{attempt['id']}/submit", headers={"Idempotency-Key": "k1"}
         )
         assert r.status_code == 422
+        assert r.json()["title"] == "External activities require a score payload"
 
 
 class TestSdkSlugResolver:
