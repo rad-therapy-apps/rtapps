@@ -1530,8 +1530,17 @@ export interface components {
      *     comment) and is always `access="practice"`.
      */
     CalculatorCreateIn: {
-      /** Calc Type */
-      calc_type: string;
+      /**
+       * Calc Type
+       * @enum {string}
+       */
+      calc_type:
+        | "mu"
+        | "inverse_square"
+        | "extended_ssd"
+        | "gap"
+        | "magnification"
+        | "si_convert";
       /** Data Tables */
       data_tables: string[];
       /** Subject Slug */
@@ -1545,8 +1554,17 @@ export interface components {
      *     as create.
      */
     CalculatorPutIn: {
-      /** Calc Type */
-      calc_type: string;
+      /**
+       * Calc Type
+       * @enum {string}
+       */
+      calc_type:
+        | "mu"
+        | "inverse_square"
+        | "extended_ssd"
+        | "gap"
+        | "magnification"
+        | "si_convert";
       /** Data Tables */
       data_tables: string[];
       /** Title */

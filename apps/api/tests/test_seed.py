@@ -245,6 +245,42 @@ async def test_seed_creates_published_mu_calculator(db: AsyncSession, settings: 
     ) == 1
 
 
+async def test_seed_republishes_mu_calculator_on_data_tables_change(
+    db: AsyncSession, settings: Settings
+) -> None:
+    """#49: the MU calculator's own republish branch. Re-running seed() against a calculator
+    whose config still lists only `pdd_6mv` — as if seeded before the scatter and wedge tables
+    existed — must restore the full data_tables list in place and cut a new published
+    ContentVersion whose snapshot carries all four tables, not leave the stale snapshot that
+    students would otherwise keep computing against, and not create a second activity."""
+    await seed(db, settings)
+    calc = await db.scalar(
+        select(Activity).where(Activity.kind == "calculator", Activity.title == "MU calculator")
+    )
+    assert calc is not None
+    old_version_id = calc.current_version_id
+    # Simulate a database seeded before sc_6mv/sp_6mv/wedge_factors were added.
+    calc.config = {"calc_type": "mu", "data_tables": ["pdd_6mv"]}
+    await db.flush()
+
+    await seed(db, settings)
+    await db.refresh(calc)
+    tables = ["pdd_6mv", "sc_6mv", "sp_6mv", "wedge_factors"]
+    assert calc.config == {"calc_type": "mu", "data_tables": tables}
+    assert calc.status == "published"
+    assert calc.current_version_id != old_version_id
+    version = await db.get(ContentVersion, calc.current_version_id)
+    assert version is not None
+    assert sorted(version.snapshot["calculator"]["data_tables"]) == sorted(tables)
+
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.kind == "calculator", Activity.title == "MU calculator")
+    )
+    assert count == 1
+
+
 async def test_seed_creates_scatter_and_wedge_tables(db: AsyncSession, settings: Settings) -> None:
     """The three new single-row `DataTable`s (Task 6), transcribed verbatim from the legacy
     MU_Calculator's 6 MV `scData`/`spData`/`wedgeFactors`: ascending cols (field sizes or
