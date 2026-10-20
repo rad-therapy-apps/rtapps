@@ -23,7 +23,7 @@
 	import { problemDetail } from '#lib/author/problem.js';
 	import Alert from '#lib/ui/Alert.svelte';
 	import Button from '#lib/ui/Button.svelte';
-	import Tabs from '#lib/ui/Tabs.svelte';
+	import Tabs, { tabPanel } from '#lib/ui/Tabs.svelte';
 	import Card from '#lib/ui/Card.svelte';
 	import Field from '#lib/ui/Field.svelte';
 	import PageHeader from '#lib/ui/PageHeader.svelte';
@@ -75,6 +75,7 @@
 <PageHeader title={data.deck.title} />
 
 <Tabs
+	id="deck-editor-tabs"
 	tabs={[
 		{ id: 'edit', label: 'Edit' },
 		{ id: 'publish', label: 'Publish' }
@@ -84,7 +85,7 @@
 />
 
 {#if activeTab === 'edit'}
-	<div role="tabpanel">
+	<div {...tabPanel('deck-editor-tabs', 'edit')}>
 		<Card as="section">
 			<div class="stack">
 				<Field label="Title" id="deck-title">
@@ -119,7 +120,7 @@
 		</Card>
 	</div>
 {:else}
-	<div role="tabpanel">
+	<div {...tabPanel('deck-editor-tabs', 'publish')}>
 		<PublishPanel
 			activityId={data.deck.activity_id}
 			importNotes={data.importNotes}

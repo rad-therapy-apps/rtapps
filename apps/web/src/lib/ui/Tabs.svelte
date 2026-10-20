@@ -1,7 +1,7 @@
 <!--
-	What this file does: A tab strip (`tablist` of `tab` buttons) for the editor pages; the page keeps rendering its own `tabpanel`s.
+	What this file does: A tab strip (`tablist` of `tab` buttons) for the editor pages; the page keeps rendering its own `tabpanel`s, spreading `tabPanel(id, tabId)` onto each so the two stay paired.
 
-	Used here and why: the five author editors each carried an identical copy of this markup and CSS. Activation is manual, matching today's click behaviour (selecting a tab can unmount an editor or trigger a fetch): Left/Right move focus between tabs (wrapping), Home/End jump to the first/last, Enter/Space (a native button click) select. Roving tabindex keeps one tab stop. The selected tab shows weight plus an underline, not colour alone.
+	Used here and why: the five author editors each carried an identical copy of this markup and CSS. Activation is manual, matching today's click behaviour (selecting a tab can unmount an editor or trigger a fetch): Left/Right move focus between tabs (wrapping), Home/End jump to the first/last, Enter/Space (a native button click) select. Roving tabindex keeps one tab stop. Props: `id` (the tab set's id, unique on the page), `tabs`, `selected` (bindable), `label`, `onselect`. Only the selected tab gets `aria-controls`, because the editors render only the selected panel. The selected tab shows weight plus an underline, not colour alone.
 
 	How it fits the project: shared UI kit, docs/specs/2026-10-01-ui-restyle-design.md (Architecture 3).
 
@@ -9,20 +9,31 @@
 	Used by: the lesson, quiz, deck, matching and sequencing editor pages under `(app)/author`.
 -->
 
+<script module lang="ts">
+	/** Attributes for the panel that belongs to tab `tab` of the tab set `set`. */
+	export function tabPanel(set: string, tab: string) {
+		return {
+			role: 'tabpanel' as const,
+			id: `${set}-panel-${tab}`,
+			'aria-labelledby': `${set}-tab-${tab}`
+		};
+	}
+</script>
+
 <script lang="ts" generics="T extends string">
 	let {
+		id,
 		tabs,
 		selected = $bindable(),
 		label,
 		onselect
 	}: {
+		id: string;
 		tabs: { id: T; label: string }[];
 		selected: T;
 		label: string;
 		onselect?: (id: T) => void;
 	} = $props();
-
-	const uid = $props.id();
 
 	function select(id: T) {
 		selected = id;
@@ -39,7 +50,7 @@
 		else if (event.key === 'End') next = tabs.length - 1;
 		else return;
 		event.preventDefault();
-		document.getElementById(`${uid}-${tabs[next].id}`)?.focus();
+		document.getElementById(`${id}-tab-${tabs[next].id}`)?.focus();
 	}
 </script>
 
@@ -48,7 +59,8 @@
 		<button
 			type="button"
 			role="tab"
-			id="{uid}-{tab.id}"
+			id="{id}-tab-{tab.id}"
+			aria-controls={selected === tab.id ? `${id}-panel-${tab.id}` : undefined}
 			aria-selected={selected === tab.id}
 			tabindex={selected === tab.id ? 0 : -1}
 			onclick={() => select(tab.id)}

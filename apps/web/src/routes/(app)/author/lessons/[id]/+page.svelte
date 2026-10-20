@@ -23,7 +23,7 @@
 	import ProseDoc from '#lib/prose/ProseDoc.svelte';
 	import Alert from '#lib/ui/Alert.svelte';
 	import Button from '#lib/ui/Button.svelte';
-	import Tabs from '#lib/ui/Tabs.svelte';
+	import Tabs, { tabPanel } from '#lib/ui/Tabs.svelte';
 	import PageHeader from '#lib/ui/PageHeader.svelte';
 	import type { AuthorPage } from '#lib/author/types.js';
 	import type { LessonSnapshot, KnowledgeCheckBlock } from '#lib/lesson/types.js';
@@ -73,6 +73,7 @@
 <PageHeader title={data.lesson.title} />
 
 <Tabs
+	id="lesson-editor-tabs"
 	tabs={[
 		{ id: 'edit', label: 'Edit' },
 		{ id: 'preview', label: 'Preview' },
@@ -84,11 +85,11 @@
 />
 
 {#if activeTab === 'edit'}
-	<div role="tabpanel">
+	<div {...tabPanel('lesson-editor-tabs', 'edit')}>
 		<LessonEditor lessonId={data.lesson.lesson_id} {initialPages} />
 	</div>
 {:else if activeTab === 'preview'}
-	<div role="tabpanel">
+	<div {...tabPanel('lesson-editor-tabs', 'preview')}>
 		{#if previewLoading}
 			<p>Loading preview…</p>
 		{/if}
@@ -120,7 +121,7 @@
 		{/if}
 	</div>
 {:else}
-	<div role="tabpanel">
+	<div {...tabPanel('lesson-editor-tabs', 'publish')}>
 		<PublishPanel
 			activityId={data.lesson.activity_id}
 			importNotes={data.lesson.import_notes}

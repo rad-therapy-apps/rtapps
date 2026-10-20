@@ -20,7 +20,7 @@ import Field from './Field.svelte';
 import Icon from './Icon.svelte';
 import PageHeader from './PageHeader.svelte';
 import SubjectTag from './SubjectTag.svelte';
-import Tabs from './Tabs.svelte';
+import Tabs, { tabPanel } from './Tabs.svelte';
 
 const text = (t: string) => createRawSnippet(() => ({ render: () => `<span>${t}</span>` }));
 
@@ -156,8 +156,28 @@ describe('Tabs', () => {
 		{ id: 'publish', label: 'Publish' }
 	];
 
+	it('pairs the selected tab with its panel and names each tab by the tab-set id', async () => {
+		await render(Tabs, { id: 'editor', tabs, selected: 'edit', label: 'Editor tabs' });
+		const edit = page.getByRole('tab', { name: 'Edit' });
+		await expect.element(edit).toHaveAttribute('id', 'editor-tab-edit');
+		await expect.element(edit).toHaveAttribute('aria-controls', 'editor-panel-edit');
+		// Only the selected panel is rendered by the editor routes, so an unselected tab must not
+		// point at a panel that is not in the document.
+		await expect
+			.element(page.getByRole('tab', { name: 'Preview' }))
+			.not.toHaveAttribute('aria-controls');
+	});
+
+	it('tabPanel() gives the panel the matching id and label', () => {
+		expect(tabPanel('editor', 'edit')).toEqual({
+			role: 'tabpanel',
+			id: 'editor-panel-edit',
+			'aria-labelledby': 'editor-tab-edit'
+		});
+	});
+
 	it('renders a tablist with the selected tab marked and the only tab stop', async () => {
-		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
+		await render(Tabs, { id: 'editor', tabs, selected: 'edit', label: 'Editor tabs' });
 		await expect.element(page.getByRole('tablist', { name: 'Editor tabs' })).toBeVisible();
 		const edit = page.getByRole('tab', { name: 'Edit' });
 		const preview = page.getByRole('tab', { name: 'Preview' });
@@ -169,7 +189,7 @@ describe('Tabs', () => {
 
 	it('clicking selects and reports the id', async () => {
 		const onselect = vi.fn();
-		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await render(Tabs, { id: 'editor', tabs, selected: 'edit', label: 'Editor tabs', onselect });
 		await page.getByRole('tab', { name: 'Publish' }).click();
 		expect(onselect).toHaveBeenCalledWith('publish');
 		await expect
@@ -179,7 +199,7 @@ describe('Tabs', () => {
 
 	it('arrows wrap, Home/End jump, and moving focus does not select', async () => {
 		const onselect = vi.fn();
-		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await render(Tabs, { id: 'editor', tabs, selected: 'edit', label: 'Editor tabs', onselect });
 		const edit = page.getByRole('tab', { name: 'Edit' });
 		await edit.click();
 		onselect.mockClear();
@@ -199,7 +219,7 @@ describe('Tabs', () => {
 
 	it('Enter selects the focused tab', async () => {
 		const onselect = vi.fn();
-		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs', onselect });
+		await render(Tabs, { id: 'editor', tabs, selected: 'edit', label: 'Editor tabs', onselect });
 		await page.getByRole('tab', { name: 'Edit' }).click();
 		await userEvent.keyboard('{ArrowRight}{Enter}');
 		expect(onselect).toHaveBeenLastCalledWith('preview');
@@ -209,7 +229,7 @@ describe('Tabs', () => {
 	});
 
 	it('leaves modified arrows alone (Alt+Left is browser Back)', async () => {
-		await render(Tabs, { tabs, selected: 'edit', label: 'Editor tabs' });
+		await render(Tabs, { id: 'editor', tabs, selected: 'edit', label: 'Editor tabs' });
 		const edit = page.getByRole('tab', { name: 'Edit' });
 		await edit.click();
 		const event = new KeyboardEvent('keydown', {

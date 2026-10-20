@@ -32,7 +32,7 @@
 	import type { components } from '@rtapps/api-client';
 	import Alert from '#lib/ui/Alert.svelte';
 	import Button from '#lib/ui/Button.svelte';
-	import Tabs from '#lib/ui/Tabs.svelte';
+	import Tabs, { tabPanel } from '#lib/ui/Tabs.svelte';
 	import Card from '#lib/ui/Card.svelte';
 	import Field from '#lib/ui/Field.svelte';
 	import PageHeader from '#lib/ui/PageHeader.svelte';
@@ -162,6 +162,7 @@
 <PageHeader title={data.quiz.title} />
 
 <Tabs
+	id="quiz-editor-tabs"
 	tabs={[
 		{ id: 'edit', label: 'Edit' },
 		{ id: 'publish', label: 'Publish' }
@@ -171,7 +172,7 @@
 />
 
 {#if activeTab === 'edit'}
-	<div role="tabpanel" class="quiz-editor">
+	<div {...tabPanel('quiz-editor-tabs', 'edit')} class="quiz-editor">
 		<Card as="section">
 			<div class="stack">
 				<Field label="Title" id="quiz-title">
@@ -326,7 +327,7 @@
 		</div>
 	</div>
 {:else}
-	<div role="tabpanel">
+	<div {...tabPanel('quiz-editor-tabs', 'publish')}>
 		<PublishPanel
 			activityId={data.quiz.activity_id}
 			importNotes={data.importNotes}
