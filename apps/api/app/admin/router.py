@@ -97,7 +97,7 @@ async def _target(
     db: AsyncSession, user_id: uuid.UUID, actor: User, *, guard_title: str | None = None
 ) -> User:
     # Shared 404 (unknown user) / 409 (last-active-admin guard) / 400 (acting on your own
-    # account) checks for the three mutating routes below. `guard_title` is the 409 Problem
+    # account) checks for the four mutating routes below. `guard_title` is the 409 Problem
     # title to raise when `target` is the sole active admin; pass None to skip that check
     # (change_role does this when the new role is still admin — that's not a demotion).
     # The guard fires before the self-modification check, same as before this was shared.

@@ -1,6 +1,8 @@
 /*
  * What this file does: the platform's design tokens (CSS custom properties) and base element
- * styles — colour, type, spacing, radius, shadows, focus ring, reduced motion.
+ * styles — colour, type, spacing, radius, shadows, focus ring, reduced motion — plus three shared
+ * layout utilities (`.stack`, `.save-controls`, `.muted`), global, so any element using one of
+ * those class names picks the rule up.
  * Used here and why: plain CSS imported once from the root layout, so every page and component
  * shares one palette; components use Svelte scoped styles that read these tokens. Starting values
  * come from the legacy RadTherapyPlatform theme (navy surfaces, cyan accent), adjusted where a

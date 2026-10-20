@@ -35,9 +35,9 @@
 		onselect?: (id: T) => void;
 	} = $props();
 
-	function select(id: T) {
-		selected = id;
-		onselect?.(id);
+	function select(tabId: T) {
+		selected = tabId;
+		onselect?.(tabId);
 	}
 
 	function onkeydown(event: KeyboardEvent, index: number) {
