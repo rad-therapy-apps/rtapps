@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "::error::Type 'upgrade' in the confirm input to run this."
           exit 1
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Require a configured host
         run: |
           if [ -z "$DEPLOY_HOST" ]; then

@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     environment: ${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Skip when the environment has no host configured
         # secrets.* can't be used in a job-level `if`, so every later step gates on this output —
         # this is what lets `test` stay green before its VM exists.
