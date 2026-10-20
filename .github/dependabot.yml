@@ -53,6 +53,10 @@ updates:
       # @types/node tracks the Node runtime (24 LTS); its major moves with the Node upgrade.
       - dependency-name: '@types/node'
         update-types: [version-update:semver-major]
+      # TipTap 3.32.0 breaks inserting a callout (RichTextEditor spec); held at 3.31.4 (#153).
+      # Only that release is skipped, so a fixed 3.32.x or later is still proposed.
+      - dependency-name: '@tiptap/*'
+        versions: ['3.32.0']
     schedule: { interval: weekly }
     # Wait a week after a release before proposing it (supply-chain safety); security
     # updates are not delayed by this.
