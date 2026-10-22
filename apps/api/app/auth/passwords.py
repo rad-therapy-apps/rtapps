@@ -24,8 +24,9 @@ _hasher = PasswordHasher()  # module-level: reuses argon2-cffi's default (pre-tu
 
 def validate_password_strength(plain: str) -> None:
     # Called by change-password (app/auth/router.py). Its ChangePasswordIn already enforces
-    # Field(min_length=10) (same floor as RegisterIn), so a too-short password is rejected
-    # with a 422 before the route runs and this ValueError is unreachable from a request.
+    # Field(min_length=MIN_PASSWORD_LENGTH) (same floor as RegisterIn), so a too-short password
+    # is rejected with a 422 before the route runs and this ValueError is unreachable from a
+    # request.
     # It stays as a defence-in-depth check should another caller skip the schema.
     if len(plain) < MIN_PASSWORD_LENGTH:
         raise ValueError(f"Password must be at least {MIN_PASSWORD_LENGTH} characters")
