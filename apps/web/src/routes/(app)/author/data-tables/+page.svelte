@@ -22,7 +22,7 @@
 	10/15) is reused verbatim.
 	Depends on: `$app/navigation` (`beforeNavigate`), `#lib/author/GridEditor.svelte`,
 	`#lib/author/PublishPanel.svelte`, `#lib/author/api` (`api`), `#lib/author/types` (`Grid`),
-	`#lib/calc/registry` (`CALC_TYPES`, `CalcType`).
+	`#lib/calc/registry` (`CALC_TYPES`, `CALC_TYPE_LABELS`, `CalcType`).
 	Used by: reached from `(app)/author`'s dashboard ("Data tables" link).
 -->
 <script lang="ts">
@@ -37,7 +37,7 @@
 	import { api } from '#lib/author/api.js';
 	import { errorTitle, problemDetail } from '#lib/author/problem.js';
 	import type { Grid } from '#lib/author/types.js';
-	import { CALC_TYPES, type CalcType } from '#lib/calc/registry.js';
+	import { CALC_TYPES, CALC_TYPE_LABELS, type CalcType } from '#lib/calc/registry.js';
 	import type { components } from '@rtapps/api-client';
 	import type { PageData } from './$types';
 
@@ -305,7 +305,7 @@
 					onchange={(e) => (calcType = e.currentTarget.value as CalcType)}
 				>
 					{#each CALC_TYPES as type (type)}
-						<option value={type}>{type}</option>
+						<option value={type}>{CALC_TYPE_LABELS[type]}</option>
 					{/each}
 				</select>
 			</Field>
