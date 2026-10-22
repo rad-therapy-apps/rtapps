@@ -5,29 +5,18 @@
  * How it fits the project: #56 — plan 4a's final review caught infra/Caddyfile flipped to
  * SAMEORIGIN while Caddyfile.prod still sent DENY; prod would silently have blocked the
  * arcade iframe. This test fails on any future drift between the two files' header lines.
- * Depends on: `node:fs`, `node:path`, vitest.
+ * Depends on: `node:fs`, `node:path`, `./repo-root` (`repoRoot`), vitest.
  * Used by: `pnpm --filter web test` (vitest `server` project, `pr.yml` job `web`).
  */
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { repoRoot } from './repo-root';
 
 // #56: plan 4a's final review caught infra/Caddyfile flipped to SAMEORIGIN while
 // Caddyfile.prod still sent DENY — prod would silently have blocked the arcade iframe.
 // This pins the two files' security-header lines to each other.
 const HEADERS = ['X-Frame-Options', 'X-Content-Type-Options', 'Referrer-Policy'];
-
-// Anchored at the repo root (the directory holding pnpm-workspace.yaml) rather than a fixed
-// number of `..` hops, so moving this file doesn't silently change the resolved path.
-function repoRoot(): string {
-	let dir = __dirname;
-	while (!fs.existsSync(path.join(dir, 'pnpm-workspace.yaml'))) {
-		const parent = path.dirname(dir);
-		if (parent === dir) throw new Error('pnpm-workspace.yaml not found above ' + __dirname);
-		dir = parent;
-	}
-	return dir;
-}
 
 function headerLines(file: string): string[] {
 	const text = fs.readFileSync(path.join(repoRoot(), 'infra', file), 'utf8');
