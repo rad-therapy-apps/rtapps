@@ -14,7 +14,8 @@
  * Depends on: `./MuCalculator.svelte`, `./InverseSquareCalculator.svelte`,
  * `./ExtendedSsdCalculator.svelte`, `./GapCalculator.svelte`, `./MagnificationCalculator.svelte`,
  * `./SiConverter.svelte`, `./interpolate` (`Grid`), `@rtapps/api-client` (`components`).
- * Used by: the student activity route; `CALC_TYPES` by the authoring "New calculator" form.
+ * Used by: the student activity route; `CALC_TYPES` and `CALC_TYPE_LABELS` by the authoring
+ * "New calculator" form.
  */
 import type { Component } from 'svelte';
 import type { components } from '@rtapps/api-client';
@@ -47,3 +48,14 @@ export const registry: Record<string, CalcPlayer> = players;
 // calculator" form's select reads this, so form and registry can never drift. The cast is exact:
 // `satisfies` above pins `players`' keys to CalcType.
 export const CALC_TYPES = Object.keys(players) as CalcType[];
+
+// What the authoring "New calculator" dropdown shows for each calc_type (#50); the value sent to
+// the API stays the calc_type itself. `satisfies` makes a calc_type without a label a type error.
+export const CALC_TYPE_LABELS = {
+	mu: 'MU (monitor units)',
+	inverse_square: 'Inverse square law',
+	extended_ssd: 'Extended SSD',
+	gap: 'Gap calculation',
+	magnification: 'Magnification',
+	si_convert: 'SI unit converter'
+} satisfies Record<CalcType, string>;

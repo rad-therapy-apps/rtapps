@@ -21,11 +21,12 @@ import uuid
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.auth.models import UserRole
+from app.auth.passwords import MIN_PASSWORD_LENGTH
 
 
 class RegisterIn(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=10, max_length=256)
+    password: str = Field(min_length=MIN_PASSWORD_LENGTH, max_length=256)
     display_name: str = Field(min_length=1, max_length=120)
 
 
@@ -36,7 +37,7 @@ class LoginIn(BaseModel):
 
 class ChangePasswordIn(BaseModel):
     current_password: str = Field(max_length=256)
-    new_password: str = Field(min_length=10, max_length=256)
+    new_password: str = Field(min_length=MIN_PASSWORD_LENGTH, max_length=256)
 
 
 # Response shape for register/login/me; built from a User ORM row via from_attributes.

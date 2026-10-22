@@ -14,7 +14,13 @@ Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 
 import pytest
 
-from app.auth.passwords import hash_password, validate_password_strength, verify_password
+from app.auth.passwords import (
+    MIN_PASSWORD_LENGTH,
+    hash_password,
+    validate_password_strength,
+    verify_password,
+)
+from app.auth.schemas import ChangePasswordIn, RegisterIn
 
 
 def test_hash_and_verify_roundtrip() -> None:
@@ -37,3 +43,14 @@ def test_malformed_stored_hash_is_not_a_crash() -> None:
     instead of raising — login must return 401, not 500, for a broken stored hash."""
     assert verify_password("anything", "not-a-valid-argon2-hash") is False
     assert verify_password("anything", "") is False
+
+
+@pytest.mark.parametrize(
+    ("model", "field"), [(RegisterIn, "password"), (ChangePasswordIn, "new_password")]
+)
+def test_password_schemas_use_the_shared_minimum(model: type, field: str) -> None:
+    """#152: the request schemas must enforce MIN_PASSWORD_LENGTH itself, not a copy of its value.
+    If they drifted below it, a too-short change-password request would pass the schema and reach
+    validate_password_strength's ValueError, which has no handler (a 500)."""
+    schema = model.model_json_schema()["properties"][field]
+    assert schema["minLength"] == MIN_PASSWORD_LENGTH

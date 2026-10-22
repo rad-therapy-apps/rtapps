@@ -7,7 +7,7 @@
 	ADR/Task 11). Changing the quantity resets the from/to unit selects to that quantity's first
 	two units (or its only unit, if it has just one), mirroring the legacy page's
 	`populateUnitSelectors()`. The result is formatted with the legacy page's exact rule: fixed
-	decimal (4 places) when `1e-4 <= |r| < 1e7`, else scientific notation (4 places).
+	decimal (4 places) when `1e-4 <= |r| <= 1e7` (or r is 0), else scientific notation (4 places).
 	How it fits the project: plan 3c Task 3 — registered via `./registry`'s `si_convert` entry;
 	legacy source `Radiation_Physics/units_of_measurement/index.html`; units/factors in
 	`./siUnits` (`UNITS`), conversion in `./formulas` (`siConvert`, Task 1, audit §11).
@@ -47,8 +47,8 @@
 		toUnit = units.length > 1 ? units[1] : units[0];
 	});
 
-	// Legacy formatting rule (audit §11): fixed decimal (4 places) when 1e-4 <= |r| < 1e7,
-	// else scientific notation (4 places).
+	// Legacy formatting rule (audit §11): fixed decimal (4 places) when 1e-4 <= |r| <= 1e7 (or r is 0),
+	// else scientific notation (4 places). Exactly 1e7 stays fixed: the legacy test is `> 1e7` (#50).
 	function formatResult(r: number): string {
 		if (Math.abs(r) > 1e7 || (Math.abs(r) < 1e-4 && r !== 0)) {
 			return r.toExponential(4);

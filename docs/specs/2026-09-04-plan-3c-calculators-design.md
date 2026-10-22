@@ -44,10 +44,15 @@ non-finite guards (never NaN/Infinity on screen), tabs/runes/no-`{@html}`.
 | calc_type | Computes | Formula core | Data |
 |---|---|---|---|
 | `inverse_square` | Dose/intensity at a new distance | I2 = I1 × (d1/d2)² | none |
-| `mayneord` | Extended-SSD correction factor (F factor) | F = ((SSD2+dm)/(SSD1+dm))² × ((SSD1+d)/(SSD2+d))² | none |
-| `gap` | Adjacent-field skin gap | gap = (L1/2)(d/SSD1) + (L2/2)(d/SSD2) | none |
+| `extended_ssd` | Extended-SSD inverse-square correction | ISF = ((SSD0+d)/(SSDe+d))²; also output % = ISF×100, MU multiplier = 1/ISF, field factor = SSDe/SSD0 | none |
+| `gap` | Adjacent-field skin gap | gap = (L1/2)(d/SSD) + (L2/2)(d/SSD) (one SSD for both fields) | none |
 | `magnification` | Radiographic magnification | M = SID/SOD (+ object/image size solve) | none |
 | `si_convert` | SI unit/prefix conversion (activity, dose, exposure units) | value × prefix/unit factors | exact constants IN the component |
+
+*Updated 2026-10-22 (#50) to match the shipped code (`apps/web/src/lib/calc/formulas.ts`): the
+extended-SSD calculator shipped as `extended_ssd` (an inverse-square correction), and the Mayneord
+F factor (`mayneordF`) is used by the MU calculator in §2 rather than as its own calc_type; the gap
+calculator takes one SSD.*
 
 Exact formulas and input/output sets come from the audit report's per-page extraction
 (`.superpowers/sdd/3c-calculator-audit.md`) — the plan copies them verbatim per calculator.
@@ -72,7 +77,7 @@ compatible:
   "(not configured)"; the existing pdd/tmr-only configuration keeps working unchanged.
   Non-finite/zero guards as today.
 - **Mayneord correction**: optional toggle with treatment-SSD vs table-SSD inputs, applied
-  only in SSD mode; formula from §1's `mayneord` module (shared, not duplicated).
+  only in SSD mode; formula from `mayneordF` in `apps/web/src/lib/calc/formulas.ts` (shared, not duplicated).
 - Table selection by key substring continues the existing convention (`"sc"`, `"sp"`,
   `"wedge"`, `"tray"` — matching the seeded key names); a key matching none of the roles is
   ignored with a visible note in the author-facing config, not a crash.

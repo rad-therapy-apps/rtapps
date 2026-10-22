@@ -144,4 +144,21 @@ describe('SiConverter', () => {
 
 		await expect.poll(() => container.textContent).toContain('2.5');
 	});
+
+	// Scenario (#50): the legacy page switches to scientific notation only when |r| > 1e7
+	// (Radiation_Physics/units_of_measurement/index.html: `Math.abs(resultValue) > 1e7`), so exactly
+	// 10,000,000 stays fixed-decimal and the next step up does not.
+	// Invariant: 1e7 renders without an exponent; 10,000,001 renders as "1.0000e+7".
+	it('keeps exactly 1e7 in fixed notation, like the legacy page', async () => {
+		const { container } = await render(SiConverter, { tables: {} });
+
+		await selectByLabel('From unit', 'Gray (Gy)');
+		await selectByLabel('To unit', 'Gray (Gy)');
+		await fillByLabel('Value', '10000000');
+		await expect.poll(() => container.textContent).toMatch(/10,?000,?000\.0000/);
+		expect(container.textContent).not.toContain('e+');
+
+		await fillByLabel('Value', '10000001');
+		await expect.poll(() => container.textContent).toContain('1.0000e+7');
+	});
 });
