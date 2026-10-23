@@ -120,6 +120,7 @@ jobs:
       - run: pnpm --filter web build:arcade
       - run: node scripts/arcade-smoke.mjs arcade/sim-hub/index.html arcade/linac-ct/index.html arcade/linac-ct/ct-suite.html
         working-directory: apps/web
+        timeout-minutes: 10 # backstop; the script also kills any bundle that runs past 2 minutes
 
   # Full-stack flow: boot the dev compose stack (same file as `make dev`), seed it, run the
   # Playwright test through Caddy on :8080, always upload the report and tear down volumes.

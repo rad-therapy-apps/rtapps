@@ -333,6 +333,7 @@ if (args[0] === '--bundle') {
 }
 
 const { spawnSync } = await import('node:child_process');
+const BUNDLE_TIMEOUT_MS = 120_000;
 let failed = 0;
 for (const htmlPath of args) {
 	const html = readFileSync(htmlPath, 'utf8');
@@ -345,10 +346,18 @@ for (const htmlPath of args) {
 	for (const src of srcs) {
 		const rel = src.replace(/^\/arcade\/[^/]+\//, '');
 		const bundle = isAbsolute(rel) ? rel : join(dirname(htmlPath), rel);
+		// A bundle whose evaluation never settles (e.g. awaiting a request the stubbed fetch never
+		// answers) must fail, not hang the CI job: kill each child after BUNDLE_TIMEOUT_MS.
+		console.log('SMOKE START:', bundle);
 		const run = spawnSync(process.execPath, [process.argv[1], '--bundle', bundle], {
-			stdio: 'inherit'
+			stdio: 'inherit',
+			timeout: BUNDLE_TIMEOUT_MS,
+			killSignal: 'SIGKILL'
 		});
-		if (run.status !== 0) failed++;
+		if (run.error || run.signal) {
+			console.error(`SMOKE TIMEOUT: ${bundle} did not finish within ${BUNDLE_TIMEOUT_MS / 1000}s`);
+			failed++;
+		} else if (run.status !== 0) failed++;
 	}
 }
 process.exit(failed === 0 ? 0 : 1);
