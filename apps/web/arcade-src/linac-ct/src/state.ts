@@ -22,7 +22,7 @@ import type {
 	OISEvent,
 	ClearanceOverrideRecord,
 	ClearanceResult
-} from './linac-delivery';
+} from './delivery/types';
 // RTApps (#77 phase 2 task 19, type-only follow-up): linac-igrt.ts now exports a
 // `CouchShift6D` interface for the literal `clinicalIGRT.baseline`/`.correction` are
 // always assigned from (built/consumed in linac-igrt.ts, which owns `ClinicalIGRTState`

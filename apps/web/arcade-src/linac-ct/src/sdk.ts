@@ -14,18 +14,16 @@ import {
 	oisPanel
 } from './dom';
 import { renderTreatmentMonitor, setBeamState } from './scene';
+import { getTreatmentFields } from './delivery/plan';
+import { cranialSRSRequired, sbrtRequired } from './delivery/stereotactic';
+import { oisLogEvent, renderOISPanel } from './delivery/ois';
+import { recordAdaptiveFractionDose } from './delivery/adaptive';
 import {
-	cranialSRSRequired,
 	deliveredTreatmentMU,
 	expectedTechnicalIGRTHandling,
 	expectedTechnicalTreatmentCode,
-	getTreatmentFields,
-	oisLogEvent,
-	recordAdaptiveFractionDose,
-	renderOISPanel,
-	renderTreatmentDeliveryPanel,
-	sbrtRequired
-} from './linac-delivery';
+	renderTreatmentDeliveryPanel
+} from './delivery/treatment-delivery';
 import { allTreatmentFieldsCompleted, setPendantLCD, updateBEVInset } from './linac-safety';
 
 // RTApps (#77 phase 2 task 19): honest shape for `S.treatmentCompletion.record`, built

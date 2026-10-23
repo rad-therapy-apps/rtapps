@@ -27,36 +27,34 @@ import {
 	updateODIReadout
 } from './scene';
 import {
-	activeElectronBolusSpec,
-	activeSpecialSetupSpec,
-	adaptiveRequired,
-	adaptiveSpec,
 	arcAngularState,
 	deliveryCasePlan,
 	deliveryProgressFraction,
-	electronBolusDeliveryOK,
-	electronBolusDeliveryRequired,
 	getCurrentPlannedParameters,
 	getDynamicFieldState,
 	getTreatmentFields,
-	immobilizationRequired,
-	immobilizationVerified,
-	isFixedElectronField,
-	motionRequired,
 	normalizeAngleValue,
-	oisLogEvent,
 	parseFirstNumber,
 	parseJawSpec,
-	persistOISSession,
-	renderOISPanel,
-	renderSRSPanel,
-	renderTreatmentDeliveryPanel,
-	specialSetupRequired,
-	specialSetupVerified,
-	srsRequired,
-	stereotacticCaseLabel,
 	treatmentParamMatches
-} from './linac-delivery';
+} from './delivery/plan';
+import {
+	activeSpecialSetupSpec,
+	specialSetupRequired,
+	specialSetupVerified
+} from './delivery/special-setup';
+import { renderSRSPanel, srsRequired, stereotacticCaseLabel } from './delivery/stereotactic';
+import { motionRequired } from './delivery/motion';
+import { oisLogEvent, persistOISSession, renderOISPanel } from './delivery/ois';
+import { adaptiveRequired, adaptiveSpec } from './delivery/adaptive';
+import {
+	activeElectronBolusSpec,
+	electronBolusDeliveryOK,
+	electronBolusDeliveryRequired
+} from './delivery/electron-bolus';
+import { immobilizationRequired, immobilizationVerified } from './delivery/immobilization';
+import { renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
+import { isFixedElectronField } from './delivery/case-setup';
 import { renderClinicalIGRT } from './linac-igrt';
 import { saveGameState } from './game';
 import { setTextById, syncOperatorConsole, wrap360 } from './main';

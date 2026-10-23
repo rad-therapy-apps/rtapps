@@ -2,19 +2,17 @@ import { S } from './state';
 import { igrtPanel } from './dom';
 import { GROUND_Y, renderTreatmentMonitor, updateCouchAccordion } from './scene';
 import {
-	activeIGRTTolerances,
 	canonicalCouchDisplay,
 	couchStateMatchesPlan,
 	deliveryCasePlan,
-	fmtOISShift,
 	getIGRTExpectedAbsoluteCouch,
 	getPlannedCouchState,
 	getTreatmentFields,
-	normalizeAngleValue,
-	oisLogEvent,
-	renderTreatmentDeliveryPanel,
-	srsRequired
-} from './linac-delivery';
+	normalizeAngleValue
+} from './delivery/plan';
+import { activeIGRTTolerances, srsRequired } from './delivery/stereotactic';
+import { fmtOISShift, oisLogEvent } from './delivery/ois';
+import { renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
 import {
 	captureCollisionPose,
 	COLLISION_PROXY_TOL,

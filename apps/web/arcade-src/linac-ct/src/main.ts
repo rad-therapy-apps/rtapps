@@ -253,62 +253,76 @@ import {
 	updateVaultAesthetics
 } from './travel';
 import {
-	acquireMotionCharacterization,
-	adaptiveRequired,
-	addImmobilizationDevice,
-	advanceAdaptiveFraction,
-	applyAdaptivePlan,
-	applyImmobilizationRules,
-	armTreatmentDelivery,
-	clearImmobilizationSelection,
 	deliveryCasePlan,
 	deliveryProgressFraction,
 	fmtSignedInt,
 	getCurrentPlannedParameters,
 	getDynamicFieldState,
 	getTreatmentFields,
+	setBeamWidth
+} from './delivery/plan';
+import {
 	handleSpecialSetupAction,
-	holdTreatmentDelivery,
-	IMAGING_SITES,
+	renderSpecialSetupPanel,
+	syncSpecialCheckboxes,
+	updateSpecialAnatomyTargetMarker
+} from './delivery/special-setup';
+import {
+	recheckSRSClearance,
+	renderSRSPanel,
+	runSRSDryRun,
+	srsRequired,
+	verifySRSTimeout
+} from './delivery/stereotactic';
+import {
+	acquireMotionCharacterization,
+	releaseDIBHHold,
+	renderMotionPanel,
+	resetMotionManagementForCase,
+	startDIBHHold,
+	updateMotionAnimation,
+	verifyMotionManagement
+} from './delivery/motion';
+import { persistOISSession, renderOISPanel, signOffOISRecord } from './delivery/ois';
+import {
+	adaptiveRequired,
+	advanceAdaptiveFraction,
+	applyAdaptivePlan,
+	renderAdaptivePanel,
+	resetAdaptiveCourseHistory,
+	verifyAdaptivePlan
+} from './delivery/adaptive';
+import { updateElectronBolusMesh } from './delivery/electron-bolus';
+import {
+	addImmobilizationDevice,
+	applyImmobilizationRules,
+	clearImmobilizationSelection,
 	IMMOBILIZATION_DEVICE_META,
-	loadTreatmentCase,
+	removeImmobilizationDevice,
+	renderImmobilizationPanel,
+	verifyImmobilizationSelection
+} from './delivery/immobilization';
+import {
+	armTreatmentDelivery,
+	holdTreatmentDelivery,
+	renderTreatmentDeliveryPanel,
+	resumeTreatmentDelivery,
+	startTreatmentDelivery,
+	terminateTreatmentDelivery
+} from './delivery/treatment-delivery';
+import {
+	IMAGING_SITES,
 	PATIENT_POS_NAMES,
 	PATIENT_POSITIONS,
-	persistOISSession,
-	populateTreatmentCaseSelect,
-	recheckSRSClearance,
-	releaseDIBHHold,
-	removeImmobilizationDevice,
-	renderAdaptivePanel,
-	renderImmobilizationPanel,
-	renderMotionPanel,
-	renderOISPanel,
-	renderSpecialSetupPanel,
-	renderSRSPanel,
-	renderTreatmentDeliveryPanel,
-	resetAdaptiveCourseHistory,
-	resetMotionManagementForCase,
-	resumeTreatmentDelivery,
-	runPatientSetup,
-	runSRSDryRun,
-	setBeamWidth,
-	setImagingError6DOF,
 	SETUP_REFINEMENTS,
-	signOffOISRecord,
-	srsRequired,
-	startDIBHHold,
-	startTreatmentDelivery,
-	syncSpecialCheckboxes,
-	terminateTreatmentDelivery,
-	TREATMENT_CASES,
-	updateElectronBolusMesh,
-	updateMotionAnimation,
-	updateSpecialAnatomyTargetMarker,
-	verifyAdaptivePlan,
-	verifyImmobilizationSelection,
-	verifyMotionManagement,
-	verifySRSTimeout
-} from './linac-delivery';
+	TREATMENT_CASES
+} from './delivery/cases';
+import {
+	loadTreatmentCase,
+	populateTreatmentCaseSelect,
+	runPatientSetup,
+	setImagingError6DOF
+} from './delivery/case-setup';
 import {
 	acquireClinicalIGRT,
 	renderClinicalIGRT,
@@ -362,7 +376,7 @@ import {
 	saveGameState,
 	updateUI
 } from './game';
-import type { TreatmentField } from './linac-delivery';
+import type { TreatmentField } from './delivery/types';
 
 // RTApps (#77 phase 2 task 19): consolidated `declare global` for this app's window
 // globals — folds in the interim per-module declarations previously carried by
