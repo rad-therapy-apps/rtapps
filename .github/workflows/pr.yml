@@ -39,6 +39,7 @@ jobs:
   # PR can edit a workflow to target any runner registered to the repo.
   api:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15 # backstop: the suite runs in ~2 min; a test blocked on a lock would otherwise hang for 6 h
     defaults:
       run:
         working-directory: apps/api

@@ -3,10 +3,20 @@ get-or-creates the three demo accounts, imports the seed lessons plus the migrat
 content and demo quiz, seeds the published MU calculator, and seeds the demo
 cohort/students/attempts/rollups.
 
-Used here and why: the real Postgres `db`/`client` fixtures from `conftest.py` (not
-mocks), because the point of these tests is that `seed()` is safe to call against a
-database that may already be seeded, and that the accounts it creates are the ones the
-login endpoint actually accepts.
+Used here and why: a real Postgres database (this module's `db` fixture, below, and
+`conftest.py`'s `make_client`; not mocks), because the point of these tests is that
+`seed()` is safe to call against a database that may already be seeded, and that the
+accounts it creates are the ones the login endpoint actually accepts.
+
+Why the module shares one seeded database: one seed() call takes about 6 s (it imports and
+validates the whole seed corpus), and each test used to run it twice. The module-scoped
+`seeded` fixture runs seed() twice, once per module, inside a transaction that is never
+committed. This module's `db` fixture (overriding conftest's) gives each test a fresh session
+inside a SAVEPOINT that is rolled back afterwards. Read-only tests assert against that
+twice-seeded state. Tests that change data re-run seed() once themselves. The arcade
+directory check lives in `test_seed_arcade_dirs.py`. Do not open a second connection or engine
+in this module (e.g. conftest's `engine`): a write through it would wait on the open `seeded`
+transaction's row locks, which Postgres cannot detect as a deadlock, so the run would hang.
 
 How it fits the project: protects `make seed` (docs/03-architecture.md §10.1) — a
 developer or CI job can run seeding more than once without duplicating users, lessons,
@@ -14,7 +24,7 @@ migrated content, the demo cohort, its student enrolments or their attempts/roll
 it must never run against a `prod` environment by mistake.
 
 Works with: pytest-asyncio, httpx.
-Depends on: `db`, `client`, `settings` fixtures and `TEST_DATABASE_URL` from
+Depends on: `migrated_db`, `settings` and `app` fixtures, `TEST_DATABASE_URL` and `make_client` from
 `conftest.py`; `app.seed.seed`; `app.config.Settings`; `app.cohorts.models` (Cohort,
 Enrollment); `app.attempts.models` (Attempt); `app.attempts.rollup` (ActivityResult);
 `app.content.models` (Activity, Lesson); `app.content.activity_models` (DataTable, Quiz,
@@ -22,12 +32,19 @@ Outcome, QuestionOutcome).
 Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 """
 
-from pathlib import Path
+from collections.abc import AsyncIterator
+from dataclasses import dataclass
 
 import pytest
-from httpx import AsyncClient
+import pytest_asyncio
+from fastapi import FastAPI
 from sqlalchemy import delete, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from app.attempts.models import Attempt
 from app.attempts.rollup import ActivityResult
@@ -36,21 +53,75 @@ from app.cohorts.models import Cohort, Enrollment
 from app.config import Settings
 from app.content.activity_models import DataTable, Outcome, QuestionOutcome, Quiz
 from app.content.models import Activity, ContentVersion, Lesson, Subject
-from app.seed import seed
-from tests.conftest import TEST_DATABASE_URL
+from app.seed import SeedSummary, seed
+from tests.conftest import TEST_DATABASE_URL, make_client
+
+# Every test in this module runs on one event loop shared with the module-scoped `seeded`
+# fixture below: asyncpg connections belong to the loop that opened them.
+pytestmark = pytest.mark.asyncio(loop_scope="module")
 
 
-async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
+@dataclass
+class Seeded:
+    """What the module-scoped `seeded` fixture leaves for the tests to read."""
+
+    conn: AsyncConnection
+    first: SeedSummary
+    second: SeedSummary
+    # Activity row count captured BETWEEN the two seed() calls, so test_seed_is_idempotent
+    # compares a before/after pair instead of one count against itself.
+    activities_after_first: int | None
+
+
+def _session_on(conn: AsyncConnection) -> AsyncSession:
+    # Same mode as conftest's `db`: a session.commit() only releases the session's own
+    # SAVEPOINT, never the transaction underneath it.
+    return async_sessionmaker(
+        bind=conn, expire_on_commit=False, join_transaction_mode="create_savepoint"
+    )()
+
+
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
+async def seeded(migrated_db: None, settings: Settings) -> AsyncIterator[Seeded]:
+    """Run seed() twice, once for the whole module, inside one never-committed transaction
+    that is rolled back when the module ends, so other test files still start empty."""
+    engine = create_async_engine(TEST_DATABASE_URL)
+    async with engine.connect() as conn:
+        trans = await conn.begin()
+        async with _session_on(conn) as session:
+            first = await seed(session, settings)
+            activities_after_first = await session.scalar(
+                select(func.count()).select_from(Activity)
+            )
+            second = await seed(session, settings)
+            # seed() does not commit. Committing releases the session's SAVEPOINT so the
+            # rows stay in `trans`; closing the session without it would roll them back.
+            await session.commit()
+        yield Seeded(conn, first, second, activities_after_first)
+        await trans.rollback()
+    await engine.dispose()
+
+
+@pytest_asyncio.fixture(loop_scope="module")
+async def db(seeded: Seeded) -> AsyncIterator[AsyncSession]:
+    """Overrides conftest's `db` for this module: a fresh session on the shared, already
+    twice-seeded connection, inside a SAVEPOINT rolled back after the test, so nothing a
+    test changes reaches the next one."""
+    savepoint = await seeded.conn.begin_nested()
+    async with _session_on(seeded.conn) as session:
+        yield session
+    await savepoint.rollback()
+
+
+async def test_seed_is_idempotent(db: AsyncSession, seeded: Seeded) -> None:
     """Calling seed() twice must not double-create anything: the second call sees all
     thirteen accounts (three demo plus ten students) and every migrated lesson already
     there, and creates 0 new users; the migrated-content + activity import counts (upserts,
     not get-or-create) stay identical across both calls."""
-    first = await seed(db, settings)
-    # Captured BETWEEN the two calls: the "before the second call" activity total, so the
-    # comparison below actually exercises idempotency instead of comparing a count against
-    # itself (both reads would otherwise happen after both calls completed).
-    total_activities_first = await db.scalar(select(func.count()).select_from(Activity))
-    second = await seed(db, settings)
+    # Both seed() calls ran once for the whole module (the `seeded` fixture), which also
+    # captured the activity total between them.
+    first, second = seeded.first, seeded.second
+    total_activities_first = seeded.activities_after_first
     assert first.users_created == 13 and second.users_created == 0
     # Confirms the get-or-create check actually matched existing rows by email, rather
     # than the count happening to come out right for some other reason (e.g. a bug that
@@ -74,30 +145,30 @@ async def test_seed_is_idempotent(db: AsyncSession, settings: Settings) -> None:
     assert total_activities_first == total_activities_second
 
 
-async def test_seed_users_can_log_in(
-    client: AsyncClient, db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_users_can_log_in(app: FastAPI, db: AsyncSession) -> None:
     """The seeded educator and a seeded student account must both be usable through the
     real login endpoint with the documented shared dev password, not just present as
     rows in the database."""
-    await seed(db, settings)
-    r = await client.post(
-        "/api/v1/auth/login",
-        json={"email": "educator@example.com", "password": "rtapps-dev-password"},
-    )
-    assert r.status_code == 200 and r.json()["role"] == "educator"
-    r = await client.post(
-        "/api/v1/auth/login",
-        json={"email": "student03@example.com", "password": "rtapps-dev-password"},
-    )
-    assert r.status_code == 200 and r.json()["role"] == "student"
+    # Built here, not via conftest's `client` fixture (function-loop scoped), so the client's
+    # lifespan and requests run on this module's event loop.
+    async with make_client(app, db) as client:
+        r = await client.post(
+            "/api/v1/auth/login",
+            json={"email": "educator@example.com", "password": "rtapps-dev-password"},
+        )
+        assert r.status_code == 200 and r.json()["role"] == "educator"
+        r = await client.post(
+            "/api/v1/auth/login",
+            json={"email": "student03@example.com", "password": "rtapps-dev-password"},
+        )
+        assert r.status_code == 200 and r.json()["role"] == "student"
 
 
-async def test_seed_cohort_students_and_results(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_cohort_students_and_results(db: AsyncSession, seeded: Seeded) -> None:
     """One demo cohort with the educator and ten students; each student has one submitted
     attempt on rbe-and-oer scoring index % 3 out of 2, and one on demo-quiz scoring index %
     5 out of 4, each with a rollup row; re-seeding adds none."""
-    first = await seed(db, settings)
+    first = seeded.first
     assert (
         first.cohort_created
         and first.students_created == 10
@@ -166,7 +237,7 @@ async def test_seed_cohort_students_and_results(db: AsyncSession, settings: Sett
     )
     assert student01_quiz_percent == 25.0
 
-    second = await seed(db, settings)
+    second = seeded.second
     assert (
         not second.cohort_created
         and second.students_created == 0
@@ -182,7 +253,6 @@ async def test_seed_partial_rerun_recreates_only_missing_attempt(
     """Deleting one demo student's lesson attempt and re-running seed() recreates only that
     student's attempt (the other nine students' lesson attempts and every quiz attempt are
     left untouched, since seed() only fills in what's missing, not a full re-import)."""
-    await seed(db, settings)
     student03 = await db.scalar(select(User).where(User.email == "student03@example.com"))
     assert student03 is not None
     lesson_activity = await db.scalar(
@@ -198,8 +268,8 @@ async def test_seed_partial_rerun_recreates_only_missing_attempt(
     )
     await db.flush()
 
-    second = await seed(db, settings)
-    assert second.attempts_created == 1 and second.quiz_attempts_created == 0
+    rerun = await seed(db, settings)
+    assert rerun.attempts_created == 1 and rerun.quiz_attempts_created == 0
     remaining = await db.scalar(
         select(func.count())
         .select_from(Attempt)
@@ -209,12 +279,11 @@ async def test_seed_partial_rerun_recreates_only_missing_attempt(
     assert (await db.scalar(select(func.count()).select_from(Attempt))) == 20
 
 
-async def test_seed_creates_published_mu_calculator(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_published_mu_calculator(db: AsyncSession) -> None:
     """The seeded `pdd_6mv` data table and its "MU calculator" activity: the table has a
     plausible, monotone PDD grid, and the calculator is published and points at it — so the
     authoring e2e (Task 18) and a student both have a fixed calculator to open; re-seeding
     creates neither a second table nor a second activity."""
-    await seed(db, settings)
     table = await db.scalar(select(DataTable).where(DataTable.key == "pdd_6mv"))
     assert table is not None
     assert table.grid["cols"] == [5.0, 10.0, 15.0, 20.0]
@@ -230,7 +299,6 @@ async def test_seed_creates_published_mu_calculator(db: AsyncSession, settings: 
         "data_tables": ["pdd_6mv", "sc_6mv", "sp_6mv", "wedge_factors"],
     }
 
-    await seed(db, settings)
     assert (
         await db.scalar(
             select(func.count()).select_from(DataTable).where(DataTable.key == "pdd_6mv")
@@ -253,7 +321,6 @@ async def test_seed_republishes_mu_calculator_on_data_tables_change(
     existed — must restore the full data_tables list in place and cut a new published
     ContentVersion whose snapshot carries all four tables, not leave the stale snapshot that
     students would otherwise keep computing against, and not create a second activity."""
-    await seed(db, settings)
     calc = await db.scalar(
         select(Activity).where(Activity.kind == "calculator", Activity.title == "MU calculator")
     )
@@ -281,12 +348,11 @@ async def test_seed_republishes_mu_calculator_on_data_tables_change(
     assert count == 1
 
 
-async def test_seed_creates_scatter_and_wedge_tables(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_scatter_and_wedge_tables(db: AsyncSession) -> None:
     """The three new single-row `DataTable`s (Task 6), transcribed verbatim from the legacy
     MU_Calculator's 6 MV `scData`/`spData`/`wedgeFactors`: ascending cols (field sizes or
     wedge angles), one row keyed `0`; the MU calculator's latest published snapshot embeds
     all four tables by value; re-seeding creates none of them twice."""
-    await seed(db, settings)
 
     sc = await db.scalar(select(DataTable).where(DataTable.key == "sc_6mv"))
     assert sc is not None
@@ -319,7 +385,6 @@ async def test_seed_creates_scatter_and_wedge_tables(db: AsyncSession, settings:
         "wedge_factors",
     }
 
-    await seed(db, settings)
     for key in ("sc_6mv", "sp_6mv", "wedge_factors"):
         count = await db.scalar(
             select(func.count()).select_from(DataTable).where(DataTable.key == key)
@@ -327,12 +392,11 @@ async def test_seed_creates_scatter_and_wedge_tables(db: AsyncSession, settings:
         assert count == 1
 
 
-async def test_seed_creates_six_practice_calculators(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_six_practice_calculators(db: AsyncSession) -> None:
     """Six new practice calculators (Task 6), get-or-created by title like the MU
     calculator: each has the right calc_type/subject and no data tables of its own, and both
     `inverse_square` instances exist (Treatment Planning teaching the law itself, Radiation
     Protection the ALARA framing); re-seeding creates none of them twice."""
-    await seed(db, settings)
     expected = [
         ("Inverse Square Law", "inverse_square", "treatment-planning"),
         ("Extended SSD", "extended_ssd", "treatment-planning"),
@@ -361,7 +425,6 @@ async def test_seed_creates_six_practice_calculators(db: AsyncSession, settings:
     )
     assert inverse_square_count == 2
 
-    await seed(db, settings)
     for title, _, _ in expected:
         count = await db.scalar(
             select(func.count())
@@ -371,11 +434,10 @@ async def test_seed_creates_six_practice_calculators(db: AsyncSession, settings:
         assert count == 1
 
 
-async def test_seed_creates_cell_defender(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_cell_defender(db: AsyncSession) -> None:
     """The seeded Cell Defender arcade activity (Plan 4a pilot): published, kind external,
     access practice, config with arcade_slug and max_score; subject is radiation-biology;
     re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Cell Defender"))
     assert activity is not None
     assert activity.kind == "external"
@@ -385,18 +447,16 @@ async def test_seed_creates_cell_defender(db: AsyncSession, settings: Settings) 
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "radiation-biology"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Cell Defender")
     )
     assert count == 1
 
 
-async def test_seed_creates_anatomy_atlas_adventure(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_anatomy_atlas_adventure(db: AsyncSession) -> None:
     """Plan 4b batch 1: Anatomy Atlas Adventure — published, kind external, access
     practice, config with arcade_slug and max_score (5 cases x 100); subject is
     sectional-anatomy; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Anatomy Atlas Adventure"))
     assert activity is not None
     assert activity.kind == "external"
@@ -406,7 +466,6 @@ async def test_seed_creates_anatomy_atlas_adventure(db: AsyncSession, settings: 
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "sectional-anatomy"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -415,11 +474,10 @@ async def test_seed_creates_anatomy_atlas_adventure(db: AsyncSession, settings: 
     assert count == 1
 
 
-async def test_seed_creates_dose_calc_dash(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_dose_calc_dash(db: AsyncSession) -> None:
     """Plan 4b batch 1: Dose Calc Dash — published, kind external, access practice,
     config with arcade_slug and max_score (4 cases x 100); subject is
     treatment-planning; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Dose Calc Dash"))
     assert activity is not None
     assert activity.kind == "external"
@@ -429,22 +487,18 @@ async def test_seed_creates_dose_calc_dash(db: AsyncSession, settings: Settings)
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-planning"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Dose Calc Dash")
     )
     assert count == 1
 
 
-async def test_seed_creates_adaptive_consultation_assessment(
-    db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_creates_adaptive_consultation_assessment(db: AsyncSession) -> None:
     """Plan 4b batch 1: Adaptive Consultation Assessment — published, kind external,
     access practice, config with arcade_slug and max_score (239, the sum of the 10
     largest per-scenario maxPoints among its 14 scenarios — the true achievable ceiling
     for a 10-round adaptive run); subject is patient-care; re-seeding creates it only
     once."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.title == "Adaptive Consultation Assessment")
     )
@@ -456,7 +510,6 @@ async def test_seed_creates_adaptive_consultation_assessment(
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "patient-care"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -465,14 +518,11 @@ async def test_seed_creates_adaptive_consultation_assessment(
     assert count == 1
 
 
-async def test_seed_creates_ethical_decision_making_simulator(
-    db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_creates_ethical_decision_making_simulator(db: AsyncSession) -> None:
     """Plan 4b batch 1: Adaptive Ethical Decision-Making Simulator — published, kind
     external, access practice, config with arcade_slug and max_score (50: 5 scenarios
     played per run x 10 points, the uniform max across all 7 defined scenarios); subject
     is ethics; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.title == "Adaptive Ethical Decision-Making Simulator")
     )
@@ -484,7 +534,6 @@ async def test_seed_creates_ethical_decision_making_simulator(
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "ethics"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -493,11 +542,10 @@ async def test_seed_creates_ethical_decision_making_simulator(
     assert count == 1
 
 
-async def test_seed_creates_legal_eagle_lineup(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_legal_eagle_lineup(db: AsyncSession) -> None:
     """Plan 4b batch 1: Legal Eagle Lineup — published, kind external, access practice,
     config with arcade_slug and max_score (9 cases x 100); subject is ethics; re-seeding
     creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Legal Eagle Lineup"))
     assert activity is not None
     assert activity.kind == "external"
@@ -507,18 +555,16 @@ async def test_seed_creates_legal_eagle_lineup(db: AsyncSession, settings: Setti
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "ethics"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Legal Eagle Lineup")
     )
     assert count == 1
 
 
-async def test_seed_creates_vital_signs_challenge(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_vital_signs_challenge(db: AsyncSession) -> None:
     """Plan 4b batch 1: Vital Signs Challenge — published, kind external, access
     practice, config with arcade_slug and max_score (10 patients x 6 points/patient);
     subject is patient-care; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Vital Signs Challenge"))
     assert activity is not None
     assert activity.kind == "external"
@@ -528,28 +574,25 @@ async def test_seed_creates_vital_signs_challenge(db: AsyncSession, settings: Se
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "patient-care"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Vital Signs Challenge")
     )
     assert count == 1
 
 
-async def test_seed_authoring_queue_is_non_empty(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_authoring_queue_is_non_empty(db: AsyncSession) -> None:
     """At least one seeded activity still carries `import_notes` (the migrated legacy corpus
     re-scanned in Task 5 always flags some pages for a human pass), so the authoring
     needs-review queue this task's e2e drives against is guaranteed non-empty."""
-    await seed(db, settings)
     activities = (await db.scalars(select(Activity))).all()
     flagged = [a for a in activities if a.config.get("import_notes")]
     assert len(flagged) > 0
 
 
-async def test_seed_creates_care_commander(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_care_commander(db: AsyncSession) -> None:
     """Plan 4b batch 2: Care Commander — published, kind external, access practice,
     config with arcade_slug and max_score (3000: 15 patients x 200 points max);
     subject is patient-care; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Care Commander"))
     assert activity is not None
     assert activity.kind == "external"
@@ -559,19 +602,17 @@ async def test_seed_creates_care_commander(db: AsyncSession, settings: Settings)
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "patient-care"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Care Commander")
     )
     assert count == 1
 
 
-async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_error_reporter(db: AsyncSession) -> None:
     """Plan 4b batch 2: Error Reporter — published, kind external, access practice,
     config with arcade_slug and max_score (10825: perfect 25-case MASTERY ACHIEVED
     playthrough, score/XP accumulate across cases and only reset on full restart);
     subject is quality-management-and-safety; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Error Reporter"))
     assert activity is not None
     assert activity.kind == "external"
@@ -581,20 +622,18 @@ async def test_seed_creates_error_reporter(db: AsyncSession, settings: Settings)
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "quality-management-and-safety"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Error Reporter")
     )
     assert count == 1
 
 
-async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_qa_crusader(db: AsyncSession) -> None:
     """Plan 4b batch 2: QA Crusader — published, kind external, access practice,
     config with arcade_slug and max_score (10000: Level 3's win floor of 8000 plus a
     bounded overshoot allowance, since reportResult fires once per level at time-up,
     not the instant the target score is crossed); subject is quality-management-and-safety;
     re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "QA Crusader"))
     assert activity is not None
     assert activity.kind == "external"
@@ -604,20 +643,18 @@ async def test_seed_creates_qa_crusader(db: AsyncSession, settings: Settings) ->
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "quality-management-and-safety"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "QA Crusader")
     )
     assert count == 1
 
 
-async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_safety_supervisor(db: AsyncSession) -> None:
     """Plan 4d: Safety Supervisor — published, kind external, access practice, config with
     arcade_slug and max_score (1700: 19 hazards x 100 (1900) minus the two isFatal hazards'
     points, now reachable because the game's Level 4 completion gate was fixed to exclude
     isFatal hazards from totalHazards — audit §4.3/4.4); subject is radiation-protection;
     re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Safety Supervisor"))
     assert activity is not None
     assert activity.kind == "external"
@@ -627,7 +664,6 @@ async def test_seed_creates_safety_supervisor(db: AsyncSession, settings: Settin
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "radiation-protection"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Safety Supervisor")
     )
@@ -642,7 +678,6 @@ async def test_seed_republishes_safety_supervisor_on_config_change(
     old (pre-fix) max_score of 1900 — as if seeded before this task — must update its
     config in place to 1700 and cut a new published ContentVersion whose snapshot reflects
     it, not leave the stale config/snapshot in place or create a second row."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Safety Supervisor"))
     assert activity is not None
     old_version_id = activity.current_version_id
@@ -664,11 +699,10 @@ async def test_seed_republishes_safety_supervisor_on_config_change(
     assert count == 1
 
 
-async def test_seed_creates_procedure_pursuit(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_procedure_pursuit(db: AsyncSession) -> None:
     """Plan 4b batch 2: Procedure Pursuit — published, kind external, access practice,
     config with arcade_slug and max_score (1650: 9 checkpoints x 100 + 5 timed x 150);
     subject is treatment-delivery-procedures; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(select(Activity).where(Activity.title == "Procedure Pursuit"))
     assert activity is not None
     assert activity.kind == "external"
@@ -678,18 +712,16 @@ async def test_seed_creates_procedure_pursuit(db: AsyncSession, settings: Settin
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Procedure Pursuit")
     )
     assert count == 1
 
 
-async def test_seed_batch_3_anatomy_angler(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_3_anatomy_angler(db: AsyncSession) -> None:
     """Plan 4b batch 3: Anatomy Angler — published, kind external, access practice,
     config with arcade_slug and max_score (2000: unbounded heuristic cap, strong-session
     estimate per audit); subject is sectional-anatomy; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Anatomy Angler")
     )
@@ -701,18 +733,16 @@ async def test_seed_batch_3_anatomy_angler(db: AsyncSession, settings: Settings)
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "sectional-anatomy"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Anatomy Angler")
     )
     assert count == 1
 
 
-async def test_seed_batch_3_side_effect_sorcerer(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_3_side_effect_sorcerer(db: AsyncSession) -> None:
     """Plan 4b batch 3: Side Effect Sorcerer — published, kind external, access practice,
     config with arcade_slug and max_score (859: fixed enemy count 6 waves, sum derived);
     subject is radiation-biology; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "Side Effect Sorcerer"
@@ -726,20 +756,16 @@ async def test_seed_batch_3_side_effect_sorcerer(db: AsyncSession, settings: Set
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "radiation-biology"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Side Effect Sorcerer")
     )
     assert count == 1
 
 
-async def test_seed_batch_3_gantry_position_guessing_game(
-    db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_batch_3_gantry_position_guessing_game(db: AsyncSession) -> None:
     """Plan 4b batch 3: Gantry Position Guessing Game — published, kind external, access
     practice, config with arcade_slug and max_score (10: perfect streak of 10 correct);
     subject is treatment-delivery-procedures; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "Gantry Position Guessing Game"
@@ -753,7 +779,6 @@ async def test_seed_batch_3_gantry_position_guessing_game(
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -762,13 +787,10 @@ async def test_seed_batch_3_gantry_position_guessing_game(
     assert count == 1
 
 
-async def test_seed_batch_3_linac_component_identification(
-    db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_batch_3_linac_component_identification(db: AsyncSession) -> None:
     """Plan 4b batch 3: LINAC Component Identification — published, kind external, access
     practice, config with arcade_slug and max_score (10: 10 components to identify);
     subject is treatment-delivery-procedures; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "LINAC Component Identification"
@@ -782,7 +804,6 @@ async def test_seed_batch_3_linac_component_identification(
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -791,11 +812,10 @@ async def test_seed_batch_3_linac_component_identification(
     assert count == 1
 
 
-async def test_seed_batch_3_ssd_practice(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_3_ssd_practice(db: AsyncSession) -> None:
     """Plan 4b batch 3: SSD Practice - BEV — published, kind external, access practice,
     config with arcade_slug and max_score (20: max user-configurable problems); subject is
     treatment-planning; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "SSD Practice - BEV")
     )
@@ -807,18 +827,16 @@ async def test_seed_batch_3_ssd_practice(db: AsyncSession, settings: Settings) -
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-planning"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "SSD Practice - BEV")
     )
     assert count == 1
 
 
-async def test_seed_batch_4_ct_borders(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_4_ct_borders(db: AsyncSession) -> None:
     """Plan 4b batch 4: CT Simulation Border Challenge — published, kind external, access
     practice, config with arcade_slug and max_score (10: MAX_CORRECT, the fixed win
     condition); subject is sectional-anatomy; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "CT Simulation Border Challenge"
@@ -832,7 +850,6 @@ async def test_seed_batch_4_ct_borders(db: AsyncSession, settings: Settings) -> 
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "sectional-anatomy"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -841,12 +858,11 @@ async def test_seed_batch_4_ct_borders(db: AsyncSession, settings: Settings) -> 
     assert count == 1
 
 
-async def test_seed_batch_4_dosimetry_vocabulary(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_4_dosimetry_vocabulary(db: AsyncSession) -> None:
     """Plan 4b batch 4: Dosimetry Vocabulary Game — published, kind external, access
     practice, config with arcade_slug and max_score (22: vocabulary.length, the fixed
     term bank shared by the multiple-choice/matching/audio-quiz modes); subject is
     radiation-physics; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "Dosimetry Vocabulary Game"
@@ -860,7 +876,6 @@ async def test_seed_batch_4_dosimetry_vocabulary(db: AsyncSession, settings: Set
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "radiation-physics"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -869,12 +884,11 @@ async def test_seed_batch_4_dosimetry_vocabulary(db: AsyncSession, settings: Set
     assert count == 1
 
 
-async def test_seed_batch_4_rad_units(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_4_rad_units(db: AsyncSession) -> None:
     """Plan 4b batch 4: Rad Units Challenge — published, kind external, access practice,
     config with arcade_slug and max_score (20: radUnitsQuestions.length, identical across
     the choice/matching/audio-quiz modes); subject is radiation-physics; re-seeding
     creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Rad Units Challenge")
     )
@@ -886,19 +900,17 @@ async def test_seed_batch_4_rad_units(db: AsyncSession, settings: Settings) -> N
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "radiation-physics"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Rad Units Challenge")
     )
     assert count == 1
 
 
-async def test_seed_batch_4_sectional_anatomy_quiz(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_4_sectional_anatomy_quiz(db: AsyncSession) -> None:
     """Plan 4b batch 4: Sectional Anatomy Quiz — published, kind external, access
     practice, config with arcade_slug and max_score (20: the largest mode's question
     count, the comprehensive mode's 8 imaging-plane + 12 terminology questions); subject
     is sectional-anatomy; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "Sectional Anatomy Quiz"
@@ -912,19 +924,17 @@ async def test_seed_batch_4_sectional_anatomy_quiz(db: AsyncSession, settings: S
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "sectional-anatomy"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Sectional Anatomy Quiz")
     )
     assert count == 1
 
 
-async def test_seed_batch_5_beam_sculptor(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_5_beam_sculptor(db: AsyncSession) -> None:
     """Plan 4b batch 5: Beam Sculptor — published, kind external, access practice,
     completion-only (no numeric score, binary approved/rejected verdict), config
     carries completion_only: True and no max_score key; subject is treatment-planning;
     re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Beam Sculptor")
     )
@@ -937,19 +947,17 @@ async def test_seed_batch_5_beam_sculptor(db: AsyncSession, settings: Settings) 
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-planning"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Beam Sculptor")
     )
     assert count == 1
 
 
-async def test_seed_batch_5_onco_uno(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_batch_5_onco_uno(db: AsyncSession) -> None:
     """Plan 4b batch 5: OncoLife UNO: The Clinical Shift — published, kind external,
     access practice, completion-only (turn-based card game, win/lose at hand-empty, no
     numeric score), config carries completion_only: True and no max_score key; subject
     is patient-care; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "OncoLife UNO: The Clinical Shift"
@@ -964,7 +972,6 @@ async def test_seed_batch_5_onco_uno(db: AsyncSession, settings: Settings) -> No
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "patient-care"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -973,12 +980,11 @@ async def test_seed_batch_5_onco_uno(db: AsyncSession, settings: Settings) -> No
     assert count == 1
 
 
-async def test_seed_creates_center_qa_walkthrough(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_center_qa_walkthrough(db: AsyncSession) -> None:
     """Plan 4c: Center QA walkthrough — the sim-hub app IS this activity's player
     (the walkable hub); published, kind external, access practice, scored (max_score 4),
     config carries sdk_slug sim-hub-qa for the simulator SDK resolver; subject is
     quality-management-and-safety; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "Center QA walkthrough"
@@ -996,19 +1002,17 @@ async def test_seed_creates_center_qa_walkthrough(db: AsyncSession, settings: Se
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "quality-management-and-safety"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Center QA walkthrough")
     )
     assert count == 1
 
 
-async def test_seed_creates_treatment_delivery(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_treatment_delivery(db: AsyncSession) -> None:
     """Plan 4c: Treatment delivery — one of the two completion-only room activities
     served by the linac-ct app; published, kind external, access practice, no numeric
     score, config carries sdk_slug sim-linac-fraction and no max_score key; subject is
     treatment-delivery-procedures; re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Treatment delivery")
     )
@@ -1025,21 +1029,19 @@ async def test_seed_creates_treatment_delivery(db: AsyncSession, settings: Setti
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Treatment delivery")
     )
     assert count == 1
 
 
-async def test_seed_creates_ct_simulation(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_ct_simulation(db: AsyncSession) -> None:
     """Plan 4c: CT simulation — the other completion-only room activity served by the
     same linac-ct app (both share arcade_slug: entering either activity's player shows
     the same served app; only sdk_slug distinguishes their result streams); published,
     kind external, access practice, no numeric score, config carries sdk_slug
     sim-ct-scan and no max_score key; subject is treatment-delivery-procedures;
     re-seeding creates 0."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "CT simulation")
     )
@@ -1056,19 +1058,17 @@ async def test_seed_creates_ct_simulation(db: AsyncSession, settings: Settings) 
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "CT simulation")
     )
     assert count == 1
 
 
-async def test_seed_creates_three_point_setup(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_three_point_setup(db: AsyncSession) -> None:
     """Plan 4d: Three-point setup — published, kind external, access practice,
     completion-only (no numeric score) shim over the `3_point_setup` alignment trainer,
     config carries completion_only: True and no sdk_slug; subject is
     treatment-delivery-procedures; re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Three-point setup")
     )
@@ -1081,19 +1081,17 @@ async def test_seed_creates_three_point_setup(db: AsyncSession, settings: Settin
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Three-point setup")
     )
     assert count == 1
 
 
-async def test_seed_creates_linac_training_beginner(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_linac_training_beginner(db: AsyncSession) -> None:
     """Plan 4d: LINAC training — beginner — published, kind external, access practice,
     completion-only shim over `3D_LINAC_beginner_activities`, config carries
     completion_only: True and no sdk_slug; subject is treatment-delivery-procedures;
     re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "LINAC training — beginner"
@@ -1108,7 +1106,6 @@ async def test_seed_creates_linac_training_beginner(db: AsyncSession, settings: 
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -1117,14 +1114,11 @@ async def test_seed_creates_linac_training_beginner(db: AsyncSession, settings: 
     assert count == 1
 
 
-async def test_seed_creates_linac_training_intermediate(
-    db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_creates_linac_training_intermediate(db: AsyncSession) -> None:
     """Plan 4d: LINAC training — intermediate — published, kind external, access practice,
     completion-only shim over `3D_LINAC_intermediate_activities`, config carries
     completion_only: True and no sdk_slug; subject is treatment-delivery-procedures;
     re-seeding creates it only once."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "LINAC training — intermediate"
@@ -1142,7 +1136,6 @@ async def test_seed_creates_linac_training_intermediate(
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count())
         .select_from(Activity)
@@ -1151,13 +1144,12 @@ async def test_seed_creates_linac_training_intermediate(
     assert count == 1
 
 
-async def test_seed_creates_treatment_console(db: AsyncSession, settings: Settings) -> None:
+async def test_seed_creates_treatment_console(db: AsyncSession) -> None:
     """Plan 4d: Treatment console — the console-emulator shim, published, kind external,
     access practice, completion-only, config carries sdk_slug sim-console for the
     simulator SDK resolver (like the plan 4c simulator activities) plus no numeric
     max_score; subject is treatment-delivery-procedures; re-seeding creates it only
     once."""
-    await seed(db, settings)
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Treatment console")
     )
@@ -1174,21 +1166,17 @@ async def test_seed_creates_treatment_console(db: AsyncSession, settings: Settin
     subject = await db.get(Subject, activity.subject_id)
     assert subject is not None and subject.slug == "treatment-delivery-procedures"
 
-    await seed(db, settings)
     count = await db.scalar(
         select(func.count()).select_from(Activity).where(Activity.title == "Treatment console")
     )
     assert count == 1
 
 
-async def test_seed_sdk_slug_unique_across_published_externals(
-    db: AsyncSession, settings: Settings
-) -> None:
+async def test_seed_sdk_slug_unique_across_published_externals(db: AsyncSession) -> None:
     """The simulator SDK resolver (`GET /activities/by-sdk-slug/{slug}`) picks whichever
     published external activity matches first when a slug repeats, so seed data must
     never let that happen: every non-null `config["sdk_slug"]` across all published
     external activities must be unique."""
-    await seed(db, settings)
     activities = (
         await db.scalars(
             select(Activity).where(Activity.kind == "external", Activity.status == "published")
@@ -1197,23 +1185,6 @@ async def test_seed_sdk_slug_unique_across_published_externals(
     sdk_slugs = [a.config["sdk_slug"] for a in activities if a.config.get("sdk_slug")]
     assert len(sdk_slugs) == len(set(sdk_slugs))
     assert {"sim-hub-qa", "sim-linac-fraction", "sim-ct-scan", "sim-console"} <= set(sdk_slugs)
-
-
-def test_seed_simulator_arcade_directories_exist_on_disk() -> None:
-    """The sim-hub and linac-ct arcade apps referenced by the three plan 4c simulator
-    activities' `arcade_slug`, plus the four plan 4d shim/console arcade apps, must
-    actually be built and present on disk, not just referenced by a seed row. A plain
-    repo-relative file check, not seed data, so no `db`/`settings` fixtures are needed."""
-    repo_root = Path(__file__).resolve().parents[3]
-    # sim-hub is Vite-built from arcade-src/ (#77): apps/web/arcade/sim-hub/ is gitignored
-    # build output produced by `pnpm --filter web build`, so a fresh checkout only carries
-    # the source tree — that source is what guarantees the served app exists.
-    assert (repo_root / "apps/web/arcade-src/sim-hub/index.html").is_file()
-    assert (repo_root / "apps/web/arcade-src/linac-ct/index.html").is_file()
-    assert (repo_root / "apps/web/arcade/three-point-setup/index.html").is_file()
-    assert (repo_root / "apps/web/arcade/linac-training-beginner/index.html").is_file()
-    assert (repo_root / "apps/web/arcade/linac-training-intermediate/index.html").is_file()
-    assert (repo_root / "apps/web/arcade/linac-console/index.html").is_file()
 
 
 async def test_seed_refuses_prod(db: AsyncSession) -> None:
