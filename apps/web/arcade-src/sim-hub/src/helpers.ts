@@ -182,8 +182,6 @@ export function makeDoorHeaderSign(room, side, gap) {
 	else s.rotation.y = Math.PI / 2;
 	scene.add(s);
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-export function makeDoorNameLabel(room) {}
 
 export function makeLobbyEntranceSign(r) {
 	const c = document.createElement('canvas');
@@ -525,14 +523,6 @@ export function makeDirectionalSign(text, sub, x, y, z, rotY, w = 3.2) {
 	scene.add(m);
 }
 
-export function samePoint(a, b) {
-	return a.distanceTo(b) < 0.06;
-}
-export function commonPrefixLen(a, b) {
-	let i = 0;
-	while (i < a.length && i < b.length && samePoint(a[i], b[i])) i++;
-	return i;
-}
 export function cleanPoints(pts) {
 	const out = [];
 	for (const p of pts) {
