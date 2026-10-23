@@ -69,8 +69,8 @@ Changes are in `apps/api/tests/test_seed.py`, plus one test moved to a new `apps
   This is required because asyncpg connections are bound to the loop that created them (pytest-asyncio 1.4 supports it).
 - **`test_seed_simulator_arcade_directories_exist_on_disk` moves, unchanged, to `tests/test_seed_arcade_dirs.py`.** It is the file's only non-async test. pytest-asyncio 1.4 warns about a non-async test under a module-wide asyncio mark ("marked with '@pytest.mark.asyncio' but it is not an async function"). It touches no database.
 - No test in the file uses the conftest's `client` or `engine` fixtures:
-  - they open a second connection on another loop;
-  - a write from that second connection could block on the shared transaction's row locks.
+  - `client` resolves its `db` to this module's override, so it does not open a second connection; but it is a function-loop-scoped async fixture, so its app lifespan would run on a different event loop from this module's tests;
+  - only `engine` opens a second connection, and a write through it can block on the shared transaction's row locks.
 
   `test_seed_users_can_log_in` builds its client inside the test with conftest's `make_client(app, db)`. The conftest `app` fixture is a plain function, so it is safe on any loop.
 
@@ -106,10 +106,10 @@ Changes are in `apps/api/tests/test_seed.py`, plus one test moved to a new `apps
 ## Verification
 
 - **Speed:** `uv run pytest tests/test_seed.py --durations=10` locally. The file finishes in under 60 s; report the number. Full suite: 343 passed, and report the wall time.
-- **Isolation:** run the whole file in reverse order by passing every node id in reverse order on the command line. All 43 must pass. This would catch a test whose changes leak into a later one.
+- **Isolation:** run the whole file in reverse order by passing every node id in reverse order on the command line. All 42 must pass. This would catch a test whose changes leak into a later one.
 - **The tests still catch real bugs.** Mutation checks on app code, temporary and never committed, verified reverted with `git diff --exit-code apps/api/app`:
   1. Make the arcade-games get-or-create always insert. `test_seed_creates_cell_defender` and the other per-game tests must fail on their count assertion.
-  2. Make the demo-attempt fill-in recreate every attempt. `test_seed_cohort_students_and_results` / `test_seed_is_idempotent` and the partial re-run test must fail.
+  2. Make the demo-attempt fill-in recreate every attempt. `test_seed_cohort_students_and_results` and `test_seed_partial_rerun_recreates_only_missing_attempt` must fail.
 - **Other files are unaffected:** after the module, the next file's first test still sees an empty database. The full suite passing in its normal order covers this.
 - **Gates:** `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy app`, and CI. CI's `--cov-fail-under=70` covers only `app/grading` and `app/auth`, which these tests still exercise through login.
 

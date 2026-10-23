@@ -10,11 +10,13 @@ accounts it creates are the ones the login endpoint actually accepts.
 
 Why the module shares one seeded database: one seed() call takes about 6 s (it imports and
 validates the whole seed corpus), and each test used to run it twice. The module-scoped
-`seeded` fixture runs seed() twice, once, inside a transaction that is never committed.
-This module's `db` fixture (overriding conftest's) gives each test a fresh session inside
-a SAVEPOINT that is rolled back afterwards. Read-only tests assert against that
+`seeded` fixture runs seed() twice, once per module, inside a transaction that is never
+committed. This module's `db` fixture (overriding conftest's) gives each test a fresh session
+inside a SAVEPOINT that is rolled back afterwards. Read-only tests assert against that
 twice-seeded state. Tests that change data re-run seed() once themselves. The arcade
-directory check lives in `test_seed_arcade_dirs.py`.
+directory check lives in `test_seed_arcade_dirs.py`. Do not open a second connection or engine
+in this module (e.g. conftest's `engine`): a write through it would wait on the open `seeded`
+transaction's row locks, which Postgres cannot detect as a deadlock, so the run would hang.
 
 How it fits the project: protects `make seed` (docs/03-architecture.md §10.1) — a
 developer or CI job can run seeding more than once without duplicating users, lessons,
@@ -147,8 +149,8 @@ async def test_seed_users_can_log_in(app: FastAPI, db: AsyncSession) -> None:
     """The seeded educator and a seeded student account must both be usable through the
     real login endpoint with the documented shared dev password, not just present as
     rows in the database."""
-    # Built here, not via conftest's `client` fixture, so the client's requests use this
-    # module's shared seeded connection and event loop.
+    # Built here, not via conftest's `client` fixture (function-loop scoped), so the client's
+    # lifespan and requests run on this module's event loop.
     async with make_client(app, db) as client:
         r = await client.post(
             "/api/v1/auth/login",

@@ -348,7 +348,7 @@ git diff --exit-code app && echo "app/ clean"
 Expected:
 - **M1:** the suite is not green. Either the per-game `count == 1` assertions fail (for example `test_seed_creates_cell_defender`), or the `seeded` setup errors. Report which.
 - **M2:** `test_seed_creates_cell_defender` FAILS on its `activity.config == {...}` assertion. This proves the read-only tests really read seeded state.
-- **M3:** the suite is not green: `test_seed_cohort_students_and_results`/`test_seed_is_idempotent` fail, or the setup errors on a unique key. Report which.
+- **M3:** the suite is not green: `test_seed_cohort_students_and_results` and `test_seed_partial_rerun_recreates_only_missing_attempt` fail, or the setup errors on a unique key. Report which.
 - Finally, `app/ clean`.
 - If any mutation leaves the suite fully green, STOP and report it: a check has been weakened.
 
