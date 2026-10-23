@@ -27,8 +27,6 @@ import { setupCCTVFeeds } from './cctv';
 import { animate, setTextById, syncOperatorConsole, wrap360 } from './main';
 import { allTreatmentFieldsCompleted, fundamentalState, setPendantLCD } from './linac-safety';
 import {
-	createImmobilizationShelf3D,
-	createImmobilizationPatientGroup,
 	treatmentParamMatches,
 	canonicalCouchDisplay,
 	getIGRTExpectedAbsoluteCouch,
@@ -37,17 +35,20 @@ import {
 	fmtSignedInt,
 	normalizeAngleValue,
 	parseJawSpec,
-	getODIMeasurement,
-	activeSpecialSetupSpec,
-	specialSetupVerified,
+	getODIMeasurement
+} from './delivery/plan';
+import { activeSpecialSetupSpec, specialSetupVerified } from './delivery/special-setup';
+import { srsRequired } from './delivery/stereotactic';
+import { motionRequired } from './delivery/motion';
+import {
+	createImmobilizationShelf3D,
+	createImmobilizationPatientGroup,
 	immobilizationRequired,
 	immobilizationSpec,
-	immobilizationVerified,
-	motionRequired,
-	srsRequired,
-	renderTreatmentDeliveryPanel
-} from './linac-delivery';
-import type { SpecialSetupSpec } from './linac-delivery';
+	immobilizationVerified
+} from './delivery/immobilization';
+import { renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
+import type { SpecialSetupSpec } from './delivery/types';
 import { renderClinicalIGRT } from './linac-igrt';
 
 const roomCeilingFixtureMats = [];
