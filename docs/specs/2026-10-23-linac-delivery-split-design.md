@@ -15,11 +15,12 @@ The file is already laid out in contiguous feature blocks, so it can be split al
 From the TypeScript compiler's top-level statement map:
 - 8 imports, 23 interfaces, 140 functions and 10 `const`s.
 - **No top-level statement runs code when the module loads.** Every `const` initializer is a literal: object and array data, `Math.PI`, numbers and strings. None references another top-level name except the `TreatmentCase` type. So the order in which the new modules load cannot change behaviour.
-- Six modules import from it, 132 names in all: `main.ts` 55, `linac-safety.ts` 29, `scene.ts` 19, `linac-igrt.ts` 12, `sdk.ts` 10, `state.ts` 7.
+- **The delivery files import each other in cycles** (for example `plan` ↔ `special-setup`, `treatment-delivery` ↔ `plan`). That is safe only while none of them runs code at load. A future top-level `const x = fn()` in any of them needs its load order checked.
+- Six modules import from it, 134 names in all, counting type-only imports: `main.ts` 56, `linac-safety.ts` 29, `scene.ts` 20, `linac-igrt.ts` 12, `sdk.ts` 10, `state.ts` 7.
 
 ## Design
 
-**New folder:** `apps/web/arcade-src/linac-ct/src/delivery/`. The source line ranges below refer to `linac-delivery.ts` at `main` 065fd0d. Each range includes the comments directly above its statements.
+**New folder:** `apps/web/arcade-src/linac-ct/src/delivery/`. The source line ranges below refer to `linac-delivery.ts` at `main` 065fd0d. Ranges are by statement start line. Each statement moves together with the comments above it; a trailing same-line comment travels with the statement after it.
 
 | New file | Holds | Source lines |
 |---|---|---|
@@ -60,9 +61,24 @@ From the TypeScript compiler's top-level statement map:
    - `pnpm check` must report 0 errors, which includes `tsc -p tsconfig.arcade.json` (23 pre-existing warnings are fine).
    - `pnpm exec eslint arcade-src` and `prettier --check arcade-src` must be clean.
    - `pnpm test` must stay at 326 passed.
-   - `pnpm build:arcade` followed by `node scripts/arcade-smoke.mjs` on the three pages must print three `SMOKE OK`. This step evaluates each built bundle, so a module-load-order (TDZ) crash would fail here.
+   - `pnpm build:arcade` followed by `node scripts/arcade-smoke.mjs` on the three pages must print three `SMOKE OK`. This step evaluates each built bundle, so a crash at load fails here. It cannot catch every load-order mistake: rolldown turns top-level `const` into `var`, so a value read too early in the bundle is `undefined` rather than an error. Item 4 covers that.
 4. **CI:** the same checks, plus the e2e suite, which drives the linac-ct simulator.
-5. **Owner:** the walk-through of both simulators (#77), which now also covers #167 and this split.
+5. **Module order** (added after the final review). The split changes the bundle's module order:
+   - **Outside `delivery/`:** `sdk` now evaluates before `linac-igrt`.
+   - **What was checked:** the evaluation order computed from source, ignoring `import type`, matches the built bundle's.
+   - **Delivery files still come first:** every delivery module still evaluates before `game`, `linac-safety`, `scene`, `travel` and `main`.
+   - **Nothing earlier reads delivery names:** the modules that evaluate earlier or in between (`console-patch`, `workspace`, `state`, `dom`, `cctv`, `sdk`, `linac-igrt`) read no delivery name at load. `sdk` and `linac-igrt` only declare literal values.
+   - So the reordering is harmless.
+6. **Owner:** the walk-through of both simulators (#77), which now also covers #167 and this split.
+
+## Known follow-ups
+
+- **Stale comments.** Some comments still describe the old single file. Under the verbatim rule they were not edited:
+  - in moved code, e.g. `delivery/types.ts` lines 3–9 ("the 32-entry literal below", now in `cases.ts`);
+  - in untouched files: `dom.ts` and `state.ts` still name `linac-delivery.ts`.
+  
+  A small comment-only follow-up can update them.
+- **The commit message for 7210a2f** says "'export' on 18 helpers"; 5 of the 18 are interfaces.
 
 ## Out of scope
 
