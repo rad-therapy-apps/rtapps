@@ -5,7 +5,8 @@
    How it fits: mirrors the shipped contract (static/arcade/rtapps-sdk.js, checked against
    src/lib/arcade/sdk.spec.ts); `activityUrl` resolves to the player URL, `recordResult` submits a score.
    Depends on: nothing (types only; Vite strips types, so nothing imports it).
-   Used by: arcade-src/sim-hub/src/sdk-bridge.ts and any arcade code reading window.RTApps. */
+   Used by: arcade-src/sim-hub/src/sdk-bridge.ts, arcade-src/linac-ct/src/sdk.ts and
+   linac-ct/src/workspace.ts (any arcade code reading window.RTApps). */
 export {};
 
 declare global {

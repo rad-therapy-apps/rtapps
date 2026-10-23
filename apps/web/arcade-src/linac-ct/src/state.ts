@@ -361,7 +361,7 @@ interface LinacState {
 	earnedParts: string[];
 	purchasedEnhancements: string[];
 	currentQuizPart: LinacPartData | null;
-	// Callback installed by main.js; shape lives there.
+	// Callback assigned in main.ts (no caller invokes it today — dead, tracked in #77).
 	bdSyncFromMachine: ((control: string, delta: number) => void) | null;
 	bonusQuestionDeck: number[];
 	recentScenarioKeys: string[];
