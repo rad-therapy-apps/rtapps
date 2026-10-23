@@ -43,7 +43,7 @@ So the cost is the repetition, not a slow seed.
 
 ## Design
 
-All changes are in `apps/api/tests/test_seed.py`. `conftest.py` and app code are unchanged.
+Changes are in `apps/api/tests/test_seed.py`, plus one test moved to a new `apps/api/tests/test_seed_arcade_dirs.py` (see below). `conftest.py` and app code are unchanged.
 
 ### Shared seeded state (module scope)
 
@@ -56,7 +56,7 @@ All changes are in `apps/api/tests/test_seed.py`. `conftest.py` and app code are
   - at module teardown, rolls back the outer transaction and disposes the engine.
 
   Nothing it seeds outlives the module, so every other test file still starts from an empty, migrated database.
-- **A function-scoped async fixture `seeded_db`:**
+- **A function-scoped async fixture named `db`, which overrides the conftest's `db` for this module only.** Test bodies keep their existing `db.` calls, so the diff stays small. It:
   - begins a SAVEPOINT (`begin_nested()`) on the shared connection;
   - yields a fresh `AsyncSession` bound to it, with `create_savepoint` mode and `expire_on_commit=False`;
   - after the test, closes the session and rolls the SAVEPOINT back.
@@ -67,11 +67,12 @@ All changes are in `apps/api/tests/test_seed.py`. `conftest.py` and app code are
   - both fixtures are declared with `loop_scope="module"`.
 
   This is required because asyncpg connections are bound to the loop that created them (pytest-asyncio 1.4 supports it).
-- No test in the file uses the conftest's function-scoped `db`/`client`:
+- **`test_seed_simulator_arcade_directories_exist_on_disk` moves, unchanged, to `tests/test_seed_arcade_dirs.py`.** It is the file's only non-async test. pytest-asyncio 1.4 warns about a non-async test under a module-wide asyncio mark ("marked with '@pytest.mark.asyncio' but it is not an async function"). It touches no database.
+- No test in the file uses the conftest's `client` or `engine` fixtures:
   - they open a second connection on another loop;
   - a write from that second connection could block on the shared transaction's row locks.
 
-  `test_seed_users_can_log_in` builds its client with conftest's `make_client(create_app(settings), seeded_db)`.
+  `test_seed_users_can_log_in` builds its client inside the test with conftest's `make_client(app, db)`. The conftest `app` fixture is a plain function, so it is safe on any loop.
 
 ### What each test does after the change
 
@@ -90,9 +91,7 @@ All changes are in `apps/api/tests/test_seed.py`. `conftest.py` and app code are
   - `test_seed_republishes_safety_supervisor_on_config_change`
 
   Each starts from the shared state, makes its change, and calls `seed()` once more: one run each, down from two. Their assertions are unchanged; the partial re-run still asserts `attempts_created == 1`.
-- **Unchanged:**
-  - `test_seed_simulator_arcade_directories_exist_on_disk` (no database).
-  - `test_seed_refuses_prod`. It raises before doing any work; it moves to `seeded_db` only so that no second connection is opened in this module.
+- **Unchanged:** `test_seed_refuses_prod`. It raises before doing any work, and now gets the module's `db`, so no second connection is opened in this module.
 - If a test listed as read-only turns out to change data, it moves to the "change data, then re-run the seed" group (one `seed()` call after its change) instead of losing coverage.
 - Docstrings that say "re-seeding creates it only once" stay true: the shared state is the result of two `seed()` calls. The module docstring gains a short paragraph on the shared fixture and why.
 
