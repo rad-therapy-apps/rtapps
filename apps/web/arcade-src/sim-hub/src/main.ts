@@ -1,9 +1,6 @@
 import * as THREE from 'three';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { S } from './state';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { box, std, wall, makeDirectionalSign } from './helpers';
+import { box, std, makeDirectionalSign } from './helpers';
 import {
 	renderer,
 	scene,
@@ -17,8 +14,7 @@ import {
 	ambienceProfile,
 	updatePerfFloor
 } from './scene';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-import { vehicleObject, monumentSign, privacyChangingNook } from './props';
+import { monumentSign, privacyChangingNook } from './props';
 import {
 	C,
 	ROOMS,
@@ -404,8 +400,6 @@ scene.add(ground);
 export const roomFloors = [];
 export const ceilings = [];
 export const doors = new Map();
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-function updateDoorNameLabels() {}
 
 buildExteriorAmbient();
 

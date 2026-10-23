@@ -501,9 +501,7 @@ export function addDoorWindow(parent, x, y, z, w, h) {
 export function buildDoor(room: Room, side, gap) {
 	const type = doorTypeFor(room),
 		g = new THREE.Group();
-	const h = room.vault ? 3.15 : 2.55,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-		t = 0.09;
+	const h = room.vault ? 3.15 : 2.55;
 	let cx = room.x,
 		cz = room.z;
 	const hx = room.w / 2,
@@ -749,7 +747,7 @@ export function buildRoom(room: Room) {
 	scene.add(ceiling);
 	ceilings.push(ceiling);
 	addRoomLighting(room, h);
-	addRoomDecor(room, h);
+	addRoomDecor(room);
 	furnish(room);
 }
 
@@ -774,9 +772,7 @@ export function lobbyWallWithGap(side, gap, h = 4.15, t = 0.18) {
 }
 
 export function buildLobbyEntrance(r: Room) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-	const side = 'zmax',
-		gap = 5.2,
+	const gap = 5.2,
 		h = 2.7,
 		g = new THREE.Group();
 	g.position.set(r.x, h / 2, r.z + r.d / 2);
@@ -829,14 +825,12 @@ export function buildHubLobby(room: Room) {
 			);
 			scene.add(light);
 		}
-	addRoomDecor(room, h);
+	addRoomDecor(room);
 	furnish(room);
 }
 
 export function addVaultDoorwaySigns(room: Room) {
 	const side = room.doorSide,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-		gap = 4.8,
 		normal = doorNormal(room),
 		tangent = side[0] === 'z' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1),
 		dc = doorCenter(room, 2.45);
@@ -858,8 +852,7 @@ export function addVaultDoorwaySigns(room: Room) {
 	warningPlaque(scene, p2.x, 2.32, p2.z, rot, 'DO NOT ENTER', 'BEAM ON WHEN LIGHT IS ON');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-export function addRoomDecor(room: Room, h) {
+export function addRoomDecor(room: Room) {
 	const g = new THREE.Group();
 	scene.add(g);
 	const ac = zoneAccentColor(room);

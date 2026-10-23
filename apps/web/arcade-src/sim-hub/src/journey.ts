@@ -5,7 +5,7 @@
    and the `beginMia*` consult/CT-sim/planning/first-treatment sequence for Mia Reynolds),
    `resetTreatmentJourney`/`setJourneyKind`/`journeyActors`/`applyJourneyPatientFocus`,
    `JOURNEY`/`JOURNEY_META`/`ROOM_WORKFLOW`/`MIA_SIM_SETUP`/`workflowTransitions` state,
-   `journeySpeech`/`journeyIntercom`/`journeyAudioCue`/`playIntercomAudio` narration,
+   `journeySpeech`/`journeyIntercom`/`playIntercomAudio` narration,
    `updateJourneyCameraFollow`/`setJourneyCameraFollow`/`clearJourneyCameraFollow`/
    `moveJourneyActor`/`journeyFocusActors` camera and blocking, `updateJourneyRoomTiming`/
    `roomElapsedLabel`/`journeyActorRoom` per-room dwell tracking, `currentJourneyMeta`/
@@ -602,11 +602,6 @@ function playIntercomAudio(text) {
 }
 function journeyIntercom(actor, text, ms = 12000) {
 	journeySpeech(actor, text, 'staff', ms);
-	playIntercomAudio(text);
-}
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 1 report
-function journeyAudioCue(actor, text, kind = 'staff', ms = 12000) {
-	journeySpeech(actor, text, kind, ms);
 	playIntercomAudio(text);
 }
 function setJourneySeated(seated) {
