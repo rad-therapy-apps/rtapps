@@ -9,6 +9,7 @@ import {
 	setWL,
 	spanOf
 } from './console';
+import type { CtCompleteMsg } from '../ct-protocol';
 /* ---------------- EMBEDDED REAL CT SERIES (all de-identified) ----------------
    Five real planning CTs, each downsampled to the 220^2 recon matrix and
    subsampled in slices. HU are packed loss-lessly into a PNG sprite (16-bit
@@ -797,7 +798,7 @@ export function finishScan() {
 			patient: S.proto?.patient || '',
 			series: S.proto?.series || '',
 			images: n
-		},
+		} satisfies CtCompleteMsg,
 		'*'
 	);
 	$('progText').textContent = `Series complete · ${n} images`;

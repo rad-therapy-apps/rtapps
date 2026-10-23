@@ -19,7 +19,7 @@ export function attachBridgeListener() {
 					patient: PROTOCOLS[d.key].patient,
 					protocol: PROTOCOLS[d.key].name,
 					series: PROTOCOLS[d.key].series
-				} as CtCaseLoadedMsg,
+				} satisfies CtCaseLoadedMsg,
 				'*'
 			);
 		}
@@ -27,5 +27,5 @@ export function attachBridgeListener() {
 }
 
 export function sendReady() {
-	window.parent?.postMessage({ type: 'rtapps-ct-ready' } as CtReadyMsg, '*');
+	window.parent?.postMessage({ type: 'rtapps-ct-ready' } satisfies CtReadyMsg, '*');
 }

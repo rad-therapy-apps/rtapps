@@ -40,22 +40,13 @@ import { roomById } from './main';
 import { JOURNEY, clearJourneyCameraFollow } from './journey';
 import { createQaLock } from './qa-lock';
 
-// RTApps (#77 phase 2 task 16): typed boundary for the SDK integration surface. `RTApps`
-// mirrors the real shipped contract (static/arcade/rtapps-sdk.js, verified against
-// src/lib/arcade/sdk.spec.ts's declared `Window['RTApps']`) for the two members this module
-// calls — `activityUrl` (resolver, resolves to the player URL string) and `recordResult` (QA
-// score submission). `CONSOLE_APP_URL` is the byte-identical e2e mirror below; the latch is
+// RTApps (#77 phase 2 task 16): typed boundary for the SDK integration surface. The `RTApps`
+// type now lives in arcade-src/shared/rtapps-sdk.d.ts (shared with linac-ct); it mirrors the real
+// shipped contract (static/arcade/rtapps-sdk.js). `CONSOLE_APP_URL` is the byte-identical e2e mirror below; the latch is
 // `__rtappsVerdictLocked` (#73, one verdict per QA scenario — also written via a local cast in
 // ./interact.ts's procResetAll).
 declare global {
 	interface Window {
-		RTApps?: {
-			activityUrl: (slug: string) => Promise<string>;
-			recordResult: (
-				slug: string,
-				opts?: { score?: number }
-			) => Promise<{ percent: number | null }>;
-		};
 		CONSOLE_APP_URL?: string | null;
 		__rtappsVerdictLocked?: boolean;
 	}
