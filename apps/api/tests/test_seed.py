@@ -3,10 +3,10 @@ get-or-creates the three demo accounts, imports the seed lessons plus the migrat
 content and demo quiz, seeds the published MU calculator, and seeds the demo
 cohort/students/attempts/rollups.
 
-Used here and why: the real Postgres `db`/`client` fixtures from `conftest.py` (not
-mocks), because the point of these tests is that `seed()` is safe to call against a
-database that may already be seeded, and that the accounts it creates are the ones the
-login endpoint actually accepts.
+Used here and why: a real Postgres database (this module's `db` fixture, below, and
+`conftest.py`'s `make_client`; not mocks), because the point of these tests is that
+`seed()` is safe to call against a database that may already be seeded, and that the
+accounts it creates are the ones the login endpoint actually accepts.
 
 Why the module shares one seeded database: one seed() call takes about 6 s (it imports and
 validates the whole seed corpus), and each test used to run it twice. The module-scoped
