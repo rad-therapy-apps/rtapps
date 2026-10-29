@@ -54,6 +54,14 @@ function mulberry32(seed) {
 let simNow = 1000;
 Object.defineProperty(globalThis.performance, 'now', { value: () => simNow, configurable: true });
 Math.random = mulberry32(1);
+// The stub GL reports no optional extensions, so three.js warns once per missing one. Drop exactly
+// that warning; every other warning still prints.
+const warn = console.warn;
+console.warn = (...a) => {
+	if (a.length === 1 && /^THREE\.WebGLRenderer: \w+ extension not supported\.$/.test(String(a[0])))
+		return;
+	warn(...a);
+};
 installBrowserStubs({ search: '?npccheck' });
 
 const assetsDir = path.resolve(HERE, '../arcade/sim-hub/assets');
@@ -93,7 +101,6 @@ function moverName(m, i) {
 }
 const names = NPC.movers.map(moverName);
 
-const results = [];
 const wallHits = [];
 const spacingEvents = [];
 
@@ -128,7 +135,7 @@ function checkWalls() {
 	});
 	const list = [...perMover].map(([k, v]) => `${k}(${v})`).join(', ');
 	const detail = wallHits
-		.filter((h, i, a) => a.findIndex((o) => o.name === h.name) === i || false)
+		.filter((h, i, a) => a.findIndex((o) => o.name === h.name) === i)
 		.slice(0, MAX_DETAIL)
 		.map(
 			(h) =>
@@ -207,11 +214,15 @@ function refsActor(actor) {
 	return n;
 }
 function checkOneMove() {
-	// The journey patient starts in the lobby (ROOM_CAST.lobby); no setup call is needed.
+	// Known start state: resetTreatmentJourney() clears the workflow transitions and puts the journey
+	// patient back in the lobby; its room is then read from its position.
+	NPC.resetTreatmentJourney(true);
 	const actor = NPC.JOURNEY.patient;
 	if (!actor) throw new Error('no journey patient');
+	const from = NPC.journeyActorRoom(actor)?.id;
+	if (!from) throw new Error('journey patient is not in a room');
 	const fired = [];
-	NPC.moveJourneyActor(actor, 'lobby', 'consult', roomFinal('consult'), () => fired.push(1));
+	NPC.moveJourneyActor(actor, from, 'consult', roomFinal('consult'), () => fired.push(1));
 	stepFor(0.5);
 	NPC.moveJourneyActor(actor, 'consult', 'education', roomFinal('education'), () => fired.push(2));
 	const problems = [];
@@ -246,46 +257,73 @@ function checkOneMove() {
 }
 
 // -------------------------------------------------------- (d) hidden tab gap
-function snapshot() {
-	const out = [];
-	NPC.movers.forEach((m, i) => {
-		out.push({
-			id: names[i],
-			obj: m.group,
-			// curve length (m) x speed (loops per s) = m/s
-			speed: m.curve.getLength() * m.speed
-		});
-	});
-	for (const t of [...NPC.workflowTransitions, ...NPC.handoffTransitions]) {
-		// smoothstep peaks at 1.5x the mean speed
-		out.push({ id: 'transition', obj: t.actor, speed: (1.5 * t.curve.getLength()) / t.duration });
-	}
-	return out.map((e) => ({ ...e, x: e.obj.position.x, z: e.obj.position.z }));
-}
-function checkHidden() {
-	// Give the check a transition actor so both kinds of walker are covered.
-	const actor = NPC.JOURNEY.newPatient || NPC.JOURNEY.patient;
-	NPC.moveJourneyActor(actor, 'lobby', 'vault1', roomFinal('vault1'), null);
+const PHASES = 5;
+const GAP_S = 10;
+// Allowed displacement over the gap: one 0.05 s frame step (the clamp on dt) at the walker's speed
+// plus 0.05 m. Movers: curve length x loops-per-second = m/s. Transition actors ride a smoothstep
+// ease, whose peak speed is 1.5x its average (d/du of 3u^2 - 2u^3 is 1.5 at u = 0.5), so their
+// speed is 1.5 x length / duration; that is the true maximum, not a loosened bound.
+const allowance = (speed) => speed * 0.05 + 0.05;
+const xzDist = (obj, x, z) => Math.hypot(obj.position.x - x, obj.position.z - z);
+
+// Runs one hidden gap and returns how far `obj` moved by the first visible frame afterwards.
+function hiddenGap(obj) {
 	stepFor(2);
-	const before = snapshot();
+	const x = obj.position.x,
+		z = obj.position.z;
 	NPC.setHidden(true);
-	stepFor(10);
-	simNow += 0; // time already advanced by stepFor; stepSimulation returned early each call
+	stepFor(GAP_S); // stepSimulation returns at once; only the clock advances
 	NPC.setHidden(false);
 	step();
-	const bad = [];
-	for (const e of before) {
-		const d = Math.hypot(e.obj.position.x - e.x, e.obj.position.z - e.z),
-			allow = e.speed * 0.05 + 0.05;
-		if (d > allow) bad.push({ id: e.id, d, allow });
-	}
 	NPC.setHidden(null);
+	return xzDist(obj, x, z);
+}
+function checkHidden() {
+	const rows = [];
+	// Transition actor: from a known state, in whatever room it stands in.
+	NPC.resetTreatmentJourney(true);
+	const actor = NPC.JOURNEY.patient,
+		from = NPC.journeyActorRoom(actor).id,
+		to = from === 'vault1' ? 'consult' : 'vault1';
+	NPC.moveJourneyActor(actor, from, to, roomFinal(to), null);
+	const t = NPC.workflowTransitions.find((x) => x.actor === actor),
+		tSpeed = (1.5 * t.curve.getLength()) / t.duration;
+	const jump = hiddenGap(actor);
+	rows.push({ id: 'transition', worst: jump, least: jump, phase: 0, allow: allowance(tSpeed) });
+	NPC.resetTreatmentJourney(true);
+	// Movers are pure functions of simulated time and loop out and back, so one start phase can
+	// give a small net displacement by coincidence. Test PHASES start phases spread evenly over
+	// each mover's loop period (1 / speed seconds). Jumping the clock to the phase start is exact
+	// for movers; the 2 s of normal frames after it settle the frame clock before the snapshot.
+	NPC.movers.forEach((m, i) => {
+		const allow = allowance(m.curve.getLength() * m.speed);
+		let least = Infinity,
+			worst = -1,
+			worstPhase = 0;
+		for (let k = 0; k < PHASES; k++) {
+			const cur = ((((simNow / 1000) * m.speed + m.offset) % 1) + 1) % 1,
+				want = k / PHASES,
+				dPhase = (want - cur + 1) % 1;
+			simNow += (dPhase / m.speed) * 1000;
+			const d = hiddenGap(m.group);
+			least = Math.min(least, d);
+			if (d > worst) {
+				worst = d;
+				worstPhase = k;
+			}
+		}
+		rows.push({ id: names[i], worst, least, phase: worstPhase, allow });
+	});
+	const bad = rows.filter((r) => r.worst > r.allow);
 	return {
 		pass: bad.length === 0,
 		summary: bad.length
-			? `${bad.length} of ${before.length} walkers jumped after a 10 s hidden gap (max ${Math.max(...bad.map((b) => b.d)).toFixed(2)} m)`
-			: `all ${before.length} walkers stayed within one frame step after a 10 s hidden gap`,
-		detail: bad.map((b) => `${b.id} moved ${b.d.toFixed(2)} m, allowed ${b.allow.toFixed(2)} m`)
+			? `${bad.length} of ${rows.length} walkers jumped after a ${GAP_S} s hidden gap (${PHASES} start phases each; worst ${Math.max(...bad.map((b) => b.worst)).toFixed(2)} m)`
+			: `all ${rows.length} walkers stayed within one frame step after a ${GAP_S} s hidden gap at ${PHASES} phases`,
+		detail: rows.map(
+			(r) =>
+				`${r.worst > r.allow ? 'JUMP' : 'ok  '} ${r.id}: worst ${r.worst.toFixed(2)} m, best ${r.least.toFixed(2)} m (phase ${r.phase}/${PHASES}), allowed ${r.allow.toFixed(2)} m`
+		)
 	};
 }
 
@@ -300,7 +338,6 @@ for (const letter of ['a', 'b', 'c', 'd']) {
 	} catch (err) {
 		setupError(`check ${letter} threw: ${err && err.stack ? err.stack : err}`);
 	}
-	results.push(r);
 	console.log(`NPC CHECK ${letter} ${r.pass ? 'PASS' : 'FAIL'}: ${r.summary}`);
 	if (!r.pass) {
 		failed++;

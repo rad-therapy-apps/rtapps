@@ -6,7 +6,14 @@ import { renderer, labelRenderer } from './scene';
 import { ROOMS } from './rooms';
 import { getColliders } from './walk';
 import { movers, dutyActors, handoffTransitions, startActorHandoff } from './npc-behavior';
-import { JOURNEY, journeyActors, moveJourneyActor, workflowTransitions } from './journey';
+import {
+	JOURNEY,
+	journeyActors,
+	journeyActorRoom,
+	moveJourneyActor,
+	resetTreatmentJourney,
+	workflowTransitions
+} from './journey';
 
 let hiddenOverride: boolean | null = null;
 
@@ -46,6 +53,8 @@ export function installNpcCheckHook(
 				hiddenOverride = v;
 			},
 			moveJourneyActor,
+			resetTreatmentJourney,
+			journeyActorRoom,
 			startActorHandoff,
 			workflowTransitions: workflowTransitions as readonly unknown[],
 			handoffTransitions: handoffTransitions as readonly unknown[],
