@@ -15,7 +15,9 @@
 
 # --- build stage: full workspace install + SvelteKit build + pnpm deploy to a self-contained dir ---
 FROM node:24-bookworm-slim AS build
-RUN corepack enable
+# corepack is installed from npm (pinned) rather than relying on the copy Node bundles: Node 25+
+# no longer ships it. It then provides the pnpm version pinned in package.json `packageManager`.
+RUN npm install -g corepack@0.36.0 && corepack enable
 WORKDIR /repo
 # Manifests only (no source yet), so `pnpm install` below is cached unless a dependency changes.
 COPY package.json pnpm-workspace.yaml .npmrc ./
