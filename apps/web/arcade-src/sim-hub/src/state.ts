@@ -34,6 +34,8 @@ interface SimHubState {
 	walkDragLook: boolean;
 	walkLastX: number;
 	walkLastY: number;
+	/** Simulator clock in seconds: the sum of the clamped frame dt on frames that run, so it pauses while the tab is hidden. */
+	simSec: number;
 }
 
 export const S: SimHubState = {
@@ -51,5 +53,6 @@ export const S: SimHubState = {
 	activeGuideKey: null,
 	walkDragLook: false,
 	walkLastX: 0,
-	walkLastY: 0
+	walkLastY: 0,
+	simSec: 0
 };

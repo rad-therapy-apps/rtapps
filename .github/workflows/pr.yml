@@ -122,6 +122,10 @@ jobs:
       - run: node scripts/arcade-smoke.mjs arcade/sim-hub/index.html arcade/linac-ct/index.html arcade/linac-ct/ct-suite.html
         working-directory: apps/web
         timeout-minutes: 10 # backstop; the script also kills any bundle that runs past 2 minutes
+      # Walls, spacing, one-move-per-actor and hidden-tab checks for sim-hub NPCs (#77 follow-up).
+      - run: node scripts/sim-hub-npc-check.mjs
+        working-directory: apps/web
+        timeout-minutes: 5
 
   # Full-stack flow: boot the dev compose stack (same file as `make dev`), seed it, run the
   # Playwright test through Caddy on :8080, always upload the report and tear down volumes.

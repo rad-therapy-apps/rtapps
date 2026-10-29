@@ -64,6 +64,9 @@ export function nearestDoor(maxD = 2.6) {
 }
 
 const colliders = [];
+/** Read-only view of the collision list, for the ?npccheck test hook. */
+export const getColliders = (): readonly { x: number; z: number; hw: number; hd: number }[] =>
+	colliders;
 export function collider(x, z, w, d) {
 	colliders.push({ x, z, hw: w / 2, hd: d / 2 });
 }

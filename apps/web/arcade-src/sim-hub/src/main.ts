@@ -102,6 +102,7 @@ import {
 	updateJourneyCameraFollow
 } from './journey';
 import { applyVisibility, groupRoomContents } from './visibility';
+import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import './sdk-bridge';
 
 const clock = new THREE.Clock();
@@ -670,17 +671,16 @@ document.addEventListener('keyup', (e) => {
 	keys[e.key.toLowerCase()] = false;
 });
 
-function animate(now) {
-	requestAnimationFrame(animate);
-	if (document.hidden) return;
+export function stepSimulation(now: number): void {
+	if (isHidden()) return;
 	const dt = Math.min(0.05, clock.getDelta()),
-		sec = now * 0.001,
-		f = ((animate as unknown as { _f?: number })._f =
-			((animate as unknown as { _f?: number })._f || 0) + 1);
+		sec = (S.simSec += dt),
+		f = ((stepSimulation as unknown as { _f?: number })._f =
+			((stepSimulation as unknown as { _f?: number })._f || 0) + 1);
 	updateDoors(dt);
 	updateWalk(dt);
 	updateTravel(now);
-	updateMovers(sec);
+	updateMovers(dt, sec);
 	updateDutyAnimations(sec);
 	updateHandoffTransitions(sec);
 	updateWorkflowTransitions(sec);
@@ -708,6 +708,11 @@ function animate(now) {
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
 }
+function animate(now) {
+	requestAnimationFrame(animate);
+	stepSimulation(now);
+}
+installNpcCheckHook(ROOM_CAST, stepSimulation, HANDOFFS);
 renderRoomList();
 updateFacilityInfo();
 journeyActors();
