@@ -269,7 +269,7 @@ export function addMovingActors() {
 			[-11.5, 0, 0.75],
 			[-12.05, 0, 1.3]
 		],
-		0.016,
+		0.01829,
 		true,
 		0.12,
 		0,
@@ -311,7 +311,7 @@ export function addMovingActors() {
 			[15.81, 0, 1.2],
 			[16.1, 0, 0.91]
 		],
-		0.014,
+		0.01604,
 		true,
 		0.42,
 		0,
@@ -407,7 +407,7 @@ export function addMovingActors() {
 			[50.4, 0, 2],
 			[50.58, 0, 1.58]
 		],
-		0.014,
+		0.01488,
 		true,
 		0.74,
 		0,
@@ -445,7 +445,7 @@ export function addMovingActors() {
 			[-36.38, 0, 33.38],
 			[-35.37, 0, 32.37]
 		],
-		0.011,
+		0.01123,
 		true,
 		0.2,
 		-Math.PI / 2,
@@ -482,7 +482,7 @@ export function addMovingActors() {
 			[-35.25, 0, 26.7],
 			[-34.3, 0, 27.65]
 		],
-		0.01,
+		0.01004,
 		true,
 		0.82,
 		-Math.PI / 2,
@@ -534,7 +534,7 @@ export function addMovingActors() {
 			[31.5, 0, -9],
 			[31.5, 0, -7.8]
 		],
-		0.013,
+		0.01136,
 		true,
 		0.17,
 		0,
@@ -582,7 +582,7 @@ export function addMovingActors() {
 			[46.4, 0, -1.8],
 			[46.58, 0, -1.38]
 		],
-		0.0125,
+		0.01311,
 		true,
 		0.53,
 		0,
@@ -637,7 +637,7 @@ export function addMovingActors() {
 			[60.81, 0, 25.9],
 			[61.1, 0, 25.61]
 		],
-		0.0118,
+		0.01287,
 		true,
 		0.29,
 		0,
