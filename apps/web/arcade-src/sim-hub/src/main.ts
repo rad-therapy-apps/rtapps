@@ -680,7 +680,7 @@ export function stepSimulation(now: number): void {
 	updateDoors(dt);
 	updateWalk(dt);
 	updateTravel(now);
-	updateMovers(sec);
+	updateMovers(dt, sec);
 	updateDutyAnimations(sec);
 	updateHandoffTransitions(sec);
 	updateWorkflowTransitions(sec);

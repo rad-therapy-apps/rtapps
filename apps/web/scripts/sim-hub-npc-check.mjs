@@ -6,7 +6,8 @@
 //
 //   a  Walls     every mover loop (500 samples) keeps clear of every collider: people by 0.3 m (the
 //                escort's chair and pusher both), vehicles by their oriented footprint plus 0.2 m
-//   b  Spacing   20 simulated minutes at 30 Hz: no mover within 0.5 m of another mover or cast actor
+//   b  Spacing   20 simulated minutes at 30 Hz, with scripted journey moves: no mover within 0.5 m of
+//                another mover, a cast actor or a journey/transition actor
 //   c  One move  two queued moves for one journey actor never overlap and never jump
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
 //
@@ -206,24 +207,102 @@ function checkWalls() {
 }
 
 // -------------------------------------------------------------- (b) spacing
+// Journey actors are driven deterministically so that movers and journey actors meet over and over:
+// each scripted actor, whenever it stands still, walks to the next room of its cycle (routes through
+// the patient-services and clinical corridors, the treatment branch and the vaults). Pairs counted:
+// mover-mover, mover-cast, mover-journey/transition. Journey-cast and journey-journey pairs are out
+// of scope (story actors; stage 3).
+const MOVE_PAUSE_S = 3;
+function journeyScript() {
+	NPC.resetTreatmentJourney(true);
+	const J = NPC.JOURNEY;
+	const plan = [
+		[J.patient, ['consult', 'lobby', 'ctsim', 'lobby', 'vault1', 'lobby', 'education', 'lobby']],
+		[J.newPatient, ['education', 'lobby', 'social', 'lobby']],
+		[J.therapist, ['vault1', 'linaccontrol']],
+		[J.vaultTherapist, ['linaccontrol', 'vault1']]
+	];
+	return plan
+		.filter(([actor]) => actor)
+		.map(([actor, rooms]) => ({
+			actor,
+			rooms,
+			i: 0,
+			cur: NPC.journeyActorRoom(actor)?.id,
+			idleSince: 0,
+			moving: false
+		}));
+}
+function driveJourney(script, tSec) {
+	for (const sc of script) {
+		if (sc.moving || tSec - sc.idleSince < MOVE_PAUSE_S || !sc.cur) continue;
+		let to = sc.rooms[sc.i++ % sc.rooms.length];
+		if (to === sc.cur) to = sc.rooms[sc.i++ % sc.rooms.length];
+		sc.moving = true;
+		const from = sc.cur;
+		NPC.moveJourneyActor(sc.actor, from, to, roomFinal(to), () => {
+			sc.moving = false;
+			sc.cur = to;
+			sc.idleSince = tSec;
+		});
+	}
+}
+// For a detail line: where the other NPC stands relative to the mover's heading, and whether the
+// mover is holding.
+function describeApproach(a, b) {
+	const mv = a.m ? a : b.m ? b : null;
+	if (!mv) return '';
+	const o = mv === a ? b : a,
+		yaw = mv.m.group.rotation.y - (mv.m.yawOffset || 0),
+		bearing = ((((Math.atan2(o.x - mv.x, o.z - mv.z) - yaw) * 180) / Math.PI + 540) % 360) - 180;
+	return `[${mv.id} ${mv.m.holding ? 'holding' : 'moving'}, other at ${bearing.toFixed(0)} deg]`;
+}
 function checkSpacing() {
 	const active = new Set();
+	const script = journeyScript();
+	const holdRun = NPC.movers.map(() => 0),
+		holdMax = NPC.movers.map(() => 0);
 	let total = 0;
 	for (let s = 0; s < SPACING_STEPS; s++) {
+		const tSec = (s * STEP_MS) / 1000;
+		driveJourney(script, tSec);
 		step();
+		NPC.movers.forEach((m, i) => {
+			holdRun[i] = m.holding ? holdRun[i] + STEP_MS / 1000 : 0;
+			holdMax[i] = Math.max(holdMax[i], holdRun[i]);
+		});
 		const pts = NPC.movers.map((m, i) => ({
 			id: names[i],
 			x: m.group.position.x,
 			z: m.group.position.z,
-			mover: true
+			kind: 'mover',
+			m
 		}));
-		for (const c of NPC.castActors()) pts.push({ ...c, mover: false });
+		const journeyObjs = new Map();
+		for (const t of NPC.workflowTransitions) journeyObjs.set(t.actor, 'transition');
+		for (const t of NPC.handoffTransitions) journeyObjs.set(t.actor, 'transition');
+		for (const o of NPC.journeyActors()) if (!journeyObjs.has(o)) journeyObjs.set(o, 'journey');
+		const wp = { x: 0, z: 0 };
+		for (const [o, kind] of journeyObjs) {
+			if (!NPC.visibleInTree(o)) continue;
+			o.getWorldPosition(NPC.tmp);
+			wp.x = NPC.tmp.x;
+			wp.z = NPC.tmp.z;
+			pts.push({
+				id: `${kind}:${o.userData?.npcRole || o.name || 'actor'}`,
+				x: wp.x,
+				z: wp.z,
+				kind,
+				o
+			});
+		}
+		for (const c of NPC.castActors()) if (!journeyObjs.has(c.g)) pts.push({ ...c, kind: 'cast' });
 		const now = new Set();
 		for (let i = 0; i < pts.length; i++) {
 			for (let j = i + 1; j < pts.length; j++) {
 				const a = pts[i],
 					b = pts[j];
-				if (!a.mover && !b.mover) continue;
+				if (a.kind !== 'mover' && b.kind !== 'mover') continue;
 				if (Math.hypot(a.x - b.x, a.z - b.z) < MIN_DIST) {
 					const key = `${a.id}|${b.id}`;
 					now.add(key);
@@ -231,6 +310,8 @@ function checkSpacing() {
 						total++;
 						spacingEvents.push({
 							pair: `${a.id} / ${b.id}`,
+							how: describeApproach(a, b),
+							kinds: [a.kind, b.kind].sort().join('-'),
 							t: (s * STEP_MS) / 1000,
 							x: (a.x + b.x) / 2,
 							z: (a.z + b.z) / 2,
@@ -243,17 +324,27 @@ function checkSpacing() {
 		active.clear();
 		for (const k of now) active.add(k);
 	}
+	const byKind = {};
+	for (const e of spacingEvents) byKind[e.kinds] = (byKind[e.kinds] || 0) + 1;
+	const kindList = Object.entries(byKind)
+		.map(([k, v]) => `${k}: ${v}`)
+		.join(', ');
+	const minutes = (SPACING_STEPS * STEP_MS) / 60000;
 	return {
 		pass: total === 0,
 		summary: total
-			? `${total} spacing events (< ${MIN_DIST} m) in ${(SPACING_STEPS * STEP_MS) / 60000} simulated minutes`
-			: `no pair closer than ${MIN_DIST} m in ${(SPACING_STEPS * STEP_MS) / 60000} simulated minutes`,
+			? `${total} spacing events (< ${MIN_DIST} m) in ${minutes} simulated minutes (${kindList})`
+			: `no pair closer than ${MIN_DIST} m in ${minutes} simulated minutes (mover-mover, mover-cast, mover-journey)`,
 		detail: spacingEvents
 			.slice(0, MAX_DETAIL)
 			.map(
 				(e) =>
-					`${e.pair} at t=${e.t.toFixed(1)}s near (${e.x.toFixed(2)}, ${e.z.toFixed(2)}) d=${e.d.toFixed(2)}`
-			)
+					`${e.kinds} ${e.pair} at t=${e.t.toFixed(1)}s near (${e.x.toFixed(2)}, ${e.z.toFixed(2)}) d=${e.d.toFixed(2)} ${e.how}`
+			),
+		info: [
+			`journey moves issued: ${script.reduce((n, sc) => n + sc.i, 0)}`,
+			`longest hold per mover (s): ${names.map((n, i) => `${n} ${holdMax[i].toFixed(1)}`).join(', ')}`
+		]
 	};
 }
 
@@ -346,20 +437,17 @@ function checkHidden() {
 	const jump = hiddenGap(actor);
 	rows.push({ id: 'transition', worst: jump, least: jump, phase: 0, allow: allowance(tSpeed) });
 	NPC.resetTreatmentJourney(true);
-	// Movers are pure functions of simulated time and loop out and back, so one start phase can
-	// give a small net displacement by coincidence. Test PHASES start phases spread evenly over
-	// each mover's loop period (1 / speed seconds). Jumping the clock to the phase start is exact
-	// for movers; the 2 s of normal frames after it settle the frame clock before the snapshot.
+	// Movers loop out and back, so one start phase can give a small net displacement by
+	// coincidence. Test PHASES start phases spread evenly over each mover's loop (m.u is its own
+	// progress); the 2 s of normal frames after it settle the frame clock before the snapshot.
 	NPC.movers.forEach((m, i) => {
 		const allow = allowance(m.curve.getLength() * m.speed);
 		let least = Infinity,
 			worst = -1,
 			worstPhase = 0;
 		for (let k = 0; k < PHASES; k++) {
-			const cur = ((((simNow / 1000) * m.speed + m.offset) % 1) + 1) % 1,
-				want = k / PHASES,
-				dPhase = (want - cur + 1) % 1;
-			simNow += (dPhase / m.speed) * 1000;
+			m.u = k / PHASES;
+			m.pendingDt = 0;
 			const d = hiddenGap(m.group);
 			least = Math.min(least, d);
 			if (d > worst) {
@@ -398,6 +486,7 @@ for (const letter of ['a', 'b', 'c', 'd']) {
 		failed++;
 		for (const line of r.detail.slice(0, MAX_DETAIL)) console.log(`  ${line}`);
 	}
+	for (const line of r.info || []) console.log(`  info: ${line}`);
 }
 
 if (svgPath) {

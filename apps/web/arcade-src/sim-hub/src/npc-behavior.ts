@@ -35,7 +35,7 @@ import {
 	makePolylineCurve
 } from './walk';
 import { roomById, ROOM_CAST, doors, player } from './main';
-import { JOURNEY, journeyActorRoom } from './journey';
+import { JOURNEY, journeyActorRoom, workflowTransitions } from './journey';
 import { setupAmbulance } from './equipment';
 
 export const movers = [];
@@ -45,11 +45,10 @@ export const interactionScenes = [];
 /* RTApps perf task 2: walk-mode distance gating for ambient movers and duty animations.
    Full-fidelity always applies in overview/orbit mode, to any actor involved in the active
    guided journey, and to any actor mid actor-handoff transition. Everyone else is strided by
-   distance to the player so far-off NPCs sample less often instead of freezing. Both
-   updateMovers and updateDutyAnimations already compute position/pose as a pure function of
-   absolute elapsed seconds (no per-frame accumulation) — so skipping frames never causes
-   drift; resampling at the current `sec` next time a strided actor updates lands exactly where
-   continuous motion would have put it, at the same real-world speed. Exchange conversations
+   distance to the player so far-off NPCs sample less often instead of freezing.
+   updateDutyAnimations computes pose as a pure function of absolute elapsed seconds, so skipping
+   frames never causes drift. updateMovers keeps its own progress: a strided mover advances by
+   the dt accumulated since its last update, so it keeps its pace. Exchange conversations
    need no membership check: NEAR_RADIUS is derived from EXCHANGE_TRIGGER_DIST (see below), so
    actively-conversing actors are always full-rate by construction. */
 const EXCHANGE_TRIGGER_DIST = 15;
@@ -82,6 +81,11 @@ function actorUpdateStride(objWorldPos, actor) {
 	if (journeyInvolved(actor)) return 1;
 	const ref = S.mode === 'guided' ? camera.position : player.pos;
 	return objWorldPos.distanceToSquared(ref) < NEAR_RADIUS_SQ ? 1 : 4;
+}
+/** False when the object or any ancestor is hidden (a hidden NPC blocks nobody). */
+export function visibleInTree(o) {
+	for (let p = o; p; p = p.parent) if (!p.visible) return false;
+	return true;
 }
 export function registerDutyActor(group, mode = 'idle', offset = Math.random()) {
 	dutyActors.push({ group, mode, offset });
@@ -212,21 +216,86 @@ function addMover(
 	id = ''
 ) {
 	scene.add(group);
-	movers.push({ group, curve: moverPath(points, closed), speed, offset, yawOffset, id });
+	movers.push({
+		group,
+		curve: moverPath(points, closed),
+		speed,
+		offset,
+		yawOffset,
+		id,
+		u: offset,
+		pendingDt: 0,
+		holding: false
+	});
 }
-export function updateMovers(sec) {
+/* Background walkers keep their own progress `m.u` (advanced by dt) so a walker can stop for
+   someone without the loop jumping when it resumes. Priority: a mover holds for any lower-index
+   mover and for any cast, duty, journey or transition actor; story actors (cast, journey,
+   transition) never hold, so a wait always ends once its blocker has walked on. */
+const YIELD_DIST = 0.9;
+const YIELD_DIST_SQ = YIELD_DIST * YIELD_DIST;
+const YIELD_HALF_ANGLE_COS = Math.cos((50 * Math.PI) / 180);
+const yieldTmp = new THREE.Vector3();
+function collectBlockers() {
+	const seen = new Set(),
+		out = [];
+	const add = (g) => {
+		if (!g || seen.has(g) || !visibleInTree(g)) return;
+		seen.add(g);
+		g.getWorldPosition(yieldTmp);
+		out.push(yieldTmp.x, yieldTmp.z);
+	};
+	for (const arr of Object.values(ROOM_CAST)) for (const e of arr) add(e.g);
+	for (const d of dutyActors) add(d.group);
+	if (typeof JOURNEY !== 'undefined')
+		for (const v of Object.values(JOURNEY)) if (v && v.isObject3D) add(v);
+	for (const t of workflowTransitions) add(t.actor);
+	for (const t of handoffTransitions) add(t.actor);
+	return out;
+}
+function shouldHold(m, blockers, px, pz, fx, fz) {
+	const ahead = (x, z) => {
+		const dx = x - px,
+			dz = z - pz,
+			d2 = dx * dx + dz * dz;
+		return (
+			d2 < YIELD_DIST_SQ &&
+			(d2 < 1e-8 || (dx * fx + dz * fz) / Math.sqrt(d2) > YIELD_HALF_ANGLE_COS)
+		);
+	};
+	for (let i = 0; i < blockers.length; i += 2) if (ahead(blockers[i], blockers[i + 1])) return true;
+	for (const o of movers) {
+		if (o === m) break;
+		if (visibleInTree(o.group) && ahead(o.group.position.x, o.group.position.z)) return true;
+	}
+	return false;
+}
+export function updateMovers(dt, sec) {
 	frameCount++;
+	let blockers = null;
 	for (const m of movers) {
 		const stride = actorUpdateStride(m.group.position, m.group);
-		if (stride > 1 && frameCount % stride !== 0) continue;
-		const u = (sec * m.speed + m.offset) % 1,
-			p = m.curve.getPointAt(u),
-			n = m.curve.getPointAt((u + 0.01) % 1);
+		if (stride > 1 && frameCount % stride !== 0) {
+			m.pendingDt += dt;
+			continue;
+		}
+		const step = m.pendingDt + dt;
+		m.pendingDt = 0;
+		let p = m.curve.getPointAt(m.u),
+			n = m.curve.getPointAt((m.u + 0.01) % 1);
+		const len = Math.hypot(n.x - p.x, n.z - p.z) || 1;
+		blockers = blockers || collectBlockers();
+		m.holding = shouldHold(m, blockers, p.x, p.z, (n.x - p.x) / len, (n.z - p.z) / len);
+		if (!m.holding) {
+			m.u = (m.u + step * m.speed) % 1;
+			p = m.curve.getPointAt(m.u);
+			n = m.curve.getPointAt((m.u + 0.01) % 1);
+		}
 		m.group.position.copy(p);
 		const yaw = Math.atan2(n.x - p.x, n.z - p.z);
 		m.group.rotation.y = yaw + (m.yawOffset || 0);
-		m.group.position.y += Math.sin(sec * 1.7 + m.offset * 6.28) * 0.01;
-		const swing = Math.sin(sec * 8 + m.offset * 6.28) * 0.42;
+		if (!m.holding) m.group.position.y += Math.sin(sec * 1.7 + m.offset * 6.28) * 0.01;
+		const swing = m.holding ? 0 : Math.sin(sec * 8 + m.offset * 6.28) * 0.42;
 		m.group.traverse((o) => {
 			const rig = o.userData?.walkRig;
 			if (rig) {
@@ -247,29 +316,30 @@ export function addMovingActors() {
 	addMover(
 		walker,
 		[
-			// Patient-services corridor lanes: west on z = 1.5, east on z = -1.5.
-			[-12.8, 0, 1.5],
-			[-21, 0, 1.5],
-			[-29, 0, 1.5],
-			[-37, 0, 1.5],
-			[-45, 0, 1.5],
-			[-45.75, 0, 1.3],
-			[-46.3, 0, 0.75],
-			[-46.5, 0, 0],
-			[-46.3, 0, -0.75],
-			[-45.75, 0, -1.3],
-			[-45, 0, -1.5],
-			[-37, 0, -1.5],
-			[-29, 0, -1.5],
-			[-21, 0, -1.5],
-			[-12.8, 0, -1.5],
-			[-12.05, 0, -1.3],
-			[-11.5, 0, -0.75],
-			[-11.3, 0, 0],
-			[-11.5, 0, 0.75],
-			[-12.05, 0, 1.3]
+			// Patient-services corridor, south side (lanes z = 1.0 west and z = 2.2 east): the rooms
+			// and the journey routes lie north of it, so no door is crossed.
+			[-14, 0, 1.0],
+			[-21, 0, 1.0],
+			[-29, 0, 1.0],
+			[-37, 0, 1.0],
+			[-45, 0, 1.0],
+			[-45.4, 0, 1.1],
+			[-45.75, 0, 1.4],
+			[-45.9, 0, 1.6],
+			[-45.75, 0, 1.8],
+			[-45.4, 0, 2.1],
+			[-45, 0, 2.2],
+			[-37, 0, 2.2],
+			[-29, 0, 2.2],
+			[-21, 0, 2.2],
+			[-14, 0, 2.2],
+			[-13.6, 0, 2.1],
+			[-13.25, 0, 1.8],
+			[-13.1, 0, 1.6],
+			[-13.25, 0, 1.4],
+			[-13.6, 0, 1.1]
 		],
-		0.01829,
+		0.02028,
 		true,
 		0.12,
 		0,
@@ -355,14 +425,15 @@ export function addMovingActors() {
 	addMover(
 		visitor,
 		[
-			[-10, 0, 0],
-			[0, 0, 0],
-			[10, 0, 0],
-			[10, 0, 6],
-			[0, 0, 6],
-			[-10, 0, 6]
+			// Hub south side, clear of the journey routes (they run z = 0..3.4 from the lobby).
+			[-10, 0, 5],
+			[0, 0, 5],
+			[10, 0, 5],
+			[10, 0, 7.5],
+			[0, 0, 7.5],
+			[-10, 0, 7.5]
 		],
-		0.015,
+		0.01727,
 		true,
 		0.31,
 		0,
@@ -377,8 +448,8 @@ export function addMovingActors() {
 		therapist,
 		[
 			// Corridor lanes z = 1.4 / 2.6, branch lanes x = 62.9 / 61.7 to the vault 2 approach.
-			[51, 0, 1.4],
-			[55, 0, 1.4],
+			[54.6, 0, 1.4],
+			[57, 0, 1.4],
 			[59, 0, 1.4],
 			[60, 0, 1.4],
 			[61.11, 0, 1.62],
@@ -401,13 +472,13 @@ export function addMovingActors() {
 			[60.85, 0, 2.83],
 			[60, 0, 2.6],
 			[59, 0, 2.6],
-			[55, 0, 2.6],
-			[51, 0, 2.6],
-			[50.58, 0, 2.42],
-			[50.4, 0, 2],
-			[50.58, 0, 1.58]
+			[57, 0, 2.6],
+			[54.6, 0, 2.6],
+			[54.2, 0, 2.42],
+			[54, 0, 2],
+			[54.2, 0, 1.58]
 		],
-		0.01488,
+		0.01714,
 		true,
 		0.74,
 		0,
@@ -549,31 +620,32 @@ export function addMovingActors() {
 	addMover(
 		linacRunner,
 		[
-			// Corridor lanes z = -1.2 / -2.4, branch lanes x = 62.9 / 61.7 to the vault 1 approach.
+			// Corridor lanes z = -1.2 / -2.4, branch lanes x = 62.2 / 60.9 to the vault 1 approach
+			// (the journey route runs along x = 63.3..64 there).
 			[47, 0, -1.2],
 			[51, 0, -1.2],
 			[55, 0, -1.2],
 			[59, 0, -1.2],
 			[60, 0, -1.2],
-			[61.11, 0, -1.42],
-			[62.05, 0, -2.05],
-			[62.68, 0, -2.99],
-			[62.9, 0, -4.1],
-			[62.9, 0, -5.3],
-			[62.9, 0, -11],
-			[62.9, 0, -16.4],
-			[62.9, 0, -17.2],
-			[62.72, 0, -17.62],
-			[62.3, 0, -17.8],
-			[61.88, 0, -17.62],
-			[61.7, 0, -17.2],
-			[61.7, 0, -16.4],
-			[61.7, 0, -11],
-			[61.7, 0, -5.3],
-			[61.7, 0, -4.1],
-			[61.47, 0, -3.25],
-			[60.85, 0, -2.63],
-			[60, 0, -2.4],
+			[61, 0, -1.35],
+			[61.8, 0, -1.95],
+			[62.15, 0, -2.95],
+			[62.2, 0, -4.1],
+			[62.2, 0, -5.3],
+			[62.2, 0, -11],
+			[62.2, 0, -16.4],
+			[62.2, 0, -17.2],
+			[62.05, 0, -17.62],
+			[61.55, 0, -17.8],
+			[61.05, 0, -17.62],
+			[60.9, 0, -17.2],
+			[60.9, 0, -16.4],
+			[60.9, 0, -11],
+			[60.9, 0, -5.3],
+			[60.9, 0, -4.1],
+			[60.75, 0, -3.2],
+			[60.35, 0, -2.65],
+			[59.6, 0, -2.4],
 			[59, 0, -2.4],
 			[55, 0, -2.4],
 			[51, 0, -2.4],
@@ -582,7 +654,7 @@ export function addMovingActors() {
 			[46.4, 0, -1.8],
 			[46.58, 0, -1.38]
 		],
-		0.01311,
+		0.01328,
 		true,
 		0.53,
 		0,

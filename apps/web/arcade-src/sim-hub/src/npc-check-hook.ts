@@ -5,7 +5,13 @@ import * as THREE from 'three';
 import { renderer, labelRenderer } from './scene';
 import { ROOMS } from './rooms';
 import { getColliders } from './walk';
-import { movers, dutyActors, handoffTransitions, startActorHandoff } from './npc-behavior';
+import {
+	movers,
+	dutyActors,
+	handoffTransitions,
+	startActorHandoff,
+	visibleInTree
+} from './npc-behavior';
 import {
 	JOURNEY,
 	journeyActors,
@@ -30,13 +36,13 @@ export function installNpcCheckHook(
 		return;
 	const castActors = () => {
 		const seen = new Set<THREE.Object3D>(),
-			out: { x: number; z: number; id: string }[] = [],
+			out: { x: number; z: number; id: string; g: THREE.Object3D }[] = [],
 			p = new THREE.Vector3(),
 			push = (g: THREE.Object3D, id: string) => {
-				if (!g || seen.has(g)) return;
+				if (!g || seen.has(g) || !visibleInTree(g)) return;
 				seen.add(g);
 				g.getWorldPosition(p);
-				out.push({ x: p.x, z: p.z, id });
+				out.push({ x: p.x, z: p.z, id, g });
 			};
 		for (const [room, arr] of Object.entries(roomCast))
 			arr.forEach((e, i) => push(e.g, `${room}:${e.kind}:${i}`));
@@ -58,6 +64,8 @@ export function installNpcCheckHook(
 			startActorHandoff,
 			workflowTransitions: workflowTransitions as readonly unknown[],
 			handoffTransitions: handoffTransitions as readonly unknown[],
+			visibleInTree,
+			tmp: new THREE.Vector3(),
 			journeyActors: () => {
 				journeyActors();
 				return [
