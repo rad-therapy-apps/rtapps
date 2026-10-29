@@ -16,9 +16,11 @@
 //   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath
 //                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s,
 //                then 8 moments over each of the ambulance crew's walks, unload and load)
-//   g  Seated    every sitter's pelvis (hip pivot - 0.06) is within 0.02 m of the seat top beside it
+//   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
+//                0.02 m of its pelvis (hip pivot - 0.06) and whose facing is within 20 deg of its own
 //   h  Lying     every lying patient's lowest point is within 0.02 m of the couch or table top beneath
-//   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of the seat top
+//   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of that chair's
+//                own seat anchor top
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
 //   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e,f,g,h,i]
@@ -334,13 +336,18 @@ function restingSpotProblems() {
 				h.actorIndex || 0
 			]?.g;
 			if (!actor) return;
-			const home = actor.position.clone();
+			const home = actor.position.clone(),
+				yaw = actor.rotation.y,
+				seated = !!actor.userData.seated;
 			NPC.startActorHandoff(key, h);
 			for (let i = 0; i < 30 * 40 && NPC.handoffTransitions.some((t) => t.actor === actor); i++)
 				step();
 			actor.getWorldPosition(tmp);
 			spots.push({ what: `handoff ${key}[${hi}] -> ${h.target}`, x: tmp.x, z: tmp.z });
-			actor.position.copy(home); // later handoffs start from home
+			// later handoffs and checks start from home: back on its seat if it was sitting
+			actor.position.copy(home);
+			actor.rotation.y = yaw;
+			if (seated) NPC.seatActor(actor, actor.getWorldPosition(tmp));
 		});
 	}
 	NPC.handoffTransitions.length = 0;
@@ -913,26 +920,21 @@ function checkFeet() {
 }
 
 // -------------------------------------------------------------- (g) seated
-// A seat is a mesh near the sitter with a top between floor + 0.35 and floor + 1.05 (chairs, couches,
-// exam tables, beds), wider than 0.35 m and thinner than 0.4 m, that is not part of any person. (Task 3 adds seat anchors.)
-function nearestSeat(p, floor, boxes) {
-	let best = null;
-	for (const b of boxes) {
-		const thick = b.hi[1] - b.lo[1],
-			w = Math.max(b.hi[0] - b.lo[0], b.hi[2] - b.lo[2]);
-		if (b.hi[1] < floor + 0.35 || b.hi[1] > floor + 1.05 || w <= 0.35 || thick >= 0.4) continue;
-		if (inAnyPerson(b.o)) continue;
-		const dx = Math.max(b.lo[0] - p.x, 0, p.x - b.hi[0]),
-			dz = Math.max(b.lo[2] - p.z, 0, p.z - b.hi[2]),
-			d = Math.hypot(dx, dz);
-		if (d <= 0.6 && (!best || d < best.d)) best = { b, d };
-	}
-	return best;
-}
+// The sitters are the figures posed seated (or flagged userData.seated) plus every cast patient that
+// should sit (userData.shouldSit), so one left standing or unseated still fails. A sitter passes when
+// a seat anchor within 0.3 m has its top within 0.02 m of the pelvis and faces within 20 deg of it.
+const SEAT_RADIUS = 0.3,
+	FACING_TOL_DEG = 20;
+// World yaw of an object (the rotation.y that turns +z to where it faces).
+const worldYaw = (o) => {
+	const d = o.getWorldDirection(new V3());
+	return Math.atan2(d.x, d.z);
+};
+const degOff = (a, b) => Math.abs(((((a - b) * 180) / Math.PI + 540) % 360) - 180);
 function checkSeated() {
 	NPC.resetTreatmentJourney(true);
 	stepFor(0.2);
-	const boxes = sceneBoxes(),
+	const seats = NPC.SEATS.map(NPC.seatInWorld),
 		rows = [];
 	let n = 0;
 	for (const { g, id } of allPeople()) {
@@ -940,31 +942,35 @@ function checkSeated() {
 		if (!(isSeatedPose(g) || g.userData.shouldSit)) continue;
 		n++;
 		const p = worldPos(g),
-			floor = floorTop(p.x, p.z),
 			pelvis = hipY(g) - HIP_TO_PELVIS,
-			pose = g.userData.pose || 'none',
-			seat = nearestSeat(p, floor, boxes),
-			who = `${id} (${label(g, id)}) pose=${pose}`;
-		if (!seat) {
+			yaw = worldYaw(g),
+			near = seats
+				.map((s) => ({ s, d: Math.hypot(s.x - p.x, s.z - p.z) }))
+				.sort((a, b) => a.d - b.d),
+			fits = ({ s, d }) =>
+				d <= SEAT_RADIUS &&
+				Math.abs(pelvis - s.top) <= SEAT_TOL &&
+				degOff(yaw, s.facing) <= FACING_TOL_DEG,
+			who = `${id} (${label(g, id)}) pose=${g.userData.pose || 'none'} at (${p.x.toFixed(2)}, ${p.z.toFixed(2)})`;
+		if (near.some(fits)) continue;
+		const c = near[0];
+		if (!c || c.d > SEAT_RADIUS) {
 			rows.push(
-				`${who}: no seat within 0.6 m; pelvis ${pelvis.toFixed(3)}, floor ${floor.toFixed(3)}`
+				`${who}: no seat anchor within ${SEAT_RADIUS} m (nearest ${c ? `${c.s.kind} ${c.d.toFixed(2)} m` : 'none'}); pelvis ${pelvis.toFixed(3)}`
 			);
 			continue;
 		}
-		const top = seat.b.hi[1],
-			gap = pelvis - top;
-		if (Math.abs(gap) > SEAT_TOL)
-			rows.push(
-				`${who}: pelvis ${pelvis.toFixed(3)}, seat top ${top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
-			);
+		const gap = pelvis - c.s.top;
+		rows.push(
+			`${who}: ${c.s.kind} anchor ${c.d.toFixed(2)} m away: pelvis ${pelvis.toFixed(3)}, seat top ${c.s.top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}; facing ${degOff(yaw, c.s.facing).toFixed(0)} deg off the seat's`
+		);
 	}
 	return {
 		pass: rows.length === 0,
 		summary: rows.length
-			? `${rows.length} of ${n} sitters not on a seat (pelvis within ${SEAT_TOL} m of the seat top)`
-			: `${n} sitters, pelvis within ${SEAT_TOL} m of the seat top`,
-		detail: rows,
-		info: ['facing test skipped until seat anchors exist (Task 3)']
+			? `${rows.length} of ${n} sitters not on a seat (anchor within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of its top, facing within ${FACING_TOL_DEG} deg)`
+			: `${n} sitters on seat anchors: within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of the top, facing within ${FACING_TOL_DEG} deg (${seats.length} anchors)`,
+		detail: rows
 	};
 }
 
@@ -1014,6 +1020,7 @@ function checkLying() {
 }
 
 // ----------------------------------------------------------- (i) wheelchair
+// The occupant's pelvis is measured against the seat anchor that its own wheelchair registered.
 function checkWheelchair() {
 	NPC.resetTreatmentJourney(true);
 	stepFor(0.5);
@@ -1026,23 +1033,17 @@ function checkWheelchair() {
 		g.updateMatrixWorld(true);
 		const chair = g.parent,
 			pelvis = hipY(g) - HIP_TO_PELVIS,
-			pose = g.userData.pose || 'none';
-		let seat = null;
-		for (const o of chair.children) {
-			if (o === g || !o.isMesh) continue;
-			const b = meshBounds(o);
-			if (b.hi[1] - b.lo[1] >= 0.12 || b.hi[0] - b.lo[0] < 0.3 || b.hi[2] - b.lo[2] < 0.3) continue;
-			if (b.hi[1] > pelvis - 0.5 && b.hi[1] < pelvis + 0.5 && (!seat || b.hi[1] > seat.hi[1]))
-				seat = b;
-		}
-		const problems = [];
+			pose = g.userData.pose || 'none',
+			anchor = NPC.SEATS.find((s) => s.group === chair),
+			problems = [];
 		if (pose !== 'seated') problems.push(`pose=${pose}, expected seated`);
-		if (!seat) problems.push('no seat mesh found in the wheelchair');
+		if (!anchor) problems.push('the wheelchair has no seat anchor');
 		else {
-			const gap = pelvis - seat.hi[1];
+			const top = NPC.seatInWorld(anchor).top,
+				gap = pelvis - top;
 			if (Math.abs(gap) > SEAT_TOL)
 				problems.push(
-					`pelvis ${pelvis.toFixed(3)}, seat top ${seat.hi[1].toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
+					`pelvis ${pelvis.toFixed(3)}, seat top ${top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
 				);
 		}
 		if (problems.length) rows.push(`wheelchair occupant: ${problems.join('; ')}`);
@@ -1052,7 +1053,7 @@ function checkWheelchair() {
 		pass: rows.length === 0,
 		summary: rows.length
 			? `${rows.length} of ${occupants.length} wheelchair occupants not seated on the chair`
-			: `${occupants.length} wheelchair occupants seated, pelvis within ${SEAT_TOL} m of the seat top`,
+			: `${occupants.length} wheelchair occupants seated, pelvis within ${SEAT_TOL} m of the chair's seat anchor top`,
 		detail: rows
 	};
 }

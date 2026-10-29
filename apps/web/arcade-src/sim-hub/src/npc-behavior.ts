@@ -16,8 +16,9 @@ import { zeroY } from './helpers';
 import { scene, camera } from './scene';
 import { S } from './state';
 import { corridorAnchor } from './rooms';
-import { wheelchairObject, medCartObject, vehicleObject } from './props';
+import { wheelchairObject, medCartObject, vehicleObject, SEATS, seatInWorld } from './props';
 import {
+	HIP_Y,
 	personFigure,
 	setNpcRole,
 	poseCharacter,
@@ -808,10 +809,59 @@ export function advancePed(o, from, to, st, speed, dt) {
 	return false;
 }
 
+const SEAT_SNAP = 1.0, // how far seatActor looks for a seat
+	HIPS_BEHIND_SEAT = 0.12, // hips behind the anchor, along its facing (scaled with the figure)
+	HIP_TO_PELVIS = 0.06; // the pelvis (the thighs' underside) is this far below the hip pivots
+/* Seats a person figure on a seat anchor (props.ts SEATS): `at` itself when it is one, otherwise the
+   nearest anchor within SEAT_SNAP of the world point `at`. The hips go 0.12 m behind the anchor
+   along its facing, the pelvis on the seat top (so y = top + 0.06 - 1.06 for an unscaled figure),
+   the figure turns to the seat's facing and is posed seated. The pose is worked out in world
+   coordinates and written in the figure's parent's frame, which also covers the floor height and a
+   figure riding a moving prop (the wheelchair occupant, seated on that chair's own anchor). With no
+   seat in reach it returns false and leaves the figure standing, so check (g) reports it. */
+export function seatActor(actor, at) {
+	if (!actor || !at) return false;
+	let seat = SEATS.includes(at) ? seatInWorld(at) : null;
+	if (!seat) {
+		let best = SEAT_SNAP;
+		for (const s of SEATS) {
+			const w = seatInWorld(s),
+				d = Math.hypot(w.x - at.x, w.z - at.z);
+			if (d <= best) {
+				best = d;
+				seat = w;
+			}
+		}
+	}
+	if (!seat) return false;
+	const k = actor.getWorldScale(new THREE.Vector3()).y,
+		back = HIPS_BEHIND_SEAT * k,
+		p = new THREE.Vector3(
+			seat.x - Math.sin(seat.facing) * back,
+			seat.top + HIP_TO_PELVIS - HIP_Y * k,
+			seat.z - Math.cos(seat.facing) * back
+		);
+	let yaw = seat.facing;
+	if (actor.parent) {
+		actor.parent.updateWorldMatrix(true, false);
+		actor.parent.worldToLocal(p);
+		const d = new THREE.Vector3(0, 0, 1).transformDirection(actor.parent.matrixWorld);
+		yaw -= Math.atan2(d.x, d.z);
+	}
+	actor.position.copy(p);
+	actor.rotation.y = yaw;
+	poseCharacter(actor, 'seated');
+	actor.userData.seated = true;
+	return true;
+}
 export function setActorSeated(actor, seated) {
 	if (!actor) return;
-	actor.position.y = seated ? -0.35 : 0;
-	poseCharacter(actor, seated ? 'seated' : 'neutral');
+	if (seated) {
+		seatActor(actor, actor.getWorldPosition(new THREE.Vector3()));
+		return;
+	}
+	actor.position.y = 0;
+	poseCharacter(actor, 'neutral'); // also clears userData.seated
 }
 
 export function movementPathFor(actor, fromId, toId, final) {
@@ -976,6 +1026,7 @@ export function startActorHandoff(key, h) {
 	requestActorMove(actor, () => beginActorHandoff(actor, key, h, target));
 }
 function beginActorHandoff(actor, key, h, target) {
+	setActorSeated(actor, false); // a seated cast patient stands up before walking off
 	actor.userData.inHandoff = true;
 	const from = roomById(key),
 		pts = buildActorHandoffPath(actor, key, h.target, h),

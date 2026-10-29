@@ -12,8 +12,10 @@ import {
 	handoffTransitions,
 	startActorHandoff,
 	shouldHold,
-	visibleInTree
+	visibleInTree,
+	seatActor
 } from './npc-behavior';
+import { SEATS, seatInWorld } from './props';
 import {
 	JOURNEY,
 	journeyActors,
@@ -86,7 +88,11 @@ export function installNpcCheckHook(
 			},
 			JOURNEY,
 			ROOMS,
-			ROOM_CAST: roomCast
+			ROOM_CAST: roomCast,
+			/** Seat anchors (props.ts), resolved to world coordinates by seatInWorld. */
+			SEATS,
+			seatInWorld,
+			seatActor
 		}
 	});
 }

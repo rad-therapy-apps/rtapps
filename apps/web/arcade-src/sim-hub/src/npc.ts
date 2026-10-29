@@ -12,7 +12,7 @@ import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers';
 import { scene, camera } from './scene';
 import { S } from './state';
-import { registerDutyActor, registerNpcExchange } from './npc-behavior';
+import { registerDutyActor, registerNpcExchange, seatActor } from './npc-behavior';
 import { STAFF_GUIDES, registerInteractable } from './interact';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
 
@@ -25,10 +25,11 @@ interface PersonFigureOptions {
 	hairColor?: number;
 }
 
-// Leg geometry shared by personFigure and setLegSwing: hip pivot at 1.06, hip -> knee 0.48,
-// knee -> sole 0.51 (shin 0.45 + shoe 0.06); the shoe runs from heel z -0.07 to toe z +0.13.
-const HIP_Y = 1.06,
-	THIGH_LEN = 0.48,
+// Leg geometry shared by personFigure and setLegSwing (and seatActor, which reads HIP_Y): hip
+// pivot at 1.06, hip -> knee 0.48, knee -> sole 0.51 (shin 0.45 + shoe 0.06); the shoe runs from
+// heel z -0.07 to toe z +0.13.
+export const HIP_Y = 1.06;
+const THIGH_LEN = 0.48,
 	KNEE_TO_SOLE = 0.51,
 	HIP_TO_SOLE = THIGH_LEN + KNEE_TO_SOLE,
 	SHOE_HEEL = -0.07,
@@ -124,8 +125,11 @@ export function personFigure(
 		shinR = box(0.12, 0.45, 0.12, legMat, 0, -0.225, 0);
 	legLP.add(thighL, kneeLP);
 	legRP.add(thighR, kneeRP);
-	kneeLP.add(shinL, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
-	kneeRP.add(shinR, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
+	// A knee cap at each knee pivot fills the wedge between thigh and shin when the knee bends.
+	const capL = box(0.12, 0.12, 0.12, legMat, 0, 0, 0),
+		capR = box(0.12, 0.12, 0.12, legMat, 0, 0, 0);
+	kneeLP.add(shinL, capL, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
+	kneeRP.add(shinR, capR, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
 	g.add(legLP);
 	g.add(legRP);
 	// Every body part sits in `body`, at the origin; only setLegSwing moves it (the pelvis drop).
@@ -137,7 +141,7 @@ export function personFigure(
 	g.userData.clothingRig = {
 		kind: 'standing',
 		topParts: [torso, shoulder, armL, armR],
-		bottomParts: [thighL, thighR, shinL, shinR],
+		bottomParts: [thighL, thighR, shinL, shinR, capL, capR],
 		topColor: top,
 		bottomColor: bottom
 	};
@@ -250,6 +254,8 @@ export function setLegSwing(rig, swing: number) {
 }
 export function poseCharacter(group, mode = 'neutral') {
 	group.userData.pose = mode;
+	// any other pose means the figure has left its seat (seatActor sets `seated`)
+	if (mode !== 'seated') group.userData.seated = false;
 	group.traverse((o) => {
 		const r = o.userData?.walkRig;
 		if (!r) return;
@@ -340,6 +346,8 @@ export function bubbleVis(b: NpcSpeechElement, on) {
 	if (b._rtappsObj) b._rtappsObj.visible = !!on;
 }
 export function faceNpcToward(a, b) {
+	// a seated figure keeps its seat's facing; turning it would swing its legs through the seat
+	if (a.userData.seated) return;
 	const pa = new THREE.Vector3(),
 		pb = new THREE.Vector3();
 	a.getWorldPosition(pa);
@@ -518,6 +526,7 @@ export function departmentStaff() {
 		g.position.set(r.x + dx, 0, r.z + dz);
 		g.rotation.y = ry || 0;
 		scene.add(g);
+		seatActor(g, g.position);
 		registerDutyActor(g, 'idle');
 		addCast(id, g, 'patient');
 		return g;
@@ -539,9 +548,17 @@ export function departmentStaff() {
 		female: true,
 		hairColor: 0x3a281f
 	});
-	sitPatient('lobby', 'Returning patient checked in for treatment.', -2.5, 3.0, Math.PI, 0x7b5239, {
-		hairColor: 0x1c1410
-	});
+	sitPatient(
+		'lobby',
+		'Returning patient checked in for treatment.',
+		-1.85,
+		3.6,
+		Math.PI,
+		0x7b5239,
+		{
+			hairColor: 0x1c1410
+		}
+	);
 	sitPatient('lobby', 'Family member accompanying a patient.', 3.2, 3.0, Math.PI, 0xe2b38d, {
 		female: true,
 		hairColor: 0x4a3126
@@ -558,7 +575,7 @@ export function departmentStaff() {
 		undefined,
 		'consult'
 	);
-	sitPatient('consult', 'Here for a new-patient consultation.', 0.2, 1.2, Math.PI);
+	sitPatient('consult', 'Here for a new-patient consultation.', 0.2, 0.8, Math.PI);
 	place(
 		'social',
 		'Oncology Social Worker',
@@ -781,7 +798,7 @@ export function departmentStaff() {
 	);
 	lyingPatient('hdr', 'Undergoing an HDR special procedure.', -1.3, 0.1, 0);
 	/* Secondary team members and patient partners create visible teamwork in each department. */
-	sitPatient('social', 'Discussing transportation and support needs.', 1.25, 1.0, -0.6, 0x7c5238, {
+	sitPatient('social', 'Discussing transportation and support needs.', 0.57, 1.65, -0.6, 0x7c5238, {
 		female: true,
 		hairColor: 0x211610
 	});
@@ -789,7 +806,7 @@ export function departmentStaff() {
 		'patientcare',
 		'Reporting symptoms during a nursing assessment.',
 		-2.5,
-		1.5,
+		1.1,
 		0.8,
 		0xd8a47f,
 		{ hairColor: 0x463229 }

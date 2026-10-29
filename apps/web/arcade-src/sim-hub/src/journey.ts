@@ -855,13 +855,14 @@ export function resetTreatmentJourney(silent = false) {
 	JOURNEY.vaultMonitorPatientOnly = false;
 	workflowTransitions.length = 0;
 	clearMoveQueues();
+	// Jordan and Mia wait on lobby chairs (the chair centres; setActorSeated seats them on the anchor)
 	if (JOURNEY.patient) {
-		JOURNEY.patient.position.set(-2.5, 0, 3.0);
+		JOURNEY.patient.position.set(-1.85, 0, 3.6);
 		JOURNEY.patient.rotation.y = Math.PI;
-		setJourneySeated(false);
+		setJourneySeated(true);
 	}
 	if (JOURNEY.newPatient) {
-		JOURNEY.newPatient.position.set(-6.2, 0, 3.3);
+		JOURNEY.newPatient.position.set(-6.2, 0, 3.6);
 		JOURNEY.newPatient.rotation.y = Math.PI;
 		setActorSeated(JOURNEY.newPatient, true);
 	}
@@ -999,7 +1000,7 @@ function beginJordanPickupSequence() {
 		JOURNEY.patient,
 		'lobby',
 		'lobby',
-		new THREE.Vector3(-2.8, 0, 3.4),
+		new THREE.Vector3(-3.3, 0, 3.6),
 		() => {
 			setJourneySeated(true);
 			applyJourneyPatientFocus();
@@ -1500,7 +1501,7 @@ function beginMiaConsultSequence() {
 		JOURNEY.newPatient,
 		'lobby',
 		'lobby',
-		new THREE.Vector3(-6.2, 0, 3.3),
+		new THREE.Vector3(-6.2, 0, 3.6),
 		() => {
 			setActorSeated(JOURNEY.newPatient, true);
 			journeyFocusActors(PRIMARY_NPCS.lobby, JOURNEY.newPatient, 'lobby');
@@ -1646,7 +1647,7 @@ function beginMiaFirstTreatmentPickup() {
 		JOURNEY.newPatient,
 		'lobby',
 		'lobby',
-		new THREE.Vector3(-2.8, 0, 3.4),
+		new THREE.Vector3(-3.3, 0, 3.6),
 		() => {
 			setActorSeated(JOURNEY.newPatient, true);
 			applyJourneyPatientFocus();

@@ -30,7 +30,8 @@ const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright')
 const SHOTS = [
 	{ name: 'walker-low', subject: 'mover:walker', u: 0.3, cam: [-1.6, 0.35, 0], lookY: 0.35 },
 	{ name: 'lobby-chairs', subject: 'cast:lobby:patient:1', cam: [3.5, 0.9, 0.5], lookY: 0.6 },
-	{ name: 'consult-patient', subject: 'cast:consult:patient:1', cam: [2.2, 1.3, 2.2], lookY: 0.8 },
+	// the patient sits on the exam table's near edge; this camera stays clear of the oncologist
+	{ name: 'consult-patient', subject: 'cast:consult:patient:1', cam: [2.6, 1.3, 1.8], lookY: 0.8 },
 	{ name: 'escort-wheelchair', subject: 'mover:escort', u: 0.3, cam: [2.4, 1.1, 0], lookY: 0.8 },
 	{ name: 'ct-table', subject: 'cast:ctsim:patient:*', cam: [0, 1.15, -2.2], lookY: 1.1 },
 	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [-2.6, 1.35, -1.6], lookY: 1.2 }
