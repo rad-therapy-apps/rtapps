@@ -9,10 +9,11 @@
 //   b  Spacing   20 simulated minutes at 30 Hz, with scripted journey moves: no mover within 0.5 m of
 //                another mover, a cast actor or a journey/transition actor
 //   c  One move  two queued moves for one journey actor never overlap and never jump
+//   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
-//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d]
+//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e]
 // Exit codes: 0 every selected check passes; 1 any fails; 2 setup error.
 // Output: `NPC CHECK <letter> PASS|FAIL: <summary>` per check, then at most 30 detail lines per failing check.
 import fs from 'node:fs';
@@ -27,7 +28,7 @@ const argVal = (flag) => {
 	return i >= 0 ? argv[i + 1] : null;
 };
 const svgPath = argVal('--svg');
-const only = new Set((argVal('--only') || 'a,b,c,d').split(',').map((x) => x.trim()));
+const only = new Set((argVal('--only') || 'a,b,c,d,e').split(',').map((x) => x.trim()));
 
 const BODY_R = 0.3;
 const VEHICLES = new Set(['car', 'shuttle']);
@@ -213,11 +214,26 @@ function checkWalls() {
 // mover-mover, mover-cast, mover-journey/transition. Journey-cast and journey-journey pairs are out
 // of scope (story actors; stage 3).
 const MOVE_PAUSE_S = 3;
+const MAX_HOLD_S = 20;
 function journeyScript() {
 	NPC.resetTreatmentJourney(true);
 	const J = NPC.JOURNEY;
 	const plan = [
-		[J.patient, ['consult', 'lobby', 'ctsim', 'lobby', 'vault1', 'lobby', 'education', 'lobby']],
+		[
+			J.patient,
+			[
+				'consult',
+				'lobby',
+				'patientcare',
+				'lobby',
+				'ctsim',
+				'lobby',
+				'vault1',
+				'lobby',
+				'education',
+				'lobby'
+			]
+		],
 		[J.newPatient, ['education', 'lobby', 'social', 'lobby']],
 		[J.therapist, ['vault1', 'linaccontrol']],
 		[J.vaultTherapist, ['linaccontrol', 'vault1']]
@@ -232,6 +248,34 @@ function journeyScript() {
 			idleSince: 0,
 			moving: false
 		}));
+}
+// Real handoffs (HANDOFFS in main.ts): the cast actor walks to its target room, then is walked home
+// with an ordinary journey move, over and over.
+// Routes that start or end inside the rooms of the resident runners (hdr, ctcontrol) are left out: they
+// share the room's own door mouth, and routes inside rooms belong to stage 3.
+const HANDOFF_PICKS = ['commons', 'qa', 'manager', 'physics', 'engineering', 'dosimetry', 'safety'];
+function handoffScript() {
+	return HANDOFF_PICKS.map((key) => {
+		const h = NPC.HANDOFFS[key][0],
+			actor = NPC.ROOM_CAST[key].filter((e) => e.kind === (h.actor || 'patient'))[h.actorIndex || 0]
+				.g;
+		return { key, h, actor, state: 'home', idleSince: 0 };
+	});
+}
+function driveHandoffs(hs, tSec) {
+	for (const x of hs) {
+		const running = NPC.handoffTransitions.some((t) => t.actor === x.actor);
+		if (x.state === 'out' && !running) {
+			x.state = 'back';
+			NPC.moveJourneyActor(x.actor, x.h.target, x.key, roomFinal(x.key), () => {
+				x.state = 'home';
+				x.idleSince = tSec;
+			});
+		} else if (x.state === 'home' && tSec - x.idleSince >= MOVE_PAUSE_S) {
+			x.state = 'out';
+			NPC.startActorHandoff(x.key, x.h);
+		}
+	}
 }
 function driveJourney(script, tSec) {
 	for (const sc of script) {
@@ -258,18 +302,19 @@ function describeApproach(a, b) {
 	return `[${mv.id} ${mv.m.holding ? 'holding' : 'moving'}, other at ${bearing.toFixed(0)} deg]`;
 }
 function checkSpacing() {
+	const tmpV = new NPC.movers[0].group.position.constructor();
 	const active = new Set();
-	const script = journeyScript();
-	const holdRun = NPC.movers.map(() => 0),
-		holdMax = NPC.movers.map(() => 0);
+	const script = journeyScript(),
+		hand = handoffScript();
+	const holdMax = NPC.movers.map(() => 0);
 	let total = 0;
 	for (let s = 0; s < SPACING_STEPS; s++) {
 		const tSec = (s * STEP_MS) / 1000;
 		driveJourney(script, tSec);
+		driveHandoffs(hand, tSec);
 		step();
 		NPC.movers.forEach((m, i) => {
-			holdRun[i] = m.holding ? holdRun[i] + STEP_MS / 1000 : 0;
-			holdMax[i] = Math.max(holdMax[i], holdRun[i]);
+			holdMax[i] = Math.max(holdMax[i], m.heldFor);
 		});
 		const pts = NPC.movers.map((m, i) => ({
 			id: names[i],
@@ -285,9 +330,9 @@ function checkSpacing() {
 		const wp = { x: 0, z: 0 };
 		for (const [o, kind] of journeyObjs) {
 			if (!NPC.visibleInTree(o)) continue;
-			o.getWorldPosition(NPC.tmp);
-			wp.x = NPC.tmp.x;
-			wp.z = NPC.tmp.z;
+			o.getWorldPosition(tmpV);
+			wp.x = tmpV.x;
+			wp.z = tmpV.z;
 			pts.push({
 				id: `${kind}:${o.userData?.npcRole || o.name || 'actor'}`,
 				x: wp.x,
@@ -330,21 +375,129 @@ function checkSpacing() {
 		.map(([k, v]) => `${k}: ${v}`)
 		.join(', ');
 	const minutes = (SPACING_STEPS * STEP_MS) / 60000;
+	const worstHold = Math.max(...holdMax),
+		released = NPC.movers.filter((m) => m.releases > 0).map((m) => m.id);
+	const holdProblems = [];
+	if (worstHold > MAX_HOLD_S)
+		holdProblems.push(`a mover waited ${worstHold.toFixed(1)} s in a row (limit ${MAX_HOLD_S} s)`);
+	if (released.length)
+		holdProblems.push(`the runtime hold release fired for ${released.join(', ')}`);
+	const base = total
+		? `${total} spacing events (< ${MIN_DIST} m) in ${minutes} simulated minutes (${kindList})`
+		: `no pair closer than ${MIN_DIST} m in ${minutes} simulated minutes (mover-mover, mover-cast, mover-journey)`;
 	return {
-		pass: total === 0,
-		summary: total
-			? `${total} spacing events (< ${MIN_DIST} m) in ${minutes} simulated minutes (${kindList})`
-			: `no pair closer than ${MIN_DIST} m in ${minutes} simulated minutes (mover-mover, mover-cast, mover-journey)`,
-		detail: spacingEvents
-			.slice(0, MAX_DETAIL)
-			.map(
-				(e) =>
-					`${e.kinds} ${e.pair} at t=${e.t.toFixed(1)}s near (${e.x.toFixed(2)}, ${e.z.toFixed(2)}) d=${e.d.toFixed(2)} ${e.how}`
-			),
+		pass: total === 0 && holdProblems.length === 0,
+		summary: [base, ...holdProblems].join('; '),
+		detail: [
+			...holdProblems,
+			...spacingEvents
+				.slice(0, MAX_DETAIL)
+				.map(
+					(e) =>
+						`${e.kinds} ${e.pair} at t=${e.t.toFixed(1)}s near (${e.x.toFixed(2)}, ${e.z.toFixed(2)}) d=${e.d.toFixed(2)} ${e.how}`
+				)
+		],
 		info: [
-			`journey moves issued: ${script.reduce((n, sc) => n + sc.i, 0)}`,
-			`longest hold per mover (s): ${names.map((n, i) => `${n} ${holdMax[i].toFixed(1)}`).join(', ')}`
+			`journey moves issued: ${script.reduce((n, sc) => n + sc.i, 0)}; handoff routes: ${hand.map((x) => `${x.key}>${x.h.target}`).join(', ')}`,
+			`longest hold per mover (s): ${names.map((n, i) => `${n} ${holdMax[i].toFixed(1)}`).join(', ')}; releases: ${released.length}`
 		]
+	};
+}
+
+// ----------------------------------------------------------------- (e) yield
+// A static obstacle (the journey patient, which every mover must yield to) is put at a chosen
+// distance and bearing from a mover each step. techCart is index 2, so it has movers of lower and
+// higher priority around it.
+function checkYield() {
+	NPC.resetTreatmentJourney(true);
+	const mi = names.indexOf('techCart'),
+		m = NPC.movers[mi],
+		obstacle = NPC.JOURNEY.patient,
+		dtStep = STEP_MS / 1000,
+		far = () => obstacle.position.set(900, 0, 900),
+		problems = [];
+	const heading = () => {
+		const p = m.curve.getPointAt(m.u),
+			n = m.curve.getPointAt((m.u + 0.01) % 1),
+			l = Math.hypot(n.x - p.x, n.z - p.z);
+		return { p, fx: (n.x - p.x) / l, fz: (n.z - p.z) / l };
+	};
+	const place = (dist, deg) => {
+		const { p, fx, fz } = heading(),
+			a = (deg * Math.PI) / 180,
+			c = Math.cos(a),
+			sn = Math.sin(a);
+		obstacle.position.set(p.x + dist * (fx * c - fz * sn), 0, p.z + dist * (fx * sn + fz * c));
+	};
+	const arms = () => {
+		let v = 0;
+		m.group.traverse((o) => {
+			const r = o.userData?.walkRig;
+			if (r) v = Math.max(v, Math.abs(r.armLP.rotation.x), Math.abs(r.legLP.rotation.x));
+		});
+		return v;
+	};
+	const run = (dist, deg, n) => {
+		for (let i = 0; i < n; i++) {
+			place(dist, deg);
+			step();
+		}
+	};
+	const moves = (dist, deg) => {
+		const u0 = m.u;
+		run(dist, deg, 5);
+		return m.u !== u0 && !m.holding;
+	};
+	far();
+	stepFor(1);
+	// (i) 0.7 m ahead: holds, u frozen for 1 s, limbs at rest
+	let u0 = m.u;
+	run(0.7, 0, 30);
+	if (!m.holding) problems.push('(i) not holding with an obstacle 0.7 m ahead');
+	if (m.u !== u0) problems.push(`(i) u moved ${m.u - u0} while holding`);
+	if (arms() !== 0) problems.push(`(i) limbs not at rest while holding (${arms().toFixed(3)} rad)`);
+	// (ii) removed: exact pace
+	far();
+	step();
+	for (let i = 0; i < 30; i++) {
+		u0 = m.u;
+		step();
+		const du = (((m.u - u0) % 1) + 1) % 1;
+		if (m.holding || Math.abs(du - m.speed * dtStep) > 1e-9) {
+			problems.push(`(ii) step ${i}: du=${du} expected ${m.speed * dtStep}, holding=${m.holding}`);
+			break;
+		}
+	}
+	// (iii) behind, (iv) 1.2 m ahead, (v) 0.7 m ahead at 70 deg
+	if (!moves(0.7, 180)) problems.push('(iii) held for an obstacle 0.7 m behind');
+	if (!moves(1.2, 0)) problems.push('(iv) held for an obstacle 1.2 m ahead');
+	if (!moves(0.7, 70)) problems.push('(v) held for an obstacle 0.7 m ahead at 70 deg');
+	if (moves(0.7, 40)) problems.push('(v) did not hold for an obstacle 0.7 m ahead at 40 deg');
+	far();
+	step();
+	// (vi) priority between movers, asked of shouldHold directly
+	const { p, fx, fz } = heading(),
+		lo = NPC.movers[mi - 1],
+		hi = NPC.movers[mi + 1],
+		saved = [lo, hi].map((o) => [o.group.position.x, o.group.position.z]),
+		put = (o) => o.group.position.set(p.x + 0.7 * fx, 0, p.z + 0.7 * fz),
+		away = (o) => o.group.position.set(900, 0, 900);
+	away(lo);
+	away(hi);
+	put(hi);
+	const holdsForHigher = NPC.shouldHold(m, [], p.x, p.z, fx, fz);
+	away(hi);
+	put(lo);
+	const holdsForLower = NPC.shouldHold(m, [], p.x, p.z, fx, fz);
+	[lo, hi].forEach((o, i) => o.group.position.set(saved[i][0], 0, saved[i][1]));
+	if (holdsForHigher) problems.push('(vi) held for a higher-index mover');
+	if (!holdsForLower) problems.push('(vi) did not hold for a lower-index mover');
+	return {
+		pass: problems.length === 0,
+		summary: problems.length
+			? `${problems.length} yield rule violations`
+			: 'holds for 0.7 m ahead (frozen, limbs at rest), walks on at exact pace, ignores behind, 1.2 m and 70 deg, yields only to lower-index movers',
+		detail: problems
 	};
 }
 
@@ -471,9 +624,9 @@ function checkHidden() {
 }
 
 // ------------------------------------------------------------------ driver
-const CHECKS = { a: checkWalls, b: checkSpacing, c: checkOneMove, d: checkHidden };
+const CHECKS = { a: checkWalls, b: checkSpacing, c: checkOneMove, d: checkHidden, e: checkYield };
 let failed = 0;
-for (const letter of ['a', 'b', 'c', 'd']) {
+for (const letter of ['a', 'b', 'c', 'd', 'e']) {
 	if (!only.has(letter)) continue;
 	let r;
 	try {

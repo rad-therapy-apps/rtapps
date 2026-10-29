@@ -712,7 +712,7 @@ function animate(now) {
 	requestAnimationFrame(animate);
 	stepSimulation(now);
 }
-installNpcCheckHook(ROOM_CAST, stepSimulation);
+installNpcCheckHook(ROOM_CAST, stepSimulation, HANDOFFS);
 renderRoomList();
 updateFacilityInfo();
 journeyActors();

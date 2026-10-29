@@ -225,35 +225,41 @@ function addMover(
 		id,
 		u: offset,
 		pendingDt: 0,
-		holding: false
+		holding: false,
+		heldFor: 0,
+		released: false,
+		releases: 0
 	});
 }
 /* Background walkers keep their own progress `m.u` (advanced by dt) so a walker can stop for
    someone without the loop jumping when it resumes. Priority: a mover holds for any lower-index
    mover and for any cast, duty, journey or transition actor; story actors (cast, journey,
    transition) never hold, so a wait always ends once its blocker has walked on. */
+const MAX_HOLD_S = 8;
 const YIELD_DIST = 0.9;
 const YIELD_DIST_SQ = YIELD_DIST * YIELD_DIST;
 const YIELD_HALF_ANGLE_COS = Math.cos((50 * Math.PI) / 180);
 const yieldTmp = new THREE.Vector3();
-function collectBlockers() {
-	const seen = new Set(),
-		out = [];
-	const add = (g) => {
-		if (!g || seen.has(g) || !visibleInTree(g)) return;
-		seen.add(g);
-		g.getWorldPosition(yieldTmp);
-		out.push(yieldTmp.x, yieldTmp.z);
-	};
-	for (const arr of Object.values(ROOM_CAST)) for (const e of arr) add(e.g);
-	for (const d of dutyActors) add(d.group);
-	if (typeof JOURNEY !== 'undefined')
-		for (const v of Object.values(JOURNEY)) if (v && v.isObject3D) add(v);
-	for (const t of workflowTransitions) add(t.actor);
-	for (const t of handoffTransitions) add(t.actor);
-	return out;
+const blockerSeen = new Set(),
+	blockerBuf = [];
+function addBlocker(g) {
+	if (!g || blockerSeen.has(g) || !visibleInTree(g)) return;
+	blockerSeen.add(g);
+	g.getWorldPosition(yieldTmp);
+	blockerBuf.push(yieldTmp.x, yieldTmp.z);
 }
-function shouldHold(m, blockers, px, pz, fx, fz) {
+function collectBlockers() {
+	blockerSeen.clear();
+	blockerBuf.length = 0;
+	for (const arr of Object.values(ROOM_CAST)) for (const e of arr) addBlocker(e.g);
+	for (const d of dutyActors) addBlocker(d.group);
+	if (typeof JOURNEY !== 'undefined')
+		for (const v of Object.values(JOURNEY)) if (v && v.isObject3D) addBlocker(v);
+	for (const t of workflowTransitions) addBlocker(t.actor);
+	for (const t of handoffTransitions) addBlocker(t.actor);
+	return blockerBuf;
+}
+export function shouldHold(m, blockers, px, pz, fx, fz) {
 	const ahead = (x, z) => {
 		const dx = x - px,
 			dz = z - pz,
@@ -285,7 +291,20 @@ export function updateMovers(dt, sec) {
 			n = m.curve.getPointAt((m.u + 0.01) % 1);
 		const len = Math.hypot(n.x - p.x, n.z - p.z) || 1;
 		blockers = blockers || collectBlockers();
-		m.holding = shouldHold(m, blockers, p.x, p.z, (n.x - p.x) / len, (n.z - p.z) / len);
+		/* A static cast or duty actor on a lane would freeze the mover for good, so after
+		   MAX_HOLD_S of continuous waiting it walks on (check b requires that no lane needs it). */
+		if (shouldHold(m, blockers, p.x, p.z, (n.x - p.x) / len, (n.z - p.z) / len)) {
+			m.heldFor += step;
+			m.holding = m.heldFor <= MAX_HOLD_S;
+			if (!m.holding && !m.released) {
+				m.released = true;
+				m.releases++;
+			}
+		} else {
+			m.heldFor = 0;
+			m.holding = false;
+			m.released = false;
+		}
 		if (!m.holding) {
 			m.u = (m.u + step * m.speed) % 1;
 			p = m.curve.getPointAt(m.u);
@@ -359,9 +378,9 @@ export function addMovingActors() {
 	addMover(
 		escort,
 		[
-			// Clinical corridor lanes: east on z = 0.8, west on z = 2.4.
-			[16.5, 0, 0.8],
-			[24.5, 0, 0.8],
+			// Clinical corridor lanes: east on z = 0.8, west on z = 2.4, east of the manager/QA door
+			// route that turns off the corridor at x = 20..22.
+			[26, 0, 0.8],
 			[32, 0, 0.8],
 			[40, 0, 0.8],
 			[47.5, 0, 0.8],
@@ -373,15 +392,14 @@ export function addMovingActors() {
 			[47.5, 0, 2.4],
 			[40, 0, 2.4],
 			[32, 0, 2.4],
-			[24.5, 0, 2.4],
-			[16.5, 0, 2.4],
-			[16.1, 0, 2.29],
-			[15.81, 0, 2],
-			[15.7, 0, 1.6],
-			[15.81, 0, 1.2],
-			[16.1, 0, 0.91]
+			[26, 0, 2.4],
+			[25.6, 0, 2.29],
+			[25.31, 0, 2],
+			[25.2, 0, 1.6],
+			[25.31, 0, 1.2],
+			[25.6, 0, 0.91]
 		],
-		0.01604,
+		0.02239,
 		true,
 		0.42,
 		0,
@@ -401,16 +419,26 @@ export function addMovingActors() {
 	addMover(
 		techCart,
 		[
-			[0, 0, -9],
-			[0, 0, -18],
-			[0, 0, -31],
-			[0, 0, -45],
-			[0, 0, -58],
-			[0, 0, -45],
-			[0, 0, -31],
-			[0, 0, -18]
+			// North spine, west side: lanes x = -1.4 (north-bound) and -2.6 (south-bound) between the
+			// physics/safety doors (z = -18) and the QA door (z = -44); story actors walk x = 0.
+			[-1.4, 0, -22.5],
+			[-1.4, 0, -24],
+			[-1.4, 0, -31],
+			[-1.4, 0, -39],
+			[-1.4, 0, -40.8],
+			[-1.7, 0, -41.5],
+			[-2.0, 0, -41.7],
+			[-2.3, 0, -41.5],
+			[-2.6, 0, -40.8],
+			[-2.6, 0, -39],
+			[-2.6, 0, -31],
+			[-2.6, 0, -24],
+			[-2.6, 0, -22.5],
+			[-2.3, 0, -21.8],
+			[-2.0, 0, -21.6],
+			[-1.7, 0, -21.8]
 		],
-		0.013,
+		0.031,
 		true,
 		0.68,
 		0,

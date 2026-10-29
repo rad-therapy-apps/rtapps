@@ -10,6 +10,7 @@ import {
 	dutyActors,
 	handoffTransitions,
 	startActorHandoff,
+	shouldHold,
 	visibleInTree
 } from './npc-behavior';
 import {
@@ -30,7 +31,8 @@ export function isHidden(): boolean {
 
 export function installNpcCheckHook(
 	roomCast: Record<string, { g: THREE.Object3D; kind: string }[]>,
-	stepSimulation: (now: number) => void
+	stepSimulation: (now: number) => void,
+	handoffs: Record<string, { target: string; actor?: string; actorIndex?: number }[]>
 ): void {
 	if (typeof location === 'undefined' || !new URLSearchParams(location.search).has('npccheck'))
 		return;
@@ -62,10 +64,11 @@ export function installNpcCheckHook(
 			resetTreatmentJourney,
 			journeyActorRoom,
 			startActorHandoff,
+			shouldHold,
+			HANDOFFS: handoffs,
 			workflowTransitions: workflowTransitions as readonly unknown[],
 			handoffTransitions: handoffTransitions as readonly unknown[],
 			visibleInTree,
-			tmp: new THREE.Vector3(),
 			journeyActors: () => {
 				journeyActors();
 				return [
