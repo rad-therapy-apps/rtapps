@@ -4,7 +4,8 @@
 // with `?npccheck`, which makes the page expose `window.__NPC` (src/npc-check-hook.ts), then drives
 // `stepSimulation` on a simulated clock (performance.now is replaced by it, Math.random is seeded).
 //
-//   a  Walls     every mover loop (500 samples) keeps 0.3 m clear of every collider
+//   a  Walls     every mover loop (500 samples) keeps clear of every collider: people by 0.3 m (the
+//                escort's chair and pusher both), vehicles by their oriented footprint plus 0.2 m
 //   b  Spacing   20 simulated minutes at 30 Hz: no mover within 0.5 m of another mover or cast actor
 //   c  One move  two queued moves for one journey actor never overlap and never jump
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
@@ -28,6 +29,8 @@ const svgPath = argVal('--svg');
 const only = new Set((argVal('--only') || 'a,b,c,d').split(',').map((x) => x.trim()));
 
 const BODY_R = 0.3;
+const VEHICLES = new Set(['car', 'shuttle']);
+const VEHICLE_MARGIN = 0.2;
 const SAMPLES = 500;
 const MIN_DIST = 0.5;
 const STEP_MS = 1000 / 30;
@@ -100,20 +103,72 @@ function moverName(m, i) {
 	return found || `mover${i}`;
 }
 const names = NPC.movers.map(moverName);
+for (const v of VEHICLES) if (!names.includes(v)) setupError(`vehicle mover '${v}' not found`);
 
 const wallHits = [];
 const spacingEvents = [];
 
 // ---------------------------------------------------------------- (a) walls
+// A vehicle's footprint in its own frame: the union of its meshes' bounding boxes (vehicleObject in
+// props.ts), grown by VEHICLE_MARGIN on every side.
+function vehicleFootprint(group) {
+	group.updateMatrixWorld(true);
+	const toGroup = group.matrixWorld.clone().invert();
+	let x0 = Infinity,
+		x1 = -Infinity,
+		z0 = Infinity,
+		z1 = -Infinity;
+	group.traverse((o) => {
+		if (!o.isMesh) return;
+		if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+		const b = o.geometry.boundingBox.clone().applyMatrix4(toGroup.clone().multiply(o.matrixWorld));
+		x0 = Math.min(x0, b.min.x);
+		x1 = Math.max(x1, b.max.x);
+		z0 = Math.min(z0, b.min.z);
+		z1 = Math.max(z1, b.max.z);
+	});
+	return {
+		cx: (x0 + x1) / 2,
+		cz: (z0 + z1) / 2,
+		ex: (x1 - x0) / 2 + VEHICLE_MARGIN,
+		ez: (z1 - z0) / 2 + VEHICLE_MARGIN
+	};
+}
+// Separating-axis test: the footprint at p, turned by rotY (the group's rotation.y), against the
+// axis-aligned collider c.
+function footprintHits(f, p, rotY, c) {
+	const ux = Math.cos(rotY),
+		uz = -Math.sin(rotY), // local x in world
+		vx = Math.sin(rotY),
+		vz = Math.cos(rotY), // local z in world
+		dx = p.x + f.cx * ux + f.cz * vx - c.x,
+		dz = p.z + f.cx * uz + f.cz * vz - c.z;
+	return (
+		Math.abs(dx) < c.hw + f.ex * Math.abs(ux) + f.ez * Math.abs(vx) &&
+		Math.abs(dz) < c.hd + f.ex * Math.abs(uz) + f.ez * Math.abs(vz) &&
+		Math.abs(dx * ux + dz * uz) < f.ex + c.hw * Math.abs(ux) + c.hd * Math.abs(uz) &&
+		Math.abs(dx * vx + dz * vz) < f.ez + c.hw * Math.abs(vx) + c.hd * Math.abs(vz)
+	);
+}
 function checkWalls() {
 	const perMover = new Map();
 	NPC.movers.forEach((m, mi) => {
-		const name = names[mi];
+		const name = names[mi],
+			foot = VEHICLES.has(name) ? vehicleFootprint(m.group) : null;
 		for (let i = 0; i < SAMPLES; i++) {
 			const u = i / SAMPLES,
 				p = m.curve.getPointAt(u),
 				n = m.curve.getPointAt((u + 0.01) % 1),
 				yaw = Math.atan2(n.x - p.x, n.z - p.z);
+			if (foot) {
+				// updateMovers turns the group to yaw + yawOffset
+				const c = NPC.colliders.find((k) => footprintHits(foot, p, yaw + (m.yawOffset || 0), k));
+				if (c) {
+					wallHits.push({ name, x: p.x, z: p.z, what: 'vehicle', c });
+					perMover.set(name, (perMover.get(name) || 0) + 1);
+				}
+				continue;
+			}
 			const pts = [{ x: p.x, z: p.z, what: 'body' }];
 			if (name === 'escort') {
 				pts.push({
