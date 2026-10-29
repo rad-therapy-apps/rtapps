@@ -145,3 +145,63 @@ Two read-only investigations, 2026-10-29, traced every cause to original design 
 2. **Owner:**
    - the before/after SVG floor plan of walker loops;
    - the simulator walk-through.
+
+## Stage 2 design: standing, sitting and lying
+
+**Status:** approved by the owner on 2026-10-29: build stage 2, fix the float with longer legs, and move the backrests.
+
+### What runtime measurement showed
+
+Measured in the loaded simulator (stubbed harness and headless Chromium). These numbers correct the static investigation's assumption that the floor is at y = 0:
+
+- **Floors** are at y ≈ 0.065–0.08 (lobby 0.075, vaults 0.08). Actor groups are placed at y = 0.
+- **Every standing or walking person floats about 0.43 m.**
+  - `personFigure` puts the hip pivots at local y = 1.06, but each leg is a single 0.5 m box plus a shoe, so the sole ends at local y ≈ 0.51.
+  - Every person mover and cast/journey actor has its lowest point at 0.50–0.51.
+  - A low side-on screenshot confirms the gap.
+  - Vehicles, the cart and the wheelchair frame sit correctly.
+- **Seated** (`setActorSeated`, y = −0.35): the hip is at 0.71 against a lobby chair seat top of 0.54, so the pelvis hovers 17 cm above it. The rigid legs stick out forward.
+- **Lying patients'** lowest points are 1.20 (CT) and 1.34 (vault). The table tops are about 1.03 and 1.08.
+
+### Design
+
+1. **Legs that reach the floor, with knees.** Each leg becomes a thigh (hip → knee) and a shin (knee → sole) with a knee pivot.
+   - The hip stays at local 1.06, and the sole lands at local 0.07 (floor height). Everything above the hips (torso, head, labels, speech bubbles) is unchanged, so the journey's camera framings still fit.
+   - People look as tall as they appear today.
+   - Thigh 0.47, shin 0.40 plus a 0.06 shoe; same materials and thickness. The `clothingRig` bottom parts include both segments, so gowns and colour changes still cover the whole leg.
+2. **One leg-swing helper.** The five places that swing legs while walking (`npc-behavior.ts` ×4, `equipment.ts` ×1) and `poseCharacter` all call one helper, `setLegSwing(rig, swing)`. It rotates the thighs as today and bends the trailing knee a little.
+3. **Seats know their seat.**
+   - `chair`, `couch`, `benchSeat`, `taskChair` and the wheelchair each register a seat anchor: world `x`, `z`, facing and seat-top height.
+   - `seatActor(actor, seatOrPoint)` snaps to the nearest anchor within 1 m and poses the figure: thighs level, shins down, pelvis on the seat top, hips toward the back of the seat, and facing the seat's way. On a seat taller than shin plus shoe, the feet hang.
+   - `setActorSeated(actor, true)` and `sitPatient` use it.
+4. **Everyone sits on a real seat:**
+   - the lobby journey patients and family go onto actual chairs;
+   - the patients `sitPatient` places in consult, education and the other rooms really sit;
+   - the occupied wheelchair's figure is seated on its seat.
+5. **Backrests follow rotation** in `chair`, `couch`, `taskChair` and `benchSeat`. Rotated chairs get their backs on the correct side.
+6. **Lying patients:** the three lying-patient builders become one. It places the patient so its lowest point rests on the couch or table top. The top is measured from the actual couch/table mesh, not a constant.
+
+### Checks (added to `sim-hub-npc-check.mjs`; they fail before the fix and run in CI)
+
+- **(f) Feet on the floor:** every standing or walking person's sole is within 3 cm of the floor beneath them. The floor is found from the scene's floor meshes. This covers movers, cast and journey actors.
+- **(g) Seated:** every seated person has a seat anchor within 0.3 m, a pelvis within 2 cm of that seat's top, and faces within 20° of the seat's facing.
+- **(h) Lying:** every lying patient's lowest point is within 2 cm of the top of the couch or table under them.
+- **(i) Wheelchair:** an occupied wheelchair's figure is posed seated, with its pelvis on the wheelchair seat.
+
+### Screenshots for the owner
+
+`apps/web/scripts/sim-hub-shots.mjs` is a dev tool, not run in CI. It loads the built simulator in headless Chromium, freezes it and renders fixed camera poses:
+- a walker side-on;
+- the lobby waiting chairs;
+- a consult patient;
+- the wheelchair escort;
+- the CT table;
+- the vault couch.
+
+Before and after images go on a review page.
+
+### Out of scope for stage 2
+
+- Routes inside rooms, and occupancy (stage 3).
+- Arm and hand poses beyond what sitting needs.
+- Changing anyone's height above the hips.
