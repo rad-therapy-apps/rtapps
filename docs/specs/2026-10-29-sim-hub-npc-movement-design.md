@@ -168,7 +168,7 @@ Measured in the loaded simulator (stubbed harness and headless Chromium). These 
 1. **Legs that reach the floor, with knees.** Each leg becomes a thigh (hip → knee) and a shin (knee → sole) with a knee pivot.
    - The hip stays at local 1.06, and the sole lands at local 0.07 (floor height). Everything above the hips (torso, head, labels, speech bubbles) is unchanged, so the journey's camera framings still fit.
    - People look as tall as they appear today.
-   - Thigh 0.47, shin 0.40 plus a 0.06 shoe; same materials and thickness. The `clothingRig` bottom parts include both segments, so gowns and colour changes still cover the whole leg.
+   - Thigh 0.48, shin 0.45 plus a 0.06 shoe (0.99 m from hip to sole); same materials and thickness. Seated on a lobby chair (seat top 0.54), the sole then ends about 1.5 cm above the floor. The `clothingRig` bottom parts include both segments, so gowns and colour changes still cover the whole leg.
 2. **One leg-swing helper.** The five places that swing legs while walking (`npc-behavior.ts` ×4, `equipment.ts` ×1) and `poseCharacter` all call one helper, `setLegSwing(rig, swing)`. It rotates the thighs as today and bends the trailing knee a little.
 3. **Seats know their seat.**
    - `chair`, `couch`, `benchSeat`, `taskChair` and the wheelchair each register a seat anchor: world `x`, `z`, facing and seat-top height.
