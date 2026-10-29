@@ -116,6 +116,10 @@ Open each PNG and confirm its subject is visible; report any that aren't.
   - `equipment.ts` near 987.
 
   Keep each site's amplitude by passing the same scaled value: the sites use `swing * 0.85`, `0.86` and `0.88`, so pass `swing * k`.
+- **Stance foot stays planted while walking** (a Task 1 review finding). Legs swing from a fixed hip, so at peak swing (±0.357 rad for movers) both soles rise by about 0.99·(1 − cos θ) ≈ 0.06 m, which is a visible float.
+  - Lower the figure by that drop for the straighter (stance) leg each frame, so the lowest sole stays within (f)'s 0.03 m at every gait phase.
+  - It must not accumulate: callers re-set position every frame, or the drop is applied to an inner node.
+  - Report how it works for each of the five swing sites.
 - **`poseCharacter`:**
   - `'neutral'` and `'idle'` reset the knees;
   - `'seated'` sets thighs to −π/2 and knees to +π/2 (shins vertical). Its y stays as `setActorSeated` sets it today; Task 3 fixes heights.
@@ -130,7 +134,7 @@ Open each PNG and confirm its subject is visible; report any that aren't.
 
 **Files:** `props.ts` (seat props and anchors), `npc.ts` (`sitPatient`), `npc-behavior.ts` (`setActorSeated`, `seatActor`), `journey.ts` (lobby seat positions) and `rooms.ts` (only if a seat call needs an anchor id).
 
-- **Anchors:** `chair`, `couch`, `benchSeat` (one anchor per 0.6 m of bench length), `taskChair` and `wheelchairObject` each push a seat anchor `{ x, z, facing, top, kind }` to an exported `SEATS` array, in world coordinates. Compute world positions with the prop group's transform, or record them after the group is placed; document which.
+- **Anchors:** `chair`, `couch`, `benchSeat` (one anchor per 0.6 m of bench length), `taskChair`, `wheelchairObject` and the exam tables / beds that patients sit on each push a seat anchor. Exam tables and beds are where the consult and patientcare patients sit (`rooms.ts` ~1017), and the social patient sits on a couch. Each anchor is `{ x, z, facing, top, kind }` to an exported `SEATS` array, in world coordinates. Compute world positions with the prop group's transform, or record them after the group is placed; document which.
 - **Backrests:** the backrest offset follows `rot` in `chair`, `couch` and `taskChair`. `benchSeat` gets full rotation, with the offset computed as the rotated local −z.
 - **`export function seatActor(actor, at)`:**
   - takes the nearest anchor within 1.0 m of `at` (an anchor or `{x, z}`);
@@ -138,6 +142,7 @@ Open each PNG and confirm its subject is visible; report any that aren't.
   - sets y = top + 0.06 − 1.06 + (actor's floor offset, if any);
   - sets rotation.y to the facing, applies pose `'seated'`, and sets `userData.seated = true`;
   - if no anchor is found, returns false and leaves the actor standing. The check then fails, so nothing silently floats.
+- **Update check (g)** to use the anchors: the 0.3 m radius; the pelvis against the anchor's own `top`; facing within 20° turned on (drop the interim info line). Keep selection by `shouldSit` or seated pose, so unanchored sitters still fail. Call `poseCharacter` on the figure node (the check reads `userData.pose` on the `walkRig` node).
 - **Callers:**
   - `setActorSeated(actor, true)` calls `seatActor(actor, actor.position)`;
   - `setActorSeated(actor, false)` restores y = 0 and the neutral pose, and clears `userData.seated`;
