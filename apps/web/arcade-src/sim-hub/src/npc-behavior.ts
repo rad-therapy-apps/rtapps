@@ -21,6 +21,7 @@ import {
 	personFigure,
 	setNpcRole,
 	poseCharacter,
+	setLegSwing,
 	faceNpcToward,
 	faceAlong,
 	npcBubble,
@@ -148,8 +149,7 @@ export function updateDutyAnimations(sec) {
 		} else {
 			rig.armLP.rotation.x = 0.04 * s;
 			rig.armRP.rotation.x = -0.04 * s;
-			rig.legLP.rotation.x = 0;
-			rig.legRP.rotation.x = 0;
+			if (d.group.userData.pose !== 'seated') setLegSwing(rig, 0);
 		}
 		if (face) {
 			face.head.rotation.y = 0.07 * Math.sin(a * 0.45);
@@ -318,11 +318,11 @@ export function updateMovers(dt, sec) {
 		const swing = m.holding ? 0 : Math.sin(sec * 8 + m.offset * 6.28) * 0.42;
 		m.group.traverse((o) => {
 			const rig = o.userData?.walkRig;
-			if (rig) {
+			// a seated rider (the wheelchair occupant) keeps its pose
+			if (rig && o.userData.pose !== 'seated') {
 				rig.armLP.rotation.x = swing;
 				rig.armRP.rotation.x = -swing;
-				rig.legLP.rotation.x = -swing * 0.85;
-				rig.legRP.rotation.x = swing * 0.85;
+				setLegSwing(rig, swing * 0.85);
 			}
 		});
 	}
@@ -760,8 +760,7 @@ export function walkSwing(g, sec) {
 		if (r) {
 			r.armLP.rotation.x = s;
 			r.armRP.rotation.x = -s;
-			r.legLP.rotation.x = -s * 0.85;
-			r.legRP.rotation.x = s * 0.85;
+			setLegSwing(r, s * 0.85);
 		}
 	});
 }
@@ -1007,8 +1006,7 @@ export function updateHandoffTransitions(sec) {
 			if (r) {
 				r.armLP.rotation.x = swing;
 				r.armRP.rotation.x = -swing;
-				r.legLP.rotation.x = -swing * 0.88;
-				r.legRP.rotation.x = swing * 0.88;
+				setLegSwing(r, swing * 0.88);
 			}
 		});
 		if (u >= 1) {

@@ -31,7 +31,7 @@ import {
 } from './helpers';
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
-import { personFigure, faceAlong, poseCharacter } from './npc';
+import { personFigure, faceAlong, poseCharacter, setLegSwing } from './npc';
 import { advanceRoute, advancePed, walkSwing, startNextQueuedMove } from './npc-behavior';
 import {
 	registerInteractable,
@@ -984,8 +984,7 @@ export function updateWorkflowTransitions(sec) {
 			if (r) {
 				r.armLP.rotation.x = sw;
 				r.armRP.rotation.x = -sw;
-				r.legLP.rotation.x = -sw * 0.86;
-				r.legRP.rotation.x = sw * 0.86;
+				setLegSwing(r, sw * 0.86);
 			}
 		});
 		for (const c of t.cues || []) {

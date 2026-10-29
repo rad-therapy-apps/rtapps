@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import { box, cyl, eRbox, std, makeCanvasPanel } from './helpers';
 import { scene } from './scene';
-import { personFigure } from './npc';
+import { personFigure, poseCharacter } from './npc';
 import { add, MAT } from './main';
 import { registerInteractable, openKioskDialog } from './interact';
 import { CT_COUCH, ROOM_CLOCKS } from './equipment';
@@ -74,6 +74,7 @@ export function wheelchairObject(scale = 1, occupied = false) {
 	if (occupied) {
 		const patient = personFigure(0x8b8ec4, 0x606a76, 0xe6c3a0);
 		patient.userData.wheelchairOccupant = true;
+		poseCharacter(patient, 'seated');
 		patient.scale.set(0.82 * s, 0.82 * s, 0.82 * s);
 		patient.position.set(0, -0.02 * s, -0.02 * s);
 		g.add(patient);

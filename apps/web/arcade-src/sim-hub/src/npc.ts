@@ -25,6 +25,14 @@ interface PersonFigureOptions {
 	hairColor?: number;
 }
 
+// Leg geometry shared by personFigure and setLegSwing: hip pivot -> knee 0.48, knee -> sole 0.51
+// (shin 0.45 + shoe 0.06); the shoe runs from heel z -0.07 to toe z +0.13.
+const THIGH_LEN = 0.48,
+	KNEE_TO_SOLE = 0.51,
+	HIP_TO_SOLE = THIGH_LEN + KNEE_TO_SOLE,
+	SHOE_HEEL = -0.07,
+	SHOE_TOE = 0.13;
+
 export function personFigure(
 	top = 0x5e8fb2,
 	bottom = 0x394651,
@@ -98,24 +106,35 @@ export function personFigure(
 	armRP.add(armR);
 	g.add(armLP);
 	g.add(armRP);
+	// Each leg: hip pivot (1.06) -> thigh -> knee pivot -> shin and shoe, sole at local 0.07.
 	const legLP = new THREE.Group();
 	legLP.position.set(-0.1, 1.06, 0);
 	const legRP = new THREE.Group();
 	legRP.position.set(0.1, 1.06, 0);
-	const legL = box(0.12, 0.5, 0.12, legMat, 0, -0.25, 0),
-		legR = box(0.12, 0.5, 0.12, legMat, 0, -0.25, 0);
-	legLP.add(legL);
-	legRP.add(legR);
-	legLP.add(box(0.13, 0.06, 0.2, shoeMat, 0, -0.52, 0.03));
-	legRP.add(box(0.13, 0.06, 0.2, shoeMat, 0, -0.52, 0.03));
+	const kneeLP = new THREE.Group();
+	kneeLP.position.y = -THIGH_LEN;
+	const kneeRP = new THREE.Group();
+	kneeRP.position.y = -THIGH_LEN;
+	const thighL = box(0.12, THIGH_LEN, 0.12, legMat, 0, -THIGH_LEN / 2, 0),
+		thighR = box(0.12, THIGH_LEN, 0.12, legMat, 0, -THIGH_LEN / 2, 0),
+		shinL = box(0.12, 0.45, 0.12, legMat, 0, -0.225, 0),
+		shinR = box(0.12, 0.45, 0.12, legMat, 0, -0.225, 0);
+	legLP.add(thighL, kneeLP);
+	legRP.add(thighR, kneeRP);
+	kneeLP.add(shinL, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
+	kneeRP.add(shinR, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
 	g.add(legLP);
 	g.add(legRP);
-	g.userData.walkRig = { armLP, armRP, legLP, legRP };
+	// Every body part sits in `body`, at the origin; only setLegSwing moves it (the pelvis drop).
+	const body = new THREE.Group();
+	body.add(...g.children);
+	g.add(body);
+	g.userData.walkRig = { armLP, armRP, legLP, legRP, kneeLP, kneeRP, body };
 	g.userData.faceRig = { head, torso };
 	g.userData.clothingRig = {
 		kind: 'standing',
 		topParts: [torso, shoulder, armL, armR],
-		bottomParts: [legL, legR],
+		bottomParts: [thighL, thighR, shinL, shinR],
 		topColor: top,
 		bottomColor: bottom
 	};
@@ -139,8 +158,8 @@ function addLabCoat(group) {
 		box(0.13, 0.12, 0.025, trimMat, -0.11, 1.17, 0.148),
 		box(0.13, 0.12, 0.025, trimMat, 0.11, 1.17, 0.148)
 	);
-	group.add(coat);
 	const wr = group.userData.walkRig;
+	(wr?.body || group).add(coat);
 	if (wr) {
 		wr.armLP.add(box(0.105, 0.43, 0.105, coatMat, 0, -0.21, 0.005));
 		wr.armRP.add(box(0.105, 0.43, 0.105, coatMat, 0, -0.21, 0.005));
@@ -172,7 +191,7 @@ export function setPatientGown(group, on = true) {
 	if (!group.userData.gownPanel && group.userData.walkRig) {
 		const panel = box(0.46, 0.46, 0.29, std(0xb9dbe1, 0.88, 0.01), 0, 1.18, 0.01);
 		panel.visible = false;
-		group.add(panel);
+		group.userData.walkRig.body.add(panel);
 		group.userData.gownPanel = panel;
 	}
 	if (group.userData.gownPanel) group.userData.gownPanel.visible = !!on;
@@ -198,8 +217,33 @@ function addChestBadge(group, name, title = '') {
 		})
 	);
 	badge.position.set(0, 1.36, 0.125);
-	group.add(badge);
+	(group.userData.walkRig?.body || group).add(badge);
 	group.userData.hasBadge = true;
+}
+// Depth below the hip pivot of a leg's lowest shoe corner (heel or toe), for hip and knee angles.
+function soleDepth(hip: number, knee: number) {
+	let d = 0;
+	for (const z of [SHOE_HEEL, SHOE_TOE]) {
+		const y = -KNEE_TO_SOLE * Math.cos(knee) - z * Math.sin(knee) - THIGH_LEN,
+			w = -KNEE_TO_SOLE * Math.sin(knee) + z * Math.cos(knee);
+		d = Math.max(d, w * Math.sin(hip) - y * Math.cos(hip));
+	}
+	return d;
+}
+/* The one walking-leg helper: thighs swing +/-swing, the trailing knee bends back by 0.9 x its
+   thigh's swing, and the pelvis drop keeps the lowest sole at rest height (local 0.07) at every
+   phase. The drop is written absolutely on walkRig.body, which nothing else moves, so it never
+   accumulates and callers that rewrite the actor's position each frame cannot undo it. */
+export function setLegSwing(rig, swing: number) {
+	rig.legLP.rotation.x = -swing;
+	rig.legRP.rotation.x = swing;
+	rig.kneeLP.rotation.x = Math.max(0, -swing) * 0.9;
+	rig.kneeRP.rotation.x = Math.max(0, swing) * 0.9;
+	rig.body.position.y =
+		Math.max(
+			soleDepth(rig.legLP.rotation.x, rig.kneeLP.rotation.x),
+			soleDepth(rig.legRP.rotation.x, rig.kneeRP.rotation.x)
+		) - HIP_TO_SOLE;
 }
 export function poseCharacter(group, mode = 'neutral') {
 	group.userData.pose = mode;
@@ -208,8 +252,7 @@ export function poseCharacter(group, mode = 'neutral') {
 		if (!r) return;
 		r.armLP.rotation.z = 0;
 		r.armRP.rotation.z = 0;
-		r.legLP.rotation.x = 0;
-		r.legRP.rotation.x = 0;
+		setLegSwing(r, 0);
 		if (mode === 'desk') {
 			r.armLP.rotation.x = -1.05;
 			r.armRP.rotation.x = -1.1;
@@ -232,8 +275,11 @@ export function poseCharacter(group, mode = 'neutral') {
 		} else if (mode === 'seated') {
 			r.armLP.rotation.x = -0.45;
 			r.armRP.rotation.x = -0.48;
-			r.legLP.rotation.x = -1.22;
-			r.legRP.rotation.x = -1.22;
+			// Thighs level, shins straight down.
+			r.legLP.rotation.x = -Math.PI / 2;
+			r.legRP.rotation.x = -Math.PI / 2;
+			r.kneeLP.rotation.x = Math.PI / 2;
+			r.kneeRP.rotation.x = Math.PI / 2;
 		} else {
 			r.armLP.rotation.x = 0;
 			r.armRP.rotation.x = 0;
