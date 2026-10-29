@@ -13,7 +13,7 @@ export const balanceDisplay = document.getElementById('balanceDisplay');
 export const enhancementStoreElem = document.getElementById('enhancementStore');
 export const resetButton = document.getElementById('resetButton');
 // RTApps (#77 phase 2 task 19): cast to HTMLSelectElement (not just HTMLElement):
-// linac-delivery.ts reads/sets `.value`/`.options`/`.disabled` on these.
+// the delivery/ modules read/set `.value`/`.options`/`.disabled` on these.
 export const treatmentCaseSelect = document.getElementById(
 	'treatmentCaseSelect'
 ) as HTMLSelectElement | null;
@@ -38,7 +38,7 @@ export const motionRelease = document.getElementById('motionRelease');
 export const motionReset = document.getElementById('motionReset');
 export const motionRecheck = document.getElementById('motionRecheck');
 // RTApps (#77 phase 2 task 19): cast to HTMLCanvasElement/HTMLInputElement (not just
-// HTMLElement): linac-delivery.ts reads `.getContext`/`.width`/`.height`/`.value` on these.
+// HTMLElement): the delivery/ modules read `.getContext`/`.width`/`.height`/`.value` on these.
 export const motionWaveCanvas = document.getElementById(
 	'motionWaveCanvas'
 ) as HTMLCanvasElement | null;
@@ -60,7 +60,7 @@ export const oisLaunchButton = document.getElementById('oisLaunchButton');
 export const oisPanel = document.getElementById('oisPanel');
 export const oisClose = document.getElementById('oisClose');
 // RTApps (#77 phase 2 task 19): cast to HTMLTextAreaElement/HTMLInputElement/
-// HTMLButtonElement/HTMLCanvasElement (not just HTMLElement): linac-delivery.ts reads/sets
+// HTMLButtonElement/HTMLCanvasElement (not just HTMLElement): the delivery/ modules read/set
 // `.value`/`.checked`/`.disabled`/`.getContext` on these.
 export const oisNote = document.getElementById('oisNote') as HTMLTextAreaElement | null;
 export const oisTherapist = document.getElementById('oisTherapist') as HTMLInputElement | null;
@@ -94,7 +94,7 @@ export const specialSetupClose = document.getElementById('specialSetupClose');
 export const specialSetupContent = document.getElementById('specialSetupContent');
 export const deliveryLaunchButton = document.getElementById('deliveryLaunchButton');
 // RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
-// linac-delivery.ts sets `.disabled` on this.
+// the delivery/ modules set `.disabled` on this.
 export const immobilizationLaunchButton = document.getElementById(
 	'immobilizationLaunchButton'
 ) as HTMLButtonElement | null;
@@ -109,7 +109,7 @@ export const deliveryPanel = document.getElementById('deliveryPanel');
 export const deliveryClose = document.getElementById('deliveryClose');
 export const deliveryRecheck = document.getElementById('deliveryRecheck');
 // RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
-// linac-delivery.ts sets `.disabled` on these.
+// the delivery/ modules set `.disabled` on these.
 export const deliveryArm = document.getElementById('deliveryArm') as HTMLButtonElement | null;
 export const clearanceOverrideCard = document.getElementById('clearanceOverrideCard');
 export const clearanceOverrideReason = document.getElementById('clearanceOverrideReason');
@@ -130,14 +130,14 @@ export const clearanceOverrideWithdraw = document.getElementById(
 ) as HTMLButtonElement | null;
 export const clearanceOverrideStatus = document.getElementById('clearanceOverrideStatus');
 // RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
-// linac-delivery.ts sets `.disabled` on these.
+// the delivery/ modules set `.disabled` on these.
 export const deliveryStart = document.getElementById('deliveryStart') as HTMLButtonElement | null;
 export const deliveryHold = document.getElementById('deliveryHold') as HTMLButtonElement | null;
 export const deliveryTerminate = document.getElementById(
 	'deliveryTerminate'
 ) as HTMLButtonElement | null;
 // RTApps (#77 phase 2 task 19): cast to HTMLSelectElement (not just HTMLElement):
-// linac-delivery.ts reads/sets `.value`/`.options`/`.disabled` on this.
+// the delivery/ modules read/set `.value`/`.options`/`.disabled` on this.
 export const deliveryFieldSelect = document.getElementById(
 	'deliveryFieldSelect'
 ) as HTMLSelectElement | null;
@@ -229,7 +229,7 @@ export const detectorToggleButton = document.getElementById(
 	'detectorToggleButton'
 ) as HTMLButtonElement | null;
 // RTApps (#77 phase 2 task 19): cast to HTMLButtonElement (not just HTMLElement):
-// linac-delivery.ts sets `.disabled` on this.
+// the delivery/ modules set `.disabled` on this.
 export const beamOnButton = document.getElementById('beamOnButton') as HTMLButtonElement | null;
 export const lasersToggleButton = document.getElementById(
 	'lasersToggleButton'
