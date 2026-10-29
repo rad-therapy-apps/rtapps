@@ -39,7 +39,7 @@ import { JOURNEY, journeyActorRoom } from './journey';
 import { setupAmbulance } from './equipment';
 
 export const movers = [];
-const dutyActors = [];
+export const dutyActors = [];
 export const interactionScenes = [];
 
 /* RTApps perf task 2: walk-mode distance gating for ambient movers and duty animations.
@@ -208,10 +208,11 @@ function addMover(
 	speed = 0.03,
 	closed = true,
 	offset = Math.random(),
-	yawOffset = 0
+	yawOffset = 0,
+	id = ''
 ) {
 	scene.add(group);
-	movers.push({ group, curve: moverPath(points, closed), speed, offset, yawOffset });
+	movers.push({ group, curve: moverPath(points, closed), speed, offset, yawOffset, id });
 }
 export function updateMovers(sec) {
 	frameCount++;
@@ -259,7 +260,9 @@ export function addMovingActors() {
 		],
 		0.016,
 		true,
-		0.12
+		0.12,
+		0,
+		'walker'
 	);
 	const escort = new THREE.Group();
 	escort.userData.suppressDuringJourney = true;
@@ -286,7 +289,9 @@ export function addMovingActors() {
 		],
 		0.014,
 		true,
-		0.42
+		0.42,
+		0,
+		'escort'
 	);
 	const techCart = new THREE.Group();
 	const cart = medCartObject(0.95, 0xc39b70);
@@ -313,7 +318,9 @@ export function addMovingActors() {
 		],
 		0.013,
 		true,
-		0.68
+		0.68,
+		0,
+		'techCart'
 	);
 	const visitor = setNpcRole(
 		personFigure(0xa56d6d, 0x414c57, 0xf1c8a4, { female: true, hairColor: 0x4b3126 }),
@@ -333,7 +340,9 @@ export function addMovingActors() {
 		],
 		0.015,
 		true,
-		0.31
+		0.31,
+		0,
+		'visitor'
 	);
 	const therapist = setNpcRole(
 		personFigure(0x6f90c5, 0x34424b, 0x5f3f2b, { hairColor: 0x120f0d }),
@@ -354,7 +363,9 @@ export function addMovingActors() {
 		],
 		0.014,
 		true,
-		0.74
+		0.74,
+		0,
+		'therapist'
 	);
 	const car = vehicleObject('car', 0x6588bf);
 	addMover(
@@ -372,7 +383,8 @@ export function addMovingActors() {
 		0.011,
 		true,
 		0.2,
-		-Math.PI / 2
+		-Math.PI / 2,
+		'car'
 	);
 	const ambulance = vehicleObject('ambulance');
 	ambulance.position.set(-42, 0, 20);
@@ -393,7 +405,8 @@ export function addMovingActors() {
 		0.01,
 		true,
 		0.82,
-		-Math.PI / 2
+		-Math.PI / 2,
+		'shuttle'
 	);
 	const ctRunner = setNpcRole(
 		personFigure(0x5f8ab6, 0x36424c, 0xb67e59, { female: true, hairColor: 0x2a1b14 }),
@@ -414,7 +427,9 @@ export function addMovingActors() {
 		],
 		0.013,
 		true,
-		0.17
+		0.17,
+		0,
+		'ctRunner'
 	);
 	const linacRunner = setNpcRole(
 		personFigure(0x6f90c5, 0x36424a, 0x8a5c3e, { hairColor: 0x160f0d }),
@@ -436,7 +451,9 @@ export function addMovingActors() {
 		],
 		0.0125,
 		true,
-		0.53
+		0.53,
+		0,
+		'linacRunner'
 	);
 	const hdrRunner = setNpcRole(
 		personFigure(0x7b9d86, 0x37454d, 0xd2a17c, { female: true, hairColor: 0x2a1912 }),
@@ -456,7 +473,9 @@ export function addMovingActors() {
 		],
 		0.0118,
 		true,
-		0.29
+		0.29,
+		0,
+		'hdrRunner'
 	);
 }
 
@@ -522,7 +541,7 @@ export function movementPathFor(actor, fromId, toId, final) {
 	return makePolylineCurve(pts.map((p) => new THREE.Vector3(p[0], 0, p[1])));
 }
 
-const handoffTransitions = [];
+export const handoffTransitions = [];
 function castActorForHandoff(key, h) {
 	const arr = ROOM_CAST[key] || [],
 		kind = h.actor || 'patient',

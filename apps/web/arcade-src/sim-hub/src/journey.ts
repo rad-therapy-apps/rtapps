@@ -751,7 +751,7 @@ export function applyJourneyPatientFocus() {
 		if (JOURNEY.couchPatient) JOURNEY.couchPatient.visible = false;
 	}
 }
-function moveJourneyActor(
+export function moveJourneyActor(
 	actor,
 	fromId,
 	toId,
