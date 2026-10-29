@@ -32,7 +32,7 @@ import {
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
 import { personFigure, faceAlong, poseCharacter } from './npc';
-import { advanceRoute, advancePed, walkSwing } from './npc-behavior';
+import { advanceRoute, advancePed, walkSwing, startNextQueuedMove } from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
@@ -925,7 +925,7 @@ export function startCtCouchScan() {
 	CT_COUCH.patient = patient;
 	CT_COUCH.patientBaseX = patient.position.x;
 	CT_COUCH.phase = 'in';
-	CT_COUCH.start = performance.now() / 1000;
+	CT_COUCH.start = S.simSec;
 	workflowState(
 		'ctsim',
 		'SCANNING',
@@ -1003,6 +1003,7 @@ export function updateWorkflowTransitions(sec) {
 			if (t.toId && doors.has(t.toId)) setTimeout(() => setDoorTarget(t.toId, false), 1500);
 			workflowTransitions.splice(i, 1);
 			if (t.onComplete) t.onComplete();
+			startNextQueuedMove(t.actor);
 		}
 	}
 }

@@ -38,7 +38,14 @@ import {
 	bubbleVis,
 	faceNpcToward
 } from './npc';
-import { movers, interactionScenes, setActorSeated, movementPathFor } from './npc-behavior';
+import {
+	movers,
+	interactionScenes,
+	setActorSeated,
+	movementPathFor,
+	requestActorMove,
+	clearMoveQueues
+} from './npc-behavior';
 import {
 	workflowState,
 	resetCtCouchMotion,
@@ -761,6 +768,19 @@ export function moveJourneyActor(
 	opts: MoveJourneyActorOptions = {}
 ) {
 	if (!actor) return;
+	requestActorMove(actor, () =>
+		beginJourneyMove(actor, fromId, toId, final, onComplete, speed, opts)
+	);
+}
+function beginJourneyMove(
+	actor,
+	fromId,
+	toId,
+	final,
+	onComplete,
+	speed,
+	opts: MoveJourneyActorOptions
+) {
 	if (fromId && doors.has(fromId)) setDoorTarget(fromId, true);
 	if (toId && doors.has(toId)) setDoorTarget(toId, true);
 	actor.userData.inHandoff = true;
@@ -773,7 +793,7 @@ export function moveJourneyActor(
 		fromId,
 		toId,
 		curve,
-		start: performance.now() / 1000,
+		start: S.simSec,
 		duration,
 		onComplete,
 		cues
@@ -832,6 +852,7 @@ export function resetTreatmentJourney(silent = false) {
 	JOURNEY.introPending = false;
 	JOURNEY.vaultMonitorPatientOnly = false;
 	workflowTransitions.length = 0;
+	clearMoveQueues();
 	if (JOURNEY.patient) {
 		JOURNEY.patient.position.set(-2.5, 0, 3.0);
 		JOURNEY.patient.rotation.y = Math.PI;

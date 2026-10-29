@@ -516,12 +516,17 @@ function checkOneMove() {
 	// Known start state: resetTreatmentJourney() clears the workflow transitions and puts the journey
 	// patient back in the lobby; its room is then read from its position.
 	NPC.resetTreatmentJourney(true);
+	NPC.handoffTransitions.length = 0; // the reset leaves handoffs alone
 	const actor = NPC.JOURNEY.patient;
 	if (!actor) throw new Error('no journey patient');
 	const from = NPC.journeyActorRoom(actor)?.id;
 	if (!from) throw new Error('journey patient is not in a room');
 	const fired = [];
-	NPC.moveJourneyActor(actor, from, 'consult', roomFinal('consult'), () => fired.push(1));
+	let arrival = null; // where the actor stood when the first onComplete ran
+	NPC.moveJourneyActor(actor, from, 'consult', roomFinal('consult'), () => {
+		fired.push(1);
+		arrival = { x: actor.position.x, z: actor.position.z };
+	});
 	stepFor(0.5);
 	NPC.moveJourneyActor(actor, 'consult', 'education', roomFinal('education'), () => fired.push(2));
 	const problems = [];
@@ -529,10 +534,18 @@ function checkOneMove() {
 		maxJump = 0,
 		prev = { x: actor.position.x, z: actor.position.z },
 		firstOverlap = null,
-		firstJump = null;
+		firstJump = null,
+		secondStart = null;
 	for (let i = 0; i < 30 * 120 && refsActor(actor) > 0; i++) {
 		step();
 		const r = refsActor(actor);
+		if (arrival && secondStart === null) {
+			const t2 = NPC.workflowTransitions.find((t) => t.actor === actor);
+			if (t2) {
+				const p0 = t2.curve.getPoint(0);
+				secondStart = Math.hypot(p0.x - arrival.x, p0.z - arrival.z);
+			}
+		}
 		if (r > maxRef) maxRef = r;
 		if (r > 1 && !firstOverlap) firstOverlap = `step ${i}: ${r} transitions reference the actor`;
 		const j = Math.hypot(actor.position.x - prev.x, actor.position.z - prev.z);
@@ -544,6 +557,10 @@ function checkOneMove() {
 	if (firstOverlap)
 		problems.push(`overlap: max ${maxRef} concurrent transitions; first ${firstOverlap}`);
 	if (firstJump) problems.push(`jump: max ${maxJump.toFixed(2)} m in one step; first ${firstJump}`);
+	if (secondStart === null || secondStart > 0.05)
+		problems.push(
+			`second move start: ${secondStart === null ? 'never started' : `${secondStart.toFixed(2)} m from where the first arrived`}`
+		);
 	const order = fired.join(',');
 	if (order !== '1,2') problems.push(`onComplete order/count: got [${order}], expected [1,2]`);
 	return {
@@ -581,6 +598,7 @@ function checkHidden() {
 	const rows = [];
 	// Transition actor: from a known state, in whatever room it stands in.
 	NPC.resetTreatmentJourney(true);
+	NPC.handoffTransitions.length = 0;
 	const actor = NPC.JOURNEY.patient,
 		from = NPC.journeyActorRoom(actor).id,
 		to = from === 'vault1' ? 'consult' : 'vault1';

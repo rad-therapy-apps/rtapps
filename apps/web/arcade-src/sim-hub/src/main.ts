@@ -674,7 +674,7 @@ document.addEventListener('keyup', (e) => {
 export function stepSimulation(now: number): void {
 	if (isHidden()) return;
 	const dt = Math.min(0.05, clock.getDelta()),
-		sec = now * 0.001,
+		sec = (S.simSec += dt),
 		f = ((stepSimulation as unknown as { _f?: number })._f =
 			((stepSimulation as unknown as { _f?: number })._f || 0) + 1);
 	updateDoors(dt);

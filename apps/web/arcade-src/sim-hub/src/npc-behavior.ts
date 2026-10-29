@@ -929,10 +929,40 @@ function buildActorHandoffPath(actor, fromId, targetId, h) {
 	}
 	return out;
 }
+// One move per actor: a request for an actor that already has a transition waits on
+// `actor.userData.moveQueue` and starts, from wherever the actor arrived, when that one completes.
+const queuedActors = new Set<{ userData: { moveQueue?: (() => void)[] } }>();
+export function actorHasTransition(actor) {
+	return (
+		workflowTransitions.some((t) => t.actor === actor) ||
+		handoffTransitions.some((t) => t.actor === actor)
+	);
+}
+export function requestActorMove(actor, start) {
+	if (!actorHasTransition(actor)) {
+		start();
+		return;
+	}
+	(actor.userData.moveQueue ||= []).push(start);
+	queuedActors.add(actor);
+}
+export function startNextQueuedMove(actor) {
+	if (actorHasTransition(actor)) return;
+	const next = actor.userData.moveQueue?.shift();
+	if (next) next();
+	else queuedActors.delete(actor);
+}
+export function clearMoveQueues() {
+	for (const a of queuedActors) delete a.userData.moveQueue;
+	queuedActors.clear();
+}
 export function startActorHandoff(key, h) {
 	const actor = castActorForHandoff(key, h),
 		target = roomById(h.target);
 	if (!actor || !target) return;
+	requestActorMove(actor, () => beginActorHandoff(actor, key, h, target));
+}
+function beginActorHandoff(actor, key, h, target) {
 	actor.userData.inHandoff = true;
 	const from = roomById(key),
 		pts = buildActorHandoffPath(actor, key, h.target, h),
@@ -947,7 +977,7 @@ export function startActorHandoff(key, h) {
 		h,
 		target,
 		curve,
-		start: performance.now() / 1000,
+		start: S.simSec,
 		duration
 	});
 	setTimeout(() => {
@@ -979,6 +1009,7 @@ export function updateHandoffTransitions(sec) {
 			poseCharacter(t.actor, t.h.actor === 'staff' ? 'support' : 'neutral');
 			if (doors.has(t.target.id)) setTimeout(() => setDoorTarget(t.target.id, false), 1200);
 			handoffTransitions.splice(i, 1);
+			startNextQueuedMove(t.actor);
 		}
 	}
 }
