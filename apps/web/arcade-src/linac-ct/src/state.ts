@@ -8,9 +8,9 @@
    `let` whose original declaration had no initializer defaults to `undefined`. */
 import type * as THREE from 'three-linac';
 import type { OrbitControls } from 'three-linac/examples/jsm/controls/OrbitControls.js';
-// RTApps (#77 phase 2 task 19, type-only follow-up): linac-delivery.ts now exports
+// RTApps (#77 phase 2 task 19, type-only follow-up): delivery/types.ts now exports
 // interfaces for the literals several nested workflow objects are always assigned
-// from (built/consumed in linac-delivery.ts, which owns all of these per the
+// from (built/consumed in the delivery/ modules, which own all of these per the
 // comments below), mirroring the sim-hub Room/Travel precedent (state.ts importing a
 // type from a module that imports `S` back — type-only, erased at compile time, no
 // runtime circularity).
@@ -81,7 +81,7 @@ interface ClinicalIGRTState {
 	clearancePending?: boolean;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js.
+// Shapes mutated almost entirely by delivery/treatment-delivery.ts.
 interface TreatmentDeliveryState {
 	armed: boolean;
 	delivering: boolean;
@@ -104,7 +104,7 @@ interface ClearanceOverrideState {
 	byField: Record<string, ClearanceOverrideRecord>;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js.
+// Shapes mutated almost entirely by delivery/motion.ts.
 interface MotionManagementState {
 	required: boolean;
 	mode: string;
@@ -130,7 +130,7 @@ interface MotionManagementState {
 	lastPanelPaint: number;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js.
+// Shapes mutated almost entirely by delivery/adaptive.ts.
 interface AdaptiveWorkflowState {
 	required: boolean;
 	assessed: boolean;
@@ -144,7 +144,7 @@ interface AdaptiveWorkflowState {
 	caseBase: unknown;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js.
+// Shapes mutated almost entirely by delivery/adaptive.ts.
 interface AdaptiveCourseState {
 	history: AdaptiveHistoryEntry[];
 	totalFractions: number;
@@ -153,7 +153,7 @@ interface AdaptiveCourseState {
 	loaded: boolean;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js.
+// Shapes mutated almost entirely by delivery/ois.ts.
 interface OISSessionState {
 	key: string;
 	events: OISEvent[];
@@ -168,7 +168,7 @@ interface OISSessionState {
 	snapshot: unknown;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js.
+// Shapes mutated almost entirely by delivery/immobilization.ts.
 interface ImmobilizationWorkflowState {
 	required: boolean;
 	verified: boolean;
@@ -181,8 +181,8 @@ interface ImmobilizationWorkflowState {
 	preparationChecked: boolean;
 }
 
-// Shapes mutated almost entirely by linac-delivery.js. `timeoutVerifiedByField`
-// is read (as a boolean flag map) from scene.js's fundamentalState summary.
+// Shapes mutated almost entirely by delivery/stereotactic.ts. `timeoutVerifiedByField`
+// is read (as a boolean flag map) from linac-safety.ts's fundamentalState summary.
 interface SRSWorkflowState {
 	dryRunByField: Record<number, boolean>;
 	timeoutVerifiedByField: Record<number, boolean>;
@@ -210,13 +210,13 @@ interface SpecialSetupElectronState {
 	bolusPositionOK: boolean;
 	bolusAirGapOK: boolean;
 	bolusLogged: boolean;
-	// RTApps (#77 phase 2 task 19): dynamically added by linac-delivery.ts's drag-finish
+	// RTApps (#77 phase 2 task 19): dynamically added by delivery/electron-bolus.ts's drag-finish
 	// handler (never in the initial literal, so optional).
 	bolusOffsetXcm?: number;
 	bolusOffsetYcm?: number;
 }
 
-// `type` is mutated by linac-delivery.js from case data; kept as `string` rather
+// `type` is mutated by delivery/special-setup.ts from case data; kept as `string` rather
 // than an exhaustive union since the source case field isn't type-narrowed here.
 interface SpecialSetupWorkflowState {
 	type: string;
@@ -225,7 +225,7 @@ interface SpecialSetupWorkflowState {
 	csiJunctionA: number;
 	csiJunctionB: number;
 	electron: SpecialSetupElectronState;
-	// RTApps (#77 phase 2 task 19): dynamically added by linac-delivery.ts's
+	// RTApps (#77 phase 2 task 19): dynamically added by delivery/special-setup.ts's
 	// syncSpecialCheckboxes (never in the initial literal, so optional).
 	indexChecked?: boolean;
 	matchDoc?: boolean;

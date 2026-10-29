@@ -1,11 +1,11 @@
 // Shared types for the treatment-delivery modules (split out of linac-delivery.ts, #77).
 
 // RTApps (#77 phase 2 task 19): honest shape for `TREATMENT_CASES` entries, derived
-// from every field actually present across the 32-entry literal below plus every
-// property read off `S.activeTreatmentCase` in this file. Exported so state.ts can
+// from every field actually present across the 32-entry literal in cases.ts plus every
+// property read off `S.activeTreatmentCase` in the delivery/ modules. Exported so state.ts can
 // tighten `activeTreatmentCase` from `unknown` to `TreatmentCase | null` (type-only
 // import, mirroring the sim-hub Room/Travel precedent) — this is the only state.ts
-// member this task tightens; other `unknown` fields this module owns keep local
+// member this task tightens; other `unknown` fields the delivery/ modules own keep local
 // erasing casts at their access sites.
 export interface FieldGeometry {
 	gantry: string;
@@ -132,7 +132,7 @@ export interface AdaptiveCourseSpec {
 	seedHistory?: AdaptiveSeedHistoryEntry[];
 }
 
-// Exported: state.ts tightens `AdaptiveWorkflowState.scenario` (owned by this module) to
+// Exported: state.ts tightens `AdaptiveWorkflowState.scenario` (owned by adaptive.ts) to
 // this type.
 export interface AdaptiveScenario {
 	title: string;
@@ -194,14 +194,14 @@ export interface DeliveryFieldPlan extends TreatmentField {
 	mode: string;
 }
 
-// IGRT couch-shift coordinate convention used throughout this file (VRT/LNG/LAT).
+// IGRT couch-shift coordinate convention used throughout the delivery/ modules (VRT/LNG/LAT).
 export interface CoordinateShift {
 	vrt: number;
 	lng: number;
 	lat: number;
 }
 
-// Exported: state.ts tightens `MotionManagementState.phaseData` (owned by this module)
+// Exported: state.ts tightens `MotionManagementState.phaseData` (owned by motion.ts)
 // to this type. Shape of each entry built by motion4DPhaseData().
 export interface MotionPhaseSample {
 	phase: number;
@@ -210,7 +210,7 @@ export interface MotionPhaseSample {
 	lr: number;
 }
 
-// Exported: state.ts tightens `OISSessionState.events` (owned by this module) to this
+// Exported: state.ts tightens `OISSessionState.events` (owned by ois.ts) to this
 // type. Shape built by oisLogEvent().
 export interface OISEvent {
 	ts: string;
@@ -221,9 +221,9 @@ export interface OISEvent {
 	dedupe: string;
 }
 
-// Exported: state.ts tightens `OISSessionState.clearanceOverrides` (owned by this
-// module) to this type. Base shape built by linac-safety.js's applyClearanceOverride;
-// `dynamicEncounterLogged` is added dynamically by this file.
+// Exported: state.ts tightens `OISSessionState.clearanceOverrides` (owned by
+// ois.ts) to this type. Base shape built by linac-safety.ts's applyClearanceOverride;
+// `dynamicEncounterLogged` is added dynamically by treatment-delivery.ts.
 export interface ClearanceOverrideRecord {
 	active: boolean;
 	used: boolean;
@@ -240,8 +240,8 @@ export interface ClearanceOverrideRecord {
 	dynamicEncounterLogged?: boolean;
 }
 
-// Exported: state.ts tightens `SRSWorkflowState.lastClearance` (owned by this module) to
-// this type. Fields are the ones actually read off it in this file; linac-safety.js's
+// Exported: state.ts tightens `SRSWorkflowState.lastClearance` (owned by stereotactic.ts) to
+// this type. Fields are the ones actually read off it in stereotactic.ts; linac-safety.ts's
 // clearance-check helpers return objects with these fields plus others not read here.
 export interface ClearanceResult {
 	safe: boolean;
@@ -251,7 +251,7 @@ export interface ClearanceResult {
 	angle: number;
 }
 
-// Exported: state.ts tightens `AdaptiveCourseState.history` (owned by this module) to
+// Exported: state.ts tightens `AdaptiveCourseState.history` (owned by adaptive.ts) to
 // this type. Entries are built either from a seeded history (postedAt absent) or a
 // posted fraction (seeded absent).
 export interface AdaptiveHistoryEntry {

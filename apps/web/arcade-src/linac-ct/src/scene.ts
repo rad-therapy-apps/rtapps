@@ -1373,7 +1373,7 @@ function drawMonitorCell(ctx, x, y, w, h, opts: MonitorCellOptions = {}) {
 	ctx.textBaseline = 'middle';
 	ctx.fillText(String(text), textX, y + h / 2 + 1);
 }
-// Shape lives in linac-delivery.js / game.js case data; only the display fields this
+// Shape lives in delivery/cases.ts (`TreatmentCase`); only the display fields this
 // treatment monitor reads off `S.activeTreatmentCase` are named here.
 interface TreatmentMonitorCaseDisplay {
 	patient?: string;
