@@ -143,7 +143,7 @@ services:
   web:
     image: node:24-bookworm-slim
     working_dir: /repo
-    command: ["sh", "-c", "corepack enable && pnpm install --frozen-lockfile && pnpm --filter web dev"]
+    command: ["sh", "-c", "npm install -g corepack@0.36.0 && corepack enable && pnpm install --frozen-lockfile && pnpm --filter web dev"]
     environment:
       API_INTERNAL_URL: ${API_INTERNAL_URL} # server-side calls go straight to api:8000
       ORIGIN: ${ORIGIN} # sent as the Origin header on server-side POSTs (API CSRF check)
