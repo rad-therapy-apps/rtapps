@@ -1005,12 +1005,13 @@ export function furnish(room: Room) {
 			desk(g, room.x - 6.0, room.z - 3.4, 5.0, 1.0);
 			monitor(g, room.x - 6.5, 1.45, room.z - 3.72, 0, 1.05, 0.58);
 			monitor(g, room.x - 4.8, 1.45, room.z - 3.72, 0, 1.05, 0.58);
-			for (let i = 0; i < 4; i++) chair(g, room.x - 6.2 + i * 1.45, room.z + 3.6);
+			// waiting seats face reception (north) or into the lobby (west), backs to the walls
+			for (let i = 0; i < 4; i++) chair(g, room.x - 6.2 + i * 1.45, room.z + 3.6, Math.PI);
 			for (let i = 0; i < 3; i++) chair(g, room.x + 3.0 + i * 1.4, room.z + 3.4, Math.PI);
-			couch(g, room.x + 5.5, room.z + 0.8, Math.PI / 2);
-			couch(g, room.x + 5.5, room.z - 2.0, Math.PI / 2);
+			couch(g, room.x + 5.5, room.z + 0.8, -Math.PI / 2);
+			couch(g, room.x + 5.5, room.z - 2.0, -Math.PI / 2);
 			add(g, box(2.2, 0.62, 1.2, std(0x4a7a62, 0.9, 0.01), room.x + 1.0, 0.33, room.z + 1.0));
-			benchSeat(g, room.x + 9.2, room.z - 4.8, Math.PI / 2, 2.4, 0x82939a);
+			benchSeat(g, room.x + 9.2, room.z - 4.8, -Math.PI / 2, 2.4, 0x82939a);
 			brochureRack(g, room.x + 8.8, room.z + 4.6, Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const wc = wheelchairObject(0.9, false);
@@ -1031,7 +1032,7 @@ export function furnish(room: Room) {
 			cabinetBank(g, room.x + 3.2, room.z - 2.6, 1.5, 1.45, 0.42, Math.PI, 0xe4eaed);
 			break;
 		case 'social':
-			couch(g, room.x, room.z + 1.7);
+			couch(g, room.x, room.z + 1.7, Math.PI); // faces the two chairs and the social worker
 			chair(g, room.x - 1.5, room.z - 0.5, 0.35);
 			chair(g, room.x + 1.5, room.z - 0.5, -0.35);
 			desk(g, room.x - 2.8, room.z - 2.2, 1.5, 0.65);
@@ -1040,11 +1041,12 @@ export function furnish(room: Room) {
 			break;
 		case 'education':
 			desk(g, room.x, room.z + 1.3, 3.8, 1.1);
+			// the outer chairs turn in toward the desk's middle, the right one toward the navigator
 			for (let i = -1; i <= 1; i++) {
-				chair(g, room.x + i * 1.3, room.z - 0.2);
+				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
 			}
 			monitor(g, room.x, 1.7, room.z + 3.9, 0, 1.8, 0.95);
-			benchSeat(g, room.x + 4.0, room.z - 2.8, Math.PI / 2, 1.8, 0x6e8390);
+			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
 			examTable(g, room.x - 2.6, room.z + 1.3);
@@ -1117,8 +1119,9 @@ export function furnish(room: Room) {
 		case 'manager':
 			desk(g, room.x, room.z - 1.5, 2.5, 0.85);
 			monitor(g, room.x, 1.4, room.z - 1.8, 0, 1.0, 0.55);
-			chair(g, room.x - 1.0, room.z + 1.5);
-			chair(g, room.x + 1.0, room.z + 1.5);
+			// visitor chairs face the manager's desk
+			chair(g, room.x - 1.0, room.z + 1.5, Math.PI);
+			chair(g, room.x + 1.0, room.z + 1.5, Math.PI);
 			break;
 		case 'ctcontrol':
 			desk(g, room.x - 1.2, room.z - 0.2, 4.8, 1.15, Math.PI / 2);

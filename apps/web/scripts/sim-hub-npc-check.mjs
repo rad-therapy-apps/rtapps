@@ -17,7 +17,8 @@
 //                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s,
 //                then 8 moments over each of the ambulance crew's walks, unload and load)
 //   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
-//                0.02 m of its pelvis (hip pivot - 0.06) and whose facing is within 20 deg of its own
+//                0.02 m of its pelvis (hip pivot - 0.06) and whose facing is within 20 deg of its own;
+//                seat facing: no seat (wheelchairs aside) faces a wall within 1.2 m
 //   h  Lying     every lying patient's lowest point is within 0.02 m of the couch or table top beneath
 //   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of that chair's
 //                own seat anchor top
@@ -965,13 +966,56 @@ function checkSeated() {
 			`${who}: ${c.s.kind} anchor ${c.d.toFixed(2)} m away: pelvis ${pelvis.toFixed(3)}, seat top ${c.s.top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}; facing ${degOff(yaw, c.s.facing).toFixed(0)} deg off the seat's`
 		);
 	}
-	return {
-		pass: rows.length === 0,
-		summary: rows.length
+	const facing = seatFacingProblems(seats),
+		sitters = rows.length
 			? `${rows.length} of ${n} sitters not on a seat (anchor within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of its top, facing within ${FACING_TOL_DEG} deg)`
-			: `${n} sitters on seat anchors: within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of the top, facing within ${FACING_TOL_DEG} deg (${seats.length} anchors)`,
-		detail: rows
+			: `${n} sitters on seat anchors: within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of the top, facing within ${FACING_TOL_DEG} deg (${seats.length} anchors)`;
+	return {
+		pass: rows.length === 0 && facing.problems.length === 0,
+		summary: facing.problems.length
+			? `${sitters}; seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW} m`
+			: `${sitters}; seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW} m`,
+		detail: [...facing.problems, ...rows]
 	};
+}
+// Sub-check "seat facing": the segment from each seat anchor SEAT_VIEW m forward along its facing must
+// not enter a wall collider (radius 0). Wheelchairs are left out: they are parked or pushed anywhere.
+const SEAT_VIEW = 1.2;
+// Whether segment (x0, z0)-(x1, z1) passes through the inside of collider box c (slab method).
+function segmentEntersBox(x0, z0, x1, z1, c) {
+	let t0 = 0,
+		t1 = 1;
+	for (const [p, d, lo, hi] of [
+		[x0, x1 - x0, c.x - c.hw, c.x + c.hw],
+		[z0, z1 - z0, c.z - c.hd, c.z + c.hd]
+	]) {
+		if (Math.abs(d) < 1e-9) {
+			if (p <= lo || p >= hi) return false;
+			continue;
+		}
+		const a = (lo - p) / d,
+			b = (hi - p) / d;
+		t0 = Math.max(t0, Math.min(a, b));
+		t1 = Math.min(t1, Math.max(a, b));
+		if (t0 >= t1) return false;
+	}
+	return true;
+}
+function seatFacingProblems(seats) {
+	const problems = [];
+	let count = 0;
+	for (const s of seats) {
+		if (s.kind === 'wheelchair') continue;
+		count++;
+		const x1 = s.x + Math.sin(s.facing) * SEAT_VIEW,
+			z1 = s.z + Math.cos(s.facing) * SEAT_VIEW,
+			hit = NPC.colliders.find((c) => segmentEntersBox(s.x, s.z, x1, z1, c));
+		if (hit)
+			problems.push(
+				`seat facing: ${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg meets the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)}) within ${SEAT_VIEW} m`
+			);
+	}
+	return { count, problems };
 }
 
 // --------------------------------------------------------------- (h) lying
