@@ -5,11 +5,13 @@
 // `stepSimulation` on a simulated clock (performance.now is replaced by it, Math.random is seeded).
 //
 //   a  Walls     every mover loop (500 samples) keeps clear of every collider: people by 0.3 m (the
-//                escort's chair and pusher both), vehicles by their oriented footprint plus 0.2 m
+//                escort's chair and pusher both), vehicles by their oriented footprint plus 0.2 m,
+//                the tech cart by its oriented footprint plus 0.1 m
 //   b  Spacing   20 simulated minutes at 30 Hz, with scripted journey moves: no mover within 0.5 m of
 //                another mover, a cast actor or a journey/transition actor
 //   c  One move  two queued moves for one journey actor never overlap and never jump
-//   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace
+//   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace;
+//                one that never moves is outwaited: released after 8 s, then walking at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
@@ -29,10 +31,19 @@ const argVal = (flag) => {
 };
 const svgPath = argVal('--svg');
 const only = new Set((argVal('--only') || 'a,b,c,d,e').split(',').map((x) => x.trim()));
+for (const x of only) {
+	if (!'abcde'.includes(x) || x.length !== 1) {
+		console.error(`NPC CHECK error: unknown check '${x}' in --only (use a,b,c,d,e)`);
+		process.exit(2);
+	}
+}
 
 const BODY_R = 0.3;
 const VEHICLES = new Set(['car', 'shuttle']);
 const VEHICLE_MARGIN = 0.2;
+// Movers checked by their real mesh footprint rather than a body circle. Vehicles get a 0.2 m
+// margin; the tech cart (a person pushing a cart down a 3 m wide spine lane) gets 0.1 m.
+const FOOTPRINT_MARGIN = { car: VEHICLE_MARGIN, shuttle: VEHICLE_MARGIN, techCart: 0.1 };
 const SAMPLES = 500;
 const MIN_DIST = 0.5;
 const STEP_MS = 1000 / 30;
@@ -55,7 +66,9 @@ function mulberry32(seed) {
 	};
 }
 
-// Simulated clock: transitions stamp `start` with performance.now(), the frame body gets `now`.
+// Simulated clock. Journey and handoff transitions run on the sim clock (S.simSec, advanced by
+// stepSimulation), not on performance.now. performance.now is still replaced so that the code that
+// still reads the wall clock (the game's own timers, travel and room timing) sees simulated time too.
 let simNow = 1000;
 Object.defineProperty(globalThis.performance, 'now', { value: () => simNow, configurable: true });
 Math.random = mulberry32(1);
@@ -111,9 +124,9 @@ const wallHits = [];
 const spacingEvents = [];
 
 // ---------------------------------------------------------------- (a) walls
-// A vehicle's footprint in its own frame: the union of its meshes' bounding boxes (vehicleObject in
-// props.ts), grown by VEHICLE_MARGIN on every side.
-function vehicleFootprint(group) {
+// A footprint in the mover's own frame: the union of its meshes' bounding boxes (vehicleObject in
+// props.ts for the vehicles), grown by `margin` on every side.
+function vehicleFootprint(group, margin) {
 	group.updateMatrixWorld(true);
 	const toGroup = group.matrixWorld.clone().invert();
 	let x0 = Infinity,
@@ -132,8 +145,8 @@ function vehicleFootprint(group) {
 	return {
 		cx: (x0 + x1) / 2,
 		cz: (z0 + z1) / 2,
-		ex: (x1 - x0) / 2 + VEHICLE_MARGIN,
-		ez: (z1 - z0) / 2 + VEHICLE_MARGIN
+		ex: (x1 - x0) / 2 + margin,
+		ez: (z1 - z0) / 2 + margin
 	};
 }
 // Separating-axis test: the footprint at p, turned by rotY (the group's rotation.y), against the
@@ -156,7 +169,7 @@ function checkWalls() {
 	const perMover = new Map();
 	NPC.movers.forEach((m, mi) => {
 		const name = names[mi],
-			foot = VEHICLES.has(name) ? vehicleFootprint(m.group) : null;
+			foot = name in FOOTPRINT_MARGIN ? vehicleFootprint(m.group, FOOTPRINT_MARGIN[name]) : null;
 		for (let i = 0; i < SAMPLES; i++) {
 			const u = i / SAMPLES,
 				p = m.curve.getPointAt(u),
@@ -166,7 +179,7 @@ function checkWalls() {
 				// updateMovers turns the group to yaw + yawOffset
 				const c = NPC.colliders.find((k) => footprintHits(foot, p, yaw + (m.yawOffset || 0), k));
 				if (c) {
-					wallHits.push({ name, x: p.x, z: p.z, what: 'vehicle', c });
+					wallHits.push({ name, x: p.x, z: p.z, what: 'footprint', c });
 					perMover.set(name, (perMover.get(name) || 0) + 1);
 				}
 				continue;
@@ -214,7 +227,6 @@ function checkWalls() {
 // mover-mover, mover-cast, mover-journey/transition. Journey-cast and journey-journey pairs are out
 // of scope (story actors; stage 3).
 const MOVE_PAUSE_S = 3;
-const MAX_HOLD_S = 20;
 function journeyScript() {
 	NPC.resetTreatmentJourney(true);
 	const J = NPC.JOURNEY;
@@ -301,7 +313,59 @@ function describeApproach(a, b) {
 		bearing = ((((Math.atan2(o.x - mv.x, o.z - mv.z) - yaw) * 180) / Math.PI + 540) % 360) - 180;
 	return `[${mv.id} ${mv.m.holding ? 'holding' : 'moving'}, other at ${bearing.toFixed(0)} deg]`;
 }
+// Static resting spots: where a story actor is left standing. A mover that holds for someone it
+// cannot outwait walks through them after the runtime release, so every spot must stay at least
+// YIELD_CLEARANCE (the runtime yield range) from every visible mover loop. The spots are the final
+// point each HANDOFFS entry sends its actor to (run to completion here, as the page leaves it) and
+// every literal position in journey.ts (move finals and stage teleports; the file is read as text).
+const YIELD_CLEARANCE = 0.9;
+function restingSpotProblems() {
+	const spots = [];
+	const tmp = new NPC.movers[0].group.position.constructor();
+	for (const [key, list] of Object.entries(NPC.HANDOFFS)) {
+		list.forEach((h, hi) => {
+			const actor = (NPC.ROOM_CAST[key] || []).filter((e) => e.kind === (h.actor || 'patient'))[
+				h.actorIndex || 0
+			]?.g;
+			if (!actor) return;
+			const home = actor.position.clone();
+			NPC.startActorHandoff(key, h);
+			for (let i = 0; i < 30 * 40 && NPC.handoffTransitions.some((t) => t.actor === actor); i++)
+				step();
+			actor.getWorldPosition(tmp);
+			spots.push({ what: `handoff ${key}[${hi}] -> ${h.target}`, x: tmp.x, z: tmp.z });
+			actor.position.copy(home); // later handoffs start from home
+		});
+	}
+	NPC.handoffTransitions.length = 0;
+	const src = fs.readFileSync(path.join(HERE, '../arcade-src/sim-hub/src/journey.ts'), 'utf8');
+	src.split('\n').forEach((line, i) => {
+		for (const m of line.matchAll(
+			/(new THREE\.Vector3|position\.set)\((-?[\d.]+),\s*0,\s*(-?[\d.]+)\)/g
+		))
+			spots.push({ what: `journey.ts:${i + 1}`, x: +m[2], z: +m[3] });
+	});
+	const loops = NPC.movers
+		.map((m, i) => ({ id: names[i], m }))
+		.filter(({ m }) => !m.group.userData.suppressDuringJourney)
+		.map(({ id, m }) => ({
+			id,
+			pts: Array.from({ length: 1000 }, (_, k) => m.curve.getPointAt(k / 1000))
+		}));
+	const problems = [];
+	for (const sp of spots)
+		for (const l of loops) {
+			let best = Infinity;
+			for (const q of l.pts) best = Math.min(best, Math.hypot(q.x - sp.x, q.z - sp.z));
+			if (best < YIELD_CLEARANCE)
+				problems.push(
+					`resting spot ${sp.what} (${sp.x.toFixed(2)}, ${sp.z.toFixed(2)}) is ${best.toFixed(2)} m from the ${l.id} loop (limit ${YIELD_CLEARANCE} m)`
+				);
+		}
+	return { count: spots.length, problems };
+}
 function checkSpacing() {
+	const rest = restingSpotProblems();
 	const tmpV = new NPC.movers[0].group.position.constructor();
 	const active = new Set();
 	const script = journeyScript(),
@@ -375,11 +439,10 @@ function checkSpacing() {
 		.map(([k, v]) => `${k}: ${v}`)
 		.join(', ');
 	const minutes = (SPACING_STEPS * STEP_MS) / 60000;
-	const worstHold = Math.max(...holdMax),
-		released = NPC.movers.filter((m) => m.releases > 0).map((m) => m.id);
-	const holdProblems = [];
-	if (worstHold > MAX_HOLD_S)
-		holdProblems.push(`a mover waited ${worstHold.toFixed(1)} s in a row (limit ${MAX_HOLD_S} s)`);
+	const released = NPC.movers.filter((m) => m.releases > 0).map((m) => m.id);
+	const holdProblems = [...rest.problems];
+	// Any hold that lasts the runtime limit (8 s) ends in a release, so this also fails a lane that
+	// leaves a mover waiting for good.
 	if (released.length)
 		holdProblems.push(`the runtime hold release fired for ${released.join(', ')}`);
 	const base = total
@@ -475,6 +538,41 @@ function checkYield() {
 	if (moves(0.7, 40)) problems.push('(v) did not hold for an obstacle 0.7 m ahead at 40 deg');
 	far();
 	step();
+	// (vii) runtime release: a blocker that never moves (0.7 m ahead for 9 s) is outwaited. The mover
+	// holds (u and height steady) until its 8 s limit, then walks on at exact pace and counts one release.
+	const releases0 = m.releases,
+		hold = [];
+	run(0.7, 0, 1);
+	const y0 = m.group.position.y;
+	let releasedAt = null,
+		ySteady = true,
+		uMoved = false;
+	for (let i = 0; i < 270 && !problems.some((x) => x.startsWith('(vii)')); i++) {
+		u0 = m.u;
+		run(0.7, 0, 1);
+		const du = (((m.u - u0) % 1) + 1) % 1;
+		hold.push(m.holding);
+		if (m.holding) {
+			if (m.group.position.y !== y0) ySteady = false;
+			if (m.u !== u0) uMoved = true;
+		} else {
+			if (releasedAt === null) releasedAt = (i + 2) * dtStep;
+			if (Math.abs(du - m.speed * dtStep) > 1e-9) {
+				problems.push(`(vii) after the release step ${i}: du=${du} expected ${m.speed * dtStep}`);
+			}
+		}
+	}
+	if (releasedAt === null || releasedAt < 7.9 || releasedAt > 8.2)
+		problems.push(
+			`(vii) release at ${releasedAt === null ? 'never' : releasedAt.toFixed(2) + ' s'}, expected 8 s`
+		);
+	if (hold.slice(0, 220).includes(false)) problems.push('(vii) stopped holding before 7.3 s');
+	if (uMoved) problems.push('(vii) u moved while holding');
+	if (!ySteady) problems.push('(vii) height changed while holding (bob not stopped)');
+	if (m.releases !== releases0 + 1)
+		problems.push(`(vii) releases went ${releases0} -> ${m.releases}, expected +1`);
+	far();
+	step();
 	// (vi) priority between movers, asked of shouldHold directly
 	const { p, fx, fz } = heading(),
 		lo = NPC.movers[mi - 1],
@@ -496,7 +594,7 @@ function checkYield() {
 		pass: problems.length === 0,
 		summary: problems.length
 			? `${problems.length} yield rule violations`
-			: 'holds for 0.7 m ahead (frozen, limbs at rest), walks on at exact pace, ignores behind, 1.2 m and 70 deg, yields only to lower-index movers',
+			: 'holds for 0.7 m ahead (frozen, limbs at rest), walks on at exact pace, releases a standing blocker after 8 s, ignores behind, 1.2 m and 70 deg, yields only to lower-index movers',
 		detail: problems
 	};
 }

@@ -234,7 +234,8 @@ function addMover(
 /* Background walkers keep their own progress `m.u` (advanced by dt) so a walker can stop for
    someone without the loop jumping when it resumes. Priority: a mover holds for any lower-index
    mover and for any cast, duty, journey or transition actor; story actors (cast, journey,
-   transition) never hold, so a wait always ends once its blocker has walked on. */
+   transition) never hold, so a wait ends once a walking blocker has walked on, and one that
+   stands still (a resting cast or journey actor) is outwaited by the MAX_HOLD_S runtime release. */
 const MAX_HOLD_S = 8;
 const YIELD_DIST = 0.9;
 const YIELD_DIST_SQ = YIELD_DIST * YIELD_DIST;
@@ -419,26 +420,29 @@ export function addMovingActors() {
 	addMover(
 		techCart,
 		[
-			// North spine, west side: lanes x = -1.4 (north-bound) and -2.6 (south-bound) between the
-			// physics/safety doors (z = -18) and the QA door (z = -44); story actors walk x = 0.
-			[-1.4, 0, -22.5],
-			[-1.4, 0, -24],
-			[-1.4, 0, -31],
-			[-1.4, 0, -39],
-			[-1.4, 0, -40.8],
-			[-1.7, 0, -41.5],
-			[-2.0, 0, -41.7],
-			[-2.3, 0, -41.5],
-			[-2.6, 0, -40.8],
-			[-2.6, 0, -39],
-			[-2.6, 0, -31],
-			[-2.6, 0, -24],
-			[-2.6, 0, -22.5],
-			[-2.3, 0, -21.8],
-			[-2.0, 0, -21.6],
-			[-1.7, 0, -21.8]
+			// North spine, west side: lanes x = -1.2 (north-bound) and -2.4 (south-bound) between the
+			// physics/safety doors (z = -18) and the QA door (z = -44); story actors walk x = 0. The
+			// south-bound lane eases east before the south turn so the cart's rear clears the west wall.
+			[-1.2, 0, -22.4],
+			[-1.2, 0, -24],
+			[-1.2, 0, -31],
+			[-1.2, 0, -39],
+			[-1.2, 0, -40.8],
+			[-1.5, 0, -41.5],
+			[-1.8, 0, -41.7],
+			[-2.1, 0, -41.5],
+			[-2.4, 0, -40.8],
+			[-2.4, 0, -39],
+			[-2.4, 0, -31],
+			[-2.4, 0, -26],
+			[-2.3, 0, -24.4],
+			[-2.1, 0, -23.2],
+			[-1.95, 0, -22.3],
+			[-1.85, 0, -21.7],
+			[-1.6, 0, -21.4],
+			[-1.3, 0, -21.7]
 		],
-		0.031,
+		0.030838,
 		true,
 		0.68,
 		0,
@@ -596,8 +600,10 @@ export function addMovingActors() {
 	addMover(
 		ctRunner,
 		[
-			// Out of CT control at x = 31.45, corridor lanes z = -1.4 / -2.6, in at x = 30.65.
-			[31.45, 0, -6.6],
+			// Out of CT control at x = 31.45 (door lane), corridor lanes z = -1.4 / -2.6, in at x = 30.65.
+			// Inside CT control the loop stays west of x = 30 (down x = 28, back up x = 29.1), clear of
+			// the idle staff and of where the CT journey and the ctsim handoff leave the therapists
+			// (31.1, -7.8), (31.3, -7.4), (32.3, -7.2).
 			[31.45, 0, -5.3],
 			[31.45, 0, -4],
 			[31.45, 0, -2.9],
@@ -617,23 +623,25 @@ export function addMovingActors() {
 			[30.54, 0, -3],
 			[30.65, 0, -3.4],
 			[30.65, 0, -4],
-			[30.65, 0, -5],
-			[30.1, 0, -5.7],
-			[29.3, 0, -6.2],
-			[28.6, 0, -6.9],
-			[28.45, 0, -8],
-			[28.45, 0, -9.5],
-			[28.45, 0, -11],
-			[28.7, 0, -11.9],
-			[29.4, 0, -12.45],
-			[30.4, 0, -12.6],
-			[31.1, 0, -12.3],
-			[31.45, 0, -11.6],
-			[31.5, 0, -10.4],
-			[31.5, 0, -9],
-			[31.5, 0, -7.8]
+			[30.65, 0, -4.9],
+			[29.9, 0, -5.3],
+			[28.9, 0, -5.6],
+			[28.2, 0, -6.4],
+			[28, 0, -8],
+			[28, 0, -9.5],
+			[28, 0, -11],
+			[28.1, 0, -11.8],
+			[28.55, 0, -12.15],
+			[29, 0, -11.8],
+			[29.1, 0, -11],
+			[29.1, 0, -9.5],
+			[29.1, 0, -8],
+			[29.1, 0, -7.2],
+			[29.6, 0, -6.6],
+			[30.4, 0, -6],
+			[31, 0, -5.5]
 		],
-		0.01136,
+		0.011522,
 		true,
 		0.17,
 		0,
