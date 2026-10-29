@@ -18,7 +18,8 @@
 //                then 8 moments over each of the ambulance crew's walks, unload and load)
 //   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
 //                0.02 m of its pelvis (hip pivot - 0.06) and whose facing is within 20 deg of its own;
-//                seat facing: no seat (wheelchairs aside) faces a wall within 1.2 m
+//                seat facing: no seat (wheelchairs aside) faces a wall within 3.0 m;
+//                exchange facing: a seated patient's exchange partner is within 60 deg of its seat's facing
 //   h  Lying     every lying patient's lowest point is within 0.02 m of the couch or table top beneath
 //   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of that chair's
 //                own seat anchor top
@@ -339,7 +340,8 @@ function restingSpotProblems() {
 			if (!actor) return;
 			const home = actor.position.clone(),
 				yaw = actor.rotation.y,
-				seated = !!actor.userData.seated;
+				seated = !!actor.userData.seated,
+				shouldSit = actor.userData.shouldSit;
 			NPC.startActorHandoff(key, h);
 			for (let i = 0; i < 30 * 40 && NPC.handoffTransitions.some((t) => t.actor === actor); i++)
 				step();
@@ -349,6 +351,7 @@ function restingSpotProblems() {
 			actor.position.copy(home);
 			actor.rotation.y = yaw;
 			if (seated) NPC.seatActor(actor, actor.getWorldPosition(tmp));
+			actor.userData.shouldSit = shouldSit; // the handoff's stand-up cleared it
 		});
 	}
 	NPC.handoffTransitions.length = 0;
@@ -967,20 +970,58 @@ function checkSeated() {
 		);
 	}
 	const facing = seatFacingProblems(seats),
+		talk = exchangeFacingProblems(seats),
 		sitters = rows.length
 			? `${rows.length} of ${n} sitters not on a seat (anchor within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of its top, facing within ${FACING_TOL_DEG} deg)`
 			: `${n} sitters on seat anchors: within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of the top, facing within ${FACING_TOL_DEG} deg (${seats.length} anchors)`;
 	return {
-		pass: rows.length === 0 && facing.problems.length === 0,
-		summary: facing.problems.length
-			? `${sitters}; seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW} m`
-			: `${sitters}; seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW} m`,
-		detail: [...facing.problems, ...rows]
+		pass: rows.length === 0 && facing.problems.length === 0 && talk.problems.length === 0,
+		summary: [
+			sitters,
+			facing.problems.length
+				? `seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW.toFixed(1)} m`
+				: `seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW.toFixed(1)} m`,
+			talk.problems.length
+				? `exchange facing: ${talk.problems.length} of ${talk.count} seated patients have their partner more than ${TALK_DEG} deg off`
+				: `exchange facing: ${talk.count} seated patients face their partner within ${TALK_DEG} deg`
+		].join('; '),
+		detail: [...facing.problems, ...talk.problems, ...rows]
 	};
+}
+// Sub-check "exchange facing": in every speech exchange (registerNpcExchange) with a seated member, the
+// partner is within TALK_DEG of the facing of the seat the sitter is on (seated bodies never turn).
+const TALK_DEG = 60;
+function exchangeFacingProblems(seats) {
+	const problems = [];
+	let count = 0;
+	for (const sc of NPC.interactionScenes)
+		for (const [sitter, partner] of [
+			[sc.a, sc.b],
+			[sc.b, sc.a]
+		]) {
+			if (!sitter.userData.seated) continue;
+			count++;
+			const p = worldPos(sitter),
+				q = worldPos(partner),
+				seat = seats
+					.map((s) => ({ s, d: Math.hypot(s.x - p.x, s.z - p.z) }))
+					.sort((u, v) => u.d - v.d)[0],
+				who = `exchange facing: ${label(sitter, 'sitter')} at (${p.x.toFixed(2)}, ${p.z.toFixed(2)}) and ${label(partner, 'partner')}`;
+			if (!seat || seat.d > SEAT_RADIUS) {
+				problems.push(`${who}: the sitter has no seat anchor within ${SEAT_RADIUS} m`);
+				continue;
+			}
+			const off = degOff(Math.atan2(q.x - p.x, q.z - p.z), seat.s.facing);
+			if (off > TALK_DEG)
+				problems.push(
+					`${who}: partner ${off.toFixed(0)} deg off the seat's facing (limit ${TALK_DEG})`
+				);
+		}
+	return { count, problems };
 }
 // Sub-check "seat facing": the segment from each seat anchor SEAT_VIEW m forward along its facing must
 // not enter a wall collider (radius 0). Wheelchairs are left out: they are parked or pushed anywhere.
-const SEAT_VIEW = 1.2;
+const SEAT_VIEW = 3.0;
 // Whether segment (x0, z0)-(x1, z1) passes through the inside of collider box c (slab method).
 function segmentEntersBox(x0, z0, x1, z1, c) {
 	let t0 = 0,
@@ -1012,7 +1053,7 @@ function seatFacingProblems(seats) {
 			hit = NPC.colliders.find((c) => segmentEntersBox(s.x, s.z, x1, z1, c));
 		if (hit)
 			problems.push(
-				`seat facing: ${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg meets the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)}) within ${SEAT_VIEW} m`
+				`seat facing: ${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg meets the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)}) within ${SEAT_VIEW.toFixed(1)} m`
 			);
 	}
 	return { count, problems };

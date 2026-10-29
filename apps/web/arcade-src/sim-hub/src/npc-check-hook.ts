@@ -13,7 +13,8 @@ import {
 	startActorHandoff,
 	shouldHold,
 	visibleInTree,
-	seatActor
+	seatActor,
+	interactionScenes
 } from './npc-behavior';
 import { SEATS, seatInWorld } from './props';
 import {
@@ -92,7 +93,9 @@ export function installNpcCheckHook(
 			/** Seat anchors (props.ts), resolved to world coordinates by seatInWorld. */
 			SEATS,
 			seatInWorld,
-			seatActor
+			seatActor,
+			/** The staff-patient speech exchanges (registerNpcExchange): { a, b, ... } pairs. */
+			interactionScenes
 		}
 	});
 }

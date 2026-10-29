@@ -783,6 +783,7 @@ function beginJourneyMove(
 	speed,
 	opts: MoveJourneyActorOptions
 ) {
+	if (actor.userData.seated) setActorSeated(actor, false); // never walk off in the seated pose
 	if (fromId && doors.has(fromId)) setDoorTarget(fromId, true);
 	if (toId && doors.has(toId)) setDoorTarget(toId, true);
 	actor.userData.inHandoff = true;

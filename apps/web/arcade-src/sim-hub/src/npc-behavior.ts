@@ -856,6 +856,8 @@ export function seatActor(actor, at) {
 }
 export function setActorSeated(actor, seated) {
 	if (!actor) return;
+	// shouldSit makes check (g) select the actor, so a seat out of reach fails there loudly
+	actor.userData.shouldSit = !!seated;
 	if (seated) {
 		seatActor(actor, actor.getWorldPosition(new THREE.Vector3()));
 		return;
@@ -1026,7 +1028,7 @@ export function startActorHandoff(key, h) {
 	requestActorMove(actor, () => beginActorHandoff(actor, key, h, target));
 }
 function beginActorHandoff(actor, key, h, target) {
-	setActorSeated(actor, false); // a seated cast patient stands up before walking off
+	if (actor.userData.seated) setActorSeated(actor, false); // never walk off in the seated pose
 	actor.userData.inHandoff = true;
 	const from = roomById(key),
 		pts = buildActorHandoffPath(actor, key, h.target, h),
