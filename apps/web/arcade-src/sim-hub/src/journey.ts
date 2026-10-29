@@ -456,6 +456,7 @@ function createJourneyLyingPatient(room, skin = 0xd7a17d, hairColor = 0x3a281f) 
 	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
 	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0));
 	setNpcRole(cont, 'Patient', 'Mia Reynolds positioned for CT simulation.');
+	cont.userData.lying = true;
 	cont.userData.clothingRig = {
 		kind: 'lying',
 		topParts: [torso, pelvis, armL, armR],
@@ -500,6 +501,7 @@ function createJourneyTreatmentPatient(room, skin = 0xd7a17d, hairColor = 0x3a28
 	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
 	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0));
 	setNpcRole(cont, 'Patient', 'Mia Reynolds positioned for her first radiation treatment.');
+	cont.userData.lying = true;
 	cont.userData.clothingRig = {
 		kind: 'lying',
 		topParts: [torso, pelvis, armL, armR],

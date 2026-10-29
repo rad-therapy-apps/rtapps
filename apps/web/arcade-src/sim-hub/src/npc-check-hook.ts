@@ -2,7 +2,7 @@
    `?npccheck` (same precedent as `?visibilitycheck` in visibility.ts); otherwise nothing is added
    to `window` and `isHidden()` is exactly `document.hidden`. */
 import * as THREE from 'three';
-import { renderer, labelRenderer } from './scene';
+import { renderer, labelRenderer, scene } from './scene';
 import { ROOMS } from './rooms';
 import { getColliders } from './walk';
 import {
@@ -53,6 +53,7 @@ export function installNpcCheckHook(
 	};
 	Object.assign(window, {
 		__NPC: {
+			scene,
 			colliders: getColliders(),
 			movers,
 			castActors,

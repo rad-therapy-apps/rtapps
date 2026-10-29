@@ -202,6 +202,7 @@ function addChestBadge(group, name, title = '') {
 	group.userData.hasBadge = true;
 }
 export function poseCharacter(group, mode = 'neutral') {
+	group.userData.pose = mode;
 	group.traverse((o) => {
 		const r = o.userData?.walkRig;
 		if (!r) return;
@@ -446,6 +447,7 @@ export function departmentStaff() {
 		const pillow = box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0);
 		cont.add(pillow);
 		setNpcRole(cont, 'Patient', detail);
+		cont.userData.lying = true;
 		cont.userData.clothingRig = {
 			kind: 'lying',
 			topParts: [torso, pelvis, armL, armR],
@@ -463,6 +465,7 @@ export function departmentStaff() {
 		const r = R(id);
 		if (!r) return;
 		const g = setNpcRole(personFigure(0xc7ced3, 0xb9c1c6, skin, opts), 'Patient', detail);
+		g.userData.shouldSit = true;
 		g.position.set(r.x + dx, 0, r.z + dz);
 		g.rotation.y = ry || 0;
 		scene.add(g);

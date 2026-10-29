@@ -73,6 +73,7 @@ export function wheelchairObject(scale = 1, occupied = false) {
 	g.add(foot);
 	if (occupied) {
 		const patient = personFigure(0x8b8ec4, 0x606a76, 0xe6c3a0);
+		patient.userData.wheelchairOccupant = true;
 		patient.scale.set(0.82 * s, 0.82 * s, 0.82 * s);
 		patient.position.set(0, -0.02 * s, -0.02 * s);
 		g.add(patient);

@@ -13,9 +13,14 @@
 //   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace;
 //                one that never moves is outwaited: released after 8 s, then walking at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
+//   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath
+//                (after the journey reset, and while the movers walk at t = 2, 30 and 90 s)
+//   g  Seated    every sitter's pelvis (hip pivot - 0.06) is within 0.02 m of the seat top beside it
+//   h  Lying     every lying patient's lowest point is within 0.02 m of the couch or table top beneath
+//   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of the seat top
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
-//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e]
+//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e,f,g,h,i]
 // Exit codes: 0 every selected check passes; 1 any fails; 2 setup error.
 // Output: `NPC CHECK <letter> PASS|FAIL: <summary>` per check, then at most 30 detail lines per failing check.
 import fs from 'node:fs';
@@ -30,10 +35,10 @@ const argVal = (flag) => {
 	return i >= 0 ? argv[i + 1] : null;
 };
 const svgPath = argVal('--svg');
-const only = new Set((argVal('--only') || 'a,b,c,d,e').split(',').map((x) => x.trim()));
+const only = new Set((argVal('--only') || 'a,b,c,d,e,f,g,h,i').split(',').map((x) => x.trim()));
 for (const x of only) {
-	if (!'abcde'.includes(x) || x.length !== 1) {
-		console.error(`NPC CHECK error: unknown check '${x}' in --only (use a,b,c,d,e)`);
+	if (!'abcdefghi'.includes(x) || x.length !== 1) {
+		console.error(`NPC CHECK error: unknown check '${x}' in --only (use a,b,c,d,e,f,g,h,i)`);
 		process.exit(2);
 	}
 }
@@ -739,10 +744,296 @@ function checkHidden() {
 	};
 }
 
+// ------------------------------------------------- shared geometry (f, g, h, i)
+const V3 = NPC.movers[0].group.position.constructor;
+const FLOOR_TOL = 0.03,
+	SEAT_TOL = 0.02,
+	LIE_TOL = 0.02;
+const HIP_TO_PELVIS = 0.06;
+// World-space bounds of a mesh (its geometry box through its world matrix).
+function meshBounds(o) {
+	if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+	const b = o.geometry.boundingBox,
+		lo = [Infinity, Infinity, Infinity],
+		hi = [-Infinity, -Infinity, -Infinity],
+		v = new V3();
+	for (const x of [b.min.x, b.max.x])
+		for (const y of [b.min.y, b.max.y])
+			for (const z of [b.min.z, b.max.z]) {
+				v.set(x, y, z).applyMatrix4(o.matrixWorld);
+				lo[0] = Math.min(lo[0], v.x);
+				lo[1] = Math.min(lo[1], v.y);
+				lo[2] = Math.min(lo[2], v.z);
+				hi[0] = Math.max(hi[0], v.x);
+				hi[1] = Math.max(hi[1], v.y);
+				hi[2] = Math.max(hi[2], v.z);
+			}
+	return { o, lo, hi };
+}
+function sceneBoxes() {
+	NPC.scene.updateMatrixWorld(true);
+	const out = [];
+	NPC.scene.traverse((o) => {
+		if (o.isMesh && o.geometry) out.push(meshBounds(o));
+	});
+	return out;
+}
+// Floor top at (x, z): the highest top below 0.8 among the meshes that contain (x, z) and span more
+// than 3 m in both x and z. Static, so the large slabs are measured once.
+let floorSlabs = null;
+function floorTop(x, z) {
+	floorSlabs ||= sceneBoxes().filter(
+		(b) => b.hi[1] < 0.8 && b.hi[0] - b.lo[0] > 3 && b.hi[2] - b.lo[2] > 3
+	);
+	let best = -Infinity;
+	for (const b of floorSlabs)
+		if (x >= b.lo[0] && x <= b.hi[0] && z >= b.lo[2] && z <= b.hi[2])
+			best = Math.max(best, b.hi[1]);
+	return best;
+}
+// A person figure is the object that carries a walkRig; a lying patient is flagged userData.lying.
+const isPart = (o, root) => {
+	for (let n = o; n; n = n.parent) if (n === root) return true;
+	return false;
+};
+const isPerson = (n) => !!(n.userData && (n.userData.walkRig || n.userData.lying));
+const inAnyPerson = (o) => {
+	for (let n = o; n; n = n.parent) if (isPerson(n)) return true;
+	return false;
+};
+function lowestY(group) {
+	group.updateMatrixWorld(true);
+	let lo = Infinity;
+	group.traverse((o) => {
+		if (o.isMesh && o.geometry) lo = Math.min(lo, meshBounds(o).lo[1]);
+	});
+	return lo;
+}
+const worldPos = (o) => o.getWorldPosition(new V3());
+const label = (g, fallback) => g.userData?.npcName || g.userData?.npcRole || g.name || fallback;
+const hipY = (g) => {
+	g.updateMatrixWorld(true);
+	return worldPos(g.userData.walkRig.legLP).y;
+};
+const isSeatedPose = (g) => g.userData.pose === 'seated' || !!g.userData.seated;
+
+// Every visible person-figure: movers, cast, duty actors and journey actors, with their ids.
+function allPeople() {
+	const seen = new Map(),
+		add = (root, id) => {
+			if (!root) return;
+			root.traverse((n) => {
+				if (n.userData?.walkRig && !seen.has(n)) seen.set(n, id);
+			});
+		};
+	NPC.movers.forEach((m, i) => add(m.group, `mover ${names[i]}`));
+	for (const [room, arr] of Object.entries(NPC.ROOM_CAST))
+		arr.forEach((e, i) => add(e.g, `${room}:${e.kind}:${i}`));
+	for (const o of NPC.journeyActors())
+		add(o, `journey ${o.userData?.npcRole || o.name || 'actor'}`);
+	return [...seen].map(([g, id]) => ({ g, id })).filter(({ g }) => NPC.visibleInTree(g));
+}
+
+// --------------------------------------------------------------- (f) feet
+function checkFeet() {
+	const rows = [],
+		moments = [];
+	const sample = (when) => {
+		let n = 0;
+		for (const { g, id } of allPeople()) {
+			if (g.userData.lying || g.userData.wheelchairOccupant || isSeatedPose(g)) continue;
+			n++;
+			const p = worldPos(g),
+				sole = lowestY(g),
+				floor = floorTop(p.x, p.z),
+				gap = sole - floor;
+			if (!(Math.abs(gap) <= FLOOR_TOL))
+				rows.push({ when, id: `${id} (${label(g, id)})`, sole, floor, gap });
+		}
+		moments.push(`${when}: ${n} checked`);
+	};
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.2);
+	sample('after reset');
+	let t = 0;
+	for (const at of [2, 30, 90]) {
+		stepFor(at - t);
+		t = at;
+		sample(`t=${at}s`);
+	}
+	const bad = new Set(rows.map((r) => r.id));
+	const worst = rows.reduce((m, r) => Math.max(m, Math.abs(r.gap)), 0);
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} sole readings off the floor by more than ${FLOOR_TOL} m across ${bad.size} people (worst ${worst.toFixed(2)} m)`
+			: `every standing or walking sole within ${FLOOR_TOL} m of the floor (${moments.join(', ')})`,
+		detail: rows.map(
+			(r) =>
+				`${r.when} ${r.id}: sole ${r.sole.toFixed(3)}, floor ${r.floor.toFixed(3)}, gap ${r.gap >= 0 ? '+' : ''}${r.gap.toFixed(3)}`
+		)
+	};
+}
+
+// -------------------------------------------------------------- (g) seated
+// A seat is a mesh near the sitter with a top between floor + 0.35 and floor + 0.75, wider than
+// 0.35 m and thinner than 0.2 m, that is not part of any person. (Task 3 adds seat anchors.)
+function nearestSeat(p, floor, boxes) {
+	let best = null;
+	for (const b of boxes) {
+		const thick = b.hi[1] - b.lo[1],
+			w = Math.max(b.hi[0] - b.lo[0], b.hi[2] - b.lo[2]);
+		if (b.hi[1] < floor + 0.35 || b.hi[1] > floor + 0.75 || w <= 0.35 || thick >= 0.2) continue;
+		if (inAnyPerson(b.o)) continue;
+		const dx = Math.max(b.lo[0] - p.x, 0, p.x - b.hi[0]),
+			dz = Math.max(b.lo[2] - p.z, 0, p.z - b.hi[2]),
+			d = Math.hypot(dx, dz);
+		if (d <= 0.6 && (!best || d < best.d)) best = { b, d };
+	}
+	return best;
+}
+function checkSeated() {
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.2);
+	const boxes = sceneBoxes(),
+		rows = [];
+	let n = 0;
+	for (const { g, id } of allPeople()) {
+		if (g.userData.wheelchairOccupant) continue; // (i)
+		if (!(isSeatedPose(g) || g.userData.shouldSit)) continue;
+		n++;
+		const p = worldPos(g),
+			floor = floorTop(p.x, p.z),
+			pelvis = hipY(g) - HIP_TO_PELVIS,
+			pose = g.userData.pose || 'none',
+			seat = nearestSeat(p, floor, boxes),
+			who = `${id} (${label(g, id)}) pose=${pose}`;
+		if (!seat) {
+			rows.push(
+				`${who}: no seat within 0.6 m; pelvis ${pelvis.toFixed(3)}, floor ${floor.toFixed(3)}`
+			);
+			continue;
+		}
+		const top = seat.b.hi[1],
+			gap = pelvis - top;
+		if (Math.abs(gap) > SEAT_TOL)
+			rows.push(
+				`${who}: pelvis ${pelvis.toFixed(3)}, seat top ${top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
+			);
+	}
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} of ${n} sitters not on a seat (pelvis within ${SEAT_TOL} m of the seat top)`
+			: `${n} sitters, pelvis within ${SEAT_TOL} m of the seat top`,
+		detail: rows,
+		info: ['facing test skipped until seat anchors exist (Task 3)']
+	};
+}
+
+// --------------------------------------------------------------- (h) lying
+function checkLying() {
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.2);
+	const boxes = sceneBoxes(),
+		lying = new Map();
+	NPC.scene.traverse((o) => {
+		if (o.userData?.lying) lying.set(o, '');
+	});
+	for (const [room, arr] of Object.entries(NPC.ROOM_CAST))
+		for (const e of arr) if (lying.has(e.g)) lying.set(e.g, room);
+	const rows = [];
+	for (const [g, room] of lying) {
+		g.updateMatrixWorld(true);
+		const mine = boxes.filter((b) => isPart(b.o, g)),
+			lowest = Math.min(...mine.map((b) => b.lo[1])),
+			cx = (Math.min(...mine.map((b) => b.lo[0])) + Math.max(...mine.map((b) => b.hi[0]))) / 2,
+			cz = (Math.min(...mine.map((b) => b.lo[2])) + Math.max(...mine.map((b) => b.hi[2]))) / 2;
+		let under = null;
+		for (const b of boxes) {
+			if (isPart(b.o, g) || inAnyPerson(b.o)) continue;
+			if (cx < b.lo[0] || cx > b.hi[0] || cz < b.lo[2] || cz > b.hi[2]) continue;
+			if (b.hi[1] < lowest - 1.6 || b.hi[1] > lowest + 0.5) continue;
+			if (!under || b.hi[1] > under.hi[1]) under = b;
+		}
+		const who = `${room || 'lying'}:${g.userData.npcRole || 'patient'} at (${cx.toFixed(2)}, ${cz.toFixed(2)}) ${g.visible ? '' : '[hidden] '}`;
+		if (!under) {
+			rows.push(`${who}lowest ${lowest.toFixed(3)}: no couch or table top under the centre`);
+			continue;
+		}
+		const gap = lowest - under.hi[1];
+		if (Math.abs(gap) > LIE_TOL)
+			rows.push(
+				`${who}lowest ${lowest.toFixed(3)}, top ${under.hi[1].toFixed(3)} (${under.o.name || 'mesh'}), gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
+			);
+	}
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} of ${lying.size} lying patients not resting on the couch or table (within ${LIE_TOL} m)`
+			: `${lying.size} lying patients rest within ${LIE_TOL} m of the couch or table top`,
+		detail: rows
+	};
+}
+
+// ----------------------------------------------------------- (i) wheelchair
+function checkWheelchair() {
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.5);
+	const occupants = [];
+	NPC.scene.traverse((o) => {
+		if (o.userData?.wheelchairOccupant) occupants.push(o);
+	});
+	const rows = [];
+	for (const g of occupants) {
+		g.updateMatrixWorld(true);
+		const chair = g.parent,
+			pelvis = hipY(g) - HIP_TO_PELVIS,
+			pose = g.userData.pose || 'none';
+		let seat = null;
+		for (const o of chair.children) {
+			if (o === g || !o.isMesh) continue;
+			const b = meshBounds(o);
+			if (b.hi[1] - b.lo[1] >= 0.12 || b.hi[0] - b.lo[0] < 0.3 || b.hi[2] - b.lo[2] < 0.3) continue;
+			if (b.hi[1] > pelvis - 0.5 && b.hi[1] < pelvis + 0.5 && (!seat || b.hi[1] > seat.hi[1]))
+				seat = b;
+		}
+		const problems = [];
+		if (pose !== 'seated') problems.push(`pose=${pose}, expected seated`);
+		if (!seat) problems.push('no seat mesh found in the wheelchair');
+		else {
+			const gap = pelvis - seat.hi[1];
+			if (Math.abs(gap) > SEAT_TOL)
+				problems.push(
+					`pelvis ${pelvis.toFixed(3)}, seat top ${seat.hi[1].toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
+				);
+		}
+		if (problems.length) rows.push(`wheelchair occupant: ${problems.join('; ')}`);
+	}
+	if (!occupants.length) rows.push('no wheelchair occupant found (userData.wheelchairOccupant)');
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} of ${occupants.length} wheelchair occupants not seated on the chair`
+			: `${occupants.length} wheelchair occupants seated, pelvis within ${SEAT_TOL} m of the seat top`,
+		detail: rows
+	};
+}
+
 // ------------------------------------------------------------------ driver
-const CHECKS = { a: checkWalls, b: checkSpacing, c: checkOneMove, d: checkHidden, e: checkYield };
+const CHECKS = {
+	a: checkWalls,
+	b: checkSpacing,
+	c: checkOneMove,
+	d: checkHidden,
+	e: checkYield,
+	f: checkFeet,
+	g: checkSeated,
+	h: checkLying,
+	i: checkWheelchair
+};
 let failed = 0;
-for (const letter of ['a', 'b', 'c', 'd', 'e']) {
+for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']) {
 	if (!only.has(letter)) continue;
 	let r;
 	try {
