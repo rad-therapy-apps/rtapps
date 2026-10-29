@@ -216,8 +216,14 @@ function addMover(
 	id = ''
 ) {
 	scene.add(group);
+	// People get their walking bob from setLegSwing's pelvis drop; only vehicles keep the sine bob.
+	let person = false;
+	group.traverse((o) => {
+		if (o.userData.walkRig) person = true;
+	});
 	movers.push({
 		group,
+		bob: !person,
 		curve: moverPath(points, closed),
 		speed,
 		offset,
@@ -314,7 +320,7 @@ export function updateMovers(dt, sec) {
 		m.group.position.copy(p);
 		const yaw = Math.atan2(n.x - p.x, n.z - p.z);
 		m.group.rotation.y = yaw + (m.yawOffset || 0);
-		if (!m.holding) m.group.position.y += Math.sin(sec * 1.7 + m.offset * 6.28) * 0.01;
+		if (!m.holding && m.bob) m.group.position.y += Math.sin(sec * 1.7 + m.offset * 6.28) * 0.01;
 		const swing = m.holding ? 0 : Math.sin(sec * 8 + m.offset * 6.28) * 0.42;
 		m.group.traverse((o) => {
 			const rig = o.userData?.walkRig;

@@ -911,13 +911,18 @@ export function addRoomDecor(room: Room) {
 		plant(g, room.x - hx + 1.0, room.z + hz - 1.0, 0.78);
 }
 
+// The ambulance-bay apron in front of the lobby; its top is the outdoor ground the ambulance
+// crew walks on.
+const APRON_Y = -0.01,
+	APRON_H = 0.018;
+export const APRON_TOP = APRON_Y + APRON_H / 2;
 export function buildExteriorAmbient() {
 	const ground = new THREE.Mesh(new THREE.PlaneGeometry(360, 300), std(0x6f8d69, 0.98, 0));
 	ground.rotation.x = -Math.PI / 2;
 	ground.position.y = -0.08;
 	ground.receiveShadow = true;
 	scene.add(ground);
-	const apron = box(40, 0.018, 18, std(0xc6cac4, 0.96, 0.01), 0, -0.01, 18);
+	const apron = box(40, APRON_H, 18, std(0xc6cac4, 0.96, 0.01), 0, APRON_Y, 18);
 	scene.add(apron);
 	const cross = box(10, 0.014, 1.5, std(0xece8dd, 0.94, 0.0), 0, -0.005, 10.2);
 	scene.add(cross);

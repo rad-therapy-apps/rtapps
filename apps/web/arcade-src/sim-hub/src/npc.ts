@@ -25,13 +25,16 @@ interface PersonFigureOptions {
 	hairColor?: number;
 }
 
-// Leg geometry shared by personFigure and setLegSwing: hip pivot -> knee 0.48, knee -> sole 0.51
-// (shin 0.45 + shoe 0.06); the shoe runs from heel z -0.07 to toe z +0.13.
-const THIGH_LEN = 0.48,
+// Leg geometry shared by personFigure and setLegSwing: hip pivot at 1.06, hip -> knee 0.48,
+// knee -> sole 0.51 (shin 0.45 + shoe 0.06); the shoe runs from heel z -0.07 to toe z +0.13.
+const HIP_Y = 1.06,
+	THIGH_LEN = 0.48,
 	KNEE_TO_SOLE = 0.51,
 	HIP_TO_SOLE = THIGH_LEN + KNEE_TO_SOLE,
 	SHOE_HEEL = -0.07,
 	SHOE_TOE = 0.13;
+/** Height of a standing person's sole above the figure's origin (0.07). */
+export const SOLE_Y = HIP_Y - HIP_TO_SOLE;
 
 export function personFigure(
 	top = 0x5e8fb2,
@@ -108,9 +111,9 @@ export function personFigure(
 	g.add(armRP);
 	// Each leg: hip pivot (1.06) -> thigh -> knee pivot -> shin and shoe, sole at local 0.07.
 	const legLP = new THREE.Group();
-	legLP.position.set(-0.1, 1.06, 0);
+	legLP.position.set(-0.1, HIP_Y, 0);
 	const legRP = new THREE.Group();
-	legRP.position.set(0.1, 1.06, 0);
+	legRP.position.set(0.1, HIP_Y, 0);
 	const kneeLP = new THREE.Group();
 	kneeLP.position.y = -THIGH_LEN;
 	const kneeRP = new THREE.Group();

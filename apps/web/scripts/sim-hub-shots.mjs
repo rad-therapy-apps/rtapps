@@ -186,7 +186,7 @@ try {
 	await page.evaluate(() => {
 		window.__V.freezeOnMultiple = true;
 	});
-	await page.waitForFunction(() => window.__V.frozen, null, { timeout: 120000 });
+	await page.waitForFunction(() => window.__V.frozen, null, { polling: 100, timeout: 120000 });
 	await page.evaluate(() => window.__NPC.resetTreatmentJourney(true));
 	await page.evaluate(() => {
 		const cv = document.querySelector('canvas'),
