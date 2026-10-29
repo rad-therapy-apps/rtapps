@@ -3,7 +3,10 @@
 // one PNG per fixed pose, to compare NPC feet, seating and lying before and after a change.
 //
 // How to run (run `pnpm build:arcade` first), from apps/web:
-//   node scripts/sim-hub-shots.mjs <outDir>
+//   node scripts/sim-hub-shots.mjs <outDir> [shotName]
+//     shotName limits the run to one of the fixed shots (walker-low, lobby-chairs, ...).
+//     Shots are deterministic: each pose runs the simulation on a fixed clock, so two runs give the
+//     same pixels (before/after comparisons).
 // Output: <outDir>/<name>.png and one line per shot. Needs Playwright's Chromium.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -16,7 +19,7 @@ const WEB = path.resolve(HERE, '..');
 const outDir = process.argv[2],
 	onlyShot = process.argv[3];
 if (!outDir) {
-	console.error('usage: node scripts/sim-hub-shots.mjs <outDir>');
+	console.error('usage: node scripts/sim-hub-shots.mjs <outDir> [shotName]');
 	process.exit(2);
 }
 const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright');
@@ -29,8 +32,8 @@ const SHOTS = [
 	{ name: 'lobby-chairs', subject: 'cast:lobby:patient:1', cam: [3.5, 0.9, 0.5], lookY: 0.6 },
 	{ name: 'consult-patient', subject: 'cast:consult:patient:1', cam: [2.2, 1.3, 2.2], lookY: 0.8 },
 	{ name: 'escort-wheelchair', subject: 'mover:escort', u: 0.3, cam: [2.4, 1.1, 0], lookY: 0.8 },
-	{ name: 'ct-table', subject: 'cast:ctsim:patient:*', cam: [0, 1.7, 3.0], lookY: 1.1 },
-	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [0, 1.9, 3.3], lookY: 1.2 }
+	{ name: 'ct-table', subject: 'cast:ctsim:patient:*', cam: [0, 1.15, -2.2], lookY: 1.1 },
+	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [-2.6, 1.35, -1.6], lookY: 1.2 }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),
@@ -84,6 +87,9 @@ await page.addInitScript(() => {
 		spec: null,
 		info: null
 	});
+	// the scene builder draws random phases for the actors' idle motion: seed it
+	let seed = 1;
+	Math.random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
 	// Puts the camera at the shot's pose; runs before every frame draws, so the page's own culling
 	// (which reads the camera) sees the new viewpoint and shows the actors in that room.
 	const place = (s, c) => {
@@ -91,10 +97,16 @@ await page.addInitScript(() => {
 		let objs, yaw;
 		if (s.subject.startsWith('mover:')) {
 			const m = N.movers.find((x) => x.id === s.subject.slice(6));
+			if (!m)
+				throw new Error(
+					`unknown mover '${s.subject.slice(6)}' (have: ${N.movers.map((x) => x.id).join(', ')})`
+				);
 			objs = [m.group];
 			yaw = m.group.rotation.y - (m.yawOffset || 0);
 		} else {
 			const [, room, kind, idx] = s.subject.split(':');
+			if (!N.ROOM_CAST[room])
+				throw new Error(`unknown room '${room}' (have: ${Object.keys(N.ROOM_CAST).join(', ')})`);
 			objs =
 				idx === '*'
 					? N.ROOM_CAST[room].filter((e) => e.kind === kind && N.visibleInTree(e.g)).map((e) => e.g)
@@ -145,6 +157,9 @@ await page.addInitScript(() => {
 	const raf = window.requestAnimationFrame.bind(window);
 	window.requestAnimationFrame = (cb) =>
 		raf((ts) => {
+			// freeze on a frame count that is a multiple of 12, so the page's frame-count striding is the
+			// same on every run
+			if (S.freezeOnMultiple && S.frames % 12 === 0) S.frozen = true;
 			if (S.frozen) {
 				S.pending = cb; // the loop stops here; resume() restarts it
 				return;
@@ -169,9 +184,10 @@ try {
 	});
 	await page.waitForTimeout(800);
 	await page.evaluate(() => {
-		window.__NPC.resetTreatmentJourney(true);
-		window.__V.frozen = true;
+		window.__V.freezeOnMultiple = true;
 	});
+	await page.waitForFunction(() => window.__V.frozen, null, { timeout: 120000 });
+	await page.evaluate(() => window.__NPC.resetTreatmentJourney(true));
 	await page.evaluate(() => {
 		const cv = document.querySelector('canvas'),
 			keep = new Set();
@@ -182,26 +198,65 @@ try {
 	});
 	await page.waitForTimeout(300);
 	fs.mkdirSync(outDir, { recursive: true });
-	for (const shot of SHOTS.filter((x) => !onlyShot || x.name === onlyShot)) {
-		// run the page's own frame loop for a few frames at the pose, so culling and animation settle
-		await page.evaluate((s) => {
-			const V = window.__V;
-			if (s.u !== undefined) window.__NPC.movers.find((x) => x.id === s.subject.slice(6)).u = s.u;
-			V.spec = s;
-			V.frames0 = V.frames;
-			V.resume();
-		}, shot);
-		await page.waitForFunction(() => window.__V.frames > window.__V.frames0 + 6);
-		const info = await page.evaluate(() => {
-			window.__V.frozen = true;
-			return window.__V.info;
-		});
-		const file = path.join(outDir, shot.name + '.png');
-		await page.locator('canvas').first().screenshot({ path: file });
-		console.log(
-			`${shot.name} -> ${file} cam ${info.cam.join(',')} look ${info.look.join(',')} visible ${info.vis}`
-		);
-	}
+	if (onlyShot && !SHOTS.some((x) => x.name === onlyShot)) {
+		console.error(`unknown shot '${onlyShot}' (have: ${SHOTS.map((x) => x.name).join(', ')})`);
+		process.exitCode = 2;
+	} else
+		for (const shot of SHOTS.filter((x) => !onlyShot || x.name === onlyShot)) {
+			// The page's own loop stays frozen. Each shot runs the simulation on a fixed clock (a base per
+			// shot, then 60 steps of 1/30 s) with the camera placed before every draw, so the culling and
+			// the animation match on every run.
+			const info = await page.evaluate(
+				([s, base]) => {
+					const V = window.__V,
+						N = window.__NPC;
+					N.state.simSec = 0;
+					N.stepSimulation._f = 0;
+					N.movers.forEach((m, i) => {
+						m.u = (i * 0.137) % 1;
+						m.heldFor = 0;
+					});
+					if (s.u !== undefined) {
+						const m = N.movers.find((x) => x.id === s.subject.slice(6));
+						if (!m)
+							throw new Error(
+								`unknown mover '${s.subject.slice(6)}' (have: ${N.movers.map((x) => x.id).join(', ')})`
+							);
+						m.u = s.u;
+					}
+					V.spec = s;
+					let t = base;
+					performance.now = () => t;
+					// the wall clocks read Date and the actors' idle motion reads Math.random: fix both
+					const D = Date,
+						d0 = D.UTC(2026, 0, 5, 10, 0, 0);
+					window.Date = class extends D {
+						constructor(...args) {
+							super(...(args.length ? args : [d0 + (t - base)]));
+						}
+						static now() {
+							return d0 + (t - base);
+						}
+					};
+					let a = 1;
+					Math.random = () => ((a = (a * 16807) % 2147483647) - 1) / 2147483646;
+					for (let i = 0; i < 60; i++) {
+						t += 1000 / 30;
+						N.stepSimulation(t);
+					}
+					return V.info;
+				},
+				[shot, 1e7 + SHOTS.indexOf(shot) * 1e5]
+			);
+			const file = path.join(outDir, shot.name + '.png');
+			await page.locator('canvas').first().screenshot({ path: file });
+			console.log(
+				`${shot.name} -> ${file} cam ${info.cam.join(',')} look ${info.look.join(',')} visible ${info.vis}`
+			);
+		}
+} catch (err) {
+	console.error(`sim-hub-shots error: ${err && err.message ? err.message : err}`);
+	process.exitCode = 2;
 } finally {
 	await browser.close();
 	srv.close();

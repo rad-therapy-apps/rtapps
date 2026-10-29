@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { renderer, labelRenderer, scene } from './scene';
 import { ROOMS } from './rooms';
+import { S } from './state';
 import { getColliders } from './walk';
 import {
 	movers,
@@ -54,6 +55,8 @@ export function installNpcCheckHook(
 	Object.assign(window, {
 		__NPC: {
 			scene,
+			/** The simulation state; the screenshot tool sets simSec so poses do not depend on real time. */
+			state: S,
 			colliders: getColliders(),
 			movers,
 			castActors,

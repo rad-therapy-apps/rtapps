@@ -14,7 +14,7 @@
 //                one that never moves is outwaited: released after 8 s, then walking at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
 //   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath
-//                (after the journey reset, and while the movers walk at t = 2, 30 and 90 s)
+//                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s)
 //   g  Seated    every sitter's pelvis (hip pivot - 0.06) is within 0.02 m of the seat top beside it
 //   h  Lying     every lying patient's lowest point is within 0.02 m of the couch or table top beneath
 //   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of the seat top
@@ -836,10 +836,17 @@ function allPeople() {
 
 // --------------------------------------------------------------- (f) feet
 function checkFeet() {
-	const rows = [],
+	// The legs swing +/-0.357 rad from a fixed hip (sin(sec * 8 + offset * 6.28)), so walking soles are
+	// sampled at 12 moments evenly spread over one swing cycle, plus 2 later ones for drift. The sole is
+	// each person's lowest point (the planted foot).
+	const CYCLE = (2 * Math.PI) / 8,
+		worstRows = [],
 		moments = [];
+	let readings = 0,
+		worst = 0;
 	const sample = (when) => {
-		let n = 0;
+		let n = 0,
+			w = null;
 		for (const { g, id } of allPeople()) {
 			if (g.userData.lying || g.userData.wheelchairOccupant || isSeatedPose(g)) continue;
 			n++;
@@ -847,43 +854,46 @@ function checkFeet() {
 				sole = lowestY(g),
 				floor = floorTop(p.x, p.z),
 				gap = sole - floor;
-			if (!(Math.abs(gap) <= FLOOR_TOL))
-				rows.push({ when, id: `${id} (${label(g, id)})`, sole, floor, gap });
+			if (Math.abs(gap) <= FLOOR_TOL) continue;
+			readings++;
+			worst = Math.max(worst, Math.abs(gap));
+			if (!w || Math.abs(gap) > Math.abs(w.gap))
+				w = { when, id: `${id} (${label(g, id)})`, sole, floor, gap };
 		}
-		moments.push(`${when}: ${n} checked`);
+		if (w) worstRows.push(w);
+		moments.push(`${when}: ${n}`);
 	};
 	NPC.resetTreatmentJourney(true);
-	stepFor(0.2);
-	sample('after reset');
-	let t = 0;
-	for (const at of [2, 30, 90]) {
-		stepFor(at - t);
-		t = at;
-		sample(`t=${at}s`);
+	stepFor(2);
+	for (let k = 0; k < 12; k++) {
+		if (k) stepFor(CYCLE / 12);
+		sample(`gait ${k}/12`);
 	}
-	const bad = new Set(rows.map((r) => r.id));
-	const worst = rows.reduce((m, r) => Math.max(m, Math.abs(r.gap)), 0);
+	stepFor(28);
+	sample('t=30s');
+	stepFor(60);
+	sample('t=90s');
 	return {
-		pass: rows.length === 0,
-		summary: rows.length
-			? `${rows.length} sole readings off the floor by more than ${FLOOR_TOL} m across ${bad.size} people (worst ${worst.toFixed(2)} m)`
-			: `every standing or walking sole within ${FLOOR_TOL} m of the floor (${moments.join(', ')})`,
-		detail: rows.map(
+		pass: readings === 0,
+		summary: readings
+			? `${readings} sole readings off the floor by more than ${FLOOR_TOL} m in ${worstRows.length} of ${moments.length} moments (worst ${worst.toFixed(2)} m)`
+			: `every standing or walking sole within ${FLOOR_TOL} m of the floor at ${moments.length} moments`,
+		detail: worstRows.map(
 			(r) =>
-				`${r.when} ${r.id}: sole ${r.sole.toFixed(3)}, floor ${r.floor.toFixed(3)}, gap ${r.gap >= 0 ? '+' : ''}${r.gap.toFixed(3)}`
+				`worst at ${r.when}: ${r.id}: sole ${r.sole.toFixed(3)}, floor ${r.floor.toFixed(3)}, gap ${r.gap >= 0 ? '+' : ''}${r.gap.toFixed(3)}`
 		)
 	};
 }
 
 // -------------------------------------------------------------- (g) seated
-// A seat is a mesh near the sitter with a top between floor + 0.35 and floor + 0.75, wider than
-// 0.35 m and thinner than 0.2 m, that is not part of any person. (Task 3 adds seat anchors.)
+// A seat is a mesh near the sitter with a top between floor + 0.35 and floor + 1.05 (chairs, couches,
+// exam tables, beds), wider than 0.35 m and thinner than 0.4 m, that is not part of any person. (Task 3 adds seat anchors.)
 function nearestSeat(p, floor, boxes) {
 	let best = null;
 	for (const b of boxes) {
 		const thick = b.hi[1] - b.lo[1],
 			w = Math.max(b.hi[0] - b.lo[0], b.hi[2] - b.lo[2]);
-		if (b.hi[1] < floor + 0.35 || b.hi[1] > floor + 0.75 || w <= 0.35 || thick >= 0.2) continue;
+		if (b.hi[1] < floor + 0.35 || b.hi[1] > floor + 1.05 || w <= 0.35 || thick >= 0.4) continue;
 		if (inAnyPerson(b.o)) continue;
 		const dx = Math.max(b.lo[0] - p.x, 0, p.x - b.hi[0]),
 			dz = Math.max(b.lo[2] - p.z, 0, p.z - b.hi[2]),
