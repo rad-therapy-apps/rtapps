@@ -953,9 +953,9 @@ export function departmentStaff() {
 		'Radiation Therapist',
 		'Verifying the simulation protocol and coordinating with the therapist in the scanner room.',
 		0x6c93b2,
-		-1.3,
+		-0.5,
 		-2.0,
-		0.3,
+		-Math.PI / 2,
 		0x81563c,
 		{ female: true, hairColor: 0x1d1410 },
 		'console'

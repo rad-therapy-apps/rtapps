@@ -2068,7 +2068,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'education',
 			'ctsim',
-			new THREE.Vector3(37.15, 0, -4.45),
+			new THREE.Vector3(37.15, 0, -4.5),
 			atChanging,
 			1.45,
 			{
