@@ -184,24 +184,96 @@ Measured in the loaded simulator (stubbed harness and headless Chromium). These 
 ### Checks (added to `sim-hub-npc-check.mjs`; they fail before the fix and run in CI)
 
 - **(f) Feet on the floor:** every standing or walking person's sole is within 3 cm of the floor beneath them. The floor is found from the scene's floor meshes. This covers movers, cast and journey actors.
-- **(g) Seated:** every seated person has a seat anchor within 0.3 m, a pelvis within 2 cm of that seat's top, and faces within 20° of the seat's facing.
-- **(h) Lying:** every lying patient's lowest point is within 2 cm of the top of the couch or table under them.
+  - It samples 12 moments over one leg-swing cycle after the journey reset, then t = 30 s and t = 90 s, then 8 moments 0.6 s apart over each of the ambulance crew's two walks (unload and load).
+- **(g) Seated:** every seated person has a seat anchor within 0.3 m, a pelvis within 2 cm of that seat's top, and faces within 20° of the seat's facing. The pelvis is the hip pivot minus 0.06 m, scaled with the figure (0.82× for the wheelchair occupant). Four sub-checks:
+  - **seat facing:** no seat (wheelchairs aside, 55 seats) faces a wall within 3.0 m;
+  - **exchange facing:** in every speech exchange with a seated member, the partner is within 60° of the seat's facing;
+  - **pickup facing:** the journey's lobby pickup, run for Jordan and for Mia, ends with the seated patient facing the therapist within 60°, and the therapist's leg column clear of furniture;
+  - **handoff seating:** "Have a seat" (from the check-in desk) and patientcare → lobby end with the patient seated on its chair. "Have a seat" for a patient already seated in the lobby starts no move.
+- **(h) Lying:** every lying patient rests on its couch or table top. The check finds the top by its `props.ts` geometry (the 5.8 m CT table, the vault couch's 4.2 m carbon insert, the 2.2 m exam table), not by the rule `restLyingPatient` uses.
+  - The lowest point, and the undersides of the torso and the pelvis, are within 2 cm of the top.
+  - The footprint of the lowest parts reaches no more than 7 cm past any edge of the top.
+  - The CT patients are measured again with the couch slid 0, 1, 2 and 3.15 m into the gantry.
 - **(i) Wheelchair:** an occupied wheelchair's figure is posed seated, with its pelvis on the wheelchair seat.
+- **(j) Stand-up:** a seated actor that starts a move keeps its leg column out of furniture for the first 30 frames. The leg column runs from the soles to the knees, with a 0.15 m radius around the soles' midpoint. Furniture is any non-person mesh under 3 m across whose top is above 0.15 m. Four flows are checked: the consult → education handoff, patientcare → lobby, "Have a seat", and Mia's journey move from her lobby chair.
+- **(c) One move** (stage 1) now starts from the reset seat, so it also measures the stand-up: no step over 0.25 m.
 
 ### Screenshots for the owner
 
 `apps/web/scripts/sim-hub-shots.mjs` is a dev tool, not run in CI. It loads the built simulator in headless Chromium, freezes it and renders fixed camera poses:
+
 - a walker side-on;
 - the lobby waiting chairs;
 - a consult patient;
 - the wheelchair escort;
 - the CT table;
-- the vault couch.
+- the vault couch;
+- low, side-on views level with the CT table, the vault couch and the HDR exam table (`ct-low`, `vault-low`, `hdr-low`), which show the lying patients' contact with the top.
 
-Before and after images go on a review page.
+The before and after shots go to the owner on a review page.
 
 ### Out of scope for stage 2
 
 - Routes inside rooms, and occupancy (stage 3).
 - Arm and hand poses beyond what sitting needs.
 - Changing anyone's height above the hips.
+
+### As built
+
+1. **Pelvis drop.**
+   - `setLegSwing` writes `walkRig.body.position.y` each frame: the depth of the lower sole corner (heel or toe) below rest. So the planted foot stays at local 0.07 at every phase of the swing.
+   - The head moves with the body: −3.8 to +1.3 cm for walkers and the ambulance crew (peak thigh swing 0.357 rad), and down to −5.8 cm on handoff walks (0.422 rad).
+   - This is a recorded exception to "everything above the hips is unchanged".
+2. **Person bob removed.** Movers carrying a person lost the ±1 cm sine bob on y; the pelvis drop is now their walking bob. Vehicles, the tech cart and the wheelchair keep it.
+3. **Ambulance crew.** The crew stands on the apron outside the lobby floor (y = apron top − 0.07 = −0.071), and at y = 0 on the lobby floor. Check (f) samples both crew walks.
+4. **Knee cap.** A 0.12 m cube at each knee pivot, in the leg material, fills the wedge between thigh and shin when the knee bends. It is one of the `clothingRig` bottom parts.
+5. **Seat anchors.**
+   - `SEATS` (`props.ts`) holds one `{ x, z, facing, top, kind, group? }` per sitting place. Furniture anchors are world coordinates. A wheelchair's anchor is in its own group's frame (`group`), so it moves with the chair; `seatInWorld` resolves it.
+   - There are 61 anchors:
+     - 20 chairs;
+     - 9 couch places (3 couches, one place per 0.6 m);
+     - 10 bench places;
+     - 8 task chairs;
+     - 8 exam-table places;
+     - 6 wheelchairs.
+   - Each exam table has 2 places, one 0.2 m in from each long edge, each facing out off its edge.
+   - The offsets toward the seat front and the tops:
+
+     | Seat       | Offset  | Top                 |
+     | ---------- | ------- | ------------------- |
+     | chair      | 0.06 m  | 0.54                |
+     | couch      | 0.07 m  | 0.59                |
+     | bench      | 0.045 m | 0.60                |
+     | task chair | 0.06 m  | 0.65                |
+     | exam table | —       | 0.945               |
+     | wheelchair | —       | 0.64 × scale + 0.04 |
+
+   - `seatActor` puts the hips 0.12 m behind the anchor along its facing, with the pelvis (hip − 0.06) on the top; both scale with the figure. It keeps the anchor in `userData.seatAnchor`.
+6. **Furniture `rot` changes.**
+   - The rotations were authored while backrests ignored `rot`, so a seat's facing never showed. With backrests following `rot`, these were turned:
+     - the lobby's front-row chairs, 0 → π (face reception);
+     - the lobby couches and bench, π/2 → −π/2 (face into the lobby);
+     - the social couch, 0 → π (faces the chairs and the social worker);
+     - the education chairs, 0 → −0.4 × i for i = −1, 0, 1 (the outer chairs turn in toward the desk);
+     - the education bench, π/2 → −π/2 (it faced a wall 0.9 m away);
+     - the manager's visitor chairs, 0 → π (face the desk).
+   - Check (g)'s "seat facing" and "exchange facing" sub-checks guard these.
+7. **Standing up.**
+   - A seated actor that starts a journey move or a handoff stands up out of its seat first (`beginRise`/`stepRise`). Over 0.5 s, the hips travel from the seat to 0.5 m in front of the seat anchor, along its facing (off the table edge for an exam table), and rise to standing height.
+   - Meanwhile the soles slide from where they rest to under the hips (`setLegReach`, a two-joint knee solve), so the lower legs stay in front of the seat. The root moves at most about 0.06 m a frame.
+   - The walk then starts from that point.
+   - `setActorSeated(actor, false)` only drops the figure to y = 0 where it is and poses it neutral; the journey uses it right after placing an actor directly.
+   - `faceNpcToward` leaves seated figures alone: a seated body keeps its seat's facing.
+8. **Sitting down at a handoff's end.**
+   - A patient handoff whose final point is within 0.3 m of a free seat anchor ends with the patient seated on it. The finals of "Have a seat" (−3.3, 3.54) and patientcare → lobby (−4.75, 3.54) are lobby chair anchors.
+   - "Have a seat" for a patient already seated in the lobby does nothing.
+9. **Moved positions.**
+   - Jordan is seated at reset, on the lobby chair at (−1.85, 3.6); he used to stand at (−2.5, 3.0). Mia sits at (−6.2, 3.6) (it was 3.3).
+   - Both lobby pickups walk the patient to the chair at (−3.3, 3.6); it was (−2.8, 3.4), between two chairs.
+   - The therapist collecting them stops at (−2.9, 2.5), in front of that chair, about 20° off the seated patient's facing. It was (−0.6, 2.9), 74° off.
+   - The consult patient moved to dz 0.8 (was 1.2), the social patient to (0.57, 1.65) (was (1.25, 1.0)), and the patientcare patient to dz 1.1 (was 1.5). Each now sits on its exam table edge, couch or chair.
+10. **Lying placement.**
+    - `createLyingPatient` is the one builder. Its back is flat: the undersides of the pillow, torso, pelvis, arms, forearms, legs and feet are one plane, the figure's lowest point, and the head rests on the pillow.
+    - `restLyingPatient(cont, surface, x, z)` puts that plane on the top of the mesh it is given. `LYING_SURFACES` (`props.ts`) holds one per room: the CT table, each vault couch's carbon insert and the HDR exam table top.
+    - Only x and z change afterwards (the CT couch slide), so the contact holds without per-frame work.
+    - The HDR patient is centred on its 2.2 m table (dx −1.57). The 2.27 m resting figure reaches 1 cm past the head end and 6 cm past the foot end.
