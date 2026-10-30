@@ -224,7 +224,7 @@ The before and after shots go to the owner on a review page.
    - `setLegSwing` writes `walkRig.body.position.y` each frame: the depth of the lower sole corner (heel or toe) below rest. So the planted foot stays at local 0.07 at every phase of the swing.
    - The head moves with the body: −3.8 to +1.3 cm for walkers and the ambulance crew (peak thigh swing 0.357 rad), and down to −5.8 cm on handoff walks (0.422 rad).
    - This is a recorded exception to "everything above the hips is unchanged".
-2. **Person bob removed.** Movers carrying a person lost the ±1 cm sine bob on y; the pelvis drop is now their walking bob. Vehicles, the tech cart and the wheelchair keep it.
+2. **Person bob removed.** Movers carrying a person lost the ±1 cm sine bob on y; the pelvis drop is now their walking bob. Only the car and the shuttle keep it; the tech cart and the wheelchair escort carry a person, so they lost it too.
 3. **Ambulance crew.** The crew stands on the apron outside the lobby floor (y = apron top − 0.07 = −0.071), and at y = 0 on the lobby floor. Check (f) samples both crew walks.
 4. **Knee cap.** A 0.12 m cube at each knee pivot, in the leg material, fills the wedge between thigh and shin when the knee bends. It is one of the `clothingRig` bottom parts.
 5. **Seat anchors.**
@@ -276,4 +276,4 @@ The before and after shots go to the owner on a review page.
     - `createLyingPatient` is the one builder. Its back is flat: the undersides of the pillow, torso, pelvis, arms, forearms, legs and feet are one plane, the figure's lowest point, and the head rests on the pillow.
     - `restLyingPatient(cont, surface, x, z)` puts that plane on the top of the mesh it is given. `LYING_SURFACES` (`props.ts`) holds one per room: the CT table, each vault couch's carbon insert and the HDR exam table top.
     - Only x and z change afterwards (the CT couch slide), so the contact holds without per-frame work.
-    - The HDR patient is centred on its 2.2 m table (dx −1.57). The 2.27 m resting figure reaches 1 cm past the head end and 6 cm past the foot end.
+    - The HDR patient is centred on its 2.2 m table (dx −1.57). The 2.27 m resting figure's pillow ends 1 cm past the head end; the head and hair overhang it by 6–7 cm, and the shoe tips by 6 cm at the foot end.
