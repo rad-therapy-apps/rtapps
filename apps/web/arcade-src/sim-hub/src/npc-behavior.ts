@@ -1036,12 +1036,15 @@ function segmentEntersRoom(r, a, b) {
 	}
 	return true;
 }
+// NPC routes walk the treatment corridor's line x = 64 at this x: the vault entrance markers hang at
+// x 63.76-64.00, z +/-18 (rooms.ts), into which a body centred on x = 64 walks.
+const NPC_TREATMENT_LANE_X = 63.4;
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
 // point in room targetId (`spot`, when the actor took an arrival spot there). Inside a room it follows
 // the room's graph (room-routes.ts inRoomPath): from the start to the door, from the door to the final,
 // or from the start to the final in the same room; in the lobby from the start to the corridor exit
 // the route leaves by, and through the lobby wherever a corridor leg crosses it. The corridor legs are
-// corridorNodesFromHub/shortestCorridorRoute's (walk.ts).
+// corridorNodesFromHub/shortestCorridorRoute's (walk.ts), with the treatment line on the NPC lane.
 function buildActorHandoffPath(
 	actor,
 	fromId,
@@ -1072,7 +1075,7 @@ function buildActorHandoffPath(
 	else if (actualFrom && !actualFrom.hub) corridor.push(corridorAnchor(actualFrom).p);
 	const legs = corridor.map((v) => {
 		const q = zeroY(v);
-		return [q.x, q.z];
+		return [Math.abs(q.x - 64) < 1e-6 ? NPC_TREATMENT_LANE_X : q.x, q.z];
 	});
 	if (detectedFrom?.hub && legs.length)
 		pts.push(...inRoomPath(detectedFrom.id, start, { x: legs[0][0], z: legs[0][1] }));
