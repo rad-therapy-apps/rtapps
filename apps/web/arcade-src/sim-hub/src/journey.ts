@@ -48,7 +48,8 @@ import {
 	clearMoveQueues,
 	beginRise,
 	seatAnchorAt,
-	seatApproach
+	seatApproach,
+	handoffTransitions
 } from './npc-behavior';
 import {
 	workflowState,
@@ -807,7 +808,8 @@ export function resetTreatmentJourney(silent = false) {
 	JOURNEY.vaultMonitorPatientOnly = false;
 	workflowTransitions.length = 0;
 	clearMoveQueues();
-	clearArrivalSpots();
+	// the reset leaves hand-overs alone: those under way keep the spots they are walking to
+	clearArrivalSpots((actor) => handoffTransitions.some((t) => t.actor === actor));
 	// Jordan and Mia wait on lobby chairs (the chair centres; setActorSeated seats them on the anchor)
 	if (JOURNEY.patient) {
 		JOURNEY.patient.position.set(-1.85, 0, 3.6);
@@ -1173,7 +1175,7 @@ function beginJordanEscortToVault() {
 		JOURNEY.therapist,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(69.8, 0, -15.25),
+		new THREE.Vector3(69.8, 0, -15.03),
 		atChange,
 		1.5
 	);
@@ -1181,7 +1183,7 @@ function beginJordanEscortToVault() {
 		JOURNEY.patient,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(68.95, 0, -14.15),
+		new THREE.Vector3(69.0, 0, -14.15),
 		atChange,
 		1.52,
 		{
@@ -1838,7 +1840,7 @@ function beginMiaFirstTreatmentEscort() {
 		JOURNEY.therapist,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(69.8, 0, -15.25),
+		new THREE.Vector3(69.8, 0, -15.03),
 		atChange,
 		1.48
 	);
@@ -1846,7 +1848,7 @@ function beginMiaFirstTreatmentEscort() {
 		JOURNEY.newPatient,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(68.95, 0, -14.15),
+		new THREE.Vector3(69.0, 0, -14.15),
 		atChange,
 		1.5,
 		{
@@ -2071,7 +2073,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.navigator,
 			'education',
 			'ctsim',
-			new THREE.Vector3(38.1, 0, -4.7),
+			new THREE.Vector3(38.3, 0, -4.7),
 			atChanging,
 			1.43
 		);

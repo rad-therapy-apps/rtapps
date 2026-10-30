@@ -1047,7 +1047,9 @@ export function furnish(room: Room) {
 			for (let i = -1; i <= 1; i++) {
 				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
 			}
-			monitor(g, room.x, 1.7, room.z + 3.9, 0, 1.8, 0.95);
+			// flush on the door wall's inner face (z = room.z + 4.42), beside the doorway: 0.9 m clear of
+			// the door opening (to x = room.x + 1.3) and of the corner
+			monitor(g, room.x + 3.11, 1.7, room.z + 4.392, 0, 1.8, 0.95);
 			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
@@ -1113,7 +1115,8 @@ export function furnish(room: Room) {
 			break;
 		case 'dosimetry':
 			workstationRow(g, room.x, room.z - 2.0, 4, 2.3);
-			monitor(g, room.x, 2.2, room.z + 4.55, 0, 2.5, 1.3);
+			// flush on the +z wall's inner face (z = room.z + 7.42)
+			monitor(g, room.x, 2.2, room.z + 7.392, 0, 2.5, 1.3);
 			desk(g, room.x, room.z + 1.4, 4.4, 1.0);
 			cabinetBank(g, room.x - 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
 			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);

@@ -116,9 +116,10 @@ export function releaseArrivalSpot(actor: THREE.Object3D): void {
 	holds.delete(actor);
 }
 
-/** Frees every spot (the journey reset). */
-export function clearArrivalSpots(): void {
-	holds.clear();
+/** Frees every spot (the journey reset) but those held by the actors `keep` returns true for: the
+    caller's hand-overs still under way, which are walking to theirs. */
+export function clearArrivalSpots(keep: (actor: THREE.Object3D) => boolean = () => false): void {
+	for (const actor of [...holds.keys()]) if (!keep(actor)) holds.delete(actor);
 }
 
 /* Room graphs: hand-placed waypoints per room (world x/z) joined by straight edges, each keeping a
@@ -220,15 +221,14 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[1, 4]
 		]
 	},
-	// in by the door's +x half, beside the screen above the doorway (x -42.9..-41.1, from 1.23 m),
-	// then round the desk (x -43.9..-40.1, z -6.75..-5.65). Spot [1] (-41.5, -7.0) stands in the
-	// 0.59 m gap between the desk and the chairs: its line to node 4 is clear at body width (0.12 m),
-	// not at 0.25 m
+	// in by the door's +x half (the doorway is x -43.3..-40.7), then round the desk (x -43.9..-40.1,
+	// z -6.75..-5.65). Spot [1] (-41.5, -7.0) stands in the 0.59 m gap between the desk and the
+	// chairs: its line to node 4 is clear at body width (0.12 m), not at 0.25 m
 	education: {
 		nodes: [
 			[-42, -2.15], // 0 door
-			[-40.55, -2.6], // 1 outside the door's +x half
-			[-40.55, -4.1], // 2 inside it, past the screen
+			[-40.92, -2.6], // 1 outside the door's +x half
+			[-40.92, -4.0], // 2 inside it
 			[-39.75, -5.3], // 3 +x of the desk: Mia's final and spot [0] arrive and leave along x
 			[-39.6, -7.3], // 4 off the desk's +x end, -z side: the seated patient and spot [1]
 			[-42.9, -5.2], // 5 +z of the desk: spot [2] along x
@@ -360,7 +360,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[44, -2.15], // 0 door
 			[43.4, -4.0], // 1 inside the door, clear of the IV pole at (43.5, -5.6)
 			[38.2, -4.4], // 2 Mia's bench final (37.15, -4.4) is reached along x, clear of the coat hook
-			[38.17, -4.93], // 3 the navigator (38.1, -4.7) leaves and arrives along ~290 deg
+			[38.37, -4.93], // 3 the navigator (38.3, -4.7) leaves and arrives along ~290 deg
 			[38.6, -6.1], // 4 toward the couch side: the navigator's next place (39.8, -6.7)
 			[41.6, -6.9], // 5 +z of the couch: the arrival spots and the CT staff
 			[45.6, -5.6], // 6 +x of the gantry
@@ -397,43 +397,49 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[4, 5]
 		]
 	},
-	// door, a step, then the maze (hall, corner, room side). The step took entries beside the old
-	// mid-doorway entrance marker; the markers now sit on the wall at x 63.685, z +/-15.45, so it
-	// avoids nothing a straight line would hit and is kept as the routes were checked. vault1's is on
-	// the -z side, away from the wall panel at (64.45, -16.8)
+	// door, a step, then the maze: the hall, a turn past the end of the hall's inner wall (x 64.30..71.50,
+	// z +/-15.24..+/-15.66), a corner beyond that wall's end, the room side. The step took entries
+	// beside the old mid-doorway entrance marker; the markers now sit on the wall at x 63.685,
+	// z +/-15.45, so it avoids nothing a straight line would hit and is kept as the routes were
+	// checked. vault1's is on the -z side, away from the wall panel at (64.45, -16.8)
 	vault1: {
 		nodes: [
 			[63.15, -18], // 0 door
 			[64.75, -18.95], // 1 step
 			[70.5, -18], // 2 hall
-			[71.25, -15.3], // 3 corner
+			[71.7, -15.0], // 3 corner: the changing-area final (69.8, -15.03) is reached along the wall
 			[73.15, -15.3], // 4 room side
-			[69.05, -12.9], // 5 off the bench's +z end: the patient beside it leaves and arrives along it
-			[74.6, -19.4] // 6 off the couch's -x end, for the staff place at (77.4, -20.4)
+			[69.05, -12.75], // 5 off the bench's +z end: the patient beside it leaves and arrives along it
+			[74.6, -19.4], // 6 off the couch's -x end, for the staff place at (77.4, -20.4)
+			[71.85, -16.0] // 7 turn, east of the inner wall's end
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
-			[2, 3],
+			[2, 7],
+			[7, 3],
 			[3, 4],
 			[3, 5],
 			[4, 6]
 		]
 	},
-	// vault1 mirrored in z, without the bench node
+	// vault1 without the bench node, the hall, turn, corner and room side mirrored in z; the step is
+	// not mirrored (z 17.05, 0.95 m to the door's -z side, as vault1's is 0.95 m to its -z side)
 	vault2: {
 		nodes: [
 			[63.15, 18], // 0 door
 			[64.75, 17.05], // 1 step (see vault1)
 			[70.5, 18], // 2 hall
-			[71.25, 15.3], // 3 corner
+			[71.7, 15.0], // 3 corner
 			[73.15, 15.3], // 4 room side
-			[74.6, 19.4] // 5 off the couch's -x end
+			[74.6, 19.4], // 5 off the couch's -x end
+			[71.85, 16.0] // 6 turn, east of the inner wall's end
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
-			[2, 3],
+			[2, 6],
+			[6, 3],
 			[3, 4],
 			[4, 5]
 		]

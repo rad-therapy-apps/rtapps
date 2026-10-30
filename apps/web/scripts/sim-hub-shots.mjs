@@ -56,10 +56,14 @@ const SHOTS = [
 		cam: [-2.4, 1.6, 0.6],
 		lookY: 0.8
 	},
-	// scenery on walls: the lobby AED cabinet (it hung mid-room at (-4.6, 3.02), now on the west wall)
-	// and vault 1's entrance marker (it hung in the doorway, now a stripe on the wall beside it)
+	// scenery on walls: the lobby AED cabinet (it hung mid-room at (-4.6, 3.02), now on the west wall),
+	// vault 1's entrance marker (it hung in the doorway, now a stripe on the wall beside it) and the
+	// education room's screen (it hung in front of the doorway, now on the door wall beside it) and the
+	// dosimetry screen (it hung 2.9 m in front of the +z wall, now on it)
 	{ name: 'lobby-aed', eye: [-1.2, 1.9, 1.4], look: [-11.84, 1.4, 5.0] },
-	{ name: 'vault-entrance', eye: [61.0, 1.8, -12.2], look: [63.9, 1.5, -17.6] }
+	{ name: 'vault-entrance', eye: [61.0, 1.8, -12.2], look: [63.9, 1.5, -17.6] },
+	{ name: 'education-monitor', eye: [-42.0, 2.6, -10.9], look: [-42.0, 1.5, -3.1] },
+	{ name: 'dosimetry-monitor', eye: [14.6, 2.4, -48.6], look: [8.0, 1.9, -42.6] }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),

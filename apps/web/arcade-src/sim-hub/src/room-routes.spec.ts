@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ROOM_GRAPHS, inRoomPath } from './room-routes';
+import * as THREE from 'three';
+import { ROOM_GRAPHS, inRoomPath, takeArrivalSpot, clearArrivalSpots } from './room-routes';
 
 const dist = (a: [number, number], b: [number, number]) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
@@ -46,5 +47,23 @@ describe.each(Object.entries(ROOM_GRAPHS))('ROOM_GRAPHS.%s', (room, g) => {
 		expect(path[0]).toEqual(pa);
 		expect(path.at(-1)).toEqual(pb);
 		expect(new Set(path).size).toBe(path.length);
+	});
+});
+
+describe('clearArrivalSpots', () => {
+	it('frees every spot but those of the actors `keep` names', () => {
+		clearArrivalSpots();
+		const root = new THREE.Group(),
+			[a, b, c] = [new THREE.Object3D(), new THREE.Object3D(), new THREE.Object3D()];
+		root.add(a, b, c);
+		const first = takeArrivalSpot('consult', a),
+			second = takeArrivalSpot('consult', b);
+		expect(first).not.toBe(second);
+		// a is still walking to its spot (a live hand-over); b's spot is free again
+		clearArrivalSpots((actor) => actor === a);
+		expect(takeArrivalSpot('consult', c)).toBe(second);
+		clearArrivalSpots();
+		expect(takeArrivalSpot('consult', c)).toBe(first);
+		clearArrivalSpots();
 	});
 });
