@@ -1586,7 +1586,10 @@ const roomAt = (x, z) =>
 	'the corridors';
 
 // The people as the page built them: every room cast, duty and journey figure, with each node's
-// transform and visibility and the figure's userData. Taken before any check runs, because checks
+// transform and visibility and the figure's userData. The rotation is kept as the Euler angles the
+// page set (x, y, z and order), not as a quaternion: read back from a quaternion, a figure turned
+// more than 90 deg about y becomes (pi, pi - y, pi), and the page's later `rotation.y = ...` would
+// then turn it the mirrored way. Taken before any check runs, because checks
 // (b) and (g) leave cast actors where their moves end and the journey reset only puts back its own
 // actors.
 function snapshotPeople() {
@@ -1601,7 +1604,7 @@ function snapshotPeople() {
 			nodes.push({
 				o,
 				p: o.position.clone(),
-				q: o.quaternion.clone(),
+				r: o.rotation.clone(),
 				s: o.scale.clone(),
 				v: o.visible
 			})
@@ -1616,7 +1619,7 @@ function resetPeople() {
 		if (parent && g.parent !== parent) parent.add(g);
 		for (const n of nodes) {
 			n.o.position.copy(n.p);
-			n.o.quaternion.copy(n.q);
+			n.o.rotation.copy(n.r);
 			n.o.scale.copy(n.s);
 			n.o.visible = n.v;
 		}
