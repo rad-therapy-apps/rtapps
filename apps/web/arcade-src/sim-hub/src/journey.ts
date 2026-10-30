@@ -46,7 +46,10 @@ import {
 	movementPathFor,
 	requestActorMove,
 	clearMoveQueues,
-	beginRise
+	beginRise,
+	seatAnchorAt,
+	seatApproach,
+	handoffTransitions
 } from './npc-behavior';
 import {
 	workflowState,
@@ -78,6 +81,7 @@ import {
 } from './main';
 import { focusCtPatientFromControl } from './sdk-bridge';
 import { LYING_SURFACES } from './props';
+import { releaseArrivalSpot, clearArrivalSpots } from './room-routes';
 
 const JOURNEY_ROOM_TIMING = { roomId: null, enteredAt: 0, lastPatient: null };
 function activeJourneyPatientActor() {
@@ -591,6 +595,8 @@ interface MoveJourneyActorOptions {
 	followSubject?: THREE.Object3D;
 	followTarget?: THREE.Object3D | null;
 	cameraOptions?: JourneyCameraFollowOptions;
+	/** The move ends on the seat anchor nearest `final`: at its approach point, then sitting down. */
+	sit?: boolean;
 }
 function setJourneyCameraFollow(subject, companion = null, opts: JourneyCameraFollowOptions = {}) {
 	if (!subject) return;
@@ -723,11 +729,14 @@ function beginJourneyMove(
 	speed,
 	opts: MoveJourneyActorOptions
 ) {
+	releaseArrivalSpot(actor);
 	const rise = beginRise(actor); // a seated actor first stands up out of its seat
 	if (fromId && doors.has(fromId)) setDoorTarget(fromId, true);
 	if (toId && doors.has(toId)) setDoorTarget(toId, true);
 	actor.userData.inHandoff = true;
-	const curve = movementPathFor(actor, fromId, toId, final, rise?.to),
+	// a move to a seat ends at the seat's approach point; updateWorkflowTransitions then sits it down
+	const seat = opts.sit ? seatAnchorAt(final) : null,
+		curve = movementPathFor(actor, fromId, toId, seat ? seatApproach(seat) : final, rise?.to),
 		len = curve.getLength(),
 		duration = Math.max(2.6, Math.min(32, len / speed));
 	const cues = (opts.cues || []).map((c) => ({ ...c, fired: false }));
@@ -740,7 +749,9 @@ function beginJourneyMove(
 		duration,
 		onComplete,
 		cues,
-		rise
+		rise,
+		seat,
+		sit: null
 	});
 	if (opts.followCamera)
 		setJourneyCameraFollow(
@@ -797,6 +808,8 @@ export function resetTreatmentJourney(silent = false) {
 	JOURNEY.vaultMonitorPatientOnly = false;
 	workflowTransitions.length = 0;
 	clearMoveQueues();
+	// the reset leaves hand-overs alone: those under way keep the spots they are walking to
+	clearArrivalSpots((actor) => handoffTransitions.some((t) => t.actor === actor));
 	// Jordan and Mia wait on lobby chairs (the chair centres; setActorSeated seats them on the anchor)
 	if (JOURNEY.patient) {
 		JOURNEY.patient.position.set(-1.85, 0, 3.6);
@@ -1015,7 +1028,8 @@ function beginJordanPickupSequence() {
 				}, 15800);
 			}, 7200);
 		},
-		1.25
+		1.25,
+		{ sit: true }
 	);
 }
 function beginJordanEscortToVault() {
@@ -1161,7 +1175,7 @@ function beginJordanEscortToVault() {
 		JOURNEY.therapist,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(69.8, 0, -15.25),
+		new THREE.Vector3(69.8, 0, -15.03),
 		atChange,
 		1.5
 	);
@@ -1169,7 +1183,7 @@ function beginJordanEscortToVault() {
 		JOURNEY.patient,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(68.8, 0, -14.15),
+		new THREE.Vector3(69.0, 0, -14.15),
 		atChange,
 		1.52,
 		{
@@ -1286,7 +1300,7 @@ export function advanceTreatmentJourney() {
 			JOURNEY.vaultTherapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(50.8, 0, 8.6),
+			new THREE.Vector3(50.85, 0, 8.6),
 			atControl,
 			1.88
 		);
@@ -1294,7 +1308,7 @@ export function advanceTreatmentJourney() {
 			JOURNEY.therapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(50.8, 0, 10.2),
+			new THREE.Vector3(51.1, 0, 10.2),
 			atControl,
 			1.9,
 			{
@@ -1458,7 +1472,7 @@ function beginMiaConsultSequence() {
 					JOURNEY.newPatient,
 					'lobby',
 					'consult',
-					new THREE.Vector3(-17.2, 0, -6.35),
+					new THREE.Vector3(-17.2, 0, -5.9),
 					() => {
 						JOURNEY.stage = 'consult';
 						JOURNEY.busy = true;
@@ -1502,7 +1516,8 @@ function beginMiaConsultSequence() {
 				);
 			}, 8200);
 		},
-		1.2
+		1.2,
+		{ sit: true }
 	);
 }
 function beginMiaFirstTreatmentReturn() {
@@ -1662,7 +1677,8 @@ function beginMiaFirstTreatmentPickup() {
 				updateJourneyUI();
 			}, 7600);
 		},
-		1.25
+		1.25,
+		{ sit: true }
 	);
 }
 function beginMiaFirstTreatmentEscort() {
@@ -1824,7 +1840,7 @@ function beginMiaFirstTreatmentEscort() {
 		JOURNEY.therapist,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(69.8, 0, -15.25),
+		new THREE.Vector3(69.8, 0, -15.03),
 		atChange,
 		1.48
 	);
@@ -1832,7 +1848,7 @@ function beginMiaFirstTreatmentEscort() {
 		JOURNEY.newPatient,
 		'lobby',
 		'vault1',
-		new THREE.Vector3(68.8, 0, -14.15),
+		new THREE.Vector3(69.0, 0, -14.15),
 		atChange,
 		1.5,
 		{
@@ -1877,7 +1893,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'consult',
 			'education',
-			new THREE.Vector3(-40.9, 0, -6.1),
+			new THREE.Vector3(-40.9, 0, -5.4),
 			() => {
 				JOURNEY.stage = 'education';
 				JOURNEY.busy = true;
@@ -2057,7 +2073,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.navigator,
 			'education',
 			'ctsim',
-			new THREE.Vector3(38.0, 0, -4.7),
+			new THREE.Vector3(38.3, 0, -4.7),
 			atChanging,
 			1.43
 		);
@@ -2065,7 +2081,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'education',
 			'ctsim',
-			new THREE.Vector3(37.15, 0, -4.7),
+			new THREE.Vector3(37.15, 0, -4.4),
 			atChanging,
 			1.45,
 			{
@@ -2478,7 +2494,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.vaultTherapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(50.8, 0, 8.6),
+			new THREE.Vector3(50.85, 0, 8.6),
 			atControl,
 			1.82
 		);
@@ -2486,7 +2502,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.therapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(50.8, 0, 10.2),
+			new THREE.Vector3(51.1, 0, 10.2),
 			atControl,
 			1.84,
 			{
@@ -2690,7 +2706,7 @@ function advanceNewPatientJourney() {
 				JOURNEY.therapist,
 				'vault1',
 				'lobby',
-				new THREE.Vector3(-0.65, 0, 3.65),
+				new THREE.Vector3(-0.4, 0, 4.1),
 				lobbyArrival,
 				1.43
 			);

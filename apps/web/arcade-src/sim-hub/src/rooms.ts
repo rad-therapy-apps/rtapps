@@ -466,10 +466,12 @@ export function addCirculationProps() {
 	scene.add(iv2);
 	const hall = new THREE.Group();
 	scene.add(hall);
-	aedWallBox(hall, -4.6, 1.62, 3.02, Math.PI, 'AED');
+	// on the lobby's west wall (inner face x = -11.91), facing into the lobby
+	aedWallBox(hall, -11.84, 1.62, 5.0, Math.PI / 2, 'AED');
 	aedWallBox(hall, 13.9, 1.62, 3.92, Math.PI, 'AED');
 	aedWallBox(hall, 3.05, 1.62, -12.92, 0, 'AED');
-	aedWallBox(hall, 60.05, 1.62, 6.82, -Math.PI / 2, 'AED');
+	// on the treatment corridor's west wall (face x = 58.08), facing east into the corridor
+	aedWallBox(hall, 58.15, 1.62, 6.82, Math.PI / 2, 'AED');
 	const cameraPole = medCartObject(0.82, 0x98adb7);
 	cameraPole.position.set(61.6, 0, -23.2);
 	cameraPole.rotation.y = Math.PI / 2;
@@ -1045,7 +1047,9 @@ export function furnish(room: Room) {
 			for (let i = -1; i <= 1; i++) {
 				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
 			}
-			monitor(g, room.x, 1.7, room.z + 3.9, 0, 1.8, 0.95);
+			// flush on the door wall's inner face (z = room.z + 4.42), beside the doorway: 0.9 m clear of
+			// the door opening (to x = room.x + 1.3) and of the corner
+			monitor(g, room.x + 3.11, 1.7, room.z + 4.392, 0, 1.8, 0.95);
 			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
@@ -1111,7 +1115,8 @@ export function furnish(room: Room) {
 			break;
 		case 'dosimetry':
 			workstationRow(g, room.x, room.z - 2.0, 4, 2.3);
-			monitor(g, room.x, 2.2, room.z + 4.55, 0, 2.5, 1.3);
+			// flush on the +z wall's inner face (z = room.z + 7.42)
+			monitor(g, room.x, 2.2, room.z + 7.392, 0, 2.5, 1.3);
 			desk(g, room.x, room.z + 1.4, 4.4, 1.0);
 			cabinetBank(g, room.x - 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
 			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
@@ -1550,7 +1555,17 @@ export function buildVaultMazeEntries() {
 			? box(0.22, 0.02, 2.65, std(0xff737b, 0.52, 0.02), 71.85, 0.07, z + 1.5)
 			: box(0.22, 0.02, 2.65, std(0xff737b, 0.52, 0.02), 71.85, 0.07, z - 1.5);
 		scene.add(turnStripe);
-		const marker = box(0.24, 3.0, 0.05, std(0x88434a, 0.65, 0.02), 63.88, 2.0, z);
+		// entrance marker: a stripe flush on the corridor face of the vault wall (x = 63.71), beside the
+		// doorway on the main corridor's side
+		const marker = box(
+			0.05,
+			3.0,
+			0.24,
+			std(0x88434a, 0.65, 0.02),
+			63.685,
+			2.0,
+			z - Math.sign(z) * halfWidth
+		);
 		scene.add(marker);
 	}
 	// Vault 1 turns toward higher Z into the open treatment space; Vault 2 mirrors toward lower Z.

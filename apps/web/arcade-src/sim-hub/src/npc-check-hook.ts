@@ -6,6 +6,7 @@ import { renderer, labelRenderer, scene } from './scene';
 import { ROOMS } from './rooms';
 import { S } from './state';
 import { getColliders } from './walk';
+import { doors } from './main';
 import {
 	movers,
 	dutyActors,
@@ -25,6 +26,9 @@ import {
 	journeyActorRoom,
 	moveJourneyActor,
 	resetTreatmentJourney,
+	setJourneyKind,
+	startTreatmentJourney,
+	advanceTreatmentJourney,
 	workflowTransitions
 } from './journey';
 
@@ -63,6 +67,8 @@ export function installNpcCheckHook(
 			/** The simulation state; the screenshot tool sets simSec so poses do not depend on real time. */
 			state: S,
 			colliders: getColliders(),
+			/** The doors (main.ts, run by walk.ts), by room id: each `group` holds every mesh of one door. */
+			doors,
 			movers,
 			castActors,
 			stepSimulation,
@@ -71,6 +77,10 @@ export function installNpcCheckHook(
 			},
 			moveJourneyActor,
 			resetTreatmentJourney,
+			/** The journey's own sequence: the check drives both journeys to 'done'. */
+			setJourneyKind,
+			startTreatmentJourney,
+			advanceTreatmentJourney,
 			journeyActorRoom,
 			startActorHandoff,
 			shouldHold,
