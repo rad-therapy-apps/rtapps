@@ -2,7 +2,8 @@
 //
 // Imports the built sim-hub bundle under stubbed browser globals (scripts/lib/browser-stubs.mjs)
 // with `?npccheck`, which makes the page expose `window.__NPC` (src/npc-check-hook.ts), then drives
-// `stepSimulation` on a simulated clock (performance.now is replaced by it, Math.random is seeded).
+// `stepSimulation` on a simulated clock (performance.now and setTimeout run on it, Math.random is
+// seeded), so the journey's own timed sequence runs headlessly at simulation speed.
 //
 //   a  Walls     every mover loop (500 samples) keeps clear of every collider: people by 0.3 m (the
 //                escort's chair and pusher both), vehicles by their oriented footprint plus 0.2 m,
@@ -35,14 +36,44 @@
 //                handoffs, "Have a seat", Mia's lobby journey move) keeps its leg column (0.15 m around
 //                the soles' midpoint, soles to knees) out of the furniture for the first 30 frames
 //
+// Checks k, l and m measure people against furniture (scripts/lib/furniture.mjs: every visible mesh
+// except people, movers, floors, walls, ceilings, mats, glass panes, planes and wall items above
+// 2 m) by their body (the legs and torso, sampled on a grid of points over each mesh). They run from
+// the people as the page built them, at the journey reset; hand-overs run as the page runs them, and
+// both patient journeys are driven through their own sequence to the end ('done').
+//   k  Rest clear  the body is at least 0.05 m from furniture (6 x 6 x 6 points per mesh; a sitter's
+//                own seat left out) for every cast, duty and journey actor 10 frames after the
+//                journey reset, every hand-over's actor at its end (each run alone) and every journey
+//                move's actor at its end
+//   l  Routes    on every frame of every hand-over (each run alone) and journey move, stand-up
+//                included, the body is at most 0.02 m into furniture (4 x 4 x 4 points per mesh;
+//                the seats within 0.6 m of the move's start, its end or the actor's own seat left
+//                out); mover loops: for the movers that walk on their loop point, a 0.2 m ring at
+//                heights 0.1, 0.5, 0.9 and 1.3 m is at most 0.02 m into furniture at 500 points
+//   m  Occupancy  people at rest (lying patients aside) are at least 0.5 m apart, root to root in
+//                x/z: after the journey reset; each hand-over's end against its target room's
+//                residents, run alone and started together with every other hand-over into that
+//                room; each journey move's end against everyone at rest then. At each of those
+//                moments a seat anchor holds one sitter and nobody standing is within 0.3 m of an
+//                occupied one
+//
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
-//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e,f,g,h,i,j]
+//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e,f,g,h,i,j,k,l,m]
+//     --svg also draws the furniture, every check l route and a red dot at each k or l failure.
 // Exit codes: 0 every selected check passes; 1 any fails; 2 setup error.
 // Output: `NPC CHECK <letter> PASS|FAIL: <summary>` per check, then at most 30 detail lines per failing check.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { installBrowserStubs } from './lib/browser-stubs.mjs';
+import {
+	buildFurniture,
+	sdf,
+	bodyPoints,
+	seatMeshes,
+	measure,
+	describe
+} from './lib/furniture.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -51,10 +82,13 @@ const argVal = (flag) => {
 	return i >= 0 ? argv[i + 1] : null;
 };
 const svgPath = argVal('--svg');
-const only = new Set((argVal('--only') || 'a,b,c,d,e,f,g,h,i,j').split(',').map((x) => x.trim()));
+const LETTERS = 'abcdefghijklm';
+const only = new Set((argVal('--only') || [...LETTERS].join(',')).split(',').map((x) => x.trim()));
 for (const x of only) {
-	if (!'abcdefghij'.includes(x) || x.length !== 1) {
-		console.error(`NPC CHECK error: unknown check '${x}' in --only (use a,b,c,d,e,f,g,h,i,j)`);
+	if (!LETTERS.includes(x) || x.length !== 1) {
+		console.error(
+			`NPC CHECK error: unknown check '${x}' in --only (use ${[...LETTERS].join(',')})`
+		);
 		process.exit(2);
 	}
 }
@@ -92,6 +126,25 @@ function mulberry32(seed) {
 // still reads the wall clock (the game's own timers, travel and room timing) sees simulated time too.
 let simNow = 1000;
 Object.defineProperty(globalThis.performance, 'now', { value: () => simNow, configurable: true });
+// The page's timers (the journey's later(), the door timers) run on the simulated clock too: they are
+// queued against simNow and step() runs every one that is due, earliest first, before the frame.
+const timers = new Map();
+let timerId = 0;
+globalThis.setTimeout = (fn, ms = 0, ...args) => {
+	timers.set(++timerId, { at: simNow + (Number(ms) || 0), fn, args });
+	return timerId;
+};
+globalThis.clearTimeout = (id) => timers.delete(id);
+function runDueTimers() {
+	for (;;) {
+		let next = null;
+		for (const [id, t] of timers)
+			if (t.at <= simNow && (!next || t.at < next[1].at)) next = [id, t];
+		if (!next) return;
+		timers.delete(next[0]);
+		next[1].fn(...next[1].args);
+	}
+}
 Math.random = mulberry32(1);
 // The stub GL reports no optional extensions, so three.js warns once per missing one. Drop exactly
 // that warning; every other warning still prints.
@@ -122,6 +175,7 @@ if (!NPC) setupError('window.__NPC missing (hook not installed with ?npccheck)')
 NPC.disableRendering();
 const step = () => {
 	simNow += STEP_MS;
+	runDueTimers();
 	NPC.stepSimulation(simNow);
 };
 const stepFor = (seconds) => {
@@ -310,7 +364,7 @@ function driveHandoffs(hs, tSec) {
 		}
 	}
 }
-function driveJourney(script, tSec) {
+function driveJourneyScript(script, tSec) {
 	for (const sc of script) {
 		if (sc.moving || tSec - sc.idleSince < MOVE_PAUSE_S || !sc.cur) continue;
 		let to = sc.rooms[sc.i++ % sc.rooms.length];
@@ -404,7 +458,7 @@ function checkSpacing() {
 	let total = 0;
 	for (let s = 0; s < SPACING_STEPS; s++) {
 		const tSec = (s * STEP_MS) / 1000;
-		driveJourney(script, tSec);
+		driveJourneyScript(script, tSec);
 		driveHandoffs(hand, tSec);
 		step();
 		NPC.movers.forEach((m, i) => {
@@ -1500,6 +1554,464 @@ function checkStandUp() {
 	};
 }
 
+// ------------------------------------------------- people and furniture (k, l, m)
+const REST_CLEAR = 0.05, // (k) the least clearance between the body and furniture at rest
+	REST_GRID = 6, // (k) body points per axis per mesh
+	ROUTE_DEPTH = 0.02, // (l) the most the body may be inside furniture on any frame
+	ROUTE_GRID = 4, // (l) body points per axis per mesh
+	ROUTE_SEAT_R = 0.6, // (l) seats this close to a move's start, end or own seat are left out
+	RING_R = 0.2, // (l) mover loops: the ring around the walker, with a point every 45 deg
+	RING_DIRS = 8,
+	RING_HEIGHTS = [0.1, 0.5, 0.9, 1.3],
+	REST_GAP = 0.5, // (m) the least distance between two people at rest, root to root in x/z
+	SEAT_KEEP = 0.3, // (m) the least distance from someone standing to an occupied seat anchor
+	REST_FRAMES = 10, // frames after the journey reset before people are taken at rest
+	HANDOFF_FRAMES = 5, // frames after the journey reset before hand-overs start
+	CHECKIN_DESK = { x: -4.5, z: -2.05 }, // where "Have a seat" starts: from a lobby chair it is a no-op
+	JOURNEY_LIMIT_S = 40 * 60;
+// The movers whose person figure walks on the loop point itself; the escort pushes its wheelchair and
+// the tech cart's person walks behind the cart, so their footprints are check (a)'s.
+const RING_MOVERS = ['walker', 'visitor', 'therapist', 'ctRunner', 'linacRunner', 'hdrRunner'];
+const furnitureFailures = []; // (k) and (l) failure positions, for --svg
+const cm = (m) => `${(m * 100).toFixed(1)} cm`;
+const xz = (p) => `(${p.x.toFixed(2)}, ${p.z.toFixed(2)})`;
+const roomAt = (x, z) =>
+	NPC.ROOMS.find((r) => Math.abs(x - r.x) <= r.w / 2 && Math.abs(z - r.z) <= r.d / 2)?.id ||
+	'the corridors';
+
+// The people as the page built them: every room cast, duty and journey figure, with each node's
+// transform and visibility and the figure's userData. Taken before any check runs, because checks
+// (b) and (g) leave cast actors where their moves end and the journey reset only puts back its own
+// actors.
+function snapshotPeople() {
+	const roots = new Set([
+		...Object.values(NPC.ROOM_CAST).flatMap((arr) => arr.map((e) => e.g)),
+		...NPC.castActors().map((c) => c.g),
+		...NPC.journeyActors()
+	]);
+	return [...roots].map((g) => {
+		const nodes = [];
+		g.traverse((o) =>
+			nodes.push({
+				o,
+				p: o.position.clone(),
+				q: o.quaternion.clone(),
+				s: o.scale.clone(),
+				v: o.visible
+			})
+		);
+		return { g, parent: g.parent, data: { ...g.userData }, nodes };
+	});
+}
+let peopleAtLoad = null;
+// Puts the people back as the page built them, then resets the journey, with no hand-over under way.
+function resetPeople() {
+	for (const { g, parent, data, nodes } of peopleAtLoad) {
+		if (parent && g.parent !== parent) parent.add(g);
+		for (const n of nodes) {
+			n.o.position.copy(n.p);
+			n.o.quaternion.copy(n.q);
+			n.o.scale.copy(n.s);
+			n.o.visible = n.v;
+		}
+		for (const k of Object.keys(g.userData)) if (!(k in data)) delete g.userData[k];
+		Object.assign(g.userData, data);
+	}
+	NPC.resetTreatmentJourney(true);
+	NPC.handoffTransitions.length = 0; // the reset leaves hand-overs alone
+}
+let furnitureCache = null;
+// The furniture, built once at the journey reset while every room shows: the page hides the content
+// of the rooms its camera cannot see (visibility.ts), and hidden meshes are not furniture.
+function furniture() {
+	if (furnitureCache) return furnitureCache;
+	resetPeople();
+	for (let i = 0; i < REST_FRAMES; i++) step();
+	const culled = NPC.scene.children.filter((o) => o.name.startsWith('room-content:') && !o.visible);
+	if (culled.length)
+		setupError(`furniture: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
+	return (furnitureCache = buildFurniture(NPC));
+}
+// Names for people: the cast ids castActors gives (room:kind:index, duty:index), else the JOURNEY key.
+function personIds() {
+	const ids = new Map();
+	for (const c of NPC.castActors()) ids.set(c.g, c.id);
+	for (const [k, v] of Object.entries(NPC.JOURNEY))
+		if (v && v.isObject3D && !ids.has(v)) ids.set(v, `JOURNEY.${k}`);
+	return ids;
+}
+function person(g, ids) {
+	const p = worldPos(g),
+		id = ids.get(g) || 'person';
+	return { g, id: `${id} (${label(g, id)})`, x: p.x, z: p.z, seated: isSeatedPose(g) };
+}
+// People at rest now: the visible cast, duty and journey actors, less lying patients (check h) and
+// anyone in a move.
+function peopleAtRest(ids) {
+	const moving = new Set(
+		[...NPC.workflowTransitions, ...NPC.handoffTransitions].map((t) => t.actor)
+	);
+	return [...ids.keys()]
+		.filter(
+			(g) => NPC.visibleInTree(g) && !g.userData.lying && !g.userData.inHandoff && !moving.has(g)
+		)
+		.map((g) => person(g, ids));
+}
+
+// ------------------------------------------------------------ journey driver
+// Drives one patient journey ('treatment' or 'newpatient') through the page's own sequence, from the
+// reset to 'done': on every frame where the journey waits (not busy, no camera travel) it is
+// advanced. onFrame runs after every frame.
+function driveJourney(kind, onFrame) {
+	const J = NPC.JOURNEY;
+	NPC.resetTreatmentJourney(true);
+	NPC.setJourneyKind(kind, true);
+	NPC.startTreatmentJourney();
+	for (let f = 0; J.stage !== 'done'; f++) {
+		if (f * STEP_MS > JOURNEY_LIMIT_S * 1000)
+			setupError(
+				`the ${kind} journey did not reach 'done' within ${JOURNEY_LIMIT_S / 60} simulated minutes (stage '${J.stage}')`
+			);
+		step();
+		onFrame();
+		if (!J.busy && !NPC.state.travel && J.stage !== 'done') NPC.advanceTreatmentJourney();
+	}
+}
+
+// ---------------------------------------------------------- moves (k, l, m)
+// Starts the hand-overs `picks` ([key, index] pairs) together, from the journey reset, as the page
+// starts them, and steps until each has ended: no hand-over entry refers to its actor and the actor
+// is out of its hand-over. "Have a seat" starts from the check-in desk. onFrame(run) runs on every
+// frame of each hand-over still under way.
+function runHandoffs(picks, onFrame = null) {
+	resetPeople();
+	for (let i = 0; i < HANDOFF_FRAMES; i++) step();
+	const runs = picks.map(([key, idx]) => {
+		const h = NPC.HANDOFFS[key][idx],
+			actor = castActor(key, h),
+			name = `hand-over ${key}[${idx}] -> ${h.target}`;
+		if (h === NPC.HANDOFFS.lobby[1]) {
+			NPC.setActorSeated(actor, false);
+			actor.position.set(CHECKIN_DESK.x, 0, CHECKIN_DESK.z);
+		}
+		const start = worldPos(actor),
+			own = actor.userData.seated ? actor.userData.seatAnchor : null;
+		NPC.startActorHandoff(key, h);
+		const entry = NPC.handoffTransitions.find((t) => t.actor === actor);
+		if (!entry) setupError(`${name}: no move started`);
+		return { key, idx, h, actor, name, start, own, entry, ended: false };
+	});
+	const underWay = (r) =>
+		NPC.handoffTransitions.some((t) => t.actor === r.actor) || r.actor.userData.inHandoff;
+	for (let f = 0; runs.some((r) => !r.ended); f++) {
+		if (f > 30 * 60)
+			setupError(
+				`${runs
+					.filter((r) => !r.ended)
+					.map((r) => r.name)
+					.join(', ')}: still under way after 60 s`
+			);
+		step();
+		for (const r of runs)
+			if (!r.ended) {
+				if (underWay(r)) onFrame?.(r);
+				else r.ended = true;
+			}
+	}
+	return runs;
+}
+// (l) a move to follow. The seats it may touch: those within ROUTE_SEAT_R of where it starts, of its
+// curve's ends and of the seat its actor rises from.
+function newRoute(F, kind, name, actor, entry, start, own) {
+	const pts = [start, entry.curve.getPoint(0), entry.curve.getPoint(1)];
+	if (own) pts.push(NPC.seatInWorld(own));
+	const near = NPC.SEATS.map(NPC.seatInWorld).filter((s) =>
+		pts.some((p) => Math.hypot(s.x - p.x, s.z - p.z) < ROUTE_SEAT_R)
+	);
+	return { kind, name, actor, skip: seatMeshes(F, near), frames: 0, worst: 0, at: null, path: [] };
+}
+// (l) one frame of a move: the body (ROUTE_GRID points per axis per mesh) against furniture.
+function followRoute(F, r) {
+	const frame = r.frames++;
+	if (!NPC.visibleInTree(r.actor)) return;
+	const p = worldPos(r.actor),
+		m = measure(F, r.actor, r.skip, bodyPoints(r.actor, ROUTE_GRID));
+	r.path.push([p.x, p.z]);
+	if (m.depth > r.worst) {
+		r.worst = m.depth;
+		r.at = { frame, x: p.x, z: p.z, hit: m.hits[0] };
+	}
+}
+// (k) one person: its body (REST_GRID points per axis per mesh) against furniture, less the seat it
+// sits on.
+function restReading(F, moment, p) {
+	const own = p.g.userData.seated && p.g.userData.seatAnchor,
+		skip = own ? seatMeshes(F, [NPC.seatInWorld(own)]) : new Set();
+	return { moment, ...p, m: measure(F, p.g, skip, bodyPoints(p.g, REST_GRID)) };
+}
+// (m) a problem, kept once with the number of moments it was seen at.
+function crowd(R, key, text) {
+	const c = R.crowding.get(key);
+	if (c) c.n++;
+	else R.crowding.set(key, { text, n: 1 });
+}
+// (m) one moment: each of `ends` against the other ends and each of `others`, then the seat anchors
+// over `everyone` at rest.
+function occupancy(R, kind, moment, ends, others, everyone) {
+	R.moments[kind]++;
+	ends.forEach((a, i) => {
+		for (const b of [...ends.slice(i + 1), ...others]) {
+			const d = Math.hypot(a.x - b.x, a.z - b.z);
+			if (d < REST_GAP)
+				crowd(
+					R,
+					`${a.id} ${xz(a)} ${b.id} ${xz(b)}`,
+					`${moment}: ${a.id} at ${xz(a)} is ${d.toFixed(2)} m from ${b.id} at ${xz(b)} (limit ${REST_GAP} m)`
+				);
+		}
+	});
+	const seats = NPC.SEATS.map(NPC.seatInWorld),
+		held = new Map();
+	for (const p of everyone) {
+		if (!p.seated) continue;
+		let best = null;
+		seats.forEach((s, i) => {
+			const d = Math.hypot(s.x - p.x, s.z - p.z);
+			if (d <= SEAT_RADIUS && (!best || d < best.d)) best = { i, d };
+		});
+		if (best) held.set(best.i, [...(held.get(best.i) || []), p]);
+	}
+	for (const [i, sitters] of held) {
+		const s = seats[i];
+		if (sitters.length > 1)
+			crowd(
+				R,
+				`seat ${i} ${sitters.map((p) => p.id).join(' ')}`,
+				`${moment}: the ${s.kind} seat anchor at ${xz(s)} holds ${sitters.length} sitters: ${sitters.map((p) => p.id).join(', ')}`
+			);
+		for (const p of everyone) {
+			const d = Math.hypot(p.x - s.x, p.z - s.z);
+			if (!p.seated && d < SEAT_KEEP)
+				crowd(
+					R,
+					`seat ${i} ${p.id}`,
+					`${moment}: ${p.id} stands at ${xz(p)}, ${d.toFixed(2)} m from the ${s.kind} seat anchor at ${xz(s)} that ${sitters[0].id} sits on (limit ${SEAT_KEEP} m)`
+				);
+		}
+	}
+}
+// (k) and (m) at the end of a move: the actor's rest clearance, and its distance from the people at
+// rest (only the residents of `room` when given) and from the seats. A hidden or lying actor is left
+// out.
+function moveEnd(R, kind, moment, g, room) {
+	if (!NPC.visibleInTree(g) || g.userData.lying) {
+		R.hidden.push(moment);
+		return;
+	}
+	const ids = personIds(),
+		me = person(g, ids),
+		others = peopleAtRest(ids).filter((p) => p.g !== g);
+	R.ends.push(restReading(R.F, moment, me));
+	occupancy(
+		R,
+		kind,
+		moment,
+		[me],
+		room ? others.filter((p) => roomAt(p.x, p.z) === room) : others,
+		[me, ...others]
+	);
+}
+let runsCache = null;
+// What (k), (l) and (m) read, gathered in one pass: the people at rest after the journey reset;
+// every hand-over run alone (followed frame by frame, then its end); the hand-overs into each room
+// started together (their ends); both journeys (each move followed frame by frame, then its end).
+function furnitureRuns() {
+	if (runsCache) return runsCache;
+	const F = furniture(),
+		R = (runsCache = {
+			F,
+			rest: [],
+			ends: [],
+			routes: [],
+			hidden: [],
+			crowding: new Map(),
+			moments: { rest: 0, alone: 0, together: 0, journey: 0 }
+		});
+	resetPeople();
+	for (let i = 0; i < REST_FRAMES; i++) step();
+	const ids = personIds(),
+		atRest = peopleAtRest(ids),
+		moment0 = `at rest ${REST_FRAMES} frames after the journey reset`;
+	for (const p of atRest) R.rest.push(restReading(F, moment0, p));
+	occupancy(R, 'rest', moment0, atRest, [], atRest);
+	// each hand-over alone; the hand-overs into one room with different actors are grouped
+	const byTarget = new Map();
+	for (const [key, list] of Object.entries(NPC.HANDOFFS))
+		list.forEach((h, idx) => {
+			const [run] = runHandoffs([[key, idx]], (r) => {
+				r.route ||= newRoute(F, 'hand-over', r.name, r.actor, r.entry, r.start, r.own);
+				followRoute(F, r.route);
+			});
+			R.routes.push(run.route);
+			moveEnd(R, 'alone', `${run.name} (alone), at its end`, run.actor, h.target);
+			const group = byTarget.get(h.target) || [];
+			if (!group.some(([k, i]) => castActor(k, NPC.HANDOFFS[k][i]) === run.actor))
+				group.push([key, idx]);
+			byTarget.set(h.target, group);
+		});
+	// the hand-overs into one room started together
+	for (const [target, picks] of byTarget) {
+		if (picks.length < 2) continue;
+		const runs = runHandoffs(picks),
+			ids = personIds(),
+			actors = new Set(runs.map((r) => r.actor)),
+			ends = runs.map((r) => {
+				const p = person(r.actor, ids);
+				return { ...p, id: `${p.id}, the end of ${r.key}[${r.idx}]` };
+			}),
+			others = peopleAtRest(ids).filter((p) => !actors.has(p.g));
+		occupancy(
+			R,
+			'together',
+			`hand-overs into ${target} started together (${picks.map(([k, i]) => `${k}[${i}]`).join(', ')}), at their end`,
+			ends,
+			others.filter((p) => roomAt(p.x, p.z) === target),
+			[...ends, ...others]
+		);
+	}
+	// both journeys, every move from the frame its entry appears to the frame it leaves
+	for (const kind of ['treatment', 'newpatient']) {
+		resetPeople();
+		const live = new Map();
+		let n = 0;
+		driveJourney(kind, () => {
+			for (const t of NPC.workflowTransitions)
+				if (!live.has(t)) {
+					const who = personIds().get(t.actor) || label(t.actor, 'actor'),
+						own = t.rise || t.actor.userData.seated ? t.actor.userData.seatAnchor : null,
+						name = `${kind} journey move ${++n} (${NPC.JOURNEY.stage}): ${who} ${t.fromId} -> ${t.toId}`,
+						route = newRoute(F, 'journey move', name, t.actor, t, worldPos(t.actor), own);
+					live.set(t, route);
+					R.routes.push(route);
+				}
+			for (const [t, route] of live) {
+				if (NPC.workflowTransitions.includes(t)) followRoute(F, route);
+				else {
+					live.delete(t);
+					moveEnd(R, 'journey', `${route.name}, at its end`, t.actor, null);
+				}
+			}
+		});
+		if (live.size)
+			setupError(`the ${kind} journey reached 'done' with ${live.size} moves still under way`);
+	}
+	NPC.setJourneyKind('treatment', true);
+	resetPeople();
+	return R;
+}
+
+// ------------------------------------------------------------ (k) rest clear
+function checkRestClearance() {
+	const R = furnitureRuns(),
+		all = [...R.rest, ...R.ends],
+		bad = all
+			.filter((e) => e.m.clearance < REST_CLEAR)
+			.sort((a, b) => a.m.clearance - b.m.clearance),
+		badRest = bad.filter((e) => R.rest.includes(e)).length,
+		where = ({ m }) =>
+			m.hits.length
+				? `${cm(m.hits[0].depth)} into ${describe(m.hits[0].rec)} (${m.hits[0].part})`
+				: `${cm(m.clearance)} from ${describe(m.nearest.rec)} (${m.nearest.part})`;
+	furnitureFailures.push(...bad);
+	return {
+		pass: bad.length === 0,
+		summary: bad.length
+			? `${bad.length} of ${all.length} people at rest are inside furniture or less than ${REST_CLEAR} m from it: ${badRest} of ${R.rest.length} after the journey reset, ${bad.length - badRest} of ${R.ends.length} at the end of a hand-over or journey move`
+			: `all ${all.length} people at rest keep at least ${REST_CLEAR} m from furniture: ${R.rest.length} after the journey reset, ${R.ends.length} at the end of a hand-over or journey move`,
+		detail: bad.map((e) => `${e.moment}: ${e.id} at ${xz(e)}: ${where(e)}`),
+		info: [
+			`not measured: lying patients (check h)${R.hidden.length ? `; ${R.hidden.length} move ends with the actor hidden or lying` : ''}`
+		]
+	};
+}
+
+// --------------------------------------------------------- (l) routes clear
+// Mover loops: a RING_R ring (RING_DIRS points at each of RING_HEIGHTS) around SAMPLES points of each
+// RING_MOVERS loop, against furniture; the deepest point per mover.
+function moverRings(F) {
+	return RING_MOVERS.map((id) => {
+		const m = NPC.movers[names.indexOf(id)];
+		if (!m) setupError(`mover '${id}' not found`);
+		let worst = 0,
+			at = null;
+		for (let i = 0; i < SAMPLES; i++) {
+			const c = m.curve.getPointAt(i / SAMPLES);
+			for (const y of RING_HEIGHTS)
+				for (let k = 0; k < RING_DIRS; k++) {
+					const a = (2 * Math.PI * k) / RING_DIRS,
+						q = { x: c.x + RING_R * Math.cos(a), y, z: c.z + RING_R * Math.sin(a) };
+					for (const idx of F.near(q.x, q.z)) {
+						const d = -sdf(F.list[idx], q);
+						if (d > worst) {
+							worst = d;
+							at = { x: c.x, z: c.z, y, rec: F.list[idx] };
+						}
+					}
+				}
+		}
+		return { id, worst, at };
+	});
+}
+function checkRoutes() {
+	const R = furnitureRuns(),
+		bad = R.routes.filter((r) => r.worst > ROUTE_DEPTH).sort((a, b) => b.worst - a.worst),
+		rings = moverRings(R.F),
+		badRings = rings.filter((r) => r.worst > ROUTE_DEPTH),
+		count = (list, kind) => list.filter((r) => r.kind === kind).length,
+		routes = `${count(R.routes, 'hand-over')} hand-overs and ${count(R.routes, 'journey move')} journey moves`;
+	furnitureFailures.push(...bad.map((r) => r.at), ...badRings.map((r) => r.at));
+	return {
+		pass: bad.length === 0 && badRings.length === 0,
+		summary: [
+			bad.length
+				? `${bad.length} of ${R.routes.length} routes go more than ${ROUTE_DEPTH} m into furniture (${count(bad, 'hand-over')} hand-overs, ${count(bad, 'journey move')} journey moves)`
+				: `every frame of ${routes} keeps the body within ${ROUTE_DEPTH} m of furniture`,
+			badRings.length
+				? `mover loops: the ${RING_R} m ring of ${badRings.length} of ${rings.length} walkers goes more than ${ROUTE_DEPTH} m into furniture`
+				: `mover loops: the ${RING_R} m ring of ${rings.length} walkers stays within ${ROUTE_DEPTH} m of furniture`
+		].join('; '),
+		detail: [
+			...badRings.map(
+				(r) =>
+					`mover loop ${r.id}: the ${RING_R} m ring at ${r.at.y} m high is ${cm(r.worst)} into ${describe(r.at.rec)}, at loop point ${xz(r.at)} in ${roomAt(r.at.x, r.at.z)}`
+			),
+			...bad.map(
+				(r) =>
+					`${r.name}: ${cm(r.worst)} into ${describe(r.at.hit.rec)} (${r.at.hit.part}) at frame ${r.at.frame} of ${r.frames}, at ${xz(r.at)} in ${roomAt(r.at.x, r.at.z)}`
+			)
+		],
+		info: [
+			`routes followed: ${routes}`,
+			`mover loop rings, deepest: ${rings.map((r) => `${r.id} ${cm(r.worst)}`).join(', ')}; the escort and the tech cart are left to check (a)`
+		]
+	};
+}
+
+// ------------------------------------------------------------ (m) occupancy
+function checkOccupancy() {
+	const R = furnitureRuns(),
+		rows = [...R.crowding.values()],
+		n = R.moments,
+		moments = `${n.rest + n.alone + n.together + n.journey} moments (after the journey reset, ${n.alone} hand-over ends alone, ${n.together} rooms' hand-overs started together, ${n.journey} journey-move ends)`;
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} occupancy problems over ${moments}`
+			: `over ${moments}: people at rest at least ${REST_GAP} m apart, one sitter per seat anchor, nobody standing within ${SEAT_KEEP} m of an occupied one`,
+		detail: rows.map((c) => (c.n > 1 ? `${c.text} (seen at ${c.n} moments)` : c.text))
+	};
+}
+
 // ------------------------------------------------------------------ driver
 const CHECKS = {
 	a: checkWalls,
@@ -1511,10 +2023,14 @@ const CHECKS = {
 	g: checkSeated,
 	h: checkLying,
 	i: checkWheelchair,
-	j: checkStandUp
+	j: checkStandUp,
+	k: checkRestClearance,
+	l: checkRoutes,
+	m: checkOccupancy
 };
+peopleAtLoad = snapshotPeople();
 let failed = 0;
-for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
+for (const letter of LETTERS) {
 	if (!only.has(letter)) continue;
 	let r;
 	try {
@@ -1526,6 +2042,7 @@ for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
 	if (!r.pass) {
 		failed++;
 		for (const line of r.detail.slice(0, MAX_DETAIL)) console.log(`  ${line}`);
+		if (r.detail.length > MAX_DETAIL) console.log(`  ... and ${r.detail.length - MAX_DETAIL} more`);
 	}
 	for (const line of r.info || []) console.log(`  info: ${line}`);
 }
@@ -1575,6 +2092,11 @@ if (svgPath) {
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(minX - pad)} ${f(minZ - pad)} ${f(W)} ${f(H)}" width="${Math.round(W * 12)}" height="${Math.round(H * 12)}">`,
 		`<rect x="${f(minX - pad)}" y="${f(minZ - pad)}" width="${f(W)}" height="${f(H)}" fill="#fff"/>`
 	];
+	// furniture (checks k, l and m): each mesh's x/z bounds
+	for (const { b } of furniture().list)
+		out.push(
+			`<rect x="${f(b.min.x)}" y="${f(b.min.z)}" width="${f(b.max.x - b.min.x)}" height="${f(b.max.z - b.min.z)}" fill="#efe8da" stroke="#d6cbb4" stroke-width="0.02"/>`
+		);
 	for (const c of NPC.colliders)
 		out.push(
 			`<rect x="${f(c.x - c.hw)}" y="${f(c.z - c.hd)}" width="${f(2 * c.hw)}" height="${f(2 * c.hd)}" fill="#bbb" stroke="#888" stroke-width="0.03"/>`
@@ -1585,10 +2107,22 @@ if (svgPath) {
 			`<text x="${f(l.pts[0][0])}" y="${f(l.pts[0][1] - 0.3)}" font-size="1.1" fill="${l.color}" font-family="sans-serif">${l.name}</text>`
 		);
 	}
+	// check (l) routes: the actor's position on every frame, one colour per route (hover for its name)
+	const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+	(runsCache?.routes || []).forEach((r, i) => {
+		if (r.path.length < 2) return;
+		out.push(
+			`<polyline points="${r.path.map((p) => `${f(p[0])},${f(p[1])}`).join(' ')}" fill="none" stroke="hsl(${((i * 137.5) % 360).toFixed(0)}, 75%, 40%)" stroke-width="0.05"><title>${esc(r.name)}</title></polyline>`
+		);
+	});
 	for (const h of wallHits)
 		out.push(`<circle cx="${f(h.x)}" cy="${f(h.z)}" r="0.22" fill="#e00"/>`);
 	for (const e of spacingEvents)
 		out.push(`<circle cx="${f(e.x)}" cy="${f(e.z)}" r="0.22" fill="#f90"/>`);
+	for (const e of furnitureFailures)
+		out.push(
+			`<circle cx="${f(e.x)}" cy="${f(e.z)}" r="0.16" fill="#e00" stroke="#600" stroke-width="0.03"/>`
+		);
 	out.push('</svg>');
 	fs.mkdirSync(path.dirname(path.resolve(svgPath)), { recursive: true });
 	fs.writeFileSync(svgPath, out.join('\n'));

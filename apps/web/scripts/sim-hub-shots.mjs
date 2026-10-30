@@ -39,7 +39,18 @@ const SHOTS = [
 	// vault couch and the HDR exam table
 	{ name: 'ct-low', subject: 'cast:ctsim:patient:*', cam: [0.4, 1.08, -1.9], lookY: 1.08 },
 	{ name: 'vault-low', subject: 'cast:vault1:patient:*', cam: [-1.3, 1.13, -1.7], lookY: 1.11 },
-	{ name: 'hdr-low', subject: 'cast:hdr:patient:*', cam: [0.4, 1.0, -1.9], lookY: 1.0 }
+	{ name: 'hdr-low', subject: 'cast:hdr:patient:*', cam: [0.4, 1.0, -1.9], lookY: 1.0 },
+	// staff at their desks and consoles (check k): the dosimetrist and the manager side-on, the CT
+	// control therapist from behind (console and window), the LINAC control therapist from its left
+	{ name: 'dosimetry-desk', subject: 'cast:dosimetry:staff:0', cam: [2.6, 1.6, 0.3], lookY: 0.8 },
+	{
+		name: 'ctcontrol-console',
+		subject: 'cast:ctcontrol:staff:1',
+		cam: [0.9, 1.7, -2.6],
+		lookY: 1.0
+	},
+	{ name: 'manager-desk', subject: 'cast:manager:staff:0', cam: [2.6, 1.6, 0.3], lookY: 0.8 },
+	{ name: 'linac-console', subject: 'cast:linaccontrol:staff:1', cam: [-2.4, 1.6, 0.6], lookY: 0.8 }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),

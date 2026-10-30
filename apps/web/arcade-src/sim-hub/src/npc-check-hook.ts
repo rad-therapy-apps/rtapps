@@ -25,6 +25,9 @@ import {
 	journeyActorRoom,
 	moveJourneyActor,
 	resetTreatmentJourney,
+	setJourneyKind,
+	startTreatmentJourney,
+	advanceTreatmentJourney,
 	workflowTransitions
 } from './journey';
 
@@ -71,6 +74,10 @@ export function installNpcCheckHook(
 			},
 			moveJourneyActor,
 			resetTreatmentJourney,
+			/** The journey's own sequence: the check drives both journeys to 'done'. */
+			setJourneyKind,
+			startTreatmentJourney,
+			advanceTreatmentJourney,
 			journeyActorRoom,
 			startActorHandoff,
 			shouldHold,
