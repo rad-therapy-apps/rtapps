@@ -34,7 +34,12 @@ const SHOTS = [
 	{ name: 'consult-patient', subject: 'cast:consult:patient:1', cam: [2.6, 1.3, 1.8], lookY: 0.8 },
 	{ name: 'escort-wheelchair', subject: 'mover:escort', u: 0.3, cam: [2.4, 1.1, 0], lookY: 0.8 },
 	{ name: 'ct-table', subject: 'cast:ctsim:patient:*', cam: [0, 1.5, -1.8], lookY: 1.05 },
-	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [-1.4, 1.6, 1.2], lookY: 1.0 }
+	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [-1.4, 1.6, 1.2], lookY: 1.0 },
+	// low and side-on, level with the top, to show the lying patients' backs on the CT table, the
+	// vault couch and the HDR exam table
+	{ name: 'ct-low', subject: 'cast:ctsim:patient:*', cam: [0.4, 1.08, -1.9], lookY: 1.08 },
+	{ name: 'vault-low', subject: 'cast:vault1:patient:*', cam: [-1.3, 1.13, -1.7], lookY: 1.11 },
+	{ name: 'hdr-low', subject: 'cast:hdr:patient:*', cam: [0.4, 1.0, -1.9], lookY: 1.0 }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),
@@ -212,7 +217,6 @@ try {
 					const V = window.__V,
 						N = window.__NPC;
 					N.state.simSec = 0;
-					N.stepSimulation._f = 0;
 					N.movers.forEach((m, i) => {
 						m.u = (i * 0.137) % 1;
 						m.heldFor = 0;

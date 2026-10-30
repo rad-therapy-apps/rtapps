@@ -14,6 +14,7 @@ import { scene, camera } from './scene';
 import { S } from './state';
 import { registerDutyActor, registerNpcExchange, seatActor } from './npc-behavior';
 import { STAFF_GUIDES, registerInteractable } from './interact';
+import { LYING_SURFACES } from './props';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
 
 // RTApps (#77 phase 2 task 13): typed boundary for the appearance-options bag passed into
@@ -25,13 +26,13 @@ interface PersonFigureOptions {
 	hairColor?: number;
 }
 
-// Leg geometry shared by personFigure and setLegSwing (and seatActor, which reads HIP_Y): hip
-// pivot at 1.06, hip -> knee 0.48, knee -> sole 0.51 (shin 0.45 + shoe 0.06); the shoe runs from
-// heel z -0.07 to toe z +0.13.
-export const HIP_Y = 1.06;
-const THIGH_LEN = 0.48,
-	KNEE_TO_SOLE = 0.51,
-	HIP_TO_SOLE = THIGH_LEN + KNEE_TO_SOLE,
+// Leg geometry shared by personFigure, setLegSwing and setLegReach (and seatActor and the stand-up,
+// which read HIP_Y, THIGH_LEN and KNEE_TO_SOLE): hip pivot at 1.06, hip -> knee 0.48, knee -> sole
+// 0.51 (shin 0.45 + shoe 0.06); the shoe runs from heel z -0.07 to toe z +0.13.
+export const HIP_Y = 1.06,
+	THIGH_LEN = 0.48,
+	KNEE_TO_SOLE = 0.51;
+const HIP_TO_SOLE = THIGH_LEN + KNEE_TO_SOLE,
 	SHOE_HEEL = -0.07,
 	SHOE_TOE = 0.13;
 /** Height of a standing person's sole above the figure's origin (0.07). */
@@ -252,6 +253,26 @@ export function setLegSwing(rig, swing: number) {
 			soleDepth(rig.legRP.rotation.x, rig.kneeRP.rotation.x)
 		) - HIP_TO_SOLE;
 }
+/* Poses both legs so each sole is `fwd` ahead of and `down` below its hip pivot (figure units), the
+   knee bent forward (a sole out of reach straightens the leg toward it), and clears the pelvis drop.
+   The seated pose is (THIGH_LEN, KNEE_TO_SOLE), standing is (0, HIP_TO_SOLE). */
+export function setLegReach(rig, fwd: number, down: number) {
+	const reach = Math.min(Math.hypot(fwd, down), HIP_TO_SOLE - 1e-6),
+		aim = Math.atan2(fwd, down),
+		// the angle at the near end of side a, in a triangle with sides a, b and the reach
+		corner = (a: number, b: number) =>
+			Math.acos(Math.max(-1, Math.min(1, (a * a + reach * reach - b * b) / (2 * a * reach)))),
+		thigh = aim + corner(THIGH_LEN, KNEE_TO_SOLE),
+		shin = aim - corner(KNEE_TO_SOLE, THIGH_LEN);
+	for (const [leg, knee] of [
+		[rig.legLP, rig.kneeLP],
+		[rig.legRP, rig.kneeRP]
+	]) {
+		leg.rotation.x = -thigh;
+		knee.rotation.x = thigh - shin;
+	}
+	rig.body.position.y = 0;
+}
 export function poseCharacter(group, mode = 'neutral') {
 	group.userData.pose = mode;
 	// any other pose means the figure has left its seat (seatActor sets `seated`)
@@ -383,8 +404,10 @@ export function faceAlong(o, dx, dz, off) {
 	if (dx || dz) o.rotation.y = Math.atan2(dx, dz) + (off || 0);
 }
 
-// One lying-patient figure (hand-built boxes, head toward -x, feet toward +x), standing on local
-// y = 0 at its lowest point. restLyingPatient puts it on a couch or table.
+// One lying-patient figure (hand-built boxes, head toward -x, feet toward +x). Its back is flat: the
+// undersides of the pillow, torso, pelvis, arms, forearms, legs and feet all lie at local y = 0.7025,
+// the figure's lowest point, and the head rests on the pillow. restLyingPatient puts that plane on a
+// couch or table top.
 export function createLyingPatient(detail, skin = 0xe9c39d, hairColor = 0x4a382e) {
 	const cont = new THREE.Group();
 	const topMat = std(0xd3d9dd, 0.78, 0.02),
@@ -392,9 +415,11 @@ export function createLyingPatient(detail, skin = 0xe9c39d, hairColor = 0x4a382e
 		skinMat = std(skin, 0.9, 0.0),
 		hairMat = std(hairColor, 0.82, 0.02),
 		shoeMat = std(0x252b30, 0.85, 0.1);
-	const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.9, -0.05),
-		pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.88, -0.02),
+	const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.8125, -0.05),
+		pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.8025, -0.02),
 		neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92, 0);
+	torso.name = 'torso'; // check (h) measures these two undersides
+	pelvis.name = 'pelvis';
 	cont.add(torso, pelvis, neck);
 	const head = sphere(0.17, skinMat);
 	head.scale.y = 1.04;
@@ -404,14 +429,14 @@ export function createLyingPatient(detail, skin = 0xe9c39d, hairColor = 0x4a382e
 	hair.scale.set(1, 0.5, 1);
 	hair.position.set(-0.73, 0.99, -0.01);
 	cont.add(hair);
-	const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86, -0.22),
-		armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86, 0.22),
-		foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84, -0.22),
-		foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84, 0.22),
-		legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82, -0.1),
-		legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82, 0.1),
-		footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77, -0.1),
-		footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77, 0.1);
+	const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.7575, -0.22),
+		armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.7575, 0.22),
+		foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.7525, -0.22),
+		foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.7525, 0.22),
+		legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.7775, -0.1),
+		legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.7775, 0.1),
+		footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.7475, -0.1),
+		footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.7475, 0.1);
 	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
 	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73, 0));
 	setNpcRole(cont, 'Patient', detail);
@@ -425,31 +450,17 @@ export function createLyingPatient(detail, skin = 0xe9c39d, hairColor = 0x4a382e
 	};
 	return cont;
 }
-// Puts a lying patient at (x, z) with its lowest point on the top of the couch or table under its
-// centre, measured from that mesh's world bounds now. The highest non-person mesh under the centre
-// with a top between 0.3 and 1.4 m is the surface. Only x/z move afterwards (the CT couch slides
+// Puts a lying patient at (x, z) with its back (its lowest point) on the top of `surface`, the mesh it
+// lies on (props.ts LYING_SURFACES: the CT table, a vault couch's carbon insert, the HDR exam table
+// top), measured from that mesh's world bounds now. Only x/z move afterwards (the CT couch slides
 // along x with the patient, so the height holds), so the contact is kept without per-frame work.
-export function restLyingPatient(cont, x, z, ry = 0) {
+export function restLyingPatient(cont, surface: THREE.Object3D, x, z, ry = 0) {
 	cont.position.set(x, 0, z);
 	cont.rotation.y = ry;
-	scene.updateMatrixWorld(true);
-	const mine = new THREE.Box3().setFromObject(cont),
-		cx = (mine.min.x + mine.max.x) / 2,
-		cz = (mine.min.z + mine.max.z) / 2;
-	let top = null;
-	const bb = new THREE.Box3();
-	scene.traverse((o) => {
-		const m = o as THREE.Mesh;
-		if (!m.isMesh) return;
-		for (let p = o; p; p = p.parent)
-			if (p === cont || p.userData?.lying || p.userData?.walkRig) return;
-		bb.setFromObject(o);
-		if (cx < bb.min.x || cx > bb.max.x || cz < bb.min.z || cz > bb.max.z) return;
-		if (bb.max.y < 0.3 || bb.max.y > 1.4) return;
-		if (top === null || bb.max.y > top) top = bb.max.y;
-	});
-	if (top === null) top = 0.02;
-	cont.position.y = top - mine.min.y;
+	surface.updateWorldMatrix(true, false);
+	const back = new THREE.Box3().setFromObject(cont).min.y,
+		top = new THREE.Box3().setFromObject(surface).max.y;
+	cont.position.y = top - back;
 }
 export function departmentStaff() {
 	const R = (id) => roomById(id),
@@ -533,7 +544,7 @@ export function departmentStaff() {
 		const r = R(id);
 		if (!r) return;
 		const cont = createLyingPatient(detail, skin, hairColor);
-		restLyingPatient(cont, r.x + dx, r.z + dz, ry);
+		restLyingPatient(cont, LYING_SURFACES[id], r.x + dx, r.z + dz, ry);
 		scene.add(cont);
 		addCast(id, cont, 'patient');
 		return cont;
@@ -816,7 +827,8 @@ export function departmentStaff() {
 		-0.6,
 		0xe8c09f
 	);
-	lyingPatient('hdr', 'Undergoing an HDR special procedure.', -1.3, 0.1, 0);
+	// centred on the 2.2 m exam table (centre dx -1.3): head and shoes within 0.06 m of its ends
+	lyingPatient('hdr', 'Undergoing an HDR special procedure.', -1.57, 0.1, 0);
 	/* Secondary team members and patient partners create visible teamwork in each department. */
 	sitPatient('social', 'Discussing transportation and support needs.', 0.57, 1.65, -0.6, 0x7c5238, {
 		female: true,

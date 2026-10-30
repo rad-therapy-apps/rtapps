@@ -45,7 +45,8 @@ import {
 	setActorSeated,
 	movementPathFor,
 	requestActorMove,
-	clearMoveQueues
+	clearMoveQueues,
+	beginRise
 } from './npc-behavior';
 import {
 	workflowState,
@@ -76,6 +77,7 @@ import {
 	player
 } from './main';
 import { focusCtPatientFromControl } from './sdk-bridge';
+import { LYING_SURFACES } from './props';
 
 const JOURNEY_ROOM_TIMING = { roomId: null, enteredAt: 0, lastPatient: null };
 function activeJourneyPatientActor() {
@@ -135,6 +137,13 @@ export const ROOM_WORKFLOW = {
 	ctcontrol: { state: 'READY', detail: 'CT control ready', color: '#42d5cf' }
 };
 export const workflowTransitions = [];
+// The lobby pickup (Jordan's and Mia's): the patient waits on the chair nearest `chair` (facing
+// reception, -z), and the therapist from treatment control stops at `therapist`, about 1.2 m in front
+// of that chair and a little to one side, so the seated patient faces them (about 20 deg off).
+export const LOBBY_PICKUP = {
+	chair: new THREE.Vector3(-3.3, 0, 3.6),
+	therapist: new THREE.Vector3(-2.9, 0, 2.5)
+};
 // RTApps (#77 phase 2 task 15): typed boundary for `JOURNEY`, the patient-journey state machine
 // this module owns — derived from the literal below plus every `JOURNEY.<member> =` assignment
 // site across the treatment and new-patient sequences (journeyActors/resetTreatmentJourney/
@@ -428,7 +437,7 @@ export function updateJourneyUI() {
 }
 function createJourneyLyingPatient(room, skin = 0xd7a17d, hairColor = 0x3a281f) {
 	const cont = createLyingPatient('Mia Reynolds positioned for CT simulation.', skin, hairColor);
-	restLyingPatient(cont, room.x - 4.0, room.z + 1.5);
+	restLyingPatient(cont, LYING_SURFACES.ctsim, room.x - 4.0, room.z + 1.5);
 	scene.add(cont);
 	(ROOM_CAST.ctsim || (ROOM_CAST.ctsim = [])).push({ g: cont, kind: 'patient' });
 	cont.visible = false;
@@ -440,7 +449,7 @@ function createJourneyTreatmentPatient(room, skin = 0xd7a17d, hairColor = 0x3a28
 		skin,
 		hairColor
 	);
-	restLyingPatient(cont, room.x - 1.25, room.z - 0.05);
+	restLyingPatient(cont, LYING_SURFACES.vault1, room.x - 1.25, room.z - 0.05);
 	scene.add(cont);
 	(ROOM_CAST.vault1 || (ROOM_CAST.vault1 = [])).push({ g: cont, kind: 'patient' });
 	cont.visible = false;
@@ -714,11 +723,11 @@ function beginJourneyMove(
 	speed,
 	opts: MoveJourneyActorOptions
 ) {
-	if (actor.userData.seated) setActorSeated(actor, false); // never walk off in the seated pose
+	const rise = beginRise(actor); // a seated actor first stands up out of its seat
 	if (fromId && doors.has(fromId)) setDoorTarget(fromId, true);
 	if (toId && doors.has(toId)) setDoorTarget(toId, true);
 	actor.userData.inHandoff = true;
-	const curve = movementPathFor(actor, fromId, toId, final),
+	const curve = movementPathFor(actor, fromId, toId, final, rise?.to),
 		len = curve.getLength(),
 		duration = Math.max(2.6, Math.min(32, len / speed));
 	const cues = (opts.cues || []).map((c) => ({ ...c, fired: false }));
@@ -727,10 +736,11 @@ function beginJourneyMove(
 		fromId,
 		toId,
 		curve,
-		start: S.simSec,
+		start: rise ? rise.end : S.simSec,
 		duration,
 		onComplete,
-		cues
+		cues,
+		rise
 	});
 	if (opts.followCamera)
 		setJourneyCameraFollow(
@@ -932,7 +942,7 @@ function beginJordanPickupSequence() {
 		JOURNEY.patient,
 		'lobby',
 		'lobby',
-		new THREE.Vector3(-3.3, 0, 3.6),
+		LOBBY_PICKUP.chair,
 		() => {
 			setJourneySeated(true);
 			applyJourneyPatientFocus();
@@ -975,7 +985,7 @@ function beginJordanPickupSequence() {
 						JOURNEY.therapist,
 						'linaccontrol',
 						'lobby',
-						new THREE.Vector3(-0.6, 0, 2.9),
+						LOBBY_PICKUP.therapist,
 						() => {
 							JOURNEY.stage = 'called';
 							faceNpcToward(JOURNEY.therapist, JOURNEY.patient);
@@ -1010,7 +1020,6 @@ function beginJordanPickupSequence() {
 }
 function beginJordanEscortToVault() {
 	JOURNEY.stage = 'called';
-	setJourneySeated(false);
 	JOURNEY.busy = true;
 	workflowState(
 		'lobby',
@@ -1439,7 +1448,6 @@ function beginMiaConsultSequence() {
 			journeyFocusActors(PRIMARY_NPCS.lobby, JOURNEY.newPatient, 'lobby');
 			updateJourneyUI();
 			later(() => {
-				setActorSeated(JOURNEY.newPatient, false);
 				workflowState(
 					'consult',
 					'CONSULT IN PROGRESS',
@@ -1579,7 +1587,7 @@ function beginMiaFirstTreatmentPickup() {
 		JOURNEY.newPatient,
 		'lobby',
 		'lobby',
-		new THREE.Vector3(-3.3, 0, 3.6),
+		LOBBY_PICKUP.chair,
 		() => {
 			setActorSeated(JOURNEY.newPatient, true);
 			applyJourneyPatientFocus();
@@ -1620,7 +1628,7 @@ function beginMiaFirstTreatmentPickup() {
 						JOURNEY.therapist,
 						'linaccontrol',
 						'lobby',
-						new THREE.Vector3(-0.6, 0, 2.9),
+						LOBBY_PICKUP.therapist,
 						() => {
 							faceNpcToward(JOURNEY.therapist, JOURNEY.newPatient);
 							faceNpcToward(JOURNEY.newPatient, JOURNEY.therapist);
@@ -1658,7 +1666,6 @@ function beginMiaFirstTreatmentPickup() {
 	);
 }
 function beginMiaFirstTreatmentEscort() {
-	setActorSeated(JOURNEY.newPatient, false);
 	JOURNEY.stage = 'firstpickup';
 	JOURNEY.busy = true;
 	workflowState(

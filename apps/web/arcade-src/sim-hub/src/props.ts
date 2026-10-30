@@ -50,6 +50,9 @@ export function seatInWorld(s: SeatAnchor): SeatAnchor {
 	const w = frameToWorld(s.group, s.x, s.top, s.z, s.facing);
 	return { x: w.x, z: w.z, facing: w.facing, top: w.y, kind: s.kind };
 }
+/** The top a lying patient rests on, per room id: the CT table (ctsim), each vault couch's carbon
+    insert (vault1, vault2) and the HDR exam table top (hdr). npc.ts restLyingPatient lies on it. */
+export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
 /* Registers a seat of a prop centred at (x, z) in group g and turned by rot: (ox, oz) is the seat's
    offset in the prop's own frame, and the sitter faces the prop's +z turned by `turn`. */
 function addSeat(g, kind: SeatKind, x, z, rot, top, ox = 0, oz = 0, turn = 0) {
@@ -564,6 +567,7 @@ export function examTable(g, x, z, rot = 0) {
 	// the table, so re-seating a sitter from where they sit keeps the same edge.
 	addSeat(g, 'examTable', x, z, rot, 0.945, 0, 0.16);
 	addSeat(g, 'examTable', x, z, rot, 0.945, 0, -0.16, Math.PI);
+	return top;
 }
 
 export function workstationRow(g, x, z, n = 3, spacing = 1.7, rot = 0) {
@@ -1269,6 +1273,7 @@ export function ctScanner(g, room: Room) {
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
 	add(g, table);
 	CT_COUCH.table = table;
+	LYING_SURFACES[room.id] = table;
 	CT_COUCH.ring = ring;
 	CT_COUCH.bore = bore;
 	CT_COUCH.baseX = table.position.x;
@@ -1412,6 +1417,7 @@ export function emulatorLinacShell(g, room: Room) {
 	const cf = eRbox(0.64, 0.055, 4.2, carbon, 0.025);
 	cf.position.set(0, 1.05, -0.14);
 	couch.add(cf);
+	LYING_SURFACES[room.id] = cf;
 	const noseTop = eRbox(0.58, 0.07, 0.78, carbon, 0.1);
 	noseTop.position.set(0, 1.05, 2.02);
 	couch.add(noseTop);
@@ -1435,7 +1441,7 @@ export function emulatorLinacShell(g, room: Room) {
 }
 
 export function hdrSuite(g, room: Room) {
-	examTable(g, room.x - 1.3, room.z, 0);
+	LYING_SURFACES[room.id] = examTable(g, room.x - 1.3, room.z, 0);
 	const after = box(0.85, 1.0, 0.85, MAT.white, room.x + 2.2, 0.65, room.z - 0.7);
 	add(g, after);
 	const stem = cyl(0.11, 0.11, 1.15, MAT.metal);

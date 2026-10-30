@@ -157,7 +157,8 @@ export const HANDOFFS = {
 			target: 'lobby',
 			actor: 'patient',
 			actorIndex: 1,
-			final: [-2.8, 0, 3.4],
+			// a lobby chair's seat anchor: the patient sits down there (a seated patient stays put)
+			final: [-3.3, 0, 3.54],
 			follow: false
 		}
 	],
@@ -211,7 +212,8 @@ export const HANDOFFS = {
 			target: 'lobby',
 			actor: 'patient',
 			actorIndex: 0,
-			final: [-4.2, 0, 3.4],
+			// a lobby chair's seat anchor: the patient sits down there
+			final: [-4.75, 0, 3.54],
 			follow: true
 		}
 	],

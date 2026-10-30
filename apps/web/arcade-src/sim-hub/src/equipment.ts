@@ -32,7 +32,7 @@ import {
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
 import { personFigure, faceAlong, poseCharacter, setLegSwing, SOLE_Y } from './npc';
-import { advanceRoute, advancePed, walkSwing, startNextQueuedMove } from './npc-behavior';
+import { advanceRoute, advancePed, walkSwing, startNextQueuedMove, stepRise } from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
@@ -989,8 +989,12 @@ export function updateCtCouchMotion(sec) {
 
 export function updateWorkflowTransitions(sec) {
 	for (let i = workflowTransitions.length - 1; i >= 0; i--) {
-		const t = workflowTransitions[i],
-			u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
+		const t = workflowTransitions[i];
+		if (t.rise) {
+			if (stepRise(t.actor, t.rise, sec)) continue;
+			t.rise = null;
+		}
+		const u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
 			e = u * u * (3 - 2 * u),
 			p = t.curve.getPoint(e),
 			n = t.curve.getPoint(Math.min(1, e + 0.006));

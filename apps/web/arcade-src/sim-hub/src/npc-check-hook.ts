@@ -14,11 +14,13 @@ import {
 	shouldHold,
 	visibleInTree,
 	seatActor,
+	setActorSeated,
 	interactionScenes
 } from './npc-behavior';
 import { SEATS, seatInWorld } from './props';
 import {
 	JOURNEY,
+	LOBBY_PICKUP,
 	journeyActors,
 	journeyActorRoom,
 	moveJourneyActor,
@@ -94,6 +96,9 @@ export function installNpcCheckHook(
 			SEATS,
 			seatInWorld,
 			seatActor,
+			setActorSeated,
+			/** Where the journey's lobby pickup seats the patient and stops the therapist. */
+			LOBBY_PICKUP,
 			/** The staff-patient speech exchanges (registerNpcExchange): { a, b, ... } pairs. */
 			interactionScenes
 		}
