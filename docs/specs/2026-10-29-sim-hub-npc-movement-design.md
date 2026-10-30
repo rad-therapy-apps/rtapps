@@ -277,3 +277,63 @@ The before and after shots go to the owner on a review page.
     - `restLyingPatient(cont, surface, x, z)` puts that plane on the top of the mesh it is given. `LYING_SURFACES` (`props.ts`) holds one per room: the CT table, each vault couch's carbon insert and the HDR exam table top.
     - Only x and z change afterwards (the CT couch slide), so the contact holds without per-frame work.
     - The HDR patient is centred on its 2.2 m table (dx −1.57). The 2.27 m resting figure's pillow ends 1 cm past the head end; the head and hair overhang it by 6–7 cm, and the shoe tips by 6 cm at the foot end.
+
+## Stage 3 design: routes inside rooms, and nobody in furniture
+
+**Status:** approved by the owner on 2026-10-30. The owner also reported stationary NPCs "standing in furniture, phasing through it".
+
+### What runtime measurement showed (2026-10-30)
+
+The probe sampled the leg and torso boxes of every person against every furniture mesh. Furniture was classified by geometry, excluding floors, walls, ceilings, mats and wall items above 2 m, and the seat a person sits on.
+
+- **Stationary staff inside their desks (7):**
+  - Medical Dosimetrist (dosimetry) 15 cm;
+  - CT control therapist 9 cm into the console, with shoulder and head into the window partition;
+  - Manager 2.5 cm;
+  - Physicist, Safety Officer, Navigator and LINAC control therapist 1–2 cm.
+- **Hand-over routes through furniture:** of 21 HANDOFFS, most cross furniture. Examples:
+  - the CT control console, 37 cm, where a route starts at the staff spot;
+  - exam tables in consult and patientcare, up to 28 cm;
+  - the education desk, 36 cm;
+  - the lobby and social couches, 16 cm;
+  - the LINAC control console, 14 cm;
+  - the manager and dosimetry desks, 11 cm.
+- **Hand-over end points inside furniture:**
+  - education (−41.1, −6.2), inside the desk;
+  - LINAC control (50.5, 7.2), inside the console;
+  - QA (−6.2, −43.2), inside a 1.55 m glass enclosure, 44 cm deep.
+- **Shared end points (occupancy):**
+  - (−41.1, −6.2) ×2;
+  - (40.4, −7.2) ×2;
+  - (6.4, −17.2) ×2;
+  - (−6.2, −43.2) ×2;
+  - (50.5, 7.2) ×4, which is also 0.22 m from the stationary LINAC control therapist;
+  - "Have a seat" and commons → lobby on the same lobby chair.
+- **Not measured yet:** the journey moves (about 38 `moveJourneyActor` literals across both journeys). Task 1 drives them.
+
+### Design
+
+1. **Checks first,** RED, then in CI:
+   - **(k) Rest clearance:** every person at rest is at least 0.05 m clear of furniture (seated people exclude their own seat). This covers the stationary cast and duty actors, and every person at the end of each hand-over and journey move.
+   - **(l) Routes clear:** every frame of every hand-over and journey move (both journeys) keeps the body within 0.02 m of furniture, at most. Stand-up and sit-down frames count.
+   - **(m) Occupancy:** no two people at rest, or route end points, are within 0.5 m of each other, and a seat anchor holds one person.
+
+   The furniture classifier from the probe becomes a shared script module.
+2. **Stationary staff** move to clear spots by their desks or consoles, still facing their work.
+3. **Arrival spots:** each room gets a short list of clear standing spots (position plus facing). A hand-over or journey move into the room takes the first free spot instead of a fixed literal. A spot is freed when its person leaves.
+4. **Per-room waypoints:**
+   - each room gets a small hand-placed graph of clear points linking its door to its spots, seats and arrival spots;
+   - routes go spot → graph → door → corridor (and the reverse), taking the shortest clear path through the graph instead of straight lines;
+   - authored by hand and verified by (l), as the owner chose over automatic pathfinding.
+5. **Sit-down mirrors stand-up:** a walk to a seat ends at the seat's approach point (anchor + 0.5 m along its facing). The person then eases into the seat over about 0.4 s, with every step under check (c)'s 0.25 m.
+6. **Leftovers from stages 1 and 2:**
+   - hdrRunner's loop clear of the HDR nook desk;
+   - the HDR and CT control hand-over routes, which stage 1 left out;
+   - the consult patient walking back through the exam table;
+   - Mia's consult end point grazing the exam table.
+
+### Out of scope for stage 3
+
+- Dynamic avoidance between moving story actors.
+- Furniture as colliders for the player.
+- Pathfinding in the corridors (stage 1 lanes stay).
