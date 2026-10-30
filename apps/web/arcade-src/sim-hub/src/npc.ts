@@ -979,7 +979,7 @@ export function departmentStaff() {
 		'Radiation Therapist',
 		'Cross-checking the treatment record, imaging status and room readiness.',
 		0x658da9,
-		-0.25,
+		-0.2,
 		-2.0,
 		-Math.PI / 2,
 		0x6b4733,

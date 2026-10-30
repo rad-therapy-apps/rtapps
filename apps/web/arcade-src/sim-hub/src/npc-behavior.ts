@@ -44,7 +44,7 @@ import {
 import { roomById, ROOM_CAST, doors, player } from './main';
 import { JOURNEY, journeyActorRoom, workflowTransitions } from './journey';
 import { setupAmbulance } from './equipment';
-import { ARRIVAL_SPOTS, takeArrivalSpot, releaseArrivalSpot } from './room-routes';
+import { ARRIVAL_SPOTS, takeArrivalSpot, releaseArrivalSpot, inRoomPath } from './room-routes';
 import type { ArrivalSpot } from './room-routes';
 
 export const movers = [];
@@ -999,55 +999,49 @@ function actorFinalPoint(targetId, h, spot: ArrivalSpot | null = null) {
 	const r = roomById(targetId);
 	return r ? new THREE.Vector3(r.x, 0, r.z) : new THREE.Vector3(0, 0, 0);
 }
-function actorExitPoints(room) {
+// Leaving a room: through its graph (room-routes.ts) to its door point. The vaults' graphs hold
+// their maze.
+function actorExitPoints(room, start) {
 	if (!room || room.hub) return [];
-	if (room.id === 'vault1')
-		return [
-			[73.15, -15.3],
-			[71.25, -15.3],
-			[70.5, -18],
-			[65.1, -18],
-			[63.15, -18]
-		];
-	if (room.id === 'vault2')
-		return [
-			[73.15, 15.3],
-			[71.25, 15.3],
-			[70.5, 18],
-			[65.1, 18],
-			[63.15, 18]
-		];
-	const p = zeroY(doorPoint(room));
-	return [[p.x, p.z]];
+	const d = zeroY(doorPoint(room));
+	return [...inRoomPath(room.id, start, d), [d.x, d.z]];
 }
-function actorEntryPoints(room, final) {
-	if (!room || room.hub) return [[final.x, final.z]];
-	const dp = zeroY(doorPoint(room));
-	if (room.id === 'vault1')
-		return [
-			[dp.x, dp.z],
-			[65.1, -18],
-			[70.5, -18],
-			[71.25, -15.3],
-			[73.15, -15.3],
-			[final.x, final.z]
-		];
-	if (room.id === 'vault2')
-		return [
-			[dp.x, dp.z],
-			[65.1, 18],
-			[70.5, 18],
-			[71.25, 15.3],
-			[73.15, 15.3],
-			[final.x, final.z]
-		];
-	return [
-		[dp.x, dp.z],
-		[final.x, final.z]
-	];
+// Entering a room: from its door point (the lobby: from `last`, the corridor exit the route arrives
+// at) through its graph to the final point.
+function actorEntryPoints(room, final, last) {
+	if (!room) return [[final.x, final.z]];
+	if (room.hub)
+		return [...inRoomPath(room.id, { x: last[0], z: last[1] }, final), [final.x, final.z]];
+	const d = zeroY(doorPoint(room));
+	return [[d.x, d.z], ...inRoomPath(room.id, d, final), [final.x, final.z]];
+}
+// Whether the segment a-b passes through the inside of room r's rectangle (x/z).
+function segmentEntersRoom(r, a, b) {
+	let t0 = 0,
+		t1 = 1;
+	for (const [k, lo, hi] of [
+		[0, r.x - r.w / 2, r.x + r.w / 2],
+		[1, r.z - r.d / 2, r.z + r.d / 2]
+	]) {
+		const d = b[k] - a[k];
+		if (Math.abs(d) < 1e-9) {
+			if (a[k] <= lo || a[k] >= hi) return false;
+			continue;
+		}
+		const u = (lo - a[k]) / d,
+			v = (hi - a[k]) / d;
+		t0 = Math.max(t0, Math.min(u, v));
+		t1 = Math.min(t1, Math.max(u, v));
+		if (t0 >= t1) return false;
+	}
+	return true;
 }
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
-// point in room targetId (`spot`, when the actor took an arrival spot there).
+// point in room targetId (`spot`, when the actor took an arrival spot there). Inside a room it follows
+// the room's graph (room-routes.ts inRoomPath): from the start to the door, from the door to the final,
+// or from the start to the final in the same room; in the lobby from the start to the corridor exit
+// the route leaves by, and through the lobby wherever a corridor leg crosses it. The corridor legs are
+// corridorNodesFromHub/shortestCorridorRoute's (walk.ts).
 function buildActorHandoffPath(
 	actor,
 	fromId,
@@ -1064,39 +1058,32 @@ function buildActorHandoffPath(
 	start.y = 0;
 	const detectedFrom = journeyActorRoom(actor),
 		actualFrom = detectedFrom || hintedFrom,
-		pts = [[start.x, start.z]];
-	if (detectedFrom && to && detectedFrom.id === to.id) {
-		const f = actorFinalPoint(targetId, h, spot);
-		pts.push([f.x, f.z]);
-		return pts;
-	}
-	if (detectedFrom && !detectedFrom.hub) pts.push(...actorExitPoints(detectedFrom));
-	if (detectedFrom?.hub && to && !to.hub) {
-		for (const v of corridorNodesFromHub(to)) {
-			const q = zeroY(v);
-			pts.push([q.x, q.z]);
-		}
-	} else if (detectedFrom && to?.hub && !detectedFrom.hub) {
-		for (const v of corridorNodesFromHub(detectedFrom).slice().reverse()) {
-			const q = zeroY(v);
-			pts.push([q.x, q.z]);
-		}
-	} else if (detectedFrom && to) {
-		for (const v of shortestCorridorRoute(detectedFrom, to)) {
-			const q = zeroY(v);
-			pts.push([q.x, q.z]);
-		}
-	} else if (to) {
-		for (const v of shortestCorridorRouteFromPosition(start, to)) {
-			const q = zeroY(v);
-			pts.push([q.x, q.z]);
-		}
-	} else if (actualFrom && !actualFrom.hub) {
-		const a = corridorAnchor(actualFrom).p;
-		pts.push([a.x, a.z]);
-	}
-	const final = actorFinalPoint(targetId, h, spot);
-	pts.push(...actorEntryPoints(to, final));
+		final = actorFinalPoint(targetId, h, spot);
+	if (detectedFrom && to && detectedFrom.id === to.id)
+		return [[start.x, start.z], ...inRoomPath(to.id, start, final), [final.x, final.z]];
+	const pts = [[start.x, start.z]],
+		corridor = [];
+	if (detectedFrom && !detectedFrom.hub) pts.push(...actorExitPoints(detectedFrom, start));
+	if (detectedFrom?.hub && to && !to.hub) corridor.push(...corridorNodesFromHub(to));
+	else if (detectedFrom && to?.hub && !detectedFrom.hub)
+		corridor.push(...corridorNodesFromHub(detectedFrom).slice().reverse());
+	else if (detectedFrom && to) corridor.push(...shortestCorridorRoute(detectedFrom, to));
+	else if (to) corridor.push(...shortestCorridorRouteFromPosition(start, to));
+	else if (actualFrom && !actualFrom.hub) corridor.push(corridorAnchor(actualFrom).p);
+	const legs = corridor.map((v) => {
+		const q = zeroY(v);
+		return [q.x, q.z];
+	});
+	if (detectedFrom?.hub && legs.length)
+		pts.push(...inRoomPath(detectedFrom.id, start, { x: legs[0][0], z: legs[0][1] }));
+	const lobby = roomById('lobby');
+	legs.forEach((q, i) => {
+		const p = pts.at(-1);
+		if (i > 0 && lobby && segmentEntersRoom(lobby, p, q))
+			pts.push(...inRoomPath(lobby.id, { x: p[0], z: p[1] }, { x: q[0], z: q[1] }));
+		pts.push(q);
+	});
+	pts.push(...actorEntryPoints(to, final, pts.at(-1)));
 	const out = [];
 	for (const p of pts) {
 		if (!out.length || Math.hypot(out.at(-1)[0] - p[0], out.at(-1)[1] - p[1]) > 0.22) out.push(p);
@@ -1184,7 +1171,8 @@ export function updateHandoffTransitions(sec) {
 			p = t.curve.getPoint(e),
 			n = t.curve.getPoint(Math.min(1, e + 0.006));
 		t.actor.position.copy(p);
-		t.actor.rotation.y = Math.atan2(n.x - p.x, n.z - p.z);
+		// on the last frame p and n can coincide (atan2(0, 0) would face +z): keep the heading
+		if (n.distanceToSquared(p) > 1e-12) t.actor.rotation.y = Math.atan2(n.x - p.x, n.z - p.z);
 		const swing = Math.sin(sec * 8) * 0.48;
 		t.actor.traverse((o) => {
 			const r = o.userData?.walkRig;

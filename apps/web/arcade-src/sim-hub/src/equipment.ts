@@ -999,7 +999,8 @@ export function updateWorkflowTransitions(sec) {
 			p = t.curve.getPoint(e),
 			n = t.curve.getPoint(Math.min(1, e + 0.006));
 		t.actor.position.copy(p);
-		t.actor.rotation.y = Math.atan2(n.x - p.x, n.z - p.z);
+		// on the last frame p and n can coincide (atan2(0, 0) would face +z): keep the heading
+		if (n.distanceToSquared(p) > 1e-12) t.actor.rotation.y = Math.atan2(n.x - p.x, n.z - p.z);
 		const sw = Math.sin(sec * 7.1) * 0.42;
 		t.actor.traverse((o) => {
 			const r = o.userData?.walkRig;

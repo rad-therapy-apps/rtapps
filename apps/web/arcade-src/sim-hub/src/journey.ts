@@ -1880,7 +1880,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'consult',
 			'education',
-			new THREE.Vector3(-40.9, 0, -5.5),
+			new THREE.Vector3(-40.9, 0, -5.4),
 			() => {
 				JOURNEY.stage = 'education';
 				JOURNEY.busy = true;
@@ -2068,7 +2068,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'education',
 			'ctsim',
-			new THREE.Vector3(37.15, 0, -4.5),
+			new THREE.Vector3(37.15, 0, -4.4),
 			atChanging,
 			1.45,
 			{
