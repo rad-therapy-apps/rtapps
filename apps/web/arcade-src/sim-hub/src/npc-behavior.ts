@@ -1113,8 +1113,8 @@ function segmentEntersRoom(r, a, b) {
 	}
 	return true;
 }
-// NPC routes walk the treatment corridor's line x = 64 at this x: the vault entrance markers hang at
-// x 63.76-64.00, z +/-18 (rooms.ts), into which a body centred on x = 64 walks.
+// NPC routes walk the treatment corridor's line x = 64 at this x: that line runs inside the corridor's
+// east wall (x 63.71-64.29, rooms.ts), into which a body centred on x = 64 walks.
 const NPC_TREATMENT_LANE_X = 63.4;
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
 // point in room targetId (`spot`, when the actor took an arrival spot there). Inside a room it follows

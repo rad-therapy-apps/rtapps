@@ -26,7 +26,7 @@ const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright')
 
 // Each shot: the subject, the camera as [right, up, forward] from the subject (right/forward turn
 // with the subject's facing; up is world height), and the world height looked at. `u` parks a mover
-// at that point of its loop first.
+// at that point of its loop first. A scenery shot gives the camera's world `eye` and `look` instead.
 const SHOTS = [
 	{ name: 'walker-low', subject: 'mover:walker', u: 0.3, cam: [-1.6, 0.35, 0], lookY: 0.35 },
 	{ name: 'lobby-chairs', subject: 'cast:lobby:patient:1', cam: [3.5, 0.9, 0.5], lookY: 0.6 },
@@ -50,7 +50,16 @@ const SHOTS = [
 		lookY: 1.0
 	},
 	{ name: 'manager-desk', subject: 'cast:manager:staff:0', cam: [2.6, 1.6, 0.3], lookY: 0.8 },
-	{ name: 'linac-console', subject: 'cast:linaccontrol:staff:1', cam: [-2.4, 1.6, 0.6], lookY: 0.8 }
+	{
+		name: 'linac-console',
+		subject: 'cast:linaccontrol:staff:1',
+		cam: [-2.4, 1.6, 0.6],
+		lookY: 0.8
+	},
+	// scenery on walls: the lobby AED cabinet (it hung mid-room at (-4.6, 3.02), now on the west wall)
+	// and vault 1's entrance marker (it hung in the doorway, now a stripe on the wall beside it)
+	{ name: 'lobby-aed', eye: [-1.2, 1.9, 1.4], look: [-11.84, 1.4, 5.0] },
+	{ name: 'vault-entrance', eye: [61.0, 1.8, -12.2], look: [63.9, 1.5, -17.6] }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),
@@ -111,6 +120,13 @@ await page.addInitScript(() => {
 	// (which reads the camera) sees the new viewpoint and shows the actors in that room.
 	const place = (s, c) => {
 		const N = window.__NPC;
+		if (s.eye) {
+			c.position.set(...s.eye);
+			c.lookAt(...s.look);
+			c.updateMatrixWorld();
+			c.updateProjectionMatrix?.();
+			return { cam: s.eye, look: s.look, vis: 'scenery' };
+		}
 		let objs, yaw;
 		if (s.subject.startsWith('mover:')) {
 			const m = N.movers.find((x) => x.id === s.subject.slice(6));

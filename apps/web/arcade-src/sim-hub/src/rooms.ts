@@ -466,10 +466,12 @@ export function addCirculationProps() {
 	scene.add(iv2);
 	const hall = new THREE.Group();
 	scene.add(hall);
-	aedWallBox(hall, -4.6, 1.62, 3.02, Math.PI, 'AED');
+	// on the lobby's west wall (inner face x = -11.91), facing into the lobby
+	aedWallBox(hall, -11.84, 1.62, 5.0, Math.PI / 2, 'AED');
 	aedWallBox(hall, 13.9, 1.62, 3.92, Math.PI, 'AED');
 	aedWallBox(hall, 3.05, 1.62, -12.92, 0, 'AED');
-	aedWallBox(hall, 60.05, 1.62, 6.82, -Math.PI / 2, 'AED');
+	// on the treatment corridor's west wall (face x = 58.08), facing east into the corridor
+	aedWallBox(hall, 58.15, 1.62, 6.82, Math.PI / 2, 'AED');
 	const cameraPole = medCartObject(0.82, 0x98adb7);
 	cameraPole.position.set(61.6, 0, -23.2);
 	cameraPole.rotation.y = Math.PI / 2;
@@ -1550,7 +1552,17 @@ export function buildVaultMazeEntries() {
 			? box(0.22, 0.02, 2.65, std(0xff737b, 0.52, 0.02), 71.85, 0.07, z + 1.5)
 			: box(0.22, 0.02, 2.65, std(0xff737b, 0.52, 0.02), 71.85, 0.07, z - 1.5);
 		scene.add(turnStripe);
-		const marker = box(0.24, 3.0, 0.05, std(0x88434a, 0.65, 0.02), 63.88, 2.0, z);
+		// entrance marker: a stripe flush on the corridor face of the vault wall (x = 63.71), beside the
+		// doorway on the main corridor's side
+		const marker = box(
+			0.05,
+			3.0,
+			0.24,
+			std(0x88434a, 0.65, 0.02),
+			63.685,
+			2.0,
+			z - Math.sign(z) * halfWidth
+		);
 		scene.add(marker);
 	}
 	// Vault 1 turns toward higher Z into the open treatment space; Vault 2 mirrors toward lower Z.
