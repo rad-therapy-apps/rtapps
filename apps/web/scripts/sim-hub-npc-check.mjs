@@ -16,7 +16,8 @@
 //   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace;
 //                one that never moves is outwaited: released after 8 s, then walking at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
-//   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath
+//   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath its
+//                shoe (the highest floor slab within 0.1 m of the root: the shoe is 0.2 m long)
 //                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s,
 //                then 8 moments over each of the ambulance crew's walks, unload and load)
 //   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
@@ -893,8 +894,11 @@ function sceneBoxes() {
 	});
 	return out;
 }
-// Floor top at (x, z): the highest top below 0.8 among the meshes that contain (x, z) and span more
-// than 3 m in both x and z. Static, so the large slabs are measured once.
+// Floor top under a shoe at (x, z): the highest top below 0.8 among the meshes that span more than
+// 3 m in both x and z and come within FLOOR_REACH of (x, z). The shoe is 0.2 m long, so a slab within
+// 0.1 m is under it (a doorway's 7.5 cm seam between two floors is bridged). Static, so the large
+// slabs are measured once.
+const FLOOR_REACH = 0.1;
 let floorSlabs = null;
 function floorTop(x, z) {
 	floorSlabs ||= sceneBoxes().filter(
@@ -902,7 +906,12 @@ function floorTop(x, z) {
 	);
 	let best = -Infinity;
 	for (const b of floorSlabs)
-		if (x >= b.lo[0] && x <= b.hi[0] && z >= b.lo[2] && z <= b.hi[2])
+		if (
+			x >= b.lo[0] - FLOOR_REACH &&
+			x <= b.hi[0] + FLOOR_REACH &&
+			z >= b.lo[2] - FLOOR_REACH &&
+			z <= b.hi[2] + FLOOR_REACH
+		)
 			best = Math.max(best, b.hi[1]);
 	return best;
 }
