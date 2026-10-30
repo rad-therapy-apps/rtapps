@@ -309,18 +309,25 @@ The probe sampled the leg and torso boxes of every person against every furnitur
   - (−6.2, −43.2) ×2;
   - (50.5, 7.2) ×4, which is also 0.22 m from the stationary LINAC control therapist;
   - "Have a seat" and commons → lobby on the same lobby chair.
-- **Not measured yet:** the journey moves (about 38 `moveJourneyActor` literals across both journeys). Task 1 drives them.
+- **Journey moves:** both journeys driven to the end give 38 moves (treatment 11, new patient 27). 20 of them go more than 2 cm into furniture:
+  - the education desk, 36 cm, where Mia's education end point is inside the desk;
+  - the CT control console, 22 cm;
+  - the vault 1 bench, 18 cm;
+  - a lobby couch, 16 cm, on every walk out of the lobby to the east;
+  - the CT sim bench, 15 cm;
+  - the consult exam table and lobby chairs, 6 cm.
+- **Background walkers:** within 3 cm of furniture (the visitor 3 cm, ctRunner 2 cm, hdrRunner 1 cm, with a 0.15 m ring).
 
 ### Design
 
 1. **Checks first,** RED, then in CI:
    - **(k) Rest clearance:** every person at rest is at least 0.05 m clear of furniture (seated people exclude their own seat). This covers the stationary cast and duty actors, and every person at the end of each hand-over and journey move.
-   - **(l) Routes clear:** every frame of every hand-over and journey move (both journeys) keeps the body within 0.02 m of furniture, at most. Stand-up and sit-down frames count.
+   - **(l) Routes clear:** every frame of every hand-over and journey move (both journeys) keeps the body within 0.02 m of furniture, at most. Stand-up and sit-down frames count. A sub-check samples the background walkers' loops: a 0.2 m ring around each walker, at heights from 0.1 to 1.3 m, stays within 0.02 m of furniture.
    - **(m) Occupancy:** no two people at rest, or route end points, are within 0.5 m of each other, and a seat anchor holds one person.
 
-   The furniture classifier from the probe becomes a shared script module.
+   The furniture classifier from the probe becomes a shared script module. The check drives both patient journeys from start to finish on a simulated clock: the page's timers run in simulated time, so the journey's own sequence runs headlessly in seconds.
 2. **Stationary staff** move to clear spots by their desks or consoles, still facing their work.
-3. **Arrival spots:** each room gets a short list of clear standing spots (position plus facing). A hand-over or journey move into the room takes the first free spot instead of a fixed literal. A spot is freed when its person leaves.
+3. **Arrival spots:** each room gets a short list of clear standing spots (position plus facing). A hand-over into the room takes the first free spot instead of a fixed literal. A spot is freed when its person leaves. Journey moves keep their authored end points, because they are story positions (beside a particular couch or console). Checks (k), (l) and (m) hold them to the same rules, and an end point that fails moves the least distance that passes.
 4. **Per-room waypoints:**
    - each room gets a small hand-placed graph of clear points linking its door to its spots, seats and arrival spots;
    - routes go spot → graph → door → corridor (and the reverse), taking the shortest clear path through the graph instead of straight lines;
