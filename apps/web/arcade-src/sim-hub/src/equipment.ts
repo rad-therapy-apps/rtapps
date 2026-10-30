@@ -32,7 +32,15 @@ import {
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
 import { personFigure, faceAlong, poseCharacter, setLegSwing, SOLE_Y } from './npc';
-import { advanceRoute, advancePed, walkSwing, startNextQueuedMove, stepRise } from './npc-behavior';
+import {
+	advanceRoute,
+	advancePed,
+	walkSwing,
+	startNextQueuedMove,
+	stepRise,
+	beginSit,
+	stepSit
+} from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
@@ -994,39 +1002,47 @@ export function updateWorkflowTransitions(sec) {
 			if (stepRise(t.actor, t.rise, sec)) continue;
 			t.rise = null;
 		}
-		const u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
-			e = u * u * (3 - 2 * u),
-			p = t.curve.getPoint(e),
-			n = t.curve.getPoint(Math.min(1, e + 0.006));
-		t.actor.position.copy(p);
-		// on the last frame p and n can coincide (atan2(0, 0) would face +z): keep the heading
-		if (n.distanceToSquared(p) > 1e-12) t.actor.rotation.y = Math.atan2(n.x - p.x, n.z - p.z);
-		const sw = Math.sin(sec * 7.1) * 0.42;
-		t.actor.traverse((o) => {
-			const r = o.userData?.walkRig;
-			if (r) {
-				r.armLP.rotation.x = sw;
-				r.armRP.rotation.x = -sw;
-				setLegSwing(r, sw * 0.86);
+		if (t.sit) {
+			if (stepSit(t.actor, t.sit, sec)) continue;
+		} else {
+			const u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
+				e = u * u * (3 - 2 * u),
+				p = t.curve.getPoint(e),
+				n = t.curve.getPoint(Math.min(1, e + 0.006));
+			t.actor.position.copy(p);
+			// on the last frame p and n can coincide (atan2(0, 0) would face +z): keep the heading
+			if (n.distanceToSquared(p) > 1e-12) t.actor.rotation.y = Math.atan2(n.x - p.x, n.z - p.z);
+			const sw = Math.sin(sec * 7.1) * 0.42;
+			t.actor.traverse((o) => {
+				const r = o.userData?.walkRig;
+				if (r) {
+					r.armLP.rotation.x = sw;
+					r.armRP.rotation.x = -sw;
+					setLegSwing(r, sw * 0.86);
+				}
+			});
+			for (const c of t.cues || []) {
+				if (!c.fired && u >= c.at) {
+					c.fired = true;
+					if (c.fn) c.fn();
+					if (c.text) journeySpeech(c.actor || t.actor, c.text, c.kind || 'staff', c.ms || 10000);
+				}
 			}
-		});
-		for (const c of t.cues || []) {
-			if (!c.fired && u >= c.at) {
-				c.fired = true;
-				if (c.fn) c.fn();
-				if (c.text) journeySpeech(c.actor || t.actor, c.text, c.kind || 'staff', c.ms || 10000);
+			if (u < 1) continue;
+			// a move to a seat ({ sit: true }) ends at its approach point: sit down on it
+			if (t.seat) {
+				t.sit = beginSit(t.actor, t.seat);
+				continue;
 			}
 		}
-		if (u >= 1) {
-			t.actor.userData.inHandoff = false;
-			poseCharacter(t.actor, 'neutral');
-			if (t.fromId && doors.has(t.fromId) && t.fromId !== t.toId)
-				setTimeout(() => setDoorTarget(t.fromId, false), 400);
-			if (t.toId && doors.has(t.toId)) setTimeout(() => setDoorTarget(t.toId, false), 1500);
-			workflowTransitions.splice(i, 1);
-			if (t.onComplete) t.onComplete();
-			startNextQueuedMove(t.actor);
-		}
+		t.actor.userData.inHandoff = false;
+		if (!t.sit) poseCharacter(t.actor, 'neutral');
+		if (t.fromId && doors.has(t.fromId) && t.fromId !== t.toId)
+			setTimeout(() => setDoorTarget(t.fromId, false), 400);
+		if (t.toId && doors.has(t.toId)) setTimeout(() => setDoorTarget(t.toId, false), 1500);
+		workflowTransitions.splice(i, 1);
+		if (t.onComplete) t.onComplete();
+		startNextQueuedMove(t.actor);
 	}
 }
 

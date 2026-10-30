@@ -46,7 +46,9 @@ import {
 	movementPathFor,
 	requestActorMove,
 	clearMoveQueues,
-	beginRise
+	beginRise,
+	seatAnchorAt,
+	seatApproach
 } from './npc-behavior';
 import {
 	workflowState,
@@ -592,6 +594,8 @@ interface MoveJourneyActorOptions {
 	followSubject?: THREE.Object3D;
 	followTarget?: THREE.Object3D | null;
 	cameraOptions?: JourneyCameraFollowOptions;
+	/** The move ends on the seat anchor nearest `final`: at its approach point, then sitting down. */
+	sit?: boolean;
 }
 function setJourneyCameraFollow(subject, companion = null, opts: JourneyCameraFollowOptions = {}) {
 	if (!subject) return;
@@ -729,7 +733,9 @@ function beginJourneyMove(
 	if (fromId && doors.has(fromId)) setDoorTarget(fromId, true);
 	if (toId && doors.has(toId)) setDoorTarget(toId, true);
 	actor.userData.inHandoff = true;
-	const curve = movementPathFor(actor, fromId, toId, final, rise?.to),
+	// a move to a seat ends at the seat's approach point; updateWorkflowTransitions then sits it down
+	const seat = opts.sit ? seatAnchorAt(final) : null,
+		curve = movementPathFor(actor, fromId, toId, seat ? seatApproach(seat) : final, rise?.to),
 		len = curve.getLength(),
 		duration = Math.max(2.6, Math.min(32, len / speed));
 	const cues = (opts.cues || []).map((c) => ({ ...c, fired: false }));
@@ -742,7 +748,9 @@ function beginJourneyMove(
 		duration,
 		onComplete,
 		cues,
-		rise
+		rise,
+		seat,
+		sit: null
 	});
 	if (opts.followCamera)
 		setJourneyCameraFollow(
@@ -1018,7 +1026,8 @@ function beginJordanPickupSequence() {
 				}, 15800);
 			}, 7200);
 		},
-		1.25
+		1.25,
+		{ sit: true }
 	);
 }
 function beginJordanEscortToVault() {
@@ -1505,7 +1514,8 @@ function beginMiaConsultSequence() {
 				);
 			}, 8200);
 		},
-		1.2
+		1.2,
+		{ sit: true }
 	);
 }
 function beginMiaFirstTreatmentReturn() {
@@ -1665,7 +1675,8 @@ function beginMiaFirstTreatmentPickup() {
 				updateJourneyUI();
 			}, 7600);
 		},
-		1.25
+		1.25,
+		{ sit: true }
 	);
 }
 function beginMiaFirstTreatmentEscort() {

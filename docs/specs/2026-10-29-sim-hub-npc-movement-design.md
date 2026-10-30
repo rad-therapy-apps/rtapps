@@ -326,6 +326,7 @@ The probe sampled the leg and torso boxes of every person against every furnitur
    - **(m) Occupancy:** no two people at rest, or route end points, are within 0.5 m of each other, and a seat anchor holds one person.
 
    The furniture classifier from the probe becomes a shared script module. The check drives both patient journeys from start to finish on a simulated clock: the page's timers run in simulated time, so the journey's own sequence runs headlessly in seconds.
+
 2. **Stationary staff** move to clear spots by their desks or consoles, still facing their work.
 3. **Arrival spots:** each room gets a short list of clear standing spots (position plus facing). A hand-over into the room takes the first free spot instead of a fixed literal. A spot is freed when its person leaves. Journey moves keep their authored end points, because they are story positions (beside a particular couch or console). Checks (k), (l) and (m) hold them to the same rules, and an end point that fails moves the least distance that passes.
 4. **Per-room waypoints:**
@@ -344,3 +345,134 @@ The probe sampled the leg and torso boxes of every person against every furnitur
 - Dynamic avoidance between moving story actors.
 - Furniture as colliders for the player.
 - Pathfinding in the corridors (stage 1 lanes stay).
+
+### As built
+
+1. **Checks (k), (l) and (m)** (`scripts/sim-hub-npc-check.mjs`, furniture in `scripts/lib/furniture.mjs`).
+   - **Furniture** is every visible mesh except people, movers, floors, walls, ceilings, mats, glass panes, planes and wall items above 2 m: 775 records. It is built once at the journey reset, while every room shows. The **body** is the leg meshes and the torso, sampled on a grid over each mesh's box: 6 × 6 × 6 points for (k), 4 × 4 × 4 for (l).
+   - **Simulated clock.** The page's timers (`later()`, the door timers) run on the check's clock. `driveJourney` drives each journey through its own sequence to `done`: treatment 11 moves, new patient 27.
+   - **Count floors**, so the checks cannot pass by measuring nobody:
+     - at least 40 people at rest after the journey reset;
+     - exactly 21 hand-overs and 11 + 27 journey moves followed;
+     - every followed move has an end, measured or dropped.
+   - **Reset between runs.** `snapshotPeople`/`resetPeople` put every person back as the page built it. The rotation is restored as Euler angles: a figure restored from a quaternion and turned more than 90° came back as (π, π − y, π), then turned the mirrored way and walked backwards.
+   - **(l)** follows every frame of a move, stand-up and sit-down included. It leaves out the seats within 0.6 m of the move's start, its curve's end or the actor's own seat. Its ring sub-check samples 500 points of the walker, visitor, therapist, ctRunner, linacRunner and hdrRunner loops.
+   - **(c)** queues three moves for Jordan: lobby → consult → education → back to the lobby chair at (4.40, 3.34), with `{ sit: true }`. That chair is free, its approach point is clear, and no other move uses it. onComplete order [1, 2, 3]; the largest step is 0.097 m, 0.077 m during the sit-down.
+   - **Output:** `--svg` draws the furniture, every (l) route and a red dot per (k) or (l) failure. There are four new shots: `dosimetry-desk`, `ctcontrol-console`, `manager-desk` and `linac-console`.
+   - The whole check runs in about 20–25 s.
+2. **Staff moved out of their desks** (world x/z; facing and pose unchanged unless noted). Each moved to the nearest spot on a 0.05 m grid at least 0.06 m clear; the extra 1 cm covers the duty animation's torso turn.
+
+   | Person                                  | Old             | New             | Move   |
+   | --------------------------------------- | --------------- | --------------- | ------ |
+   | Medical Dosimetrist (dosimetry:staff:0) | (5.40, −50.80)  | (5.40, −50.45)  | 0.35 m |
+   | Medical Physicist, Dr. Priya Shah       | (7.10, −47.90)  | (7.10, −48.35)  | 0.45 m |
+   | Rad Onc Manager                         | (20.00, 6.90)   | (20.00, 7.10)   | 0.20 m |
+   | Radiation Safety Officer                | (−7.50, −19.10) | (−7.50, −18.95) | 0.15 m |
+   | Patient Navigator                       | (−43.60, −6.60) | (−43.60, −6.95) | 0.35 m |
+   | LINAC control therapist, Marcus Hill    | (50.60, 7.00)   | (50.80, 7.00)   | 0.20 m |
+   | Radiation Oncologist (consult)          | (−20.30, −8.80) | (−20.30, −8.75) | 0.05 m |
+   | CT control therapist, Avery Woods       | (30.20, −11.00) | (31.00, −11.00) | 0.80 m |
+   - Avery also turns from ry 0.3 to −π/2, facing the console like the operators. No spot within 0.6 m cleared the console and the window partition, so the 0.8 m move was approved.
+   - Marcus moved 0.15 m first, then 0.05 m more when the routes were checked: at 50.75 every departure put a thigh into the console top, because the pelvis drops 6 cm while walking.
+
+3. **Arrival spots** (`room-routes.ts` `ARRIVAL_SPOTS`, world x/z with the facing taken on arrival).
+   - Each room that a hand-over targets has one spot more than the hand-overs into it, and at least 3.
+   - Each spot is:
+     - at least 0.06 m clear of furniture;
+     - 0.65 m from the room's other spots;
+     - 0.55 m from its residents;
+     - 0.5 m from any seat anchor, and 0.6 m from a seated resident's feet;
+     - 0.95 m from every mover loop.
+   - Facings point at the room's primary staff member. In LINAC control they point at the console centre (50, 9), and in the lobby at reception.
+   - **Taking a spot.** A hand-over without its own `final` takes `takeArrivalSpot(target, actor)`: the first spot that no other actor holds, with no other visible person within 0.5 m. The hold ends when the actor starts another move, or at `clearArrivalSpots()` (the journey reset). The seat finals keep their `final`.
+
+   | Room         | Spots (x, z, facing)                                                                                    |
+   | ------------ | ------------------------------------------------------------------------------------------------------- |
+   | lobby        | (−3.2, 1.3, −2.53), (−3.45, 0.7, −2.5), (−2.6, 1.05, −2.41), (−3.75, 1.65, −2.66)                       |
+   | consult      | (−16.7, −6.85, −2.06), (−17.3, −7.1, −2.07), (−16.5, −6.2, −2.16)                                       |
+   | social       | (−28.9, −6.05, −2.25), (−28.9, −6.7, −2.12), (−29.6, −6.95, −2.16)                                      |
+   | education    | (−41.1, −5.4, −2.13), (−41.5, −7.0, −1.55), (−41.8, −5.4, −2.28)                                        |
+   | patientcare  | (−27.4, 4.95, 0.53), (−27.4, 6.05, 1.27), (−26.65, 5.5, 0.06)                                           |
+   | physics      | (6.4, −17.2, −2.66), (5.75, −17.2, −2.93), (6.15, −17.8, −2.63)                                         |
+   | qa           | (−5.65, −43.4, −2.16), (−5.65, −42.4, −2.32), (−5.6, −44.05, −2.03)                                     |
+   | ctcontrol    | (31.3, −7.4, 1.05), (31.3, −6.75, 1.46), (31.85, −7.75, 0.64)                                           |
+   | ctsim        | (40.4, −7.2, 2.58), (40.4, −7.9, 2.3), (40.5, −6.5, 2.77)                                               |
+   | linaccontrol | (52.75, 7.2, −0.99), (52.75, 6.5, −0.83), (52.75, 7.9, −1.19), (52.75, 8.6, −1.43), (52.75, 9.3, −1.68) |
+   | vault1       | (75.0, −14.25, 2.36), (74.8, −14.9, 1.36), (75.45, −13.75, 3.09)                                        |
+   | vault2       | (75.15, 14.3, 0.66), (74.8, 14.85, 1.71), (75.8, 14.25, −0.54)                                          |
+   - The commons → lobby hand-over now ends at a lobby spot, not in "Have a seat"'s chair.
+
+4. **Room graphs** (`room-routes.ts` `ROOM_GRAPHS`, `inRoomPath`).
+   - Every room a hand-over or journey move enters or leaves has a graph; there are 18 (radbio has no moves). Node 0 is `doorPoint(room)`. The lobby's nodes 0–2 are its exits: E (12.8, 0), W (−12.8, 0) and T (0, −10.8).
+
+     | Room        | Nodes / edges | Room         | Nodes / edges |
+     | ----------- | ------------- | ------------ | ------------- |
+     | lobby       | 16 / 23       | qa           | 3 / 2         |
+     | consult     | 6 / 6         | dosimetry    | 2 / 1         |
+     | social      | 5 / 4         | commons      | 2 / 1         |
+     | education   | 8 / 7         | manager      | 3 / 2         |
+     | patientcare | 6 / 5         | ctcontrol    | 6 / 5         |
+     | safety      | 2 / 1         | ctsim        | 8 / 8         |
+     | physics     | 2 / 1         | linaccontrol | 6 / 6         |
+     | engineering | 3 / 2         | vault1       | 7 / 6         |
+     | hdr         | 2 / 1         | vault2       | 6 / 5         |
+
+   - **Edges** keep a 0.25 m half-width strip clear of furniture at heights 0.1–1.3 m. The exceptions are the vault and HDR door edges, which cross the 2 cm door leaf across each doorway by 1.0 cm at most.
+   - **`inRoomPath(room, from, to)`** goes from the node nearest `from`, along the shortest graph path (Dijkstra, no node repeated), to the node nearest `to`. Nodes within 0.22 m of either end are dropped.
+   - **Placing nodes.** A walker's legs swing about 0.6 m behind and 0.4 m ahead at foot height. So each start or final's nearest node lies along a heading on which the person can leave or arrive cleanly.
+   - **Routing** (`buildActorHandoffPath`):
+     - start → graph → door when leaving a room;
+     - door → graph → final when entering one;
+     - start → graph → final within a room;
+     - in the lobby, start → graph → the exit nearest the first corridor point.
+   - **Lobby pass-through.** A corridor leg that crosses the lobby rectangle goes through the lobby graph too: J (0, 0) → G1 (4.2, −0.6) → G2 (6.8, −0.6), through the gap between the two east couches. Walks out of the lobby go along N2–M–C, at z ≈ 2.3–2.4.
+   - **Vaults.** The maze lives in the vault graphs. Its first point, in line at (65.1, ±18), became a step beside the entrance marker at (64.75, ±18.95). Vault 1's node P (69.05, −12.9) lets the patient beside the bench leave along it.
+   - **NPC treatment lane.** NPC routes walk the treatment corridor's x = 64 line at `NPC_TREATMENT_LANE_X` = 63.4, junction (64, 0) included. The red vault entrance markers (0.24 × 3 × 0.05 m, y 0.5–3.5, at x 63.76–64.00, z ±18; `rooms.ts`) hang in the walkway, and a body centred on x = 64 walked into them by 2.5 cm. `walk.ts` and `rooms.ts` are unchanged, so the player's guided travel is too. The owner has been asked whether the markers are intended.
+   - **Last-frame heading.** Both transition walkers keep the heading when the curve's last two points coincide (within 1 µm). Before, `atan2(0, 0)` faced the walker +z on its last frame and kicked the furniture beside the final, by up to 17.6 cm.
+5. **Journey finals moved** (old → new; the shortest move that passes, on a 0.05 m grid):
+
+   | Move(s)                                                         | Old            | New             | Move    |
+   | --------------------------------------------------------------- | -------------- | --------------- | ------- |
+   | treatment 4, new patient 18 (patient beside vault 1's bench)    | (68.8, −14.15) | (68.95, −14.15) | 0.15 m  |
+   | treatment 7, new patient 21 (vault therapist → LINAC control)   | (50.8, 8.6)    | (50.85, 8.6)    | 0.05 m  |
+   | treatment 8, new patient 22 (treatment control → LINAC control) | (50.8, 10.2)   | (51.1, 10.2)    | 0.30 m  |
+   | new patient 2 (Mia → consult)                                   | (−17.2, −6.35) | (−17.2, −5.9)   | 0.45 m  |
+   | new patient 3 (Mia → education)                                 | (−40.9, −6.1)  | (−40.9, −5.4)   | 0.70 m  |
+   | new patient 4 (navigator → CT sim)                              | (38.0, −4.7)   | (38.1, −4.7)    | 0.10 m  |
+   | new patient 5 (Mia → CT sim bench)                              | (37.15, −4.7)  | (37.15, −4.4)   | 0.30 m  |
+   | new patient 26 (treatment control → lobby)                      | (−0.65, 3.65)  | (−0.4, 4.1)     | 0.515 m |
+   - Mia's education final went to −5.5 for (k), then to −5.4 once the last-frame heading was fixed: facing her real arrival heading, she stood 1.2 cm into the desk top.
+   - Her CT bench final went to −4.45, then −4.5 after the rotation fix, then −4.4 for (l): a coat hook hangs at torso height at (37.77, −4.70).
+   - Move 26 had left the treatment-control therapist on the CT sim therapist's lobby spot.
+
+6. **Sitting down** (`beginSit`/`stepSit`, `npc-behavior.ts`).
+   - A walk to a seat ends at its approach point, `seatApproach(anchor)`: STAND_CLEAR (0.5 m) in front of the anchor, along its facing. It is the point the stand-up rises to, and the graph path is routed to it, not to the seat.
+   - Over SIT_S = 0.4 s:
+     - the yaw turns the shortest way from the arrival heading to the seat's facing, in the first half (smoothstep);
+     - the hips travel from standing at the approach point to `seatActor`'s pose along a smoothstep: 0.12 m behind the anchor, with the pelvis on the top;
+     - the soles slide back from under the hips to under the knees (`setLegReach(rig, THIGH_LEN × e, hip − sole)`);
+     - the arms ease from the walk's swing to the seated pose's;
+     - the last frame calls `seatActor(actor, anchor)`.
+   - The largest root step is 0.077 m per 1/30 s frame (check c).
+   - **Hand-overs:** a patient whose final is within 0.3 m of a free anchor (the existing rule, decided when the walk starts) walks to that seat's approach point. It sits only if the anchor is still free on arrival; otherwise it stands there.
+   - **Journey moves** passed `{ sit: true }` sit on the anchor nearest `final` (`seatAnchorAt`, within 1.0 m). These are Jordan to `LOBBY_PICKUP.chair`, Mia to her lobby chair (−6.2, 3.6), and Mia to `LOBBY_PICKUP.chair`. Their `onComplete` then finds the actor already seated on that anchor. Other journey walks end in the 'neutral' pose as before.
+   - The transition stays listed until the figure is seated, so check (l) measures the sit-down frames.
+7. **Mover loops** (`addMovingActors`).
+   - The ring flagged two walkers, each walking through a parked wheelchair.
+   - **visitor:** its west corners moved, (−10, 5) → (−10, 4.75) and (−10, 7.5) → (−10, 7.8). Its lanes now pass the lobby wheelchairs at (−8.5, 5.3) and (−7.6, 7.2) instead of going through their seats.
+   - **ctRunner:** its west-bound corridor lane moved north, (30.65, −1.4) and (27.5, −1.4) → z −0.85, past the wheelchair parked at (28.6, −1.4) (`addCirculationProps`).
+   - Each is the least move, on a 0.05 m grid, that keeps both the 0.2 m ring and the walker's own body (legs and torso) within 0.02 m of furniture. The ring alone is blind to a wheelchair seat, a slab at y 0.57–0.65 between its 0.5 m and 0.9 m heights.
+   - The deepest ring is now: visitor 2.0 cm, ctRunner 1.1 cm, hdrRunner 0.4 cm (the HDR nook desk, under the limit, so unchanged).
+     - The visitor's 2.0 cm is the brochure rack at (8.88, 4.60), unchanged by this edit: the ring's 0.5 m and 0.9 m heights sit exactly 2 cm under its shelf tops.
+   - Speeds were rescaled as in stage 1, so the walking pace in m/s is unchanged:
+     - visitor: 45.325 → 45.864 m, speed 0.01727 → 0.017067 (0.783 m/s);
+     - ctRunner: 37.604 → 38.017 m, speed 0.011522 → 0.011397 (0.433 m/s).
+8. **patientcare → lobby sits in the east row.**
+   - Its `final` moved from the chair at (−4.75, 3.54) to the one at (5.8, 3.34).
+   - A wall-box AED cabinet (`rooms.ts`) hangs at y 1.23–2.01 at (−4.6, 3.02), with no wall behind it, right at the old chair's approach point (−4.75, 3.04). The walk there put the patient's torso 6.8 cm into it.
+   - Of the two free east-row chairs, (5.8, 3.34) backtracks least past the lobby node N2 (6.9, 2.4).
+   - The cabinet itself is unchanged; the owner will be asked about it.
+9. **Open questions for the owner:**
+   - the red vault entrance markers on the treatment corridor's x = 64 line, which NPC routes avoid on the 63.4 lane (item 4);
+   - the floating lobby AED cabinet (item 8);
+   - the three wheelchairs parked on or beside walker loops (item 7).

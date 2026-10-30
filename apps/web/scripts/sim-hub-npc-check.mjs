@@ -10,8 +10,9 @@
 //                the tech cart by its oriented footprint plus 0.1 m
 //   b  Spacing   20 simulated minutes at 30 Hz, with scripted journey moves: no mover within 0.5 m of
 //                another mover, a cast actor or a journey/transition actor
-//   c  One move  two queued moves for one journey actor never overlap and never jump (the first starts
-//                from the reset seat, so the stand-up is measured too)
+//   c  One move  three queued moves for one journey actor never overlap and never jump (the first starts
+//                from the reset seat, so the stand-up is measured too; the third ends sitting down on a
+//                free lobby chair, so the sit-down is too)
 //   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace;
 //                one that never moves is outwaited: released after 8 s, then walking at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
@@ -694,6 +695,7 @@ function refsActor(actor) {
 	for (const t of NPC.handoffTransitions) if (t.actor === actor) n++;
 	return n;
 }
+const C_CHAIR = { x: 4.4, z: 3.34 }; // (c)'s third move ends sitting on this lobby chair
 function checkOneMove() {
 	// Known start state: resetTreatmentJourney() clears the workflow transitions and puts the journey
 	// patient back in the lobby; its room is then read from its position.
@@ -729,8 +731,29 @@ function checkOneMove() {
 		track(i);
 	}
 	NPC.moveJourneyActor(actor, 'consult', 'education', roomFinal('education'), () => fired.push(2));
+	// The third move sits down on the lobby chair at C_CHAIR: free, with a clear approach point, and
+	// nobody else's (Jordan's, Mia's and the pickup chair are -1.85, -6.2 and -3.3 in the front row,
+	// patientcare -> lobby sits at (5.8, 3.34), and a wall-box AED hangs over the approach point of the
+	// front row's other chair, (-4.75, 3.54)).
+	const sitters = [...NPC.castActors().map((c) => c.g), ...NPC.journeyActors()]
+			.filter((g) => g?.userData.seated)
+			.map(worldPos),
+		chair = NPC.SEATS.find((s) => {
+			const w = NPC.seatInWorld(s);
+			return s.kind === 'chair' && Math.hypot(w.x - C_CHAIR.x, w.z - C_CHAIR.z) < 0.01;
+		});
+	if (!chair) throw new Error(`no chair seat anchor at ${xz(C_CHAIR)}`);
+	const seat = NPC.seatInWorld(chair);
+	if (sitters.some((p) => Math.hypot(p.x - seat.x, p.z - seat.z) < SEAT_RADIUS))
+		throw new Error(`the lobby chair at ${xz(seat)} is taken`);
+	NPC.moveJourneyActor(actor, 'education', 'lobby', seat, () => fired.push(3), undefined, {
+		sit: true
+	});
+	let sitMax = null; // the largest step from the frame the sit-down starts
 	for (let i = 0; i < 30 * 120 && refsActor(actor) > 0; i++) {
 		step();
+		if (sitMax === null && NPC.workflowTransitions.some((t) => t.actor === actor && t.sit))
+			sitMax = 0;
 		const r = refsActor(actor);
 		if (arrival && secondStart === null) {
 			const t2 = NPC.workflowTransitions.find((t) => t.actor === actor);
@@ -741,6 +764,8 @@ function checkOneMove() {
 		}
 		if (r > maxRef) maxRef = r;
 		if (r > 1 && !firstOverlap) firstOverlap = `step ${i}: ${r} transitions reference the actor`;
+		const j = Math.hypot(actor.position.x - prev.x, actor.position.z - prev.z);
+		if (sitMax !== null) sitMax = Math.max(sitMax, j);
 		track(i);
 	}
 	if (firstOverlap)
@@ -751,12 +776,16 @@ function checkOneMove() {
 			`second move start: ${secondStart === null ? 'never started' : `${secondStart.toFixed(2)} m from where the first arrived`}`
 		);
 	const order = fired.join(',');
-	if (order !== '1,2') problems.push(`onComplete order/count: got [${order}], expected [1,2]`);
+	if (order !== '1,2,3') problems.push(`onComplete order/count: got [${order}], expected [1,2,3]`);
+	if (sitMax === null || !actor.userData.seated || actor.userData.seatAnchor !== chair)
+		problems.push(
+			`sit-down: ${sitMax === null ? 'never started' : 'the actor does not end seated'} on the lobby chair at ${xz(seat)}`
+		);
 	return {
 		pass: problems.length === 0,
 		summary: problems.length
 			? problems.map((p) => p.split(';')[0]).join('; ')
-			: `no overlap, max step ${maxJump.toFixed(3)} m, onComplete [1,2]`,
+			: `no overlap, max step ${maxJump.toFixed(3)} m (sit-down ${sitMax.toFixed(3)} m), onComplete [1,2,3], seated on the lobby chair at ${xz(seat)}`,
 		detail: problems
 	};
 }
