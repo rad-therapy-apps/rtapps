@@ -383,6 +383,74 @@ export function faceAlong(o, dx, dz, off) {
 	if (dx || dz) o.rotation.y = Math.atan2(dx, dz) + (off || 0);
 }
 
+// One lying-patient figure (hand-built boxes, head toward -x, feet toward +x), standing on local
+// y = 0 at its lowest point. restLyingPatient puts it on a couch or table.
+export function createLyingPatient(detail, skin = 0xe9c39d, hairColor = 0x4a382e) {
+	const cont = new THREE.Group();
+	const topMat = std(0xd3d9dd, 0.78, 0.02),
+		pantMat = std(0xc3cace, 0.82, 0.03),
+		skinMat = std(skin, 0.9, 0.0),
+		hairMat = std(hairColor, 0.82, 0.02),
+		shoeMat = std(0x252b30, 0.85, 0.1);
+	const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.9, -0.05),
+		pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.88, -0.02),
+		neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92, 0);
+	cont.add(torso, pelvis, neck);
+	const head = sphere(0.17, skinMat);
+	head.scale.y = 1.04;
+	head.position.set(-0.72, 0.92, 0);
+	cont.add(head);
+	const hair = sphere(0.175, hairMat);
+	hair.scale.set(1, 0.5, 1);
+	hair.position.set(-0.73, 0.99, -0.01);
+	cont.add(hair);
+	const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86, -0.22),
+		armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86, 0.22),
+		foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84, -0.22),
+		foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84, 0.22),
+		legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82, -0.1),
+		legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82, 0.1),
+		footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77, -0.1),
+		footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77, 0.1);
+	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
+	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73, 0));
+	setNpcRole(cont, 'Patient', detail);
+	cont.userData.lying = true;
+	cont.userData.clothingRig = {
+		kind: 'lying',
+		topParts: [torso, pelvis, armL, armR],
+		bottomParts: [legL, legR],
+		topColor: 0xd3d9dd,
+		bottomColor: 0xc3cace
+	};
+	return cont;
+}
+// Puts a lying patient at (x, z) with its lowest point on the top of the couch or table under its
+// centre, measured from that mesh's world bounds now. The highest non-person mesh under the centre
+// with a top between 0.3 and 1.4 m is the surface. Only x/z move afterwards (the CT couch slides
+// along x with the patient, so the height holds), so the contact is kept without per-frame work.
+export function restLyingPatient(cont, x, z, ry = 0) {
+	cont.position.set(x, 0, z);
+	cont.rotation.y = ry;
+	scene.updateMatrixWorld(true);
+	const mine = new THREE.Box3().setFromObject(cont),
+		cx = (mine.min.x + mine.max.x) / 2,
+		cz = (mine.min.z + mine.max.z) / 2;
+	let top = null;
+	const bb = new THREE.Box3();
+	scene.traverse((o) => {
+		const m = o as THREE.Mesh;
+		if (!m.isMesh) return;
+		for (let p = o; p; p = p.parent)
+			if (p === cont || p.userData?.lying || p.userData?.walkRig) return;
+		bb.setFromObject(o);
+		if (cx < bb.min.x || cx > bb.max.x || cz < bb.min.z || cz > bb.max.z) return;
+		if (bb.max.y < 0.3 || bb.max.y > 1.4) return;
+		if (top === null || bb.max.y > top) top = bb.max.y;
+	});
+	if (top === null) top = 0.02;
+	cont.position.y = top - mine.min.y;
+}
 export function departmentStaff() {
 	const R = (id) => roomById(id),
 		cast = ROOM_CAST;
@@ -464,56 +532,8 @@ export function departmentStaff() {
 	const lyingPatient = (id, detail, dx, dz, ry = 0, skin = 0xe9c39d, hairColor = 0x4a382e) => {
 		const r = R(id);
 		if (!r) return;
-		const cont = new THREE.Group();
-		const lift = id === 'vault1' || id === 'vault2' ? 0.62 : id === 'ctsim' ? 0.48 : 0.42;
-		const topMat = std(0xd3d9dd, 0.78, 0.02),
-			pantMat = std(0xc3cace, 0.82, 0.03),
-			skinMat = std(skin, 0.9, 0.0),
-			hairMat = std(hairColor, 0.82, 0.02),
-			shoeMat = std(0x252b30, 0.85, 0.1);
-		const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.9 + lift, -0.05);
-		cont.add(torso);
-		const pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.88 + lift, -0.02);
-		cont.add(pelvis);
-		const neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92 + lift, 0);
-		cont.add(neck);
-		const head = sphere(0.17, skinMat);
-		head.scale.y = 1.04;
-		head.position.set(-0.72, 0.92 + lift, 0);
-		cont.add(head);
-		const hair = sphere(0.175, hairMat);
-		hair.scale.set(1, 0.5, 1);
-		hair.position.set(-0.73, 0.99 + lift, -0.01);
-		cont.add(hair);
-		const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, -0.22);
-		cont.add(armL);
-		const armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, 0.22);
-		cont.add(armR);
-		const foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, -0.22);
-		cont.add(foreL);
-		const foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, 0.22);
-		cont.add(foreR);
-		const legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, -0.1);
-		cont.add(legL);
-		const legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, 0.1);
-		cont.add(legR);
-		const footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, -0.1);
-		cont.add(footL);
-		const footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, 0.1);
-		cont.add(footR);
-		const pillow = box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0);
-		cont.add(pillow);
-		setNpcRole(cont, 'Patient', detail);
-		cont.userData.lying = true;
-		cont.userData.clothingRig = {
-			kind: 'lying',
-			topParts: [torso, pelvis, armL, armR],
-			bottomParts: [legL, legR],
-			topColor: 0xd3d9dd,
-			bottomColor: 0xc3cace
-		};
-		cont.position.set(r.x + dx, 0.02, r.z + dz);
-		cont.rotation.y = ry;
+		const cont = createLyingPatient(detail, skin, hairColor);
+		restLyingPatient(cont, r.x + dx, r.z + dz, ry);
 		scene.add(cont);
 		addCast(id, cont, 'patient');
 		return cont;

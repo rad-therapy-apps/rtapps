@@ -33,8 +33,8 @@ const SHOTS = [
 	// the patient sits on the exam table's near edge; this camera stays clear of the oncologist
 	{ name: 'consult-patient', subject: 'cast:consult:patient:1', cam: [2.6, 1.3, 1.8], lookY: 0.8 },
 	{ name: 'escort-wheelchair', subject: 'mover:escort', u: 0.3, cam: [2.4, 1.1, 0], lookY: 0.8 },
-	{ name: 'ct-table', subject: 'cast:ctsim:patient:*', cam: [0, 1.15, -2.2], lookY: 1.1 },
-	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [-2.6, 1.35, -1.6], lookY: 1.2 }
+	{ name: 'ct-table', subject: 'cast:ctsim:patient:*', cam: [0, 1.5, -1.8], lookY: 1.05 },
+	{ name: 'vault-couch', subject: 'cast:vault1:patient:*', cam: [-1.4, 1.6, 1.2], lookY: 1.0 }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),

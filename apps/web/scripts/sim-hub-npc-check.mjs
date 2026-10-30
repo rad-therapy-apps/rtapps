@@ -1017,6 +1017,8 @@ function exchangeFacingProblems(seats) {
 					`${who}: partner ${off.toFixed(0)} deg off the seat's facing (limit ${TALK_DEG})`
 				);
 		}
+	if (count < 1)
+		problems.push('exchange facing: no seated exchange pair was checked (the set is empty)');
 	return { count, problems };
 }
 // Sub-check "seat facing": the segment from each seat anchor SEAT_VIEW m forward along its facing must

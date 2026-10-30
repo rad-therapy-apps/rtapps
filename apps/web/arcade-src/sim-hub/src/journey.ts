@@ -27,16 +27,17 @@
    `advanceNewPatientJourney`'s use. */
 import * as THREE from 'three';
 import { S } from './state';
-import { box, sphere, std, cleanPoints, later } from './helpers';
+import { cleanPoints, later } from './helpers';
 import { scene, camera, orbit, AMBIENCE, initAmbience } from './scene';
 import { ROOMS } from './rooms';
 import {
 	setPatientGown,
-	setNpcRole,
 	poseCharacter,
 	npcBubble,
 	bubbleVis,
-	faceNpcToward
+	faceNpcToward,
+	createLyingPatient,
+	restLyingPatient
 } from './npc';
 import {
 	movers,
@@ -426,90 +427,20 @@ export function updateJourneyUI() {
 		.forEach((b) => b.classList.toggle('active', b.dataset.journey === JOURNEY.kind));
 }
 function createJourneyLyingPatient(room, skin = 0xd7a17d, hairColor = 0x3a281f) {
-	const cont = new THREE.Group(),
-		topMat = std(0xd3d9dd, 0.78, 0.02),
-		pantMat = std(0xc3cace, 0.82, 0.03),
-		skinMat = std(skin, 0.9, 0.0),
-		hairMat = std(hairColor, 0.82, 0.02),
-		shoeMat = std(0x252b30, 0.85, 0.1),
-		lift = 0.48;
-	const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.9 + lift, -0.05),
-		pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.88 + lift, -0.02),
-		neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92 + lift, 0);
-	cont.add(torso, pelvis, neck);
-	const hd = sphere(0.17, skinMat);
-	hd.scale.y = 1.04;
-	hd.position.set(-0.72, 0.92 + lift, 0);
-	cont.add(hd);
-	const hair = sphere(0.175, hairMat);
-	hair.scale.set(1, 0.5, 1);
-	hair.position.set(-0.73, 0.99 + lift, -0.01);
-	cont.add(hair);
-	const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, -0.22),
-		armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, 0.22),
-		foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, -0.22),
-		foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, 0.22),
-		legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, -0.1),
-		legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, 0.1),
-		footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, -0.1),
-		footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, 0.1);
-	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
-	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0));
-	setNpcRole(cont, 'Patient', 'Mia Reynolds positioned for CT simulation.');
-	cont.userData.lying = true;
-	cont.userData.clothingRig = {
-		kind: 'lying',
-		topParts: [torso, pelvis, armL, armR],
-		bottomParts: [legL, legR],
-		topColor: 0xd3d9dd,
-		bottomColor: 0xc3cace
-	};
-	cont.position.set(room.x - 4.0, 0.02, room.z + 1.5);
+	const cont = createLyingPatient('Mia Reynolds positioned for CT simulation.', skin, hairColor);
+	restLyingPatient(cont, room.x - 4.0, room.z + 1.5);
 	scene.add(cont);
 	(ROOM_CAST.ctsim || (ROOM_CAST.ctsim = [])).push({ g: cont, kind: 'patient' });
 	cont.visible = false;
 	return cont;
 }
 function createJourneyTreatmentPatient(room, skin = 0xd7a17d, hairColor = 0x3a281f) {
-	const cont = new THREE.Group(),
-		topMat = std(0xd3d9dd, 0.78, 0.02),
-		pantMat = std(0xc3cace, 0.82, 0.03),
-		skinMat = std(skin, 0.9, 0.0),
-		hairMat = std(hairColor, 0.82, 0.02),
-		shoeMat = std(0x252b30, 0.85, 0.1),
-		lift = 0.62;
-	const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.9 + lift, -0.05),
-		pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.88 + lift, -0.02),
-		neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92 + lift, 0);
-	cont.add(torso, pelvis, neck);
-	const hd = sphere(0.17, skinMat);
-	hd.scale.y = 1.04;
-	hd.position.set(-0.72, 0.92 + lift, 0);
-	cont.add(hd);
-	const hair = sphere(0.175, hairMat);
-	hair.scale.set(1, 0.5, 1);
-	hair.position.set(-0.73, 0.99 + lift, -0.01);
-	cont.add(hair);
-	const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, -0.22),
-		armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, 0.22),
-		foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, -0.22),
-		foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, 0.22),
-		legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, -0.1),
-		legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, 0.1),
-		footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, -0.1),
-		footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, 0.1);
-	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
-	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0));
-	setNpcRole(cont, 'Patient', 'Mia Reynolds positioned for her first radiation treatment.');
-	cont.userData.lying = true;
-	cont.userData.clothingRig = {
-		kind: 'lying',
-		topParts: [torso, pelvis, armL, armR],
-		bottomParts: [legL, legR],
-		topColor: 0xd3d9dd,
-		bottomColor: 0xc3cace
-	};
-	cont.position.set(room.x - 1.25, 0.02, room.z - 0.05);
+	const cont = createLyingPatient(
+		'Mia Reynolds positioned for her first radiation treatment.',
+		skin,
+		hairColor
+	);
+	restLyingPatient(cont, room.x - 1.25, room.z - 0.05);
 	scene.add(cont);
 	(ROOM_CAST.vault1 || (ROOM_CAST.vault1 = [])).push({ g: cont, kind: 'patient' });
 	cont.visible = false;
