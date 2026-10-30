@@ -1569,6 +1569,12 @@ const REST_CLEAR = 0.05, // (k) the least clearance between the body and furnitu
 	HANDOFF_FRAMES = 5, // frames after the journey reset before hand-overs start
 	CHECKIN_DESK = { x: -4.5, z: -2.05 }, // where "Have a seat" starts: from a lobby chair it is a no-op
 	JOURNEY_LIMIT_S = 40 * 60;
+// Count floors, as measured when these checks were written, so that (k), (l) and (m) cannot pass by
+// measuring nobody: the people at rest after the journey reset (at least), the hand-overs followed
+// and the moves of each journey (exactly). Every followed move has an end, measured or dropped.
+const REST_FLOOR = 40,
+	HANDOFF_ROUTES = 21,
+	JOURNEY_ROUTES = { treatment: 11, newpatient: 27 };
 // The movers whose person figure walks on the loop point itself; the escort pushes its wheelchair and
 // the tech cart's person walks behind the cart, so their footprints are check (a)'s.
 const RING_MOVERS = ['walker', 'visitor', 'therapist', 'ctRunner', 'linacRunner', 'hdrRunner'];
@@ -1630,7 +1636,9 @@ function furniture() {
 	const culled = NPC.scene.children.filter((o) => o.name.startsWith('room-content:') && !o.visible);
 	if (culled.length)
 		setupError(`furniture: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
-	return (furnitureCache = buildFurniture(NPC));
+	furnitureCache = buildFurniture(NPC);
+	if (!furnitureCache.list.length) setupError('furniture: no mesh classified as furniture');
+	return furnitureCache;
 }
 // Names for people: the cast ids castActors gives (room:kind:index, duty:index), else the JOURNEY key.
 function personIds() {
@@ -1679,6 +1687,16 @@ function driveJourney(kind, onFrame) {
 }
 
 // ---------------------------------------------------------- moves (k, l, m)
+// "Have a seat", HANDOFFS.lobby[1]: the lobby patient's hand-over to a lobby chair (its final point).
+// Checked, so that a reordered HANDOFFS fails here rather than skipping its check-in-desk start.
+function haveASeat() {
+	const h = NPC.HANDOFFS.lobby?.[1];
+	if (!h || h.target !== 'lobby' || (h.actor || 'patient') !== 'patient' || !h.final)
+		setupError(
+			`HANDOFFS.lobby[1] is not "Have a seat" (target 'lobby', actor 'patient', a final point): ${JSON.stringify(h && { target: h.target, actor: h.actor, final: h.final })}`
+		);
+	return h;
+}
 // Starts the hand-overs `picks` ([key, index] pairs) together, from the journey reset, as the page
 // starts them, and steps until each has ended: no hand-over entry refers to its actor and the actor
 // is out of its hand-over. "Have a seat" starts from the check-in desk. onFrame(run) runs on every
@@ -1686,11 +1704,12 @@ function driveJourney(kind, onFrame) {
 function runHandoffs(picks, onFrame = null) {
 	resetPeople();
 	for (let i = 0; i < HANDOFF_FRAMES; i++) step();
+	const seat = haveASeat();
 	const runs = picks.map(([key, idx]) => {
 		const h = NPC.HANDOFFS[key][idx],
 			actor = castActor(key, h),
 			name = `hand-over ${key}[${idx}] -> ${h.target}`;
-		if (h === NPC.HANDOFFS.lobby[1]) {
+		if (h === seat) {
 			NPC.setActorSeated(actor, false);
 			actor.position.set(CHECKIN_DESK.x, 0, CHECKIN_DESK.z);
 		}
@@ -1835,13 +1854,18 @@ function furnitureRuns() {
 			routes: [],
 			hidden: [],
 			crowding: new Map(),
-			moments: { rest: 0, alone: 0, together: 0, journey: 0 }
+			moments: { rest: 0, alone: 0, together: 0, journey: 0 },
+			journeyMoves: {}
 		});
 	resetPeople();
 	for (let i = 0; i < REST_FRAMES; i++) step();
 	const ids = personIds(),
 		atRest = peopleAtRest(ids),
 		moment0 = `at rest ${REST_FRAMES} frames after the journey reset`;
+	if (atRest.length < REST_FLOOR)
+		setupError(
+			`${atRest.length} people at rest after the journey reset, fewer than the ${REST_FLOOR} measured when (k) and (m) were written`
+		);
 	for (const p of atRest) R.rest.push(restReading(F, moment0, p));
 	occupancy(R, 'rest', moment0, atRest, [], atRest);
 	// each hand-over alone; the hand-overs into one room with different actors are grouped
@@ -1852,6 +1876,7 @@ function furnitureRuns() {
 				r.route ||= newRoute(F, 'hand-over', r.name, r.actor, r.entry, r.start, r.own);
 				followRoute(F, r.route);
 			});
+			if (!run.route) setupError(`${run.name}: ended before its first frame`);
 			R.routes.push(run.route);
 			moveEnd(R, 'alone', `${run.name} (alone), at its end`, run.actor, h.target);
 			const group = byTarget.get(h.target) || [];
@@ -1904,9 +1929,27 @@ function furnitureRuns() {
 		});
 		if (live.size)
 			setupError(`the ${kind} journey reached 'done' with ${live.size} moves still under way`);
+		R.journeyMoves[kind] = n;
 	}
 	NPC.setJourneyKind('treatment', true);
 	resetPeople();
+	// the count floors: every hand-over and journey move followed, and every one of them has an end
+	const handoffs = R.routes.filter((r) => r.kind === 'hand-over').length,
+		moves = Object.values(R.journeyMoves).reduce((a, b) => a + b, 0),
+		counts = `${handoffs} hand-overs, journey moves ${Object.entries(R.journeyMoves)
+			.map(([k, v]) => `${k} ${v}`)
+			.join(', ')}`;
+	if (
+		handoffs !== HANDOFF_ROUTES ||
+		Object.entries(JOURNEY_ROUTES).some(([k, v]) => R.journeyMoves[k] !== v)
+	)
+		setupError(
+			`(l) followed ${counts}; expected exactly ${HANDOFF_ROUTES} hand-overs and journey moves treatment ${JOURNEY_ROUTES.treatment}, newpatient ${JOURNEY_ROUTES.newpatient}`
+		);
+	if (R.ends.length + R.hidden.length !== handoffs + moves)
+		setupError(
+			`${R.ends.length} move ends measured and ${R.hidden.length} dropped, for ${handoffs + moves} moves followed`
+		);
 	return R;
 }
 
@@ -1930,7 +1973,9 @@ function checkRestClearance() {
 			: `all ${all.length} people at rest keep at least ${REST_CLEAR} m from furniture: ${R.rest.length} after the journey reset, ${R.ends.length} at the end of a hand-over or journey move`,
 		detail: bad.map((e) => `${e.moment}: ${e.id} at ${xz(e)}: ${where(e)}`),
 		info: [
-			`not measured: lying patients (check h)${R.hidden.length ? `; ${R.hidden.length} move ends with the actor hidden or lying` : ''}`
+			`counts: ${R.rest.length} at rest after the journey reset (floor ${REST_FLOOR}); ${R.ends.length} move ends measured and ${R.hidden.length} dropped, of ${R.ends.length + R.hidden.length} moves followed`,
+			'not measured: lying patients (check h)',
+			...R.hidden.map((m) => `not measured, the actor hidden or lying: ${m}`)
 		]
 	};
 }
@@ -1965,22 +2010,28 @@ function moverRings(F) {
 function checkRoutes() {
 	const R = furnitureRuns(),
 		bad = R.routes.filter((r) => r.worst > ROUTE_DEPTH).sort((a, b) => b.worst - a.worst),
+		// a route whose actor is hidden on every frame measures nothing, so it fails
+		unseen = R.routes.filter((r) => r.path.length === 0),
 		rings = moverRings(R.F),
 		badRings = rings.filter((r) => r.worst > ROUTE_DEPTH),
 		count = (list, kind) => list.filter((r) => r.kind === kind).length,
 		routes = `${count(R.routes, 'hand-over')} hand-overs and ${count(R.routes, 'journey move')} journey moves`;
 	furnitureFailures.push(...bad.map((r) => r.at), ...badRings.map((r) => r.at));
 	return {
-		pass: bad.length === 0 && badRings.length === 0,
+		pass: bad.length === 0 && unseen.length === 0 && badRings.length === 0,
 		summary: [
 			bad.length
 				? `${bad.length} of ${R.routes.length} routes go more than ${ROUTE_DEPTH} m into furniture (${count(bad, 'hand-over')} hand-overs, ${count(bad, 'journey move')} journey moves)`
 				: `every frame of ${routes} keeps the body within ${ROUTE_DEPTH} m of furniture`,
+			...(unseen.length
+				? [`${unseen.length} of ${R.routes.length} routes have the actor hidden on every frame`]
+				: []),
 			badRings.length
 				? `mover loops: the ${RING_R} m ring of ${badRings.length} of ${rings.length} walkers goes more than ${ROUTE_DEPTH} m into furniture`
 				: `mover loops: the ${RING_R} m ring of ${rings.length} walkers stays within ${ROUTE_DEPTH} m of furniture`
 		].join('; '),
 		detail: [
+			...unseen.map((r) => `${r.name}: the actor is hidden on all ${r.frames} frames`),
 			...badRings.map(
 				(r) =>
 					`mover loop ${r.id}: the ${RING_R} m ring at ${r.at.y} m high is ${cm(r.worst)} into ${describe(r.at.rec)}, at loop point ${xz(r.at)} in ${roomAt(r.at.x, r.at.z)}`
@@ -1991,7 +2042,7 @@ function checkRoutes() {
 			)
 		],
 		info: [
-			`routes followed: ${routes}`,
+			`routes followed: ${routes} (exactly ${HANDOFF_ROUTES} and ${JOURNEY_ROUTES.treatment} + ${JOURNEY_ROUTES.newpatient} required); ${R.routes.length - unseen.length} with at least one visible frame`,
 			`mover loop rings, deepest: ${rings.map((r) => `${r.id} ${cm(r.worst)}`).join(', ')}; the escort and the tech cart are left to check (a)`
 		]
 	};
