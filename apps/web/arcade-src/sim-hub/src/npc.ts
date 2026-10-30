@@ -12,8 +12,9 @@ import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers';
 import { scene, camera } from './scene';
 import { S } from './state';
-import { registerDutyActor, registerNpcExchange } from './npc-behavior';
+import { registerDutyActor, registerNpcExchange, seatActor } from './npc-behavior';
 import { STAFF_GUIDES, registerInteractable } from './interact';
+import { LYING_SURFACES } from './props';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
 
 // RTApps (#77 phase 2 task 13): typed boundary for the appearance-options bag passed into
@@ -24,6 +25,18 @@ interface PersonFigureOptions {
 	female?: boolean;
 	hairColor?: number;
 }
+
+// Leg geometry shared by personFigure, setLegSwing and setLegReach (and seatActor and the stand-up,
+// which read HIP_Y, THIGH_LEN and KNEE_TO_SOLE): hip pivot at 1.06, hip -> knee 0.48, knee -> sole
+// 0.51 (shin 0.45 + shoe 0.06); the shoe runs from heel z -0.07 to toe z +0.13.
+export const HIP_Y = 1.06,
+	THIGH_LEN = 0.48,
+	KNEE_TO_SOLE = 0.51;
+const HIP_TO_SOLE = THIGH_LEN + KNEE_TO_SOLE,
+	SHOE_HEEL = -0.07,
+	SHOE_TOE = 0.13;
+/** Height of a standing person's sole above the figure's origin (0.07). */
+export const SOLE_Y = HIP_Y - HIP_TO_SOLE;
 
 export function personFigure(
 	top = 0x5e8fb2,
@@ -98,24 +111,38 @@ export function personFigure(
 	armRP.add(armR);
 	g.add(armLP);
 	g.add(armRP);
+	// Each leg: hip pivot (1.06) -> thigh -> knee pivot -> shin and shoe, sole at local 0.07.
 	const legLP = new THREE.Group();
-	legLP.position.set(-0.1, 1.06, 0);
+	legLP.position.set(-0.1, HIP_Y, 0);
 	const legRP = new THREE.Group();
-	legRP.position.set(0.1, 1.06, 0);
-	const legL = box(0.12, 0.5, 0.12, legMat, 0, -0.25, 0),
-		legR = box(0.12, 0.5, 0.12, legMat, 0, -0.25, 0);
-	legLP.add(legL);
-	legRP.add(legR);
-	legLP.add(box(0.13, 0.06, 0.2, shoeMat, 0, -0.52, 0.03));
-	legRP.add(box(0.13, 0.06, 0.2, shoeMat, 0, -0.52, 0.03));
+	legRP.position.set(0.1, HIP_Y, 0);
+	const kneeLP = new THREE.Group();
+	kneeLP.position.y = -THIGH_LEN;
+	const kneeRP = new THREE.Group();
+	kneeRP.position.y = -THIGH_LEN;
+	const thighL = box(0.12, THIGH_LEN, 0.12, legMat, 0, -THIGH_LEN / 2, 0),
+		thighR = box(0.12, THIGH_LEN, 0.12, legMat, 0, -THIGH_LEN / 2, 0),
+		shinL = box(0.12, 0.45, 0.12, legMat, 0, -0.225, 0),
+		shinR = box(0.12, 0.45, 0.12, legMat, 0, -0.225, 0);
+	legLP.add(thighL, kneeLP);
+	legRP.add(thighR, kneeRP);
+	// A knee cap at each knee pivot fills the wedge between thigh and shin when the knee bends.
+	const capL = box(0.12, 0.12, 0.12, legMat, 0, 0, 0),
+		capR = box(0.12, 0.12, 0.12, legMat, 0, 0, 0);
+	kneeLP.add(shinL, capL, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
+	kneeRP.add(shinR, capR, box(0.13, 0.06, 0.2, shoeMat, 0, 0.03 - KNEE_TO_SOLE, 0.03));
 	g.add(legLP);
 	g.add(legRP);
-	g.userData.walkRig = { armLP, armRP, legLP, legRP };
+	// Every body part sits in `body`, at the origin; only setLegSwing moves it (the pelvis drop).
+	const body = new THREE.Group();
+	body.add(...g.children);
+	g.add(body);
+	g.userData.walkRig = { armLP, armRP, legLP, legRP, kneeLP, kneeRP, body };
 	g.userData.faceRig = { head, torso };
 	g.userData.clothingRig = {
 		kind: 'standing',
 		topParts: [torso, shoulder, armL, armR],
-		bottomParts: [legL, legR],
+		bottomParts: [thighL, thighR, shinL, shinR, capL, capR],
 		topColor: top,
 		bottomColor: bottom
 	};
@@ -139,8 +166,8 @@ function addLabCoat(group) {
 		box(0.13, 0.12, 0.025, trimMat, -0.11, 1.17, 0.148),
 		box(0.13, 0.12, 0.025, trimMat, 0.11, 1.17, 0.148)
 	);
-	group.add(coat);
 	const wr = group.userData.walkRig;
+	(wr?.body || group).add(coat);
 	if (wr) {
 		wr.armLP.add(box(0.105, 0.43, 0.105, coatMat, 0, -0.21, 0.005));
 		wr.armRP.add(box(0.105, 0.43, 0.105, coatMat, 0, -0.21, 0.005));
@@ -172,7 +199,7 @@ export function setPatientGown(group, on = true) {
 	if (!group.userData.gownPanel && group.userData.walkRig) {
 		const panel = box(0.46, 0.46, 0.29, std(0xb9dbe1, 0.88, 0.01), 0, 1.18, 0.01);
 		panel.visible = false;
-		group.add(panel);
+		group.userData.walkRig.body.add(panel);
 		group.userData.gownPanel = panel;
 	}
 	if (group.userData.gownPanel) group.userData.gownPanel.visible = !!on;
@@ -198,17 +225,64 @@ function addChestBadge(group, name, title = '') {
 		})
 	);
 	badge.position.set(0, 1.36, 0.125);
-	group.add(badge);
+	(group.userData.walkRig?.body || group).add(badge);
 	group.userData.hasBadge = true;
 }
+// Depth below the hip pivot of a leg's lowest shoe corner (heel or toe), for hip and knee angles.
+function soleDepth(hip: number, knee: number) {
+	let d = 0;
+	for (const z of [SHOE_HEEL, SHOE_TOE]) {
+		const y = -KNEE_TO_SOLE * Math.cos(knee) - z * Math.sin(knee) - THIGH_LEN,
+			w = -KNEE_TO_SOLE * Math.sin(knee) + z * Math.cos(knee);
+		d = Math.max(d, w * Math.sin(hip) - y * Math.cos(hip));
+	}
+	return d;
+}
+/* The one walking-leg helper: thighs swing +/-swing, the trailing knee bends back by 0.9 x its
+   thigh's swing, and the pelvis drop keeps the lowest sole at rest height (local 0.07) at every
+   phase. The drop is written absolutely on walkRig.body, which nothing else moves, so it never
+   accumulates and callers that rewrite the actor's position each frame cannot undo it. */
+export function setLegSwing(rig, swing: number) {
+	rig.legLP.rotation.x = -swing;
+	rig.legRP.rotation.x = swing;
+	rig.kneeLP.rotation.x = Math.max(0, -swing) * 0.9;
+	rig.kneeRP.rotation.x = Math.max(0, swing) * 0.9;
+	rig.body.position.y =
+		Math.max(
+			soleDepth(rig.legLP.rotation.x, rig.kneeLP.rotation.x),
+			soleDepth(rig.legRP.rotation.x, rig.kneeRP.rotation.x)
+		) - HIP_TO_SOLE;
+}
+/* Poses both legs so each sole is `fwd` ahead of and `down` below its hip pivot (figure units), the
+   knee bent forward (a sole out of reach straightens the leg toward it), and clears the pelvis drop.
+   The seated pose is (THIGH_LEN, KNEE_TO_SOLE), standing is (0, HIP_TO_SOLE). */
+export function setLegReach(rig, fwd: number, down: number) {
+	const reach = Math.min(Math.hypot(fwd, down), HIP_TO_SOLE - 1e-6),
+		aim = Math.atan2(fwd, down),
+		// the angle at the near end of side a, in a triangle with sides a, b and the reach
+		corner = (a: number, b: number) =>
+			Math.acos(Math.max(-1, Math.min(1, (a * a + reach * reach - b * b) / (2 * a * reach)))),
+		thigh = aim + corner(THIGH_LEN, KNEE_TO_SOLE),
+		shin = aim - corner(KNEE_TO_SOLE, THIGH_LEN);
+	for (const [leg, knee] of [
+		[rig.legLP, rig.kneeLP],
+		[rig.legRP, rig.kneeRP]
+	]) {
+		leg.rotation.x = -thigh;
+		knee.rotation.x = thigh - shin;
+	}
+	rig.body.position.y = 0;
+}
 export function poseCharacter(group, mode = 'neutral') {
+	group.userData.pose = mode;
+	// any other pose means the figure has left its seat (seatActor sets `seated`)
+	if (mode !== 'seated') group.userData.seated = false;
 	group.traverse((o) => {
 		const r = o.userData?.walkRig;
 		if (!r) return;
 		r.armLP.rotation.z = 0;
 		r.armRP.rotation.z = 0;
-		r.legLP.rotation.x = 0;
-		r.legRP.rotation.x = 0;
+		setLegSwing(r, 0);
 		if (mode === 'desk') {
 			r.armLP.rotation.x = -1.05;
 			r.armRP.rotation.x = -1.1;
@@ -231,8 +305,11 @@ export function poseCharacter(group, mode = 'neutral') {
 		} else if (mode === 'seated') {
 			r.armLP.rotation.x = -0.45;
 			r.armRP.rotation.x = -0.48;
-			r.legLP.rotation.x = -1.22;
-			r.legRP.rotation.x = -1.22;
+			// Thighs level, shins straight down.
+			r.legLP.rotation.x = -Math.PI / 2;
+			r.legRP.rotation.x = -Math.PI / 2;
+			r.kneeLP.rotation.x = Math.PI / 2;
+			r.kneeRP.rotation.x = Math.PI / 2;
 		} else {
 			r.armLP.rotation.x = 0;
 			r.armRP.rotation.x = 0;
@@ -290,6 +367,8 @@ export function bubbleVis(b: NpcSpeechElement, on) {
 	if (b._rtappsObj) b._rtappsObj.visible = !!on;
 }
 export function faceNpcToward(a, b) {
+	// a seated figure keeps its seat's facing; turning it would swing its legs through the seat
+	if (a.userData.seated) return;
 	const pa = new THREE.Vector3(),
 		pb = new THREE.Vector3();
 	a.getWorldPosition(pa);
@@ -325,6 +404,64 @@ export function faceAlong(o, dx, dz, off) {
 	if (dx || dz) o.rotation.y = Math.atan2(dx, dz) + (off || 0);
 }
 
+// One lying-patient figure (hand-built boxes, head toward -x, feet toward +x). Its back is flat: the
+// undersides of the pillow, torso, pelvis, arms, forearms, legs and feet all lie at local y = 0.7025,
+// the figure's lowest point, and the head rests on the pillow. restLyingPatient puts that plane on a
+// couch or table top.
+export function createLyingPatient(detail, skin = 0xe9c39d, hairColor = 0x4a382e) {
+	const cont = new THREE.Group();
+	const topMat = std(0xd3d9dd, 0.78, 0.02),
+		pantMat = std(0xc3cace, 0.82, 0.03),
+		skinMat = std(skin, 0.9, 0.0),
+		hairMat = std(hairColor, 0.82, 0.02),
+		shoeMat = std(0x252b30, 0.85, 0.1);
+	const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.8125, -0.05),
+		pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.8025, -0.02),
+		neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92, 0);
+	torso.name = 'torso'; // check (h) measures these two undersides
+	pelvis.name = 'pelvis';
+	cont.add(torso, pelvis, neck);
+	const head = sphere(0.17, skinMat);
+	head.scale.y = 1.04;
+	head.position.set(-0.72, 0.92, 0);
+	cont.add(head);
+	const hair = sphere(0.175, hairMat);
+	hair.scale.set(1, 0.5, 1);
+	hair.position.set(-0.73, 0.99, -0.01);
+	cont.add(hair);
+	const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.7575, -0.22),
+		armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.7575, 0.22),
+		foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.7525, -0.22),
+		foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.7525, 0.22),
+		legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.7775, -0.1),
+		legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.7775, 0.1),
+		footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.7475, -0.1),
+		footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.7475, 0.1);
+	cont.add(armL, armR, foreL, foreR, legL, legR, footL, footR);
+	cont.add(box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73, 0));
+	setNpcRole(cont, 'Patient', detail);
+	cont.userData.lying = true;
+	cont.userData.clothingRig = {
+		kind: 'lying',
+		topParts: [torso, pelvis, armL, armR],
+		bottomParts: [legL, legR],
+		topColor: 0xd3d9dd,
+		bottomColor: 0xc3cace
+	};
+	return cont;
+}
+// Puts a lying patient at (x, z) with its back (its lowest point) on the top of `surface`, the mesh it
+// lies on (props.ts LYING_SURFACES: the CT table, a vault couch's carbon insert, the HDR exam table
+// top), measured from that mesh's world bounds now. Only x/z move afterwards (the CT couch slides
+// along x with the patient, so the height holds), so the contact is kept without per-frame work.
+export function restLyingPatient(cont, surface: THREE.Object3D, x, z, ry = 0) {
+	cont.position.set(x, 0, z);
+	cont.rotation.y = ry;
+	surface.updateWorldMatrix(true, false);
+	const back = new THREE.Box3().setFromObject(cont).min.y,
+		top = new THREE.Box3().setFromObject(surface).max.y;
+	cont.position.y = top - back;
+}
 export function departmentStaff() {
 	const R = (id) => roomById(id),
 		cast = ROOM_CAST;
@@ -406,55 +543,8 @@ export function departmentStaff() {
 	const lyingPatient = (id, detail, dx, dz, ry = 0, skin = 0xe9c39d, hairColor = 0x4a382e) => {
 		const r = R(id);
 		if (!r) return;
-		const cont = new THREE.Group();
-		const lift = id === 'vault1' || id === 'vault2' ? 0.62 : id === 'ctsim' ? 0.48 : 0.42;
-		const topMat = std(0xd3d9dd, 0.78, 0.02),
-			pantMat = std(0xc3cace, 0.82, 0.03),
-			skinMat = std(skin, 0.9, 0.0),
-			hairMat = std(hairColor, 0.82, 0.02),
-			shoeMat = std(0x252b30, 0.85, 0.1);
-		const torso = box(0.82, 0.22, 0.42, topMat, 0, 0.9 + lift, -0.05);
-		cont.add(torso);
-		const pelvis = box(0.42, 0.2, 0.42, topMat, 0.5, 0.88 + lift, -0.02);
-		cont.add(pelvis);
-		const neck = box(0.08, 0.06, 0.08, skinMat, -0.52, 0.92 + lift, 0);
-		cont.add(neck);
-		const head = sphere(0.17, skinMat);
-		head.scale.y = 1.04;
-		head.position.set(-0.72, 0.92 + lift, 0);
-		cont.add(head);
-		const hair = sphere(0.175, hairMat);
-		hair.scale.set(1, 0.5, 1);
-		hair.position.set(-0.73, 0.99 + lift, -0.01);
-		cont.add(hair);
-		const armL = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, -0.22);
-		cont.add(armL);
-		const armR = box(0.44, 0.11, 0.11, topMat, -0.02, 0.86 + lift, 0.22);
-		cont.add(armR);
-		const foreL = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, -0.22);
-		cont.add(foreL);
-		const foreR = box(0.24, 0.1, 0.1, skinMat, 0.32, 0.84 + lift, 0.22);
-		cont.add(foreR);
-		const legL = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, -0.1);
-		cont.add(legL);
-		const legR = box(0.62, 0.15, 0.16, pantMat, 0.98, 0.82 + lift, 0.1);
-		cont.add(legR);
-		const footL = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, -0.1);
-		cont.add(footL);
-		const footR = box(0.18, 0.09, 0.18, shoeMat, 1.34, 0.77 + lift, 0.1);
-		cont.add(footR);
-		const pillow = box(0.34, 0.055, 0.42, std(0xd7e1e5, 0.86, 0.02), -0.67, 0.73 + lift, 0);
-		cont.add(pillow);
-		setNpcRole(cont, 'Patient', detail);
-		cont.userData.clothingRig = {
-			kind: 'lying',
-			topParts: [torso, pelvis, armL, armR],
-			bottomParts: [legL, legR],
-			topColor: 0xd3d9dd,
-			bottomColor: 0xc3cace
-		};
-		cont.position.set(r.x + dx, 0.02, r.z + dz);
-		cont.rotation.y = ry;
+		const cont = createLyingPatient(detail, skin, hairColor);
+		restLyingPatient(cont, LYING_SURFACES[id], r.x + dx, r.z + dz, ry);
 		scene.add(cont);
 		addCast(id, cont, 'patient');
 		return cont;
@@ -463,9 +553,11 @@ export function departmentStaff() {
 		const r = R(id);
 		if (!r) return;
 		const g = setNpcRole(personFigure(0xc7ced3, 0xb9c1c6, skin, opts), 'Patient', detail);
+		g.userData.shouldSit = true;
 		g.position.set(r.x + dx, 0, r.z + dz);
 		g.rotation.y = ry || 0;
 		scene.add(g);
+		seatActor(g, g.position);
 		registerDutyActor(g, 'idle');
 		addCast(id, g, 'patient');
 		return g;
@@ -487,9 +579,17 @@ export function departmentStaff() {
 		female: true,
 		hairColor: 0x3a281f
 	});
-	sitPatient('lobby', 'Returning patient checked in for treatment.', -2.5, 3.0, Math.PI, 0x7b5239, {
-		hairColor: 0x1c1410
-	});
+	sitPatient(
+		'lobby',
+		'Returning patient checked in for treatment.',
+		-1.85,
+		3.6,
+		Math.PI,
+		0x7b5239,
+		{
+			hairColor: 0x1c1410
+		}
+	);
 	sitPatient('lobby', 'Family member accompanying a patient.', 3.2, 3.0, Math.PI, 0xe2b38d, {
 		female: true,
 		hairColor: 0x4a3126
@@ -506,7 +606,7 @@ export function departmentStaff() {
 		undefined,
 		'consult'
 	);
-	sitPatient('consult', 'Here for a new-patient consultation.', 0.2, 1.2, Math.PI);
+	sitPatient('consult', 'Here for a new-patient consultation.', 0.2, 0.8, Math.PI);
 	place(
 		'social',
 		'Oncology Social Worker',
@@ -727,9 +827,10 @@ export function departmentStaff() {
 		-0.6,
 		0xe8c09f
 	);
-	lyingPatient('hdr', 'Undergoing an HDR special procedure.', -1.3, 0.1, 0);
+	// centred on the 2.2 m exam table (centre dx -1.3): head and shoes within 0.06 m of its ends
+	lyingPatient('hdr', 'Undergoing an HDR special procedure.', -1.57, 0.1, 0);
 	/* Secondary team members and patient partners create visible teamwork in each department. */
-	sitPatient('social', 'Discussing transportation and support needs.', 1.25, 1.0, -0.6, 0x7c5238, {
+	sitPatient('social', 'Discussing transportation and support needs.', 0.57, 1.65, -0.6, 0x7c5238, {
 		female: true,
 		hairColor: 0x211610
 	});
@@ -737,7 +838,7 @@ export function departmentStaff() {
 		'patientcare',
 		'Reporting symptoms during a nursing assessment.',
 		-2.5,
-		1.5,
+		1.1,
 		0.8,
 		0xd8a47f,
 		{ hairColor: 0x463229 }

@@ -9,13 +9,34 @@
 //                the tech cart by its oriented footprint plus 0.1 m
 //   b  Spacing   20 simulated minutes at 30 Hz, with scripted journey moves: no mover within 0.5 m of
 //                another mover, a cast actor or a journey/transition actor
-//   c  One move  two queued moves for one journey actor never overlap and never jump
+//   c  One move  two queued moves for one journey actor never overlap and never jump (the first starts
+//                from the reset seat, so the stand-up is measured too)
 //   e  Yield     a mover holds for someone 0.9 m ahead (+/-50 deg), stands still, then walks on at pace;
 //                one that never moves is outwaited: released after 8 s, then walking at pace
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
+//   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath
+//                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s,
+//                then 8 moments over each of the ambulance crew's walks, unload and load)
+//   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
+//                0.02 m of its pelvis (hip pivot - 0.06 x scale) and whose facing is within 20 deg of its own;
+//                seat facing: no seat (wheelchairs aside) faces a wall within 3.0 m;
+//                exchange facing: a seated patient's exchange partner is within 60 deg of its seat's facing;
+//                pickup facing: at the journey's lobby pickup the therapist is within 60 deg of the seated
+//                patient's facing and stands clear of furniture (Jordan and Mia);
+//                handoff seating: "Have a seat" and patientcare -> lobby end seated on their chair, and
+//                "Have a seat" for a patient already seated in the lobby is a no-op
+//   h  Lying     every lying patient rests on its couch or table top, found by its props.ts geometry
+//                (CT table, vault couch carbon insert, HDR exam table): the lowest point and the torso's
+//                and pelvis's undersides within 0.02 m of the top, and no more than 0.07 m past any edge;
+//                also with the CT couch slid 0, 1, 2 and 3.15 m into the gantry
+//   i  Wheelchair  the wheelchair occupant is posed seated, pelvis within 0.02 m of that chair's
+//                own seat anchor top
+//   j  Stand-up  a seated actor that starts a move (the consult -> education and patientcare -> lobby
+//                handoffs, "Have a seat", Mia's lobby journey move) keeps its leg column (0.15 m around
+//                the soles' midpoint, soles to knees) out of the furniture for the first 30 frames
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
-//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e]
+//   node scripts/sim-hub-npc-check.mjs [--svg <file>] [--only a,b,c,d,e,f,g,h,i,j]
 // Exit codes: 0 every selected check passes; 1 any fails; 2 setup error.
 // Output: `NPC CHECK <letter> PASS|FAIL: <summary>` per check, then at most 30 detail lines per failing check.
 import fs from 'node:fs';
@@ -30,10 +51,10 @@ const argVal = (flag) => {
 	return i >= 0 ? argv[i + 1] : null;
 };
 const svgPath = argVal('--svg');
-const only = new Set((argVal('--only') || 'a,b,c,d,e').split(',').map((x) => x.trim()));
+const only = new Set((argVal('--only') || 'a,b,c,d,e,f,g,h,i,j').split(',').map((x) => x.trim()));
 for (const x of only) {
-	if (!'abcde'.includes(x) || x.length !== 1) {
-		console.error(`NPC CHECK error: unknown check '${x}' in --only (use a,b,c,d,e)`);
+	if (!'abcdefghij'.includes(x) || x.length !== 1) {
+		console.error(`NPC CHECK error: unknown check '${x}' in --only (use a,b,c,d,e,f,g,h,i,j)`);
 		process.exit(2);
 	}
 }
@@ -328,13 +349,22 @@ function restingSpotProblems() {
 				h.actorIndex || 0
 			]?.g;
 			if (!actor) return;
-			const home = actor.position.clone();
+			const home = actor.position.clone(),
+				yaw = actor.rotation.y,
+				seated = !!actor.userData.seated,
+				shouldSit = actor.userData.shouldSit;
 			NPC.startActorHandoff(key, h);
 			for (let i = 0; i < 30 * 40 && NPC.handoffTransitions.some((t) => t.actor === actor); i++)
 				step();
 			actor.getWorldPosition(tmp);
 			spots.push({ what: `handoff ${key}[${hi}] -> ${h.target}`, x: tmp.x, z: tmp.z });
-			actor.position.copy(home); // later handoffs start from home
+			// later handoffs and checks start from home: back on its seat if it was sitting, standing if
+			// it was standing (a handoff that ends on a seat seats its actor)
+			if (!seated && actor.userData.seated) NPC.setActorSeated(actor, false);
+			actor.position.copy(home);
+			actor.rotation.y = yaw;
+			if (seated) NPC.seatActor(actor, actor.getWorldPosition(tmp));
+			actor.userData.shouldSit = shouldSit; // the handoff's stand-up cleared it
 		});
 	}
 	NPC.handoffTransitions.length = 0;
@@ -621,12 +651,6 @@ function checkOneMove() {
 	if (!from) throw new Error('journey patient is not in a room');
 	const fired = [];
 	let arrival = null; // where the actor stood when the first onComplete ran
-	NPC.moveJourneyActor(actor, from, 'consult', roomFinal('consult'), () => {
-		fired.push(1);
-		arrival = { x: actor.position.x, z: actor.position.z };
-	});
-	stepFor(0.5);
-	NPC.moveJourneyActor(actor, 'consult', 'education', roomFinal('education'), () => fired.push(2));
 	const problems = [];
 	let maxRef = 0,
 		maxJump = 0,
@@ -634,6 +658,23 @@ function checkOneMove() {
 		firstOverlap = null,
 		firstJump = null,
 		secondStart = null;
+	const track = (i) => {
+		const j = Math.hypot(actor.position.x - prev.x, actor.position.z - prev.z);
+		if (j > maxJump) maxJump = j;
+		if (j > 0.25 && !firstJump)
+			firstJump = `step ${i}: actor moved ${j.toFixed(2)} m in one step to (${actor.position.x.toFixed(2)}, ${actor.position.z.toFixed(2)})`;
+		prev = { x: actor.position.x, z: actor.position.z };
+	};
+	// The reset seats the actor, so the first 0.5 s (15 steps) cover its stand-up out of the chair.
+	NPC.moveJourneyActor(actor, from, 'consult', roomFinal('consult'), () => {
+		fired.push(1);
+		arrival = { x: actor.position.x, z: actor.position.z };
+	});
+	for (let i = -15; i < 0; i++) {
+		step();
+		track(i);
+	}
+	NPC.moveJourneyActor(actor, 'consult', 'education', roomFinal('education'), () => fired.push(2));
 	for (let i = 0; i < 30 * 120 && refsActor(actor) > 0; i++) {
 		step();
 		const r = refsActor(actor);
@@ -646,11 +687,7 @@ function checkOneMove() {
 		}
 		if (r > maxRef) maxRef = r;
 		if (r > 1 && !firstOverlap) firstOverlap = `step ${i}: ${r} transitions reference the actor`;
-		const j = Math.hypot(actor.position.x - prev.x, actor.position.z - prev.z);
-		if (j > maxJump) maxJump = j;
-		if (j > 0.25 && !firstJump)
-			firstJump = `step ${i}: actor moved ${j.toFixed(2)} m in one step to (${actor.position.x.toFixed(2)}, ${actor.position.z.toFixed(2)})`;
-		prev = { x: actor.position.x, z: actor.position.z };
+		track(i);
 	}
 	if (firstOverlap)
 		problems.push(`overlap: max ${maxRef} concurrent transitions; first ${firstOverlap}`);
@@ -739,10 +776,745 @@ function checkHidden() {
 	};
 }
 
+// ------------------------------------------------- shared geometry (f, g, h, i)
+const V3 = NPC.movers[0].group.position.constructor;
+const FLOOR_TOL = 0.03,
+	SEAT_TOL = 0.02,
+	LIE_TOL = 0.02;
+const HIP_TO_PELVIS = 0.06;
+// World-space bounds of a mesh (its geometry box through its world matrix).
+function meshBounds(o) {
+	if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+	const b = o.geometry.boundingBox,
+		lo = [Infinity, Infinity, Infinity],
+		hi = [-Infinity, -Infinity, -Infinity],
+		v = new V3();
+	for (const x of [b.min.x, b.max.x])
+		for (const y of [b.min.y, b.max.y])
+			for (const z of [b.min.z, b.max.z]) {
+				v.set(x, y, z).applyMatrix4(o.matrixWorld);
+				lo[0] = Math.min(lo[0], v.x);
+				lo[1] = Math.min(lo[1], v.y);
+				lo[2] = Math.min(lo[2], v.z);
+				hi[0] = Math.max(hi[0], v.x);
+				hi[1] = Math.max(hi[1], v.y);
+				hi[2] = Math.max(hi[2], v.z);
+			}
+	return { o, lo, hi };
+}
+function sceneBoxes() {
+	NPC.scene.updateMatrixWorld(true);
+	const out = [];
+	NPC.scene.traverse((o) => {
+		if (o.isMesh && o.geometry) out.push(meshBounds(o));
+	});
+	return out;
+}
+// Floor top at (x, z): the highest top below 0.8 among the meshes that contain (x, z) and span more
+// than 3 m in both x and z. Static, so the large slabs are measured once.
+let floorSlabs = null;
+function floorTop(x, z) {
+	floorSlabs ||= sceneBoxes().filter(
+		(b) => b.hi[1] < 0.8 && b.hi[0] - b.lo[0] > 3 && b.hi[2] - b.lo[2] > 3
+	);
+	let best = -Infinity;
+	for (const b of floorSlabs)
+		if (x >= b.lo[0] && x <= b.hi[0] && z >= b.lo[2] && z <= b.hi[2])
+			best = Math.max(best, b.hi[1]);
+	return best;
+}
+// A person figure is the object that carries a walkRig; a lying patient is flagged userData.lying.
+const isPerson = (n) => !!(n.userData && (n.userData.walkRig || n.userData.lying));
+const inAnyPerson = (o) => {
+	for (let n = o; n; n = n.parent) if (isPerson(n)) return true;
+	return false;
+};
+function lowestY(group) {
+	group.updateMatrixWorld(true);
+	let lo = Infinity;
+	group.traverse((o) => {
+		if (o.isMesh && o.geometry) lo = Math.min(lo, meshBounds(o).lo[1]);
+	});
+	return lo;
+}
+const worldPos = (o) => o.getWorldPosition(new V3());
+const label = (g, fallback) => g.userData?.npcName || g.userData?.npcRole || g.name || fallback;
+const hipY = (g) => {
+	g.updateMatrixWorld(true);
+	return worldPos(g.userData.walkRig.legLP).y;
+};
+// The pelvis (the thighs' underside) is HIP_TO_PELVIS below the hip pivots, scaled with the figure.
+const pelvisY = (g) => hipY(g) - HIP_TO_PELVIS * g.getWorldScale(new V3()).y;
+const isSeatedPose = (g) => g.userData.pose === 'seated' || !!g.userData.seated;
+const castActor = (key, h) =>
+	(NPC.ROOM_CAST[key] || []).filter((e) => e.kind === (h.actor || 'patient'))[h.actorIndex || 0]?.g;
+// Furniture: every non-person mesh under 3 m across in x and z (floors and long walls are larger)
+// whose top is above FLOOR_ITEM_TOP (floor pads and markings are lower).
+const FLOOR_ITEM_TOP = 0.15;
+function furnitureBoxes() {
+	return sceneBoxes().filter(
+		(b) =>
+			!inAnyPerson(b.o) &&
+			b.hi[1] > FLOOR_ITEM_TOP &&
+			b.hi[0] - b.lo[0] <= 3 &&
+			b.hi[2] - b.lo[2] <= 3
+	);
+}
+const describeBox = (b) => {
+	const p = b.o.geometry.parameters || {},
+		dims = ['width', 'height', 'depth'].map((k) => p[k]).filter((v) => v !== undefined);
+	return `${b.o.geometry.type}${dims.length ? `(${dims.map((v) => +v.toFixed(3)).join(', ')})` : ''} x ${b.lo[0].toFixed(2)}..${b.hi[0].toFixed(2)} y ${b.lo[1].toFixed(2)}..${b.hi[1].toFixed(2)} z ${b.lo[2].toFixed(2)}..${b.hi[2].toFixed(2)}`;
+};
+// A person's leg column: a vertical cylinder of radius LEG_R around the midpoint of its two soles (the
+// bottom centres of the shoes, the lowest meshes under each knee pivot), from the soles up to the
+// knees. Standing or walking it is under the hips; seated or standing up it is where the feet are.
+const LEG_R = 0.15;
+function legColumn(g) {
+	g.updateMatrixWorld(true);
+	const rig = g.userData.walkRig,
+		soles = [];
+	let top = -Infinity;
+	for (const knee of [rig.kneeLP, rig.kneeRP]) {
+		top = Math.max(top, worldPos(knee).y);
+		let shoe = null;
+		knee.traverse((o) => {
+			if (!o.isMesh) return;
+			const b = meshBounds(o);
+			if (!shoe || b.lo[1] < shoe.lo[1]) shoe = b;
+		});
+		soles.push({
+			x: (shoe.lo[0] + shoe.hi[0]) / 2,
+			y: shoe.lo[1],
+			z: (shoe.lo[2] + shoe.hi[2]) / 2
+		});
+	}
+	return {
+		x: (soles[0].x + soles[1].x) / 2,
+		z: (soles[0].z + soles[1].z) / 2,
+		lo: Math.min(soles[0].y, soles[1].y),
+		hi: top
+	};
+}
+// Whether box b reaches into leg column c (overlapping heights, and its x/z rectangle within LEG_R of
+// the column's axis).
+const columnHits = (c, b) =>
+	b.lo[1] < c.hi &&
+	c.lo < b.hi[1] &&
+	Math.hypot(Math.max(b.lo[0] - c.x, 0, c.x - b.hi[0]), Math.max(b.lo[2] - c.z, 0, c.z - b.hi[2])) <
+		LEG_R;
+const describeColumn = (c) =>
+	`leg column at (${c.x.toFixed(2)}, ${c.z.toFixed(2)}) r ${LEG_R}, y ${c.lo.toFixed(2)}..${c.hi.toFixed(2)}`;
+
+// Every visible person-figure: movers, cast, duty actors and journey actors, with their ids.
+function allPeople() {
+	const seen = new Map(),
+		add = (root, id) => {
+			if (!root) return;
+			root.traverse((n) => {
+				if (n.userData?.walkRig && !seen.has(n)) seen.set(n, id);
+			});
+		};
+	NPC.movers.forEach((m, i) => add(m.group, `mover ${names[i]}`));
+	for (const [room, arr] of Object.entries(NPC.ROOM_CAST))
+		arr.forEach((e, i) => add(e.g, `${room}:${e.kind}:${i}`));
+	for (const o of NPC.journeyActors())
+		add(o, `journey ${o.userData?.npcRole || o.name || 'actor'}`);
+	add(NPC.state.ambUnload, 'ambulance crew (unload)');
+	add(NPC.state.ambLoad, 'ambulance crew (load)');
+	return [...seen].map(([g, id]) => ({ g, id })).filter(({ g }) => NPC.visibleInTree(g));
+}
+
+// --------------------------------------------------------------- (f) feet
+function checkFeet() {
+	// The legs swing +/-0.357 rad from a fixed hip (sin(sec * 8 + offset * 6.28)), so walking soles are
+	// sampled at 12 moments evenly spread over one swing cycle, plus 2 later ones for drift. The sole is
+	// each person's lowest point (the planted foot).
+	const CYCLE = (2 * Math.PI) / 8,
+		worstRows = [],
+		moments = [];
+	let readings = 0,
+		worst = 0;
+	const sample = (when) => {
+		let n = 0,
+			w = null;
+		for (const { g, id } of allPeople()) {
+			if (g.userData.lying || g.userData.wheelchairOccupant || isSeatedPose(g)) continue;
+			n++;
+			const p = worldPos(g),
+				sole = lowestY(g),
+				floor = floorTop(p.x, p.z),
+				gap = sole - floor;
+			if (Math.abs(gap) <= FLOOR_TOL) continue;
+			readings++;
+			worst = Math.max(worst, Math.abs(gap));
+			if (!w || Math.abs(gap) > Math.abs(w.gap))
+				w = { when, id: `${id} (${label(g, id)})`, sole, floor, gap };
+		}
+		if (w) worstRows.push(w);
+		moments.push(`${when}: ${n}`);
+	};
+	NPC.resetTreatmentJourney(true);
+	stepFor(2);
+	for (let k = 0; k < 12; k++) {
+		if (k) stepFor(CYCLE / 12);
+		sample(`gait ${k}/12`);
+	}
+	stepFor(28);
+	sample('t=30s');
+	stepFor(60);
+	sample('t=90s');
+	// The ambulance crew is only visible while it walks between the bay and the lobby: wait for each
+	// walk, then sample 8 moments 0.6 s apart along it (the walk takes about 5 s).
+	for (const [key, name] of [
+		['ambUnload', 'unload'],
+		['ambLoad', 'load']
+	]) {
+		const crew = NPC.state[key];
+		for (let i = 0; i < 30 * 90 && !(crew && crew.visible); i++) step();
+		if (!(crew && crew.visible)) {
+			readings++;
+			worstRows.push({
+				when: `ambulance ${name}`,
+				id: 'crew never walked in 90 s',
+				sole: NaN,
+				floor: NaN,
+				gap: NaN
+			});
+			continue;
+		}
+		for (let k = 0; k < 8 && crew.visible; k++) {
+			if (k) stepFor(0.6);
+			sample(`ambulance ${name} ${k}/8`);
+		}
+	}
+	return {
+		pass: readings === 0,
+		summary: readings
+			? `${readings} sole readings off the floor by more than ${FLOOR_TOL} m in ${worstRows.length} of ${moments.length} moments (worst ${worst.toFixed(2)} m)`
+			: `every standing or walking sole within ${FLOOR_TOL} m of the floor at ${moments.length} moments`,
+		detail: worstRows.map(
+			(r) =>
+				`worst at ${r.when}: ${r.id}: sole ${r.sole.toFixed(3)}, floor ${r.floor.toFixed(3)}, gap ${r.gap >= 0 ? '+' : ''}${r.gap.toFixed(3)}`
+		)
+	};
+}
+
+// -------------------------------------------------------------- (g) seated
+// The sitters are the figures posed seated (or flagged userData.seated) plus every cast patient that
+// should sit (userData.shouldSit), so one left standing or unseated still fails. A sitter passes when
+// a seat anchor within 0.3 m has its top within 0.02 m of the pelvis and faces within 20 deg of it.
+const SEAT_RADIUS = 0.3,
+	FACING_TOL_DEG = 20;
+// World yaw of an object (the rotation.y that turns +z to where it faces).
+const worldYaw = (o) => {
+	const d = o.getWorldDirection(new V3());
+	return Math.atan2(d.x, d.z);
+};
+const degOff = (a, b) => Math.abs(((((a - b) * 180) / Math.PI + 540) % 360) - 180);
+// Why sitter g is not on a seat anchor (within SEAT_RADIUS, pelvis within SEAT_TOL of its top, facing
+// within FACING_TOL_DEG of it), or null when it is.
+function sitterProblem(g, id, seats) {
+	const p = worldPos(g),
+		pelvis = pelvisY(g),
+		yaw = worldYaw(g),
+		near = seats.map((s) => ({ s, d: Math.hypot(s.x - p.x, s.z - p.z) })).sort((a, b) => a.d - b.d),
+		fits = ({ s, d }) =>
+			d <= SEAT_RADIUS &&
+			Math.abs(pelvis - s.top) <= SEAT_TOL &&
+			degOff(yaw, s.facing) <= FACING_TOL_DEG,
+		who = `${id} (${label(g, id)}) pose=${g.userData.pose || 'none'} at (${p.x.toFixed(2)}, ${p.z.toFixed(2)})`;
+	if (near.some(fits)) return null;
+	const c = near[0];
+	if (!c || c.d > SEAT_RADIUS)
+		return `${who}: no seat anchor within ${SEAT_RADIUS} m (nearest ${c ? `${c.s.kind} ${c.d.toFixed(2)} m` : 'none'}); pelvis ${pelvis.toFixed(3)}`;
+	const gap = pelvis - c.s.top;
+	return `${who}: ${c.s.kind} anchor ${c.d.toFixed(2)} m away: pelvis ${pelvis.toFixed(3)}, seat top ${c.s.top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}; facing ${degOff(yaw, c.s.facing).toFixed(0)} deg off the seat's`;
+}
+function checkSeated() {
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.2);
+	const seats = NPC.SEATS.map(NPC.seatInWorld),
+		rows = [];
+	let n = 0;
+	for (const { g, id } of allPeople()) {
+		if (g.userData.wheelchairOccupant) continue; // (i)
+		if (!(isSeatedPose(g) || g.userData.shouldSit)) continue;
+		n++;
+		const r = sitterProblem(g, id, seats);
+		if (r) rows.push(r);
+	}
+	const facing = seatFacingProblems(seats),
+		talk = exchangeFacingProblems(seats),
+		pickup = pickupFacingProblems(seats),
+		handoff = handoffSeatingProblems(seats),
+		sitters = rows.length
+			? `${rows.length} of ${n} sitters not on a seat (anchor within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of its top, facing within ${FACING_TOL_DEG} deg)`
+			: `${n} sitters on seat anchors: within ${SEAT_RADIUS} m, pelvis within ${SEAT_TOL} m of the top, facing within ${FACING_TOL_DEG} deg (${seats.length} anchors)`;
+	return {
+		pass:
+			rows.length === 0 &&
+			facing.problems.length === 0 &&
+			talk.problems.length === 0 &&
+			pickup.problems.length === 0 &&
+			handoff.problems.length === 0,
+		summary: [
+			sitters,
+			facing.problems.length
+				? `seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW.toFixed(1)} m`
+				: `seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW.toFixed(1)} m`,
+			talk.problems.length
+				? `exchange facing: ${talk.problems.length} of ${talk.count} seated patients have their partner more than ${TALK_DEG} deg off`
+				: `exchange facing: ${talk.count} seated patients face their partner within ${TALK_DEG} deg`,
+			pickup.problems.length
+				? `pickup facing: ${pickup.problems.length} problems in ${pickup.count} lobby pickups`
+				: `pickup facing: in ${pickup.count} lobby pickups the seated patient faces the therapist within ${TALK_DEG} deg, the therapist clear of furniture`,
+			handoff.problems.length
+				? `handoff seating: ${handoff.problems.length} of ${handoff.count} handoffs not ending seated as expected`
+				: `handoff seating: ${handoff.count} handoffs end seated on their chair or leave a seated patient seated`
+		].join('; '),
+		detail: [...facing.problems, ...talk.problems, ...pickup.problems, ...handoff.problems, ...rows]
+	};
+}
+// Sub-check "pickup facing": the journey's lobby pickup run the way the journey runs it, for Jordan
+// and for Mia: the patient walks to LOBBY_PICKUP.chair and is seated on the chair there, and the
+// therapist walks in from treatment control to LOBBY_PICKUP.therapist. The therapist must then be
+// within TALK_DEG of the seat's facing, seen from the seated patient's hips (seated bodies never
+// turn), and its lower legs clear of furniture.
+function pickupFacingProblems(seats) {
+	const J = NPC.JOURNEY,
+		P = NPC.LOBBY_PICKUP,
+		problems = [];
+	let count = 0;
+	for (const [who, patient] of [
+		['Jordan', J.patient],
+		['Mia', J.newPatient]
+	]) {
+		NPC.resetTreatmentJourney(true);
+		count++;
+		let left = 2;
+		NPC.moveJourneyActor(patient, 'lobby', 'lobby', P.chair, () => {
+			NPC.setActorSeated(patient, true);
+			left--;
+		});
+		NPC.moveJourneyActor(J.therapist, 'linaccontrol', 'lobby', P.therapist, () => left--);
+		for (let i = 0; i < 30 * 90 && left > 0; i++) step();
+		const tag = `pickup facing (${who})`;
+		if (left > 0) {
+			problems.push(`${tag}: the pickup moves did not finish within 90 s`);
+			continue;
+		}
+		const p = worldPos(patient),
+			q = worldPos(J.therapist),
+			seat = seats
+				.map((s) => ({ s, d: Math.hypot(s.x - p.x, s.z - p.z) }))
+				.sort((u, v) => u.d - v.d)[0];
+		if (!patient.userData.seated || !seat || seat.d > SEAT_RADIUS) {
+			problems.push(`${tag}: the patient is not seated on a seat anchor at the pickup chair`);
+			continue;
+		}
+		const off = degOff(Math.atan2(q.x - p.x, q.z - p.z), seat.s.facing);
+		if (off > TALK_DEG)
+			problems.push(
+				`${tag}: the therapist at (${q.x.toFixed(2)}, ${q.z.toFixed(2)}) is ${off.toFixed(0)} deg off the facing of the patient's seat at (${seat.s.x.toFixed(2)}, ${seat.s.z.toFixed(2)}) (limit ${TALK_DEG})`
+			);
+		const legs = legColumn(J.therapist),
+			hit = furnitureBoxes().find((b) => columnHits(legs, b));
+		if (hit)
+			problems.push(`${tag}: the therapist's ${describeColumn(legs)} meets ${describeBox(hit)}`);
+	}
+	NPC.resetTreatmentJourney(true);
+	return { count, problems };
+}
+// Sub-check "handoff seating": a patient handoff whose final point is a free seat anchor ends with the
+// patient seated there (sitterProblem passes): "Have a seat" (the patient first walks to the check-in
+// desk) and patientcare -> lobby. "Have a seat" for a patient already seated in the lobby is a no-op:
+// no move starts and the patient stays on the same seat.
+function handoffSeatingProblems(seats) {
+	const H = NPC.HANDOFFS,
+		problems = [],
+		haveSeat = H.lobby[1],
+		running = (a) => NPC.handoffTransitions.some((t) => t.actor === a),
+		runHandoff = (key, h, actor) => {
+			NPC.startActorHandoff(key, h);
+			for (let i = 0; i < 30 * 40 && running(actor); i++) step();
+		},
+		expectSeated = (what, actor) => {
+			const r = running(actor)
+				? 'still walking after 40 s'
+				: !actor.userData.shouldSit
+					? `ends with pose=${actor.userData.pose || 'none'}, shouldSit=${!!actor.userData.shouldSit}; ${sitterProblem(actor, what, seats) || 'on a seat anchor'}`
+					: sitterProblem(actor, what, seats);
+			if (r) problems.push(`handoff seating: ${what}: ${r}`);
+		};
+	// "Have a seat" while already seated: the reset seats the patient on a lobby chair
+	NPC.resetTreatmentJourney(true);
+	NPC.handoffTransitions.length = 0;
+	step();
+	const jordan = castActor('lobby', haveSeat),
+		p0 = worldPos(jordan);
+	NPC.startActorHandoff('lobby', haveSeat);
+	stepFor(1);
+	const moved = worldPos(jordan).distanceTo(p0);
+	if (running(jordan) || !jordan.userData.seated || moved > 0.01)
+		problems.push(
+			`handoff seating: "${haveSeat.label}" for a patient seated in the lobby is not a no-op: ${running(jordan) ? 'a move started' : 'no move'}, pose=${jordan.userData.pose || 'none'}, moved ${moved.toFixed(2)} m in 1 s`
+		);
+	NPC.handoffTransitions.length = 0;
+	// "Have a seat" from the check-in desk
+	NPC.resetTreatmentJourney(true);
+	let atDesk = false;
+	NPC.moveJourneyActor(
+		jordan,
+		'lobby',
+		'lobby',
+		{ x: -4.5, y: 0, z: -2.05 },
+		() => (atDesk = true)
+	);
+	for (let i = 0; i < 30 * 30 && !atDesk; i++) step();
+	runHandoff('lobby', haveSeat, jordan);
+	expectSeated(`"${haveSeat.label}" from the check-in desk`, jordan);
+	// patientcare -> lobby, from the exam table; the cast patient goes back to its seat afterwards
+	NPC.resetTreatmentJourney(true);
+	const care = H.patientcare[0],
+		carer = castActor('patientcare', care),
+		home = carer.position.clone(),
+		yaw = carer.rotation.y;
+	runHandoff('patientcare', care, carer);
+	expectSeated(`"${care.label}"`, carer);
+	NPC.handoffTransitions.length = 0;
+	NPC.setActorSeated(carer, false);
+	carer.position.copy(home);
+	carer.rotation.y = yaw;
+	NPC.setActorSeated(carer, true);
+	NPC.resetTreatmentJourney(true);
+	return { count: 3, problems };
+}
+// Sub-check "exchange facing": in every speech exchange (registerNpcExchange) with a seated member, the
+// partner is within TALK_DEG of the facing of the seat the sitter is on (seated bodies never turn).
+const TALK_DEG = 60;
+function exchangeFacingProblems(seats) {
+	const problems = [];
+	let count = 0;
+	for (const sc of NPC.interactionScenes)
+		for (const [sitter, partner] of [
+			[sc.a, sc.b],
+			[sc.b, sc.a]
+		]) {
+			if (!sitter.userData.seated) continue;
+			count++;
+			const p = worldPos(sitter),
+				q = worldPos(partner),
+				seat = seats
+					.map((s) => ({ s, d: Math.hypot(s.x - p.x, s.z - p.z) }))
+					.sort((u, v) => u.d - v.d)[0],
+				who = `exchange facing: ${label(sitter, 'sitter')} at (${p.x.toFixed(2)}, ${p.z.toFixed(2)}) and ${label(partner, 'partner')}`;
+			if (!seat || seat.d > SEAT_RADIUS) {
+				problems.push(`${who}: the sitter has no seat anchor within ${SEAT_RADIUS} m`);
+				continue;
+			}
+			const off = degOff(Math.atan2(q.x - p.x, q.z - p.z), seat.s.facing);
+			if (off > TALK_DEG)
+				problems.push(
+					`${who}: partner ${off.toFixed(0)} deg off the seat's facing (limit ${TALK_DEG})`
+				);
+		}
+	if (count < 1)
+		problems.push('exchange facing: no seated exchange pair was checked (the set is empty)');
+	return { count, problems };
+}
+// Sub-check "seat facing": the segment from each seat anchor SEAT_VIEW m forward along its facing must
+// not enter a wall collider (radius 0). Wheelchairs are left out: they are parked or pushed anywhere.
+const SEAT_VIEW = 3.0;
+// Whether segment (x0, z0)-(x1, z1) passes through the inside of collider box c (slab method).
+function segmentEntersBox(x0, z0, x1, z1, c) {
+	let t0 = 0,
+		t1 = 1;
+	for (const [p, d, lo, hi] of [
+		[x0, x1 - x0, c.x - c.hw, c.x + c.hw],
+		[z0, z1 - z0, c.z - c.hd, c.z + c.hd]
+	]) {
+		if (Math.abs(d) < 1e-9) {
+			if (p <= lo || p >= hi) return false;
+			continue;
+		}
+		const a = (lo - p) / d,
+			b = (hi - p) / d;
+		t0 = Math.max(t0, Math.min(a, b));
+		t1 = Math.min(t1, Math.max(a, b));
+		if (t0 >= t1) return false;
+	}
+	return true;
+}
+function seatFacingProblems(seats) {
+	const problems = [];
+	let count = 0;
+	for (const s of seats) {
+		if (s.kind === 'wheelchair') continue;
+		count++;
+		const x1 = s.x + Math.sin(s.facing) * SEAT_VIEW,
+			z1 = s.z + Math.cos(s.facing) * SEAT_VIEW,
+			hit = NPC.colliders.find((c) => segmentEntersBox(s.x, s.z, x1, z1, c));
+		if (hit)
+			problems.push(
+				`seat facing: ${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg meets the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)}) within ${SEAT_VIEW.toFixed(1)} m`
+			);
+	}
+	return { count, problems };
+}
+
+// --------------------------------------------------------------- (h) lying
+// The tops a patient lies on, found by their props.ts geometry (the mesh's own box size times its
+// scale), not by the rule restLyingPatient uses, so the check does not confirm itself.
+const LYING_SURFACES = [
+	{ what: 'CT table', size: [5.8, 0.15, 0.72] },
+	{ what: 'vault couch carbon insert', size: [0.64, 0.055, 4.2] },
+	{ what: 'exam table', size: [2.2, 0.13, 0.72] }
+];
+const LIE_OVERHANG = 0.07,
+	CT_SLIDES = [0, 1, 2, 3.15]; // the CT couch slides up to 3.15 m into the gantry (CT_COUCH.inDist)
+function lyingSurfaces() {
+	const out = [];
+	NPC.scene.traverse((o) => {
+		if (!o.isMesh || !o.geometry || inAnyPerson(o)) return;
+		if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+		const b = o.geometry.boundingBox,
+			d = [b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z].map(
+				(v, k) => v * Math.abs(o.scale.getComponent(k))
+			),
+			s = LYING_SURFACES.find((x) => x.size.every((v, k) => Math.abs(v - d[k]) < 0.01));
+		if (s) out.push({ what: s.what, o });
+	});
+	return out;
+}
+// The lying figure's parts, its whole box, and the known surface under its centre.
+function lyingOn(g, surfaces) {
+	g.updateMatrixWorld(true);
+	const parts = [];
+	g.traverse((o) => {
+		if (o.isMesh && o.geometry) parts.push(meshBounds(o));
+	});
+	const lo = [0, 1, 2].map((k) => Math.min(...parts.map((b) => b.lo[k]))),
+		hi = [0, 1, 2].map((k) => Math.max(...parts.map((b) => b.hi[k]))),
+		rest = parts.filter((b) => b.lo[1] <= lo[1] + LIE_TOL),
+		foot = [0, 2].map((k) => [
+			Math.min(...rest.map((b) => b.lo[k])),
+			Math.max(...rest.map((b) => b.hi[k]))
+		]),
+		cx = (lo[0] + hi[0]) / 2,
+		cz = (lo[2] + hi[2]) / 2,
+		under = surfaces
+			.map((s) => ({ ...s, b: meshBounds(s.o) }))
+			.find(({ b }) => cx >= b.lo[0] && cx <= b.hi[0] && cz >= b.lo[2] && cz <= b.hi[2]);
+	return { lo, hi, foot, cx, cz, under };
+}
+// What is wrong with lying patient g on its surface: the lowest point and the torso's and pelvis's
+// undersides within LIE_TOL of the top, and its footprint (the x/z box of its lowest parts, those
+// whose undersides are within LIE_TOL of its lowest point: what rests on the top) no more than
+// LIE_OVERHANG past any edge of the top.
+function lyingProblems(g, surfaces, who) {
+	const { lo, foot, cx, cz, under } = lyingOn(g, surfaces),
+		at = `${who} at (${cx.toFixed(2)}, ${cz.toFixed(2)})`;
+	if (!under) return [`${at}: no known couch or table top under the centre`];
+	const top = under.b.hi[1],
+		off = (y) => `${y - top >= 0 ? '+' : ''}${(y - top).toFixed(3)}`,
+		rows = [];
+	if (Math.abs(lo[1] - top) > LIE_TOL)
+		rows.push(
+			`${at}: lowest point ${off(lo[1])} from the top of the ${under.what} (${top.toFixed(3)})`
+		);
+	for (const name of ['torso', 'pelvis']) {
+		const part = g.getObjectByName(name);
+		if (!part) {
+			rows.push(`${at}: no part named '${name}' (createLyingPatient names it)`);
+			continue;
+		}
+		const y = meshBounds(part).lo[1];
+		if (Math.abs(y - top) > LIE_TOL)
+			rows.push(
+				`${at}: ${name} underside ${off(y)} from the top of the ${under.what} (${top.toFixed(3)})`
+			);
+	}
+	const past = {
+		'-x': under.b.lo[0] - foot[0][0],
+		'+x': foot[0][1] - under.b.hi[0],
+		'-z': under.b.lo[2] - foot[1][0],
+		'+z': foot[1][1] - under.b.hi[2]
+	};
+	for (const [side, v] of Object.entries(past))
+		if (v > LIE_OVERHANG)
+			rows.push(
+				`${at}: reaches ${v.toFixed(2)} m past the ${under.what}'s ${side} edge (limit ${LIE_OVERHANG})`
+			);
+	return rows;
+}
+function checkLying() {
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.2);
+	NPC.scene.updateMatrixWorld(true);
+	const surfaces = lyingSurfaces(),
+		lying = new Map();
+	NPC.scene.traverse((o) => {
+		if (o.userData?.lying) lying.set(o, '');
+	});
+	for (const [room, arr] of Object.entries(NPC.ROOM_CAST))
+		for (const e of arr) if (lying.has(e.g)) lying.set(e.g, room);
+	const rows = [],
+		name = (g, room) =>
+			`${room || 'lying'}:${g.userData.npcRole || 'patient'}${g.visible ? '' : ' [hidden]'}`;
+	for (const [g, room] of lying) rows.push(...lyingProblems(g, surfaces, name(g, room)));
+	// The CT couch slide (updateCtCouchMotion) moves the table and its patient along x by the same
+	// offset: sample it at CT_SLIDES, moving every patient lying on the CT table with it.
+	const ct = surfaces.find((s) => s.what === 'CT table');
+	if (!ct) rows.push('no CT table found by its geometry');
+	else {
+		const riders = [...lying.keys()].filter((g) => lyingOn(g, surfaces).under?.o === ct.o),
+			tableX = ct.o.position.x,
+			riderX = riders.map((g) => g.position.x);
+		for (const d of CT_SLIDES) {
+			ct.o.position.x = tableX + d;
+			riders.forEach((g, i) => (g.position.x = riderX[i] + d));
+			NPC.scene.updateMatrixWorld(true);
+			for (const g of riders)
+				rows.push(...lyingProblems(g, surfaces, `${name(g, lying.get(g))} (couch slid ${d} m)`));
+		}
+		ct.o.position.x = tableX;
+		riders.forEach((g, i) => (g.position.x = riderX[i]));
+		NPC.scene.updateMatrixWorld(true);
+		if (!riders.length) rows.push('no lying patient on the CT table to slide');
+	}
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} lying problems (${lying.size} lying patients; lowest point, torso and pelvis within ${LIE_TOL} m of the top, at most ${LIE_OVERHANG} m past an edge)`
+			: `${lying.size} lying patients rest on their ${[...new Set(surfaces.map((s) => s.what))].join(', ')} (lowest point, torso and pelvis within ${LIE_TOL} m of the top, at most ${LIE_OVERHANG} m past an edge), also with the CT couch slid ${CT_SLIDES.join(', ')} m`,
+		detail: rows
+	};
+}
+
+// ----------------------------------------------------------- (i) wheelchair
+// The occupant's pelvis is measured against the seat anchor that its own wheelchair registered.
+function checkWheelchair() {
+	NPC.resetTreatmentJourney(true);
+	stepFor(0.5);
+	const occupants = [];
+	NPC.scene.traverse((o) => {
+		if (o.userData?.wheelchairOccupant) occupants.push(o);
+	});
+	const rows = [];
+	for (const g of occupants) {
+		g.updateMatrixWorld(true);
+		const chair = g.parent,
+			pelvis = pelvisY(g),
+			pose = g.userData.pose || 'none',
+			anchor = NPC.SEATS.find((s) => s.group === chair),
+			problems = [];
+		if (pose !== 'seated') problems.push(`pose=${pose}, expected seated`);
+		if (!anchor) problems.push('the wheelchair has no seat anchor');
+		else {
+			const top = NPC.seatInWorld(anchor).top,
+				gap = pelvis - top;
+			if (Math.abs(gap) > SEAT_TOL)
+				problems.push(
+					`pelvis ${pelvis.toFixed(3)}, seat top ${top.toFixed(3)}, gap ${gap >= 0 ? '+' : ''}${gap.toFixed(3)}`
+				);
+		}
+		if (problems.length) rows.push(`wheelchair occupant: ${problems.join('; ')}`);
+	}
+	if (!occupants.length) rows.push('no wheelchair occupant found (userData.wheelchairOccupant)');
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} of ${occupants.length} wheelchair occupants not seated on the chair`
+			: `${occupants.length} wheelchair occupants seated, pelvis within ${SEAT_TOL} m of the chair's seat anchor top`,
+		detail: rows
+	};
+}
+
+// ------------------------------------------------------------ (j) stand-up
+// Seated actors that start a move: for the first STANDUP_FRAMES frames after the move starts, their
+// leg column (legColumn) must not meet any furniture (furnitureBoxes), so the actor stands up out of
+// its seat, not inside it, and walks off clear of it.
+const STANDUP_FRAMES = 30;
+function checkStandUp() {
+	const J = NPC.JOURNEY,
+		handoff = (key, idx) => {
+			const h = NPC.HANDOFFS[key][idx];
+			return [() => castActor(key, h), () => NPC.startActorHandoff(key, h)];
+		},
+		flows = [
+			['consult -> education handoff', ...handoff('consult', 0)],
+			['patientcare -> lobby handoff', ...handoff('patientcare', 0)],
+			[`"${NPC.HANDOFFS.lobby[1].label}" handoff`, ...handoff('lobby', 1)],
+			[
+				"Mia's lobby journey move (lobby chair -> consult)",
+				() => J.newPatient,
+				// the journey's own move (beginMiaConsultSequence)
+				() => NPC.moveJourneyActor(J.newPatient, 'lobby', 'consult', { x: -17.2, y: 0, z: -6.35 })
+			]
+		],
+		rows = [],
+		info = [];
+	for (const [what, who, start] of flows) {
+		NPC.resetTreatmentJourney(true);
+		NPC.handoffTransitions.length = 0;
+		step();
+		const actor = who();
+		if (!actor) {
+			rows.push(`${what}: no actor`);
+			continue;
+		}
+		const homeSeated = !!actor.userData.seated;
+		start();
+		let hitFrames = 0,
+			first = null;
+		for (let f = 1; f <= STANDUP_FRAMES; f++) {
+			step();
+			const legs = legColumn(actor),
+				hits = furnitureBoxes().filter((b) => columnHits(legs, b));
+			if (!hits.length) continue;
+			hitFrames++;
+			if (!first) {
+				const p = worldPos(actor);
+				first = `frame ${f}: ${label(actor, 'actor')} at (${p.x.toFixed(2)}, ${p.z.toFixed(2)}) pose=${actor.userData.pose || 'none'}, ${describeColumn(legs)} meets ${hits.map(describeBox).join(' | ')}`;
+			}
+		}
+		if (hitFrames)
+			rows.push(
+				`${what}: leg column in furniture in ${hitFrames} of the first ${STANDUP_FRAMES} frames; first ${first}`
+			);
+		const moving = NPC.handoffTransitions.some((t) => t.actor === actor),
+			walking = NPC.workflowTransitions.some((t) => t.actor === actor);
+		info.push(
+			`${what}: ${homeSeated ? 'seated' : 'not seated'} at the start, ${moving || walking ? 'moving' : 'no move (still seated)'} after ${STANDUP_FRAMES} frames, ${hitFrames} frames with furniture`
+		);
+	}
+	NPC.handoffTransitions.length = 0;
+	NPC.resetTreatmentJourney(true);
+	return {
+		pass: rows.length === 0,
+		summary: rows.length
+			? `${rows.length} of ${flows.length} stand-ups put the legs in furniture`
+			: `${flows.length} stand-up flows keep the leg column (r ${LEG_R} m, soles to knees) out of furniture for the first ${STANDUP_FRAMES} frames`,
+		detail: rows,
+		info
+	};
+}
+
 // ------------------------------------------------------------------ driver
-const CHECKS = { a: checkWalls, b: checkSpacing, c: checkOneMove, d: checkHidden, e: checkYield };
+const CHECKS = {
+	a: checkWalls,
+	b: checkSpacing,
+	c: checkOneMove,
+	d: checkHidden,
+	e: checkYield,
+	f: checkFeet,
+	g: checkSeated,
+	h: checkLying,
+	i: checkWheelchair,
+	j: checkStandUp
+};
 let failed = 0;
-for (const letter of ['a', 'b', 'c', 'd', 'e']) {
+for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
 	if (!only.has(letter)) continue;
 	let r;
 	try {

@@ -16,7 +16,56 @@ import { personFigure } from './npc';
 import { add, MAT } from './main';
 import { registerInteractable, openKioskDialog } from './interact';
 import { CT_COUCH, ROOM_CLOCKS } from './equipment';
+import { seatActor } from './npc-behavior';
 import type { Room } from './rooms';
+
+export type SeatKind = 'chair' | 'couch' | 'bench' | 'taskChair' | 'wheelchair' | 'examTable';
+/** Where one person sits: the centre of the sitting area, the way a sitter faces (a rotation.y; the
+    seat faces its local +z) and the seat-top height. seatActor puts the hips 0.12 m behind (x, z). */
+export interface SeatAnchor {
+	x: number;
+	z: number;
+	facing: number;
+	top: number;
+	kind: SeatKind;
+	/** Set only on a wheelchair's anchor: x, z, facing and top are then in this group's frame, so the
+	    anchor moves with the chair. */
+	group?: THREE.Object3D;
+}
+/** Every seat. Furniture anchors are world coordinates, computed when the prop is built through the
+    transform of the group it is built into (the room groups sit at the origin and never move). */
+export const SEATS: SeatAnchor[] = [];
+/** A point and facing in `frame`'s coordinates, in world coordinates. */
+function frameToWorld(frame: THREE.Object3D, x: number, y: number, z: number, facing: number) {
+	frame.updateWorldMatrix(true, false);
+	const p = frame.localToWorld(new THREE.Vector3(x, y, z)),
+		d = new THREE.Vector3(Math.sin(facing), 0, Math.cos(facing)).transformDirection(
+			frame.matrixWorld
+		);
+	return { x: p.x, y: p.y, z: p.z, facing: Math.atan2(d.x, d.z) };
+}
+/** The anchor in world coordinates (a wheelchair's is resolved through its group's current transform). */
+export function seatInWorld(s: SeatAnchor): SeatAnchor {
+	if (!s.group) return s;
+	const w = frameToWorld(s.group, s.x, s.top, s.z, s.facing);
+	return { x: w.x, z: w.z, facing: w.facing, top: w.y, kind: s.kind };
+}
+/** The top a lying patient rests on, per room id: the CT table (ctsim), each vault couch's carbon
+    insert (vault1, vault2) and the HDR exam table top (hdr). npc.ts restLyingPatient lies on it. */
+export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
+/* Registers a seat of a prop centred at (x, z) in group g and turned by rot: (ox, oz) is the seat's
+   offset in the prop's own frame, and the sitter faces the prop's +z turned by `turn`. */
+function addSeat(g, kind: SeatKind, x, z, rot, top, ox = 0, oz = 0, turn = 0) {
+	const c = Math.cos(rot),
+		s = Math.sin(rot),
+		w = frameToWorld(g, x + c * ox + s * oz, top, z - s * ox + c * oz, rot + turn);
+	SEATS.push({ x: w.x, z: w.z, facing: w.facing, top: w.y, kind });
+}
+/* Seats along a prop of length len: one per 0.6 m, evenly spaced. */
+function addSeatRow(g, kind: SeatKind, x, z, rot, top, len, oz) {
+	const n = Math.max(1, Math.round(len / 0.6));
+	for (let i = 0; i < n; i++) addSeat(g, kind, x, z, rot, top, (i - (n - 1) / 2) * (len / n), oz);
+}
 
 export function lampPost(x, z, h = 4.4) {
 	const g = new THREE.Group();
@@ -71,11 +120,22 @@ export function wheelchairObject(scale = 1, occupied = false) {
 	g.add(caster2);
 	const foot = box(0.28 * s, 0.03, 0.09 * s, frameMat, 0, 0.18 * s, 0.28 * s);
 	g.add(foot);
+	// The seat's sitting area runs from the backrest (-0.14 s) to the front edge (+0.22 s).
+	const seatAnchor: SeatAnchor = {
+		x: 0,
+		z: 0.04 * s,
+		facing: 0,
+		top: 0.64 * s + 0.04,
+		kind: 'wheelchair',
+		group: g
+	};
+	SEATS.push(seatAnchor);
 	if (occupied) {
 		const patient = personFigure(0x8b8ec4, 0x606a76, 0xe6c3a0);
+		patient.userData.wheelchairOccupant = true;
 		patient.scale.set(0.82 * s, 0.82 * s, 0.82 * s);
-		patient.position.set(0, -0.02 * s, -0.02 * s);
 		g.add(patient);
+		seatActor(patient, seatAnchor);
 	}
 	return g;
 }
@@ -346,9 +406,19 @@ export function benchSeat(g, x, z, rot = 0, len = 2.2, col = 0x7f8f98) {
 	const seat = box(len, 0.12, 0.58, std(col, 0.78, 0.02), x, 0.54, z);
 	seat.rotation.y = rot;
 	add(g, seat);
-	const back = box(len, 0.42, 0.08, std(col, 0.78, 0.02), x, 0.82, z - 0.24 * Math.cos(rot));
+	const back = box(
+		len,
+		0.42,
+		0.08,
+		std(col, 0.78, 0.02),
+		x - 0.24 * Math.sin(rot),
+		0.82,
+		z - 0.24 * Math.cos(rot)
+	);
 	back.rotation.y = rot;
 	add(g, back);
+	// sitting area: backrest front (-0.2) to the seat's front edge (+0.29)
+	addSeatRow(g, 'bench', x, z, rot, 0.6, len, 0.045);
 	for (const ox of [-len * 0.36, len * 0.36]) {
 		const leg = box(
 			0.09,
@@ -461,18 +531,30 @@ export function chair(g, x, z, rot = 0) {
 	const s = box(0.55, 0.12, 0.55, MAT.uphol, x, 0.48, z);
 	s.rotation.y = rot;
 	add(g, s);
-	const b = box(0.55, 0.65, 0.12, MAT.uphol, x, 0.82, z - 0.21);
+	const b = box(
+		0.55,
+		0.65,
+		0.12,
+		MAT.uphol,
+		x - 0.21 * Math.sin(rot),
+		0.82,
+		z - 0.21 * Math.cos(rot)
+	);
 	b.rotation.y = rot;
 	add(g, b);
+	// sitting area: backrest front (-0.15) to the seat's front edge (+0.275)
+	addSeat(g, 'chair', x, z, rot, 0.54, 0, 0.06);
 }
 
 export function couch(g, x, z, rot = 0) {
 	const s = box(1.7, 0.32, 0.72, MAT.uphol, x, 0.43, z);
 	s.rotation.y = rot;
 	add(g, s);
-	const b = box(1.7, 0.72, 0.16, MAT.uphol, x, 0.87, z - 0.3);
+	const b = box(1.7, 0.72, 0.16, MAT.uphol, x - 0.3 * Math.sin(rot), 0.87, z - 0.3 * Math.cos(rot));
 	b.rotation.y = rot;
 	add(g, b);
+	// sitting area: backrest front (-0.22) to the seat's front edge (+0.36)
+	addSeatRow(g, 'couch', x, z, rot, 0.59, 1.7, 0.07);
 }
 
 export function examTable(g, x, z, rot = 0) {
@@ -480,6 +562,12 @@ export function examTable(g, x, z, rot = 0) {
 	top.rotation.y = rot;
 	add(g, top);
 	add(g, box(0.55, 0.77, 0.46, MAT.metal, x, 0.45, z));
+	// A patient sits on either long edge facing out, feet hanging: an anchor 0.2 m in from each edge
+	// puts the hips 0.32 m in and the knees 0.16 m past the edge. The hips stay on their own half of
+	// the table, so re-seating a sitter from where they sit keeps the same edge.
+	addSeat(g, 'examTable', x, z, rot, 0.945, 0, 0.16);
+	addSeat(g, 'examTable', x, z, rot, 0.945, 0, -0.16, Math.PI);
+	return top;
 }
 
 export function workstationRow(g, x, z, n = 3, spacing = 1.7, rot = 0) {
@@ -500,9 +588,19 @@ export function taskChair(g, x, z, rot = 0, color = 0x506d7a) {
 	const seat = box(0.54, 0.1, 0.5, std(color, 0.82, 0.02), x, 0.6, z);
 	seat.rotation.y = rot;
 	add(g, seat);
-	const back = box(0.5, 0.46, 0.1, std(color, 0.84, 0.02), x, 0.86, z - 0.18 * Math.cos(rot));
+	const back = box(
+		0.5,
+		0.46,
+		0.1,
+		std(color, 0.84, 0.02),
+		x - 0.18 * Math.sin(rot),
+		0.86,
+		z - 0.18 * Math.cos(rot)
+	);
 	back.rotation.y = rot;
 	add(g, back);
+	// sitting area: backrest front (-0.13) to the seat's front edge (+0.25)
+	addSeat(g, 'taskChair', x, z, rot, 0.65, 0, 0.06);
 }
 
 export function cabinetBank(g, x, z, w = 2.0, h = 1.8, d = 0.48, rot = 0, color = 0xdfe5e8) {
@@ -1175,6 +1273,7 @@ export function ctScanner(g, room: Room) {
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
 	add(g, table);
 	CT_COUCH.table = table;
+	LYING_SURFACES[room.id] = table;
 	CT_COUCH.ring = ring;
 	CT_COUCH.bore = bore;
 	CT_COUCH.baseX = table.position.x;
@@ -1318,6 +1417,7 @@ export function emulatorLinacShell(g, room: Room) {
 	const cf = eRbox(0.64, 0.055, 4.2, carbon, 0.025);
 	cf.position.set(0, 1.05, -0.14);
 	couch.add(cf);
+	LYING_SURFACES[room.id] = cf;
 	const noseTop = eRbox(0.58, 0.07, 0.78, carbon, 0.1);
 	noseTop.position.set(0, 1.05, 2.02);
 	couch.add(noseTop);
@@ -1341,7 +1441,7 @@ export function emulatorLinacShell(g, room: Room) {
 }
 
 export function hdrSuite(g, room: Room) {
-	examTable(g, room.x - 1.3, room.z, 0);
+	LYING_SURFACES[room.id] = examTable(g, room.x - 1.3, room.z, 0);
 	const after = box(0.85, 1.0, 0.85, MAT.white, room.x + 2.2, 0.65, room.z - 0.7);
 	add(g, after);
 	const stem = cyl(0.11, 0.11, 1.15, MAT.metal);

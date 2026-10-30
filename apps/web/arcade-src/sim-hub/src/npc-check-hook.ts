@@ -2,8 +2,9 @@
    `?npccheck` (same precedent as `?visibilitycheck` in visibility.ts); otherwise nothing is added
    to `window` and `isHidden()` is exactly `document.hidden`. */
 import * as THREE from 'three';
-import { renderer, labelRenderer } from './scene';
+import { renderer, labelRenderer, scene } from './scene';
 import { ROOMS } from './rooms';
+import { S } from './state';
 import { getColliders } from './walk';
 import {
 	movers,
@@ -11,10 +12,15 @@ import {
 	handoffTransitions,
 	startActorHandoff,
 	shouldHold,
-	visibleInTree
+	visibleInTree,
+	seatActor,
+	setActorSeated,
+	interactionScenes
 } from './npc-behavior';
+import { SEATS, seatInWorld } from './props';
 import {
 	JOURNEY,
+	LOBBY_PICKUP,
 	journeyActors,
 	journeyActorRoom,
 	moveJourneyActor,
@@ -53,6 +59,9 @@ export function installNpcCheckHook(
 	};
 	Object.assign(window, {
 		__NPC: {
+			scene,
+			/** The simulation state; the screenshot tool sets simSec so poses do not depend on real time. */
+			state: S,
 			colliders: getColliders(),
 			movers,
 			castActors,
@@ -82,7 +91,16 @@ export function installNpcCheckHook(
 			},
 			JOURNEY,
 			ROOMS,
-			ROOM_CAST: roomCast
+			ROOM_CAST: roomCast,
+			/** Seat anchors (props.ts), resolved to world coordinates by seatInWorld. */
+			SEATS,
+			seatInWorld,
+			seatActor,
+			setActorSeated,
+			/** Where the journey's lobby pickup seats the patient and stops the therapist. */
+			LOBBY_PICKUP,
+			/** The staff-patient speech exchanges (registerNpcExchange): { a, b, ... } pairs. */
+			interactionScenes
 		}
 	});
 }

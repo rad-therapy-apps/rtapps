@@ -16,11 +16,18 @@ import { zeroY } from './helpers';
 import { scene, camera } from './scene';
 import { S } from './state';
 import { corridorAnchor } from './rooms';
-import { wheelchairObject, medCartObject, vehicleObject } from './props';
+import { wheelchairObject, medCartObject, vehicleObject, SEATS, seatInWorld } from './props';
+import type { SeatAnchor } from './props';
 import {
+	HIP_Y,
+	THIGH_LEN,
+	KNEE_TO_SOLE,
+	SOLE_Y,
 	personFigure,
 	setNpcRole,
 	poseCharacter,
+	setLegSwing,
+	setLegReach,
 	faceNpcToward,
 	faceAlong,
 	npcBubble,
@@ -148,8 +155,7 @@ export function updateDutyAnimations(sec) {
 		} else {
 			rig.armLP.rotation.x = 0.04 * s;
 			rig.armRP.rotation.x = -0.04 * s;
-			rig.legLP.rotation.x = 0;
-			rig.legRP.rotation.x = 0;
+			if (d.group.userData.pose !== 'seated') setLegSwing(rig, 0);
 		}
 		if (face) {
 			face.head.rotation.y = 0.07 * Math.sin(a * 0.45);
@@ -216,8 +222,14 @@ function addMover(
 	id = ''
 ) {
 	scene.add(group);
+	// People get their walking bob from setLegSwing's pelvis drop; only vehicles keep the sine bob.
+	let person = false;
+	group.traverse((o) => {
+		if (o.userData.walkRig) person = true;
+	});
 	movers.push({
 		group,
+		bob: !person,
 		curve: moverPath(points, closed),
 		speed,
 		offset,
@@ -314,15 +326,15 @@ export function updateMovers(dt, sec) {
 		m.group.position.copy(p);
 		const yaw = Math.atan2(n.x - p.x, n.z - p.z);
 		m.group.rotation.y = yaw + (m.yawOffset || 0);
-		if (!m.holding) m.group.position.y += Math.sin(sec * 1.7 + m.offset * 6.28) * 0.01;
+		if (!m.holding && m.bob) m.group.position.y += Math.sin(sec * 1.7 + m.offset * 6.28) * 0.01;
 		const swing = m.holding ? 0 : Math.sin(sec * 8 + m.offset * 6.28) * 0.42;
 		m.group.traverse((o) => {
 			const rig = o.userData?.walkRig;
-			if (rig) {
+			// a seated rider (the wheelchair occupant) keeps its pose
+			if (rig && o.userData.pose !== 'seated') {
 				rig.armLP.rotation.x = swing;
 				rig.armRP.rotation.x = -swing;
-				rig.legLP.rotation.x = -swing * 0.85;
-				rig.legRP.rotation.x = swing * 0.85;
+				setLegSwing(rig, swing * 0.85);
 			}
 		});
 	}
@@ -760,8 +772,7 @@ export function walkSwing(g, sec) {
 		if (r) {
 			r.armLP.rotation.x = s;
 			r.armRP.rotation.x = -s;
-			r.legLP.rotation.x = -s * 0.85;
-			r.legRP.rotation.x = s * 0.85;
+			setLegSwing(r, s * 0.85);
 		}
 	});
 }
@@ -803,15 +814,170 @@ export function advancePed(o, from, to, st, speed, dt) {
 	return false;
 }
 
+const SEAT_SNAP = 1.0, // how far seatActor looks for a seat
+	HIPS_BEHIND_SEAT = 0.12, // hips behind the anchor, along its facing (scaled with the figure)
+	HIP_TO_PELVIS = 0.06, // the pelvis (the thighs' underside) is this far below the hip pivots (scaled)
+	SEAT_AT_FINAL = 0.3; // a patient handoff whose final point is this close to a free seat sits there
+// The actor seatActor last put on each anchor (it holds the seat while it is still seated there).
+const seatHolders = new Map<SeatAnchor, THREE.Object3D>();
+/* Seats a person figure on a seat anchor (props.ts SEATS): `at` itself when it is one, otherwise the
+   nearest anchor within SEAT_SNAP of the world point `at`. The hips go 0.12 m behind the anchor
+   along its facing, the pelvis on the seat top (so y = top + 0.06 - 1.06 for an unscaled figure; both
+   scale with the figure), the figure turns to the seat's facing and is posed seated, and the anchor
+   is kept in userData.seatAnchor (the stand-up starts from it). The pose is worked out in world
+   coordinates and written in the figure's parent's frame, which also covers the floor height and a
+   figure riding a moving prop (the wheelchair occupant, seated on that chair's own anchor). With no
+   seat in reach it returns false and leaves the figure standing, so check (g) reports it. */
+export function seatActor(actor, at) {
+	if (!actor || !at) return false;
+	let anchor = SEATS.includes(at) ? at : null;
+	if (!anchor) {
+		let best = SEAT_SNAP;
+		for (const s of SEATS) {
+			const w = seatInWorld(s),
+				d = Math.hypot(w.x - at.x, w.z - at.z);
+			if (d <= best) {
+				best = d;
+				anchor = s;
+			}
+		}
+	}
+	if (!anchor) return false;
+	const seat = seatInWorld(anchor),
+		k = actor.getWorldScale(new THREE.Vector3()).y,
+		back = HIPS_BEHIND_SEAT * k,
+		p = new THREE.Vector3(
+			seat.x - Math.sin(seat.facing) * back,
+			seat.top + (HIP_TO_PELVIS - HIP_Y) * k,
+			seat.z - Math.cos(seat.facing) * back
+		);
+	let yaw = seat.facing;
+	if (actor.parent) {
+		actor.parent.updateWorldMatrix(true, false);
+		actor.parent.worldToLocal(p);
+		const d = new THREE.Vector3(0, 0, 1).transformDirection(actor.parent.matrixWorld);
+		yaw -= Math.atan2(d.x, d.z);
+	}
+	actor.position.copy(p);
+	actor.rotation.y = yaw;
+	poseCharacter(actor, 'seated');
+	actor.userData.seated = true;
+	actor.userData.seatAnchor = anchor;
+	seatHolders.set(anchor, actor);
+	return true;
+}
+/** The seat anchor nearest the world point p within `radius`, or null; given `freeFor`, only an
+    anchor no other actor is still seated on. */
+function seatNear(p, radius, freeFor = null) {
+	let best = null,
+		bestD = radius;
+	for (const s of SEATS) {
+		const w = seatInWorld(s),
+			d = Math.hypot(w.x - p.x, w.z - p.z),
+			holder = seatHolders.get(s),
+			taken =
+				freeFor &&
+				holder &&
+				holder !== freeFor &&
+				holder.userData.seated &&
+				holder.userData.seatAnchor === s;
+		if (d <= bestD && !taken) {
+			best = s;
+			bestD = d;
+		}
+	}
+	return best;
+}
+const STAND_CLEAR = 0.5, // a sitter stands up this far in front of its seat anchor, along its facing
+	RISE_S = 0.5; // and takes this long to stand up
+export interface Rise {
+	start: number;
+	end: number;
+	x0: number;
+	z0: number;
+	fx: number;
+	fz: number;
+	dist: number;
+	hip0: number;
+	armL: number;
+	armR: number;
+	to: THREE.Vector3;
+}
+/* A seated actor that starts a move first stands up out of its seat. Over RISE_S the hips travel
+   from the seat to STAND_CLEAR in front of the seat anchor, along the seat's facing (off the table
+   edge for an exam table), and rise to standing height, while the soles slide from where they rest
+   to under the hips (setLegReach): the lower legs stay in front of the seat and the root never jumps.
+   beginRise starts it and returns it, with `to`, the point the walk starts from (null when the actor
+   is not seated); stepRise poses each frame and returns false once the actor stands at `to`. */
+export function beginRise(actor): Rise | null {
+	if (!actor.userData.seated) return null;
+	const anchor = actor.userData.seatAnchor;
+	if (!anchor) {
+		setActorSeated(actor, false); // never walk off in the seated pose
+		return null;
+	}
+	const seat = seatInWorld(anchor),
+		fx = Math.sin(seat.facing),
+		fz = Math.cos(seat.facing),
+		rig = actor.userData.walkRig,
+		to = new THREE.Vector3(seat.x + fx * STAND_CLEAR, 0, seat.z + fz * STAND_CLEAR),
+		r: Rise = {
+			start: S.simSec,
+			end: S.simSec + RISE_S,
+			x0: actor.position.x,
+			z0: actor.position.z,
+			fx,
+			fz,
+			dist: Math.hypot(to.x - actor.position.x, to.z - actor.position.z),
+			// seated hip height, in figure units above a standing figure's origin
+			hip0: actor.position.y / actor.scale.y + HIP_Y,
+			armL: rig.armLP.rotation.x,
+			armR: rig.armRP.rotation.x,
+			to
+		};
+	actor.userData.shouldSit = false;
+	poseCharacter(actor, 'rising'); // clears userData.seated
+	stepRise(actor, r, S.simSec);
+	return r;
+}
+export function stepRise(actor, r: Rise, sec) {
+	const u = Math.min(1, (sec - r.start) / RISE_S),
+		e = u * u * (3 - 2 * u),
+		k = actor.scale.y,
+		rig = actor.userData.walkRig;
+	if (u >= 1) {
+		actor.position.copy(r.to);
+		poseCharacter(actor, 'neutral');
+		return false;
+	}
+	// in figure units: the hips' height and how far they have come; the soles' height and how far
+	// ahead of the hips' start they are (THIGH_LEN while seated, under the hips at the end)
+	const hip = r.hip0 + (HIP_Y - r.hip0) * e,
+		along = (r.dist / k) * e,
+		sole0 = r.hip0 - KNEE_TO_SOLE,
+		sole = sole0 + (SOLE_Y - sole0) * e,
+		foot = THIGH_LEN + (r.dist / k - THIGH_LEN) * e;
+	actor.position.set(r.x0 + r.fx * along * k, (hip - HIP_Y) * k, r.z0 + r.fz * along * k);
+	setLegReach(rig, foot - along, hip - sole);
+	rig.armLP.rotation.x = r.armL * (1 - e);
+	rig.armRP.rotation.x = r.armR * (1 - e);
+	return true;
+}
 export function setActorSeated(actor, seated) {
 	if (!actor) return;
-	actor.position.y = seated ? -0.35 : 0;
-	poseCharacter(actor, seated ? 'seated' : 'neutral');
+	// shouldSit makes check (g) select the actor, so a seat out of reach fails there loudly
+	actor.userData.shouldSit = !!seated;
+	if (seated) {
+		seatActor(actor, actor.getWorldPosition(new THREE.Vector3()));
+		return;
+	}
+	actor.position.y = 0;
+	poseCharacter(actor, 'neutral'); // also clears userData.seated
 }
 
-export function movementPathFor(actor, fromId, toId, final) {
+export function movementPathFor(actor, fromId, toId, final, startAt = null) {
 	const h = { target: toId, actor: 'patient', final: [final.x, 0, final.z] },
-		pts = buildActorHandoffPath(actor, fromId, toId, h);
+		pts = buildActorHandoffPath(actor, fromId, toId, h, startAt);
 	return makePolylineCurve(pts.map((p) => new THREE.Vector3(p[0], 0, p[1])));
 }
 
@@ -890,11 +1056,14 @@ function actorEntryPoints(room, final) {
 		[final.x, final.z]
 	];
 }
-function buildActorHandoffPath(actor, fromId, targetId, h) {
+// The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
+// point in room targetId.
+function buildActorHandoffPath(actor, fromId, targetId, h, startAt = null) {
 	const hintedFrom = roomById(fromId),
 		to = roomById(targetId),
 		start = new THREE.Vector3();
-	actor.getWorldPosition(start);
+	if (startAt) start.copy(startAt);
+	else actor.getWorldPosition(start);
 	start.y = 0;
 	const detectedFrom = journeyActorRoom(actor),
 		actualFrom = detectedFrom || hintedFrom,
@@ -968,12 +1137,21 @@ export function startActorHandoff(key, h) {
 	const actor = castActorForHandoff(key, h),
 		target = roomById(h.target);
 	if (!actor || !target) return;
+	// a handoff to a seat in the room a seated actor already sits in ("Have a seat" for a patient
+	// seated in the lobby): nothing to do, rather than stand up and sit down again
+	if (
+		actor.userData.seated &&
+		journeyActorRoom(actor)?.id === target.id &&
+		seatNear(actorFinalPoint(h.target, h), SEAT_AT_FINAL)
+	)
+		return;
 	requestActorMove(actor, () => beginActorHandoff(actor, key, h, target));
 }
 function beginActorHandoff(actor, key, h, target) {
+	const rise = beginRise(actor); // a seated actor first stands up out of its seat
 	actor.userData.inHandoff = true;
 	const from = roomById(key),
-		pts = buildActorHandoffPath(actor, key, h.target, h),
+		pts = buildActorHandoffPath(actor, key, h.target, h, rise?.to),
 		curve = makePolylineCurve(pts.map((p) => new THREE.Vector3(p[0], 0, p[1]))),
 		len = curve.getLength(),
 		duration = Math.max(4.5, Math.min(16, len / 2.25));
@@ -985,8 +1163,9 @@ function beginActorHandoff(actor, key, h, target) {
 		h,
 		target,
 		curve,
-		start: S.simSec,
-		duration
+		start: rise ? rise.end : S.simSec,
+		duration,
+		rise
 	});
 	setTimeout(() => {
 		if (from && doors.has(from.id) && from.id !== target.id) setDoorTarget(from.id, false);
@@ -994,8 +1173,12 @@ function beginActorHandoff(actor, key, h, target) {
 }
 export function updateHandoffTransitions(sec) {
 	for (let i = handoffTransitions.length - 1; i >= 0; i--) {
-		const t = handoffTransitions[i],
-			u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
+		const t = handoffTransitions[i];
+		if (t.rise) {
+			if (stepRise(t.actor, t.rise, sec)) continue;
+			t.rise = null;
+		}
+		const u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
 			e = u * u * (3 - 2 * u),
 			p = t.curve.getPoint(e),
 			n = t.curve.getPoint(Math.min(1, e + 0.006));
@@ -1007,14 +1190,17 @@ export function updateHandoffTransitions(sec) {
 			if (r) {
 				r.armLP.rotation.x = swing;
 				r.armRP.rotation.x = -swing;
-				r.legLP.rotation.x = -swing * 0.88;
-				r.legRP.rotation.x = swing * 0.88;
+				setLegSwing(r, swing * 0.88);
 			}
 		});
 		if (u >= 1) {
 			t.actor.userData.inHandoff = false;
 			t.actor.userData.handoffCompleted = true;
-			poseCharacter(t.actor, t.h.actor === 'staff' ? 'support' : 'neutral');
+			// a patient whose final point is a free seat anchor sits down on it ("Have a seat")
+			const seat =
+				t.h.actor === 'staff' ? null : seatNear(t.actor.position, SEAT_AT_FINAL, t.actor);
+			if (seat && seatActor(t.actor, seat)) t.actor.userData.shouldSit = true;
+			else poseCharacter(t.actor, t.h.actor === 'staff' ? 'support' : 'neutral');
 			if (doors.has(t.target.id)) setTimeout(() => setDoorTarget(t.target.id, false), 1200);
 			handoffTransitions.splice(i, 1);
 			startNextQueuedMove(t.actor);

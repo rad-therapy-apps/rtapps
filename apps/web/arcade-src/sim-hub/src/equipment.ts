@@ -31,8 +31,8 @@ import {
 } from './helpers';
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
-import { personFigure, faceAlong, poseCharacter } from './npc';
-import { advanceRoute, advancePed, walkSwing, startNextQueuedMove } from './npc-behavior';
+import { personFigure, faceAlong, poseCharacter, setLegSwing, SOLE_Y } from './npc';
+import { advanceRoute, advancePed, walkSwing, startNextQueuedMove, stepRise } from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
@@ -41,7 +41,8 @@ import {
 	showEquipmentPanel
 } from './interact';
 import { setDoorTarget } from './walk';
-import { roomById, PRIMARY_PATIENTS, doors, player } from './main';
+import { roomById, PRIMARY_PATIENTS, doors, player, roomFloors } from './main';
+import { APRON_TOP } from './rooms';
 import {
 	JOURNEY,
 	ROOM_WORKFLOW,
@@ -713,6 +714,18 @@ const AMB_OUT = [
 ];
 const AMB_REAR = { x: -4.2, z: 13.6 },
 	AMB_ENTRY = { x: 0.4, z: 7.8 };
+/* The crew walks between the ambulance bay and the lobby. On the lobby floor it stands at y 0 like
+   every indoor actor; off it, it stands on the bay apron, so its soles touch the ground there too. */
+let lobbyFloorBox = null;
+function crewOnGround(q) {
+	lobbyFloorBox ||= new THREE.Box3().setFromObject(
+		roomFloors.find((f) => f.userData.roomId === 'lobby')
+	);
+	const p = q.position,
+		b = lobbyFloorBox,
+		indoors = p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z;
+	p.y = indoors ? 0 : APRON_TOP - SOLE_Y;
+}
 function ambPatient() {
 	const q = personFigure(0xcfd6da, 0xb9c1c6, 0xe9c39d);
 	q.visible = false;
@@ -737,10 +750,13 @@ export function updateAmbulance(dt, sec) {
 			A.route = { i: 0, d: 0 };
 			S.ambUnload.visible = true;
 			S.ambUnload.position.set(AMB_REAR.x, 0, AMB_REAR.z);
+			crewOnGround(S.ambUnload);
 		}
 	} else if (A.phase === 'unload') {
 		walkSwing(S.ambUnload, sec);
-		if (advancePed(S.ambUnload, AMB_REAR, AMB_ENTRY, A.route, 1.5, dt)) {
+		const unloaded = advancePed(S.ambUnload, AMB_REAR, AMB_ENTRY, A.route, 1.5, dt);
+		crewOnGround(S.ambUnload);
+		if (unloaded) {
 			S.ambUnload.visible = false;
 			A.phase = 'dwell';
 			A.wait = 0;
@@ -755,7 +771,9 @@ export function updateAmbulance(dt, sec) {
 		}
 	} else if (A.phase === 'load') {
 		walkSwing(S.ambLoad, sec);
-		if (advancePed(S.ambLoad, AMB_ENTRY, AMB_REAR, A.route, 1.4, dt)) {
+		const loaded = advancePed(S.ambLoad, AMB_ENTRY, AMB_REAR, A.route, 1.4, dt);
+		crewOnGround(S.ambLoad);
+		if (loaded) {
 			S.ambLoad.visible = false;
 			A.phase = 'depart';
 			A.route = { i: 0, d: 0 };
@@ -971,8 +989,12 @@ export function updateCtCouchMotion(sec) {
 
 export function updateWorkflowTransitions(sec) {
 	for (let i = workflowTransitions.length - 1; i >= 0; i--) {
-		const t = workflowTransitions[i],
-			u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
+		const t = workflowTransitions[i];
+		if (t.rise) {
+			if (stepRise(t.actor, t.rise, sec)) continue;
+			t.rise = null;
+		}
+		const u = Math.max(0, Math.min(1, (sec - t.start) / t.duration)),
 			e = u * u * (3 - 2 * u),
 			p = t.curve.getPoint(e),
 			n = t.curve.getPoint(Math.min(1, e + 0.006));
@@ -984,8 +1006,7 @@ export function updateWorkflowTransitions(sec) {
 			if (r) {
 				r.armLP.rotation.x = sw;
 				r.armRP.rotation.x = -sw;
-				r.legLP.rotation.x = -sw * 0.86;
-				r.legRP.rotation.x = sw * 0.86;
+				setLegSwing(r, sw * 0.86);
 			}
 		});
 		for (const c of t.cues || []) {
