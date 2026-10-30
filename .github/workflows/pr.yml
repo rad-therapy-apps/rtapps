@@ -122,7 +122,9 @@ jobs:
       - run: node scripts/arcade-smoke.mjs arcade/sim-hub/index.html arcade/linac-ct/index.html arcade/linac-ct/ct-suite.html
         working-directory: apps/web
         timeout-minutes: 10 # backstop; the script also kills any bundle that runs past 2 minutes
-      # Walls, spacing, one-move-per-actor and hidden-tab checks for sim-hub NPCs (#77 follow-up).
+      # sim-hub NPC checks a-m (#77 follow-up): movers clear of walls and each other, one move per actor,
+      # hidden tab, yielding, feet, seated/lying/wheelchair poses, stand-ups; people clear of furniture
+      # and walls at rest and on every route, and not crowded.
       - run: node scripts/sim-hub-npc-check.mjs
         working-directory: apps/web
         timeout-minutes: 5

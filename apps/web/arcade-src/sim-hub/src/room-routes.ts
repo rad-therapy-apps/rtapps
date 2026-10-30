@@ -3,11 +3,14 @@
 
    Arrival spots: the standing spots a hand-over without its own `final` point ends at, per target
    room, in world x/z with the facing (rotation.y) the actor turns to on arrival: toward the room's
-   resident staff or its work area. Each spot is at least 0.05 m clear of furniture for the
-   people who arrive there, 0.6 m from the room's other spots and 0.5 m from its residents
-   (checks k and m in scripts/sim-hub-npc-check.mjs). Each room has one more spot than the
-   hand-overs into it, and at least 3. The first spot is the room's old fixed arrival point where
-   that point passes. */
+   resident staff or its work area. Spots are placed 0.05 m clear of furniture, 0.6 m from the
+   room's other spots and 0.5 m from its residents. Each room has one more spot than the hand-overs
+   into it, and at least 3. The first spot is the room's old fixed arrival point where that point
+   passes. Checks k and m in scripts/sim-hub-npc-check.mjs measure every spot a hand-over takes
+   there: run alone, a hand-over takes its room's first free spot; started together, the hand-overs
+   into a room take one each. Check k holds the person on it 0.05 m clear of furniture, with the
+   0.2 m circle round the root clear of the walls; check m holds it 0.5 m from the room's residents
+   and the other arrivals. A spot no hand-over takes there (the spare) is not measured. */
 import * as THREE from 'three';
 
 export interface ArrivalSpot {
@@ -123,8 +126,8 @@ export function clearArrivalSpots(keep: (actor: THREE.Object3D) => boolean = () 
 }
 
 /* Room graphs: hand-placed waypoints per room (world x/z) joined by straight edges, each keeping a
-   0.25 m half-width corridor clear of furniture (check l in scripts/sim-hub-npc-check.mjs; the vault
-   and HDR door leaves, 2 cm thick across their doorways, are crossed by 1.0 cm at most). The first
+   0.25 m half-width corridor clear of furniture and the 0.2 m circle round the walker's root clear of
+   the walls (check l in scripts/sim-hub-npc-check.mjs; doors are not furniture). The first
    node is the room's door point (walk.ts doorPoint); the lobby's first three are its corridor exits,
    east, west and technical, and the vaults' graphs hold their maze. Every resting place in a room
    (arrival spots, staff spots, seat approach points, journey finals) has a nearest node it reaches in
