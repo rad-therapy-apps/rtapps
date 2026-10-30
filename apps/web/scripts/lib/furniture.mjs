@@ -4,8 +4,8 @@
 // (window.__NPC, src/npc-check-hook.ts) or what buildFurniture returned; nothing is imported from
 // the bundle.
 
-/* The furniture: every mesh that is not a person, a mover, hidden, a floor, wall or ceiling part, a
-   mat, a glass pane, a plane or a wall item above 2 m. Each record keeps the mesh `o`, its world box
+/* The furniture: every mesh that is not a person, a mover, a door, hidden, a floor, wall or ceiling
+   part, a mat, a glass pane, a plane or a wall item above 2 m. Each record keeps the mesh `o`, its world box
    `b`, its geometry type and parameters, its world-matrix inverse and scale (for sdf), its size in
    metres `dims`, its `top` and `bot`, and its material. near(x, z) gives the indices into `list` of
    the records whose box comes within 0.5 m of the 1 m cell holding (x, z). */
@@ -14,8 +14,19 @@ export function buildFurniture(NPC) {
 	scene.updateMatrixWorld(true);
 	const M4 = scene.matrixWorld.constructor,
 		moverMeshes = new Set(),
+		doorMeshes = new Set(),
 		list = [];
 	NPC.movers.forEach((m) => m.group.traverse((o) => moverMeshes.add(o)));
+	NPC.doors.forEach((d) => d.group.traverse((o) => doorMeshes.add(o)));
+	// whether (cx, cz) is within 0.3 m of a wall collider's footprint
+	const nearCollider = (cx, cz) =>
+		NPC.colliders.some(
+			(c) =>
+				Math.hypot(
+					Math.max(Math.abs(cx - c.x) - c.hw, 0),
+					Math.max(Math.abs(cz - c.z) - c.hd, 0)
+				) <= 0.3
+		);
 	const nearRoomWall = (cx, cz, L) =>
 		NPC.ROOMS.some((r) => {
 			const lx = [r.x - r.w / 2, r.x + r.w / 2],
@@ -47,6 +58,8 @@ export function buildFurniture(NPC) {
 			if (p.userData?.walkRig || p.userData?.lying) return;
 			// movers (their walkers, vehicles and carts) are check (a)'s
 			if (moverMeshes.has(p)) return;
+			// doors (the hook's door map): every mesh of a door, whatever its state, open or shut
+			if (doorMeshes.has(p)) return;
 			// anything hidden, itself or by an ancestor
 			if (p.visible === false) return;
 		}
@@ -77,8 +90,9 @@ export function buildFurniture(NPC) {
 			b.max.y < 0.12 ||
 			// floor slabs: over 2.5 m both ways and under 0.35 m tall
 			(longh > 2.5 && thin > 2.5 && ext < 0.35) ||
-			// walls, doors and posts: over 2 m tall, at most 0.3 m thick, from below 0.5 m
-			(ext > 2.0 && thin <= 0.3 && b.min.y < 0.5) ||
+			// walls and posts: over 2 m tall, at most 0.3 m thick, from below 0.5 m, centred within 0.3 m
+			// of a wall collider (free-standing panels, such as the changing nooks', are furniture)
+			(ext > 2.0 && thin <= 0.3 && b.min.y < 0.5 && nearCollider(cx, cz)) ||
 			// anything over 3 m tall but a torus (the gantry rings)
 			(ext > 3.0 && gtype !== 'TorusGeometry') ||
 			// planes: decals and signs

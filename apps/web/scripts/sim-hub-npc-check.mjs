@@ -39,19 +39,24 @@
 //                the soles' midpoint, soles to knees) out of the furniture for the first 30 frames
 //
 // Checks k, l and m measure people against furniture (scripts/lib/furniture.mjs: every visible mesh
-// except people, movers, floors, walls, ceilings, mats, glass panes, planes and wall items above
-// 2 m) by their body (the legs and torso, sampled on a grid of points over each mesh). They run from
-// the people as the page built them, at the journey reset; hand-overs run as the page runs them, and
-// both patient journeys are driven through their own sequence to the end ('done').
+// except people, movers, doors, floors, walls, ceilings, mats, glass panes, planes and wall items
+// above 2 m) by their body (the legs and torso, sampled on a grid of points over each mesh); k and l
+// also measure them against the walls: the person's root, as a 0.2 m circle in x/z, against every
+// wall collider (as check a does for movers). They run from the people as the page built them, at
+// the journey reset; hand-overs run as the page runs them, and both patient journeys are driven
+// through their own sequence to the end ('done').
 //   k  Rest clear  the body is at least 0.05 m from furniture (6 x 6 x 6 points per mesh; a sitter's
-//                own seat left out) for every cast, duty and journey actor 10 frames after the
-//                journey reset, every hand-over's actor at its end (each run alone) and every journey
-//                move's actor at its end
-//   l  Routes    on every frame of every hand-over (each run alone) and journey move, stand-up
-//                included, the body is at most 0.02 m into furniture (4 x 4 x 4 points per mesh;
-//                the seats within 0.6 m of the move's start, its end or the actor's own seat left
-//                out); mover loops: for the movers that walk on their loop point, a 0.2 m ring at
-//                heights 0.1, 0.5, 0.9 and 1.3 m is at most 0.02 m into furniture at 500 points
+//                own seat left out) and the root circle clear of the walls, for every cast, duty and
+//                journey actor 10 frames after the journey reset, every hand-over's actor at its end
+//                (each run alone, and the hand-overs into each room started together) and every
+//                journey move's actor at its end
+//   l  Routes    on every frame of every hand-over (each run alone, and the hand-overs into each room
+//                started together) and journey move, stand-up included, the body is at most 0.02 m
+//                into furniture (4 x 4 x 4 points per mesh; the seats within 0.6 m of the move's
+//                start, its end or the actor's own seat left out) and the root circle clear of the
+//                walls; the five routes that come closest to furniture are printed; mover loops: for
+//                the movers that walk on their loop point, a 0.2 m ring at heights 0.1, 0.5, 0.9 and
+//                1.3 m is at most 0.02 m into furniture at 500 points
 //   m  Occupancy  people at rest (lying patients aside) are at least 0.5 m apart, root to root in
 //                x/z: after the journey reset; each hand-over's end against its target room's
 //                residents, run alone and started together with every other hand-over into that
@@ -1597,6 +1602,7 @@ const REST_CLEAR = 0.05, // (k) the least clearance between the body and furnitu
 	ROUTE_DEPTH = 0.02, // (l) the most the body may be inside furniture on any frame
 	ROUTE_GRID = 4, // (l) body points per axis per mesh
 	ROUTE_SEAT_R = 0.6, // (l) seats this close to a move's start, end or own seat are left out
+	WALL_R = 0.2, // (k), (l) the person's root as a circle of this radius in x/z, against the walls
 	RING_R = 0.2, // (l) mover loops: the ring around the walker, with a point every 45 deg
 	RING_DIRS = 8,
 	RING_HEIGHTS = [0.1, 0.5, 0.9, 1.3],
@@ -1608,9 +1614,11 @@ const REST_CLEAR = 0.05, // (k) the least clearance between the body and furnitu
 	JOURNEY_LIMIT_S = 40 * 60;
 // Count floors, as measured when these checks were written, so that (k), (l) and (m) cannot pass by
 // measuring nobody: the people at rest after the journey reset (at least), the hand-overs followed
-// and the moves of each journey (exactly). Every followed move has an end, measured or dropped.
+// (each run alone, and those run together into a room) and the moves of each journey (exactly).
+// Every followed move has an end, measured or dropped.
 const REST_FLOOR = 40,
 	HANDOFF_ROUTES = 21,
+	TOGETHER_ROUTES = 15,
 	JOURNEY_ROUTES = { treatment: 11, newpatient: 27 };
 // The movers whose person figure walks on the loop point itself; the escort pushes its wheelchair and
 // the tech cart's person walks behind the cart, so their footprints are check (a)'s.
@@ -1621,6 +1629,20 @@ const xz = (p) => `(${p.x.toFixed(2)}, ${p.z.toFixed(2)})`;
 const roomAt = (x, z) =>
 	NPC.ROOMS.find((r) => Math.abs(x - r.x) <= r.w / 2 && Math.abs(z - r.z) <= r.d / 2)?.id ||
 	'the corridors';
+const colliderText = (c) =>
+	`(${c.x.toFixed(2)}, ${c.z.toFixed(2)}) hw ${c.hw.toFixed(2)} hd ${c.hd.toFixed(2)}`;
+// (k), (l) how far a WALL_R circle at (x, z) reaches into the wall colliders: the deepest
+// { depth, c }, or null when it is clear of all of them.
+function wallReach(x, z) {
+	let deepest = null;
+	for (const c of NPC.colliders) {
+		const depth =
+			WALL_R -
+			Math.hypot(Math.max(Math.abs(x - c.x) - c.hw, 0), Math.max(Math.abs(z - c.z) - c.hd, 0));
+		if (depth > 0 && (!deepest || depth > deepest.depth)) deepest = { depth, c };
+	}
+	return deepest;
+}
 
 // The people as the page built them: every room cast, duty and journey figure, with each node's
 // transform and visibility and the figure's userData. The rotation is kept as the Euler angles the
@@ -1787,26 +1809,51 @@ function newRoute(F, kind, name, actor, entry, start, own) {
 	const near = NPC.SEATS.map(NPC.seatInWorld).filter((s) =>
 		pts.some((p) => Math.hypot(s.x - p.x, s.z - p.z) < ROUTE_SEAT_R)
 	);
-	return { kind, name, actor, skip: seatMeshes(F, near), frames: 0, worst: 0, at: null, path: [] };
+	return {
+		kind,
+		name,
+		actor,
+		skip: seatMeshes(F, near),
+		frames: 0,
+		worst: 0,
+		at: null,
+		least: Infinity,
+		near: null,
+		wall: null,
+		path: []
+	};
 }
-// (l) one frame of a move: the body (ROUTE_GRID points per axis per mesh) against furniture.
+// (l) one frame of a move: the body (ROUTE_GRID points per axis per mesh) against furniture, and the
+// root circle against the walls. Keeps the deepest frame, the least clearance and the deepest wall
+// reach.
 function followRoute(F, r) {
 	const frame = r.frames++;
 	if (!NPC.visibleInTree(r.actor)) return;
 	const p = worldPos(r.actor),
-		m = measure(F, r.actor, r.skip, bodyPoints(r.actor, ROUTE_GRID));
+		m = measure(F, r.actor, r.skip, bodyPoints(r.actor, ROUTE_GRID)),
+		w = wallReach(p.x, p.z);
 	r.path.push([p.x, p.z]);
 	if (m.depth > r.worst) {
 		r.worst = m.depth;
 		r.at = { frame, x: p.x, z: p.z, hit: m.hits[0] };
 	}
+	if (m.clearance < r.least) {
+		r.least = m.clearance;
+		r.near = m.nearest;
+	}
+	if (w && w.depth > (r.wall?.depth ?? 0)) r.wall = { frame, x: p.x, z: p.z, ...w };
 }
 // (k) one person: its body (REST_GRID points per axis per mesh) against furniture, less the seat it
-// sits on.
+// sits on, and its root circle against the walls.
 function restReading(F, moment, p) {
 	const own = p.g.userData.seated && p.g.userData.seatAnchor,
 		skip = own ? seatMeshes(F, [NPC.seatInWorld(own)]) : new Set();
-	return { moment, ...p, m: measure(F, p.g, skip, bodyPoints(p.g, REST_GRID)) };
+	return {
+		moment,
+		...p,
+		m: measure(F, p.g, skip, bodyPoints(p.g, REST_GRID)),
+		wall: wallReach(p.x, p.z)
+	};
 }
 // (m) a problem, kept once with the number of moments it was seen at.
 function crowd(R, key, text) {
@@ -1883,7 +1930,8 @@ function moveEnd(R, kind, moment, g, room) {
 let runsCache = null;
 // What (k), (l) and (m) read, gathered in one pass: the people at rest after the journey reset;
 // every hand-over run alone (followed frame by frame, then its end); the hand-overs into each room
-// started together (their ends); both journeys (each move followed frame by frame, then its end).
+// started together (followed frame by frame, then their ends); both journeys (each move followed
+// frame by frame, then its end).
 function furnitureRuns() {
 	if (runsCache) return runsCache;
 	const F = furniture(),
@@ -1891,8 +1939,10 @@ function furnitureRuns() {
 			F,
 			rest: [],
 			ends: [],
+			together: [],
 			routes: [],
 			hidden: [],
+			togetherHidden: [],
 			crowding: new Map(),
 			moments: { rest: 0, alone: 0, together: 0, journey: 0 },
 			journeyMoves: {}
@@ -1927,7 +1977,18 @@ function furnitureRuns() {
 	// the hand-overs into one room started together
 	for (const [target, picks] of byTarget) {
 		if (picks.length < 2) continue;
-		const runs = runHandoffs(picks),
+		const runs = runHandoffs(picks, (r) => {
+				r.route ||= newRoute(
+					F,
+					'together',
+					`${r.name} (together)`,
+					r.actor,
+					r.entry,
+					r.start,
+					r.own
+				);
+				followRoute(F, r.route);
+			}),
 			ids = personIds(),
 			actors = new Set(runs.map((r) => r.actor)),
 			ends = runs.map((r) => {
@@ -1935,6 +1996,13 @@ function furnitureRuns() {
 				return { ...p, id: `${p.id}, the end of ${r.key}[${r.idx}]` };
 			}),
 			others = peopleAtRest(ids).filter((p) => !actors.has(p.g));
+		for (const r of runs) {
+			if (!r.route) setupError(`${r.name} (together): ended before its first frame`);
+			R.routes.push(r.route);
+			const moment = `${r.route.name}, at the end of the hand-overs into ${target}`;
+			if (!NPC.visibleInTree(r.actor) || r.actor.userData.lying) R.togetherHidden.push(moment);
+			else R.together.push(restReading(F, moment, person(r.actor, ids)));
+		}
 		occupancy(
 			R,
 			'together',
@@ -1975,20 +2043,28 @@ function furnitureRuns() {
 	resetPeople();
 	// the count floors: every hand-over and journey move followed, and every one of them has an end
 	const handoffs = R.routes.filter((r) => r.kind === 'hand-over').length,
+		together = R.routes.filter((r) => r.kind === 'together').length,
 		moves = Object.values(R.journeyMoves).reduce((a, b) => a + b, 0),
-		counts = `${handoffs} hand-overs, journey moves ${Object.entries(R.journeyMoves)
+		counts = `${handoffs} hand-overs alone, ${together} together, journey moves ${Object.entries(
+			R.journeyMoves
+		)
 			.map(([k, v]) => `${k} ${v}`)
 			.join(', ')}`;
 	if (
 		handoffs !== HANDOFF_ROUTES ||
+		together !== TOGETHER_ROUTES ||
 		Object.entries(JOURNEY_ROUTES).some(([k, v]) => R.journeyMoves[k] !== v)
 	)
 		setupError(
-			`(l) followed ${counts}; expected exactly ${HANDOFF_ROUTES} hand-overs and journey moves treatment ${JOURNEY_ROUTES.treatment}, newpatient ${JOURNEY_ROUTES.newpatient}`
+			`(l) followed ${counts}; expected exactly ${HANDOFF_ROUTES} hand-overs alone, ${TOGETHER_ROUTES} together and journey moves treatment ${JOURNEY_ROUTES.treatment}, newpatient ${JOURNEY_ROUTES.newpatient}`
 		);
 	if (R.ends.length + R.hidden.length !== handoffs + moves)
 		setupError(
 			`${R.ends.length} move ends measured and ${R.hidden.length} dropped, for ${handoffs + moves} moves followed`
+		);
+	if (R.together.length + R.togetherHidden.length !== together)
+		setupError(
+			`${R.together.length} ends of hand-overs run together measured and ${R.togetherHidden.length} dropped, for ${together} followed`
 		);
 	return R;
 }
@@ -1996,26 +2072,40 @@ function furnitureRuns() {
 // ------------------------------------------------------------ (k) rest clear
 function checkRestClearance() {
 	const R = furnitureRuns(),
-		all = [...R.rest, ...R.ends],
+		all = [...R.rest, ...R.ends, ...R.together],
 		bad = all
 			.filter((e) => e.m.clearance < REST_CLEAR)
 			.sort((a, b) => a.m.clearance - b.m.clearance),
-		badRest = bad.filter((e) => R.rest.includes(e)).length,
+		walled = all.filter((e) => e.wall).sort((a, b) => b.wall.depth - a.wall.depth),
+		badOf = (list) => `${bad.filter((e) => list.includes(e)).length} of ${list.length}`,
 		where = ({ m }) =>
 			m.hits.length
 				? `${cm(m.hits[0].depth)} into ${describe(m.hits[0].rec)} (${m.hits[0].part})`
 				: `${cm(m.clearance)} from ${describe(m.nearest.rec)} (${m.nearest.part})`;
-	furnitureFailures.push(...bad);
+	furnitureFailures.push(...bad, ...walled);
 	return {
-		pass: bad.length === 0,
-		summary: bad.length
-			? `${bad.length} of ${all.length} people at rest are inside furniture or less than ${REST_CLEAR} m from it: ${badRest} of ${R.rest.length} after the journey reset, ${bad.length - badRest} of ${R.ends.length} at the end of a hand-over or journey move`
-			: `all ${all.length} people at rest keep at least ${REST_CLEAR} m from furniture: ${R.rest.length} after the journey reset, ${R.ends.length} at the end of a hand-over or journey move`,
-		detail: bad.map((e) => `${e.moment}: ${e.id} at ${xz(e)}: ${where(e)}`),
+		pass: bad.length === 0 && walled.length === 0,
+		summary: [
+			bad.length
+				? `${bad.length} of ${all.length} people at rest are inside furniture or less than ${REST_CLEAR} m from it: ${badOf(R.rest)} after the journey reset, ${badOf(R.ends)} at the end of a hand-over or journey move, ${badOf(R.together)} at the end of hand-overs started together`
+				: `all ${all.length} people at rest keep at least ${REST_CLEAR} m from furniture: ${R.rest.length} after the journey reset, ${R.ends.length} at the end of a hand-over or journey move, ${R.together.length} at the end of hand-overs started together`,
+			walled.length
+				? `walls: ${walled.length} of ${all.length} have the ${WALL_R} m circle round their root in a wall collider`
+				: `walls: the ${WALL_R} m circle round every root is clear of the wall colliders`
+		].join('; '),
+		detail: [
+			...bad.map((e) => `${e.moment}: ${e.id} at ${xz(e)}: ${where(e)}`),
+			...walled.map(
+				(e) =>
+					`${e.moment}: ${e.id} at ${xz(e)}: the ${WALL_R} m circle is ${cm(e.wall.depth)} into the wall collider ${colliderText(e.wall.c)}`
+			)
+		],
 		info: [
-			`counts: ${R.rest.length} at rest after the journey reset (floor ${REST_FLOOR}); ${R.ends.length} move ends measured and ${R.hidden.length} dropped, of ${R.ends.length + R.hidden.length} moves followed`,
+			`counts: ${R.rest.length} at rest after the journey reset (floor ${REST_FLOOR}); ${R.ends.length} move ends measured and ${R.hidden.length} dropped, of ${R.ends.length + R.hidden.length} moves followed; ${R.together.length} ends of hand-overs started together measured and ${R.togetherHidden.length} dropped, of ${R.together.length + R.togetherHidden.length} followed`,
 			'not measured: lying patients (check h)',
-			...R.hidden.map((m) => `not measured, the actor hidden or lying: ${m}`)
+			...[...R.hidden, ...R.togetherHidden].map(
+				(m) => `not measured, the actor hidden or lying: ${m}`
+			)
 		]
 	};
 }
@@ -2050,19 +2140,33 @@ function moverRings(F) {
 function checkRoutes() {
 	const R = furnitureRuns(),
 		bad = R.routes.filter((r) => r.worst > ROUTE_DEPTH).sort((a, b) => b.worst - a.worst),
+		walled = R.routes.filter((r) => r.wall).sort((a, b) => b.wall.depth - a.wall.depth),
 		// a route whose actor is hidden on every frame measures nothing, so it fails
 		unseen = R.routes.filter((r) => r.path.length === 0),
 		rings = moverRings(R.F),
 		badRings = rings.filter((r) => r.worst > ROUTE_DEPTH),
 		count = (list, kind) => list.filter((r) => r.kind === kind).length,
-		routes = `${count(R.routes, 'hand-over')} hand-overs and ${count(R.routes, 'journey move')} journey moves`;
-	furnitureFailures.push(...bad.map((r) => r.at), ...badRings.map((r) => r.at));
+		kinds = (list) =>
+			`${count(list, 'hand-over')} hand-overs alone, ${count(list, 'together')} together and ${count(list, 'journey move')} journey moves`,
+		// the routes that come closest to furniture (deepest first), to show drift between runs
+		closest = R.routes
+			.filter((r) => r.near)
+			.sort((a, b) => a.least - b.least)
+			.slice(0, 5);
+	furnitureFailures.push(
+		...bad.map((r) => r.at),
+		...walled.map((r) => r.wall),
+		...badRings.map((r) => r.at)
+	);
 	return {
-		pass: bad.length === 0 && unseen.length === 0 && badRings.length === 0,
+		pass: bad.length === 0 && walled.length === 0 && unseen.length === 0 && badRings.length === 0,
 		summary: [
 			bad.length
-				? `${bad.length} of ${R.routes.length} routes go more than ${ROUTE_DEPTH} m into furniture (${count(bad, 'hand-over')} hand-overs, ${count(bad, 'journey move')} journey moves)`
-				: `every frame of ${routes} keeps the body within ${ROUTE_DEPTH} m of furniture`,
+				? `${bad.length} of ${R.routes.length} routes go more than ${ROUTE_DEPTH} m into furniture (${kinds(bad)})`
+				: `every frame of ${kinds(R.routes)} keeps the body within ${ROUTE_DEPTH} m of furniture`,
+			walled.length
+				? `walls: ${walled.length} of ${R.routes.length} routes bring the ${WALL_R} m circle round the root into a wall collider (${kinds(walled)})`
+				: `walls: the ${WALL_R} m circle round the root stays clear of the wall colliders on every frame`,
 			...(unseen.length
 				? [`${unseen.length} of ${R.routes.length} routes have the actor hidden on every frame`]
 				: []),
@@ -2079,10 +2183,18 @@ function checkRoutes() {
 			...bad.map(
 				(r) =>
 					`${r.name}: ${cm(r.worst)} into ${describe(r.at.hit.rec)} (${r.at.hit.part}) at frame ${r.at.frame} of ${r.frames}, at ${xz(r.at)} in ${roomAt(r.at.x, r.at.z)}`
+			),
+			...walled.map(
+				(r) =>
+					`${r.name}: the ${WALL_R} m circle is ${cm(r.wall.depth)} into the wall collider ${colliderText(r.wall.c)} at frame ${r.wall.frame} of ${r.frames}, at ${xz(r.wall)} in ${roomAt(r.wall.x, r.wall.z)}`
 			)
 		],
 		info: [
-			`routes followed: ${routes} (exactly ${HANDOFF_ROUTES} and ${JOURNEY_ROUTES.treatment} + ${JOURNEY_ROUTES.newpatient} required); ${R.routes.length - unseen.length} with at least one visible frame`,
+			`routes followed: ${kinds(R.routes)} (exactly ${HANDOFF_ROUTES}, ${TOGETHER_ROUTES} and ${JOURNEY_ROUTES.treatment} + ${JOURNEY_ROUTES.newpatient} required); ${R.routes.length - unseen.length} with at least one visible frame`,
+			...closest.map(
+				(r, i) =>
+					`closest to furniture ${i + 1} of ${closest.length}: ${r.least < 0 ? `${cm(-r.least)} into` : `${cm(r.least)} from`} ${describe(r.near.rec)} (${r.near.part}): ${r.name}`
+			),
 			`mover loop rings, deepest: ${rings.map((r) => `${r.id} ${cm(r.worst)}`).join(', ')}; the escort and the tech cart are left to check (a)`
 		]
 	};
