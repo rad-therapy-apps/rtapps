@@ -733,9 +733,8 @@ function checkOneMove() {
 	}
 	NPC.moveJourneyActor(actor, 'consult', 'education', roomFinal('education'), () => fired.push(2));
 	// The third move sits down on the lobby chair at C_CHAIR: free, with a clear approach point, and
-	// nobody else's (Jordan's, Mia's and the pickup chair are -1.85, -6.2 and -3.3 in the front row,
-	// patientcare -> lobby sits at (5.8, 3.34), and a wall-box AED hangs over the approach point of the
-	// front row's other chair, (-4.75, 3.54)).
+	// nobody else's (the front row's -1.85, -6.2, -3.3 and -4.75 are Jordan's, Mia's, the pickup chair
+	// and patientcare -> lobby's).
 	const sitters = [...NPC.castActors().map((c) => c.g), ...NPC.journeyActors()]
 			.filter((g) => g?.userData.seated)
 			.map(worldPos),

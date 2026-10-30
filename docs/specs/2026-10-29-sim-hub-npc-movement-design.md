@@ -427,7 +427,7 @@ The probe sampled the leg and torso boxes of every person against every furnitur
      - in the lobby, start → graph → the exit nearest the first corridor point.
    - **Lobby pass-through.** A corridor leg that crosses the lobby rectangle goes through the lobby graph too: J (0, 0) → G1 (4.2, −0.6) → G2 (6.8, −0.6), through the gap between the two east couches. Walks out of the lobby go along N2–M–C, at z ≈ 2.3–2.4.
    - **Vaults.** The maze lives in the vault graphs. Its first point, in line at (65.1, ±18), became a step beside the entrance marker at (64.75, ±18.95). Vault 1's node P (69.05, −12.9) lets the patient beside the bench leave along it.
-   - **NPC treatment lane.** NPC routes walk the treatment corridor's x = 64 line at `NPC_TREATMENT_LANE_X` = 63.4, junction (64, 0) included. The red vault entrance markers (0.24 × 3 × 0.05 m, y 0.5–3.5, at x 63.76–64.00, z ±18; `rooms.ts`) hang in the walkway, and a body centred on x = 64 walked into them by 2.5 cm. `walk.ts` and `rooms.ts` are unchanged, so the player's guided travel is too. The owner has been asked whether the markers are intended.
+   - **NPC treatment lane.** NPC routes walk the treatment corridor's x = 64 line at `NPC_TREATMENT_LANE_X` = 63.4, junction (64, 0) included. The x = 64 line runs inside the corridor's east wall (x 63.71–64.29), so a body centred on it walked into the wall and the vault entrance markers by 2.5 cm. `walk.ts` is unchanged, so the player's guided travel is too.
    - **Last-frame heading.** Both transition walkers keep the heading when the curve's last two points coincide (within 1 µm). Before, `atan2(0, 0)` faced the walker +z on its last frame and kicked the furniture beside the final, by up to 17.6 cm.
 5. **Journey finals moved** (old → new; the shortest move that passes, on a 0.05 m grid):
 
@@ -467,12 +467,16 @@ The probe sampled the leg and torso boxes of every person against every furnitur
    - Speeds were rescaled as in stage 1, so the walking pace in m/s is unchanged:
      - visitor: 45.325 → 45.864 m, speed 0.01727 → 0.017067 (0.783 m/s);
      - ctRunner: 37.604 → 38.017 m, speed 0.011522 → 0.011397 (0.433 m/s).
-8. **patientcare → lobby sits in the east row.**
-   - Its `final` moved from the chair at (−4.75, 3.54) to the one at (5.8, 3.34).
-   - A wall-box AED cabinet (`rooms.ts`) hangs at y 1.23–2.01 at (−4.6, 3.02), with no wall behind it, right at the old chair's approach point (−4.75, 3.04). The walk there put the patient's torso 6.8 cm into it.
-   - Of the two free east-row chairs, (5.8, 3.34) backtracks least past the lobby node N2 (6.9, 2.4).
-   - The cabinet itself is unchanged; the owner will be asked about it.
-9. **Open questions for the owner:**
-   - the red vault entrance markers on the treatment corridor's x = 64 line, which NPC routes avoid on the 63.4 lane (item 4);
-   - the floating lobby AED cabinet (item 8);
-   - the three wheelchairs parked on or beside walker loops (item 7).
+8. **Scenery moved onto walls** (`rooms.ts`).
+   - Two AED wall cabinets, and the two red vault entrance markers, hung with no wall behind them. The lobby cabinet hung at the approach point (−4.75, 3.04) of patientcare → lobby's chair, and the patient's torso walked 6.8 cm into it. With the cabinet moved, that hand-over keeps its chair (−4.75, 3.54).
+
+     | Item                    | Old                                               | New                                                          |
+     | ----------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+     | lobby AED               | (−4.6, 3.02), rot π, mid-room                     | (−11.84, 5.0), rot π/2, on the west wall (x −11.91)          |
+     | treatment corridor AED  | (60.05, 6.82), rot −π/2, 1.97 m from a wall       | (58.15, 6.82), rot π/2, on the west wall (x 58.08)           |
+     | vault 1 entrance marker | 0.24 × 3 × 0.05 m at (63.88, −18), in the doorway | 0.05 × 3 × 0.24 m at (63.685, −15.45), on the wall beside it |
+     | vault 2 entrance marker | the same at (63.88, 18)                           | the same at (63.685, 15.45)                                  |
+
+   - The cabinets keep y 1.62 and face into the room. The markers keep y 2.0 (0.5–3.5) and sit beside the doorway on the main corridor's side (z − sign(z) × 2.55). The AEDs at (13.9, 3.92) and (3.05, −12.92) were already on walls and are unchanged.
+   - Two shots show them: `lobby-aed` and `vault-entrance`.
+9. **Open question for the owner:** the three wheelchairs parked on or beside walker loops (item 7).

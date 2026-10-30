@@ -212,9 +212,8 @@ export const HANDOFFS = {
 			target: 'lobby',
 			actor: 'patient',
 			actorIndex: 0,
-			// a lobby chair's seat anchor, in the east row: the patient sits down there (the wall-box AED
-			// at (-4.6, 3.02) hangs where a walk to the old chair, (-4.75, 3.54), ends)
-			final: [5.8, 0, 3.34],
+			// a lobby chair's seat anchor: the patient sits down there
+			final: [-4.75, 0, 3.54],
 			follow: true
 		}
 	],
