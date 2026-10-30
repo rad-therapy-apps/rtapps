@@ -44,6 +44,8 @@ import {
 import { roomById, ROOM_CAST, doors, player } from './main';
 import { JOURNEY, journeyActorRoom, workflowTransitions } from './journey';
 import { setupAmbulance } from './equipment';
+import { ARRIVAL_SPOTS, takeArrivalSpot, releaseArrivalSpot } from './room-routes';
+import type { ArrivalSpot } from './room-routes';
 
 export const movers = [];
 export const dutyActors = [];
@@ -988,26 +990,14 @@ function castActorForHandoff(key, h) {
 		actors = arr.filter((x) => x.kind === kind);
 	return actors[h.actorIndex || 0]?.g || null;
 }
-function actorFinalPoint(targetId, h) {
+// Where a handoff ends: its own final point, else the arrival spot its actor took (room-routes.ts),
+// else the room's first arrival spot, else the room centre.
+function actorFinalPoint(targetId, h, spot: ArrivalSpot | null = null) {
 	if (h.final) return new THREE.Vector3(h.final[0], 0, h.final[2]);
+	const s = spot || ARRIVAL_SPOTS[targetId]?.[0];
+	if (s) return new THREE.Vector3(s.x, 0, s.z);
 	const r = roomById(targetId);
-	if (!r) return new THREE.Vector3(0, 0, 0);
-	const map = {
-		consult: [-17.1, 0, -6.5],
-		social: [-29.2, 0, -6.2],
-		education: [-41.1, 0, -6.2],
-		patientcare: [-27.4, 0, 5.5],
-		physics: [6.4, 0, -17.2],
-		qa: [-6.2, 0, -43.2],
-		ctcontrol: [31.3, 0, -7.4],
-		ctsim: [40.4, 0, -7.2],
-		linaccontrol: [50.5, 0, 7.2],
-		vault1: [75.2, 0, -14.4],
-		vault2: [75.2, 0, 14.4],
-		lobby: [-3.2, 0, 3.4]
-	};
-	const a = map[targetId] || [r.x, 0, r.z];
-	return new THREE.Vector3(...a);
+	return r ? new THREE.Vector3(r.x, 0, r.z) : new THREE.Vector3(0, 0, 0);
 }
 function actorExitPoints(room) {
 	if (!room || room.hub) return [];
@@ -1057,8 +1047,15 @@ function actorEntryPoints(room, final) {
 	];
 }
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
-// point in room targetId.
-function buildActorHandoffPath(actor, fromId, targetId, h, startAt = null) {
+// point in room targetId (`spot`, when the actor took an arrival spot there).
+function buildActorHandoffPath(
+	actor,
+	fromId,
+	targetId,
+	h,
+	startAt = null,
+	spot: ArrivalSpot | null = null
+) {
 	const hintedFrom = roomById(fromId),
 		to = roomById(targetId),
 		start = new THREE.Vector3();
@@ -1069,7 +1066,7 @@ function buildActorHandoffPath(actor, fromId, targetId, h, startAt = null) {
 		actualFrom = detectedFrom || hintedFrom,
 		pts = [[start.x, start.z]];
 	if (detectedFrom && to && detectedFrom.id === to.id) {
-		const f = actorFinalPoint(targetId, h);
+		const f = actorFinalPoint(targetId, h, spot);
 		pts.push([f.x, f.z]);
 		return pts;
 	}
@@ -1098,7 +1095,7 @@ function buildActorHandoffPath(actor, fromId, targetId, h, startAt = null) {
 		const a = corridorAnchor(actualFrom).p;
 		pts.push([a.x, a.z]);
 	}
-	const final = actorFinalPoint(targetId, h);
+	const final = actorFinalPoint(targetId, h, spot);
 	pts.push(...actorEntryPoints(to, final));
 	const out = [];
 	for (const p of pts) {
@@ -1148,10 +1145,13 @@ export function startActorHandoff(key, h) {
 	requestActorMove(actor, () => beginActorHandoff(actor, key, h, target));
 }
 function beginActorHandoff(actor, key, h, target) {
+	releaseArrivalSpot(actor);
+	// a handoff without its own final point ends at the first free arrival spot in the target room
+	const spot = h.final ? null : takeArrivalSpot(h.target, actor);
 	const rise = beginRise(actor); // a seated actor first stands up out of its seat
 	actor.userData.inHandoff = true;
 	const from = roomById(key),
-		pts = buildActorHandoffPath(actor, key, h.target, h, rise?.to),
+		pts = buildActorHandoffPath(actor, key, h.target, h, rise?.to, spot),
 		curve = makePolylineCurve(pts.map((p) => new THREE.Vector3(p[0], 0, p[1]))),
 		len = curve.getLength(),
 		duration = Math.max(4.5, Math.min(16, len / 2.25));
@@ -1165,7 +1165,8 @@ function beginActorHandoff(actor, key, h, target) {
 		curve,
 		start: rise ? rise.end : S.simSec,
 		duration,
-		rise
+		rise,
+		spot
 	});
 	setTimeout(() => {
 		if (from && doors.has(from.id) && from.id !== target.id) setDoorTarget(from.id, false);
@@ -1200,7 +1201,10 @@ export function updateHandoffTransitions(sec) {
 			const seat =
 				t.h.actor === 'staff' ? null : seatNear(t.actor.position, SEAT_AT_FINAL, t.actor);
 			if (seat && seatActor(t.actor, seat)) t.actor.userData.shouldSit = true;
-			else poseCharacter(t.actor, t.h.actor === 'staff' ? 'support' : 'neutral');
+			else {
+				poseCharacter(t.actor, t.h.actor === 'staff' ? 'support' : 'neutral');
+				if (t.spot) t.actor.rotation.y = t.spot.facing;
+			}
 			if (doors.has(t.target.id)) setTimeout(() => setDoorTarget(t.target.id, false), 1200);
 			handoffTransitions.splice(i, 1);
 			startNextQueuedMove(t.actor);
