@@ -10,7 +10,7 @@
    there: run alone, a hand-over takes its room's first free spot; started together, the hand-overs
    into a room take one each. Check k holds the person on it 0.05 m clear of furniture, with the
    0.2 m circle round the root clear of the walls; check m holds it 0.5 m from the room's residents
-   and the other arrivals. A spot no hand-over takes there (the spare) is not measured. */
+   and the other arrivals. Spots that no hand-over takes are not measured. */
 import * as THREE from 'three';
 
 export interface ArrivalSpot {

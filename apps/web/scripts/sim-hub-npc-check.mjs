@@ -1700,6 +1700,8 @@ function furniture() {
 		setupError(`furniture: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
 	furnitureCache = buildFurniture(NPC);
 	if (!furnitureCache.list.length) setupError('furniture: no mesh classified as furniture');
+	// the wall sub-checks of (k) and (l) measure against the colliders, so none would pass them vacuously
+	if (!NPC.colliders.length) setupError('walls: no wall colliders to measure against');
 	return furnitureCache;
 }
 // Names for people: the cast ids castActors gives (room:kind:index, duty:index), else the JOURNEY key.
@@ -2101,7 +2103,7 @@ function checkRestClearance() {
 			)
 		],
 		info: [
-			`counts: ${R.rest.length} at rest after the journey reset (floor ${REST_FLOOR}); ${R.ends.length} move ends measured and ${R.hidden.length} dropped, of ${R.ends.length + R.hidden.length} moves followed; ${R.together.length} ends of hand-overs started together measured and ${R.togetherHidden.length} dropped, of ${R.together.length + R.togetherHidden.length} followed`,
+			`counts: ${R.rest.length} at rest after the journey reset (floor ${REST_FLOOR}); ${R.ends.length} move ends measured and ${R.hidden.length} dropped, of ${R.ends.length + R.hidden.length} moves followed; ${R.together.length} ends of hand-overs started together measured and ${R.togetherHidden.length} dropped, of ${R.together.length + R.togetherHidden.length} followed; furniture ${R.F.list.length} meshes, walls ${NPC.colliders.length} colliders`,
 			'not measured: lying patients (check h)',
 			...[...R.hidden, ...R.togetherHidden].map(
 				(m) => `not measured, the actor hidden or lying: ${m}`
