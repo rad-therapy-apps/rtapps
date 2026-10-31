@@ -160,6 +160,18 @@ const PLACEMENTS = [
 		id: 'QA room-sized tank removed',
 		pick: { size: [3.1, 1.55, 2.8], at: [-7.5, -43.3] },
 		absent: true
+	},
+	// Task 6: the manager's desk stands 0.3 m in front of the visitor chairs; its screen faces the manager
+	{
+		id: 'manager desk by the visitor chairs',
+		pick: { size: [2.5, 0.08, 0.85], at: [20, 8.5] },
+		within: [19.99, 20.01, 8.49, 8.51]
+	},
+	{
+		id: 'manager screen on the desk',
+		pick: { size: [1.0, 0.55, 0.055], at: [20, 8.75] },
+		minY: 1.16,
+		within: [18.75, 21.25, 8.075, 8.925]
 	}
 ];
 

@@ -1146,8 +1146,10 @@ export function furnish(room: Room) {
 			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
 			break;
 		case 'manager':
-			desk(g, room.x, room.z - 1.5, 2.5, 0.85);
-			monitor(g, room.x, 1.4, room.z - 1.8, 0, 1.0, 0.55);
+			// the desk stands just in front of the visitor chairs (seat fronts at z = room.z + 1.22), the
+			// manager on its door side facing them; the screen faces the manager
+			desk(g, room.x, room.z + 0.5, 2.5, 0.85);
+			monitor(g, room.x, 1.435, room.z + 0.75, Math.PI, 1.0, 0.55);
 			// visitor chairs face the manager's desk
 			chair(g, room.x - 1.0, room.z + 1.5, Math.PI);
 			chair(g, room.x + 1.0, room.z + 1.5, Math.PI);

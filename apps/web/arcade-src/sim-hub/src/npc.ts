@@ -736,7 +736,7 @@ export function departmentStaff() {
 		'Coordinates treatment operations, staffing, chart review and escalation.',
 		0x6d9c84,
 		0,
-		-0.9,
+		-0.55,
 		0,
 		0xefc8a6,
 		undefined,

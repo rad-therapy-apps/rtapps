@@ -324,16 +324,18 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// round the desk's -x end (x 18.75..21.25, z 6.07..6.93)
+	// round the desk's -x end (x 18.75..21.25, z 8.075..8.925)
 	manager: {
 		nodes: [
 			[20, 2.65], // 0 door
-			[18.2, 6.5], // 1 -x of the desk
-			[18.6, 7.6] // 2 +z of the desk's -x end: the manager behind it and the visitor's chair
+			[18.2, 6.5], // 1 -x of the desk, on its door side
+			[18.6, 7.6], // 2 by the desk's -x end: the manager in front of it
+			[18.25, 8.55] // 3 beside the desk's -x end: the visitor's chair and Chris Evans
 		],
 		edges: [
 			[0, 1],
-			[1, 2]
+			[1, 2],
+			[2, 3]
 		]
 	},
 	// past the cabinet inside the door, then down the aisle between the console (x 29.73..30.87) and
