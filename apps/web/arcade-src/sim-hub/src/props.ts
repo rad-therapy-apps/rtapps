@@ -519,10 +519,12 @@ export function desk(g, x, z, w = 2.2, d = 0.75, rot = 0) {
 	add(g, base);
 }
 
-export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48) {
+export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48, stand = true) {
 	const m = box(w, h, 0.055, MAT.screen, x, y, z);
 	m.rotation.y = rot;
 	add(g, m);
+	// a wall-mounted screen has no desk stand under it
+	if (!stand) return;
 	const st = box(0.08, 0.28, 0.08, MAT.black, x, y - h / 2 - 0.14, z);
 	add(g, st);
 }

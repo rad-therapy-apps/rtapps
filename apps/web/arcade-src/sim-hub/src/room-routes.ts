@@ -275,7 +275,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// door to the open floor; the desk and the round panel at (9.2, -17.5) stay clear
+	// door to the open floor; the desk stays clear
 	physics: {
 		nodes: [
 			[2.15, -18],
@@ -283,13 +283,12 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// in by the door's -z half, between the wall screen (x 3.1..3.2, z -31.16..-28.14, from 1.11 m)
-	// and the cabinet at (4.05, -32.9)
+	// in by the door's -z half, past the cabinet at (4.05, -32.9)
 	engineering: {
 		nodes: [
 			[2.15, -31], // 0 door
 			[2.6, -31.68], // 1 outside the door's -z half
-			[3.9, -31.68] // 2 inside, between the screen and the cabinet
+			[3.9, -31.68] // 2 inside, clear of the cabinet
 		],
 		edges: [
 			[0, 1],

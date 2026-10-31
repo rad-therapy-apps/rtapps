@@ -106,6 +106,49 @@ const PLACEMENTS = [
 		id: 'lobby entrance sign on the entrance wall face',
 		pick: { geom: 'PlaneGeometry', size: [5.4, 1.05], at: [0, 10.095], r: 0.1 },
 		flush: { axis: 'z', face: 10.09, side: 'min' }
+	},
+	// Task 4: desk computer screens stand on their desks; wall screens hang flush on their walls
+	{
+		id: 'education desk screen',
+		pick: { size: [0.8, 0.48, 0.055], at: [-42, -5.95] },
+		minY: 1.16,
+		within: [-43.9, -40.1, -6.75, -5.65]
+	},
+	{
+		id: 'education wall screen removed',
+		pick: { size: [1.8, 0.95, 0.055], at: [-38.89, -3.11] },
+		absent: true
+	},
+	{
+		id: 'physics atom disc removed',
+		pick: { geom: 'CylinderGeometry', size: [1, 1, 0.06], at: [9.2, -17.5] },
+		absent: true
+	},
+	{
+		id: 'engineering overview screen on the +z wall',
+		pick: { size: [3.03, 1.84, 0.1], at: [5.6, -26.16] },
+		flush: { axis: 'z', face: -26.08, side: 'max' }
+	},
+	{
+		id: 'engineering shielding screen on the +z wall',
+		pick: { size: [3.03, 1.84, 0.1], at: [10.4, -26.16] },
+		flush: { axis: 'z', face: -26.08, side: 'max' }
+	},
+	{
+		id: 'dosimetry desk screen',
+		pick: { size: [1.2, 0.65, 0.055], at: [9, -47.4] },
+		minY: 1.16,
+		within: [6.8, 11.2, -48.1, -47.1]
+	},
+	{
+		id: 'dosimetry wall screen removed',
+		pick: { size: [2.5, 1.3, 0.055], at: [9, -41.6] },
+		absent: true
+	},
+	{
+		id: 'commons screen on the wall the chairs face',
+		pick: { size: [1.8, 1.0, 0.055], at: [-8, -54.11] },
+		flush: { axis: 'z', face: -54.08, side: 'max' }
 	}
 ];
 

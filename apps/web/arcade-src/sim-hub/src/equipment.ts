@@ -203,13 +203,16 @@ export function buildLinacHeadWallStation(g, room) {
 	);
 	g.add(shelf);
 }
+// The two small teaching screens hang side by side on the +z wall, opposite the big head schematic on
+// the -z wall; the -x wall holds the door.
 export function buildEngineeringWallSchematics(g, room) {
+	const z = room.z + room.d / 2 - 0.16;
 	customTextureWallMonitor(
 		g,
-		room.x - room.w / 2 + 0.16,
+		room.x - 2.4,
 		2.03,
-		room.z + 1.35,
-		Math.PI / 2,
+		z,
+		Math.PI,
 		2.85,
 		1.66,
 		engineeringLinacOverviewTexture(),
@@ -218,10 +221,10 @@ export function buildEngineeringWallSchematics(g, room) {
 	);
 	customTextureWallMonitor(
 		g,
-		room.x + room.w / 2 - 0.16,
+		room.x + 2.4,
 		2.03,
-		room.z + 1.35,
-		-Math.PI / 2,
+		z,
+		Math.PI,
 		2.85,
 		1.66,
 		engineeringShieldingTexture(),

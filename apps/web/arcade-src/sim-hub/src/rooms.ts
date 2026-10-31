@@ -1060,9 +1060,9 @@ export function furnish(room: Room) {
 			for (let i = -1; i <= 1; i++) {
 				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
 			}
-			// flush on the door wall's inner face (z = room.z + 4.42), beside the doorway: 0.9 m clear of
-			// the door opening (to x = room.x + 1.3) and of the corner
-			monitor(g, room.x + 3.11, 1.7, room.z + 4.392, 0, 1.8, 0.95);
+			// the navigator's computer on the desk, toward its door-side edge, facing the visitor chairs
+			// (-z) so the navigator and the patient read it together
+			monitor(g, room.x, 1.4, room.z + 1.55, Math.PI, 0.8, 0.48);
 			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
@@ -1088,11 +1088,6 @@ export function furnish(room: Room) {
 			break;
 		case 'physics':
 			desk(g, room.x - 2.3, room.z - 2.2, 2, 0.75);
-			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
-			const atom = cyl(1.0, 1.0, 0.06, MAT.water, 34);
-			atom.rotation.x = Math.PI / 2;
-			atom.position.set(room.x + 1.7, 1.3, room.z + 0.5);
-			add(g, atom);
 			break;
 		case 'radbio':
 			for (let i = -1; i <= 1; i++) {
@@ -1128,8 +1123,8 @@ export function furnish(room: Room) {
 			break;
 		case 'dosimetry':
 			workstationRow(g, room.x, room.z - 2.0, 4, 2.3);
-			// flush on the +z wall's inner face (z = room.z + 7.42)
-			monitor(g, room.x, 2.2, room.z + 7.392, 0, 2.5, 1.3);
+			// the planning review screen on the centre desk, toward its +z edge, facing Dr Shah's side (-z)
+			monitor(g, room.x, 1.485, room.z + 1.6, Math.PI, 1.2, 0.65);
 			desk(g, room.x, room.z + 1.4, 4.4, 1.0);
 			cabinetBank(g, room.x - 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
 			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
@@ -1270,7 +1265,9 @@ export function furnish(room: Room) {
 		case 'commons':
 			desk(g, room.x, room.z, 5.2, 1.25);
 			for (let i = -2; i <= 2; i++) chair(g, room.x + i * 1.15, room.z - 1.3);
-			monitor(g, room.x - 4.9, 2.0, room.z, Math.PI / 2, 1.8, 1.0);
+			// a presentation screen flush on the +z wall's inner face (z = room.z + 5.92), facing the five
+			// chairs; no desk stand
+			monitor(g, room.x, 1.9, room.z + room.d / 2 - 0.115, Math.PI, 1.8, 1.0, false);
 			break;
 		case 'linaccontrol':
 			desk(g, room.x - 1.0, room.z, 6.0, 1.25, Math.PI / 2);
