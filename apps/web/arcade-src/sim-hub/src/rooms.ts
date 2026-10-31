@@ -1110,8 +1110,24 @@ export function furnish(room: Room) {
 			buildEngineeringWallSchematics(g, room);
 			break;
 		case 'qa':
+			// the water phantom: a scanning tank about real size (0.65 m) on its wheeled cart, at the old
+			// tank's x/z so the qa_water anchor (equipment.ts) still marks it; the tank stays the
+			// interactable
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
-			const tank = box(3.1, 1.55, 2.8, MAT.water, room.x, 1.0, room.z + 0.7);
+			const cartMat = std(0x8d9aa3, 0.5, 0.35),
+				cartZ = room.z + 0.7;
+			add(g, box(0.9, 0.06, 0.9, cartMat, room.x, 0.77, cartZ));
+			add(g, box(0.84, 0.04, 0.84, cartMat, room.x, 0.22, cartZ));
+			for (const sx of [-0.4, 0.4])
+				for (const sz of [-0.4, 0.4]) {
+					add(g, box(0.05, 0.62, 0.05, cartMat, room.x + sx, 0.43, cartZ + sz));
+					const wheel = cyl(0.06, 0.06, 0.05, MAT.black, 12);
+					wheel.rotation.z = Math.PI / 2;
+					wheel.position.set(room.x + sx, 0.06, cartZ + sz);
+					add(g, wheel);
+				}
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
+			const tank = box(0.65, 0.55, 0.65, MAT.water, room.x, 1.075, cartZ);
 			add(g, tank);
 			registerInteractable(
 				tank,

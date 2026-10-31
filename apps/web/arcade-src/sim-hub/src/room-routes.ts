@@ -52,11 +52,11 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 		{ x: 5.75, z: -17.2, facing: -2.93 },
 		{ x: 6.15, z: -17.8, facing: -2.63 }
 	],
-	// beside the QA enclosure, facing it
+	// beside the phantom's cart, facing it
 	qa: [
-		{ x: -5.65, z: -43.4, facing: -2.16 },
-		{ x: -5.65, z: -42.4, facing: -2.32 },
-		{ x: -5.6, z: -44.05, facing: -2.03 }
+		{ x: -6.5, z: -43.3, facing: -1.57 },
+		{ x: -6.5, z: -42.65, facing: -1.57 },
+		{ x: -6.5, z: -43.95, facing: -1.57 }
 	],
 	ctcontrol: [
 		{ x: 31.3, z: -7.4, facing: 1.05 },
@@ -295,12 +295,12 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[1, 2]
 		]
 	},
-	// the arrival spots stand beside the enclosure (x -9.05..-5.95, z -44.7..-41.9): they are reached
-	// along z, from off its ends
+	// the arrival spots stand beside the phantom's cart (x -7.95..-7.05, z -43.75..-42.85): they are
+	// reached from off its ends
 	qa: {
 		nodes: [
 			[-2.15, -44], // 0 door
-			[-5.3, -45.5], // 1 off the enclosure's -z end: spots [0] and [2]
+			[-5.3, -45.5], // 1 off the cart's -z end: spots [0] and [2]
 			[-5.3, -41.3] // 2 off its +z end: spot [1] and the physicist's start
 		],
 		edges: [

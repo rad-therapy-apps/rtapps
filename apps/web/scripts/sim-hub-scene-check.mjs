@@ -149,6 +149,17 @@ const PLACEMENTS = [
 		id: 'commons screen on the wall the chairs face',
 		pick: { size: [1.8, 1.0, 0.055], at: [-8, -54.11] },
 		flush: { axis: 'z', face: -54.08, side: 'max' }
+	},
+	// Task 5: the water phantom is a real-size tank (0.65 m) on its cart (deck top 0.80)
+	{
+		id: 'QA water phantom tank on its cart',
+		pick: { size: [0.65, 0.55, 0.65], at: [-7.5, -43.3] },
+		minY: 0.8
+	},
+	{
+		id: 'QA room-sized tank removed',
+		pick: { size: [3.1, 1.55, 2.8], at: [-7.5, -43.3] },
+		absent: true
 	}
 ];
 
