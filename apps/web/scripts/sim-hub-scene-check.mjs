@@ -54,7 +54,14 @@ const CHAIRS = 20,
 //   within  the box centre is inside [x0, x1, z0, z1] (a desk top)
 //   flush   { axis: 'x' | 'z', face, side: 'min' | 'max' }: the box's `side` along `axis` (the side
 //           toward the wall) is 0 to 0.06 m off the wall's inner face `face`, not past it
-const PLACEMENTS = [];
+const PLACEMENTS = [
+	// Task 2: a turned cabinet shows its drawer lines on the face it turns to (engineering's east
+	// cabinet faces -x; its front is 0.2058 m from its centre)
+	{
+		id: 'engineering east cabinet drawer line on its front',
+		pick: { size: [1.26, 0.02, 0.015], at: [11.744, -33], y: 0.31, r: 0.05 }
+	}
+];
 
 function setupError(msg) {
 	console.error(`SCENE CHECK setup error: ${msg}`);

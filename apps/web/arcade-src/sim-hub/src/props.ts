@@ -527,9 +527,29 @@ export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48) {
 	add(g, st);
 }
 
+// Four legs from the floor to a seat's underside, inset from its corners and turned with it, in the
+// seat's own material: the NPC check counts a seat's same-material parts as its frame, not as
+// furniture its sitter must clear (scripts/lib/furniture.mjs seatMeshes).
+function seatLegs(g, kind, x, z, rot, hx, hz, h) {
+	const c = Math.cos(rot),
+		s = Math.sin(rot);
+	for (const [lx, lz] of [
+		[-hx, -hz],
+		[hx, -hz],
+		[-hx, hz],
+		[hx, hz]
+	]) {
+		const leg = box(0.04, h, 0.04, MAT.uphol, x + lx * c + lz * s, h / 2, z - lx * s + lz * c);
+		leg.rotation.y = rot;
+		leg.name = `${kind}-leg`;
+		add(g, leg);
+	}
+}
+
 export function chair(g, x, z, rot = 0) {
 	const s = box(0.55, 0.12, 0.55, MAT.uphol, x, 0.48, z);
 	s.rotation.y = rot;
+	s.name = 'chair-seat';
 	add(g, s);
 	const b = box(
 		0.55,
@@ -542,6 +562,7 @@ export function chair(g, x, z, rot = 0) {
 	);
 	b.rotation.y = rot;
 	add(g, b);
+	seatLegs(g, 'chair', x, z, rot, 0.235, 0.235, 0.42);
 	// sitting area: backrest front (-0.15) to the seat's front edge (+0.275)
 	addSeat(g, 'chair', x, z, rot, 0.54, 0, 0.06);
 }
@@ -549,10 +570,12 @@ export function chair(g, x, z, rot = 0) {
 export function couch(g, x, z, rot = 0) {
 	const s = box(1.7, 0.32, 0.72, MAT.uphol, x, 0.43, z);
 	s.rotation.y = rot;
+	s.name = 'couch-seat';
 	add(g, s);
 	const b = box(1.7, 0.72, 0.16, MAT.uphol, x - 0.3 * Math.sin(rot), 0.87, z - 0.3 * Math.cos(rot));
 	b.rotation.y = rot;
 	add(g, b);
+	seatLegs(g, 'couch', x, z, rot, 0.8, 0.31, 0.27);
 	// sitting area: backrest front (-0.22) to the seat's front edge (+0.36)
 	addSeatRow(g, 'couch', x, z, rot, 0.59, 1.7, 0.07);
 }
@@ -607,43 +630,24 @@ export function cabinetBank(g, x, z, w = 2.0, h = 1.8, d = 0.48, rot = 0, color 
 	const body = box(w, h, d, std(color, 0.84, 0.02), x, h / 2, z);
 	body.rotation.y = rot;
 	add(g, body);
+	// the drawer lines and handles go on the front (the body's local +z face), turned with the body
+	const front = (d / 2) * 0.98,
+		at = (lx) => [
+			x + lx * Math.cos(rot) + front * Math.sin(rot),
+			z - lx * Math.sin(rot) + front * Math.cos(rot)
+		];
 	for (let i = -1; i <= 1; i++) {
-		const line = box(
-			w * 0.9,
-			0.02,
-			0.015,
-			std(0xb2bcc2, 0.7, 0.06),
-			x,
-			h * 0.22 + i * h * 0.22,
-			z + (d / 2) * 0.98
-		);
+		const y = h * 0.22 + i * h * 0.22,
+			[lx0, lz0] = at(0);
+		const line = box(w * 0.9, 0.02, 0.015, std(0xb2bcc2, 0.7, 0.06), lx0, y, lz0);
 		line.rotation.y = rot;
 		add(g, line);
-	}
-	const handleOff = (d / 2) * 0.98;
-	for (let i = -1; i <= 1; i++) {
-		const h1 = box(
-			0.04,
-			0.16,
-			0.015,
-			std(0x7d8b93, 0.45, 0.35),
-			x - w * 0.24,
-			h * 0.22 + i * h * 0.22,
-			z + handleOff
-		);
-		h1.rotation.y = rot;
-		add(g, h1);
-		const h2 = box(
-			0.04,
-			0.16,
-			0.015,
-			std(0x7d8b93, 0.45, 0.35),
-			x + w * 0.24,
-			h * 0.22 + i * h * 0.22,
-			z + handleOff
-		);
-		h2.rotation.y = rot;
-		add(g, h2);
+		for (const side of [-1, 1]) {
+			const [hx, hz] = at(side * w * 0.24);
+			const handle = box(0.04, 0.16, 0.015, std(0x7d8b93, 0.45, 0.35), hx, y, hz);
+			handle.rotation.y = rot;
+			add(g, handle);
+		}
 	}
 }
 
