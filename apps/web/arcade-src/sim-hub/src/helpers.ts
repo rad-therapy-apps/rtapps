@@ -2,7 +2,7 @@
    Verbatim extractions from main.js — mesh primitives (box/cyl/sphere/std/eRbox), canvas
    texture builders (sign/door-header/badge/workflow/engineering textures/architectural wall
    material), and small utilities (escHtml/zeroY/point helpers/later). A handful of these
-   (wall, makeWallSign, makeDoorHeaderSign, makeLobbyEntranceSign, makeDirectionalSign, later)
+   (wall, makeDoorHeaderSign, makeLobbyEntranceSign, makeDirectionalSign, later)
    still reach back for `scene` (now from ./scene.js, task 4) and `JOURNEY` (owned by
    ./journey.js, task 9) and `collider`/`doorCenter`/`doorNormal` (task 8's ./walk.js). */
 import * as THREE from 'three';
@@ -70,72 +70,6 @@ export function wall(x, z, w, d, h, mat, collide = true) {
 	return o;
 }
 
-export function makeSignTexture(room) {
-	const c = document.createElement('canvas');
-	c.width = 900;
-	c.height = 270;
-	const x = c.getContext('2d');
-	const palette =
-		room.zone === 'technical'
-			? ['#f7f2e9', '#8a5b1a']
-			: room.zone === 'clinical'
-				? ['#edf8f7', '#176f70']
-				: ['#eef5fb', '#2a5f8d'];
-	if (room.id === 'manager') palette[1] = '#685398';
-	if (room.vault) palette[1] = '#9d3942';
-	if (room.special) palette[1] = '#287d58';
-	x.fillStyle = palette[0];
-	x.fillRect(0, 0, c.width, c.height);
-	x.fillStyle = palette[1];
-	x.fillRect(0, 0, 22, c.height);
-	x.strokeStyle = 'rgba(30,45,55,.22)';
-	x.lineWidth = 6;
-	x.strokeRect(3, 3, c.width - 6, c.height - 6);
-	x.fillStyle = '#24343b';
-	x.font = '700 35px Arial';
-	x.fillText(room.kicker.toUpperCase(), 54, 65);
-	x.fillStyle = '#11242c';
-	x.font = '800 52px Arial';
-	const words = room.name
-		.replace('Treatment Vault 1 — ', 'Vault 1 · ')
-		.replace('Treatment Vault 2 — ', 'Vault 2 · ');
-	x.fillText(words.length > 34 ? words.slice(0, 34) + '…' : words, 54, 137);
-	x.fillStyle = '#5a6d75';
-	x.font = '600 28px Arial';
-	x.fillText(
-		'RTApps · ' +
-			(room.zone === 'technical'
-				? 'Education & Technical'
-				: room.zone === 'clinical'
-					? 'Clinical Services'
-					: 'Patient Services'),
-		54,
-		205
-	);
-	const t = new THREE.CanvasTexture(c);
-	t.colorSpace = THREE.SRGBColorSpace;
-	return t;
-}
-export function makeWallSign(room, side, gap) {
-	const dc = doorCenter(room, 1.88);
-	const tangent = side[0] === 'z' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
-	const normal = doorNormal(room);
-	const pos = dc
-		.clone()
-		.add(tangent.multiplyScalar(gap / 2 + 1.25))
-		.add(normal.multiplyScalar(0.035));
-	const sign = new THREE.Mesh(
-		new THREE.PlaneGeometry(2.15, 0.65),
-		new THREE.MeshBasicMaterial({ map: makeSignTexture(room), side: THREE.DoubleSide })
-	);
-	sign.position.copy(pos);
-	if (side === 'zmin') sign.rotation.y = Math.PI;
-	else if (side === 'zmax') sign.rotation.y = 0;
-	else if (side === 'xmin') sign.rotation.y = -Math.PI / 2;
-	else sign.rotation.y = Math.PI / 2;
-	scene.add(sign);
-}
-
 export function makeDoorHeaderTexture(room) {
 	const c = document.createElement('canvas');
 	c.width = 1200;
@@ -164,7 +98,9 @@ export function makeDoorHeaderSign(room, side, gap) {
 	const h = room.vault ? 3.78 : 3.05,
 		dc = doorCenter(room, h),
 		normal = doorNormal(room);
-	dc.add(normal.clone().multiplyScalar(0.085));
+	// the back plate sits 0.005 m out from the wall's face: half the wall's thickness from the door's
+	// centre line (buildRoom: 0.58 m vault walls, 0.16 m others)
+	dc.add(normal.clone().multiplyScalar((room.vault ? 0.29 : 0.08) + 0.005));
 	const w = room.vault ? 4.7 : Math.max(2.8, Math.min(4.4, gap + 1.2)),
 		hh = room.vault ? 0.76 : 0.62;
 	const back = box(w + 0.12, hh + 0.1, 0.055, std(0x26363d, 0.7, 0.12), dc.x, dc.y, dc.z);
@@ -205,7 +141,8 @@ export function makeLobbyEntranceSign(r) {
 		new THREE.PlaneGeometry(5.4, 1.05),
 		new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })
 	);
-	s.position.set(r.x, 3.28, r.z + r.d / 2 + 0.03);
+	// 0.005 m out from the entrance wall's outer face (the wall is 0.18 m thick)
+	s.position.set(r.x, 3.28, r.z + r.d / 2 + 0.095);
 	scene.add(s);
 }
 

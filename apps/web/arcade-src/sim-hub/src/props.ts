@@ -1570,8 +1570,10 @@ export function privacyChangingNook(roomId, x, z, rot = 0, label = 'PATIENT CHAN
 	q.fillText('Please close privacy screen while occupied', 550, 354);
 	const tx = new THREE.CanvasTexture(c);
 	tx.colorSpace = THREE.SRGBColorSpace;
+	// as wide as the back panel (p1), in the canvas's own 2.6:1, so it stays clear of the walls beside
+	// the nook (the CT room's west wall, the vault maze hall walls)
 	const sign = new THREE.Mesh(
-		new THREE.PlaneGeometry(2.35 * s, 0.9),
+		new THREE.PlaneGeometry(1.75 * s, 0.67 * s),
 		new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })
 	);
 	sign.position.set(x + Math.sin(rot) * 0.058, 1.88, z + Math.cos(rot) * 0.058);

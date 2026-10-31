@@ -60,6 +60,52 @@ const PLACEMENTS = [
 	{
 		id: 'engineering east cabinet drawer line on its front',
 		pick: { size: [1.26, 0.02, 0.015], at: [11.744, -33], y: 0.31, r: 0.05 }
+	},
+	// Task 3: the hallway blades stop 0.05 m short of the corridor face of the room wall they stand
+	// off; the vault warning plaques hang side by side above each vault door on the corridor face
+	// (x 63.71), over the door's header sign, which also moves out of the lintel
+	{
+		id: 'CT SIMULATION blade stops at the corridor face',
+		pick: { geom: 'PlaneGeometry', size: [3.4, 0.76], at: [27.8, -2.17] },
+		flush: { axis: 'z', face: -3.92, side: 'min' }
+	},
+	{
+		id: 'TREATMENT AREA blade stops at the corridor face',
+		pick: { geom: 'PlaneGeometry', size: [3.7, 0.76], at: [46.5, 2.02] },
+		flush: { axis: 'z', face: 3.92, side: 'max' }
+	},
+	...[-18, 18].flatMap((vz) => [
+		...[-1.55, 0, 1.55].map((dz) => ({
+			id: `vault plaque above the door at z ${vz + dz}`,
+			pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [63.66, vz + dz], r: 0.1 },
+			minY: 4.44,
+			flush: { axis: 'x', face: 63.71, side: 'max' }
+		})),
+		{
+			id: `vault header sign on the corridor face at z ${vz}`,
+			pick: { geom: 'PlaneGeometry', size: [4.7, 0.76], at: [63.66, vz], r: 0.1 },
+			flush: { axis: 'x', face: 63.71, side: 'max' }
+		}
+	]),
+	{
+		id: 'vault 1 NO ENTRY plaque inside the maze removed',
+		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [64.32, -15.05], r: 0.1 },
+		absent: true
+	},
+	{
+		id: 'vault 2 NO ENTRY plaque inside the maze removed',
+		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [64.32, 20.95], r: 0.1 },
+		absent: true
+	},
+	{
+		id: 'hidden door-side name signs removed (consult)',
+		pick: { geom: 'PlaneGeometry', size: [2.15, 0.65], at: [-15.45, -2.965] },
+		absent: true
+	},
+	{
+		id: 'lobby entrance sign on the entrance wall face',
+		pick: { geom: 'PlaneGeometry', size: [5.4, 1.05], at: [0, 10.095], r: 0.1 },
+		flush: { axis: 'z', face: 10.09, side: 'min' }
 	}
 ];
 

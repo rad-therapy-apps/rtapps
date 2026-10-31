@@ -18,7 +18,6 @@ import {
 	cyl,
 	std,
 	wall,
-	makeWallSign,
 	makeDoorHeaderSign,
 	makeLobbyEntranceSign,
 	architecturalWallMaterial
@@ -469,7 +468,8 @@ export function addCirculationProps() {
 	// on the lobby's west wall (inner face x = -11.91), facing into the lobby
 	aedWallBox(hall, -11.84, 1.62, 5.0, Math.PI / 2, 'AED');
 	aedWallBox(hall, 13.9, 1.62, 3.92, Math.PI, 'AED');
-	aedWallBox(hall, 3.05, 1.62, -12.92, 0, 'AED');
+	// on the north corridor's east wall (inner face x = 2.92), facing west into the corridor
+	aedWallBox(hall, 2.85, 1.62, -12.92, -Math.PI / 2, 'AED');
 	// on the treatment corridor's west wall (face x = 58.08), facing east into the corridor
 	aedWallBox(hall, 58.15, 1.62, 6.82, Math.PI / 2, 'AED');
 	const cameraPole = medCartObject(0.82, 0x98adb7);
@@ -586,7 +586,6 @@ export function buildDoor(room: Room, side, gap) {
 	}
 	scene.add(g);
 	doors.set(room.id, d);
-	makeWallSign(room, side, gap);
 	makeDoorHeaderSign(room, side, gap);
 }
 
@@ -603,7 +602,9 @@ export function buildSide(room: Room, side, h, t, mat) {
 			const sw = (room.w - gap) / 2;
 			wall(room.x - (gap / 2 + sw / 2), z, sw, t, h, mat);
 			wall(room.x + (gap / 2 + sw / 2), z, sw, t, h, mat);
-			scene.add(box(gap, h - 2.65, t, mat, room.x, 2.65 + (h - 2.65) / 2, z));
+			const lint = box(gap, h - 2.65, t, mat, room.x, 2.65 + (h - 2.65) / 2, z);
+			lint.name = 'wall-lintel';
+			scene.add(lint);
 			buildDoor(room, side, gap);
 		} else if (isWindow) {
 			const sw = (room.w - win) / 2;
@@ -611,6 +612,7 @@ export function buildSide(room: Room, side, h, t, mat) {
 			wall(room.x + (win / 2 + sw / 2), z, sw, t, h, mat);
 			wall(room.x, z, win, t, 1.0, mat);
 			const hdr = box(win, h - 2.82, t, mat, room.x, 2.82 + (h - 2.82) / 2, z);
+			hdr.name = 'wall-lintel';
 			scene.add(hdr);
 			scene.add(box(win, 1.65, t * 0.45, MAT.glass, room.x, 2.0, z));
 		} else wall(room.x, z, room.w, t, h, mat);
@@ -621,6 +623,7 @@ export function buildSide(room: Room, side, h, t, mat) {
 			wall(x, room.z - (gap / 2 + sd / 2), t, sd, h, mat);
 			wall(x, room.z + (gap / 2 + sd / 2), t, sd, h, mat);
 			const lint = box(t, h - 2.65, gap, mat, x, 2.65 + (h - 2.65) / 2, room.z);
+			lint.name = 'wall-lintel';
 			scene.add(lint);
 			buildDoor(room, side, gap);
 		} else if (isWindow) {
@@ -628,7 +631,9 @@ export function buildSide(room: Room, side, h, t, mat) {
 			wall(x, room.z - (win / 2 + sd / 2), t, sd, h, mat);
 			wall(x, room.z + (win / 2 + sd / 2), t, sd, h, mat);
 			wall(x, room.z, t, win, 1.0, mat);
-			scene.add(box(t, h - 2.82, win, mat, x, 2.82 + (h - 2.82) / 2, room.z));
+			const hdr = box(t, h - 2.82, win, mat, x, 2.82 + (h - 2.82) / 2, room.z);
+			hdr.name = 'wall-lintel';
+			scene.add(hdr);
 			scene.add(box(t * 0.45, 1.65, win, MAT.glass, x, 2.0, room.z));
 		} else wall(x, room.z, t, room.d, h, mat);
 	}
@@ -763,13 +768,17 @@ export function lobbyWallWithGap(side, gap, h = 4.15, t = 0.18) {
 			sw = (r.w - gap) / 2;
 		wall(r.x - (gap / 2 + sw / 2), z, sw, t, h, mat);
 		wall(r.x + (gap / 2 + sw / 2), z, sw, t, h, mat);
-		scene.add(box(gap, h - 2.75, t, mat, r.x, 2.75 + (h - 2.75) / 2, z));
+		const lint = box(gap, h - 2.75, t, mat, r.x, 2.75 + (h - 2.75) / 2, z);
+		lint.name = 'wall-lintel';
+		scene.add(lint);
 	} else {
 		const x = r.x + (side === 'xmin' ? -hx : hx),
 			sd = (r.d - gap) / 2;
 		wall(x, r.z - (gap / 2 + sd / 2), t, sd, h, mat);
 		wall(x, r.z + (gap / 2 + sd / 2), t, sd, h, mat);
-		scene.add(box(t, h - 2.75, gap, mat, x, 2.75 + (h - 2.75) / 2, r.z));
+		const lint = box(t, h - 2.75, gap, mat, x, 2.75 + (h - 2.75) / 2, r.z);
+		lint.name = 'wall-lintel';
+		scene.add(lint);
 	}
 }
 
@@ -835,23 +844,27 @@ export function addVaultDoorwaySigns(room: Room) {
 	const side = room.doorSide,
 		normal = doorNormal(room),
 		tangent = side[0] === 'z' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1),
-		dc = doorCenter(room, 2.45);
+		dc = doorCenter(room, 4.85);
 	// eslint-disable-next-line no-useless-assignment -- initial value always overwritten by the branch below; kept for parity with legacy pattern
 	let rot = 0;
 	if (side === 'zmin') rot = Math.PI;
 	else if (side === 'zmax') rot = 0;
 	else if (side === 'xmin') rot = -Math.PI / 2;
 	else rot = Math.PI / 2;
-	const p1 = dc
-		.clone()
-		.add(tangent.clone().multiplyScalar(-2.2))
-		.add(normal.clone().multiplyScalar(0.12));
-	const p2 = dc
-		.clone()
-		.add(tangent.clone().multiplyScalar(2.2))
-		.add(normal.clone().multiplyScalar(0.12));
-	warningPlaque(scene, p1.x, 2.32, p1.z, rot, 'CAUTION', 'RADIATION AREA');
-	warningPlaque(scene, p2.x, 2.32, p2.z, rot, 'DO NOT ENTER', 'BEAM ON WHEN LIGHT IS ON');
+	// Three plaques side by side on the corridor face above the door, over its header sign (y 3.40..4.16):
+	// the vault wall is 0.58 m thick, so its corridor face is 0.29 m off the door centre line
+	const signs: [number, string, string][] = [
+		[-1.55, 'CAUTION', 'RADIATION AREA'],
+		[0, 'DO NOT ENTER', 'BEAM ON WHEN LIGHT IS ON'],
+		[1.55, 'NO ENTRY', 'WHEN BEAM ON']
+	];
+	for (const [along, title, sub] of signs) {
+		const p = dc
+			.clone()
+			.add(tangent.clone().multiplyScalar(along))
+			.add(normal.clone().multiplyScalar(0.34));
+		warningPlaque(scene, p.x, 4.85, p.z, rot, title, sub);
+	}
 }
 
 export function addRoomDecor(room: Room) {
@@ -1355,15 +1368,6 @@ export function furnish(room: Room) {
 				'CAUTION',
 				'HIGH RADIATION AREA'
 			);
-			warningPlaque(
-				g,
-				room.x - room.w / 2 + 0.32,
-				1.65,
-				room.z + 2.95,
-				Math.PI / 2,
-				'NO ENTRY',
-				'WHEN BEAM ON'
-			);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
@@ -1453,15 +1457,6 @@ export function furnish(room: Room) {
 				Math.PI / 2,
 				'CAUTION',
 				'HIGH RADIATION AREA'
-			);
-			warningPlaque(
-				g,
-				room.x - room.w / 2 + 0.32,
-				1.65,
-				room.z + 2.95,
-				Math.PI / 2,
-				'NO ENTRY',
-				'WHEN BEAM ON'
 			);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);

@@ -1109,12 +1109,14 @@ export function updateStatusBeacons(sec) {
 }
 
 export function buildPhase5Wayfinding() {
+	// the two blades stand off the room walls along the clinical corridor; each one's wall edge stops
+	// 0.05 m short of that wall's corridor face (z -3.92 for CT control, 3.92 for LINAC control)
 	makeDirectionalSign(
 		'CT SIMULATION  ↓',
 		'CT Simulator · CT Control',
 		27.8,
 		2.82,
-		-2.8,
+		-2.17,
 		Math.PI / 2,
 		3.4
 	);
@@ -1123,7 +1125,7 @@ export function buildPhase5Wayfinding() {
 		'LINAC Control · Vaults · HDR',
 		46.5,
 		2.82,
-		2.75,
+		2.02,
 		-Math.PI / 2,
 		3.7
 	);
