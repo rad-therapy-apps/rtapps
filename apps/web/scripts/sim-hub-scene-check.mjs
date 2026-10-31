@@ -220,6 +220,17 @@ const PLACEMENTS = [
 		id: 'CT control speaker beside the window',
 		pick: { size: [0.34, 0.34, 0.08], at: [35.87, -12.3], y: 2.65, r: 0.1 },
 		flush: { axis: 'x', face: 35.92, side: 'max' }
+	},
+	// Task 8: a real-size CT gantry (2.1 m tall) stands under the 3.75 m ceiling
+	{
+		id: 'CT gantry real size',
+		pick: { geom: 'TorusGeometry', size: [0.75, 0.3], at: [44, -9.5] },
+		maxY: 2.11
+	},
+	{
+		id: 'CT room-sized gantry ring removed',
+		pick: { geom: 'TorusGeometry', size: [2.15, 0.58], at: [44, -9.5] },
+		absent: true
 	}
 ];
 

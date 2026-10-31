@@ -1262,19 +1262,21 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 }
 
 export function ctScanner(g, room: Room) {
-	const ring = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.58, 18, 54), MAT.white);
+	// a real-size big-bore CT gantry: 2.1 m tall with a 0.9 m bore, centred 1.05 m up, so the couch top
+	// (y 1.025, 0.72 m wide) and the patient on it pass through the bore when the couch slides in
+	const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.3, 18, 54), MAT.white);
 	ring.rotation.y = Math.PI / 2;
-	ring.position.set(room.x, 2.15, room.z + 1.5);
+	ring.position.set(room.x, 1.05, room.z + 1.5);
 	ring.castShadow = true;
 	add(g, ring);
 	const bore = new THREE.Mesh(
-		new THREE.TorusGeometry(1.5, 0.07, 14, 48),
+		new THREE.TorusGeometry(0.45, 0.02, 14, 48),
 		std(0x2b3944, 0.5, 0.1, { emissive: 0x16435a, emissiveIntensity: 0.65 })
 	);
 	bore.rotation.y = Math.PI / 2;
 	bore.position.copy(ring.position);
 	add(g, bore);
-	const base = box(1.2, 1.0, 4.9, MAT.white, room.x, 1.0, room.z + 1.5);
+	const base = box(0.8, 0.35, 1.6, MAT.white, room.x, 0.175, room.z + 1.5);
 	add(g, base);
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
 	add(g, table);
