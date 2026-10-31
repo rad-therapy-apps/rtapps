@@ -1,0 +1,280 @@
+// sim-hub scenery check (dev only, not run in CI).
+//
+// Imports the built sim-hub bundle under stubbed browser globals (scripts/lib/browser-stubs.mjs) with
+// `?npccheck`, which makes the page expose `window.__NPC` (src/npc-check-hook.ts), and measures the
+// scenery as the page builds it: each mesh by its world box (its geometry's box through its world
+// matrix), the walls by their colliders (walk.ts) and by the lintel boxes over doors and windows
+// (rooms.ts buildSide names them 'wall-lintel'; they are not colliders).
+//
+//   signs       no panel drawn from a canvas (a sign, plaque, label or screen face) reaches more than
+//               0.01 m into a wall collider (in x/z) or a lintel (in x, y and z)
+//   legs        every chair() and couch() seat (props.ts: meshes named 'chair-seat' / 'couch-seat')
+//               stands on four legs ('chair-leg' / 'couch-leg') centred under it, from the floor
+//               (bottom at most 0.005 m up) to the seat's underside (within 0.005 m); 20 chairs and
+//               3 couches
+//   placements  every PLACEMENTS entry below holds
+//
+// How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
+//   node scripts/sim-hub-scene-check.mjs [--only signs,legs,placements] [--dump <file.json>]
+//     --dump also writes every mesh's world box, geometry size, colour and room, and the wall
+//     colliders, to <file.json>, to look things up while placing them.
+// Exit codes: 0 every selected rule passes; 1 any fails; 2 setup error.
+// Output: `SCENE CHECK <rule> PASS|FAIL: <summary>` per rule, then at most 40 detail lines per failing rule.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { installBrowserStubs } from './lib/browser-stubs.mjs';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const argv = process.argv.slice(2);
+const argVal = (flag) => {
+	const i = argv.indexOf(flag);
+	return i >= 0 ? argv[i + 1] : null;
+};
+const RULES = ['signs', 'legs', 'placements'];
+const only = new Set((argVal('--only') || RULES.join(',')).split(',').map((x) => x.trim()));
+for (const x of only)
+	if (!RULES.includes(x)) setupError(`unknown rule '${x}' in --only (use ${RULES.join(',')})`);
+const dumpPath = argVal('--dump');
+const MAX_DETAIL = 40;
+const SIGN_DEPTH = 0.01;
+const LEG_TOL = 0.005;
+const FLUSH_GAP = 0.06;
+const CHAIRS = 20,
+	COUCHES = 3;
+
+// Where the scenery fixes put things (docs/specs/2026-10-31-sim-hub-scenery-design.md). `pick` finds
+// exactly one mesh: geometry type `geom` (default BoxGeometry) whose geometry parameters match `size`
+// within 0.005 (box [width, height, depth], plane [width, height], torus [radius, tube], cylinder
+// [radiusTop, radiusBottom, height]), whose world box centre is within `r` (default 0.5) of `at`
+// [x, z] and, if `y` is given, within 0.1 of it in height. Then each given test:
+//   absent  no such mesh exists (a removed prop)
+//   minY    the box bottom is at this height, within 0.01 (a desk screen: the 0.88 desk top + 0.28 stand)
+//   maxY    the box top is at most this height
+//   within  the box centre is inside [x0, x1, z0, z1] (a desk top)
+//   flush   { axis: 'x' | 'z', face, side: 'min' | 'max' }: the box's `side` along `axis` (the side
+//           toward the wall) is 0 to 0.06 m off the wall's inner face `face`, not past it
+const PLACEMENTS = [];
+
+function setupError(msg) {
+	console.error(`SCENE CHECK setup error: ${msg}`);
+	process.exit(2);
+}
+
+// seeded, so the page builds the same scene on every run
+let seed = 1;
+Math.random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+// The stub GL reports no optional extensions, so three.js warns once per missing one. Drop exactly
+// that warning; every other warning still prints.
+const warn = console.warn;
+console.warn = (...a) => {
+	if (a.length === 1 && /^THREE\.WebGLRenderer: \w+ extension not supported\.$/.test(String(a[0])))
+		return;
+	warn(...a);
+};
+installBrowserStubs({ search: '?npccheck' });
+
+const assetsDir = path.resolve(HERE, '../arcade/sim-hub/assets');
+let bundle;
+try {
+	bundle = fs.readdirSync(assetsDir).find((f) => /^index-.*\.js$/.test(f));
+} catch {
+	/* handled below */
+}
+if (!bundle) setupError(`no built bundle in ${assetsDir} (run pnpm build:arcade)`);
+try {
+	await import(pathToFileURL(path.join(assetsDir, bundle)).href);
+} catch (err) {
+	setupError(`bundle threw during evaluation: ${err && err.stack ? err.stack : err}`);
+}
+const NPC = globalThis.window && globalThis.window.__NPC;
+if (!NPC) setupError('window.__NPC missing (hook not installed with ?npccheck)');
+NPC.disableRendering();
+const walls = NPC.colliders;
+if (!walls || !walls.length) setupError('no wall colliders');
+
+NPC.scene.updateMatrixWorld(true);
+const meshes = [];
+NPC.scene.traverse((o) => {
+	if (!o.isMesh || !o.geometry) return;
+	const g = o.geometry;
+	if (!g.boundingBox) g.computeBoundingBox();
+	const b = g.boundingBox.clone().applyMatrix4(o.matrixWorld);
+	let room = '';
+	for (let p = o.parent; p && p !== NPC.scene; p = p.parent)
+		if (p.name && p.name.startsWith('room-content:')) room = p.name.slice(13);
+	const mat = Array.isArray(o.material) ? o.material[0] : o.material;
+	meshes.push({
+		name: o.name || '',
+		geom: g.type,
+		params: g.parameters || {},
+		mat,
+		canvas: !!(mat && mat.map && mat.map.isCanvasTexture),
+		min: [b.min.x, b.min.y, b.min.z],
+		max: [b.max.x, b.max.y, b.max.z],
+		cx: (b.min.x + b.max.x) / 2,
+		cy: (b.min.y + b.max.y) / 2,
+		cz: (b.min.z + b.max.z) / 2,
+		room
+	});
+});
+if (!meshes.length) setupError('no meshes in the scene');
+
+const results = [];
+function report(rule, fails, summary) {
+	results.push(!fails.length);
+	console.log(`SCENE CHECK ${rule} ${fails.length ? 'FAIL' : 'PASS'}: ${summary}`);
+	for (const f of fails.slice(0, MAX_DETAIL)) console.log(`  ${f}`);
+	if (fails.length > MAX_DETAIL) console.log(`  ... and ${fails.length - MAX_DETAIL} more`);
+}
+const f2 = (v) => v.toFixed(2);
+const where = (m) =>
+	`${m.geom} ${m.name || m.room || '(scene)'} x ${f2(m.min[0])}..${f2(m.max[0])} y ${f2(m.min[1])}..${f2(m.max[1])} z ${f2(m.min[2])}..${f2(m.max[2])}`;
+
+// How far [a, b] reaches into [c0, c1]: their overlap, or for a flat extent (a panel seen edge-on)
+// its distance to the nearer end of [c0, c1]; 0 when outside.
+function reach(a, b, c0, c1) {
+	if (b - a < 1e-6) return a > c0 && a < c1 ? Math.min(a - c0, c1 - a) : 0;
+	return Math.max(0, Math.min(b, c1) - Math.max(a, c0));
+}
+
+if (only.has('signs')) {
+	const fails = [],
+		lintels = meshes.filter((m) => m.name === 'wall-lintel');
+	let n = 0;
+	for (const m of meshes) {
+		// panels are planes; the walls' own boxes carry a canvas texture too
+		if (!m.canvas || m.geom !== 'PlaneGeometry') continue;
+		n++;
+		for (const c of walls) {
+			const d = Math.min(
+				reach(m.min[0], m.max[0], c.x - c.hw, c.x + c.hw),
+				reach(m.min[2], m.max[2], c.z - c.hd, c.z + c.hd)
+			);
+			if (d > SIGN_DEPTH)
+				fails.push(
+					`${where(m)} is ${f2(d)} m into the wall at x ${f2(c.x - c.hw)}..${f2(c.x + c.hw)} z ${f2(c.z - c.hd)}..${f2(c.z + c.hd)}`
+				);
+		}
+		for (const l of lintels) {
+			const d = Math.min(
+				reach(m.min[0], m.max[0], l.min[0], l.max[0]),
+				reach(m.min[1], m.max[1], l.min[1], l.max[1]),
+				reach(m.min[2], m.max[2], l.min[2], l.max[2])
+			);
+			if (d > SIGN_DEPTH) fails.push(`${where(m)} is ${f2(d)} m into the lintel ${where(l)}`);
+		}
+	}
+	report(
+		'signs',
+		fails,
+		`${n} canvas panels against ${walls.length} wall colliders and ${lintels.length} lintels, ${fails.length} into a wall by more than ${SIGN_DEPTH} m`
+	);
+}
+
+if (only.has('legs')) {
+	const fails = [],
+		count = { chair: 0, couch: 0 };
+	for (const kind of ['chair', 'couch']) {
+		const legs = meshes.filter((m) => m.name === `${kind}-leg`);
+		for (const s of meshes.filter((m) => m.name === `${kind}-seat`)) {
+			count[kind]++;
+			const under = legs.filter(
+				(l) =>
+					l.cx > s.min[0] &&
+					l.cx < s.max[0] &&
+					l.cz > s.min[2] &&
+					l.cz < s.max[2] &&
+					l.min[1] <= LEG_TOL &&
+					Math.abs(l.max[1] - s.min[1]) <= LEG_TOL
+			);
+			if (under.length !== 4) fails.push(`${where(s)} stands on ${under.length} legs`);
+		}
+	}
+	if (count.chair !== CHAIRS) fails.push(`found ${count.chair} chair seats (expected ${CHAIRS})`);
+	if (count.couch !== COUCHES) fails.push(`found ${count.couch} couch seats (expected ${COUCHES})`);
+	report(
+		'legs',
+		fails,
+		`${count.chair} chairs and ${count.couch} couches, ${fails.length} problems`
+	);
+}
+
+if (only.has('placements')) {
+	const fails = [],
+		sizeKeys = {
+			BoxGeometry: ['width', 'height', 'depth'],
+			PlaneGeometry: ['width', 'height'],
+			TorusGeometry: ['radius', 'tube'],
+			CylinderGeometry: ['radiusTop', 'radiusBottom', 'height']
+		};
+	for (const e of PLACEMENTS) {
+		const geom = e.pick.geom || 'BoxGeometry',
+			keys = sizeKeys[geom],
+			r = e.pick.r ?? 0.5;
+		if (!keys) setupError(`${e.id}: no size keys for ${geom}`);
+		const found = meshes.filter(
+			(m) =>
+				m.geom === geom &&
+				keys.every((k, i) => Math.abs(m.params[k] - e.pick.size[i]) <= 0.005) &&
+				Math.hypot(m.cx - e.pick.at[0], m.cz - e.pick.at[1]) <= r &&
+				(e.pick.y === undefined || Math.abs(m.cy - e.pick.y) <= 0.1)
+		);
+		if (e.absent) {
+			if (found.length) fails.push(`${e.id}: still there (${where(found[0])})`);
+			continue;
+		}
+		if (found.length !== 1) {
+			fails.push(`${e.id}: picked ${found.length} meshes (expected 1)`);
+			continue;
+		}
+		const m = found[0];
+		if (e.minY !== undefined && Math.abs(m.min[1] - e.minY) > 0.01)
+			fails.push(`${e.id}: bottom at y ${m.min[1].toFixed(3)} (expected ${e.minY}): ${where(m)}`);
+		if (e.maxY !== undefined && m.max[1] > e.maxY + 0.001)
+			fails.push(
+				`${e.id}: top at y ${m.max[1].toFixed(3)} (expected at most ${e.maxY}): ${where(m)}`
+			);
+		if (e.within) {
+			const [x0, x1, z0, z1] = e.within;
+			if (m.cx < x0 || m.cx > x1 || m.cz < z0 || m.cz > z1)
+				fails.push(
+					`${e.id}: centre (${f2(m.cx)}, ${f2(m.cz)}) outside x ${x0}..${x1} z ${z0}..${z1}`
+				);
+		}
+		if (e.flush) {
+			const { axis, face, side } = e.flush,
+				k = axis === 'x' ? 0 : 2,
+				gap = side === 'max' ? face - m.max[k] : m.min[k] - face;
+			if (gap < -0.001 || gap > FLUSH_GAP)
+				fails.push(
+					`${e.id}: ${gap < 0 ? `${(-gap).toFixed(3)} m into` : `${gap.toFixed(3)} m off`} the wall face ${axis} = ${face}: ${where(m)}`
+				);
+		}
+	}
+	report('placements', fails, `${PLACEMENTS.length} placements, ${fails.length} problems`);
+}
+
+if (dumpPath) {
+	const r3 = (v) => +v.toFixed(3);
+	fs.writeFileSync(
+		dumpPath,
+		JSON.stringify({
+			walls,
+			meshes: meshes.map((m) => ({
+				name: m.name,
+				geom: m.geom,
+				params: Object.fromEntries(
+					Object.entries(m.params).filter(([, v]) => typeof v === 'number')
+				),
+				color: m.mat && m.mat.color ? m.mat.color.getHexString() : null,
+				canvas: m.canvas,
+				room: m.room,
+				min: m.min.map(r3),
+				max: m.max.map(r3)
+			}))
+		})
+	);
+	console.log(`SCENE CHECK dump: ${meshes.length} meshes, ${walls.length} walls -> ${dumpPath}`);
+}
+process.exit(results.every(Boolean) ? 0 : 1);
