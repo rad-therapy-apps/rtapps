@@ -172,6 +172,54 @@ const PLACEMENTS = [
 		pick: { size: [1.0, 0.55, 0.055], at: [20, 8.75] },
 		minY: 1.16,
 		within: [18.75, 21.25, 8.075, 8.925]
+	},
+	// Task 7: CT control: keyboard on the console desk (x 29.725..30.875); chairs 0.5 m from it; the
+	// cabinet on the door wall east of the door; the live CT CONTROL board on the back wall below the room
+	// sign; the blank screens gone; the four live screens side by side in front of the backing board
+	{
+		id: 'CT control keyboard on the console desk',
+		pick: { size: [0.72, 0.035, 0.24], at: [30.6, -8.35] },
+		within: [29.725, 30.875, -11.6, -6.8]
+	},
+	...[-10.15, -9, -7.85].map((z) => ({
+		id: `CT control chair at z ${z} 0.5 m from the desk`,
+		pick: { size: [0.54, 0.1, 0.5], at: [31.65, z], r: 0.05 }
+	})),
+	{
+		id: 'CT control cabinet on the door wall',
+		pick: { size: [1.6, 1.5, 0.45], at: [34.7, -4.31] },
+		flush: { axis: 'z', face: -4.08, side: 'max' }
+	},
+	{
+		id: 'CT CONTROL board on the back wall',
+		pick: { size: [2.73, 1.56, 0.1], at: [31.5, -13.82] },
+		flush: { axis: 'z', face: -13.92, side: 'min' },
+		maxY: 2.75
+	},
+	{
+		id: 'CT control blank wall screen removed',
+		pick: { size: [1.9, 1.05, 0.055], at: [31.5, -13.15] },
+		absent: true
+	},
+	{
+		id: 'CT control blank monitor wall removed',
+		pick: { size: [0.95, 0.54, 0.055], at: [29.95, -9], r: 0.6 },
+		absent: true
+	},
+	...[
+		[-9.6, 2.08, 'CT SIM STATUS'],
+		[-8.4, 2.08, 'PATIENT VIEW'],
+		[-9.6, 1.38, 'GANTRY VIEW'],
+		[-8.4, 1.38, 'ROOM WIDE']
+	].map(([z, y, label]) => ({
+		id: `CT control ${label} screen in front of the board`,
+		pick: { size: [1.14, 0.7, 0.08], at: [30.15, z], y, r: 0.1 }
+	})),
+	// the CT control intercom speaker is on the window wall beside the window (z -11.25..-6.75), not over it
+	{
+		id: 'CT control speaker beside the window',
+		pick: { size: [0.34, 0.34, 0.08], at: [35.87, -12.3], y: 2.65, r: 0.1 },
+		flush: { axis: 'x', face: 35.92, side: 'max' }
 	}
 ];
 

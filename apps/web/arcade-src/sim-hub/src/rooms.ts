@@ -1156,11 +1156,11 @@ export function furnish(room: Room) {
 			break;
 		case 'ctcontrol':
 			desk(g, room.x - 1.2, room.z - 0.2, 4.8, 1.15, Math.PI / 2);
-			monitorWall(g, room.x - 1.55, 1.68, room.z, 0.5 * Math.PI, 2, 2, 0.95, 0.54, 0.1);
+			// the operators' chairs face the console, seat fronts 0.5 m from the desk edge (x 30.875)
 			for (let i = -1; i <= 1; i++)
-				taskChair(g, room.x + 0.95, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
-			monitor(g, room.x, 2.05, room.z - 4.15, 0, 1.9, 1.05);
-			cabinetBank(g, room.x + 1.1, room.z + 3.45, 1.6, 1.5, 0.45, 0, 0xdbe3e8);
+				taskChair(g, room.x + 0.15, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
+			// a storage cabinet against the door wall east of the door (x 30.2..32.8), drawers facing in
+			cabinetBank(g, room.x + 3.2, room.z + room.d / 2 - 0.31, 1.6, 1.5, 0.45, Math.PI, 0xdbe3e8);
 			interiorRoomSign(
 				g,
 				room.x,
@@ -1172,7 +1172,8 @@ export function furnish(room: Room) {
 			);
 			wallClock(g, room.x + 2.9, 2.65, room.z - room.d / 2 + 0.13, 0);
 			sanitizerDispenser(g, room.x - 2.9, 1.55, room.z - room.d / 2 + 0.13, 0);
-			wallSpeaker(g, room.x + 3.75, 2.65, room.z, Math.PI / 2);
+			// the intercom speaker hangs on the window (+x) wall beside the window (z -11.25..-6.75), not over it
+			wallSpeaker(g, room.x + room.w / 2 - 0.13, 2.65, room.z - 3.3, -Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const ccart = medCartObject(0.88, 0x9db4bf);
 			ccart.position.set(room.x + 0.8, 0, room.z - 3.25);

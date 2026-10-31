@@ -264,16 +264,9 @@ export function buildPhase4WorkflowDisplays() {
 	createWorkflowDisplay('consultState', -18, 2.25, -11.82, 0, 'CONSULT STATUS', 2.65, 1.38);
 	createWorkflowDisplay('educationState', -42, 2.25, -11.82, 0, 'PATIENT EDUCATION', 2.65, 1.38);
 	createWorkflowDisplay('ctSimState', 44, 2.35, -18.82, 0, 'CT SIMULATION', 2.85, 1.45);
-	createWorkflowDisplay(
-		'ctControlState',
-		35.82,
-		2.22,
-		-11.2,
-		-Math.PI / 2,
-		'CT CONTROL',
-		2.55,
-		1.38
-	);
+	// on CT control's back (-z) wall, where the blank screen was: clear of the window on the +x wall and
+	// below the room sign (from y 2.75)
+	createWorkflowDisplay('ctControlState', 31.5, 1.95, -13.82, 0, 'CT CONTROL', 2.55, 1.38);
 	createWorkflowDisplay(
 		'dosimetryState',
 		15.82,
@@ -530,11 +523,14 @@ export function buildCtLiveConsole() {
 	const g = new THREE.Group();
 	scene.add(g);
 	const rot = Math.PI / 2;
+	// the four screens stand side by side in a 2 x 2 grid on the desk, in front of the backing board
+	// (x 29.98..30.06), facing the operators (+x): status and gantry on the -z side, patient and room on +z
+	const mx = r.x - 1.35;
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
+		mx,
 		2.08,
-		r.z,
+		r.z - 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -542,7 +538,7 @@ export function buildCtLiveConsole() {
 		'CT simulation status mirror',
 		'Mirrors the CT Simulation room workflow/status display.'
 	);
-	operatorLabel(g, r.x - 2.05, 2.46, r.z, rot, 'CT SIM STATUS', 'MIRROR');
+	operatorLabel(g, mx, 2.46, r.z - 0.6, rot, 'CT SIM STATUS', 'MIRROR');
 	const tA = createCtFeed(
 		'CT Patient Side',
 		new THREE.Vector3(36.0, 2.15, -9.0),
@@ -563,9 +559,9 @@ export function buildCtLiveConsole() {
 	);
 	createOperatorMonitor(
 		g,
-		r.x - 1.0,
+		mx,
 		2.08,
-		r.z,
+		r.z + 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -573,12 +569,12 @@ export function buildCtLiveConsole() {
 		'CT patient view',
 		'Live CT-room view centered on Mia during simulation.'
 	);
-	operatorLabel(g, r.x - 1.0, 2.46, r.z, rot, 'PATIENT VIEW');
+	operatorLabel(g, mx, 2.46, r.z + 0.6, rot, 'PATIENT VIEW');
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
+		mx,
 		1.38,
-		r.z,
+		r.z - 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -586,12 +582,12 @@ export function buildCtLiveConsole() {
 		'CT gantry view',
 		'Live view of the CT couch entering and exiting the gantry.'
 	);
-	operatorLabel(g, r.x - 2.05, 1.76, r.z, rot, 'GANTRY VIEW');
+	operatorLabel(g, mx, 1.76, r.z - 0.6, rot, 'GANTRY VIEW');
 	createOperatorMonitor(
 		g,
-		r.x - 1.0,
+		mx,
 		1.38,
-		r.z,
+		r.z + 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -599,8 +595,8 @@ export function buildCtLiveConsole() {
 		'CT room wide view',
 		'Wide live view of the simulation tabletop and gantry.'
 	);
-	operatorLabel(g, r.x - 1.0, 1.76, r.z, rot, 'ROOM WIDE');
-	consoleKeyboard(g, r.x - 0.15, r.z + 0.65, rot);
+	operatorLabel(g, mx, 1.76, r.z + 0.6, rot, 'ROOM WIDE');
+	consoleKeyboard(g, r.x - 0.9, r.z + 0.65, rot);
 	CT_OPERATOR_CONSOLE.built = true;
 }
 function ctPatientTarget() {

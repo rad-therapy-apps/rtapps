@@ -58,10 +58,11 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 		{ x: -6.5, z: -42.65, facing: -1.57 },
 		{ x: -6.5, z: -43.95, facing: -1.57 }
 	],
+	// behind the operators' chairs, facing the console
 	ctcontrol: [
-		{ x: 31.3, z: -7.4, facing: 1.05 },
-		{ x: 31.3, z: -6.75, facing: 1.46 },
-		{ x: 31.85, z: -7.75, facing: 0.64 }
+		{ x: 32.75, z: -7.25, facing: -1.57 },
+		{ x: 32.75, z: -8.45, facing: -1.57 },
+		{ x: 33.35, z: -7.85, facing: -1.57 }
 	],
 	ctsim: [
 		{ x: 40.4, z: -7.2, facing: 2.58 },
@@ -338,16 +339,16 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[2, 3]
 		]
 	},
-	// past the cabinet inside the door, then down the aisle between the console (x 29.73..30.87) and
-	// the operators' chairs (from x 32.2)
+	// in through the door, then down behind the operators' chairs (seats x 31.4..31.9, backs to 31.88):
+	// the 0.5 m between the console (to x 30.875) and the seats is too narrow to walk
 	ctcontrol: {
 		nodes: [
 			[31.5, -3.15], // 0 door
 			[31.5, -4.5], // 1 inside the door
-			[31.2, -5.6], // 2 -x of the cabinet at (32.6, -5.55)
-			[31.6, -7.15], // 3 aisle: the arrival spots and the operators' places
-			[31.84, -8.5], // 4 past the keyboard tray (x 31.23..31.47) on its +x side
-			[31.85, -10.69] // 5 the partner (31.0, -11.0) leaves at ~20 deg, legs clear of the console
+			[31.2, -5.6], // 2 toward the console's +z end
+			[32.6, -6.95], // 3 north of the chairs: the therapist (32.7, -6.6) and spot [0]
+			[32.6, -8.5], // 4 behind the chairs: spots [1] and [2], scan place (32.3, -8.45)
+			[32.6, -10.5] // 5 behind the south chair: the partner (31.1, -11.0) leaves along ~72 deg
 		],
 		edges: [
 			[0, 1],
