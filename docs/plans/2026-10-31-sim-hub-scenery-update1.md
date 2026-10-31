@@ -766,11 +766,33 @@ xmin/xmax window:
 
 - [ ] **Step 6: The changing-nook sign fits its nook**
 
-In `props.ts` `privacyChangingNook`, change the sign plane from `new THREE.PlaneGeometry(2.35 * s, 0.9)` to `new THREE.PlaneGeometry(2.1 * s, 0.8)`. Add above it:
+The nook sign is wider than the nook's back panel (`p1`, `1.75 * s` wide), so it reaches into the wall beside each nook:
+- the CT nook's into the CT room's west wall (inner face x 36.08), by 0.10 m;
+- the two vault nooks' (scale 1.16, at z ±14.2) into the maze hall walls (z ±15.24), by 0.32 m.
+
+In `props.ts` `privacyChangingNook`, change the sign plane from `new THREE.PlaneGeometry(2.35 * s, 0.9)` to `new THREE.PlaneGeometry(1.75 * s, 0.67 * s)`. Add above it:
 
 ```ts
-	// 2.1 m wide (the canvas's own 2.6:1), so the CT nook's sign (x 36.10..38.20) clears the room's
-	// west wall (inner face x 36.08)
+	// as wide as the back panel (p1), in the canvas's own 2.6:1, so it stays clear of the walls beside
+	// the nook (the CT room's west wall, the vault maze hall walls)
+```
+
+- [ ] **Step 6b: The lobby entrance sign out of its lintel**
+
+`makeLobbyEntranceSign` (`helpers.ts` ≈205) puts its 5.4 m sign at `r.z + r.d / 2 + 0.03`. That is inside the 0.18 m entrance wall's lintel (z 9.91..10.09), so it has never shown.
+
+Change that z to `r.z + r.d / 2 + 0.095`, so it sits 0.005 m out from the wall's outer face, z 10.09. Add the comment `// 0.005 m out from the entrance wall's outer face (the wall is 0.18 m thick)`.
+
+In `rooms.ts` `lobbyWallWithGap`, name both lintel boxes `wall-lintel` the same way as Step 5. They are the `scene.add(box(gap, h - 2.75, t, …))` and `scene.add(box(t, h - 2.75, gap, …))` lines.
+
+Add one placement:
+
+```js
+	{
+		id: 'lobby entrance sign on the entrance wall face',
+		pick: { geom: 'PlaneGeometry', size: [5.4, 1.05], at: [0, 10.095], r: 0.1 },
+		flush: { axis: 'z', face: 10.09, side: 'min' }
+	}
 ```
 
 - [ ] **Step 7: Run the scene check**
@@ -781,9 +803,9 @@ Run:
 cd apps/web && pnpm build:arcade >/dev/null && node scripts/sim-hub-scene-check.mjs; echo "exit $?"
 ```
 
-Expected: `signs PASS`, `legs PASS`, `placements PASS`, `exit 0`.
+Expected: `legs PASS`, `placements PASS`, and `signs FAIL` with exactly one offender left. It is vault 2's HAND HYGIENE sign over its sink (x 65.41..66.99, z 6.79, 0.20 m into the x 66.79..67.21 wall). Task 10 moves that sink to the opposite wall, which clears it. Exit 1 for that reason only.
 
-If `signs` still lists an offender not covered above, move that panel out to 0.005–0.05 m in front of the wall face it stands on. Change its builder's offset the same way as Step 4, list it in your report and re-run. Do not raise `SIGN_DEPTH`.
+If `signs` lists any other offender not covered above, move that panel out to 0.005–0.05 m in front of the wall face it stands on. Change its builder's offset the same way as Step 4, list it in your report and re-run. Do not raise `SIGN_DEPTH`.
 
 - [ ] **Step 8: NPC check, tests, typecheck**
 
