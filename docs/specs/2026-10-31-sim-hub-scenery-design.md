@@ -42,7 +42,7 @@ Three read-only investigations on 2026-10-30 measured each item from the code an
 - **Room contents:** objects stay inside their room's box (`visibility.ts` puts a mesh in a room's content group only if its box is inside the room, inset 0.05 m).
 - **Mirrored vaults:** vault 1 and vault 2 furnishing is copy-pasted (`rooms.ts` `furnish` cases `vault1` ≈1272–1370, `vault2` ≈1373–1470). Every vault fix applies to both, mirrored where stated.
 - **"Flush on a wall":**
-  - the back of the object is 0.00–0.03 m from the wall's inner face;
+  - the back of the object is 0.00–0.06 m from the wall's inner face (the existing workflow boards sit 0.05 m off);
   - the stand of a `monitor()` placed on a wall is removed or hidden, so no stem hangs in the air.
 - **"On a desk":** the object's lowest point is at the desk top, y = 0.88 for `desk()`, within 0.01 m. For `monitor()`: y = 0.88 + 0.28 + h/2.
 
@@ -230,6 +230,10 @@ The vault west walls are 0.58 m thick (x 63.71..64.29), with door openings at z 
     - the HDR door signs by 0.05 m;
     - any vault door sign left inside the 0.58 m wall.
   - The vault door plaques themselves move in V1.
+- **Vault door header signs:** "TREATMENT VAULT 1/2 · LINAC" (`makeDoorHeaderSign`, `helpers.ts` ≈163) sits 0.13 m off the wall centre line. On the 0.58 m vault walls that puts it inside the lintel above the door (x 63.87), so it is hidden. Offset the header and its back plate by the wall's half-thickness beyond 0.08 (+0.21 m for vaults; no change for 0.16 m walls), so the vault header shows on the corridor face.
+- **Hidden door-side name signs:** `makeWallSign` (`helpers.ts` ≈119) puts a 2.15 m name sign beside every room door 0.035 m off the wall centre line, inside the wall, so it has never been visible. **Owner decision (2026-10-31): remove them** (the call in `buildDoor`, `makeWallSign` and its only user `makeSignTexture`).
+- **CT changing-nook sign:** 2.35 m wide, it reaches 0.1 m into the CT room's west wall. Make the nook sign 2.1 × 0.8 (same proportions as its canvas), which also shrinks the vault nooks' signs.
+- **Lintels:** name the lintel and window-header boxes (`buildSide`) `wall-lintel`, so the check measures panels against them too (they are not colliders).
 
 ### C. Chair and couch legs
 
@@ -307,7 +311,7 @@ The lobby glass doors (z = 10) are the building entrance and stay open.
 
 - **Scene dump (dev tool):**
   - It loads the built sim hub headless and writes every mesh's world box, geometry, material colour/opacity and group chain to JSON. It was built in the session scratchpad on 2026-10-30.
-  - Update 1 adds it to the repo as `apps/web/scripts/sim-hub-scene-dump.mjs`, with a small `--check` mode for this spec's measurable rules:
+  - Update 1 adds it to the repo as `apps/web/scripts/sim-hub-scene-check.mjs` (with `--dump <file>` to write the boxes), checking this spec's measurable rules:
     - no sign or plate box intersects a wall box;
     - each named moved screen is on its desk top or flush on its wall;
     - every `chair()` / `couch()` has 4 legs touching the floor.
