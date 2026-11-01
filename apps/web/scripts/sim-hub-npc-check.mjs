@@ -23,7 +23,9 @@
 //   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
 //                0.02 m of its pelvis (hip pivot - 0.06 x scale) and whose facing is within 20 deg of its own;
 //                seat facing: no seat (wheelchairs aside) faces a wall within 3.0 m, unless its facing
-//                first crosses a desk-height furniture top (0.7..1.0 m): a desk or console against that wall;
+//                first crosses a work surface standing against that wall (a desk or console top: a slab
+//                at most 0.1 m thick and at least 0.5 m both ways, its top at 0.7..1.0 m, which the
+//                facing leaves within 0.3 m of the wall);
 //                exchange facing: a seated patient's exchange partner is within 60 deg of its seat's facing;
 //                pickup facing: at the journey's lobby pickup the therapist is within 60 deg of the seated
 //                patient's facing and stands clear of furniture (Jordan and Mia);
@@ -1157,8 +1159,8 @@ function checkSeated() {
 		summary: [
 			sitters,
 			facing.problems.length
-				? `seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW.toFixed(1)} m with no desk-height top between`
-				: `seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW.toFixed(1)} m with no desk-height top between (${facing.desks.length} face a desk against the wall)`,
+				? `seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW.toFixed(1)} m with no work surface standing against it in between`
+				: `seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW.toFixed(1)} m, except ${facing.desks.length} across a work surface standing against that wall`,
 			talk.problems.length
 				? `exchange facing: ${talk.problems.length} of ${talk.count} seated patients have their partner more than ${TALK_DEG} deg off`
 				: `exchange facing: ${talk.count} seated patients face their partner within ${TALK_DEG} deg`,
@@ -1176,7 +1178,12 @@ function checkSeated() {
 			...handoff.problems,
 			...rows
 		],
-		info: facing.desks
+		info: [
+			...facing.desks.slice(0, 5),
+			...(facing.desks.length > 5
+				? [`seat facing: ... and ${facing.desks.length - 5} more across a work surface`]
+				: [])
+		]
 	};
 }
 // Sub-check "pickup facing": the journey's lobby pickup run the way the journey runs it, for Jordan
@@ -1327,13 +1334,19 @@ function exchangeFacingProblems(seats) {
 	return { count, problems };
 }
 // Sub-check "seat facing": the segment from each seat anchor SEAT_VIEW m forward along its facing must
-// not enter a wall collider (radius 0), unless it first enters the footprint of a desk-height
-// furniture top (top within DESK_TOP; scripts/lib/furniture.mjs): the seat faces a desk or console
-// standing against that wall. Wheelchairs are left out: they are parked or pushed anywhere.
+// not enter a wall collider (radius 0), unless it first crosses a work surface standing against that
+// wall, the top of a desk or console: a furniture record (scripts/lib/furniture.mjs) whose world box
+// is a slab (at most SLAB_THICK from bottom to top, at least SLAB_SPAN in x and in z, its top within
+// DESK_TOP), which the segment enters from outside it before the wall and leaves no more than
+// AGAINST_WALL before the wall. Wheelchairs are left out: they are parked or pushed anywhere.
 const SEAT_VIEW = 3.0,
-	DESK_TOP = [0.7, 1.0];
-// Where segment (x0, z0)-(x1, z1) enters the inside of box c (centre x, z, half sizes hw, hd), as a
-// fraction of its length (0 when it starts inside), or null when it misses (slab method).
+	DESK_TOP = [0.7, 1.0],
+	SLAB_THICK = 0.1,
+	SLAB_SPAN = 0.5,
+	AGAINST_WALL = 0.3;
+// Where segment (x0, z0)-(x1, z1) enters and leaves the inside of box c (centre x, z, half sizes hw,
+// hd), as fractions of its length [enter, exit] (enter 0 when it starts inside, exit 1 when it ends
+// inside), or null when it misses (slab method).
 function segmentEntry(x0, z0, x1, z1, c) {
 	let t0 = 0,
 		t1 = 1;
@@ -1351,15 +1364,20 @@ function segmentEntry(x0, z0, x1, z1, c) {
 		t1 = Math.min(t1, Math.max(a, b));
 		if (t0 >= t1) return null;
 	}
-	return t0;
+	return [t0, t1];
 }
 function seatFacingProblems(seats) {
-	// the furniture as the page shows it now, every room's content shown (see furniture())
-	const culled = NPC.scene.children.filter((o) => o.name.startsWith('room-content:') && !o.visible);
-	if (culled.length)
-		setupError(`seat facing: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
-	const tops = buildFurniture(NPC)
-		.list.filter((r) => r.top >= DESK_TOP[0] && r.top <= DESK_TOP[1])
+	// the furniture as the page shows it now; furniture()'s cache is left for checks k-m to build
+	requireRoomsShown('seat facing');
+	const surfaces = buildFurniture(NPC)
+		.list.filter(
+			(r) =>
+				r.top >= DESK_TOP[0] &&
+				r.top <= DESK_TOP[1] &&
+				r.top - r.bot <= SLAB_THICK &&
+				r.b.max.x - r.b.min.x >= SLAB_SPAN &&
+				r.b.max.z - r.b.min.z >= SLAB_SPAN
+		)
 		.map((r) => ({
 			r,
 			x: (r.b.min.x + r.b.max.x) / 2,
@@ -1379,18 +1397,21 @@ function seatFacingProblems(seats) {
 			tHit = Infinity;
 		for (const c of NPC.colliders) {
 			const t = segmentEntry(s.x, s.z, x1, z1, c);
-			if (t !== null && t < tHit) [hit, tHit] = [c, t];
+			if (t && t[0] < tHit) [hit, tHit] = [c, t[0]];
 		}
 		if (!hit) continue;
 		const seat = `${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg`,
 			wall = `the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)})`,
-			// a top the segment enters from outside it (not one round the seat) before the wall
-			desk = tops.find((q) => {
+			// a surface the segment enters from outside it (not one round the seat) before the wall, and
+			// leaves at most AGAINST_WALL before the wall: the surface stands against that wall
+			desk = surfaces.find((q) => {
 				const t = segmentEntry(s.x, s.z, x1, z1, q);
-				return t !== null && t > 0 && t < tHit;
+				return t && t[0] > 0 && t[0] < tHit && (tHit - t[1]) * SEAT_VIEW <= AGAINST_WALL;
 			});
 		if (desk)
-			desks.push(`seat facing: ${seat} meets ${wall} past a desk-height top: ${describe(desk.r)}`);
+			desks.push(
+				`seat facing: ${seat} meets ${wall} across a work surface against it: ${describe(desk.r)}`
+			);
 		else problems.push(`seat facing: ${seat} meets ${wall} within ${SEAT_VIEW.toFixed(1)} m`);
 	}
 	return { count, problems, desks };
@@ -1727,15 +1748,19 @@ function resetPeople() {
 	NPC.handoffTransitions.length = 0; // the reset leaves hand-overs alone
 }
 let furnitureCache = null;
-// The furniture, built once at the journey reset while every room shows: the page hides the content
-// of the rooms its camera cannot see (visibility.ts), and hidden meshes are not furniture.
+// Furniture is built while every room shows: the page hides the content of the rooms its camera
+// cannot see (visibility.ts), and hidden meshes are not furniture. `what` names the caller.
+function requireRoomsShown(what) {
+	const culled = NPC.scene.children.filter((o) => o.name.startsWith('room-content:') && !o.visible);
+	if (culled.length)
+		setupError(`${what}: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
+}
+// The furniture, built once at the journey reset while every room shows.
 function furniture() {
 	if (furnitureCache) return furnitureCache;
 	resetPeople();
 	for (let i = 0; i < REST_FRAMES; i++) step();
-	const culled = NPC.scene.children.filter((o) => o.name.startsWith('room-content:') && !o.visible);
-	if (culled.length)
-		setupError(`furniture: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
+	requireRoomsShown('furniture');
 	furnitureCache = buildFurniture(NPC);
 	if (!furnitureCache.list.length) setupError('furniture: no mesh classified as furniture');
 	// the wall sub-checks of (k) and (l) measure against the colliders, so none would pass them vacuously

@@ -444,7 +444,7 @@ export function buildOperatorLiveConsole() {
 	createOperatorMonitor(
 		g,
 		mx,
-		2.16,
+		2.23,
 		r.z,
 		rot,
 		1.02,
@@ -453,11 +453,11 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera A',
 		'Live oblique CCTV view of the patient on the treatment couch.'
 	);
-	operatorLabel(g, mx, 2.55, r.z, rot, 'CAM A');
+	operatorLabel(g, mx, 2.62, r.z, rot, 'CAM A');
 	createOperatorMonitor(
 		g,
 		mx,
-		2.16,
+		2.23,
 		right,
 		rot,
 		1.02,
@@ -466,7 +466,7 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera B',
 		'Live cross-table CCTV view of the active patient.'
 	);
-	operatorLabel(g, mx, 2.55, right, rot, 'CAM B');
+	operatorLabel(g, mx, 2.62, right, rot, 'CAM B');
 	createOperatorMonitor(
 		g,
 		mx,
@@ -483,7 +483,7 @@ export function buildOperatorLiveConsole() {
 	createOperatorMonitor(
 		g,
 		mx,
-		2.36,
+		2.43,
 		left,
 		rot,
 		1.28,
@@ -492,7 +492,7 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV wide view',
 		'Wide-angle live vault view for monitoring patient position and room status.'
 	);
-	operatorLabel(g, mx, 2.82, left, rot, 'VAULT WIDE');
+	operatorLabel(g, mx, 2.89, left, rot, 'VAULT WIDE');
 	createOperatorMonitor(
 		g,
 		mx,
@@ -535,7 +535,7 @@ export function buildCtLiveConsole() {
 	createOperatorMonitor(
 		g,
 		mx,
-		2.08,
+		2.15,
 		r.z - 0.6,
 		rot,
 		1.0,
@@ -544,7 +544,7 @@ export function buildCtLiveConsole() {
 		'CT simulation status mirror',
 		'Mirrors the CT Simulation room workflow/status display.'
 	);
-	operatorLabel(g, mx, 2.46, r.z - 0.6, rot, 'CT SIM STATUS', 'MIRROR');
+	operatorLabel(g, mx, 2.53, r.z - 0.6, rot, 'CT SIM STATUS', 'MIRROR');
 	const tA = createCtFeed(
 		'CT Patient Side',
 		new THREE.Vector3(36.0, 2.15, -9.0),
@@ -566,7 +566,7 @@ export function buildCtLiveConsole() {
 	createOperatorMonitor(
 		g,
 		mx,
-		2.08,
+		2.15,
 		r.z + 0.6,
 		rot,
 		1.0,
@@ -575,7 +575,7 @@ export function buildCtLiveConsole() {
 		'CT patient view',
 		'Live CT-room view centered on Mia during simulation.'
 	);
-	operatorLabel(g, mx, 2.46, r.z + 0.6, rot, 'PATIENT VIEW');
+	operatorLabel(g, mx, 2.53, r.z + 0.6, rot, 'PATIENT VIEW');
 	createOperatorMonitor(
 		g,
 		mx,

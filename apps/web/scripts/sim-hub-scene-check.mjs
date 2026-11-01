@@ -207,8 +207,8 @@ const PLACEMENTS = [
 		absent: true
 	},
 	...[
-		[-9.6, 2.08, 'CT SIM STATUS'],
-		[-8.4, 2.08, 'PATIENT VIEW'],
+		[-9.6, 2.15, 'CT SIM STATUS'],
+		[-8.4, 2.15, 'PATIENT VIEW'],
 		[-9.6, 1.38, 'GANTRY VIEW'],
 		[-8.4, 1.38, 'ROOM WIDE']
 	].map(([z, y, label]) => ({
@@ -242,15 +242,15 @@ const PLACEMENTS = [
 	},
 	{
 		id: 'LINAC backing board on the west wall',
-		pick: { size: [0.08, 2.35, 5.4], at: [44.12, 9] },
+		pick: { size: [0.08, 2.5, 5.4], at: [44.12, 9] },
 		flush: { axis: 'x', face: 44.08, side: 'min' }
 	},
 	...[
-		[1.42, 0.86, 10.37, 2.36, 'Vault Wide (left, top)'],
+		[1.42, 0.86, 10.37, 2.43, 'Vault Wide (left, top)'],
 		[1.42, 0.86, 10.37, 1.48, 'Patient View (left, bottom)'],
-		[1.16, 0.72, 9, 2.16, 'Cam A (middle, top)'],
+		[1.16, 0.72, 9, 2.23, 'Cam A (middle, top)'],
 		[1.16, 0.72, 9, 1.42, 'Overhead (middle, bottom)'],
-		[1.16, 0.72, 7.76, 2.16, 'Cam B (right, top)'],
+		[1.16, 0.72, 7.76, 2.23, 'Cam B (right, top)'],
 		[1.16, 0.72, 7.76, 1.42, 'Vault Status (right, bottom)']
 	].map(([w, h, z, y, label]) => ({
 		id: `LINAC ${label}`,

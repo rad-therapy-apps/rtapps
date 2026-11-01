@@ -1672,9 +1672,9 @@ export function addClinicalWallPolish() {
 	const dark = std(0x31444d, 0.58, 0.12);
 	// Flat, thin backplates behind the monitor banks. The previous rotated geometry projected into the room.
 	// LINAC control's console stands against the room's west wall (inner face x 44.08)
-	const linacPlate = box(0.08, 2.35, 5.4, dark, 44.12, 1.75, 9);
+	const linacPlate = box(0.08, 2.5, 5.4, dark, 44.12, 1.825, 9);
 	g.add(linacPlate);
-	const linacAccent = box(0.035, 0.07, 5.0, glow, 44.18, 2.92, 9);
+	const linacAccent = box(0.035, 0.07, 5.0, glow, 44.18, 3.07, 9);
 	g.add(linacAccent);
 	const ctPlate = box(0.08, 2.35, 4.2, dark, 30.02, 1.75, -9);
 	g.add(ctPlate);

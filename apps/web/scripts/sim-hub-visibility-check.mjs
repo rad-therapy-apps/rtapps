@@ -412,7 +412,7 @@ const report = await page.evaluate(
 			name: 'linaccontrol monitors left',
 			room: 'linaccontrol',
 			pos: [lc.x - 2.5, 1.65, lc.z + 1.37],
-			look: [lc.x - 6.55, 2.36, lc.z + 1.37]
+			look: [lc.x - 6.55, 2.43, lc.z + 1.37]
 		});
 		poses.push({
 			name: 'linaccontrol monitors right',
