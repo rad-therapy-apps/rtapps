@@ -703,28 +703,6 @@ export function gurneyObject(g, x, z, rot = 0) {
 	add(g, pillow);
 }
 
-export function monitorWall(
-	g,
-	x,
-	y,
-	z,
-	rot = 0,
-	cols = 2,
-	rows = 2,
-	sw = 1.0,
-	sh = 0.58,
-	gap = 0.12
-) {
-	for (let r = 0; r < rows; r++)
-		for (let c = 0; c < cols; c++) {
-			const ox = (c - (cols - 1) / 2) * (sw + gap),
-				oy = (rows - 1 - r) * (sh + gap) - ((rows - 1) * (sh + gap)) / 2;
-			const sx = x + Math.cos(rot) * 0 + Math.sin(rot) * ox,
-				sz = z + Math.cos(rot) * ox - Math.sin(rot) * 0;
-			monitor(g, sx, y + oy, sz, rot, sw, sh);
-		}
-}
-
 export function wallShelf(g, x, y, z, w = 1.4, rot = 0) {
 	const sh = box(w, 0.04, 0.28, std(0xcfd7db, 0.84, 0.03), x, y, z);
 	sh.rotation.y = rot;

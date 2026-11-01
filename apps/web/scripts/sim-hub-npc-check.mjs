@@ -22,7 +22,8 @@
 //                then 8 moments over each of the ambulance crew's walks, unload and load)
 //   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
 //                0.02 m of its pelvis (hip pivot - 0.06 x scale) and whose facing is within 20 deg of its own;
-//                seat facing: no seat (wheelchairs aside) faces a wall within 3.0 m;
+//                seat facing: no seat (wheelchairs aside) faces a wall within 3.0 m, unless its facing
+//                first crosses a desk-height furniture top (0.7..1.0 m): a desk or console against that wall;
 //                exchange facing: a seated patient's exchange partner is within 60 deg of its seat's facing;
 //                pickup facing: at the journey's lobby pickup the therapist is within 60 deg of the seated
 //                patient's facing and stands clear of furniture (Jordan and Mia);
@@ -1156,8 +1157,8 @@ function checkSeated() {
 		summary: [
 			sitters,
 			facing.problems.length
-				? `seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW.toFixed(1)} m`
-				: `seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW.toFixed(1)} m`,
+				? `seat facing: ${facing.problems.length} of ${facing.count} seats face a wall within ${SEAT_VIEW.toFixed(1)} m with no desk-height top between`
+				: `seat facing: none of ${facing.count} seats faces a wall within ${SEAT_VIEW.toFixed(1)} m with no desk-height top between (${facing.desks.length} face a desk against the wall)`,
 			talk.problems.length
 				? `exchange facing: ${talk.problems.length} of ${talk.count} seated patients have their partner more than ${TALK_DEG} deg off`
 				: `exchange facing: ${talk.count} seated patients face their partner within ${TALK_DEG} deg`,
@@ -1168,7 +1169,14 @@ function checkSeated() {
 				? `handoff seating: ${handoff.problems.length} of ${handoff.count} handoffs not ending seated as expected`
 				: `handoff seating: ${handoff.count} handoffs end seated on their chair or leave a seated patient seated`
 		].join('; '),
-		detail: [...facing.problems, ...talk.problems, ...pickup.problems, ...handoff.problems, ...rows]
+		detail: [
+			...facing.problems,
+			...talk.problems,
+			...pickup.problems,
+			...handoff.problems,
+			...rows
+		],
+		info: facing.desks
 	};
 }
 // Sub-check "pickup facing": the journey's lobby pickup run the way the journey runs it, for Jordan
@@ -1319,10 +1327,14 @@ function exchangeFacingProblems(seats) {
 	return { count, problems };
 }
 // Sub-check "seat facing": the segment from each seat anchor SEAT_VIEW m forward along its facing must
-// not enter a wall collider (radius 0). Wheelchairs are left out: they are parked or pushed anywhere.
-const SEAT_VIEW = 3.0;
-// Whether segment (x0, z0)-(x1, z1) passes through the inside of collider box c (slab method).
-function segmentEntersBox(x0, z0, x1, z1, c) {
+// not enter a wall collider (radius 0), unless it first enters the footprint of a desk-height
+// furniture top (top within DESK_TOP; scripts/lib/furniture.mjs): the seat faces a desk or console
+// standing against that wall. Wheelchairs are left out: they are parked or pushed anywhere.
+const SEAT_VIEW = 3.0,
+	DESK_TOP = [0.7, 1.0];
+// Where segment (x0, z0)-(x1, z1) enters the inside of box c (centre x, z, half sizes hw, hd), as a
+// fraction of its length (0 when it starts inside), or null when it misses (slab method).
+function segmentEntry(x0, z0, x1, z1, c) {
 	let t0 = 0,
 		t1 = 1;
 	for (const [p, d, lo, hi] of [
@@ -1330,32 +1342,58 @@ function segmentEntersBox(x0, z0, x1, z1, c) {
 		[z0, z1 - z0, c.z - c.hd, c.z + c.hd]
 	]) {
 		if (Math.abs(d) < 1e-9) {
-			if (p <= lo || p >= hi) return false;
+			if (p <= lo || p >= hi) return null;
 			continue;
 		}
 		const a = (lo - p) / d,
 			b = (hi - p) / d;
 		t0 = Math.max(t0, Math.min(a, b));
 		t1 = Math.min(t1, Math.max(a, b));
-		if (t0 >= t1) return false;
+		if (t0 >= t1) return null;
 	}
-	return true;
+	return t0;
 }
 function seatFacingProblems(seats) {
-	const problems = [];
+	// the furniture as the page shows it now, every room's content shown (see furniture())
+	const culled = NPC.scene.children.filter((o) => o.name.startsWith('room-content:') && !o.visible);
+	if (culled.length)
+		setupError(`seat facing: the camera culls ${culled.length} rooms (mode ${NPC.state.mode})`);
+	const tops = buildFurniture(NPC)
+		.list.filter((r) => r.top >= DESK_TOP[0] && r.top <= DESK_TOP[1])
+		.map((r) => ({
+			r,
+			x: (r.b.min.x + r.b.max.x) / 2,
+			z: (r.b.min.z + r.b.max.z) / 2,
+			hw: (r.b.max.x - r.b.min.x) / 2,
+			hd: (r.b.max.z - r.b.min.z) / 2
+		}));
+	const problems = [],
+		desks = [];
 	let count = 0;
 	for (const s of seats) {
 		if (s.kind === 'wheelchair') continue;
 		count++;
 		const x1 = s.x + Math.sin(s.facing) * SEAT_VIEW,
-			z1 = s.z + Math.cos(s.facing) * SEAT_VIEW,
-			hit = NPC.colliders.find((c) => segmentEntersBox(s.x, s.z, x1, z1, c));
-		if (hit)
-			problems.push(
-				`seat facing: ${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg meets the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)}) within ${SEAT_VIEW.toFixed(1)} m`
-			);
+			z1 = s.z + Math.cos(s.facing) * SEAT_VIEW;
+		let hit = null,
+			tHit = Infinity;
+		for (const c of NPC.colliders) {
+			const t = segmentEntry(s.x, s.z, x1, z1, c);
+			if (t !== null && t < tHit) [hit, tHit] = [c, t];
+		}
+		if (!hit) continue;
+		const seat = `${s.kind} at (${s.x.toFixed(2)}, ${s.z.toFixed(2)}) facing ${((s.facing * 180) / Math.PI).toFixed(0)} deg`,
+			wall = `the wall at (${hit.x.toFixed(2)}, ${hit.z.toFixed(2)})`,
+			// a top the segment enters from outside it (not one round the seat) before the wall
+			desk = tops.find((q) => {
+				const t = segmentEntry(s.x, s.z, x1, z1, q);
+				return t !== null && t > 0 && t < tHit;
+			});
+		if (desk)
+			desks.push(`seat facing: ${seat} meets ${wall} past a desk-height top: ${describe(desk.r)}`);
+		else problems.push(`seat facing: ${seat} meets ${wall} within ${SEAT_VIEW.toFixed(1)} m`);
 	}
-	return { count, problems };
+	return { count, problems, desks };
 }
 
 // --------------------------------------------------------------- (h) lying

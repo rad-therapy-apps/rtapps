@@ -71,11 +71,11 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 	],
 	// behind the operators' chairs, facing the console
 	linaccontrol: [
-		{ x: 52.75, z: 7.2, facing: -0.99 },
-		{ x: 52.75, z: 6.5, facing: -0.83 },
-		{ x: 52.75, z: 7.9, facing: -1.19 },
-		{ x: 52.75, z: 8.6, facing: -1.43 },
-		{ x: 52.75, z: 9.3, facing: -1.68 }
+		{ x: 47.46, z: 7.2, facing: -0.99 },
+		{ x: 47.46, z: 6.5, facing: -0.83 },
+		{ x: 47.46, z: 7.9, facing: -1.19 },
+		{ x: 47.46, z: 8.6, facing: -1.43 },
+		{ x: 47.46, z: 9.3, facing: -1.68 }
 	],
 	vault1: [
 		{ x: 75.0, z: -14.25, facing: 2.36 },
@@ -382,24 +382,26 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[6, 7]
 		]
 	},
-	// the aisle between the console's keyboards (to x 50.87) and the operators' chairs (from x 51.7),
-	// and a line behind the chairs for the arrival spots
+	// the aisle between the console's keyboards (to x 45.12) and the operators' chairs (from x 46.41),
+	// and a line behind the chairs for the arrival spots; in through the door's middle
 	linaccontrol: {
 		nodes: [
 			[51, 3.15], // 0 door
-			[50.95, 6.2], // 1 Marcus (50.8, 7.0) leaves along -z, clear of the console top
-			[51.3, 7.85], // 2 aisle
-			[51.28, 9.5], // 3 aisle
-			[52.8, 5.9], // 4 behind the chairs: spot [0] arrives along z
-			[52.9, 8.6] // 5 behind the chairs: spots [2]-[4]
+			[51, 4.7], // 1 inside the door
+			[45.66, 6.2], // 2 Marcus (45.51, 7.0) leaves along -z, clear of the console top
+			[46.01, 7.85], // 3 aisle
+			[45.99, 9.5], // 4 aisle
+			[47.51, 5.9], // 5 behind the chairs: spot [0] arrives along z
+			[47.61, 8.6] // 6 behind the chairs: spots [2]-[4]
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
 			[2, 3],
-			[1, 4],
-			[0, 4],
-			[4, 5]
+			[3, 4],
+			[2, 5],
+			[1, 5],
+			[5, 6]
 		]
 	},
 	// door, a step, then the maze: the hall, a turn past the end of the hall's inner wall (x 64.30..71.50,

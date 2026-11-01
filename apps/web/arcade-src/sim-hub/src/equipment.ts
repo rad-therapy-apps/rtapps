@@ -392,11 +392,17 @@ export function buildOperatorLiveConsole() {
 	const g = new THREE.Group();
 	scene.add(g);
 	const rot = Math.PI / 2;
+	// Three columns of screens on the console desk against the west wall, facing east (+x), left to right
+	// as the operator sees them (left = +z): Vault Wide over Patient View, Cam A over Overhead, Cam B over
+	// the Vault 1 status mirror. Stems stand on the desk top (y 0.88); columns 0.08 m apart.
+	const mx = r.x - 6.55,
+		left = r.z + 1.37,
+		right = r.z - 1.24;
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
-		2.16,
-		r.z,
+		mx,
+		1.42,
+		right,
 		rot,
 		1.02,
 		0.58,
@@ -404,7 +410,7 @@ export function buildOperatorLiveConsole() {
 		'Vault monitor mirror',
 		'Mirrors the in-room patient-info and treatment-status monitor inside Vault 1.'
 	);
-	operatorLabel(g, r.x - 2.05, 2.55, r.z, rot, 'VAULT STATUS', 'MIRROR');
+	operatorLabel(g, mx, 1.81, right, rot, 'VAULT STATUS', 'MIRROR');
 	const tA = createOperatorFeed(
 		'Oblique right',
 		new THREE.Vector3(88.7, 2.6, -13.1),
@@ -437,7 +443,7 @@ export function buildOperatorLiveConsole() {
 	);
 	createOperatorMonitor(
 		g,
-		r.x - 1.02,
+		mx,
 		2.16,
 		r.z,
 		rot,
@@ -447,12 +453,12 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera A',
 		'Live oblique CCTV view of the patient on the treatment couch.'
 	);
-	operatorLabel(g, r.x - 1.02, 2.55, r.z, rot, 'CAM A');
+	operatorLabel(g, mx, 2.55, r.z, rot, 'CAM A');
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
-		1.42,
-		r.z,
+		mx,
+		2.16,
+		right,
 		rot,
 		1.02,
 		0.58,
@@ -460,10 +466,10 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera B',
 		'Live cross-table CCTV view of the active patient.'
 	);
-	operatorLabel(g, r.x - 2.05, 1.81, r.z, rot, 'CAM B');
+	operatorLabel(g, mx, 2.55, right, rot, 'CAM B');
 	createOperatorMonitor(
 		g,
-		r.x - 1.02,
+		mx,
 		1.42,
 		r.z,
 		rot,
@@ -473,35 +479,35 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera C',
 		'Live overhead CCTV view of the treatment couch and setup.'
 	);
-	operatorLabel(g, r.x - 1.02, 1.81, r.z, rot, 'OVERHEAD');
+	operatorLabel(g, mx, 1.81, r.z, rot, 'OVERHEAD');
 	createOperatorMonitor(
 		g,
-		r.x + 4.48,
-		2.2,
-		r.z + 2.0,
+		mx,
+		2.36,
+		left,
 		rot,
-		1.68,
-		0.95,
+		1.28,
+		0.72,
 		tD,
 		'Vault CCTV wide view',
 		'Wide-angle live vault view for monitoring patient position and room status.'
 	);
-	operatorLabel(g, r.x + 4.48, 2.82, r.z + 2.0, rot, 'VAULT WIDE');
+	operatorLabel(g, mx, 2.82, left, rot, 'VAULT WIDE');
 	createOperatorMonitor(
 		g,
-		r.x + 4.48,
-		2.2,
-		r.z - 2.0,
+		mx,
+		1.48,
+		left,
 		rot,
-		1.68,
-		0.95,
+		1.28,
+		0.72,
 		tE,
 		'Vault CCTV close-up',
 		'Closer live view of the active patient on the couch for therapist observation.'
 	);
-	operatorLabel(g, r.x + 4.48, 2.82, r.z - 2.0, rot, 'PATIENT VIEW');
-	consoleKeyboard(g, r.x - 0.25, r.z + 1.15, rot);
-	consoleKeyboard(g, r.x - 0.25, r.z - 1.15, rot);
+	operatorLabel(g, mx, 1.94, left, rot, 'PATIENT VIEW');
+	consoleKeyboard(g, r.x - 6.0, r.z + 1.15, rot);
+	consoleKeyboard(g, r.x - 6.0, r.z - 1.15, rot);
 	OPERATOR_CONSOLE.built = true;
 }
 
@@ -1287,7 +1293,7 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'linac_console',
 		roomId: 'linaccontrol',
-		dx: -1.0,
+		dx: -6.29,
 		dz: 0,
 		y: 1.35,
 		label: 'LINAC Treatment Control Console',

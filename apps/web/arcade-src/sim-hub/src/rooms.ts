@@ -43,7 +43,6 @@ import {
 	cabinetBank,
 	stool,
 	gurneyObject,
-	monitorWall,
 	wallShelf,
 	framedWallMonitor,
 	interiorRoomSign,
@@ -1289,14 +1288,15 @@ export function furnish(room: Room) {
 			monitor(g, room.x, 1.9, room.z + room.d / 2 - 0.115, Math.PI, 1.8, 1.0, false);
 			break;
 		case 'linaccontrol':
-			desk(g, room.x - 1.0, room.z, 6.0, 1.25, Math.PI / 2);
-			monitorWall(g, room.x - 1.55, 1.78, room.z, 0.5 * Math.PI, 2, 2, 0.92, 0.52, 0.12);
+			// the console desk against the west wall (inner face x = room.x - 6.92), its screens facing east
+			// into the room as before; the operators' chairs keep their 1.07 m to the desk edge
+			desk(g, room.x - 6.29, room.z, 6.0, 1.25, Math.PI / 2);
 			for (let i = -2; i <= 2; i++)
-				taskChair(g, room.x + 0.95, room.z + i * 1.05, -Math.PI / 2, 0x4d6877);
-			monitor(g, room.x + 4.45, 2.2, room.z + 2.0, Math.PI / 2, 1.7, 0.95);
-			monitor(g, room.x + 4.45, 2.2, room.z - 2.0, Math.PI / 2, 1.7, 0.95);
-			cabinetBank(g, room.x + 4.9, room.z, 1.7, 1.5, 0.45, Math.PI / 2, 0xdfe7ea);
-			wallClock(g, room.x + 4.9, 2.85, room.z - 3.65, Math.PI / 2);
+				taskChair(g, room.x - 4.34, room.z + i * 1.05, -Math.PI / 2, 0x4d6877);
+			// under the Treatment Control screen on the east wall (frame from y 1.38), drawers facing in
+			cabinetBank(g, room.x + 6.69, room.z, 1.7, 1.3, 0.45, -Math.PI / 2, 0xdfe7ea);
+			// on the east wall beside the Treatment Control screen (z room.z - 1.49 .. room.z + 1.49)
+			wallClock(g, room.x + 6.86, 2.85, room.z - 3.6, -Math.PI / 2);
 			sanitizerDispenser(g, room.x - 4.6, 1.55, room.z - room.d / 2 + 0.13, 0);
 			break;
 		case 'vault1':
@@ -1671,9 +1671,10 @@ export function addClinicalWallPolish() {
 	const glow = std(0x78e8e0, 0.28, 0, { emissive: 0x3accc6, emissiveIntensity: 1.15 });
 	const dark = std(0x31444d, 0.58, 0.12);
 	// Flat, thin backplates behind the monitor banks. The previous rotated geometry projected into the room.
-	const linacPlate = box(0.08, 2.35, 5.4, dark, 49.72, 1.75, 9);
+	// LINAC control's console stands against the room's west wall (inner face x 44.08)
+	const linacPlate = box(0.08, 2.35, 5.4, dark, 44.12, 1.75, 9);
 	g.add(linacPlate);
-	const linacAccent = box(0.035, 0.07, 5.0, glow, 49.78, 2.92, 9);
+	const linacAccent = box(0.035, 0.07, 5.0, glow, 44.18, 2.92, 9);
 	g.add(linacAccent);
 	const ctPlate = box(0.08, 2.35, 4.2, dark, 30.02, 1.75, -9);
 	g.add(ctPlate);
