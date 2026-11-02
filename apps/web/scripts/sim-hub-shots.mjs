@@ -67,7 +67,7 @@ const SHOTS = [
 	// vault the door signs, the sink, the setup checklist and the status board
 	{ name: 'education-monitor', eye: [-42.0, 1.8, -10.4], look: [-42.0, 1.2, -5.95] },
 	{ name: 'dosimetry-monitor', eye: [11.6, 1.9, -50.4], look: [9.0, 1.3, -47.4] },
-	{ name: 'blade-ct', eye: [23.0, 2.2, 2.6], look: [27.8, 2.8, -2.6] },
+	{ name: 'blade-ct', eye: [32.5, 2.2, 2.6], look: [27.8, 2.8, -2.6] },
 	{ name: 'blade-treatment', eye: [41.5, 2.2, -2.6], look: [46.5, 2.8, 2.4] },
 	{ name: 'lobby-chair-legs', eye: [-0.6, 0.75, 6.4], look: [-3.3, 0.35, 3.6] },
 	{ name: 'engineering-screens', eye: [8.0, 1.9, -34.6], look: [8.0, 1.9, -26.1] },

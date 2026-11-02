@@ -741,13 +741,35 @@ export function framedWallMonitor(
 }
 
 export function interiorRoomSign(g, x, y, z, rot = 0, title = 'ROOM', sub = 'Radiation Oncology') {
-	const sign = new THREE.Mesh(
-		new THREE.PlaneGeometry(2.8, 0.62),
-		new THREE.MeshBasicMaterial({ map: makeCanvasPanel(title, sub, []), side: THREE.DoubleSide })
-	);
-	sign.position.set(x, y, z);
-	sign.rotation.y = rot;
-	g.add(sign);
+	// a canvas at the plane's 2.8 : 0.62 aspect, title and subtitle centred across it (a long line is
+	// squeezed to fit, not cut)
+	const c = document.createElement('canvas');
+	c.width = 1400;
+	c.height = 310;
+	const q = c.getContext('2d');
+	q.fillStyle = '#f4f7f7';
+	q.fillRect(0, 0, 1400, 310);
+	q.fillStyle = '#2f8cab';
+	q.fillRect(0, 0, 1400, 26);
+	q.textAlign = 'center';
+	q.fillStyle = '#19313a';
+	q.font = '800 120px Arial';
+	q.fillText(title, 700, 164, 1320);
+	q.fillStyle = '#59717a';
+	q.font = '700 60px Arial';
+	q.fillText(sub, 700, 250, 1320);
+	const tx = new THREE.CanvasTexture(c);
+	tx.colorSpace = THREE.SRGBColorSpace;
+	const mat = new THREE.MeshBasicMaterial({ map: tx, side: THREE.FrontSide });
+	// two one-sided faces ('sign-back' turned by pi), so neither side reads mirrored (the CT
+	// immobilization shelf's sign faces the wall behind it)
+	[rot, rot + Math.PI].forEach((r, i) => {
+		const sign = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.62), mat);
+		if (i) sign.name = 'sign-back';
+		sign.position.set(x, y, z);
+		sign.rotation.y = r;
+		g.add(sign);
+	});
 }
 
 export function soapDispenser(g, x, y, z, rot = 0) {
@@ -1472,7 +1494,8 @@ export function customTextureWallMonitor(
 }
 
 export function consoleKeyboard(g, x, z, rot = 0) {
-	const kb = box(0.72, 0.035, 0.24, std(0x262d31, 0.52, 0.18), x, 0.91, z);
+	// on the desk top (y 0.88): the body 0.88..0.915, the key caps on the body, the mouse beside it
+	const kb = box(0.72, 0.035, 0.24, std(0x262d31, 0.52, 0.18), x, 0.8975, z);
 	kb.rotation.y = rot;
 	g.add(kb);
 	for (let r = 0; r < 3; r++)
@@ -1483,14 +1506,14 @@ export function consoleKeyboard(g, x, z, rot = 0) {
 				0.035,
 				std(0x727d82, 0.56, 0.08),
 				x + (c - 4.5) * 0.055 * Math.cos(rot) - r * 0.045 * Math.sin(rot),
-				0.935,
+				0.921,
 				z - (c - 4.5) * 0.055 * Math.sin(rot) - r * 0.045 * Math.cos(rot)
 			);
 			k.rotation.y = rot;
 			g.add(k);
 		}
 	const mouse = eRbox(0.11, 0.045, 0.16, std(0x363f44, 0.45, 0.18), 0.03);
-	mouse.position.set(x + 0.48 * Math.cos(rot), 0.94, z - 0.48 * Math.sin(rot));
+	mouse.position.set(x + 0.48 * Math.cos(rot), 0.9025, z - 0.48 * Math.sin(rot));
 	mouse.rotation.y = rot;
 	g.add(mouse);
 }

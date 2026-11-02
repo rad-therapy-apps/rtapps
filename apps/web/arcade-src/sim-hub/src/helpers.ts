@@ -98,8 +98,9 @@ export function makeDoorHeaderSign(room, side, gap) {
 	const h = room.vault ? 3.78 : 3.05,
 		dc = doorCenter(room, h),
 		normal = doorNormal(room);
-	// the back plate sits 0.005 m out from the wall's face: half the wall's thickness from the door's
-	// centre line (buildRoom: 0.58 m vault walls, 0.16 m others)
+	// the back plate's centre sits 0.005 m out from the wall's face (it stands about 0.03 m proud):
+	// half the wall's thickness from the door's centre line (buildRoom: 0.58 m vault walls, 0.16 m
+	// others)
 	dc.add(normal.clone().multiplyScalar((room.vault ? 0.29 : 0.08) + 0.005));
 	const w = room.vault ? 4.7 : Math.max(2.8, Math.min(4.4, gap + 1.2)),
 		hh = room.vault ? 0.76 : 0.62;
@@ -433,31 +434,42 @@ export function zeroY(v) {
 	return new THREE.Vector3(v.x, 0, v.z);
 }
 
+// Two one-sided faces at the same spot, so neither side reads mirrored. The back face ('sign-back')
+// swaps the horizontal arrows, so from either side they point the same way in the world.
 export function makeDirectionalSign(text, sub, x, y, z, rotY, w = 3.2) {
-	const c = document.createElement('canvas');
-	c.width = 1000;
-	c.height = 240;
-	const q = c.getContext('2d');
-	q.fillStyle = '#13242c';
-	q.fillRect(0, 0, 1000, 240);
-	q.strokeStyle = '#62818c';
-	q.lineWidth = 7;
-	q.strokeRect(4, 4, 992, 232);
-	q.fillStyle = '#eff6f7';
-	q.font = '800 56px Arial';
-	q.fillText(text, 45, 94);
-	q.fillStyle = '#9ccbd0';
-	q.font = '600 31px Arial';
-	q.fillText(sub, 45, 162);
-	const tx = new THREE.CanvasTexture(c);
-	tx.colorSpace = THREE.SRGBColorSpace;
-	const m = new THREE.Mesh(
-		new THREE.PlaneGeometry(w, 0.76),
-		new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })
+	const face = (label, rot, name) => {
+		const c = document.createElement('canvas');
+		c.width = 1000;
+		c.height = 240;
+		const q = c.getContext('2d');
+		q.fillStyle = '#13242c';
+		q.fillRect(0, 0, 1000, 240);
+		q.strokeStyle = '#62818c';
+		q.lineWidth = 7;
+		q.strokeRect(4, 4, 992, 232);
+		q.fillStyle = '#eff6f7';
+		q.font = '800 56px Arial';
+		q.fillText(label, 45, 94);
+		q.fillStyle = '#9ccbd0';
+		q.font = '600 31px Arial';
+		q.fillText(sub, 45, 162);
+		const tx = new THREE.CanvasTexture(c);
+		tx.colorSpace = THREE.SRGBColorSpace;
+		const m = new THREE.Mesh(
+			new THREE.PlaneGeometry(w, 0.76),
+			new THREE.MeshBasicMaterial({ map: tx, side: THREE.FrontSide })
+		);
+		m.name = name;
+		m.position.set(x, y, z);
+		m.rotation.y = rot;
+		scene.add(m);
+	};
+	face(text, rotY, '');
+	face(
+		text.replace(/[←→]/g, (a) => (a === '←' ? '→' : '←')),
+		rotY + Math.PI,
+		'sign-back'
 	);
-	m.position.set(x, y, z);
-	m.rotation.y = rotY;
-	scene.add(m);
 }
 
 export function cleanPoints(pts) {

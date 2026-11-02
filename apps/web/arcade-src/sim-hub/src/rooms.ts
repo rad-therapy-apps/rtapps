@@ -1268,6 +1268,8 @@ export function furnish(room: Room) {
 				room.z + 1.5
 			);
 			add(g, laser2);
+			// the sagittal laser on the ceiling over the gantry: its top at the ceiling slab's
+			// underside (y 3.71)
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser3 = box(
 				0.12,
@@ -1275,7 +1277,7 @@ export function furnish(room: Room) {
 				0.12,
 				std(0x57d6cf, 0.1, 0.0, { emissive: 0x57d6cf, emissiveIntensity: 1.6 }),
 				room.x,
-				2.98,
+				3.65,
 				room.z + 1.5
 			);
 			add(g, laser3);

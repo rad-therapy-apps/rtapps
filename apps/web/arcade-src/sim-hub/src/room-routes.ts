@@ -348,7 +348,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[31.2, -5.6], // 2 toward the console's +z end
 			[32.6, -6.95], // 3 north of the chairs: the therapist (32.7, -6.6) and spot [0]
 			[32.6, -8.5], // 4 behind the chairs: spots [1] and [2], scan place (32.3, -8.45)
-			[32.6, -10.5] // 5 behind the south chair: the partner (31.1, -11.0) leaves along ~72 deg
+			[32.6, -10.5] // 5 behind the south chair: the partner (31.1, -11.0) leaves along ~18 deg
 		],
 		edges: [
 			[0, 1],

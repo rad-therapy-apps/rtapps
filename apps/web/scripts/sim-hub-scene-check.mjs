@@ -47,7 +47,9 @@ const CHAIRS = 20,
 // exactly one mesh: geometry type `geom` (default BoxGeometry) whose geometry parameters match `size`
 // within 0.005 (box [width, height, depth], plane [width, height], torus [radius, tube], cylinder
 // [radiusTop, radiusBottom, height]), whose world box centre is within `r` (default 0.5) of `at`
-// [x, z] and, if `y` is given, within 0.1 of it in height. Then each given test:
+// [x, z], if `y` is given within 0.1 of it in height, and if `name` is given whose mesh name is
+// exactly that ('' for an unnamed mesh). An eRbox (RoundedBoxGeometry) reports a BoxGeometry of
+// size [1, 1, 1]. Then each given test:
 //   absent  no such mesh exists (a removed prop)
 //   minY    the box bottom is at this height, within 0.01 (a desk screen: the 0.88 desk top + 0.28 stand)
 //   maxY    the box top is at most this height
@@ -55,23 +57,24 @@ const CHAIRS = 20,
 //   flush   { axis: 'x' | 'z', face, side: 'min' | 'max' }: the box's `side` along `axis` (the side
 //           toward the wall) is 0 to 0.06 m off the wall's inner face `face`, not past it
 const PLACEMENTS = [
-	// Task 2: a turned cabinet shows its drawer lines on the face it turns to (engineering's east
+	// R11: a turned cabinet shows its drawer lines on the face it turns to (engineering's east
 	// cabinet faces -x; its front is 0.2058 m from its centre)
 	{
 		id: 'engineering east cabinet drawer line on its front',
 		pick: { size: [1.26, 0.02, 0.015], at: [11.744, -33], y: 0.31, r: 0.05 }
 	},
-	// Task 3: the hallway blades stop 0.05 m short of the corridor face of the room wall they stand
-	// off; the vault warning plaques hang side by side above each vault door on the corridor face
-	// (x 63.71), over the door's header sign, which also moves out of the lintel
+	// S and V1: the hallway blades (their front faces; the back face is 'sign-back') stop 0.05 m short
+	// of the corridor face of the room wall they stand off; the vault warning plaques hang side by
+	// side above each vault door on the corridor face (x 63.71), over the door's header sign, which
+	// also moves out of the lintel
 	{
 		id: 'CT SIMULATION blade stops at the corridor face',
-		pick: { geom: 'PlaneGeometry', size: [3.4, 0.76], at: [27.8, -2.17] },
+		pick: { geom: 'PlaneGeometry', size: [3.4, 0.76], at: [27.8, -2.17], name: '' },
 		flush: { axis: 'z', face: -3.92, side: 'min' }
 	},
 	{
 		id: 'TREATMENT AREA blade stops at the corridor face',
-		pick: { geom: 'PlaneGeometry', size: [3.7, 0.76], at: [46.5, 2.02] },
+		pick: { geom: 'PlaneGeometry', size: [3.7, 0.76], at: [46.5, 2.02], name: '' },
 		flush: { axis: 'z', face: 3.92, side: 'max' }
 	},
 	...[-18, 18].flatMap((vz) => [
@@ -107,7 +110,8 @@ const PLACEMENTS = [
 		pick: { geom: 'PlaneGeometry', size: [5.4, 1.05], at: [0, 10.095], r: 0.1 },
 		flush: { axis: 'z', face: 10.09, side: 'min' }
 	},
-	// Task 4: desk computer screens stand on their desks; wall screens hang flush on their walls
+	// R1-R3, R5, R6: desk computer screens stand on their desks; wall screens hang flush on
+	// their walls
 	{
 		id: 'education desk screen',
 		pick: { size: [0.8, 0.48, 0.055], at: [-42, -5.95] },
@@ -150,7 +154,7 @@ const PLACEMENTS = [
 		pick: { size: [1.8, 1.0, 0.055], at: [-8, -54.11] },
 		flush: { axis: 'z', face: -54.08, side: 'max' }
 	},
-	// Task 5: the water phantom is a real-size tank (0.65 m) on its cart (deck top 0.80)
+	// R4: the water phantom is a real-size tank (0.65 m) on its cart (deck top 0.80)
 	{
 		id: 'QA water phantom tank on its cart',
 		pick: { size: [0.65, 0.55, 0.65], at: [-7.5, -43.3] },
@@ -161,7 +165,7 @@ const PLACEMENTS = [
 		pick: { size: [3.1, 1.55, 2.8], at: [-7.5, -43.3] },
 		absent: true
 	},
-	// Task 6: the manager's desk stands 0.3 m in front of the visitor chairs; its screen faces the manager
+	// R7: the manager's desk stands 0.3 m in front of the visitor chairs; its screen faces the manager
 	{
 		id: 'manager desk by the visitor chairs',
 		pick: { size: [2.5, 0.08, 0.85], at: [20, 8.5] },
@@ -173,12 +177,20 @@ const PLACEMENTS = [
 		minY: 1.16,
 		within: [18.75, 21.25, 8.075, 8.925]
 	},
-	// Task 7: CT control: keyboard on the console desk (x 29.725..30.875); chairs 0.5 m from it; the
-	// cabinet on the door wall east of the door; the live CT CONTROL board on the back wall below the room
-	// sign; the blank screens gone; the four live screens side by side in front of the backing board
+	// R8: CT control: keyboard and mouse on the console desk (x 29.725..30.875); chairs 0.5 m from
+	// it; the cabinet on the door wall east of the door; the live CT CONTROL board on the back wall
+	// below the room sign; the blank screens gone; the four live screens side by side in front of the
+	// backing board
 	{
 		id: 'CT control keyboard on the console desk',
 		pick: { size: [0.72, 0.035, 0.24], at: [30.6, -8.35] },
+		minY: 0.88,
+		within: [29.725, 30.875, -11.6, -6.8]
+	},
+	{
+		id: 'CT control mouse on the console desk',
+		pick: { size: [1, 1, 1], at: [30.6, -8.83], y: 0.9, r: 0.05 },
+		minY: 0.88,
 		within: [29.725, 30.875, -11.6, -6.8]
 	},
 	...[-10.15, -9, -7.85].map((z) => ({
@@ -221,20 +233,27 @@ const PLACEMENTS = [
 		pick: { size: [0.34, 0.34, 0.08], at: [35.87, -12.3], y: 2.65, r: 0.1 },
 		flush: { axis: 'x', face: 35.92, side: 'max' }
 	},
-	// Task 8: a real-size CT gantry (2.1 m tall) stands under the 3.75 m ceiling
+	// R9: a real-size CT gantry (2.1 m tall) stands under the 3.75 m ceiling; the sagittal laser over
+	// it is on the ceiling (slab underside y 3.71), not hanging where the old ring's bore was
 	{
 		id: 'CT gantry real size',
 		pick: { geom: 'TorusGeometry', size: [0.75, 0.3], at: [44, -9.5] },
 		maxY: 2.11
 	},
 	{
+		id: 'CT sagittal laser on the ceiling',
+		pick: { size: [0.12, 0.12, 0.12], at: [44, -9.5], y: 3.65, r: 0.1 },
+		minY: 3.59,
+		maxY: 3.71
+	},
+	{
 		id: 'CT room-sized gantry ring removed',
 		pick: { geom: 'TorusGeometry', size: [2.15, 0.58], at: [44, -9.5] },
 		absent: true
 	},
-	// Task 9: LINAC control: the console against the west wall (inner face x 44.08), its screens in
-	// three columns facing east; keyboards on the desk; the cabinet under the Treatment Control screen;
-	// the clock on the east wall; the blank duplicates gone
+	// R10: LINAC control: the console against the west wall (inner face x 44.08), its screens in
+	// three columns facing east; keyboards and mice on the desk; the cabinet under the Treatment
+	// Control screen; the clock on the east wall; the blank duplicates gone
 	{
 		id: 'LINAC console desk against the west wall',
 		pick: { size: [6.0, 0.08, 1.25], at: [44.71, 9] },
@@ -256,11 +275,20 @@ const PLACEMENTS = [
 		id: `LINAC ${label}`,
 		pick: { size: [w, h, 0.08], at: [44.45, z], y, r: 0.1 }
 	})),
-	...[7.85, 10.15].map((z) => ({
-		id: `LINAC keyboard at z ${z} on the desk`,
-		pick: { size: [0.72, 0.035, 0.24], at: [45.0, z] },
-		within: [44.085, 45.335, 6, 12]
-	})),
+	...[7.85, 10.15].flatMap((z) => [
+		{
+			id: `LINAC keyboard at z ${z} on the desk`,
+			pick: { size: [0.72, 0.035, 0.24], at: [45.0, z] },
+			minY: 0.88,
+			within: [44.085, 45.335, 6, 12]
+		},
+		{
+			id: `LINAC mouse by the keyboard at z ${z} on the desk`,
+			pick: { size: [1, 1, 1], at: [45.0, z - 0.48], y: 0.9, r: 0.05 },
+			minY: 0.88,
+			within: [44.085, 45.335, 6, 12]
+		}
+	]),
 	{
 		id: 'LINAC cabinet under the Treatment Control screen',
 		pick: { size: [1.7, 1.3, 0.45], at: [57.69, 9] },
@@ -282,7 +310,7 @@ const PLACEMENTS = [
 		pick: { size: [0.92, 0.52, 0.055], at: [49.45, 9], r: 0.6 },
 		absent: true
 	},
-	// Task 10: vault sinks flush on their walls (vault 2's on the opposite, +z wall); the wall art off
+	// V2-V4: vault sinks flush on their walls (vault 2's on the opposite, +z wall); the wall art off
 	// the setup checklist; one live status board per vault, mirrored on the wall nearest the junction
 	{
 		id: 'vault 1 sink splash flush on the -z wall',
@@ -491,7 +519,8 @@ if (only.has('placements')) {
 				m.geom === geom &&
 				keys.every((k, i) => Math.abs(m.params[k] - e.pick.size[i]) <= 0.005) &&
 				Math.hypot(m.cx - e.pick.at[0], m.cz - e.pick.at[1]) <= r &&
-				(e.pick.y === undefined || Math.abs(m.cy - e.pick.y) <= 0.1)
+				(e.pick.y === undefined || Math.abs(m.cy - e.pick.y) <= 0.1) &&
+				(e.pick.name === undefined || m.name === e.pick.name)
 		);
 		if (e.absent) {
 			if (found.length) fails.push(`${e.id}: still there (${where(found[0])})`);
