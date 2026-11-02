@@ -247,6 +247,11 @@ const PLACEMENTS = [
 		maxY: 3.71
 	},
 	{
+		id: 'CT SIMULATION board below the CT room sign',
+		pick: { size: [3.03, 1.63, 0.1], at: [44, -18.82] },
+		maxY: 2.75
+	},
+	{
 		id: 'CT room-sized gantry ring removed',
 		pick: { geom: 'TorusGeometry', size: [2.15, 0.58], at: [44, -9.5] },
 		absent: true

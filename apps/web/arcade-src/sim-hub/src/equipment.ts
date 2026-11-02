@@ -276,7 +276,8 @@ export function buildPhase4WorkflowDisplays() {
 	createWorkflowDisplay('vault2State', 78.45, 2.18, 5.39, 0, 'VAULT 2 STATUS', 3.5, 1.97);
 	createWorkflowDisplay('consultState', -18, 2.25, -11.82, 0, 'CONSULT STATUS', 2.65, 1.38);
 	createWorkflowDisplay('educationState', -42, 2.25, -11.82, 0, 'PATIENT EDUCATION', 2.65, 1.38);
-	createWorkflowDisplay('ctSimState', 44, 2.35, -18.82, 0, 'CT SIMULATION', 2.85, 1.45);
+	// below the CT room's sign on the same wall (from y 2.75)
+	createWorkflowDisplay('ctSimState', 44, 1.9, -18.82, 0, 'CT SIMULATION', 2.85, 1.45);
 	// on CT control's back (-z) wall, where the blank screen was: clear of the window on the +x wall and
 	// below the room sign (from y 2.75)
 	createWorkflowDisplay('ctControlState', 31.5, 1.95, -13.82, 0, 'CT CONTROL', 2.55, 1.38);
