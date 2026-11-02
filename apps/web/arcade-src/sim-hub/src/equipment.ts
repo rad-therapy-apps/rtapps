@@ -51,6 +51,7 @@ import {
 import { setDoorTarget } from './walk';
 import { roomById, PRIMARY_PATIENTS, doors, player, roomFloors } from './main';
 import { APRON_TOP } from './rooms';
+import { VAULT2_SETUP_STEPS, vault2StepAt } from './vault-setup-loop';
 import {
 	JOURNEY,
 	ROOM_WORKFLOW,
@@ -118,6 +119,15 @@ function createWorkflowDisplay(key, x, y, z, rot, title, w = 2.7, h = 1.5) {
 function updateWorkflowDisplay(key, status, rows = [], accent = '#42d5cf') {
 	const d = PHASE4_DISPLAYS[key];
 	if (d) paintWorkflowDisplay(d, status, rows, accent);
+}
+let vault2Step = -1;
+/** Repaints vault 2's board when its setup loop moves on (stepSimulation, main.ts). */
+export function updateVault2Board(sec) {
+	const i = vault2StepAt(sec);
+	if (i === vault2Step) return;
+	vault2Step = i;
+	const s = VAULT2_SETUP_STEPS[i];
+	updateWorkflowDisplay('vault2State', s.state, s.rows, s.color);
 }
 export const ROOM_CLOCKS = [];
 export function updateWallClocks(now = performance.now()) {
@@ -260,7 +270,10 @@ export function buildPhase4WorkflowDisplays() {
 		2.8,
 		1.5
 	);
-	createWorkflowDisplay('vault1State', 90.78, 2.32, -8.2, -Math.PI / 2, 'VAULT 1 STATUS', 2.7, 1.5);
+	// one live status board per vault, mirrored on the wall nearest the junction (vault 1's +z wall,
+	// vault 2's -z wall: inner faces z -5.29 and 5.29), sized to the board texture (1100 x 620)
+	createWorkflowDisplay('vault1State', 78.45, 2.18, -5.39, Math.PI, 'VAULT 1 STATUS', 3.5, 1.97);
+	createWorkflowDisplay('vault2State', 78.45, 2.18, 5.39, 0, 'VAULT 2 STATUS', 3.5, 1.97);
 	createWorkflowDisplay('consultState', -18, 2.25, -11.82, 0, 'CONSULT STATUS', 2.65, 1.38);
 	createWorkflowDisplay('educationState', -42, 2.25, -11.82, 0, 'PATIENT EDUCATION', 2.65, 1.38);
 	createWorkflowDisplay('ctSimState', 44, 2.35, -18.82, 0, 'CT SIMULATION', 2.85, 1.45);

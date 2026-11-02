@@ -281,6 +281,51 @@ const PLACEMENTS = [
 		id: 'LINAC blank monitor wall removed',
 		pick: { size: [0.92, 0.52, 0.055], at: [49.45, 9], r: 0.6 },
 		absent: true
+	},
+	// Task 10: vault sinks flush on their walls (vault 2's on the opposite, +z wall); the wall art off
+	// the setup checklist; one live status board per vault, mirrored on the wall nearest the junction
+	{
+		id: 'vault 1 sink splash flush on the -z wall',
+		pick: { size: [1.52, 0.78, 0.07], at: [66.2, -30.67] },
+		flush: { axis: 'z', face: -30.71, side: 'min' }
+	},
+	{
+		id: 'vault 2 sink splash flush on the +z wall',
+		pick: { size: [1.52, 0.78, 0.07], at: [66.2, 30.67] },
+		flush: { axis: 'z', face: 30.71, side: 'max' }
+	},
+	{
+		id: 'vault 1 wall art off the checklist',
+		pick: { size: [1.29, 0.61, 0.05], at: [93.65, -26.6] }
+	},
+	{
+		id: 'vault 2 wall art off the checklist',
+		pick: { size: [1.29, 0.61, 0.05], at: [93.65, 9.4] }
+	},
+	{
+		id: 'vault 1 live status board on its +z wall',
+		pick: { size: [3.68, 2.15, 0.1], at: [78.45, -5.39] },
+		flush: { axis: 'z', face: -5.29, side: 'max' }
+	},
+	{
+		id: 'vault 2 live status board on its -z wall',
+		pick: { size: [3.68, 2.15, 0.1], at: [78.45, 5.39] },
+		flush: { axis: 'z', face: 5.29, side: 'min' }
+	},
+	{
+		id: 'vault 1 floating status board removed',
+		pick: { size: [2.88, 1.68, 0.1], at: [90.78, -8.2] },
+		absent: true
+	},
+	{
+		id: 'vault 1 static status screen removed',
+		pick: { size: [4.73, 2.13, 0.1], at: [78.45, -30.65] },
+		absent: true
+	},
+	{
+		id: 'vault 2 static status screen removed',
+		pick: { size: [4.73, 2.13, 0.1], at: [78.45, 5.35] },
+		absent: true
 	}
 ];
 

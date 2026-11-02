@@ -52,6 +52,7 @@ import {
 	addJourneyWallClocks,
 	buildPhase4WorkflowDisplays,
 	updateWorkflowTransitions,
+	updateVault2Board,
 	buildPhase5Wayfinding,
 	workflowState,
 	CLINICAL_FOCUS
@@ -686,6 +687,7 @@ export function stepSimulation(now: number): void {
 	updateDutyAnimations(sec);
 	updateHandoffTransitions(sec);
 	updateWorkflowTransitions(sec);
+	updateVault2Board(sec);
 	updateCtCouchMotion(sec);
 	updateJourneyCameraFollow();
 	if (f % 2 === 0) updateNpcExchanges(sec);

@@ -1335,22 +1335,6 @@ export function furnish(room: Room) {
 					['Beam status', 'Standby']
 				]
 			);
-			framedWallMonitor(
-				g,
-				room.x - 0.55,
-				2.18,
-				room.z - room.d / 2 + 0.35,
-				0,
-				4.55,
-				1.95,
-				'VAULT STATUS',
-				'Room observation',
-				[
-					['Camera feeds', 'Ceiling and wall CCTV active'],
-					['Intercom', 'Two-way communication ready'],
-					['Safety', 'Emergency OFF locations marked']
-				]
-			);
 			immobilizationStorage(
 				g,
 				room.x + 7.6,
@@ -1359,13 +1343,15 @@ export function furnish(room: Room) {
 				'VAULT 1 IMMOBILIZATION'
 			);
 			biohazardBox(g, room.x + 10.25, room.z + room.d / 2 - 2.05, Math.PI, 'BIOHAZARD');
-			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 2.1, 0);
+			// splash back flush on the -z wall's inner face (room.z - room.d / 2 + 0.29)
+			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 0.69, 0);
+			// over the live status board on the +z wall (equipment.ts), as vault 2's over its board on the -z wall
 			interiorRoomSign(
 				g,
 				room.x,
-				3.58,
-				room.z - room.d / 2 + 0.34,
-				0,
+				3.75,
+				room.z + room.d / 2 - 0.34,
+				Math.PI,
 				'VAULT 1 · LINAC',
 				'External beam treatment vault'
 			);
@@ -1387,7 +1373,8 @@ export function furnish(room: Room) {
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
-			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 6.0, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
+			// clear of the setup checklist screen (room.z - 6.89 .. room.z - 2.71)
+			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 8.6, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
 			break;
 		case 'vault2':
 			emulatorLinacShell(g, room);
@@ -1425,22 +1412,6 @@ export function furnish(room: Room) {
 					['Beam status', 'Standby']
 				]
 			);
-			framedWallMonitor(
-				g,
-				room.x - 0.55,
-				2.18,
-				room.z - room.d / 2 + 0.35,
-				0,
-				4.55,
-				1.95,
-				'VAULT STATUS',
-				'Room observation',
-				[
-					['Camera feeds', 'Ceiling and wall CCTV active'],
-					['Intercom', 'Two-way communication ready'],
-					['Safety', 'Emergency OFF locations marked']
-				]
-			);
 			immobilizationStorage(
 				g,
 				room.x + 7.6,
@@ -1449,11 +1420,13 @@ export function furnish(room: Room) {
 				'VAULT 2 IMMOBILIZATION'
 			);
 			biohazardBox(g, room.x + 10.25, room.z + room.d / 2 - 2.05, Math.PI, 'BIOHAZARD');
-			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 2.1, 0);
+			// on the +z wall, opposite the status board; splash back flush on its inner face
+			// (room.z + room.d / 2 - 0.29)
+			sinkStation(g, room.x - room.w / 2 + 2.2, room.z + room.d / 2 - 0.69, Math.PI);
 			interiorRoomSign(
 				g,
 				room.x,
-				3.58,
+				3.75,
 				room.z - room.d / 2 + 0.34,
 				0,
 				'VAULT 2 · LINAC',
@@ -1477,7 +1450,8 @@ export function furnish(room: Room) {
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
-			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 6.0, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
+			// clear of the setup checklist screen (room.z - 6.89 .. room.z - 2.71)
+			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 8.6, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
 			break;
 		case 'hdr':
 			hdrSuite(g, room);
