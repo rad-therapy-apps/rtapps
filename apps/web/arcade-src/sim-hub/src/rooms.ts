@@ -727,6 +727,12 @@ export function zoneAccentColor(room: Room) {
 	return 0x4279a0;
 }
 
+// Ceilings and hallway roofs are only seen from below, where the hemisphere light's olive ground
+// colour shades them dark green; a matching glow keeps them a light ceiling grey.
+function ceilingMat(c) {
+	return std(c, 0.95, 0, { emissive: c, emissiveIntensity: 0.6 });
+}
+
 export function buildRoom(room: Room) {
 	const h = room.vault ? 5.7 : 3.75,
 		t = room.vault ? 0.58 : 0.16,
@@ -748,7 +754,7 @@ export function buildRoom(room: Room) {
 	['zmin', 'zmax', 'xmin', 'xmax'].forEach((s) => buildSide(room, s, h, t, mat));
 	if (room.vault) addVaultDoorwaySigns(room);
 	addRoomBaseboards(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, std(0xe9edef, 0.95, 0), room.x, h, room.z);
+	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xe9edef), room.x, h, room.z);
 	ceiling.castShadow = false;
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
@@ -820,7 +826,7 @@ export function buildHubLobby(room: Room) {
 	lobbyWallWithGap('zmin', 7.0, h, t);
 	lobbyWallWithGap('zmax', 5.2, h, t);
 	buildLobbyEntrance(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, std(0xf0f3f4, 0.95, 0), room.x, h, room.z);
+	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xf0f3f4), room.x, h, room.z);
 	scene.add(ceiling);
 	ceilings.push(ceiling);
 	for (let x = -8; x <= 8; x += 4)
@@ -1629,7 +1635,7 @@ export function corridorLightsVertical(z0, z1, x, y = 3.72) {
 	}
 }
 
-const ROOF_MAT = std(0xe9edef, 0.95, 0);
+const ROOF_MAT = ceilingMat(0xe9edef);
 // Roofs over the hallways, like the room ceilings: 0.08 slabs at the wall top (3.75; the treatment
 // walkway's at 5.7, the vault height), edges on the wall centre lines so they never overlap a room's
 // ceiling (which stops 0.1 m inside its walls). They join `ceilings`, so the overview hides them. Then
