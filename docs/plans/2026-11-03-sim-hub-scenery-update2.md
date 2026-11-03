@@ -286,9 +286,9 @@ Also add npc.ts if you changed it.
 	{ id: 'walkway south end wall', pick: { size: [6.09, 5.7, 0.18], at: [60.955, 31] } },
 	{ id: 'clinical z +4 stub across the walkway mouth removed', pick: { size: [2, 3.75, 0.18], at: [59, 4] }, absent: true },
 	{ id: 'clinical z -4 infill ends at x 58', pick: { size: [6, 3.75, 0.18], at: [55, -4] } },
-	{ id: 'walkway floor x 58..64', pick: { size: [6, 0.06, 62], at: [61, 0] } },
-	{ id: 'old branch floor x 60..68 removed', pick: { size: [8, 0.06, 62], at: [64, 0] }, absent: true }
 ```
+
+(The walkway floor, the junction plate and the clinical hallway floor, with their three placements, already landed in Task 2; do not add them again.)
 
 Build, then run `--only placements`. Expected: FAIL.
 
@@ -309,29 +309,9 @@ In `buildCorridorInfillWalls`:
 	infillH(57.91, 64, 31, 5.7);
 ```
 
-- [ ] **Step 3: Floor, plate, lights**
+- [ ] **Step 3: Lights**
 
-In `main.ts`:
-
-```ts
-corridorFloor(61, 0, 6, 62, C.vault); // Treatment walkway, x 58..64
-// the junction plate also floors the pocket between the vault entrances (x 64..67, z -4.71..4.71)
-scene.add(box(9.5, 0.065, 9.5, std(0x627079, 0.82, 0.04), 64, 0.026, 0));
-```
-
-These replace the `corridorFloor(64, 0, 8, 62, C.vault)` and `box(9, …)` lines.
-
-Also end the clinical hallway's floor at the walkway's wall line. Otherwise it overlaps the walkway floor at the same height for x 58..59.25, where the plate does not cover it, and z-fights. Replace `corridorFloor(38, 0, 52, 8, C.clinical); // Main Clinical east corridor` with:
-
-```ts
-corridorFloor(35, 0, 46, 8, C.clinical); // Main Clinical east corridor, x 12..58
-```
-
-Add this placement in Step 1:
-
-```js
-	{ id: 'clinical hallway floor ends at x 58', pick: { size: [46, 0.06, 8], at: [35, 0] } },
-```
+The walkway floor, the junction plate and the clinical hallway floor already landed in Task 2 (see the Task 2 commit).
 
 Lights:
 - change `corridorLightsHorizontal(12, 64, 0);` to `corridorLightsHorizontal(12, 57, 0);`;
