@@ -1179,7 +1179,7 @@ export function buildPhase5Wayfinding() {
 		linaccontrol: [51.0, 3.12, 4.12, 0],
 		vault1: [66.72, 3.55, -18, -Math.PI / 2],
 		vault2: [66.72, 3.55, 18, -Math.PI / 2],
-		hdr: [61.1, 3.15, 24.1, 0]
+		hdr: [57.6, 3.15, 23.1, 0]
 	};
 	for (const [id, v] of Object.entries(placements)) makeStatusBeacon(id, ...v);
 }

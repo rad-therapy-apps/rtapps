@@ -6,7 +6,7 @@ import { renderer, labelRenderer, scene } from './scene';
 import { ROOMS } from './rooms';
 import { S } from './state';
 import { getColliders } from './walk';
-import { doors } from './main';
+import { doors, ceilings } from './main';
 import {
 	movers,
 	dutyActors,
@@ -69,6 +69,8 @@ export function installNpcCheckHook(
 			colliders: getColliders(),
 			/** The doors (main.ts, run by walk.ts), by room id: each `group` holds every mesh of one door. */
 			doors,
+			/** The room ceilings and hallway roofs (main.ts); hidden at boot and in overview. */
+			ceilings,
 			movers,
 			castActors,
 			stepSimulation,

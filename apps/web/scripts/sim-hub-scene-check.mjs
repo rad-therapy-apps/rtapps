@@ -359,7 +359,93 @@ const PLACEMENTS = [
 		id: 'vault 2 static status screen removed',
 		pick: { size: [4.73, 2.13, 0.1], at: [78.45, 5.35] },
 		absent: true
-	}
+	},
+	// B4: the HDR suite is 13 x 13 at (51.5, 24); the cart and the door beacon move with it; the parking
+	// curb stops short of its floor
+	{ id: 'HDR floor 13 x 13', pick: { size: [12.85, 0.07, 12.85], at: [51.5, 24] } },
+	{
+		id: 'HDR old floor removed',
+		pick: { size: [10.85, 0.07, 11.85], at: [56, 25] },
+		absent: true
+	},
+	{
+		id: 'HDR cart beside the table',
+		pick: { size: [0.62 * 0.92, 0.05, 0.44 * 0.92], at: [50.8, 22.8], r: 0.2 }
+	},
+	{ id: 'parking curb ends at x 44.9', pick: { size: [82.9, 0.08, 0.22], at: [3.45, 20.95] } },
+	{
+		id: 'parking curb under the HDR floor removed',
+		pick: { size: [96, 0.08, 0.22], at: [10, 20.95] },
+		absent: true
+	},
+	// B3: the walkway floor x 58..64 (brought forward from the walls task so the HDR runner has a floor
+	// at its door)
+	{ id: 'walkway floor x 58..64', pick: { size: [6, 0.06, 62], at: [61, 0] } },
+	{
+		id: 'old branch floor x 60..68 removed',
+		pick: { size: [8, 0.06, 62], at: [64, 0] },
+		absent: true
+	},
+	{ id: 'clinical hallway floor ends at x 58', pick: { size: [46, 0.06, 8], at: [35, 0] } },
+	// B2, B3: the treatment walkway's outside wall at x 58 (5.7 m), its end walls at z +-31, and the clinical
+	// hallway's infill trimmed at x 58
+	{ id: 'walkway outside wall z -31..-4', pick: { size: [0.18, 5.7, 27], at: [58, -17.5] } },
+	{ id: 'walkway outside wall z 14..17.5', pick: { size: [0.18, 5.7, 3.5], at: [58, 15.75] } },
+	{ id: 'walkway outside wall z 30.5..31', pick: { size: [0.18, 5.7, 0.5], at: [58, 30.75] } },
+	{ id: 'walkway north end wall', pick: { size: [6.09, 5.7, 0.18], at: [60.955, -31] } },
+	{ id: 'walkway south end wall', pick: { size: [6.09, 5.7, 0.18], at: [60.955, 31] } },
+	{
+		id: 'clinical z +4 stub across the walkway mouth removed',
+		pick: { size: [2, 3.75, 0.18], at: [59, 4] },
+		absent: true
+	},
+	{
+		id: 'clinical z -4 infill meets the walkway wall at x 58.09',
+		pick: { size: [6.09, 3.75, 0.18], at: [55.045, -4] }
+	},
+	// B1, B2: hallway roofs (3.75, and the walkway's at 5.7), the gap fills up to the walkway roof, and
+	// the patient and technical hallways' end walls
+	...[
+		[-52, -12, -3, 3, 3.75, 'west hallway'],
+		[-3, 3, -41.5, -10, 3.75, 'technical hallway south'],
+		[-3, 2, -54, -41.5, 3.75, 'technical hallway by dosimetry'],
+		[-2, 2, -56.5, -54, 3.75, 'technical hallway by commons and dosimetry'],
+		[-2, 3, -66, -56.5, 3.75, 'technical hallway north'],
+		[12, 15, -4, 4, 3.75, 'clinical hallway by the lobby'],
+		[15, 25, -4, 3.5, 3.75, 'clinical hallway by the manager'],
+		[25, 36, -4, 4, 3.75, 'clinical hallway by CT control'],
+		[36, 52, -3, 4, 3.75, 'clinical hallway by the CT room'],
+		[52, 58, -4, 4, 3.75, 'clinical hallway by LINAC control'],
+		[58, 64, -31, 31, 5.7, 'treatment walkway'],
+		[64, 67, -5, 5, 5.7, 'pocket between the vault entrances']
+	].map(([x0, x1, z0, z1, y, where]) => ({
+		id: `roof over the ${where}`,
+		pick: {
+			size: [x1 - x0, 0.08, z1 - z0],
+			at: [(x0 + x1) / 2, (z0 + z1) / 2],
+			y,
+			r: 0.05,
+			name: 'hall-roof'
+		},
+		minY: y - 0.04
+	})),
+	{
+		id: 'fill above LINAC control east wall',
+		pick: { size: [0.16, 1.95, 10], at: [58, 9] },
+		minY: 3.75
+	},
+	{
+		id: 'fill above the HDR suite east wall',
+		pick: { size: [0.16, 1.95, 13], at: [58, 24] },
+		minY: 3.75
+	},
+	{
+		id: 'lintel over the clinical hallway mouth',
+		pick: { size: [0.18, 1.95, 8], at: [58, 0] },
+		minY: 3.75
+	},
+	{ id: 'west hallway end wall', pick: { size: [0.18, 3.75, 6], at: [-52, 0] } },
+	{ id: 'technical hallway end wall', pick: { size: [5, 3.75, 0.18], at: [0.5, -66] } }
 ];
 
 function setupError(msg) {

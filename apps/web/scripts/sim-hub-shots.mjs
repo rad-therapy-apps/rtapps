@@ -27,6 +27,7 @@ const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright')
 // Each shot: the subject, the camera as [right, up, forward] from the subject (right/forward turn
 // with the subject's facing; up is world height), and the world height looked at. `u` parks a mover
 // at that point of its loop first. A scenery shot gives the camera's world `eye` and `look` instead.
+// A shot with `ceilings: true` shows the ceilings and hallway roofs, which the boot state hides.
 const SHOTS = [
 	{ name: 'walker-low', subject: 'mover:walker', u: 0.3, cam: [-1.6, 0.35, 0], lookY: 0.35 },
 	{ name: 'lobby-chairs', subject: 'cast:lobby:patient:1', cam: [3.5, 0.9, 0.5], lookY: 0.6 },
@@ -87,7 +88,19 @@ const SHOTS = [
 	{ name: 'vault2-sink', eye: [69.5, 1.9, 25.5], look: [66.2, 1.0, 30.5] },
 	{ name: 'vault1-checklist', eye: [87.0, 2.3, -22.8], look: [93.7, 2.4, -22.8] },
 	{ name: 'vault1-status', eye: [78.45, 2.3, -13.0], look: [78.45, 2.2, -5.3] },
-	{ name: 'vault2-status', eye: [78.45, 2.3, 13.0], look: [78.45, 2.2, 5.3] }
+	{ name: 'vault2-status', eye: [78.45, 2.3, 13.0], look: [78.45, 2.2, 5.3] },
+	// the 2026-11-03 building-shell fixes (Update 2): hallway roofs and end walls, the widened treatment
+	// walkway and its outside wall, the bigger HDR suite, and two overviews (the plan, and the roofs)
+	{ name: 'hall-west-end', eye: [-38, 1.7, 0], look: [-52, 2.2, 0], ceilings: true },
+	{ name: 'hall-tech-north', eye: [0, 1.7, -50], look: [0, 2.2, -66], ceilings: true },
+	{ name: 'hall-clinical-roof', eye: [20, 1.6, 0], look: [34, 3.6, 0], ceilings: true },
+	{ name: 'walkway-junction', eye: [48, 1.7, 0], look: [62, 2.6, 0], ceilings: true },
+	{ name: 'walkway-north', eye: [60.9, 1.7, -1], look: [60.9, 2.4, -31], ceilings: true },
+	{ name: 'walkway-south', eye: [60.9, 1.7, 1], look: [60.9, 2.4, 31], ceilings: true },
+	{ name: 'hdr-door', eye: [62.6, 1.7, 21.5], look: [57.5, 1.6, 24.5], ceilings: true },
+	{ name: 'hdr-room', eye: [55.5, 2.4, 19.8], look: [50, 1.0, 29], ceilings: true },
+	{ name: 'overview-treatment', eye: [56, 75, -0.1], look: [56, 0, 0] },
+	{ name: 'overview-roofs', eye: [20, 120, -15.1], look: [20, 0, -15], ceilings: true }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),
@@ -285,6 +298,8 @@ try {
 						m.u = s.u;
 					}
 					V.spec = s;
+					// ceilings and hallway roofs are hidden at boot (as in overview); a shot may show them
+					N.ceilings.forEach((c) => (c.visible = !!s.ceilings));
 					let t = base;
 					performance.now = () => t;
 					// the wall clocks read Date and the actors' idle motion reads Math.random: fix both

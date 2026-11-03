@@ -39,7 +39,8 @@ import {
 	corridorNodesFromHub,
 	shortestCorridorRoute,
 	shortestCorridorRouteFromPosition,
-	makePolylineCurve
+	makePolylineCurve,
+	TREATMENT_JUNCTION_X
 } from './walk';
 import { roomById, ROOM_CAST, doors, player } from './main';
 import { JOURNEY, journeyActorRoom, workflowTransitions } from './journey';
@@ -674,7 +675,7 @@ export function addMovingActors() {
 		linacRunner,
 		[
 			// Corridor lanes z = -1.2 / -2.4, branch lanes x = 62.2 / 60.9 to the vault 1 approach
-			// (the journey route runs along x = 63.3..64 there).
+			// (journey hand-overs run along x = 63.4 there, the player's guided line along x = 60.4).
 			[47, 0, -1.2],
 			[51, 0, -1.2],
 			[55, 0, -1.2],
@@ -722,17 +723,19 @@ export function addMovingActors() {
 	addMover(
 		hdrRunner,
 		[
-			// Out of HDR at z = 25.5, strip lanes x = 62.15 / 63.15, in at z = 24.5 to the nook.
-			[61.5, 0, 25.5],
-			[61.83, 0, 25.59],
-			[62.06, 0, 25.83],
-			[62.15, 0, 26.15],
-			[62.15, 0, 28.5],
-			[62.15, 0, 30.4],
-			[62.3, 0, 30.75],
-			[62.65, 0, 30.9],
-			[63, 0, 30.75],
-			[63.15, 0, 30.4],
+			// Out of the HDR door (x = 58) at z = 24.5, east to the strip lanes x = 62.15 / 63.15 (turns at
+			// z = 30.4 and 20.1), back in at z = 23.5 to a loop on the console side of the glass (x 55.2..56.2).
+			[58, 0, 24.5],
+			[61.5, 0, 24.5],
+			[61.83, 0, 24.59],
+			[62.06, 0, 24.83],
+			[62.15, 0, 25.15],
+			[62.15, 0, 27.5],
+			[62.15, 0, 29.9],
+			[62.3, 0, 30.25],
+			[62.65, 0, 30.4],
+			[63, 0, 30.25],
+			[63.15, 0, 29.9],
 			[63.15, 0, 28],
 			[63.15, 0, 25.5],
 			[63.15, 0, 23],
@@ -742,27 +745,30 @@ export function addMovingActors() {
 			[62.3, 0, 20.25],
 			[62.15, 0, 20.6],
 			[62.15, 0, 22],
-			[62.15, 0, 23.85],
-			[62.06, 0, 24.18],
-			[61.83, 0, 24.41],
-			[61.5, 0, 24.5],
-			[60.6, 0, 24.5],
-			[60.15, 0, 24.62],
-			[59.82, 0, 24.95],
-			[59.7, 0, 25.4],
-			[59.7, 0, 26.5],
-			[59.7, 0, 28],
-			[59.7, 0, 29.6],
-			[59.85, 0, 29.95],
-			[60.2, 0, 30.1],
-			[60.55, 0, 29.95],
-			[60.7, 0, 29.6],
-			[60.7, 0, 28],
-			[60.7, 0, 26.3],
-			[60.81, 0, 25.9],
-			[61.1, 0, 25.61]
+			[62.15, 0, 22.85],
+			[62.06, 0, 23.18],
+			[61.83, 0, 23.41],
+			[61.5, 0, 23.5],
+			[58, 0, 23.5],
+			[56.1, 0, 23.5],
+			[55.65, 0, 23.62],
+			[55.32, 0, 23.95],
+			[55.2, 0, 24.4],
+			[55.2, 0, 25.5],
+			[55.2, 0, 27],
+			[55.2, 0, 28.6],
+			[55.35, 0, 28.95],
+			[55.7, 0, 29.1],
+			[56.05, 0, 28.95],
+			[56.2, 0, 28.6],
+			[56.2, 0, 27],
+			[56.2, 0, 25.3],
+			[56.31, 0, 24.9],
+			[56.6, 0, 24.61]
 		],
-		0.01287,
+		// loops per second: 0.01047 x the 42.9 m loop keeps the old pace (~0.45 m/s) now that the door
+		// moved 3.5 m west of the lanes
+		0.01047,
 		true,
 		0.29,
 		0,
@@ -1113,8 +1119,8 @@ function segmentEntersRoom(r, a, b) {
 	}
 	return true;
 }
-// NPC routes walk the treatment corridor's line x = 64 at this x: that line runs inside the corridor's
-// east wall (x 63.71-64.29, rooms.ts), into which a body centred on x = 64 walks.
+// The player's guided line walks the treatment walkway's middle (walk.ts TREATMENT_JUNCTION_X, x 60.4);
+// NPC hand-over routes keep to this lane instead, beside the vault wall (x 63.71-64.29, rooms.ts).
 const NPC_TREATMENT_LANE_X = 63.4;
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
 // point in room targetId (`spot`, when the actor took an arrival spot there). Inside a room it follows
@@ -1152,7 +1158,7 @@ function buildActorHandoffPath(
 	else if (actualFrom && !actualFrom.hub) corridor.push(corridorAnchor(actualFrom).p);
 	const legs = corridor.map((v) => {
 		const q = zeroY(v);
-		return [Math.abs(q.x - 64) < 1e-6 ? NPC_TREATMENT_LANE_X : q.x, q.z];
+		return [Math.abs(q.x - TREATMENT_JUNCTION_X) < 1e-6 ? NPC_TREATMENT_LANE_X : q.x, q.z];
 	});
 	if (detectedFrom?.hub && legs.length)
 		pts.push(...inRoomPath(detectedFrom.id, start, { x: legs[0][0], z: legs[0][1] }));

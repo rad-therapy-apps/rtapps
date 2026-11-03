@@ -63,7 +63,7 @@ import {
 } from './props';
 import { add, MAT, roomFloors, ceilings, doors, roomById } from './main';
 import { registerInteractable } from './interact';
-import { doorNormal, doorCenter } from './walk';
+import { doorNormal, doorCenter, TREATMENT_JUNCTION_X } from './walk';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment';
 
 // RTApps (#77 phase 2 task 12): typed boundary for the ROOMS layout table — fields
@@ -424,16 +424,16 @@ export const ROOMS: Room[] = [
 		zone: 'clinical',
 		name: 'HDR / Special Procedures Suite',
 		kicker: 'Clinical Wing · Brachytherapy',
-		x: 56,
-		z: 25,
-		w: 11,
-		d: 12,
+		x: 51.5,
+		z: 24,
+		w: 13,
+		d: 13,
 		doorSide: 'xmax',
 		special: true,
 		doorType: 'hdrSlide',
 		color: C.special,
-		cam: [60.8, 1.68, 25],
-		look: [56, 1.25, 25],
+		cam: [57.3, 1.68, 24],
+		look: [51.5, 1.25, 24],
 		desc: 'A shielded special-procedures suite representing high-dose-rate brachytherapy, where a temporary radioactive source is remotely transferred through applicators for treatment.',
 		what: 'HDR care combines physician procedures, nursing support, medical physics, radiation therapy and strict source-safety procedures.'
 	}
@@ -453,7 +453,8 @@ export function addCirculationProps() {
 	cart1.rotation.y = Math.PI;
 	scene.add(cart1);
 	const cart2 = medCartObject(0.92, 0x77b59b);
-	cart2.position.set(55.3, 0, 23.8);
+	// in the HDR suite, beside the exam table (room centre (51.5, 24))
+	cart2.position.set(50.8, 0, 22.8);
 	cart2.rotation.y = Math.PI / 2;
 	scene.add(cart2);
 	const iv1 = ivPoleObject(0.95);
@@ -726,6 +727,12 @@ export function zoneAccentColor(room: Room) {
 	return 0x4279a0;
 }
 
+// Ceilings and hallway roofs are only seen from below, where the hemisphere light's olive ground
+// colour shades them dark green; a matching glow keeps them a light ceiling grey.
+function ceilingMat(c) {
+	return std(c, 0.95, 0, { emissive: c, emissiveIntensity: 0.6 });
+}
+
 export function buildRoom(room: Room) {
 	const h = room.vault ? 5.7 : 3.75,
 		t = room.vault ? 0.58 : 0.16,
@@ -747,7 +754,7 @@ export function buildRoom(room: Room) {
 	['zmin', 'zmax', 'xmin', 'xmax'].forEach((s) => buildSide(room, s, h, t, mat));
 	if (room.vault) addVaultDoorwaySigns(room);
 	addRoomBaseboards(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, std(0xe9edef, 0.95, 0), room.x, h, room.z);
+	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xe9edef), room.x, h, room.z);
 	ceiling.castShadow = false;
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
@@ -819,7 +826,7 @@ export function buildHubLobby(room: Room) {
 	lobbyWallWithGap('zmin', 7.0, h, t);
 	lobbyWallWithGap('zmax', 5.2, h, t);
 	buildLobbyEntrance(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, std(0xf0f3f4, 0.95, 0), room.x, h, room.z);
+	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xf0f3f4), room.x, h, room.z);
 	scene.add(ceiling);
 	ceilings.push(ceiling);
 	for (let x = -8; x <= 8; x += 4)
@@ -946,7 +953,9 @@ export function buildExteriorAmbient() {
 	}
 	const drive = box(94, 0.014, 18, std(0x4d565d, 0.98, 0.01), 10, -0.025, 30);
 	scene.add(drive);
-	const curb = box(96, 0.08, 0.22, std(0xadb4af, 0.9, 0.02), 10, 0.04, 20.95);
+	// the drive's north curb stops at x 44.9, short of the HDR suite (x 45..58): its top (0.08) would
+	// show through the suite's floor
+	const curb = box(82.9, 0.08, 0.22, std(0xadb4af, 0.9, 0.02), 3.45, 0.04, 20.95);
 	scene.add(curb);
 	const curb2 = box(96, 0.08, 0.22, std(0xadb4af, 0.9, 0.02), 10, 0.04, 39.05);
 	scene.add(curb2);
@@ -1513,15 +1522,25 @@ export function buildCorridorInfillWalls() {
 	// Clinical corridor and transition toward treatment branch.
 	[
 		[12, 15],
-		[25, 44],
-		[58, 60]
+		[25, 44]
 	].forEach((s) => infillH(s[0], s[1], 4));
 	[
 		[12, 27],
-		[52, 60]
+		[52, 58.09]
 	].forEach((s) => infillH(s[0], s[1], -4));
 	// Treatment branch between the two vault entrances.
 	infillV(-7, 7, 67, 5.7, 0.42);
+	// The treatment walkway's outside wall, on the line of LINAC Control's and the HDR suite's east walls
+	// (x 58), 5.7 m like the vault walls opposite, and its two end walls
+	infillV(-31, -4, 58, 5.7);
+	infillV(14, 17.5, 58, 5.7);
+	infillV(30.5, 31, 58, 5.7);
+	infillH(57.91, 64, -31, 5.7);
+	infillH(57.91, 64, 31, 5.7);
+	// the patient-services hallway's west end and the technical hallway's north end (x -3..-2 is the
+	// commons' wall)
+	infillV(-3, 3, -52);
+	infillH(-2, 3, -66);
 }
 
 export function buildVaultMazeEntries() {
@@ -1616,6 +1635,46 @@ export function corridorLightsVertical(z0, z1, x, y = 3.72) {
 	}
 }
 
+const ROOF_MAT = ceilingMat(0xe9edef);
+// Roofs over the hallways, like the room ceilings: 0.08 slabs at the wall top (3.75; the treatment
+// walkway's at 5.7, the vault height), edges on the wall centre lines so they never overlap a room's
+// ceiling (which stops 0.1 m inside its walls). They join `ceilings`, so the overview hides them. Then
+// the walls above the 3.75 rooms that face the walkway, and the lintel over the hallway mouth, are filled
+// up to its roof.
+export function buildCorridorRoofs() {
+	const roof = (x0, x1, z0, z1, y) => {
+		const r = box(x1 - x0, 0.08, z1 - z0, ROOF_MAT, (x0 + x1) / 2, y, (z0 + z1) / 2);
+		r.name = 'hall-roof';
+		r.castShadow = false;
+		r.receiveShadow = false;
+		scene.add(r);
+		ceilings.push(r);
+	};
+	roof(-52, -12, -3, 3, 3.75); // patient-services hallway
+	// technical hallway: the commons (x -2) and dosimetry (x 2) walls stand 1 m inside its lines
+	roof(-3, 3, -41.5, -10, 3.75);
+	roof(-3, 2, -54, -41.5, 3.75);
+	roof(-2, 2, -56.5, -54, 3.75);
+	roof(-2, 3, -66, -56.5, 3.75);
+	// clinical hallway: the manager's (z 3.5) and the CT room's (z -3) walls stand inside its lines
+	roof(12, 15, -4, 4, 3.75);
+	roof(15, 25, -4, 3.5, 3.75);
+	roof(25, 36, -4, 4, 3.75);
+	roof(36, 52, -3, 4, 3.75);
+	roof(52, 58, -4, 4, 3.75);
+	// the treatment walkway and the pocket between the vault entrances, at the vault height
+	roof(58, 64, -31, 31, 5.7);
+	roof(64, 67, -5, 5, 5.7);
+	const fill = (t, len, x, z, alongZ) => {
+		const f = box(alongZ ? t : len, 1.95, alongZ ? len : t, INFILL_MAT, x, 4.725, z);
+		f.name = 'roof-fill';
+		scene.add(f);
+	};
+	fill(0.16, 10, 58, 9, true); // above LINAC Control's east wall (z 4..14)
+	fill(0.16, 13, 58, 24, true); // above the HDR suite's east wall (z 17.5..30.5)
+	fill(0.18, 8, 58, 0, true); // over the clinical hallway's mouth (z -4..4)
+}
+
 export function clinicalCeilingAccents(roomId) {
 	const r = roomById(roomId);
 	if (!r) return;
@@ -1677,9 +1736,9 @@ export function corridorAnchor(room: Room) {
 	if (room.wing === 'patient') return { p: new THREE.Vector3(room.x, 1.66, 0), line: 'main' };
 	if (room.wing === 'technical')
 		return { p: new THREE.Vector3(0, 1.66, room.z), line: 'technical' };
-	if (room.id === 'vault1') return { p: new THREE.Vector3(63.15, 1.66, -18), line: 'treatment' };
-	if (room.id === 'vault2') return { p: new THREE.Vector3(63.15, 1.66, 18), line: 'treatment' };
-	if (room.id === 'hdr') return { p: new THREE.Vector3(64, 1.66, room.z), line: 'treatment' };
+	// the treatment walkway's rooms (vaults at z -18 / 18, HDR at z 24): on its walking line at the door's z
+	if (room.id === 'vault1' || room.id === 'vault2' || room.id === 'hdr')
+		return { p: new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, room.z), line: 'treatment' };
 	return { p: new THREE.Vector3(room.x, 1.66, 0), line: 'main' };
 }
 

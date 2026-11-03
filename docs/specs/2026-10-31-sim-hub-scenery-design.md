@@ -247,6 +247,30 @@ The vault west walls are 0.58 m thick (x 63.71..64.29), with door openings at z 
 
 Planned after Update 1 merges. Re-measure first: Update 1 moves nothing here, but the plan needs exact wall pieces.
 
+**Re-measured 2026-11-03 (main 7e52ed2). These numbers replace the ones below where they differ:**
+
+- **Roof edges:** roofs lie on the wall centre lines, so they do not overlap the room ceilings, which stop 0.1 m inside their walls. Rectangles at y 3.75:
+  - **west:** x -52..-12, z -3..3;
+  - **technical** (four pieces, because the commons and dosimetry walls intrude 1 m): x -3..3 z -41.5..-10; x -3..2 z -54..-41.5; x -2..2 z -56.5..-54; x -2..3 z -66..-56.5;
+  - **clinical** (five pieces, for the manager and CT sim walls): x 12..15 z -4..4; x 15..25 z -4..3.5; x 25..36 z -4..4; x 36..52 z -3..4; x 52..58 z -4..4.
+- **Walkway roof:** at y 5.7, covering x 58..64, z -31..31, plus the junction pocket between the vault entrances, x 64..67, z -5..5.
+- **Gap fills** (non-colliding, y 3.75..5.7):
+  - above LINAC Control's east wall (x 58, z 4..14);
+  - above the HDR suite's east wall (x 58, its z span);
+  - a lintel over the clinical hallway's mouth (x 58, z -4..4).
+- **End walls:**
+  - the technical north end wall is x -2..3, because x -3..-2 is the commons' wall;
+  - the walkway ends at z ±31 run from x 57.91 to 64, 5.7 m tall.
+- **Clinical hallway infill:** remove the z = +4 piece at x 58..60 as well as trimming the z = -4 piece (x 52..60 to 52..58).
+- **Walkway floor:** spans x 58..68, keeping the pocket's floor, plus the junction plate.
+- **Walkway lights:** at x 61 and y 5.67. The clinical hallway's light strips end at x 57, and the technical hallway's start at z -64.
+- **HDR suite:** 13 × 13, centre (51.5, 24), x 45..58, z 17.5..30.5, door on the x = 58 wall centred on z 24.
+  - It cannot reach z 33: the parking-loop car drives at z 32 and turns at x 47..49.75, so the south wall stays at z ≤ 30.5.
+  - The outside-wall segments become z 14..17.5 and z 30.5..31.
+  - The parking curb (x -38..58, z 20.95) is shortened to end at x 44.9; its top already showed through the old HDR floor.
+- **Shots:** `sim-hub-shots.mjs` gains a per-shot `ceilings: true` option, through a `ceilings` export on the NPC hook, so the shots can show the roofs.
+- **Visibility check:** the pre-existing failure is expected to clear, because the clinical roof's edge at z -3 covers the CT room's ceiling slab.
+
 ### B1. Hallway roofs
 
 - **Now:** rooms have ceilings: `buildRoom` (`rooms.ts` ≈725–754), a 0.08 slab at the wall height, pushed to `ceilings` (`main.ts` 404). The four hallways have none, only light strips at y 3.72.
@@ -377,3 +401,40 @@ The exemption applies to exactly the 5 LINAC control chairs. A seat facing a bar
   - Cabinet drawer lines cover only the lower half of a cabinet.
   - The LINAC inspect camera now frames the console from across the room.
   - Smaller scene-check and NPC-check tidy-ups, listed in the final review.
+
+### Update 2 (branch `fix/sim-hub-scenery-building`, plan `docs/plans/2026-11-03-sim-hub-scenery-update2.md`)
+
+Built to the "Re-measured 2026-11-03" block above, with one exception (the walkway floor, below). Where that block and B1–B4 differ, the block is what was built.
+
+**HDR suite (B4):**
+- 13 × 13 at (51.5, 24): x 45..58, z 17.5..30.5, door on the x = 58 wall centred on z 24. The planned z 19..33 would have put the south wall in the parking-loop car's path (z 32).
+- The cart sits at (50.8, 0, 22.8) and the door beacon at (57.6, 3.15, 23.1). `ROOM_GRAPHS.hdr`'s door nodes (58.85, 24) and (57.0, 24.6) replace the old (62.35, 25) and (60.5, 25.6).
+- The hdrRunner loop is rebuilt for the new room. Its speed drops to 0.01047, which keeps the old 0.45 m/s on the longer loop.
+- The parking curb ends at x 44.9.
+
+**Treatment walkway (B3):**
+- **Floor:** x 58..64 plus the 9.5 m junction plate (the block above says x 58..68; the floor was built to x 64 and the plate covers the rest), and the clinical hallway's floor now reaches x 58. Both landed with the HDR task, because the hdrRunner walks there.
+- **Walls (5.7 m):** the x = 58 line is closed from z -31 to 31. The pieces at z -31..-4, 14..17.5 and 30.5..31 are new; the gaps are LINAC Control, the HDR suite and the hallway mouth. The end walls at z ±31 run from x 57.91 to 64.
+- **Clinical hallway infill:** the z = +4 piece at x 58..60 is gone, and the z = -4 piece ends at x 58.09, where it meets the new x = 58 wall's outer face (a first version stopped at x 58 and left a 9 × 9 cm notch at the corner (58, -4)).
+- **Walking line:** `TREATMENT_JUNCTION_X` (exported from `walk.ts`) is 60.4, not the planned 60.9: at 60.9 the guided camera ran in the walkway runner's lane. The vault guided-route nodes at (62.8, ±18) are dropped, and the vault 1, vault 2 and HDR corridor anchors sit on the line at (60.4, room.z). This closes the issue #182 item about the guided route running inside the vault wall.
+- **NPC lane:** NPC hand-overs still run at x 63.4. `npc-behavior.ts` remaps junction nodes onto `NPC_TREATMENT_LANE_X`.
+- **Guided route:** the player's guided camera curve gets one extra main-line node at (56, 1.66, 0) next to the junction node, when the route runs along the main hallway into or out of the junction from the west (`easeIntoJunction` in `walk.ts`). Without it the long leg into (60.4, 0) made the curve overshoot east into the NPC lanes. Peak x inside the walkway (past z ±4.2) dropped from 61.7–63.1 to at most 60.53 on every sampled route. NPC routes are unchanged.
+- **Lights:** the walkway strips run at x 61, y 5.67, z -30..30. The clinical hallway's last strip is centred at x 57 and reaches x 58.05.
+
+**Roofs and end walls (B1, B2):**
+- **Roofs:** `buildCorridorRoofs()` lays the 12 roof rectangles from the block above: 0.08 slabs named `hall-roof`, pushed to `ceilings` and casting no shadows.
+- **Fills:** three `roof-fill` boxes (y 3.75..5.7, not colliders) close the walkway side above LINAC Control, above the HDR suite and over the hallway mouth.
+- **End walls:** the patient-services hallway ends at x = -52, and the technical hallway at z = -66 (x -2..3). The technical hallway's lights start at z -64.
+
+**Ceilings (owner decision, 2026-11-03):** every room ceiling, the lobby ceiling and the hallway roofs now read light grey from below. The hemisphere light's ground colour (0x63745f) had shaded every downward face dark olive. They share `ceilingMat()` in `rooms.ts`: the ceiling colour, with an emissive glow of the same colour at 0.6.
+
+**Checks:**
+- **Scene check:** 102 placements pass.
+- **Visibility check:** 297 poses, 0 failures. The Update 1 "linaccontrol walk h0" failure is cleared by the clinical roof.
+- **Shots tool:** a shot can set `ceilings: true` (through `window.__NPC.ceilings`). Ten building-shell shots were added: hall-west-end, hall-tech-north, hall-clinical-roof, walkway-junction, walkway-north, walkway-south, hdr-door, hdr-room, overview-treatment and overview-roofs.
+
+**Known, not fixed here:**
+- No automated check covers the player's guided camera curve. The peak x above was sampled by hand. A follow-up could sample `makeRouteToApproach` for every room pair against the wall colliders and the NPC lanes.
+- The guided curve still overshoots in z at the end of some routes, inside the walkway (vault 1 → HDR to z 25.12, vault 1 → vault 2 to z 18.96, lobby → vault 1 to z -18.48). This was there before Update 2, and the door and entry phase absorbs it.
+- The hand-over route `hdr[0] → patientcare` crosses the HDR suite's glass partition. The glass is not a collider, so no check catches it; the old layout had the same crossing.
+- The hallway and walkway light strips sit 2.5 mm under the roof undersides, as they did under the room ceilings. No flicker shows in stills.
