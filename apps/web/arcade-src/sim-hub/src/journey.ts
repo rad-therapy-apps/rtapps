@@ -822,7 +822,7 @@ export function resetTreatmentJourney(silent = false) {
 		setActorSeated(JOURNEY.newPatient, true);
 	}
 	if (JOURNEY.therapist) {
-		JOURNEY.therapist.position.set(51.35, 0, 10.6);
+		JOURNEY.therapist.position.set(46.06, 0, 10.6);
 		JOURNEY.therapist.rotation.y = -Math.PI / 2;
 		poseCharacter(JOURNEY.therapist, 'console');
 	}
@@ -1300,7 +1300,7 @@ export function advanceTreatmentJourney() {
 			JOURNEY.vaultTherapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(50.85, 0, 8.6),
+			new THREE.Vector3(45.56, 0, 8.6),
 			atControl,
 			1.88
 		);
@@ -1308,7 +1308,7 @@ export function advanceTreatmentJourney() {
 			JOURNEY.therapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(51.1, 0, 10.2),
+			new THREE.Vector3(45.81, 0, 10.2),
 			atControl,
 			1.9,
 			{
@@ -2143,7 +2143,7 @@ function advanceNewPatientJourney() {
 				JOURNEY.ctControlTherapist,
 				'ctcontrol',
 				'ctcontrol',
-				new THREE.Vector3(31.1, 0, -7.8),
+				new THREE.Vector3(32.3, 0, -8.45),
 				atControl,
 				1.25
 			);
@@ -2494,7 +2494,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.vaultTherapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(50.85, 0, 8.6),
+			new THREE.Vector3(45.56, 0, 8.6),
 			atControl,
 			1.82
 		);
@@ -2502,7 +2502,7 @@ function advanceNewPatientJourney() {
 			JOURNEY.therapist,
 			'vault1',
 			'linaccontrol',
-			new THREE.Vector3(51.1, 0, 10.2),
+			new THREE.Vector3(45.81, 0, 10.2),
 			atControl,
 			1.84,
 			{

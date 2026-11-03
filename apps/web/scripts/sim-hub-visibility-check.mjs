@@ -20,7 +20,7 @@
 //       * high guided-orbit poses inside rooms (just above their wall tops), looking down
 //       * the LINAC 'Overhead' feed camera (79.6,5.4,-24.8; under the 5.7 m vault walls), which
 //         must still be culled correctly
-//   - 2 poses in linaccontrol looking at the wall monitors, 1 in ctcontrol looking through the glass
+//   - 2 poses in linaccontrol looking at the console monitors, 1 in ctcontrol looking through the glass
 //     into ctsim
 //
 // ON pass = production behaviour: applyVisibility(camera) runs, then the ID buffer is rendered with
@@ -409,16 +409,16 @@ const report = await page.evaluate(
 		const lc = ROOMS.find((x) => x.id === 'linaccontrol');
 		const cc = ROOMS.find((x) => x.id === 'ctcontrol');
 		poses.push({
-			name: 'linaccontrol monitors north',
+			name: 'linaccontrol monitors left',
 			room: 'linaccontrol',
-			pos: [lc.x + 1, 1.65, lc.z + 2],
-			look: [lc.x + 4.45, 2.2, lc.z + 2]
+			pos: [lc.x - 2.5, 1.65, lc.z + 1.37],
+			look: [lc.x - 6.55, 2.43, lc.z + 1.37]
 		});
 		poses.push({
-			name: 'linaccontrol monitors south',
+			name: 'linaccontrol monitors right',
 			room: 'linaccontrol',
-			pos: [lc.x + 1, 1.65, lc.z - 2],
-			look: [lc.x + 4.45, 2.2, lc.z - 2]
+			pos: [lc.x + 1, 1.65, lc.z - 1.24],
+			look: [lc.x - 6.55, 1.8, lc.z - 1.24]
 		});
 		poses.push({
 			name: 'ctcontrol glass into ctsim',

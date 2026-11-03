@@ -620,7 +620,7 @@ export function addMovingActors() {
 			// the west-bound lane passes north of the parked wheelchair at (28.6, -1.4) at z = -0.85.
 			// Inside CT control the loop stays west of x = 30 (down x = 28, back up x = 29.1), clear of
 			// the idle staff and of where the CT journey and the ctsim handoff leave the therapists
-			// (31.1, -7.8), (31.3, -7.4), (32.3, -7.2).
+			// (32.3, -8.45), (32.75, -7.25), (32.3, -7.2).
 			[31.45, 0, -5.3],
 			[31.45, 0, -4],
 			[31.45, 0, -2.9],

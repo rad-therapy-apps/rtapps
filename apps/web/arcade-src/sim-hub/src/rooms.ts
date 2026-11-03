@@ -18,7 +18,6 @@ import {
 	cyl,
 	std,
 	wall,
-	makeWallSign,
 	makeDoorHeaderSign,
 	makeLobbyEntranceSign,
 	architecturalWallMaterial
@@ -44,7 +43,6 @@ import {
 	cabinetBank,
 	stool,
 	gurneyObject,
-	monitorWall,
 	wallShelf,
 	framedWallMonitor,
 	interiorRoomSign,
@@ -469,7 +467,8 @@ export function addCirculationProps() {
 	// on the lobby's west wall (inner face x = -11.91), facing into the lobby
 	aedWallBox(hall, -11.84, 1.62, 5.0, Math.PI / 2, 'AED');
 	aedWallBox(hall, 13.9, 1.62, 3.92, Math.PI, 'AED');
-	aedWallBox(hall, 3.05, 1.62, -12.92, 0, 'AED');
+	// on the north corridor's east wall (inner face x = 2.92), facing west into the corridor
+	aedWallBox(hall, 2.85, 1.62, -12.92, -Math.PI / 2, 'AED');
 	// on the treatment corridor's west wall (face x = 58.08), facing east into the corridor
 	aedWallBox(hall, 58.15, 1.62, 6.82, Math.PI / 2, 'AED');
 	const cameraPole = medCartObject(0.82, 0x98adb7);
@@ -586,7 +585,6 @@ export function buildDoor(room: Room, side, gap) {
 	}
 	scene.add(g);
 	doors.set(room.id, d);
-	makeWallSign(room, side, gap);
 	makeDoorHeaderSign(room, side, gap);
 }
 
@@ -603,7 +601,9 @@ export function buildSide(room: Room, side, h, t, mat) {
 			const sw = (room.w - gap) / 2;
 			wall(room.x - (gap / 2 + sw / 2), z, sw, t, h, mat);
 			wall(room.x + (gap / 2 + sw / 2), z, sw, t, h, mat);
-			scene.add(box(gap, h - 2.65, t, mat, room.x, 2.65 + (h - 2.65) / 2, z));
+			const lint = box(gap, h - 2.65, t, mat, room.x, 2.65 + (h - 2.65) / 2, z);
+			lint.name = 'wall-lintel';
+			scene.add(lint);
 			buildDoor(room, side, gap);
 		} else if (isWindow) {
 			const sw = (room.w - win) / 2;
@@ -611,6 +611,7 @@ export function buildSide(room: Room, side, h, t, mat) {
 			wall(room.x + (win / 2 + sw / 2), z, sw, t, h, mat);
 			wall(room.x, z, win, t, 1.0, mat);
 			const hdr = box(win, h - 2.82, t, mat, room.x, 2.82 + (h - 2.82) / 2, z);
+			hdr.name = 'wall-lintel';
 			scene.add(hdr);
 			scene.add(box(win, 1.65, t * 0.45, MAT.glass, room.x, 2.0, z));
 		} else wall(room.x, z, room.w, t, h, mat);
@@ -621,6 +622,7 @@ export function buildSide(room: Room, side, h, t, mat) {
 			wall(x, room.z - (gap / 2 + sd / 2), t, sd, h, mat);
 			wall(x, room.z + (gap / 2 + sd / 2), t, sd, h, mat);
 			const lint = box(t, h - 2.65, gap, mat, x, 2.65 + (h - 2.65) / 2, room.z);
+			lint.name = 'wall-lintel';
 			scene.add(lint);
 			buildDoor(room, side, gap);
 		} else if (isWindow) {
@@ -628,7 +630,9 @@ export function buildSide(room: Room, side, h, t, mat) {
 			wall(x, room.z - (win / 2 + sd / 2), t, sd, h, mat);
 			wall(x, room.z + (win / 2 + sd / 2), t, sd, h, mat);
 			wall(x, room.z, t, win, 1.0, mat);
-			scene.add(box(t, h - 2.82, win, mat, x, 2.82 + (h - 2.82) / 2, room.z));
+			const hdr = box(t, h - 2.82, win, mat, x, 2.82 + (h - 2.82) / 2, room.z);
+			hdr.name = 'wall-lintel';
+			scene.add(hdr);
 			scene.add(box(t * 0.45, 1.65, win, MAT.glass, x, 2.0, room.z));
 		} else wall(x, room.z, t, room.d, h, mat);
 	}
@@ -763,13 +767,17 @@ export function lobbyWallWithGap(side, gap, h = 4.15, t = 0.18) {
 			sw = (r.w - gap) / 2;
 		wall(r.x - (gap / 2 + sw / 2), z, sw, t, h, mat);
 		wall(r.x + (gap / 2 + sw / 2), z, sw, t, h, mat);
-		scene.add(box(gap, h - 2.75, t, mat, r.x, 2.75 + (h - 2.75) / 2, z));
+		const lint = box(gap, h - 2.75, t, mat, r.x, 2.75 + (h - 2.75) / 2, z);
+		lint.name = 'wall-lintel';
+		scene.add(lint);
 	} else {
 		const x = r.x + (side === 'xmin' ? -hx : hx),
 			sd = (r.d - gap) / 2;
 		wall(x, r.z - (gap / 2 + sd / 2), t, sd, h, mat);
 		wall(x, r.z + (gap / 2 + sd / 2), t, sd, h, mat);
-		scene.add(box(t, h - 2.75, gap, mat, x, 2.75 + (h - 2.75) / 2, r.z));
+		const lint = box(t, h - 2.75, gap, mat, x, 2.75 + (h - 2.75) / 2, r.z);
+		lint.name = 'wall-lintel';
+		scene.add(lint);
 	}
 }
 
@@ -835,23 +843,27 @@ export function addVaultDoorwaySigns(room: Room) {
 	const side = room.doorSide,
 		normal = doorNormal(room),
 		tangent = side[0] === 'z' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1),
-		dc = doorCenter(room, 2.45);
+		dc = doorCenter(room, 4.85);
 	// eslint-disable-next-line no-useless-assignment -- initial value always overwritten by the branch below; kept for parity with legacy pattern
 	let rot = 0;
 	if (side === 'zmin') rot = Math.PI;
 	else if (side === 'zmax') rot = 0;
 	else if (side === 'xmin') rot = -Math.PI / 2;
 	else rot = Math.PI / 2;
-	const p1 = dc
-		.clone()
-		.add(tangent.clone().multiplyScalar(-2.2))
-		.add(normal.clone().multiplyScalar(0.12));
-	const p2 = dc
-		.clone()
-		.add(tangent.clone().multiplyScalar(2.2))
-		.add(normal.clone().multiplyScalar(0.12));
-	warningPlaque(scene, p1.x, 2.32, p1.z, rot, 'CAUTION', 'RADIATION AREA');
-	warningPlaque(scene, p2.x, 2.32, p2.z, rot, 'DO NOT ENTER', 'BEAM ON WHEN LIGHT IS ON');
+	// Three plaques side by side on the corridor face above the door, over its header sign (y 3.40..4.16):
+	// the vault wall is 0.58 m thick, so its corridor face is 0.29 m off the door centre line
+	const signs: [number, string, string][] = [
+		[-1.55, 'CAUTION', 'RADIATION AREA'],
+		[0, 'DO NOT ENTER', 'BEAM ON WHEN LIGHT IS ON'],
+		[1.55, 'NO ENTRY', 'WHEN BEAM ON']
+	];
+	for (const [along, title, sub] of signs) {
+		const p = dc
+			.clone()
+			.add(tangent.clone().multiplyScalar(along))
+			.add(normal.clone().multiplyScalar(0.34));
+		warningPlaque(scene, p.x, 4.85, p.z, rot, title, sub);
+	}
 }
 
 export function addRoomDecor(room: Room) {
@@ -1047,9 +1059,9 @@ export function furnish(room: Room) {
 			for (let i = -1; i <= 1; i++) {
 				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
 			}
-			// flush on the door wall's inner face (z = room.z + 4.42), beside the doorway: 0.9 m clear of
-			// the door opening (to x = room.x + 1.3) and of the corner
-			monitor(g, room.x + 3.11, 1.7, room.z + 4.392, 0, 1.8, 0.95);
+			// the navigator's computer on the desk, toward its door-side edge, facing the visitor chairs
+			// (-z) so the navigator and the patient read it together
+			monitor(g, room.x, 1.4, room.z + 1.55, Math.PI, 0.8, 0.48);
 			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
@@ -1075,11 +1087,6 @@ export function furnish(room: Room) {
 			break;
 		case 'physics':
 			desk(g, room.x - 2.3, room.z - 2.2, 2, 0.75);
-			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
-			const atom = cyl(1.0, 1.0, 0.06, MAT.water, 34);
-			atom.rotation.x = Math.PI / 2;
-			atom.position.set(room.x + 1.7, 1.3, room.z + 0.5);
-			add(g, atom);
 			break;
 		case 'radbio':
 			for (let i = -1; i <= 1; i++) {
@@ -1102,8 +1109,24 @@ export function furnish(room: Room) {
 			buildEngineeringWallSchematics(g, room);
 			break;
 		case 'qa':
+			// the water phantom: a scanning tank about real size (0.65 m) on its wheeled cart, at the old
+			// tank's x/z so the qa_water anchor (equipment.ts) still marks it; the tank stays the
+			// interactable
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
-			const tank = box(3.1, 1.55, 2.8, MAT.water, room.x, 1.0, room.z + 0.7);
+			const cartMat = std(0x8d9aa3, 0.5, 0.35),
+				cartZ = room.z + 0.7;
+			add(g, box(0.9, 0.06, 0.9, cartMat, room.x, 0.77, cartZ));
+			add(g, box(0.84, 0.04, 0.84, cartMat, room.x, 0.22, cartZ));
+			for (const sx of [-0.4, 0.4])
+				for (const sz of [-0.4, 0.4]) {
+					add(g, box(0.05, 0.62, 0.05, cartMat, room.x + sx, 0.43, cartZ + sz));
+					const wheel = cyl(0.06, 0.06, 0.05, MAT.black, 12);
+					wheel.rotation.z = Math.PI / 2;
+					wheel.position.set(room.x + sx, 0.06, cartZ + sz);
+					add(g, wheel);
+				}
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
+			const tank = box(0.65, 0.55, 0.65, MAT.water, room.x, 1.075, cartZ);
 			add(g, tank);
 			registerInteractable(
 				tank,
@@ -1115,26 +1138,28 @@ export function furnish(room: Room) {
 			break;
 		case 'dosimetry':
 			workstationRow(g, room.x, room.z - 2.0, 4, 2.3);
-			// flush on the +z wall's inner face (z = room.z + 7.42)
-			monitor(g, room.x, 2.2, room.z + 7.392, 0, 2.5, 1.3);
+			// the planning review screen on the centre desk, toward its +z edge, facing Dr Shah's side (-z)
+			monitor(g, room.x, 1.485, room.z + 1.6, Math.PI, 1.2, 0.65);
 			desk(g, room.x, room.z + 1.4, 4.4, 1.0);
 			cabinetBank(g, room.x - 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
 			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
 			break;
 		case 'manager':
-			desk(g, room.x, room.z - 1.5, 2.5, 0.85);
-			monitor(g, room.x, 1.4, room.z - 1.8, 0, 1.0, 0.55);
+			// the desk stands just in front of the visitor chairs (seat fronts at z = room.z + 1.22), the
+			// manager on its door side facing them; the screen faces the manager
+			desk(g, room.x, room.z + 0.5, 2.5, 0.85);
+			monitor(g, room.x, 1.435, room.z + 0.75, Math.PI, 1.0, 0.55);
 			// visitor chairs face the manager's desk
 			chair(g, room.x - 1.0, room.z + 1.5, Math.PI);
 			chair(g, room.x + 1.0, room.z + 1.5, Math.PI);
 			break;
 		case 'ctcontrol':
 			desk(g, room.x - 1.2, room.z - 0.2, 4.8, 1.15, Math.PI / 2);
-			monitorWall(g, room.x - 1.55, 1.68, room.z, 0.5 * Math.PI, 2, 2, 0.95, 0.54, 0.1);
+			// the operators' chairs face the console, seat fronts 0.5 m from the desk edge (x 30.875)
 			for (let i = -1; i <= 1; i++)
-				taskChair(g, room.x + 0.95, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
-			monitor(g, room.x, 2.05, room.z - 4.15, 0, 1.9, 1.05);
-			cabinetBank(g, room.x + 1.1, room.z + 3.45, 1.6, 1.5, 0.45, 0, 0xdbe3e8);
+				taskChair(g, room.x + 0.15, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
+			// a storage cabinet against the door wall east of the door (x 30.2..32.8), drawers facing in
+			cabinetBank(g, room.x + 3.2, room.z + room.d / 2 - 0.31, 1.6, 1.5, 0.45, Math.PI, 0xdbe3e8);
 			interiorRoomSign(
 				g,
 				room.x,
@@ -1146,7 +1171,8 @@ export function furnish(room: Room) {
 			);
 			wallClock(g, room.x + 2.9, 2.65, room.z - room.d / 2 + 0.13, 0);
 			sanitizerDispenser(g, room.x - 2.9, 1.55, room.z - room.d / 2 + 0.13, 0);
-			wallSpeaker(g, room.x + 3.75, 2.65, room.z, Math.PI / 2);
+			// the intercom speaker hangs on the window (+x) wall beside the window (z -11.25..-6.75), not over it
+			wallSpeaker(g, room.x + room.w / 2 - 0.13, 2.65, room.z - 3.3, -Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const ccart = medCartObject(0.88, 0x9db4bf);
 			ccart.position.set(room.x + 0.8, 0, room.z - 3.25);
@@ -1242,6 +1268,8 @@ export function furnish(room: Room) {
 				room.z + 1.5
 			);
 			add(g, laser2);
+			// the sagittal laser on the ceiling over the gantry: its top at the ceiling slab's
+			// underside (y 3.71)
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser3 = box(
 				0.12,
@@ -1249,7 +1277,7 @@ export function furnish(room: Room) {
 				0.12,
 				std(0x57d6cf, 0.1, 0.0, { emissive: 0x57d6cf, emissiveIntensity: 1.6 }),
 				room.x,
-				2.98,
+				3.65,
 				room.z + 1.5
 			);
 			add(g, laser3);
@@ -1257,17 +1285,20 @@ export function furnish(room: Room) {
 		case 'commons':
 			desk(g, room.x, room.z, 5.2, 1.25);
 			for (let i = -2; i <= 2; i++) chair(g, room.x + i * 1.15, room.z - 1.3);
-			monitor(g, room.x - 4.9, 2.0, room.z, Math.PI / 2, 1.8, 1.0);
+			// a presentation screen flush on the +z wall's inner face (z = room.z + 5.92), facing the five
+			// chairs; no desk stand
+			monitor(g, room.x, 1.9, room.z + room.d / 2 - 0.115, Math.PI, 1.8, 1.0, false);
 			break;
 		case 'linaccontrol':
-			desk(g, room.x - 1.0, room.z, 6.0, 1.25, Math.PI / 2);
-			monitorWall(g, room.x - 1.55, 1.78, room.z, 0.5 * Math.PI, 2, 2, 0.92, 0.52, 0.12);
+			// the console desk against the west wall (inner face x = room.x - 6.92), its screens facing east
+			// into the room as before; the operators' chairs keep their 1.07 m to the desk edge
+			desk(g, room.x - 6.29, room.z, 6.0, 1.25, Math.PI / 2);
 			for (let i = -2; i <= 2; i++)
-				taskChair(g, room.x + 0.95, room.z + i * 1.05, -Math.PI / 2, 0x4d6877);
-			monitor(g, room.x + 4.45, 2.2, room.z + 2.0, Math.PI / 2, 1.7, 0.95);
-			monitor(g, room.x + 4.45, 2.2, room.z - 2.0, Math.PI / 2, 1.7, 0.95);
-			cabinetBank(g, room.x + 4.9, room.z, 1.7, 1.5, 0.45, Math.PI / 2, 0xdfe7ea);
-			wallClock(g, room.x + 4.9, 2.85, room.z - 3.65, Math.PI / 2);
+				taskChair(g, room.x - 4.34, room.z + i * 1.05, -Math.PI / 2, 0x4d6877);
+			// under the Treatment Control screen on the east wall (frame from y 1.38), drawers facing in
+			cabinetBank(g, room.x + 6.69, room.z, 1.7, 1.3, 0.45, -Math.PI / 2, 0xdfe7ea);
+			// on the east wall beside the Treatment Control screen (z room.z - 1.49 .. room.z + 1.49)
+			wallClock(g, room.x + 6.86, 2.85, room.z - 3.6, -Math.PI / 2);
 			sanitizerDispenser(g, room.x - 4.6, 1.55, room.z - room.d / 2 + 0.13, 0);
 			break;
 		case 'vault1':
@@ -1306,22 +1337,6 @@ export function furnish(room: Room) {
 					['Beam status', 'Standby']
 				]
 			);
-			framedWallMonitor(
-				g,
-				room.x - 0.55,
-				2.18,
-				room.z - room.d / 2 + 0.35,
-				0,
-				4.55,
-				1.95,
-				'VAULT STATUS',
-				'Room observation',
-				[
-					['Camera feeds', 'Ceiling and wall CCTV active'],
-					['Intercom', 'Two-way communication ready'],
-					['Safety', 'Emergency OFF locations marked']
-				]
-			);
 			immobilizationStorage(
 				g,
 				room.x + 7.6,
@@ -1330,13 +1345,16 @@ export function furnish(room: Room) {
 				'VAULT 1 IMMOBILIZATION'
 			);
 			biohazardBox(g, room.x + 10.25, room.z + room.d / 2 - 2.05, Math.PI, 'BIOHAZARD');
-			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 2.1, 0);
+			// splash back flush on the -z wall's inner face (room.z - room.d / 2 + 0.29)
+			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 0.69, 0);
+			// centred over the live status board on the +z wall (equipment.ts, x room.x - 0.55), as vault 2's
+			// over its board on the -z wall
 			interiorRoomSign(
 				g,
-				room.x,
-				3.58,
-				room.z - room.d / 2 + 0.34,
-				0,
+				room.x - 0.55,
+				3.75,
+				room.z + room.d / 2 - 0.34,
+				Math.PI,
 				'VAULT 1 · LINAC',
 				'External beam treatment vault'
 			);
@@ -1355,19 +1373,11 @@ export function furnish(room: Room) {
 				'CAUTION',
 				'HIGH RADIATION AREA'
 			);
-			warningPlaque(
-				g,
-				room.x - room.w / 2 + 0.32,
-				1.65,
-				room.z + 2.95,
-				Math.PI / 2,
-				'NO ENTRY',
-				'WHEN BEAM ON'
-			);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
-			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 6.0, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
+			// clear of the setup checklist screen (room.z - 6.89 .. room.z - 2.71)
+			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 8.6, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
 			break;
 		case 'vault2':
 			emulatorLinacShell(g, room);
@@ -1405,22 +1415,6 @@ export function furnish(room: Room) {
 					['Beam status', 'Standby']
 				]
 			);
-			framedWallMonitor(
-				g,
-				room.x - 0.55,
-				2.18,
-				room.z - room.d / 2 + 0.35,
-				0,
-				4.55,
-				1.95,
-				'VAULT STATUS',
-				'Room observation',
-				[
-					['Camera feeds', 'Ceiling and wall CCTV active'],
-					['Intercom', 'Two-way communication ready'],
-					['Safety', 'Emergency OFF locations marked']
-				]
-			);
 			immobilizationStorage(
 				g,
 				room.x + 7.6,
@@ -1429,11 +1423,14 @@ export function furnish(room: Room) {
 				'VAULT 2 IMMOBILIZATION'
 			);
 			biohazardBox(g, room.x + 10.25, room.z + room.d / 2 - 2.05, Math.PI, 'BIOHAZARD');
-			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 2.1, 0);
+			// on the +z wall, opposite the status board; splash back flush on its inner face
+			// (room.z + room.d / 2 - 0.29)
+			sinkStation(g, room.x - room.w / 2 + 2.2, room.z + room.d / 2 - 0.69, Math.PI);
+			// centred over the live status board on the -z wall (equipment.ts, x room.x - 0.55)
 			interiorRoomSign(
 				g,
-				room.x,
-				3.58,
+				room.x - 0.55,
+				3.75,
 				room.z - room.d / 2 + 0.34,
 				0,
 				'VAULT 2 · LINAC',
@@ -1454,19 +1451,11 @@ export function furnish(room: Room) {
 				'CAUTION',
 				'HIGH RADIATION AREA'
 			);
-			warningPlaque(
-				g,
-				room.x - room.w / 2 + 0.32,
-				1.65,
-				room.z + 2.95,
-				Math.PI / 2,
-				'NO ENTRY',
-				'WHEN BEAM ON'
-			);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
-			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 6.0, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
+			// clear of the setup checklist screen (room.z - 6.89 .. room.z - 2.71)
+			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 8.6, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
 			break;
 		case 'hdr':
 			hdrSuite(g, room);
@@ -1660,9 +1649,10 @@ export function addClinicalWallPolish() {
 	const glow = std(0x78e8e0, 0.28, 0, { emissive: 0x3accc6, emissiveIntensity: 1.15 });
 	const dark = std(0x31444d, 0.58, 0.12);
 	// Flat, thin backplates behind the monitor banks. The previous rotated geometry projected into the room.
-	const linacPlate = box(0.08, 2.35, 5.4, dark, 49.72, 1.75, 9);
+	// LINAC control's console stands against the room's west wall (inner face x 44.08)
+	const linacPlate = box(0.08, 2.5, 5.4, dark, 44.12, 1.825, 9);
 	g.add(linacPlate);
-	const linacAccent = box(0.035, 0.07, 5.0, glow, 49.78, 2.92, 9);
+	const linacAccent = box(0.035, 0.07, 5.0, glow, 44.18, 3.07, 9);
 	g.add(linacAccent);
 	const ctPlate = box(0.08, 2.35, 4.2, dark, 30.02, 1.75, -9);
 	g.add(ctPlate);

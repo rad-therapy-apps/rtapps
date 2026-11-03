@@ -519,17 +519,39 @@ export function desk(g, x, z, w = 2.2, d = 0.75, rot = 0) {
 	add(g, base);
 }
 
-export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48) {
+export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48, stand = true) {
 	const m = box(w, h, 0.055, MAT.screen, x, y, z);
 	m.rotation.y = rot;
 	add(g, m);
+	// a wall-mounted screen has no desk stand under it
+	if (!stand) return;
 	const st = box(0.08, 0.28, 0.08, MAT.black, x, y - h / 2 - 0.14, z);
 	add(g, st);
+}
+
+// Four legs from the floor to a seat's underside, inset from its corners and turned with it, in the
+// seat's own material: the NPC check counts a seat's same-material parts as its frame, not as
+// furniture its sitter must clear (scripts/lib/furniture.mjs seatMeshes).
+function seatLegs(g, kind, x, z, rot, hx, hz, h) {
+	const c = Math.cos(rot),
+		s = Math.sin(rot);
+	for (const [lx, lz] of [
+		[-hx, -hz],
+		[hx, -hz],
+		[-hx, hz],
+		[hx, hz]
+	]) {
+		const leg = box(0.04, h, 0.04, MAT.uphol, x + lx * c + lz * s, h / 2, z - lx * s + lz * c);
+		leg.rotation.y = rot;
+		leg.name = `${kind}-leg`;
+		add(g, leg);
+	}
 }
 
 export function chair(g, x, z, rot = 0) {
 	const s = box(0.55, 0.12, 0.55, MAT.uphol, x, 0.48, z);
 	s.rotation.y = rot;
+	s.name = 'chair-seat';
 	add(g, s);
 	const b = box(
 		0.55,
@@ -542,6 +564,7 @@ export function chair(g, x, z, rot = 0) {
 	);
 	b.rotation.y = rot;
 	add(g, b);
+	seatLegs(g, 'chair', x, z, rot, 0.235, 0.235, 0.42);
 	// sitting area: backrest front (-0.15) to the seat's front edge (+0.275)
 	addSeat(g, 'chair', x, z, rot, 0.54, 0, 0.06);
 }
@@ -549,10 +572,12 @@ export function chair(g, x, z, rot = 0) {
 export function couch(g, x, z, rot = 0) {
 	const s = box(1.7, 0.32, 0.72, MAT.uphol, x, 0.43, z);
 	s.rotation.y = rot;
+	s.name = 'couch-seat';
 	add(g, s);
 	const b = box(1.7, 0.72, 0.16, MAT.uphol, x - 0.3 * Math.sin(rot), 0.87, z - 0.3 * Math.cos(rot));
 	b.rotation.y = rot;
 	add(g, b);
+	seatLegs(g, 'couch', x, z, rot, 0.8, 0.31, 0.27);
 	// sitting area: backrest front (-0.22) to the seat's front edge (+0.36)
 	addSeatRow(g, 'couch', x, z, rot, 0.59, 1.7, 0.07);
 }
@@ -607,43 +632,24 @@ export function cabinetBank(g, x, z, w = 2.0, h = 1.8, d = 0.48, rot = 0, color 
 	const body = box(w, h, d, std(color, 0.84, 0.02), x, h / 2, z);
 	body.rotation.y = rot;
 	add(g, body);
+	// the drawer lines and handles go on the front (the body's local +z face), turned with the body
+	const front = (d / 2) * 0.98,
+		at = (lx) => [
+			x + lx * Math.cos(rot) + front * Math.sin(rot),
+			z - lx * Math.sin(rot) + front * Math.cos(rot)
+		];
 	for (let i = -1; i <= 1; i++) {
-		const line = box(
-			w * 0.9,
-			0.02,
-			0.015,
-			std(0xb2bcc2, 0.7, 0.06),
-			x,
-			h * 0.22 + i * h * 0.22,
-			z + (d / 2) * 0.98
-		);
+		const y = h * 0.22 + i * h * 0.22,
+			[lx0, lz0] = at(0);
+		const line = box(w * 0.9, 0.02, 0.015, std(0xb2bcc2, 0.7, 0.06), lx0, y, lz0);
 		line.rotation.y = rot;
 		add(g, line);
-	}
-	const handleOff = (d / 2) * 0.98;
-	for (let i = -1; i <= 1; i++) {
-		const h1 = box(
-			0.04,
-			0.16,
-			0.015,
-			std(0x7d8b93, 0.45, 0.35),
-			x - w * 0.24,
-			h * 0.22 + i * h * 0.22,
-			z + handleOff
-		);
-		h1.rotation.y = rot;
-		add(g, h1);
-		const h2 = box(
-			0.04,
-			0.16,
-			0.015,
-			std(0x7d8b93, 0.45, 0.35),
-			x + w * 0.24,
-			h * 0.22 + i * h * 0.22,
-			z + handleOff
-		);
-		h2.rotation.y = rot;
-		add(g, h2);
+		for (const side of [-1, 1]) {
+			const [hx, hz] = at(side * w * 0.24);
+			const handle = box(0.04, 0.16, 0.015, std(0x7d8b93, 0.45, 0.35), hx, y, hz);
+			handle.rotation.y = rot;
+			add(g, handle);
+		}
 	}
 }
 
@@ -697,28 +703,6 @@ export function gurneyObject(g, x, z, rot = 0) {
 	add(g, pillow);
 }
 
-export function monitorWall(
-	g,
-	x,
-	y,
-	z,
-	rot = 0,
-	cols = 2,
-	rows = 2,
-	sw = 1.0,
-	sh = 0.58,
-	gap = 0.12
-) {
-	for (let r = 0; r < rows; r++)
-		for (let c = 0; c < cols; c++) {
-			const ox = (c - (cols - 1) / 2) * (sw + gap),
-				oy = (rows - 1 - r) * (sh + gap) - ((rows - 1) * (sh + gap)) / 2;
-			const sx = x + Math.cos(rot) * 0 + Math.sin(rot) * ox,
-				sz = z + Math.cos(rot) * ox - Math.sin(rot) * 0;
-			monitor(g, sx, y + oy, sz, rot, sw, sh);
-		}
-}
-
 export function wallShelf(g, x, y, z, w = 1.4, rot = 0) {
 	const sh = box(w, 0.04, 0.28, std(0xcfd7db, 0.84, 0.03), x, y, z);
 	sh.rotation.y = rot;
@@ -757,13 +741,35 @@ export function framedWallMonitor(
 }
 
 export function interiorRoomSign(g, x, y, z, rot = 0, title = 'ROOM', sub = 'Radiation Oncology') {
-	const sign = new THREE.Mesh(
-		new THREE.PlaneGeometry(2.8, 0.62),
-		new THREE.MeshBasicMaterial({ map: makeCanvasPanel(title, sub, []), side: THREE.DoubleSide })
-	);
-	sign.position.set(x, y, z);
-	sign.rotation.y = rot;
-	g.add(sign);
+	// a canvas at the plane's 2.8 : 0.62 aspect, title and subtitle centred across it (a long line is
+	// squeezed to fit, not cut)
+	const c = document.createElement('canvas');
+	c.width = 1400;
+	c.height = 310;
+	const q = c.getContext('2d');
+	q.fillStyle = '#f4f7f7';
+	q.fillRect(0, 0, 1400, 310);
+	q.fillStyle = '#2f8cab';
+	q.fillRect(0, 0, 1400, 26);
+	q.textAlign = 'center';
+	q.fillStyle = '#19313a';
+	q.font = '800 120px Arial';
+	q.fillText(title, 700, 164, 1320);
+	q.fillStyle = '#59717a';
+	q.font = '700 60px Arial';
+	q.fillText(sub, 700, 250, 1320);
+	const tx = new THREE.CanvasTexture(c);
+	tx.colorSpace = THREE.SRGBColorSpace;
+	const mat = new THREE.MeshBasicMaterial({ map: tx, side: THREE.FrontSide });
+	// two one-sided faces ('sign-back' turned by pi), so neither side reads mirrored (the CT
+	// immobilization shelf's sign faces the wall behind it)
+	[rot, rot + Math.PI].forEach((r, i) => {
+		const sign = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.62), mat);
+		if (i) sign.name = 'sign-back';
+		sign.position.set(x, y, z);
+		sign.rotation.y = r;
+		g.add(sign);
+	});
 }
 
 export function soapDispenser(g, x, y, z, rot = 0) {
@@ -1256,19 +1262,21 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 }
 
 export function ctScanner(g, room: Room) {
-	const ring = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.58, 18, 54), MAT.white);
+	// a real-size big-bore CT gantry: 2.1 m tall with a 0.9 m bore, centred 1.05 m up, so the couch top
+	// (y 1.025, 0.72 m wide) and the patient on it pass through the bore when the couch slides in
+	const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.3, 18, 54), MAT.white);
 	ring.rotation.y = Math.PI / 2;
-	ring.position.set(room.x, 2.15, room.z + 1.5);
+	ring.position.set(room.x, 1.05, room.z + 1.5);
 	ring.castShadow = true;
 	add(g, ring);
 	const bore = new THREE.Mesh(
-		new THREE.TorusGeometry(1.5, 0.07, 14, 48),
+		new THREE.TorusGeometry(0.45, 0.02, 14, 48),
 		std(0x2b3944, 0.5, 0.1, { emissive: 0x16435a, emissiveIntensity: 0.65 })
 	);
 	bore.rotation.y = Math.PI / 2;
 	bore.position.copy(ring.position);
 	add(g, bore);
-	const base = box(1.2, 1.0, 4.9, MAT.white, room.x, 1.0, room.z + 1.5);
+	const base = box(0.8, 0.35, 1.6, MAT.white, room.x, 0.175, room.z + 1.5);
 	add(g, base);
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
 	add(g, table);
@@ -1486,7 +1494,8 @@ export function customTextureWallMonitor(
 }
 
 export function consoleKeyboard(g, x, z, rot = 0) {
-	const kb = box(0.72, 0.035, 0.24, std(0x262d31, 0.52, 0.18), x, 0.91, z);
+	// on the desk top (y 0.88): the body 0.88..0.915, the key caps on the body, the mouse beside it
+	const kb = box(0.72, 0.035, 0.24, std(0x262d31, 0.52, 0.18), x, 0.8975, z);
 	kb.rotation.y = rot;
 	g.add(kb);
 	for (let r = 0; r < 3; r++)
@@ -1497,14 +1506,14 @@ export function consoleKeyboard(g, x, z, rot = 0) {
 				0.035,
 				std(0x727d82, 0.56, 0.08),
 				x + (c - 4.5) * 0.055 * Math.cos(rot) - r * 0.045 * Math.sin(rot),
-				0.935,
+				0.921,
 				z - (c - 4.5) * 0.055 * Math.sin(rot) - r * 0.045 * Math.cos(rot)
 			);
 			k.rotation.y = rot;
 			g.add(k);
 		}
 	const mouse = eRbox(0.11, 0.045, 0.16, std(0x363f44, 0.45, 0.18), 0.03);
-	mouse.position.set(x + 0.48 * Math.cos(rot), 0.94, z - 0.48 * Math.sin(rot));
+	mouse.position.set(x + 0.48 * Math.cos(rot), 0.9025, z - 0.48 * Math.sin(rot));
 	mouse.rotation.y = rot;
 	g.add(mouse);
 }
@@ -1566,8 +1575,10 @@ export function privacyChangingNook(roomId, x, z, rot = 0, label = 'PATIENT CHAN
 	q.fillText('Please close privacy screen while occupied', 550, 354);
 	const tx = new THREE.CanvasTexture(c);
 	tx.colorSpace = THREE.SRGBColorSpace;
+	// as wide as the back panel (p1), in the canvas's own 2.6:1, so it stays clear of the walls beside
+	// the nook (the CT room's west wall, the vault maze hall walls)
 	const sign = new THREE.Mesh(
-		new THREE.PlaneGeometry(2.35 * s, 0.9),
+		new THREE.PlaneGeometry(1.75 * s, 0.67 * s),
 		new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })
 	);
 	sign.position.set(x + Math.sin(rot) * 0.058, 1.88, z + Math.cos(rot) * 0.058);

@@ -51,6 +51,7 @@ import {
 import { setDoorTarget } from './walk';
 import { roomById, PRIMARY_PATIENTS, doors, player, roomFloors } from './main';
 import { APRON_TOP } from './rooms';
+import { VAULT2_SETUP_STEPS, vault2StepAt } from './vault-setup-loop';
 import {
 	JOURNEY,
 	ROOM_WORKFLOW,
@@ -118,6 +119,15 @@ function createWorkflowDisplay(key, x, y, z, rot, title, w = 2.7, h = 1.5) {
 function updateWorkflowDisplay(key, status, rows = [], accent = '#42d5cf') {
 	const d = PHASE4_DISPLAYS[key];
 	if (d) paintWorkflowDisplay(d, status, rows, accent);
+}
+let vault2Step = -1;
+/** Repaints vault 2's board when its setup loop moves on (stepSimulation, main.ts). */
+export function updateVault2Board(sec) {
+	const i = vault2StepAt(sec);
+	if (i === vault2Step) return;
+	vault2Step = i;
+	const s = VAULT2_SETUP_STEPS[i];
+	updateWorkflowDisplay('vault2State', s.state, s.rows, s.color);
 }
 export const ROOM_CLOCKS = [];
 export function updateWallClocks(now = performance.now()) {
@@ -203,13 +213,16 @@ export function buildLinacHeadWallStation(g, room) {
 	);
 	g.add(shelf);
 }
+// The two small teaching screens hang side by side on the +z wall, opposite the big head schematic on
+// the -z wall; the -x wall holds the door.
 export function buildEngineeringWallSchematics(g, room) {
+	const z = room.z + room.d / 2 - 0.16;
 	customTextureWallMonitor(
 		g,
-		room.x - room.w / 2 + 0.16,
+		room.x - 2.4,
 		2.03,
-		room.z + 1.35,
-		Math.PI / 2,
+		z,
+		Math.PI,
 		2.85,
 		1.66,
 		engineeringLinacOverviewTexture(),
@@ -218,10 +231,10 @@ export function buildEngineeringWallSchematics(g, room) {
 	);
 	customTextureWallMonitor(
 		g,
-		room.x + room.w / 2 - 0.16,
+		room.x + 2.4,
 		2.03,
-		room.z + 1.35,
-		-Math.PI / 2,
+		z,
+		Math.PI,
 		2.85,
 		1.66,
 		engineeringShieldingTexture(),
@@ -257,20 +270,17 @@ export function buildPhase4WorkflowDisplays() {
 		2.8,
 		1.5
 	);
-	createWorkflowDisplay('vault1State', 90.78, 2.32, -8.2, -Math.PI / 2, 'VAULT 1 STATUS', 2.7, 1.5);
+	// one live status board per vault, mirrored on the wall nearest the junction (vault 1's +z wall,
+	// vault 2's -z wall: inner faces z -5.29 and 5.29), sized to the board texture (1100 x 620)
+	createWorkflowDisplay('vault1State', 78.45, 2.18, -5.39, Math.PI, 'VAULT 1 STATUS', 3.5, 1.97);
+	createWorkflowDisplay('vault2State', 78.45, 2.18, 5.39, 0, 'VAULT 2 STATUS', 3.5, 1.97);
 	createWorkflowDisplay('consultState', -18, 2.25, -11.82, 0, 'CONSULT STATUS', 2.65, 1.38);
 	createWorkflowDisplay('educationState', -42, 2.25, -11.82, 0, 'PATIENT EDUCATION', 2.65, 1.38);
-	createWorkflowDisplay('ctSimState', 44, 2.35, -18.82, 0, 'CT SIMULATION', 2.85, 1.45);
-	createWorkflowDisplay(
-		'ctControlState',
-		35.82,
-		2.22,
-		-11.2,
-		-Math.PI / 2,
-		'CT CONTROL',
-		2.55,
-		1.38
-	);
+	// below the CT room's sign on the same wall (from y 2.75)
+	createWorkflowDisplay('ctSimState', 44, 1.9, -18.82, 0, 'CT SIMULATION', 2.85, 1.45);
+	// on CT control's back (-z) wall, where the blank screen was: clear of the window on the +x wall and
+	// below the room sign (from y 2.75)
+	createWorkflowDisplay('ctControlState', 31.5, 1.95, -13.82, 0, 'CT CONTROL', 2.55, 1.38);
 	createWorkflowDisplay(
 		'dosimetryState',
 		15.82,
@@ -396,11 +406,17 @@ export function buildOperatorLiveConsole() {
 	const g = new THREE.Group();
 	scene.add(g);
 	const rot = Math.PI / 2;
+	// Three columns of screens on the console desk against the west wall, facing east (+x), left to right
+	// as the operator sees them (left = +z): Vault Wide over Patient View, Cam A over Overhead, Cam B over
+	// the Vault 1 status mirror. Stems stand on the desk top (y 0.88); columns 0.08 m apart.
+	const mx = r.x - 6.55,
+		left = r.z + 1.37,
+		right = r.z - 1.24;
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
-		2.16,
-		r.z,
+		mx,
+		1.42,
+		right,
 		rot,
 		1.02,
 		0.58,
@@ -408,7 +424,7 @@ export function buildOperatorLiveConsole() {
 		'Vault monitor mirror',
 		'Mirrors the in-room patient-info and treatment-status monitor inside Vault 1.'
 	);
-	operatorLabel(g, r.x - 2.05, 2.55, r.z, rot, 'VAULT STATUS', 'MIRROR');
+	operatorLabel(g, mx, 1.81, right, rot, 'VAULT STATUS', 'MIRROR');
 	const tA = createOperatorFeed(
 		'Oblique right',
 		new THREE.Vector3(88.7, 2.6, -13.1),
@@ -441,8 +457,8 @@ export function buildOperatorLiveConsole() {
 	);
 	createOperatorMonitor(
 		g,
-		r.x - 1.02,
-		2.16,
+		mx,
+		2.23,
 		r.z,
 		rot,
 		1.02,
@@ -451,12 +467,12 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera A',
 		'Live oblique CCTV view of the patient on the treatment couch.'
 	);
-	operatorLabel(g, r.x - 1.02, 2.55, r.z, rot, 'CAM A');
+	operatorLabel(g, mx, 2.62, r.z, rot, 'CAM A');
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
-		1.42,
-		r.z,
+		mx,
+		2.23,
+		right,
 		rot,
 		1.02,
 		0.58,
@@ -464,10 +480,10 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera B',
 		'Live cross-table CCTV view of the active patient.'
 	);
-	operatorLabel(g, r.x - 2.05, 1.81, r.z, rot, 'CAM B');
+	operatorLabel(g, mx, 2.62, right, rot, 'CAM B');
 	createOperatorMonitor(
 		g,
-		r.x - 1.02,
+		mx,
 		1.42,
 		r.z,
 		rot,
@@ -477,35 +493,35 @@ export function buildOperatorLiveConsole() {
 		'Vault CCTV camera C',
 		'Live overhead CCTV view of the treatment couch and setup.'
 	);
-	operatorLabel(g, r.x - 1.02, 1.81, r.z, rot, 'OVERHEAD');
+	operatorLabel(g, mx, 1.81, r.z, rot, 'OVERHEAD');
 	createOperatorMonitor(
 		g,
-		r.x + 4.48,
-		2.2,
-		r.z + 2.0,
+		mx,
+		2.43,
+		left,
 		rot,
-		1.68,
-		0.95,
+		1.28,
+		0.72,
 		tD,
 		'Vault CCTV wide view',
 		'Wide-angle live vault view for monitoring patient position and room status.'
 	);
-	operatorLabel(g, r.x + 4.48, 2.82, r.z + 2.0, rot, 'VAULT WIDE');
+	operatorLabel(g, mx, 2.89, left, rot, 'VAULT WIDE');
 	createOperatorMonitor(
 		g,
-		r.x + 4.48,
-		2.2,
-		r.z - 2.0,
+		mx,
+		1.48,
+		left,
 		rot,
-		1.68,
-		0.95,
+		1.28,
+		0.72,
 		tE,
 		'Vault CCTV close-up',
 		'Closer live view of the active patient on the couch for therapist observation.'
 	);
-	operatorLabel(g, r.x + 4.48, 2.82, r.z - 2.0, rot, 'PATIENT VIEW');
-	consoleKeyboard(g, r.x - 0.25, r.z + 1.15, rot);
-	consoleKeyboard(g, r.x - 0.25, r.z - 1.15, rot);
+	operatorLabel(g, mx, 1.94, left, rot, 'PATIENT VIEW');
+	consoleKeyboard(g, r.x - 6.0, r.z + 1.15, rot);
+	consoleKeyboard(g, r.x - 6.0, r.z - 1.15, rot);
 	OPERATOR_CONSOLE.built = true;
 }
 
@@ -527,11 +543,14 @@ export function buildCtLiveConsole() {
 	const g = new THREE.Group();
 	scene.add(g);
 	const rot = Math.PI / 2;
+	// the four screens stand side by side in a 2 x 2 grid on the desk, in front of the backing board
+	// (x 29.98..30.06), facing the operators (+x): status and gantry on the -z side, patient and room on +z
+	const mx = r.x - 1.35;
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
-		2.08,
-		r.z,
+		mx,
+		2.15,
+		r.z - 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -539,7 +558,7 @@ export function buildCtLiveConsole() {
 		'CT simulation status mirror',
 		'Mirrors the CT Simulation room workflow/status display.'
 	);
-	operatorLabel(g, r.x - 2.05, 2.46, r.z, rot, 'CT SIM STATUS', 'MIRROR');
+	operatorLabel(g, mx, 2.53, r.z - 0.6, rot, 'CT SIM STATUS', 'MIRROR');
 	const tA = createCtFeed(
 		'CT Patient Side',
 		new THREE.Vector3(36.0, 2.15, -9.0),
@@ -560,9 +579,9 @@ export function buildCtLiveConsole() {
 	);
 	createOperatorMonitor(
 		g,
-		r.x - 1.0,
-		2.08,
-		r.z,
+		mx,
+		2.15,
+		r.z + 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -570,12 +589,12 @@ export function buildCtLiveConsole() {
 		'CT patient view',
 		'Live CT-room view centered on Mia during simulation.'
 	);
-	operatorLabel(g, r.x - 1.0, 2.46, r.z, rot, 'PATIENT VIEW');
+	operatorLabel(g, mx, 2.53, r.z + 0.6, rot, 'PATIENT VIEW');
 	createOperatorMonitor(
 		g,
-		r.x - 2.05,
+		mx,
 		1.38,
-		r.z,
+		r.z - 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -583,12 +602,12 @@ export function buildCtLiveConsole() {
 		'CT gantry view',
 		'Live view of the CT couch entering and exiting the gantry.'
 	);
-	operatorLabel(g, r.x - 2.05, 1.76, r.z, rot, 'GANTRY VIEW');
+	operatorLabel(g, mx, 1.76, r.z - 0.6, rot, 'GANTRY VIEW');
 	createOperatorMonitor(
 		g,
-		r.x - 1.0,
+		mx,
 		1.38,
-		r.z,
+		r.z + 0.6,
 		rot,
 		1.0,
 		0.56,
@@ -596,8 +615,8 @@ export function buildCtLiveConsole() {
 		'CT room wide view',
 		'Wide live view of the simulation tabletop and gantry.'
 	);
-	operatorLabel(g, r.x - 1.0, 1.76, r.z, rot, 'ROOM WIDE');
-	consoleKeyboard(g, r.x - 0.15, r.z + 0.65, rot);
+	operatorLabel(g, mx, 1.76, r.z + 0.6, rot, 'ROOM WIDE');
+	consoleKeyboard(g, r.x - 0.9, r.z + 0.65, rot);
 	CT_OPERATOR_CONSOLE.built = true;
 }
 function ctPatientTarget() {
@@ -1109,12 +1128,14 @@ export function updateStatusBeacons(sec) {
 }
 
 export function buildPhase5Wayfinding() {
+	// the two blades stand off the room walls along the clinical corridor; each one's wall edge stops
+	// 0.05 m short of that wall's corridor face (z -3.92 for CT control, 3.92 for LINAC control)
 	makeDirectionalSign(
 		'CT SIMULATION  ↓',
 		'CT Simulator · CT Control',
 		27.8,
 		2.82,
-		-2.8,
+		-2.17,
 		Math.PI / 2,
 		3.4
 	);
@@ -1123,7 +1144,7 @@ export function buildPhase5Wayfinding() {
 		'LINAC Control · Vaults · HDR',
 		46.5,
 		2.82,
-		2.75,
+		2.02,
 		-Math.PI / 2,
 		3.7
 	);
@@ -1286,7 +1307,7 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'linac_console',
 		roomId: 'linaccontrol',
-		dx: -1.0,
+		dx: -6.29,
 		dz: 0,
 		y: 1.35,
 		label: 'LINAC Treatment Control Console',

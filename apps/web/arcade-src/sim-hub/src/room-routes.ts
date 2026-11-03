@@ -52,16 +52,17 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 		{ x: 5.75, z: -17.2, facing: -2.93 },
 		{ x: 6.15, z: -17.8, facing: -2.63 }
 	],
-	// beside the QA enclosure, facing it
+	// beside the phantom's cart, facing it
 	qa: [
-		{ x: -5.65, z: -43.4, facing: -2.16 },
-		{ x: -5.65, z: -42.4, facing: -2.32 },
-		{ x: -5.6, z: -44.05, facing: -2.03 }
+		{ x: -6.5, z: -43.3, facing: -1.57 },
+		{ x: -6.5, z: -42.65, facing: -1.57 },
+		{ x: -6.5, z: -43.95, facing: -1.57 }
 	],
+	// behind the operators' chairs, facing the console
 	ctcontrol: [
-		{ x: 31.3, z: -7.4, facing: 1.05 },
-		{ x: 31.3, z: -6.75, facing: 1.46 },
-		{ x: 31.85, z: -7.75, facing: 0.64 }
+		{ x: 32.75, z: -7.25, facing: -1.57 },
+		{ x: 32.75, z: -8.45, facing: -1.57 },
+		{ x: 33.35, z: -7.85, facing: -1.57 }
 	],
 	ctsim: [
 		{ x: 40.4, z: -7.2, facing: 2.58 },
@@ -70,11 +71,11 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 	],
 	// behind the operators' chairs, facing the console
 	linaccontrol: [
-		{ x: 52.75, z: 7.2, facing: -0.99 },
-		{ x: 52.75, z: 6.5, facing: -0.83 },
-		{ x: 52.75, z: 7.9, facing: -1.19 },
-		{ x: 52.75, z: 8.6, facing: -1.43 },
-		{ x: 52.75, z: 9.3, facing: -1.68 }
+		{ x: 47.46, z: 7.2, facing: -0.99 },
+		{ x: 47.46, z: 6.5, facing: -0.83 },
+		{ x: 47.46, z: 7.9, facing: -1.19 },
+		{ x: 47.46, z: 8.6, facing: -1.43 },
+		{ x: 47.46, z: 9.3, facing: -1.68 }
 	],
 	vault1: [
 		{ x: 75.0, z: -14.25, facing: 2.36 },
@@ -275,7 +276,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// door to the open floor; the desk and the round panel at (9.2, -17.5) stay clear
+	// door to the open floor; the desk stays clear
 	physics: {
 		nodes: [
 			[2.15, -18],
@@ -283,25 +284,24 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// in by the door's -z half, between the wall screen (x 3.1..3.2, z -31.16..-28.14, from 1.11 m)
-	// and the cabinet at (4.05, -32.9)
+	// in by the door's -z half, past the cabinet at (4.05, -32.9)
 	engineering: {
 		nodes: [
 			[2.15, -31], // 0 door
 			[2.6, -31.68], // 1 outside the door's -z half
-			[3.9, -31.68] // 2 inside, between the screen and the cabinet
+			[3.9, -31.68] // 2 inside, clear of the cabinet
 		],
 		edges: [
 			[0, 1],
 			[1, 2]
 		]
 	},
-	// the arrival spots stand beside the enclosure (x -9.05..-5.95, z -44.7..-41.9): they are reached
-	// along z, from off its ends
+	// the arrival spots stand beside the phantom's cart (x -7.95..-7.05, z -43.75..-42.85): they are
+	// reached from off its ends
 	qa: {
 		nodes: [
 			[-2.15, -44], // 0 door
-			[-5.3, -45.5], // 1 off the enclosure's -z end: spots [0] and [2]
+			[-5.3, -45.5], // 1 off the cart's -z end: spots [0] and [2]
 			[-5.3, -41.3] // 2 off its +z end: spot [1] and the physicist's start
 		],
 		edges: [
@@ -325,28 +325,30 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// round the desk's -x end (x 18.75..21.25, z 6.07..6.93)
+	// round the desk's -x end (x 18.75..21.25, z 8.075..8.925)
 	manager: {
 		nodes: [
 			[20, 2.65], // 0 door
-			[18.2, 6.5], // 1 -x of the desk
-			[18.6, 7.6] // 2 +z of the desk's -x end: the manager behind it and the visitor's chair
+			[18.2, 6.5], // 1 -x of the desk, on its door side
+			[18.6, 7.6], // 2 by the desk's -x end: the manager in front of it
+			[18.25, 8.55] // 3 beside the desk's -x end: the visitor's chair and Chris Evans
 		],
 		edges: [
 			[0, 1],
-			[1, 2]
+			[1, 2],
+			[2, 3]
 		]
 	},
-	// past the cabinet inside the door, then down the aisle between the console (x 29.73..30.87) and
-	// the operators' chairs (from x 32.2)
+	// in through the door, then down behind the operators' chairs (seats x 31.4..31.9, backs to 31.88):
+	// the 0.5 m between the console (to x 30.875) and the seats is too narrow to walk
 	ctcontrol: {
 		nodes: [
 			[31.5, -3.15], // 0 door
 			[31.5, -4.5], // 1 inside the door
-			[31.2, -5.6], // 2 -x of the cabinet at (32.6, -5.55)
-			[31.6, -7.15], // 3 aisle: the arrival spots and the operators' places
-			[31.84, -8.5], // 4 past the keyboard tray (x 31.23..31.47) on its +x side
-			[31.85, -10.69] // 5 the partner (31.0, -11.0) leaves at ~20 deg, legs clear of the console
+			[31.2, -5.6], // 2 toward the console's +z end
+			[32.6, -6.95], // 3 north of the chairs: the therapist (32.7, -6.6) and spot [0]
+			[32.6, -8.5], // 4 behind the chairs: spots [1] and [2], scan place (32.3, -8.45)
+			[32.6, -10.5] // 5 behind the south chair: the partner (31.1, -11.0) leaves along ~18 deg
 		],
 		edges: [
 			[0, 1],
@@ -356,7 +358,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[4, 5]
 		]
 	},
-	// from the door round the gantry (x 43.4..44.6, z -12.2..-6.8): -x to the couch side and the
+	// from the door round the gantry (x 43.6..44.4, z -10.55..-8.45): -x to the couch side and the
 	// changing bench, +x to the far side
 	ctsim: {
 		nodes: [
@@ -380,24 +382,26 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[6, 7]
 		]
 	},
-	// the aisle between the console's keyboards (to x 50.87) and the operators' chairs (from x 51.7),
-	// and a line behind the chairs for the arrival spots
+	// the aisle between the console's keyboards (to x 45.12) and the operators' chairs (from x 46.41),
+	// and a line behind the chairs for the arrival spots; in through the door's middle
 	linaccontrol: {
 		nodes: [
 			[51, 3.15], // 0 door
-			[50.95, 6.2], // 1 Marcus (50.8, 7.0) leaves along -z, clear of the console top
-			[51.3, 7.85], // 2 aisle
-			[51.28, 9.5], // 3 aisle
-			[52.8, 5.9], // 4 behind the chairs: spot [0] arrives along z
-			[52.9, 8.6] // 5 behind the chairs: spots [2]-[4]
+			[51, 4.7], // 1 inside the door
+			[45.66, 6.2], // 2 Marcus (45.51, 7.0) leaves along -z, clear of the console top
+			[46.01, 7.85], // 3 aisle
+			[45.99, 9.5], // 4 aisle
+			[47.51, 5.9], // 5 behind the chairs: spot [0] arrives along z
+			[47.61, 8.6] // 6 behind the chairs: spots [2]-[4]
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
 			[2, 3],
-			[1, 4],
-			[0, 4],
-			[4, 5]
+			[3, 4],
+			[2, 5],
+			[1, 5],
+			[5, 6]
 		]
 	},
 	// door, a step, then the maze: the hall, a turn past the end of the hall's inner wall (x 64.30..71.50,

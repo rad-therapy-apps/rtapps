@@ -56,14 +56,38 @@ const SHOTS = [
 		cam: [-2.4, 1.6, 0.6],
 		lookY: 0.8
 	},
-	// scenery on walls: the lobby AED cabinet (it hung mid-room at (-4.6, 3.02), now on the west wall),
-	// vault 1's entrance marker (it hung in the doorway, now a stripe on the wall beside it) and the
-	// education room's screen (it hung in front of the doorway, now on the door wall beside it) and the
-	// dosimetry screen (it hung 2.9 m in front of the +z wall, now on it)
+	// scenery on walls: the lobby AED cabinet (it hung mid-room at (-4.6, 3.02), now on the west wall)
+	// and vault 1's entrance marker (it hung in the doorway, now a stripe on the wall beside it)
 	{ name: 'lobby-aed', eye: [-1.2, 1.9, 1.4], look: [-11.84, 1.4, 5.0] },
 	{ name: 'vault-entrance', eye: [61.0, 1.8, -12.2], look: [63.9, 1.5, -17.6] },
-	{ name: 'education-monitor', eye: [-42.0, 2.6, -10.9], look: [-42.0, 1.5, -3.1] },
-	{ name: 'dosimetry-monitor', eye: [14.6, 2.4, -48.6], look: [8.0, 1.9, -42.6] }
+	// the 2026-10-31 scenery fixes (docs/specs/2026-10-31-sim-hub-scenery-design.md), one view per fix,
+	// to compare before and after: the education and dosimetry desk screens, the hallway blades, chair
+	// legs, the engineering screens and door, the physics room, the QA phantom, the commons screen, the
+	// manager's desk, CT control, the CT gantry, the LINAC control console and east wall, and in each
+	// vault the door signs, the sink, the setup checklist and the status board
+	{ name: 'education-monitor', eye: [-42.0, 1.8, -10.4], look: [-42.0, 1.2, -5.95] },
+	{ name: 'dosimetry-monitor', eye: [11.6, 1.9, -50.4], look: [9.0, 1.3, -47.4] },
+	{ name: 'blade-ct', eye: [32.5, 2.2, 2.6], look: [27.8, 2.8, -2.6] },
+	{ name: 'blade-treatment', eye: [41.5, 2.2, -2.6], look: [46.5, 2.8, 2.4] },
+	{ name: 'lobby-chair-legs', eye: [-0.6, 0.75, 6.4], look: [-3.3, 0.35, 3.6] },
+	{ name: 'engineering-screens', eye: [8.0, 1.9, -34.6], look: [8.0, 1.9, -26.1] },
+	{ name: 'engineering-door', eye: [11.6, 1.9, -31.0], look: [3.1, 1.7, -31.0] },
+	{ name: 'physics-room', eye: [3.6, 2.4, -13.6], look: [11.0, 1.0, -22.0] },
+	{ name: 'qa-phantom', eye: [-3.8, 2.0, -40.2], look: [-7.5, 1.0, -43.3] },
+	{ name: 'commons-screen', eye: [-8.0, 1.8, -64.6], look: [-8.0, 1.6, -54.1] },
+	{ name: 'manager-office', eye: [24.4, 2.4, 4.1], look: [17.0, 1.0, 10.5] },
+	{ name: 'ctcontrol-room', eye: [35.4, 2.4, -13.4], look: [28.0, 1.0, -5.0] },
+	{ name: 'ctcontrol-backwall', eye: [31.5, 1.9, -5.2], look: [31.5, 1.8, -13.9] },
+	{ name: 'ct-gantry', eye: [38.0, 2.6, -17.0], look: [46.0, 2.0, -9.0] },
+	{ name: 'linaccontrol-console', eye: [52.5, 1.9, 9.0], look: [44.1, 1.7, 9.0] },
+	{ name: 'linaccontrol-east', eye: [47.5, 1.9, 9.0], look: [57.9, 1.5, 7.2] },
+	{ name: 'vault1-door-signs', eye: [60.0, 1.7, -18.0], look: [63.7, 4.1, -18.0] },
+	{ name: 'vault2-door-signs', eye: [60.0, 1.7, 18.0], look: [63.7, 4.1, 18.0] },
+	{ name: 'vault1-sink', eye: [69.5, 1.9, -25.5], look: [66.2, 1.0, -30.5] },
+	{ name: 'vault2-sink', eye: [69.5, 1.9, 25.5], look: [66.2, 1.0, 30.5] },
+	{ name: 'vault1-checklist', eye: [87.0, 2.3, -22.8], look: [93.7, 2.4, -22.8] },
+	{ name: 'vault1-status', eye: [78.45, 2.3, -13.0], look: [78.45, 2.2, -5.3] },
+	{ name: 'vault2-status', eye: [78.45, 2.3, 13.0], look: [78.45, 2.2, 5.3] }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),
