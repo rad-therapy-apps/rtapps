@@ -1347,10 +1347,11 @@ export function furnish(room: Room) {
 			biohazardBox(g, room.x + 10.25, room.z + room.d / 2 - 2.05, Math.PI, 'BIOHAZARD');
 			// splash back flush on the -z wall's inner face (room.z - room.d / 2 + 0.29)
 			sinkStation(g, room.x - room.w / 2 + 2.2, room.z - room.d / 2 + 0.69, 0);
-			// over the live status board on the +z wall (equipment.ts), as vault 2's over its board on the -z wall
+			// centred over the live status board on the +z wall (equipment.ts, x room.x - 0.55), as vault 2's
+			// over its board on the -z wall
 			interiorRoomSign(
 				g,
-				room.x,
+				room.x - 0.55,
 				3.75,
 				room.z + room.d / 2 - 0.34,
 				Math.PI,
@@ -1425,9 +1426,10 @@ export function furnish(room: Room) {
 			// on the +z wall, opposite the status board; splash back flush on its inner face
 			// (room.z + room.d / 2 - 0.29)
 			sinkStation(g, room.x - room.w / 2 + 2.2, room.z + room.d / 2 - 0.69, Math.PI);
+			// centred over the live status board on the -z wall (equipment.ts, x room.x - 0.55)
 			interiorRoomSign(
 				g,
-				room.x,
+				room.x - 0.55,
 				3.75,
 				room.z - room.d / 2 + 0.34,
 				0,

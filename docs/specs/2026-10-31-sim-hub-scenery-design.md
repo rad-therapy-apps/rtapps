@@ -331,4 +331,49 @@ The lobby glass doors (z = 10) are the building entrance and stay open.
 
 ## As-built notes
 
-(Filled in as each update lands.)
+### Update 1 (branch `fix/sim-hub-scenery-rooms`, plan `docs/plans/2026-10-31-sim-hub-scenery-update1.md`)
+
+**Scene check** (`apps/web/scripts/sim-hub-scene-check.mjs`, dev only):
+- The signs rule measures canvas-textured *planes* only, because the walls carry canvas textures too.
+- 70 placements pass, all 20 chairs and 3 couches stand on legs, and no panel reaches into a wall or lintel.
+
+**Signs (S, V1):**
+- **Blades:** both hallway blades stop 0.05 m short of the wall. `makeDirectionalSign` is now two-faced: the back plane (`sign-back`) carries the same text with ← and → swapped, so the blades read correctly from both directions.
+- **Vault doors:** the three plaques hang above each vault door. The vault header signs move out of the lintel.
+- **Door-side name signs:** the 18 hidden signs are removed (owner decision).
+- **Found by the check:**
+  - the lobby entrance sign sat inside its lintel; it is moved out, and the lobby lintels are named `wall-lintel`;
+  - the changing-nook signs are now as wide as the nook's back panel, 1.75 × 0.67 × scale;
+  - the technical-corridor AED was buried in the wall; it now sits at (2.85, 1.62, -12.92), facing west.
+- **Room signs:** `interiorRoomSign` now draws a sign-shaped canvas, legible across the whole sign rather than tiny text in the corner, and is two-faced. The CT SIMULATION board moves down to y 1.9 so it no longer covers the CT room's sign. The vault name signs are centred over their boards (x room.x - 0.55).
+
+**Rooms:**
+- **R1–R6** are as specified.
+- **CT control (R8):**
+  - The four live screens sit 2 × 2 in front of the board, with the top row at y 2.15 so the labels clear the screens.
+  - The CT scan journey's end point for the CT control therapist moves to (32.3, -8.45), behind the chairs and out of the 0.5 m desk–chair gap.
+  - `ROOM_GRAPHS.ctcontrol` node 5 is now (32.6, -10.5), and Avery's dx is -0.4.
+  - The wall speaker moves off the window to (35.87, 2.65, -12.3).
+- **CT gantry (R9):**
+  - At full couch slide (3.15 m), the table corner is 0.40 m and the patient 0.29 m from the bore axis, against the bore glow's 0.43 m.
+  - The sagittal laser moves up to the ceiling.
+- **LINAC control (R10):**
+  - The upper row of screens sits 0.07 m higher than planned (Cam A and Cam B at 2.23, Vault Wide at 2.43), and the backing plate is 2.5 m tall with its accent at y 3.07, so the labels clear the screens above them.
+  - The keyboards and mice sit on the desk top (keyboard bottom at 0.88). The CT control keyboard is fixed the same way.
+
+**NPC check g (owner decision, 2026-11-01):** a seat may face a wall within 3.0 m only across a work-surface slab standing against that wall. A slab here is:
+- at most 0.1 m thick;
+- at least 0.5 m across in x and z;
+- with its top at 0.7–1.0 m;
+- ending within 0.3 m of the wall, measured along the seat's facing.
+
+The exemption applies to exactly the 5 LINAC control chairs. A seat facing a bare wall, or with only a keyboard or mouse in front of it, still fails.
+
+**Known, not fixed here:**
+- The local visibility check fails one pose, "linaccontrol walk h0". The CT room's ceiling slab (top 3.79) shows above its 3.75 m wall. It fails the same way on main (115 px there, 182 px now). Update 2's hallway roofs (B1) should hide it; re-check after B1.
+- Follow-ups (issue):
+  - CT wall lasers 1 and 2 hang about 0.2 m off their walls.
+  - `wallSpeaker` grille slats ignore its rotation.
+  - Cabinet drawer lines cover only the lower half of a cabinet.
+  - The LINAC inspect camera now frames the console from across the room.
+  - Smaller scene-check and NPC-check tidy-ups, listed in the final review.
