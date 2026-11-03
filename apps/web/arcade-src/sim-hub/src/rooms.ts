@@ -1686,9 +1686,8 @@ export function corridorAnchor(room: Room) {
 	if (room.wing === 'patient') return { p: new THREE.Vector3(room.x, 1.66, 0), line: 'main' };
 	if (room.wing === 'technical')
 		return { p: new THREE.Vector3(0, 1.66, room.z), line: 'technical' };
-	if (room.id === 'vault1') return { p: new THREE.Vector3(63.15, 1.66, -18), line: 'treatment' };
-	if (room.id === 'vault2') return { p: new THREE.Vector3(63.15, 1.66, 18), line: 'treatment' };
-	if (room.id === 'hdr')
+	// the treatment walkway's rooms (vaults at z -18 / 18, HDR at z 24): on its walking line at the door's z
+	if (room.id === 'vault1' || room.id === 'vault2' || room.id === 'hdr')
 		return { p: new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, room.z), line: 'treatment' };
 	return { p: new THREE.Vector3(room.x, 1.66, 0), line: 'main' };
 }
