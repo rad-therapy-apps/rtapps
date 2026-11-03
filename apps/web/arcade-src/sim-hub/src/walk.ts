@@ -49,7 +49,9 @@ import {
 } from './interact';
 
 const HUB = new THREE.Vector3(0, 1.68, 0);
-export const TREATMENT_JUNCTION_X = 60.9; // the treatment walkway's middle (x 58.09..63.71)
+// the treatment walkway's middle (x 58.09..63.71), 0.5 m west of centre so the guided camera stays clear
+// of the NPC lanes (x 60.9 and east)
+export const TREATMENT_JUNCTION_X = 60.4;
 
 export function nearestDoor(maxD = 2.6) {
 	let best = null,
@@ -139,20 +141,7 @@ export function corridorNodesFromHub(room) {
 		return [new THREE.Vector3(-12.8, 1.66, 0), new THREE.Vector3(room.x, 1.66, 0)];
 	if (room.wing === 'technical')
 		return [new THREE.Vector3(0, 1.66, -10.8), new THREE.Vector3(0, 1.66, room.z)];
-	if (room.id === 'vault1')
-		return [
-			new THREE.Vector3(12.8, 1.66, 0),
-			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
-			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, -18),
-			new THREE.Vector3(62.8, 1.66, -18)
-		];
-	if (room.id === 'vault2')
-		return [
-			new THREE.Vector3(12.8, 1.66, 0),
-			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
-			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 18),
-			new THREE.Vector3(62.8, 1.66, 18)
-		];
+	// the vaults (z -18 / 18) too: down the walkway to the door's z, then approachPoint
 	if (room.wing === 'treatment')
 		return [
 			new THREE.Vector3(12.8, 1.66, 0),

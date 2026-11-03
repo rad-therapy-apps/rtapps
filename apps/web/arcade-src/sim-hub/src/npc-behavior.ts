@@ -675,7 +675,7 @@ export function addMovingActors() {
 		linacRunner,
 		[
 			// Corridor lanes z = -1.2 / -2.4, branch lanes x = 62.2 / 60.9 to the vault 1 approach
-			// (journey hand-overs run along x = 62.8..63.4 there, the player's guided line along x = 60.9).
+			// (journey hand-overs run along x = 63.15..63.4 there, the player's guided line along x = 60.4).
 			[47, 0, -1.2],
 			[51, 0, -1.2],
 			[55, 0, -1.2],
@@ -1119,7 +1119,7 @@ function segmentEntersRoom(r, a, b) {
 	}
 	return true;
 }
-// The player's guided line walks the treatment walkway's middle (walk.ts TREATMENT_JUNCTION_X, x 60.9);
+// The player's guided line walks the treatment walkway's middle (walk.ts TREATMENT_JUNCTION_X, x 60.4);
 // NPC hand-over routes keep to this lane instead, beside the vault wall (x 63.71-64.29, rooms.ts).
 const NPC_TREATMENT_LANE_X = 63.4;
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
