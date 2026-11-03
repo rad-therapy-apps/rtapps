@@ -359,7 +359,34 @@ const PLACEMENTS = [
 		id: 'vault 2 static status screen removed',
 		pick: { size: [4.73, 2.13, 0.1], at: [78.45, 5.35] },
 		absent: true
-	}
+	},
+	// B4: the HDR suite is 13 x 13 at (51.5, 24); the cart and the door beacon move with it; the parking
+	// curb stops short of its floor
+	{ id: 'HDR floor 13 x 13', pick: { size: [12.85, 0.07, 12.85], at: [51.5, 24] } },
+	{
+		id: 'HDR old floor removed',
+		pick: { size: [10.85, 0.07, 11.85], at: [56, 25] },
+		absent: true
+	},
+	{
+		id: 'HDR cart beside the table',
+		pick: { size: [0.62 * 0.92, 0.05, 0.44 * 0.92], at: [50.8, 22.8], r: 0.2 }
+	},
+	{ id: 'parking curb ends at x 44.9', pick: { size: [82.9, 0.08, 0.22], at: [3.45, 20.95] } },
+	{
+		id: 'parking curb under the HDR floor removed',
+		pick: { size: [96, 0.08, 0.22], at: [10, 20.95] },
+		absent: true
+	},
+	// B3: the walkway floor x 58..64 (brought forward from the walls task so the HDR runner has a floor
+	// at its door)
+	{ id: 'walkway floor x 58..64', pick: { size: [6, 0.06, 62], at: [61, 0] } },
+	{
+		id: 'old branch floor x 60..68 removed',
+		pick: { size: [8, 0.06, 62], at: [64, 0] },
+		absent: true
+	},
+	{ id: 'clinical hallway floor ends at x 58', pick: { size: [46, 0.06, 8], at: [35, 0] } }
 ];
 
 function setupError(msg) {

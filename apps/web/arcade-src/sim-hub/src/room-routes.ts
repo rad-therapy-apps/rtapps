@@ -451,11 +451,12 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[4, 5]
 		]
 	},
-	// door to the open floor; the machine at (58.2, 24.3) and the exam table stay clear
+	// door to the console side of the glass partition (x 54.4); the machine at (53.7, 23.3) and the
+	// exam table stay clear
 	hdr: {
 		nodes: [
-			[62.35, 25],
-			[60.5, 25.6]
+			[58.85, 24],
+			[57.0, 24.6]
 		],
 		edges: [[0, 1]]
 	}

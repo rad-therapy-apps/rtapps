@@ -424,16 +424,16 @@ export const ROOMS: Room[] = [
 		zone: 'clinical',
 		name: 'HDR / Special Procedures Suite',
 		kicker: 'Clinical Wing · Brachytherapy',
-		x: 56,
-		z: 25,
-		w: 11,
-		d: 12,
+		x: 51.5,
+		z: 24,
+		w: 13,
+		d: 13,
 		doorSide: 'xmax',
 		special: true,
 		doorType: 'hdrSlide',
 		color: C.special,
-		cam: [60.8, 1.68, 25],
-		look: [56, 1.25, 25],
+		cam: [57.3, 1.68, 24],
+		look: [51.5, 1.25, 24],
 		desc: 'A shielded special-procedures suite representing high-dose-rate brachytherapy, where a temporary radioactive source is remotely transferred through applicators for treatment.',
 		what: 'HDR care combines physician procedures, nursing support, medical physics, radiation therapy and strict source-safety procedures.'
 	}
@@ -453,7 +453,8 @@ export function addCirculationProps() {
 	cart1.rotation.y = Math.PI;
 	scene.add(cart1);
 	const cart2 = medCartObject(0.92, 0x77b59b);
-	cart2.position.set(55.3, 0, 23.8);
+	// in the HDR suite, beside the exam table (room centre (51.5, 24))
+	cart2.position.set(50.8, 0, 22.8);
 	cart2.rotation.y = Math.PI / 2;
 	scene.add(cart2);
 	const iv1 = ivPoleObject(0.95);
@@ -946,7 +947,9 @@ export function buildExteriorAmbient() {
 	}
 	const drive = box(94, 0.014, 18, std(0x4d565d, 0.98, 0.01), 10, -0.025, 30);
 	scene.add(drive);
-	const curb = box(96, 0.08, 0.22, std(0xadb4af, 0.9, 0.02), 10, 0.04, 20.95);
+	// the drive's north curb stops at x 44.9, short of the HDR suite (x 45..58): its top (0.08) would
+	// show through the suite's floor
+	const curb = box(82.9, 0.08, 0.22, std(0xadb4af, 0.9, 0.02), 3.45, 0.04, 20.95);
 	scene.add(curb);
 	const curb2 = box(96, 0.08, 0.22, std(0xadb4af, 0.9, 0.02), 10, 0.04, 39.05);
 	scene.add(curb2);
