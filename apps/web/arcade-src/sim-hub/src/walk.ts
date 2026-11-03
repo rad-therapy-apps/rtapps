@@ -6,12 +6,14 @@
    (`shortestCorridorRoute(FromPosition)`, `corridorNodesFromHub`, `nearestCorridorProjection`,
    `approachPoint`, `insidePoint`, `makeRouteToApproach`, `makePolylineCurve`,
    `branchRouteBetween`), and `setMode`/`aimPlayerAt`/`roomContainingWalkPoint`. Verbatim
-   extractions from main.js. `HUB`/`TREATMENT_JUNCTION_X` (corridor-routing constants used only
-   here) and `colliders` (collision list read only by `canMove`/`collider`) moved along with
-   their sole consumers and are not exported. A handful of symbols stay owned by main.js because
-   still-resident journey/booking systems read or write them too, or because they're entangled
-   with the conversation-camera/journey-timing code: `roomById`/`player`/`doors`/`ceilings`/
-   `keys` (already exported from main.js per earlier tasks). `JOURNEY`/`updateJourneyUI`/
+   extractions from main.js. `HUB` (a corridor-routing constant used only here) and `colliders`
+   (collision list read only by `canMove`/`collider`) moved along with their sole consumers and
+   are not exported; `TREATMENT_JUNCTION_X` (the treatment walkway's walking line) is exported
+   for rooms.ts `corridorAnchor` and npc-behavior.ts's hand-over lane remap. A handful of
+   symbols stay owned by main.js because still-resident journey/booking systems read or write
+   them too, or because they're entangled with the conversation-camera/journey-timing code:
+   `roomById`/`player`/`doors`/`ceilings`/`keys` (already exported from main.js per earlier
+   tasks). `JOURNEY`/`updateJourneyUI`/
    `beginRoutePhase`/`beginEntryPhase`/`focusTargetsForRoom`/`walkCompositionReady`/
    `applyWalkConversationComposition`/`enableGuidedConversationComposition`/
    `showJourneyCheckinIntro` moved to ./journey.js and `showCtQaDock` to ./sdk-bridge.js in
@@ -47,7 +49,7 @@ import {
 } from './interact';
 
 const HUB = new THREE.Vector3(0, 1.68, 0);
-const TREATMENT_JUNCTION_X = 64;
+export const TREATMENT_JUNCTION_X = 60.9; // the treatment walkway's middle (x 58.09..63.71)
 
 export function nearestDoor(maxD = 2.6) {
 	let best = null,
@@ -140,15 +142,15 @@ export function corridorNodesFromHub(room) {
 	if (room.id === 'vault1')
 		return [
 			new THREE.Vector3(12.8, 1.66, 0),
-			new THREE.Vector3(64, 1.66, 0),
-			new THREE.Vector3(64, 1.66, -18),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, -18),
 			new THREE.Vector3(62.8, 1.66, -18)
 		];
 	if (room.id === 'vault2')
 		return [
 			new THREE.Vector3(12.8, 1.66, 0),
-			new THREE.Vector3(64, 1.66, 0),
-			new THREE.Vector3(64, 1.66, 18),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 18),
 			new THREE.Vector3(62.8, 1.66, 18)
 		];
 	if (room.wing === 'treatment')
@@ -163,9 +165,9 @@ function nearestCorridorProjection(pos) {
 	const clamp = (v, a, b) => Math.max(a, Math.min(b, v)),
 		y = 1.66;
 	const candidates = [
-		{ line: 'main', p: new THREE.Vector3(clamp(pos.x, -52, 64), y, 0) },
+		{ line: 'main', p: new THREE.Vector3(clamp(pos.x, -52, TREATMENT_JUNCTION_X), y, 0) },
 		{ line: 'technical', p: new THREE.Vector3(0, y, clamp(pos.z, -66, 0)) },
-		{ line: 'treatment', p: new THREE.Vector3(64, y, clamp(pos.z, -30, 30)) }
+		{ line: 'treatment', p: new THREE.Vector3(TREATMENT_JUNCTION_X, y, clamp(pos.z, -30, 30)) }
 	];
 	let best = candidates[0],
 		bd = Infinity;
@@ -187,7 +189,7 @@ export function shortestCorridorRouteFromPosition(pos, destRoom) {
 	if (destRoom?.hub) {
 		if (a.line === 'technical') pts.push(new THREE.Vector3(0, 1.66, -10.8));
 		else if (a.line === 'treatment')
-			pts.push(new THREE.Vector3(64, 1.66, 0), new THREE.Vector3(12.8, 1.66, 0));
+			pts.push(new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0), new THREE.Vector3(12.8, 1.66, 0));
 		else pts.push(new THREE.Vector3(pos.x < 0 ? -12.8 : 12.8, 1.66, 0));
 		return cleanPoints(pts);
 	}
@@ -201,13 +203,21 @@ export function shortestCorridorRouteFromPosition(pos, destRoom) {
 	else if (a.line === 'technical' && b.line === 'main')
 		pts.push(new THREE.Vector3(0, 1.66, 0), b.p.clone());
 	else if (a.line === 'main' && b.line === 'treatment')
-		pts.push(new THREE.Vector3(64, 1.66, 0), b.p.clone());
+		pts.push(new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0), b.p.clone());
 	else if (a.line === 'treatment' && b.line === 'main')
-		pts.push(new THREE.Vector3(64, 1.66, 0), b.p.clone());
+		pts.push(new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0), b.p.clone());
 	else if (a.line === 'technical' && b.line === 'treatment')
-		pts.push(new THREE.Vector3(0, 1.66, 0), new THREE.Vector3(64, 1.66, 0), b.p.clone());
+		pts.push(
+			new THREE.Vector3(0, 1.66, 0),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
+			b.p.clone()
+		);
 	else if (a.line === 'treatment' && b.line === 'technical')
-		pts.push(new THREE.Vector3(64, 1.66, 0), new THREE.Vector3(0, 1.66, 0), b.p.clone());
+		pts.push(
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
+			new THREE.Vector3(0, 1.66, 0),
+			b.p.clone()
+		);
 	return cleanPoints(pts);
 }
 export function shortestCorridorRoute(srcRoom, destRoom) {
@@ -223,20 +233,20 @@ export function shortestCorridorRoute(srcRoom, destRoom) {
 	else if (a.line === 'technical' && b.line === 'main')
 		pts.push(a.p.clone(), new THREE.Vector3(0, 1.66, 0), b.p.clone());
 	else if (a.line === 'main' && b.line === 'treatment')
-		pts.push(a.p.clone(), new THREE.Vector3(64, 1.66, 0), b.p.clone());
+		pts.push(a.p.clone(), new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0), b.p.clone());
 	else if (a.line === 'treatment' && b.line === 'main')
-		pts.push(a.p.clone(), new THREE.Vector3(64, 1.66, 0), b.p.clone());
+		pts.push(a.p.clone(), new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0), b.p.clone());
 	else if (a.line === 'technical' && b.line === 'treatment')
 		pts.push(
 			a.p.clone(),
 			new THREE.Vector3(0, 1.66, 0),
-			new THREE.Vector3(64, 1.66, 0),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
 			b.p.clone()
 		);
 	else if (a.line === 'treatment' && b.line === 'technical')
 		pts.push(
 			a.p.clone(),
-			new THREE.Vector3(64, 1.66, 0),
+			new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, 0),
 			new THREE.Vector3(0, 1.66, 0),
 			b.p.clone()
 		);

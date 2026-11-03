@@ -386,7 +386,20 @@ const PLACEMENTS = [
 		pick: { size: [8, 0.06, 62], at: [64, 0] },
 		absent: true
 	},
-	{ id: 'clinical hallway floor ends at x 58', pick: { size: [46, 0.06, 8], at: [35, 0] } }
+	{ id: 'clinical hallway floor ends at x 58', pick: { size: [46, 0.06, 8], at: [35, 0] } },
+	// B2, B3: the treatment walkway's outside wall at x 58 (5.7 m), its end walls at z +-31, and the clinical
+	// hallway's infill trimmed at x 58
+	{ id: 'walkway outside wall z -31..-4', pick: { size: [0.18, 5.7, 27], at: [58, -17.5] } },
+	{ id: 'walkway outside wall z 14..17.5', pick: { size: [0.18, 5.7, 3.5], at: [58, 15.75] } },
+	{ id: 'walkway outside wall z 30.5..31', pick: { size: [0.18, 5.7, 0.5], at: [58, 30.75] } },
+	{ id: 'walkway north end wall', pick: { size: [6.09, 5.7, 0.18], at: [60.955, -31] } },
+	{ id: 'walkway south end wall', pick: { size: [6.09, 5.7, 0.18], at: [60.955, 31] } },
+	{
+		id: 'clinical z +4 stub across the walkway mouth removed',
+		pick: { size: [2, 3.75, 0.18], at: [59, 4] },
+		absent: true
+	},
+	{ id: 'clinical z -4 infill ends at x 58', pick: { size: [6, 3.75, 0.18], at: [55, -4] } }
 ];
 
 function setupError(msg) {

@@ -63,7 +63,7 @@ import {
 } from './props';
 import { add, MAT, roomFloors, ceilings, doors, roomById } from './main';
 import { registerInteractable } from './interact';
-import { doorNormal, doorCenter } from './walk';
+import { doorNormal, doorCenter, TREATMENT_JUNCTION_X } from './walk';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment';
 
 // RTApps (#77 phase 2 task 12): typed boundary for the ROOMS layout table — fields
@@ -1516,15 +1516,21 @@ export function buildCorridorInfillWalls() {
 	// Clinical corridor and transition toward treatment branch.
 	[
 		[12, 15],
-		[25, 44],
-		[58, 60]
+		[25, 44]
 	].forEach((s) => infillH(s[0], s[1], 4));
 	[
 		[12, 27],
-		[52, 60]
+		[52, 58]
 	].forEach((s) => infillH(s[0], s[1], -4));
 	// Treatment branch between the two vault entrances.
 	infillV(-7, 7, 67, 5.7, 0.42);
+	// The treatment walkway's outside wall, on the line of LINAC Control's and the HDR suite's east walls
+	// (x 58), 5.7 m like the vault walls opposite, and its two end walls
+	infillV(-31, -4, 58, 5.7);
+	infillV(14, 17.5, 58, 5.7);
+	infillV(30.5, 31, 58, 5.7);
+	infillH(57.91, 64, -31, 5.7);
+	infillH(57.91, 64, 31, 5.7);
 }
 
 export function buildVaultMazeEntries() {
@@ -1682,7 +1688,8 @@ export function corridorAnchor(room: Room) {
 		return { p: new THREE.Vector3(0, 1.66, room.z), line: 'technical' };
 	if (room.id === 'vault1') return { p: new THREE.Vector3(63.15, 1.66, -18), line: 'treatment' };
 	if (room.id === 'vault2') return { p: new THREE.Vector3(63.15, 1.66, 18), line: 'treatment' };
-	if (room.id === 'hdr') return { p: new THREE.Vector3(64, 1.66, room.z), line: 'treatment' };
+	if (room.id === 'hdr')
+		return { p: new THREE.Vector3(TREATMENT_JUNCTION_X, 1.66, room.z), line: 'treatment' };
 	return { p: new THREE.Vector3(room.x, 1.66, 0), line: 'main' };
 }
 

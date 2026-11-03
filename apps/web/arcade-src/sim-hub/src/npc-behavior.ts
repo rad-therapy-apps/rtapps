@@ -39,7 +39,8 @@ import {
 	corridorNodesFromHub,
 	shortestCorridorRoute,
 	shortestCorridorRouteFromPosition,
-	makePolylineCurve
+	makePolylineCurve,
+	TREATMENT_JUNCTION_X
 } from './walk';
 import { roomById, ROOM_CAST, doors, player } from './main';
 import { JOURNEY, journeyActorRoom, workflowTransitions } from './journey';
@@ -674,7 +675,7 @@ export function addMovingActors() {
 		linacRunner,
 		[
 			// Corridor lanes z = -1.2 / -2.4, branch lanes x = 62.2 / 60.9 to the vault 1 approach
-			// (the journey route runs along x = 63.3..64 there).
+			// (journey hand-overs run along x = 62.8..63.4 there, the player's guided line along x = 60.9).
 			[47, 0, -1.2],
 			[51, 0, -1.2],
 			[55, 0, -1.2],
@@ -1118,8 +1119,8 @@ function segmentEntersRoom(r, a, b) {
 	}
 	return true;
 }
-// NPC routes walk the treatment corridor's line x = 64 at this x: that line runs inside the corridor's
-// east wall (x 63.71-64.29, rooms.ts), into which a body centred on x = 64 walks.
+// The player's guided line walks the treatment walkway's middle (walk.ts TREATMENT_JUNCTION_X, x 60.9);
+// NPC hand-over routes keep to this lane instead, beside the vault wall (x 63.71-64.29, rooms.ts).
 const NPC_TREATMENT_LANE_X = 63.4;
 // The route from the actor (or from `startAt`, where a seated actor stands up) to the handoff's final
 // point in room targetId (`spot`, when the actor took an arrival spot there). Inside a room it follows
@@ -1157,7 +1158,7 @@ function buildActorHandoffPath(
 	else if (actualFrom && !actualFrom.hub) corridor.push(corridorAnchor(actualFrom).p);
 	const legs = corridor.map((v) => {
 		const q = zeroY(v);
-		return [Math.abs(q.x - 64) < 1e-6 ? NPC_TREATMENT_LANE_X : q.x, q.z];
+		return [Math.abs(q.x - TREATMENT_JUNCTION_X) < 1e-6 ? NPC_TREATMENT_LANE_X : q.x, q.z];
 	});
 	if (detectedFrom?.hub && legs.length)
 		pts.push(...inRoomPath(detectedFrom.id, start, { x: legs[0][0], z: legs[0][1] }));
