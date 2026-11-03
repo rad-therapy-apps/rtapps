@@ -399,7 +399,44 @@ const PLACEMENTS = [
 		pick: { size: [2, 3.75, 0.18], at: [59, 4] },
 		absent: true
 	},
-	{ id: 'clinical z -4 infill ends at x 58', pick: { size: [6, 3.75, 0.18], at: [55, -4] } }
+	{ id: 'clinical z -4 infill ends at x 58', pick: { size: [6, 3.75, 0.18], at: [55, -4] } },
+	// B1, B2: hallway roofs (3.75, and the walkway's at 5.7), the gap fills up to the walkway roof, and
+	// the patient and technical hallways' end walls
+	...[
+		[-52, -12, -3, 3, 3.75, 'west hallway'],
+		[-3, 3, -41.5, -10, 3.75, 'technical hallway south'],
+		[-3, 2, -54, -41.5, 3.75, 'technical hallway by dosimetry'],
+		[-2, 2, -56.5, -54, 3.75, 'technical hallway by commons and dosimetry'],
+		[-2, 3, -66, -56.5, 3.75, 'technical hallway north'],
+		[12, 15, -4, 4, 3.75, 'clinical hallway by the lobby'],
+		[15, 25, -4, 3.5, 3.75, 'clinical hallway by the manager'],
+		[25, 36, -4, 4, 3.75, 'clinical hallway by CT control'],
+		[36, 52, -3, 4, 3.75, 'clinical hallway by the CT room'],
+		[52, 58, -4, 4, 3.75, 'clinical hallway by LINAC control'],
+		[58, 64, -31, 31, 5.7, 'treatment walkway'],
+		[64, 67, -5, 5, 5.7, 'pocket between the vault entrances']
+	].map(([x0, x1, z0, z1, y, where]) => ({
+		id: `roof over the ${where}`,
+		pick: { size: [x1 - x0, 0.08, z1 - z0], at: [(x0 + x1) / 2, (z0 + z1) / 2], y, r: 0.05 },
+		minY: y - 0.04
+	})),
+	{
+		id: 'fill above LINAC control east wall',
+		pick: { size: [0.16, 1.95, 10], at: [58, 9] },
+		minY: 3.75
+	},
+	{
+		id: 'fill above the HDR suite east wall',
+		pick: { size: [0.16, 1.95, 13], at: [58, 24] },
+		minY: 3.75
+	},
+	{
+		id: 'lintel over the clinical hallway mouth',
+		pick: { size: [0.18, 1.95, 8], at: [58, 0] },
+		minY: 3.75
+	},
+	{ id: 'west hallway end wall', pick: { size: [0.18, 3.75, 6], at: [-52, 0] } },
+	{ id: 'technical hallway end wall', pick: { size: [5, 3.75, 0.18], at: [0.5, -66] } }
 ];
 
 function setupError(msg) {

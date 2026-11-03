@@ -25,6 +25,7 @@ import {
 	corridorFloor,
 	corridorLightsHorizontal,
 	corridorLightsVertical,
+	buildCorridorRoofs,
 	clinicalCeilingAccents,
 	addCirculationProps,
 	addClinicalWallPolish,
@@ -414,9 +415,10 @@ corridorFloor(61, 0, 6, 62, C.vault); // Treatment walkway, x 58..64
 // the junction plate also floors the pocket between the vault entrances (x 64..67, z -4.71..4.71)
 scene.add(box(9.5, 0.065, 9.5, std(0x627079, 0.82, 0.04), 64, 0.026, 0));
 corridorLightsHorizontal(-50, -12, 0);
-corridorLightsVertical(-66, -10, 0);
+corridorLightsVertical(-64, -10, 0);
 corridorLightsHorizontal(12, 57, 0);
 corridorLightsVertical(-30, 30, 61, 5.67);
+buildCorridorRoofs();
 buildCorridorInfillWalls();
 buildVaultMazeEntries();
 ROOMS.forEach((r) => (r.hub ? buildHubLobby(r) : buildRoom(r)));

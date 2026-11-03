@@ -1531,6 +1531,10 @@ export function buildCorridorInfillWalls() {
 	infillV(30.5, 31, 58, 5.7);
 	infillH(57.91, 64, -31, 5.7);
 	infillH(57.91, 64, 31, 5.7);
+	// the patient-services hallway's west end and the technical hallway's north end (x -3..-2 is the
+	// commons' wall)
+	infillV(-3, 3, -52);
+	infillH(-2, 3, -66);
 }
 
 export function buildVaultMazeEntries() {
@@ -1623,6 +1627,45 @@ export function corridorLightsVertical(z0, z1, x, y = 3.72) {
 		);
 		scene.add(l);
 	}
+}
+
+const ROOF_MAT = std(0xe9edef, 0.95, 0);
+// Roofs over the hallways, like the room ceilings: 0.08 slabs at the wall top (3.75; the treatment
+// walkway's at 5.7, the vault height), edges on the wall centre lines so they never overlap a room's
+// ceiling (which stops 0.1 m inside its walls). They join `ceilings`, so the overview hides them. Then
+// the walls above the 3.75 rooms that face the walkway are filled up to its roof.
+export function buildCorridorRoofs() {
+	const roof = (x0, x1, z0, z1, y) => {
+		const r = box(x1 - x0, 0.08, z1 - z0, ROOF_MAT, (x0 + x1) / 2, y, (z0 + z1) / 2);
+		r.name = 'hall-roof';
+		r.castShadow = false;
+		r.receiveShadow = false;
+		scene.add(r);
+		ceilings.push(r);
+	};
+	roof(-52, -12, -3, 3, 3.75); // patient-services hallway
+	// technical hallway: the commons (x -2) and dosimetry (x 2) walls stand 1 m inside its lines
+	roof(-3, 3, -41.5, -10, 3.75);
+	roof(-3, 2, -54, -41.5, 3.75);
+	roof(-2, 2, -56.5, -54, 3.75);
+	roof(-2, 3, -66, -56.5, 3.75);
+	// clinical hallway: the manager's (z 3.5) and the CT room's (z -3) walls stand inside its lines
+	roof(12, 15, -4, 4, 3.75);
+	roof(15, 25, -4, 3.5, 3.75);
+	roof(25, 36, -4, 4, 3.75);
+	roof(36, 52, -3, 4, 3.75);
+	roof(52, 58, -4, 4, 3.75);
+	// the treatment walkway and the pocket between the vault entrances, at the vault height
+	roof(58, 64, -31, 31, 5.7);
+	roof(64, 67, -5, 5, 5.7);
+	const fill = (t, len, x, z, alongZ) => {
+		const f = box(alongZ ? t : len, 1.95, alongZ ? len : t, INFILL_MAT, x, 4.725, z);
+		f.name = 'roof-fill';
+		scene.add(f);
+	};
+	fill(0.16, 10, 58, 9, true); // above LINAC Control's east wall (z 4..14)
+	fill(0.16, 13, 58, 24, true); // above the HDR suite's east wall (z 17.5..30.5)
+	fill(0.18, 8, 58, 0, true); // over the clinical hallway's mouth (z -4..4)
 }
 
 export function clinicalCeilingAccents(roomId) {
