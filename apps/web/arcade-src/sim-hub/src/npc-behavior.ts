@@ -675,7 +675,7 @@ export function addMovingActors() {
 		linacRunner,
 		[
 			// Corridor lanes z = -1.2 / -2.4, branch lanes x = 62.2 / 60.9 to the vault 1 approach
-			// (journey hand-overs run along x = 63.15..63.4 there, the player's guided line along x = 60.4).
+			// (journey hand-overs run along x = 63.4 there, the player's guided line along x = 60.4).
 			[47, 0, -1.2],
 			[51, 0, -1.2],
 			[55, 0, -1.2],

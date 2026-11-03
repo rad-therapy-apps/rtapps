@@ -265,7 +265,26 @@ export function makeRouteToApproach(dest) {
 		if (dest.hub) pts.push(new THREE.Vector3(...dest.cam));
 		else pts.push(...corridorNodesFromHub(dest), approachPoint(dest));
 	}
-	return new THREE.CatmullRomCurve3(cleanPoints(pts), false, 'catmullrom', 0.18);
+	return new THREE.CatmullRomCurve3(
+		cleanPoints(easeIntoJunction(cleanPoints(pts))),
+		false,
+		'catmullrom',
+		0.18
+	);
+}
+// The guided curve only: a main-line node at x 56 beside the junction node, so the long leg to it from
+// the west does not overshoot into the walkway (NPC routes are unchanged).
+function easeIntoJunction(pts) {
+	const onMain = (p) => Math.abs(p.z) < 0.01 && p.x < 56;
+	const out = [];
+	pts.forEach((p, i) => {
+		const atJunction = Math.abs(p.x - TREATMENT_JUNCTION_X) < 0.01 && Math.abs(p.z) < 0.01;
+		if (atJunction && i > 0 && onMain(pts[i - 1])) out.push(new THREE.Vector3(56, 1.66, 0));
+		out.push(p);
+		if (atJunction && i < pts.length - 1 && onMain(pts[i + 1]))
+			out.push(new THREE.Vector3(56, 1.66, 0));
+	});
+	return out;
 }
 export function setDoorTarget(id, v) {
 	const d = doors.get(id);

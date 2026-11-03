@@ -399,7 +399,10 @@ const PLACEMENTS = [
 		pick: { size: [2, 3.75, 0.18], at: [59, 4] },
 		absent: true
 	},
-	{ id: 'clinical z -4 infill ends at x 58', pick: { size: [6, 3.75, 0.18], at: [55, -4] } },
+	{
+		id: 'clinical z -4 infill meets the walkway wall at x 58.09',
+		pick: { size: [6.09, 3.75, 0.18], at: [55.045, -4] }
+	},
 	// B1, B2: hallway roofs (3.75, and the walkway's at 5.7), the gap fills up to the walkway roof, and
 	// the patient and technical hallways' end walls
 	...[
@@ -417,7 +420,13 @@ const PLACEMENTS = [
 		[64, 67, -5, 5, 5.7, 'pocket between the vault entrances']
 	].map(([x0, x1, z0, z1, y, where]) => ({
 		id: `roof over the ${where}`,
-		pick: { size: [x1 - x0, 0.08, z1 - z0], at: [(x0 + x1) / 2, (z0 + z1) / 2], y, r: 0.05 },
+		pick: {
+			size: [x1 - x0, 0.08, z1 - z0],
+			at: [(x0 + x1) / 2, (z0 + z1) / 2],
+			y,
+			r: 0.05,
+			name: 'hall-roof'
+		},
 		minY: y - 0.04
 	})),
 	{

@@ -1526,7 +1526,7 @@ export function buildCorridorInfillWalls() {
 	].forEach((s) => infillH(s[0], s[1], 4));
 	[
 		[12, 27],
-		[52, 58]
+		[52, 58.09]
 	].forEach((s) => infillH(s[0], s[1], -4));
 	// Treatment branch between the two vault entrances.
 	infillV(-7, 7, 67, 5.7, 0.42);
@@ -1639,7 +1639,8 @@ const ROOF_MAT = ceilingMat(0xe9edef);
 // Roofs over the hallways, like the room ceilings: 0.08 slabs at the wall top (3.75; the treatment
 // walkway's at 5.7, the vault height), edges on the wall centre lines so they never overlap a room's
 // ceiling (which stops 0.1 m inside its walls). They join `ceilings`, so the overview hides them. Then
-// the walls above the 3.75 rooms that face the walkway are filled up to its roof.
+// the walls above the 3.75 rooms that face the walkway, and the lintel over the hallway mouth, are filled
+// up to its roof.
 export function buildCorridorRoofs() {
 	const roof = (x0, x1, z0, z1, y) => {
 		const r = box(x1 - x0, 0.08, z1 - z0, ROOF_MAT, (x0 + x1) / 2, y, (z0 + z1) / 2);
