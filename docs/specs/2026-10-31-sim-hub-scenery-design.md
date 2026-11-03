@@ -247,6 +247,30 @@ The vault west walls are 0.58 m thick (x 63.71..64.29), with door openings at z 
 
 Planned after Update 1 merges. Re-measure first: Update 1 moves nothing here, but the plan needs exact wall pieces.
 
+**Re-measured 2026-11-03 (main 7e52ed2). These numbers replace the ones below where they differ:**
+
+- **Roof edges:** roofs lie on the wall centre lines, so they do not overlap the room ceilings, which stop 0.1 m inside their walls. Rectangles at y 3.75:
+  - **west:** x -52..-12, z -3..3;
+  - **technical** (four pieces, because the commons and dosimetry walls intrude 1 m): x -3..3 z -41.5..-10; x -3..2 z -54..-41.5; x -2..2 z -56.5..-54; x -2..3 z -66..-56.5;
+  - **clinical** (five pieces, for the manager and CT sim walls): x 12..15 z -4..4; x 15..25 z -4..3.5; x 25..36 z -4..4; x 36..52 z -3..4; x 52..58 z -4..4.
+- **Walkway roof:** at y 5.7, covering x 58..64, z -31..31, plus the junction pocket between the vault entrances, x 64..67, z -5..5.
+- **Gap fills** (non-colliding, y 3.75..5.7):
+  - above LINAC Control's east wall (x 58, z 4..14);
+  - above the HDR suite's east wall (x 58, its z span);
+  - a lintel over the clinical hallway's mouth (x 58, z -4..4).
+- **End walls:**
+  - the technical north end wall is x -2..3, because x -3..-2 is the commons' wall;
+  - the walkway ends at z ±31 run from x 57.91 to 64, 5.7 m tall.
+- **Clinical hallway infill:** remove the z = +4 piece at x 58..60 as well as trimming the z = -4 piece (x 52..60 to 52..58).
+- **Walkway floor:** spans x 58..68, keeping the pocket's floor, plus the junction plate.
+- **Walkway lights:** at x 61 and y 5.67. The clinical hallway's light strips end at x 57, and the technical hallway's start at z -64.
+- **HDR suite:** 13 × 13, centre (51.5, 24), x 45..58, z 17.5..30.5, door on the x = 58 wall centred on z 24.
+  - It cannot reach z 33: the parking-loop car drives at z 32 and turns at x 47..49.75, so the south wall stays at z ≤ 30.5.
+  - The outside-wall segments become z 14..17.5 and z 30.5..31.
+  - The parking curb (x -38..58, z 20.95) is shortened to end at x 44.9; its top already showed through the old HDR floor.
+- **Shots:** `sim-hub-shots.mjs` gains a per-shot `ceilings: true` option, through a `ceilings` export on the NPC hook, so the shots can show the roofs.
+- **Visibility check:** the pre-existing failure is expected to clear, because the clinical roof's edge at z -3 covers the CT room's ceiling slab.
+
 ### B1. Hallway roofs
 
 - **Now:** rooms have ceilings: `buildRoom` (`rooms.ts` ≈725–754), a 0.08 slab at the wall height, pushed to `ceilings` (`main.ts` 404). The four hallways have none, only light strips at y 3.72.
