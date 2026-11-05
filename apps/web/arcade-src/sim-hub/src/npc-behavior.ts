@@ -292,6 +292,9 @@ export function shouldHold(m, blockers, px, pz, fx, fz) {
 	}
 	return false;
 }
+// reused for every mover each frame so the walkers make no garbage for the collector to pause on
+const moverPoint = new THREE.Vector3(),
+	moverAhead = new THREE.Vector3();
 export function updateMovers(dt, sec) {
 	frameCount++;
 	let blockers = null;
@@ -303,8 +306,8 @@ export function updateMovers(dt, sec) {
 		}
 		const step = m.pendingDt + dt;
 		m.pendingDt = 0;
-		let p = m.curve.getPointAt(m.u),
-			n = m.curve.getPointAt((m.u + 0.01) % 1);
+		let p = m.curve.getPointAt(m.u, moverPoint),
+			n = m.curve.getPointAt((m.u + 0.01) % 1, moverAhead);
 		const len = Math.hypot(n.x - p.x, n.z - p.z) || 1;
 		blockers = blockers || collectBlockers();
 		/* A static cast or duty actor on a lane would freeze the mover for good, so after
@@ -323,8 +326,8 @@ export function updateMovers(dt, sec) {
 		}
 		if (!m.holding) {
 			m.u = (m.u + step * m.speed) % 1;
-			p = m.curve.getPointAt(m.u);
-			n = m.curve.getPointAt((m.u + 0.01) % 1);
+			p = m.curve.getPointAt(m.u, moverPoint);
+			n = m.curve.getPointAt((m.u + 0.01) % 1, moverAhead);
 		}
 		m.group.position.copy(p);
 		const yaw = Math.atan2(n.x - p.x, n.z - p.z);
