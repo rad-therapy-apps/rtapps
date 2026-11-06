@@ -964,17 +964,24 @@ Run every check after `pnpm build:arcade`, from `apps/web`.
   - 7e38a68: P1-2, P1-11;
   - ac412f3: P1-5 to P1-8;
   - 55d0c8e: P1-9, P1-10, P1-12;
-  - 2853573 and 51fa37a: P1-13, P1-14.
+  - 2853573 and 51fa37a: P1-13, P1-14;
+  - e4ed502: the final review's fixes (walk start, technical hallway floor, lobby ceiling, comments).
 - **Final checks, from a clean build:**
-  - scene check: signs PASS (163 panels), legs PASS (20 chairs, 3 couches), placements PASS (144);
+  - scene check: signs PASS (163 panels), legs PASS (20 chairs, 3 couches), placements PASS (147);
   - NPC check: a–m PASS, with a at 10 movers and 0 wall-clipping samples, f at 14 moments, g at 7 sitters, j at 4 flows, k at 114 at rest, l at 74 routes, m at 66 moments;
   - visibility check (Metal): 301 poses, 0 failures;
   - sim-hub vitest 77/77; `pnpm check`, smoke and `prettier --check` pass.
 - **Changes from the text above, each found during the build:**
   - **Entrance timing (P1-11):** the player's trigger radius is 5.5 m (`ENTRANCE_PLAYER_R`); people keep 3.0 m. `openSeconds` is 0.9.
     - At 3.0 m and 2.15 s the panes were still opening when the player reached them.
-    - A scripted walk-in from the outside start, holding W, confirms the fix. Walking, the panes start opening at z 15.3 and are fully open (progress 1.00) at the glass. Sprinting gives the same: trigger at z 15.2, fully open at the glass.
-  - **Room ceiling slabs (P1-10's new outside poses):** every non-lobby room's ceiling slab is now 0.04 thick at `h - 0.02`, instead of 0.08 at `h`.
+    - A scripted walk-in from the final start (4.2, 20.4), holding W, confirms the fix. Walking, the panes are fully open (progress 1.00) when the player reaches the glass.
+    - Sprinting, they are 0.87 open there. Their inner edges are at x ±2.26, and the player at x ≈ 1.1 needs 1.43, so they are 0.8 m clear.
+  - **Walk start (P1-10):** the start is (4.2, 20.4), aimed at (1.2, 2.0, 10.5), instead of (2.0, 20.4) aimed at (-1.0, 2.0, 10.5).
+    - Holding W from the old start walked through the monument sign's slab (x -4.4..0.8), because outdoor props are not colliders.
+    - The new start keeps the same facing. Swept with a 0.32 m body radius against the scene dump, the straight walk-in comes no closer than 0.47 m to anything 0.3–2.0 m tall (the sign's east plant). It enters the doors at x 1.05 and passes the kiosk 1.7 m clear.
+    - The visibility check's four spawn poses and the `outside-spawn` shot moved with it.
+  - **Technical hallway floor (P1-6):** `corridorFloor` takes an optional list of slab pieces. The technical hallway's floor is z -56.5..-10 at full width, then z -66..-56.5 at x -3.5..2.09, so its last 9.5 m stops at the x 2 wall instead of running 1.4 m outdoors. The accent stripe is unchanged.
+  - **Room ceiling slabs (P1-10's new outside poses):** every room's ceiling slab, the lobby's included, is now 0.04 thick at `h - 0.02`, instead of 0.08 at `h`.
     - Its underside stays at `h - 0.04` (3.71). Its top is now flush with the wall tops.
     - Before, the slab's top stood 4 cm above the walls. From the outside start, a sliver of the manager office's ceiling showed over its west wall. Culling hid it, so visibility pose `outside spawn h270` failed.
   - **The car's loop (P1-14):**
@@ -985,9 +992,12 @@ Run every check after `pnpm build:arcade`, from `apps/web`.
   - **Wheel track (P1-14):** turning the tyres round side out put them inside the van's and the ambulance's bodies. Each kind now has its own track:
     - ambulance 0.58, van 0.55, car 0.47 (local);
     - each tyre stands 0.02 local outside its chassis side;
-    - a scene-check pin on the parked ambulance's wheel guards it, which brings the total to 144 placements, one more than planned.
+    - a scene-check pin on the parked ambulance's wheel guards it. With the three floor pins, that brings the total to 147 placements, four more than planned.
   - **Orphans (P1-13):** `faceAlong` is removed from npc.ts as well, since nothing uses it once the crew is gone.
-- **Known, not fixed:** at 1.6 scale the shuttle's sweep reaches z 20.99 at its west U-turn, 7 cm past the north curb's face (21.06). Its front reaches x -37.40, 0.4 m past the drive's west end. It passes every check.
+- **Known, not fixed:**
+  - At 1.6 scale the shuttle's sweep reaches z 20.99 at its west U-turn, 7 cm past the north curb's face (21.06). Its front reaches x -37.40, 0.4 m past the drive's west end. It passes every check.
+  - The entrance's 5.5 m player circle is round, so it also holds the glass open while the player stands near the kiosk inside.
+  - The door-gap width (2.6 m, 4.8 m for vaults) is repeated in `buildSide`, `addRoomBaseboards` (rooms.ts) and portals.ts.
 
 ## Out of scope / not changing
 
