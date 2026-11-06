@@ -438,3 +438,12 @@ Built to the "Re-measured 2026-11-03" block above, with one exception (the walkw
 - The guided curve still overshoots in z at the end of some routes, inside the walkway (vault 1 → HDR to z 25.12, vault 1 → vault 2 to z 18.96, lobby → vault 1 to z -18.48). This was there before Update 2, and the door and entry phase absorbs it.
 - The hand-over route `hdr[0] → patientcare` crosses the HDR suite's glass partition. The glass is not a collider, so no check catches it; the old layout had the same crossing.
 - The hallway and walkway light strips sit 2.5 mm under the roof undersides, as they did under the room ceilings. No flicker shows in stills.
+
+### Owner follow-ups (2026-11-05, branch `fix/sim-hub-lobby-kiosk-ct`)
+
+- **Lobby openings:** the west and north hallway openings were 7.2 m and 7.0 m wide, but their hallway walls stand on z ±3 and x ±3. That left a 0.5–0.6 m slot at each corner, through which the outside showed. All three openings now end at the hallway walls' inner faces: 5.82 m west and north, and 7.82 m east (walls on z ±4).
+- **Welcome kiosk:** its screen was mounted on the back of the frame (z - 0.105, facing +z into it). From the lobby you saw the frame's blank back; from the other side, the text mirrored. The frame and screen now sit on the lobby side (z + 0.04 and z + 0.105), still leaning back 0.18 rad.
+- **CT gantry (R9, owner's choice of 1.25× real size):**
+  - The torus has R 0.9375 and tube 0.375 (a 2.625 m ring with a 1.125 m bore). The bore glow has R 0.5625. The base is 1.0 × 0.35 × 2.0.
+  - The ring is centred at y 1.25, not resting on the floor (y 1.3125). Resting on the floor would bring the couch's bottom corners (y 0.875, z ±0.36) 0.567 m from the bore axis, past the 0.5625 inner radius. At 1.25 they are 0.52 m out, which clears the ring by 0.04 m. The ring's foot sits 0.06 m under the floor, behind the base.
+- **Scene check:** 109 placements: the six lobby wall pieces, the kiosk screen on the lobby side, and the gantry size (replacing the real-size rule).

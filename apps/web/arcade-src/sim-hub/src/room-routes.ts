@@ -358,8 +358,8 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[4, 5]
 		]
 	},
-	// from the door round the gantry (x 43.6..44.4, z -10.55..-8.45): -x to the couch side and the
-	// changing bench, +x to the far side
+	// from the door round the gantry (base x 43.5..44.5, ring z -10.81..-8.19): -x to the couch side
+	// and the changing bench, +x to the far side
 	ctsim: {
 		nodes: [
 			[44, -2.15], // 0 door

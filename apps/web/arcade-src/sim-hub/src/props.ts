@@ -1262,21 +1262,22 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 }
 
 export function ctScanner(g, room: Room) {
-	// a real-size big-bore CT gantry: 2.1 m tall with a 0.9 m bore, centred 1.05 m up, so the couch top
-	// (y 1.025, 0.72 m wide) and the patient on it pass through the bore when the couch slides in
-	const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.3, 18, 54), MAT.white);
+	// a big-bore CT gantry at 1.25x real size (owner's choice): a 2.625 m ring with a 1.125 m bore,
+	// centred 1.25 m up (its foot sits 0.06 m under the floor, behind the base) so the couch's bottom
+	// corners (y 0.875, z ±0.36) clear the bore by 0.04 m when the couch slides the patient in
+	const ring = new THREE.Mesh(new THREE.TorusGeometry(0.9375, 0.375, 18, 54), MAT.white);
 	ring.rotation.y = Math.PI / 2;
-	ring.position.set(room.x, 1.05, room.z + 1.5);
+	ring.position.set(room.x, 1.25, room.z + 1.5);
 	ring.castShadow = true;
 	add(g, ring);
 	const bore = new THREE.Mesh(
-		new THREE.TorusGeometry(0.45, 0.02, 14, 48),
+		new THREE.TorusGeometry(0.5625, 0.02, 14, 48),
 		std(0x2b3944, 0.5, 0.1, { emissive: 0x16435a, emissiveIntensity: 0.65 })
 	);
 	bore.rotation.y = Math.PI / 2;
 	bore.position.copy(ring.position);
 	add(g, bore);
-	const base = box(0.8, 0.35, 1.6, MAT.white, room.x, 0.175, room.z + 1.5);
+	const base = box(1.0, 0.35, 2.0, MAT.white, room.x, 0.175, room.z + 1.5);
 	add(g, base);
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
 	add(g, table);
@@ -1622,7 +1623,8 @@ export function orientationKiosk() {
 		z = -4.3;
 	const pedestal = box(0.72, 1.18, 0.56, std(0x3c5965, 0.6, 0.16), x, 0.59, z);
 	g.add(pedestal);
-	const screenFrame = box(1.32, 0.86, 0.12, std(0x24343b, 0.5, 0.18), x, 1.48, z - 0.04);
+	// the screen faces the lobby (+z) and leans back, so it reads the right way round from the room
+	const screenFrame = box(1.32, 0.86, 0.12, std(0x24343b, 0.5, 0.18), x, 1.48, z + 0.04);
 	screenFrame.rotation.x = -0.18;
 	g.add(screenFrame);
 	const tx = makeCanvasPanel('WELCOME TO RTApps', 'Choose a patient journey or explore freely', [
@@ -1634,7 +1636,7 @@ export function orientationKiosk() {
 		new THREE.PlaneGeometry(1.16, 0.68),
 		new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })
 	);
-	screen.position.set(x, 1.5, z - 0.105);
+	screen.position.set(x, 1.5, z + 0.105);
 	screen.rotation.x = -0.18;
 	g.add(screen);
 	registerInteractable(
