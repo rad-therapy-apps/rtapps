@@ -956,6 +956,39 @@ Run every check after `pnpm build:arcade`, from `apps/web`.
 
 **Owner page:** a before/after page for the owner, published as an artifact like the earlier rounds.
 
+### Part 1 as built
+
+- **Commits** (branch `fix/sim-hub-scenery-r3-building`):
+  - 23972fe: the plan;
+  - 146d7d9: P1-1, P1-3, P1-4;
+  - 7e38a68: P1-2, P1-11;
+  - ac412f3: P1-5 to P1-8;
+  - 55d0c8e: P1-9, P1-10, P1-12;
+  - 2853573 and 51fa37a: P1-13, P1-14.
+- **Final checks, from a clean build:**
+  - scene check: signs PASS (163 panels), legs PASS (20 chairs, 3 couches), placements PASS (144);
+  - NPC check: a–m PASS, with a at 10 movers and 0 wall-clipping samples, f at 14 moments, g at 7 sitters, j at 4 flows, k at 114 at rest, l at 74 routes, m at 66 moments;
+  - visibility check (Metal): 301 poses, 0 failures;
+  - sim-hub vitest 77/77; `pnpm check`, smoke and `prettier --check` pass.
+- **Changes from the text above, each found during the build:**
+  - **Entrance timing (P1-11):** the player's trigger radius is 5.5 m (`ENTRANCE_PLAYER_R`); people keep 3.0 m. `openSeconds` is 0.9.
+    - At 3.0 m and 2.15 s the panes were still opening when the player reached them.
+    - A scripted walk-in from the outside start, holding W, confirms the fix. Walking, the panes start opening at z 15.3 and are fully open (progress 1.00) at the glass. Sprinting gives the same: trigger at z 15.2, fully open at the glass.
+  - **Room ceiling slabs (P1-10's new outside poses):** every non-lobby room's ceiling slab is now 0.04 thick at `h - 0.02`, instead of 0.08 at `h`.
+    - Its underside stays at `h - 0.04` (3.71). Its top is now flush with the wall tops.
+    - Before, the slab's top stood 4 cm above the walls. From the outside start, a sliver of the manager office's ceiling showed over its west wall. Culling hid it, so visibility pose `outside spawn h270` failed.
+  - **The car's loop (P1-14):**
+    - The car turns about its centre toward a point about 1.8 m ahead. At 1.6 scale, its rear swings about 1.9 m sideways at the start of each 2.75 m U-turn. On the old loop it clipped the HDR suite wall (check a) and went over curb2.
+    - The loop now runs east on z 31.5 and west on z 37, with its U-turns at x 41 and x -32.5.
+    - Swept with the same heading rule, the footprint without margin stays within x -36.82..45.33 and z 29.92..38.60. That is on the drive, inside curb2 (38.94), and never beside the HDR suite below z 32.5.
+    - This supersedes P1-14's car clearances.
+  - **Wheel track (P1-14):** turning the tyres round side out put them inside the van's and the ambulance's bodies. Each kind now has its own track:
+    - ambulance 0.58, van 0.55, car 0.47 (local);
+    - each tyre stands 0.02 local outside its chassis side;
+    - a scene-check pin on the parked ambulance's wheel guards it, which brings the total to 144 placements, one more than planned.
+  - **Orphans (P1-13):** `faceAlong` is removed from npc.ts as well, since nothing uses it once the crew is gone.
+- **Known, not fixed:** at 1.6 scale the shuttle's sweep reaches z 20.99 at its west U-turn, 7 cm past the north curb's face (21.06). Its front reaches x -37.40, 0.4 m past the drive's west end. It passes every check.
+
 ## Out of scope / not changing
 
 **From the decisions:**
