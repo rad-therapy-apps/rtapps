@@ -472,10 +472,6 @@ export function addCirculationProps() {
 	aedWallBox(hall, 2.85, 1.62, -12.92, -Math.PI / 2, 'AED');
 	// on the treatment corridor's west wall (face x = 58.08), facing east into the corridor
 	aedWallBox(hall, 58.15, 1.62, 6.82, Math.PI / 2, 'AED');
-	const cameraPole = medCartObject(0.82, 0x98adb7);
-	cameraPole.position.set(61.6, 0, -23.2);
-	cameraPole.rotation.y = Math.PI / 2;
-	scene.add(cameraPole);
 }
 
 export function doorTypeFor(room: Room) {
@@ -1560,8 +1556,7 @@ export function buildCorridorInfillWalls() {
 	[
 		[-13, -10],
 		[-26, -23],
-		[-41.5, -36],
-		[-66, -56.5]
+		[-41.5, -36]
 	].forEach((s) => infillV(s[0], s[1], 3));
 	// Clinical corridor and transition toward treatment branch.
 	[
@@ -1574,6 +1569,11 @@ export function buildCorridorInfillWalls() {
 	].forEach((s) => infillH(s[0], s[1], -4));
 	// Treatment branch between the two vault entrances.
 	infillV(-7, 7, 67, 5.7, 0.42);
+	// A solid block fills that pocket (x 63.71..66.79, z -5..5, the vault height). Its face continues the
+	// vault walls' corridor face (x 63.71), so the walkway's east side reads as one wall, and the junction
+	// sign hangs on it (equipment.ts buildPhase5Wayfinding). z ±5 also closes the notches where the vault
+	// west walls end. The pocket's roof, floor plate and back wall stay, hidden inside or under it.
+	wall(65.25, 0, 3.08, 10.0, 5.7, MAT.wallVault, true);
 	// The treatment walkway's outside wall, on the line of LINAC Control's and the HDR suite's east walls
 	// (x 58), 5.7 m like the vault walls opposite, and its two end walls
 	infillV(-31, -4, 58, 5.7);
@@ -1582,9 +1582,12 @@ export function buildCorridorInfillWalls() {
 	infillH(57.91, 64, -31, 5.7);
 	infillH(57.91, 64, 31, 5.7);
 	// the patient-services hallway's west end and the technical hallway's north end (x -3..-2 is the
-	// commons' wall)
+	// commons' wall). The technical hallway's right wall runs on along x 2 past dosimetry (z -56.5) to
+	// that end, so the hallway stays 4 m wide (x -2..2) from the commons to its end, centred on the floor
+	// stripe and the lights.
 	infillV(-3, 3, -52);
-	infillH(-2, 3, -66);
+	infillV(-66, -56.5, 2);
+	infillH(-2, 2, -66);
 }
 
 export function buildVaultMazeEntries() {
@@ -1649,6 +1652,8 @@ export function corridorFloor(x, z, w, d, color) {
 	scene.add(accent);
 }
 
+// The strips cast no shadow. The hallway roofs cast none, so the sun reaches a strip, and its shadow
+// drew a thin diagonal line across the hallway walls.
 export function corridorLightsHorizontal(x0, x1, z, y = 3.72) {
 	for (let x = x0; x <= x1; x += 5) {
 		const l = box(
@@ -1660,6 +1665,7 @@ export function corridorLightsHorizontal(x0, x1, z, y = 3.72) {
 			y,
 			z
 		);
+		l.castShadow = false;
 		scene.add(l);
 	}
 }
@@ -1675,6 +1681,7 @@ export function corridorLightsVertical(z0, z1, x, y = 3.72) {
 			y,
 			z
 		);
+		l.castShadow = false;
 		scene.add(l);
 	}
 }
@@ -1698,8 +1705,7 @@ export function buildCorridorRoofs() {
 	// technical hallway: the commons (x -2) and dosimetry (x 2) walls stand 1 m inside its lines
 	roof(-3, 3, -41.5, -10, 3.75);
 	roof(-3, 2, -54, -41.5, 3.75);
-	roof(-2, 2, -56.5, -54, 3.75);
-	roof(-2, 3, -66, -56.5, 3.75);
+	roof(-2, 2, -66, -54, 3.75);
 	// clinical hallway: the manager's (z 3.5) and the CT room's (z -3) walls stand inside its lines
 	roof(12, 15, -4, 4, 3.75);
 	roof(15, 25, -4, 3.5, 3.75);

@@ -412,8 +412,7 @@ const PLACEMENTS = [
 		[-52, -12, -3, 3, 3.75, 'west hallway'],
 		[-3, 3, -41.5, -10, 3.75, 'technical hallway south'],
 		[-3, 2, -54, -41.5, 3.75, 'technical hallway by dosimetry'],
-		[-2, 2, -56.5, -54, 3.75, 'technical hallway by commons and dosimetry'],
-		[-2, 3, -66, -56.5, 3.75, 'technical hallway north'],
+		[-2, 2, -66, -54, 3.75, 'technical hallway north'],
 		[12, 15, -4, 4, 3.75, 'clinical hallway by the lobby'],
 		[15, 25, -4, 3.5, 3.75, 'clinical hallway by the manager'],
 		[25, 36, -4, 4, 3.75, 'clinical hallway by CT control'],
@@ -448,7 +447,7 @@ const PLACEMENTS = [
 		minY: 3.75
 	},
 	{ id: 'west hallway end wall', pick: { size: [0.18, 3.75, 6], at: [-52, 0] } },
-	{ id: 'technical hallway end wall', pick: { size: [5, 3.75, 0.18], at: [0.5, -66] } },
+	{ id: 'technical hallway end wall', pick: { size: [4, 3.75, 0.18], at: [0, -66] } },
 	// the lobby's hallway openings end at the hallway walls' inner faces (z ±2.91 west, x ±2.91
 	// north, z ±3.91 east), so no slot beside a hallway wall shows the outside
 	...[
@@ -530,7 +529,33 @@ const PLACEMENTS = [
 	].map(([side, x]) => ({
 		id: `lobby entrance pane ${side}, closed`,
 		pick: { size: [2.6, 2.7, 0.05], at: [x, 10], r: 0.02 }
-	}))
+	})),
+	// P1-6: the technical hallway's right wall runs straight along x 2 from dosimetry to the end wall
+	{
+		id: 'technical hallway north right wall on x 2',
+		pick: { size: [0.18, 3.75, 9.5], at: [2, -61.25], r: 0.02 }
+	},
+	{
+		id: 'technical hallway north right wall on x 3 removed',
+		pick: { size: [0.18, 3.75, 9.5], at: [3, -61.25] },
+		absent: true
+	},
+	// P1-7: a solid block fills the pocket between the vault entrances, its face on the vault walls'
+	// corridor face (x 63.71); the junction sign hangs on it; the walkway's supply cart is gone
+	{
+		id: 'junction block flush with the vault walls',
+		pick: { size: [3.08, 5.7, 10.0], at: [65.25, 0], r: 0.02 }
+	},
+	{
+		id: 'junction sign on the block',
+		pick: { geom: 'PlaneGeometry', size: [4.0, 0.76], at: [63.66, 0], r: 0.1, name: '' },
+		flush: { axis: 'x', face: 63.71, side: 'max' }
+	},
+	{
+		id: 'walkway cart removed',
+		pick: { size: [0.4592, 0.78, 0.3116], at: [61.6, -23.2] },
+		absent: true
+	}
 ];
 
 function setupError(msg) {

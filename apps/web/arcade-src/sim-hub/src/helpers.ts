@@ -439,9 +439,11 @@ export function zeroY(v) {
 }
 
 // Two one-sided faces at the same spot, so neither side reads mirrored. The back face ('sign-back')
-// swaps the horizontal arrows, so from either side they point the same way in the world.
-export function makeDirectionalSign(text, sub, x, y, z, rotY, w = 3.2) {
-	const face = (label, rot, name) => {
+// swaps the horizontal arrows, so from either side they point the same way in the world. A blade that
+// passes `back` ([text, sub]) shows that on its back face instead: the lobby blades, whose backs face
+// the hallways, point back to the lobby.
+export function makeDirectionalSign(text, sub, x, y, z, rotY, w = 3.2, back?: [string, string]) {
+	const face = (label, subLabel, rot, name) => {
 		const c = document.createElement('canvas');
 		c.width = 1000;
 		c.height = 240;
@@ -456,7 +458,7 @@ export function makeDirectionalSign(text, sub, x, y, z, rotY, w = 3.2) {
 		q.fillText(label, 45, 94);
 		q.fillStyle = '#9ccbd0';
 		q.font = '600 31px Arial';
-		q.fillText(sub, 45, 162);
+		q.fillText(subLabel, 45, 162);
 		const tx = new THREE.CanvasTexture(c);
 		tx.colorSpace = THREE.SRGBColorSpace;
 		const m = new THREE.Mesh(
@@ -468,12 +470,9 @@ export function makeDirectionalSign(text, sub, x, y, z, rotY, w = 3.2) {
 		m.rotation.y = rot;
 		scene.add(m);
 	};
-	face(text, rotY, '');
-	face(
-		text.replace(/[←→]/g, (a) => (a === '←' ? '→' : '←')),
-		rotY + Math.PI,
-		'sign-back'
-	);
+	face(text, sub, rotY, '');
+	const [backText, backSub] = back || [text.replace(/[←→]/g, (a) => (a === '←' ? '→' : '←')), sub];
+	face(backText, backSub, rotY + Math.PI, 'sign-back');
 }
 
 export function cleanPoints(pts) {

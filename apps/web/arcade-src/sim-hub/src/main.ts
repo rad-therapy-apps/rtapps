@@ -476,14 +476,21 @@ async function toggleAmbience() {
 		);
 }
 
+// The three lobby blades hang over the openings you walk straight through, so each front points ↑.
+// Their backs face the hallways and point back to the lobby.
+const LOBBY_BLADE_BACK: [string, string] = [
+	'MAIN LOBBY  ↑',
+	'Reception · Check-in · Main entrance'
+];
 makeDirectionalSign(
-	'←  PATIENT SERVICES',
+	'PATIENT SERVICES  ↑',
 	'Consult · Counseling · Education · Patient Care',
 	-11.25,
 	2.82,
 	0,
 	Math.PI / 2,
-	3.7
+	3.7,
+	LOBBY_BLADE_BACK
 );
 makeDirectionalSign(
 	'TECHNICAL / EDUCATION  ↑',
@@ -492,16 +499,18 @@ makeDirectionalSign(
 	2.82,
 	-9.35,
 	0,
-	4.2
+	4.2,
+	LOBBY_BLADE_BACK
 );
 makeDirectionalSign(
-	'CLINICAL SERVICES  →',
+	'CLINICAL SERVICES  ↑',
 	'CT Simulation · Leadership · LINAC · HDR',
 	11.25,
 	2.82,
 	0,
 	-Math.PI / 2,
-	3.7
+	3.7,
+	LOBBY_BLADE_BACK
 );
 buildPhase5Wayfinding();
 

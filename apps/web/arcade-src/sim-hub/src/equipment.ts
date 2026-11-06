@@ -1161,10 +1161,13 @@ export function buildPhase5Wayfinding() {
 		-Math.PI / 2,
 		3.7
 	);
+	// On the junction block's face (x 63.71, rooms.ts buildCorridorInfillWalls), 0.05 m off it. Read from
+	// the walkway facing +x, vault 1 (z -18) is on the left and vault 2 (z 18) on the right. Its back face
+	// faces the block and is never seen, so it passes no back label.
 	makeDirectionalSign(
-		'VAULT 1  ↓   ·   VAULT 2  ↑',
+		'VAULT 1  ←   ·   VAULT 2  →',
 		'Shielded treatment rooms',
-		63.2,
+		63.66,
 		2.88,
 		0,
 		-Math.PI / 2,
