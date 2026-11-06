@@ -44,7 +44,6 @@ import {
 	buildClinicalEquipmentLayer,
 	updateClinicalEquipment,
 	updateStatusBeacons,
-	updateAmbulance,
 	renderOperatorLiveFeeds,
 	precompileShaders,
 	buildOperatorLiveConsole,
@@ -711,7 +710,6 @@ export function stepSimulation(now: number): void {
 	updateCtCouchMotion(sec);
 	updateJourneyCameraFollow();
 	if (f % 2 === 0) updateNpcExchanges(sec);
-	updateAmbulance(dt, sec);
 	updateStatusBeacons(sec);
 	if (f % 3 === 0) updateClinicalEquipment(sec);
 	updateAmbience();

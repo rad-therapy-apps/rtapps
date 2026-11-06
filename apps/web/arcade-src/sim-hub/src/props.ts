@@ -202,19 +202,27 @@ export function medCartObject(scale = 1, color = 0x7da9c8) {
 }
 
 export function vehicleObject(kind = 'car', color = 0x5c89bf) {
-	const g = new THREE.Group();
+	// The models are built at about half real size, so their parts go in an inner `body` group scaled
+	// 1.6 (car 3.68 x 1.73 x 1.49 m, van 4.16 x 1.98 x 1.70, ambulance 4.48 x 2.08 x 1.86; wheels r 0.35,
+	// still on the ground). The returned group stays unscaled. npc-check a measures a mover's meshes in
+	// that group's frame, where a scale on the group itself would cancel out of the footprint it tests.
+	const g = new THREE.Group(),
+		body = new THREE.Group();
+	body.scale.setScalar(1.6);
+	g.add(body);
 	const wheelMat = std(0x20262b, 0.85, 0.12);
 	function addWheel(x, z, r = 0.22, w = 0.18) {
 		const wh = cyl(r, r, w, wheelMat, 16);
-		wh.rotation.z = Math.PI / 2;
+		// the axle runs across the vehicle (local z), so each tyre shows its round side
+		wh.rotation.x = Math.PI / 2;
 		wh.position.set(x, 0.22, z);
-		g.add(wh);
+		body.add(wh);
 	}
 	if (kind === 'ambulance') {
-		g.add(box(2.8, 0.24, 1.3, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
-		g.add(box(2.2, 0.8, 1.18, std(0xf6f7f8, 0.75, 0.02), 0, 0.66, 0));
-		g.add(box(1.0, 0.18, 1.22, std(0xc73138, 0.72, 0.03), 0.45, 0.86, 0));
-		g.add(
+		body.add(box(2.8, 0.24, 1.3, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
+		body.add(box(2.2, 0.8, 1.18, std(0xf6f7f8, 0.75, 0.02), 0, 0.66, 0));
+		body.add(box(1.0, 0.18, 1.22, std(0xc73138, 0.72, 0.03), 0.45, 0.86, 0));
+		body.add(
 			box(
 				0.44,
 				0.42,
@@ -225,7 +233,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.44,
 				0.42,
@@ -236,7 +244,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				-0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.52,
 				0.52,
@@ -247,7 +255,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.52,
 				0.52,
@@ -258,7 +266,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				-0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.3,
 				0.12,
@@ -269,7 +277,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.22
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.3,
 				0.12,
@@ -281,9 +289,9 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 			)
 		);
 	} else if (kind === 'van') {
-		g.add(box(2.6, 0.22, 1.24, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
-		g.add(box(2.22, 0.84, 1.12, std(color, 0.7, 0.04), 0, 0.64, 0));
-		g.add(
+		body.add(box(2.6, 0.22, 1.24, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
+		body.add(box(2.22, 0.84, 1.12, std(color, 0.7, 0.04), 0, 0.64, 0));
+		body.add(
 			box(
 				1.0,
 				0.5,
@@ -294,7 +302,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				1.0,
 				0.5,
@@ -305,7 +313,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				-0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.58,
 				0.4,
@@ -316,7 +324,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.58,
 				0.4,
@@ -328,10 +336,10 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 			)
 		);
 	} else {
-		g.add(box(2.3, 0.2, 1.08, std(0x3d444a, 0.72, 0.08), 0, 0.13, 0));
-		g.add(box(1.95, 0.48, 1.0, std(color, 0.74, 0.04), 0, 0.45, 0));
-		g.add(box(0.9, 0.32, 0.92, std(color, 0.76, 0.04), -0.15, 0.77, 0));
-		g.add(
+		body.add(box(2.3, 0.2, 1.08, std(0x3d444a, 0.72, 0.08), 0, 0.13, 0));
+		body.add(box(1.95, 0.48, 1.0, std(color, 0.74, 0.04), 0, 0.45, 0));
+		body.add(box(0.9, 0.32, 0.92, std(color, 0.76, 0.04), -0.15, 0.77, 0));
+		body.add(
 			box(
 				0.72,
 				0.28,
@@ -342,7 +350,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.48
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.72,
 				0.28,

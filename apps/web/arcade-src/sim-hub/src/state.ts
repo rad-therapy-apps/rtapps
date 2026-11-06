@@ -6,7 +6,6 @@
    Modules extracted from main.js in later tasks import `S` and read/write
    `S.<name>` in its place. Initializers below are verbatim from the original
    top-level declarations. */
-import type * as THREE from 'three';
 import type { Room } from './rooms';
 import type { Travel } from './walk';
 
@@ -16,9 +15,6 @@ interface SimHubState {
 	ROOM_APP_URL: string | null;
 	CONSOLE_APP_URL: string | null;
 	CONSOLE_APP_DOORS: Set<string>;
-	AMB: THREE.Object3D | null;
-	ambUnload: THREE.Object3D | null;
-	ambLoad: THREE.Object3D | null;
 	mode: 'overview' | 'guided' | 'walk';
 	// RTApps (#77 phase 2 task 12, type-only follow-up): rooms.ts now exports a `Room`
 	// interface for the ROOMS table entries this is always assigned from — tightened
@@ -42,9 +38,6 @@ export const S: SimHubState = {
 	ROOM_APP_URL: null,
 	CONSOLE_APP_URL: null,
 	CONSOLE_APP_DOORS: new Set(['Learning Commons / Staff Education']),
-	AMB: null,
-	ambUnload: null,
-	ambLoad: null,
 	mode: 'overview',
 	activeRoom: null,
 	history: [],

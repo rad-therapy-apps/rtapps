@@ -982,11 +982,9 @@ export function addRoomDecor(room: Room) {
 		plant(g, room.x - hx + 1.0, room.z + hz - 1.0, 0.78);
 }
 
-// The ambulance-bay apron in front of the lobby; its top is the outdoor ground the ambulance
-// crew walks on.
+// The light apron of the entrance plaza in front of the lobby.
 const APRON_Y = -0.01,
 	APRON_H = 0.018;
-export const APRON_TOP = APRON_Y + APRON_H / 2;
 export function buildExteriorAmbient() {
 	const ground = new THREE.Mesh(new THREE.PlaneGeometry(360, 300), std(0x6f8d69, 0.98, 0));
 	ground.rotation.x = -Math.PI / 2;
@@ -1699,7 +1697,7 @@ export function corridorLightsVertical(z0, z1, x, y = 3.72) {
 }
 
 const ROOF_MAT = ceilingMat(0xe9edef);
-// Roofs over the hallways, like the room ceilings: 0.08 slabs at the wall top (3.75; the treatment
+// Roofs over the hallways: 0.08 slabs centred on the wall top (3.75; the treatment
 // walkway's at 5.7, the vault height), edges on the wall centre lines so they never overlap a room's
 // ceiling (which stops 0.1 m inside its walls). They join `ceilings`, so the overview hides them. Then
 // the walls above the 3.75 rooms that face the walkway, and the lintel over the hallway mouth, are filled

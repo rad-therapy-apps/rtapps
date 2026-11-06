@@ -575,7 +575,13 @@ const PLACEMENTS = [
 	].map(([corner, x, z]) => ({
 		id: `monument plant at the ${corner} corner`,
 		pick: { geom: 'CylinderGeometry', size: [0.1485, 0.187, 0.286], at: [x, z], r: 0.05 }
-	}))
+	})),
+	// P1-13: the ambulance is parked on the asphalt east of the entrance plaza, nose west (its chassis
+	// geometry is 2.8 x 0.24 x 1.3 before the vehicles' 1.6 scale)
+	{
+		id: 'ambulance parked in the lot',
+		pick: { size: [2.8, 0.24, 1.3], at: [31, 23], r: 0.05 }
+	}
 ];
 
 function setupError(msg) {

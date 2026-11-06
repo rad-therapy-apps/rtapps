@@ -31,16 +31,8 @@ import {
 } from './helpers';
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
-import { personFigure, faceAlong, poseCharacter, setLegSwing, SOLE_Y } from './npc';
-import {
-	advanceRoute,
-	advancePed,
-	walkSwing,
-	startNextQueuedMove,
-	stepRise,
-	beginSit,
-	stepSit
-} from './npc-behavior';
+import { poseCharacter, setLegSwing } from './npc';
+import { startNextQueuedMove, stepRise, beginSit, stepSit } from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
@@ -49,8 +41,7 @@ import {
 	showEquipmentPanel
 } from './interact';
 import { setDoorTarget } from './walk';
-import { roomById, PRIMARY_PATIENTS, doors, player, roomFloors } from './main';
-import { APRON_TOP } from './rooms';
+import { roomById, PRIMARY_PATIENTS, doors, player } from './main';
 import { VAULT2_SETUP_STEPS, vault2StepAt } from './vault-setup-loop';
 import {
 	JOURNEY,
@@ -733,105 +724,6 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	}
 	renderer.setRenderTarget(null);
 	renderer.shadowMap.autoUpdate = shadowAutoUpdate;
-}
-
-/* ---- Ambulance drop-off choreography: pull up, unload, dwell, load, depart ---- */
-const ambState = { phase: 'approach', route: { i: 0, d: 0 }, wait: 0 };
-const AMB_FWD = -Math.PI / 2;
-const AMB_IN = [
-	[-42, 20],
-	[-14, 20],
-	[-3.4, 20],
-	[-2.6, 16],
-	[-2.2, 13.2]
-];
-const AMB_OUT = [
-	[-2.2, 13.2],
-	[-2.9, 16.6],
-	[-8, 20],
-	[-30, 20],
-	[-54, 20]
-];
-const AMB_REAR = { x: -4.2, z: 13.6 },
-	AMB_ENTRY = { x: 0.4, z: 7.8 };
-/* The crew walks between the ambulance bay and the lobby. On the lobby floor it stands at y 0 like
-   every indoor actor; off it, it stands on the bay apron, so its soles touch the ground there too. */
-let lobbyFloorBox = null;
-function crewOnGround(q) {
-	lobbyFloorBox ||= new THREE.Box3().setFromObject(
-		roomFloors.find((f) => f.userData.roomId === 'lobby')
-	);
-	const p = q.position,
-		b = lobbyFloorBox,
-		indoors = p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z;
-	p.y = indoors ? 0 : APRON_TOP - SOLE_Y;
-}
-function ambPatient() {
-	const q = personFigure(0xcfd6da, 0xb9c1c6, 0xe9c39d);
-	q.visible = false;
-	scene.add(q);
-	return q;
-}
-export function setupAmbulance(a) {
-	S.AMB = a;
-	S.ambUnload = ambPatient();
-	S.ambLoad = ambPatient();
-	ambState.phase = 'approach';
-	ambState.route = { i: 0, d: 0 };
-	ambState.wait = 0;
-}
-export function updateAmbulance(dt, sec) {
-	if (!S.AMB) return;
-	const A = ambState;
-	if (A.phase === 'approach') {
-		if (advanceRoute(S.AMB, AMB_IN, A.route, 7.5, dt, AMB_FWD)) {
-			faceAlong(S.AMB, 0, -1, AMB_FWD);
-			A.phase = 'unload';
-			A.route = { i: 0, d: 0 };
-			S.ambUnload.visible = true;
-			S.ambUnload.position.set(AMB_REAR.x, 0, AMB_REAR.z);
-			crewOnGround(S.ambUnload);
-		}
-	} else if (A.phase === 'unload') {
-		walkSwing(S.ambUnload, sec);
-		const unloaded = advancePed(S.ambUnload, AMB_REAR, AMB_ENTRY, A.route, 1.5, dt);
-		crewOnGround(S.ambUnload);
-		if (unloaded) {
-			S.ambUnload.visible = false;
-			A.phase = 'dwell';
-			A.wait = 0;
-		}
-	} else if (A.phase === 'dwell') {
-		A.wait += dt;
-		if (A.wait > 3.4) {
-			A.phase = 'load';
-			A.route = { i: 0, d: 0 };
-			S.ambLoad.visible = true;
-			S.ambLoad.position.set(AMB_ENTRY.x, 0, AMB_ENTRY.z);
-		}
-	} else if (A.phase === 'load') {
-		walkSwing(S.ambLoad, sec);
-		const loaded = advancePed(S.ambLoad, AMB_ENTRY, AMB_REAR, A.route, 1.4, dt);
-		crewOnGround(S.ambLoad);
-		if (loaded) {
-			S.ambLoad.visible = false;
-			A.phase = 'depart';
-			A.route = { i: 0, d: 0 };
-		}
-	} else if (A.phase === 'depart') {
-		if (advanceRoute(S.AMB, AMB_OUT, A.route, 8.6, dt, AMB_FWD)) {
-			A.phase = 'gap';
-			A.wait = 0;
-		}
-	} else if (A.phase === 'gap') {
-		A.wait += dt;
-		if (A.wait > 4.5) {
-			S.AMB.position.set(-42, 0, 20);
-			faceAlong(S.AMB, 1, 0, AMB_FWD);
-			A.phase = 'approach';
-			A.route = { i: 0, d: 0 };
-		}
-	}
 }
 
 export function workflowState(roomId, state, detail, color = '#42d5cf') {
