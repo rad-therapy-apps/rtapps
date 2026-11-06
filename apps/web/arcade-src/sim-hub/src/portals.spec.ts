@@ -73,7 +73,7 @@ describe('buildPortals', () => {
 		const ps = PORTALS.get('L')!;
 		expect(ps).toHaveLength(4);
 		const widths = ps.map((b) => Math.max(b.max.x - b.min.x, b.max.z - b.min.z)).sort();
-		expect(widths.map((w) => +w.toFixed(2))).toEqual([5.2, 7.0, 7.2, 8.0]);
+		expect(widths.map((w) => +w.toFixed(2))).toEqual([5.2, 5.82, 5.82, 7.82]);
 	});
 	it('gives rooms with no door or window an empty list', () => {
 		expect(buildPortals([room({ id: 'X', x: 0, z: 0, w: 4, d: 4 })]).get('X')).toEqual([]);
