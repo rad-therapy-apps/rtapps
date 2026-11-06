@@ -487,9 +487,14 @@ export function monumentSign(x, z) {
 	);
 	face.position.set(x, 1.18, z + 0.19);
 	g.add(face);
-	for (const ox of [-2.6, -1.8, 1.8, 2.6]) {
-		plant(g, x + ox, z - 0.15, 0.55);
-	}
+	// one plant at each corner of the planter bed (6.4 x 1.85), clear of the slab and of the lettering
+	for (const [ox, oz] of [
+		[-2.85, -0.6],
+		[2.85, -0.6],
+		[-2.85, 0.6],
+		[2.85, 0.6]
+	])
+		plant(g, x + ox, z + oz, 0.55);
 }
 
 export function tree(x, z, s = 1) {
@@ -1632,11 +1637,12 @@ export function privacyChangingNook(roomId, x, z, rot = 0, label = 'PATIENT CHAN
 export function orientationKiosk() {
 	const g = new THREE.Group();
 	scene.add(g);
-	const x = 5.5,
-		z = -4.3;
+	// just inside the main entrance (the doors are at z 10), east of the walk-in line, square to the doors
+	const x = 2.6,
+		z = 6.25;
 	const pedestal = box(0.72, 1.18, 0.56, std(0x3c5965, 0.6, 0.16), x, 0.59, z);
 	g.add(pedestal);
-	// the screen faces the lobby (+z) and leans back, so it reads the right way round from the room
+	// the screen faces the entrance doors (+z) and leans back, so it reads the right way round as you walk in
 	const screenFrame = box(1.32, 0.86, 0.12, std(0x24343b, 0.5, 0.18), x, 1.48, z + 0.04);
 	screenFrame.rotation.x = -0.18;
 	g.add(screenFrame);

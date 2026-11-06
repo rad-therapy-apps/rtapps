@@ -26,7 +26,7 @@ import { camera, orbit, canvas } from './scene';
 import { ROOMS, corridorAnchor, doorLabel } from './rooms';
 import type { Room } from './rooms';
 import { cleanPoints } from './helpers';
-import { roomById, player, doors, ceilings, keys } from './main';
+import { roomById, player, doors, ceilings, keys, PLAYER_EYE_Y, REACH_Y } from './main';
 import { showCtQaDock } from './sdk-bridge';
 import {
 	JOURNEY,
@@ -53,12 +53,15 @@ const HUB = new THREE.Vector3(0, 1.68, 0);
 // of the NPC lanes (x 60.9 and east)
 export const TREATMENT_JUNCTION_X = 60.4;
 
+// door reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye, so it feels as before
+const doorReachFrom = new THREE.Vector3();
 export function nearestDoor(maxD = 2.6) {
 	let best = null,
 		bd = maxD;
+	doorReachFrom.set(player.pos.x, REACH_Y, player.pos.z);
 	ROOMS.filter((r) => !r.hub).forEach((r) => {
 		const p = doorPoint(r),
-			d = player.pos.distanceTo(p);
+			d = doorReachFrom.distanceTo(p);
 		if (d < bd) {
 			bd = d;
 			best = { room: r, d };
@@ -359,6 +362,8 @@ function finishTravel() {
 	document.getElementById('travelHUD').classList.remove('show');
 	enableGuidedConversationComposition(arrived);
 	player.pos.copy(camera.position);
+	// walk mode keeps its own eye height, never the guided camera's
+	player.pos.y = PLAYER_EYE_Y;
 	updateRoomUI(arrived);
 	renderRoomList();
 	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
@@ -505,14 +510,14 @@ export function setMode(m, announce = true) {
 		if (S.activeRoom) {
 			applyWalkConversationComposition(S.activeRoom, true);
 		} else {
-			player.pos.set(0, 1.65, 5.5);
+			// Walk mode starts outside, on the entrance plaza about 0.5 m north of the curb, facing the
+			// monument and entrance signs. The walk in runs north along x 2.0 through the sliding glass.
+			// S.activeRoom stays null outside; walking in, roomContainingWalkPoint picks up the lobby.
+			player.pos.set(2.0, PLAYER_EYE_Y, 20.4);
 			camera.position.copy(player.pos);
-			const f = focusTargetsForRoom(roomById('lobby'));
-			if (f) aimPlayerAt(f.target);
-			else {
-				player.yaw = 0;
-				player.pitch = 0;
-			}
+			aimPlayerAt(new THREE.Vector3(-1.0, 2.0, 10.5));
+			document.getElementById('locText').textContent =
+				'Outside the main entrance · walk in through the doors';
 		}
 		if (announce)
 			toast('Walk mode: use WASD and the mouse to move and look around. Press E to interact.');

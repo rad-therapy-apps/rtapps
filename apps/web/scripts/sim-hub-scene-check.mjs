@@ -461,11 +461,11 @@ const PLACEMENTS = [
 		id: `lobby ${side} wall meets its hallway wall at ${x}, ${z}`,
 		pick: { size: [w, 4.15, d], at: [x, z], r: 0.05 }
 	})),
-	// the welcome kiosk's screen is on the lobby side (+z) of its stand, so it reads the right way
-	// round from the room
+	// P1-9: the welcome kiosk stands just inside the main entrance, east of the walk-in line. Its screen
+	// is on the doors' side (+z) of its stand, so it reads the right way round as you walk in.
 	{
-		id: 'welcome kiosk screen faces the lobby',
-		pick: { geom: 'PlaneGeometry', size: [1.16, 0.68], at: [5.5, -4.195], r: 0.02 }
+		id: 'welcome kiosk screen faces the entrance',
+		pick: { geom: 'PlaneGeometry', size: [1.16, 0.68], at: [2.6, 6.355], r: 0.02 }
 	},
 	// P1-1 (2026-11-06): each room's status light hangs on the hallway face of its door wall, its back
 	// 0.005 m off the face, right of the door sign; both vault lights are on the main-corridor side
@@ -555,7 +555,27 @@ const PLACEMENTS = [
 		id: 'walkway cart removed',
 		pick: { size: [0.4592, 0.78, 0.3116], at: [61.6, -23.2] },
 		absent: true
-	}
+	},
+	// P1-12: the plaza light pole stands left of the monument sign (seen from the street), and the sign's
+	// four plants stand at the corners of its planter bed, none inside the slab (pots at scale 0.55)
+	{
+		id: 'light pole left of the monument sign',
+		pick: { geom: 'CylinderGeometry', size: [0.06, 0.08, 4.4], at: [-5.75, 14.25], r: 0.05 }
+	},
+	{
+		id: 'light pole behind the monument sign removed',
+		pick: { geom: 'CylinderGeometry', size: [0.06, 0.08, 4.4], at: [0, 14], r: 0.1 },
+		absent: true
+	},
+	...[
+		['front-left', -4.65, 14.85],
+		['front-right', 1.05, 14.85],
+		['back-left', -4.65, 13.65],
+		['back-right', 1.05, 13.65]
+	].map(([corner, x, z]) => ({
+		id: `monument plant at the ${corner} corner`,
+		pick: { geom: 'CylinderGeometry', size: [0.1485, 0.187, 0.286], at: [x, z], r: 0.05 }
+	}))
 ];
 
 function setupError(msg) {

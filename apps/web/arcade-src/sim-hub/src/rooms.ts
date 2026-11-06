@@ -778,7 +778,17 @@ export function buildRoom(room: Room) {
 	['zmin', 'zmax', 'xmin', 'xmax'].forEach((s) => buildSide(room, s, h, t, mat));
 	if (room.vault) addVaultDoorwaySigns(room);
 	addRoomBaseboards(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xe9edef), room.x, h, room.z);
+	// the slab's top is flush with the wall tops (h), so no edge shows over the walls from outside; its
+	// underside stays at h - 0.04
+	const ceiling = box(
+		room.w - 0.2,
+		0.04,
+		room.d - 0.2,
+		ceilingMat(0xe9edef),
+		room.x,
+		h - 0.02,
+		room.z
+	);
 	ceiling.castShadow = false;
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
@@ -1025,7 +1035,9 @@ export function buildExteriorAmbient() {
 		tree(x, z, s);
 	for (const [x, z] of [
 		[-20, 14],
-		[0, 14],
+		// left of the monument sign seen from the street; the arm (+x) hangs the luminaire over the
+		// planter's west end
+		[-5.75, 14.25],
 		[20, 14],
 		[-20, 42],
 		[0, 42],

@@ -542,8 +542,14 @@ sign.rotation.y = Math.PI;
 scene.add(sign);
 monumentSign(-1.8, 14.25);
 
+// The walk camera's height. NPC eyes are at 1.87 (npc.ts personFigure), so the player meets them eye to
+// eye. Interaction reach (interact.ts nearestInteractable, walk.ts nearestDoor) is measured from
+// REACH_Y, the old eye height, so every reach feels as before. Guided travel keeps its 1.66 route nodes.
+export const PLAYER_EYE_Y = 1.87;
+export const REACH_Y = 1.65;
 export const player = {
-	pos: new THREE.Vector3(0, 1.65, 5.5),
+	// walk mode starts outside the main entrance (walk.ts setMode)
+	pos: new THREE.Vector3(2.0, PLAYER_EYE_Y, 20.4),
 	yaw: Math.PI,
 	pitch: 0,
 	locked: false

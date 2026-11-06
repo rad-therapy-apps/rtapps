@@ -77,7 +77,8 @@ import {
 	PRIMARY_NPCS,
 	PRIMARY_PATIENTS,
 	doors,
-	player
+	player,
+	PLAYER_EYE_Y
 } from './main';
 import { focusCtPatientFromControl } from './sdk-bridge';
 import { LYING_SURFACES } from './props';
@@ -2946,7 +2947,7 @@ export function applyWalkConversationComposition(r, reposition = false, aim = tr
 	if (reposition) {
 		const pose = roomInspectPose(r);
 		player.pos.copy(pose.pos);
-		player.pos.y = 1.65;
+		player.pos.y = PLAYER_EYE_Y;
 	}
 	S.activeRoom = r;
 	updateRoomUI(r);
