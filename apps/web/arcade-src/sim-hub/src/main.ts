@@ -37,7 +37,8 @@ import {
 	addMovingActors,
 	updateDutyAnimations,
 	updateNpcExchanges,
-	updateHandoffTransitions
+	updateHandoffTransitions,
+	updateLobbyEntrance
 } from './npc-behavior';
 import {
 	buildClinicalEquipmentLayer,
@@ -683,6 +684,7 @@ export function stepSimulation(now: number): void {
 		sec = (S.simSec += dt),
 		f = ((stepSimulation as unknown as { _f?: number })._f =
 			((stepSimulation as unknown as { _f?: number })._f || 0) + 1);
+	updateLobbyEntrance();
 	updateDoors(dt);
 	updateWalk(dt);
 	updateTravel(now);

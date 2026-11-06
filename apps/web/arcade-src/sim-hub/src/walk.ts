@@ -461,8 +461,10 @@ export function updateDoors(dt) {
 			d.parts[0].rotation.y = -Math.PI * 0.46 * p;
 			d.parts[1].rotation.y = Math.PI * 0.46 * p;
 		} else if (d.type === 'clinicalSlide') {
-			d.parts[0].position.x = -d.gap * 0.245 - d.gap * 0.48 * p;
-			d.parts[1].position.x = d.gap * 0.245 + d.gap * 0.48 * p;
+			// each panel (gap/2 wide, closed at ±gap/4) slides gap/2 into the wall: open, it spans
+			// gap/2..gap from the centre and the opening is clear
+			d.parts[0].position.x = -(d.gap / 4 + d.gap * 0.5 * p);
+			d.parts[1].position.x = d.gap / 4 + d.gap * 0.5 * p;
 		} else {
 			const off = d.gap * 1.02 * p;
 			d.parts.forEach((part) => (part.position.x = off));
@@ -597,6 +599,8 @@ export function updateWalk(dt) {
 	});
 	if (nearest && nd < 2.15) setDoorTarget(nearest.id, true);
 	doors.forEach((d, id) => {
+		// the lobby's glass entrance has its own sensor (npc-behavior.ts updateLobbyEntrance)
+		if (id === 'lobby-entrance') return;
 		if (!nearest || id !== nearest.id || nd >= 2.15) setDoorTarget(id, false);
 	});
 }

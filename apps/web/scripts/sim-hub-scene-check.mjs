@@ -485,6 +485,51 @@ const PLACEMENTS = [
 		id: `status light beside the ${room} door sign`,
 		pick: { size: [0.58, 0.24, 0.13], at: [x, z], r: 0.05 },
 		flush: { axis, face, side }
+	})),
+	// P1-2: every closed door leaf spans jamb to jamb (the swing leaf stops 6 mm short of the latch jamb,
+	// so its corner clears it as it opens); the door wall's baseboard stops at the opening. The scene is
+	// measured as the page builds it, with every door closed.
+	{
+		id: 'consult door leaf jamb to jamb',
+		pick: { size: [2.594, 2.55, 0.08], at: [-18.003, -3], r: 0.02 }
+	},
+	{
+		id: 'manager door leaf jamb to jamb',
+		pick: { size: [2.594, 2.55, 0.08], at: [19.997, 3.5], r: 0.02 }
+	},
+	...[-17.35, -18.65].map((z) => ({
+		id: `physics door leaves meet in the middle (leaf at z ${z})`,
+		pick: { size: [1.3, 2.55, 0.08], at: [3, z], r: 0.02 }
+	})),
+	...[30.85, 32.15].map((x) => ({
+		id: `CT control door panels meet in the middle (panel at x ${x})`,
+		pick: { size: [1.3, 2.55, 0.07], at: [x, -4], r: 0.02 }
+	})),
+	{
+		id: 'vault 1 door leaf jamb to jamb',
+		pick: { size: [4.8, 3.15, 0.18], at: [64, -18], r: 0.02 }
+	},
+	{
+		id: 'HDR door leaf jamb to jamb',
+		pick: { size: [2.6, 2.55, 0.18], at: [58, 24], r: 0.02 }
+	},
+	{
+		id: 'consult door-wall baseboard no longer runs across the door',
+		pick: { size: [9.72, 0.18, 0.07], at: [-18, -3.1] },
+		absent: true
+	},
+	...[-21.08, -14.92].map((x) => ({
+		id: `consult door-wall baseboard cut at the door (piece at x ${x})`,
+		pick: { size: [3.56, 0.18, 0.07], at: [x, -3.1], r: 0.02 }
+	})),
+	// P1-11: the lobby's glass entrance is a sliding door; closed, its panes meet in the middle and reach
+	// the jambs (x -2.6..2.6)
+	...[
+		['west', -1.3],
+		['east', 1.3]
+	].map(([side, x]) => ({
+		id: `lobby entrance pane ${side}, closed`,
+		pick: { size: [2.6, 2.7, 0.05], at: [x, 10], r: 0.02 }
 	}))
 ];
 

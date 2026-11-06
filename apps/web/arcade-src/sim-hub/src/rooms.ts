@@ -526,9 +526,12 @@ export function buildDoor(room: Room, side, gap) {
 		const mat = type === 'leadershipSwing' ? std(0x705943, 0.78, 0.04) : std(0x8a755f, 0.82, 0.03);
 		const pivot = new THREE.Group();
 		pivot.position.x = -gap / 2;
-		const leaf = box(gap * 0.88, h, 0.08, mat, gap * 0.44, 0, 0);
+		// closed, the leaf spans the opening from the hinge jamb to 6 mm short of the latch jamb, so its
+		// corner swings clear of that jamb
+		const leaf = box(gap - 0.006, h, 0.08, mat, (gap - 0.006) / 2, 0, 0);
 		pivot.add(leaf);
-		if (type === 'patientSwing') addDoorWindow(pivot, gap * 0.49, 0.35, 0.046, gap * 0.22, 0.72);
+		if (type === 'patientSwing')
+			addDoorWindow(pivot, (gap - 0.006) / 2, 0.35, 0.046, gap * 0.22, 0.72);
 		g.add(pivot);
 		d.parts = [pivot];
 		d.openSeconds = type === 'leadershipSwing' ? 1.8 : 2.15;
@@ -538,8 +541,9 @@ export function buildDoor(room: Room, side, gap) {
 			rp = new THREE.Group();
 		lp.position.x = -gap / 2;
 		rp.position.x = gap / 2;
-		const lw = box(gap * 0.48, h, 0.08, mat, gap * 0.24, 0, 0),
-			rw = box(gap * 0.48, h, 0.08, mat, -gap * 0.24, 0, 0);
+		// closed, the two leaves reach their jambs and meet in the middle (seam 0; the faces are hidden)
+		const lw = box(gap / 2, h, 0.08, mat, gap / 4, 0, 0),
+			rw = box(gap / 2, h, 0.08, mat, -gap / 4, 0, 0);
 		lp.add(lw);
 		rp.add(rw);
 		addDoorWindow(lp, gap * 0.24, 0.28, 0.046, gap * 0.18, 0.75);
@@ -549,14 +553,17 @@ export function buildDoor(room: Room, side, gap) {
 		d.openSeconds = 2.4;
 	} else if (type === 'clinicalSlide') {
 		const mat = std(0x9db2ba, 0.36, 0.35, { transparent: true, opacity: 0.82 });
-		const lw = box(gap * 0.47, h, 0.07, mat, -gap * 0.245, 0, 0),
-			rw = box(gap * 0.47, h, 0.07, mat, gap * 0.245, 0, 0);
+		// closed, the two panels reach the jambs and meet in the middle; open, each slides gap/2 into the
+		// wall (walk.ts updateDoors), so the whole opening is clear
+		const lw = box(gap / 2, h, 0.07, mat, -gap / 4, 0, 0),
+			rw = box(gap / 2, h, 0.07, mat, gap / 4, 0, 0);
 		g.add(lw, rw);
 		d.parts = [lw, rw];
 		d.openSeconds = 2.15;
 	} else {
 		const mat = type === 'hdrSlide' ? std(0x75867f, 0.68, 0.42) : std(0x7f898f, 0.72, 0.48);
-		const leaf = box(gap * 0.94, h, 0.18, mat, 0, 0, 0);
+		// closed, the leaf spans jamb to jamb; open (gap * 1.02 aside), it clears the opening
+		const leaf = box(gap, h, 0.18, mat, 0, 0, 0);
 		g.add(leaf);
 		const inset = box(
 			gap * 0.6,
@@ -671,11 +678,32 @@ export function addRoomBaseboards(room: Room) {
 		hz = room.d / 2,
 		y = 0.12,
 		hh = 0.18,
-		m = std(room.vault ? 0x4e5961 : 0x839198, 0.72, 0.08);
-	scene.add(box(room.w - 0.28, hh, 0.07, m, room.x, y, room.z - hz + 0.1));
-	scene.add(box(room.w - 0.28, hh, 0.07, m, room.x, y, room.z + hz - 0.1));
-	scene.add(box(0.07, hh, room.d - 0.28, m, room.x - hx + 0.1, y, room.z));
-	scene.add(box(0.07, hh, room.d - 0.28, m, room.x + hx - 0.1, y, room.z));
+		m = std(room.vault ? 0x4e5961 : 0x839198, 0.72, 0.08),
+		half = (room.vault ? 4.8 : 2.6) / 2;
+	// One wall's board, 0.1 m in from the wall line and 0.14 m short of each corner. On the door wall it
+	// is two pieces that stop at the opening's edges (the door is centred on that wall, its gap as in
+	// buildSide), so no board runs across the doorway.
+	const board = (side, alongX, at) => {
+		const c = alongX ? room.x : room.z,
+			len = (alongX ? room.w : room.d) - 0.28,
+			runs =
+				room.doorSide === side
+					? [
+							[c - len / 2, c - half],
+							[c + half, c + len / 2]
+						]
+					: [[c - len / 2, c + len / 2]];
+		for (const [a, b] of runs)
+			scene.add(
+				alongX
+					? box(b - a, hh, 0.07, m, (a + b) / 2, y, at)
+					: box(0.07, hh, b - a, m, at, y, (a + b) / 2)
+			);
+	};
+	board('zmin', true, room.z - hz + 0.1);
+	board('zmax', true, room.z + hz - 0.1);
+	board('xmin', false, room.x - hx + 0.1);
+	board('xmax', false, room.x + hx - 0.1);
 }
 
 export function addRoomLighting(room: Room, h) {
@@ -800,9 +828,23 @@ export function buildLobbyEntrance(r: Room) {
 		box(0.14, h, 0.18, frame, -gap / 2 - 0.07, 0, 0),
 		box(0.14, h, 0.18, frame, gap / 2 + 0.07, 0, 0)
 	);
-	const l = box(gap * 0.47, h, 0.05, glass, -gap * 0.245, 0, 0),
-		rr = box(gap * 0.47, h, 0.05, glass, gap * 0.245, 0, 0);
+	// A sliding glass door, like the clinical sliders. Closed, the panes meet in the middle and reach the
+	// jambs (±2.6). Open, each slides gap/2 into the front wall, so the 5.2 m opening is clear. It opens on
+	// its own sensor (npc-behavior.ts updateLobbyEntrance). Its id is not a room's, so room moves never open
+	// or close it. Like every door, the panes do not collide.
+	const l = box(gap / 2, h, 0.05, glass, -gap / 4, 0, 0),
+		rr = box(gap / 2, h, 0.05, glass, gap / 4, 0, 0);
 	g.add(l, rr);
+	doors.set('lobby-entrance', {
+		group: g,
+		side: 'zmax',
+		type: 'clinicalSlide',
+		progress: 0,
+		target: 0,
+		openSeconds: 0.9,
+		parts: [l, rr],
+		gap
+	});
 	scene.add(g);
 	makeLobbyEntranceSign(r);
 }

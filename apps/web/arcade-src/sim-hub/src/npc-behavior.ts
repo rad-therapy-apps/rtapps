@@ -275,6 +275,34 @@ function collectBlockers() {
 	for (const t of handoffTransitions) addBlocker(t.actor);
 	return blockerBuf;
 }
+// The lobby's glass entrance (rooms.ts buildLobbyEntrance, door id 'lobby-entrance') is a sensor door,
+// like the clinical sliders. Each frame, in every mode, it opens while someone is within
+// ENTRANCE_OPEN_R (horizontal) of the doorway's centre (0, 10), and closes otherwise. Someone means the
+// player in walk mode, or any person: the actors collectBlockers gathers, plus the movers that are
+// people, not vehicles. The player's circle is wider (ENTRANCE_PLAYER_R) so the panes are clear before
+// a walking or sprinting player reaches them. main.ts stepSimulation calls it before updateDoors.
+const ENTRANCE_X = 0,
+	ENTRANCE_Z = 10,
+	ENTRANCE_OPEN_R = 3.0,
+	ENTRANCE_PLAYER_R = 5.5;
+export function updateLobbyEntrance() {
+	const near = (x: number, z: number, r: number) => Math.hypot(x - ENTRANCE_X, z - ENTRANCE_Z) < r;
+	let open = S.mode === 'walk' && near(player.pos.x, player.pos.z, ENTRANCE_PLAYER_R);
+	if (!open) {
+		const b = collectBlockers();
+		for (let i = 0; i < b.length && !open; i += 2) open = near(b[i], b[i + 1], ENTRANCE_OPEN_R);
+	}
+	// a mover is a person when it has a walking rig, which addMover records as `bob: false`
+	for (const m of movers) {
+		if (open) break;
+		open =
+			!m.bob &&
+			visibleInTree(m.group) &&
+			near(m.group.position.x, m.group.position.z, ENTRANCE_OPEN_R);
+	}
+	setDoorTarget('lobby-entrance', open);
+}
+
 export function shouldHold(m, blockers, px, pz, fx, fz) {
 	const ahead = (x, z) => {
 		const dx = x - px,
