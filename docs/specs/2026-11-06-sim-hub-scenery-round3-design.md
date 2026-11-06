@@ -376,13 +376,13 @@ Four read-only investigations on 2026-11-06 measured each item from the code and
   - The panes are `gap * 0.47` = 2.444 wide at ±`gap * 0.245`, 2.7 tall and 0.05 deep. They have no collider and no door entry, so today you walk through closed glass.
 - **Change:**
   - **Panes:** `box(gap / 2, h, 0.05, glass, ∓gap / 4, 0, 0)`, each 2.6 m wide, meeting in the middle with seam 0 and reaching the jamb faces (±2.6).
-  - **Door entry:** register them in `doors` as `{ group: g, side: 'zmax', type: 'clinicalSlide', progress: 0, target: 0, openSeconds: 2.15, parts: [l, rr], gap }` under the id `'lobby-entrance'`.
+  - **Door entry:** register them in `doors` as `{ group: g, side: 'zmax', type: 'clinicalSlide', progress: 0, target: 0, openSeconds: 0.9, parts: [l, rr], gap }` under the id `'lobby-entrance'`.
     - The id is not a room id, so room moves never call `setDoorTarget` on it.
     - `updateDoors` slides it with the P1-2 formula. Open, each pane spans 2.6..5.2 m from the centre, inside the front wall (x ≥ 2.6 and ≤ -2.6), and the 5.2 m opening is clear.
     - The entrance sign above (y 2.755..3.805) is untouched.
-  - **Trigger:** each frame, in every mode, set its target to 1 when either is within 3.0 m (horizontal) of the doorway centre (0, 10), and to 0 otherwise:
-    - the player, in walk mode;
-    - any person: the actors `collectBlockers` gathers (npc-behavior.ts:267), plus the movers that are people, not vehicles.
+  - **Trigger:** each frame, in every mode, set its target to 1 when either is near the doorway centre (0, 10), measured horizontally, and to 0 otherwise:
+    - the player, in walk mode, within 5.5 m (so the panes are clear before a walking or sprinting player reaches them);
+    - any person within 3.0 m: the actors `collectBlockers` gathers (npc-behavior.ts:267), plus the movers that are people, not vehicles.
     - In practice it opens for the player walking in, the visitor walker passing (0, 7.5), and a departing patient at Mia's (0, 8.9) or Jordan's (0, 7.6) final.
     - Call it from the main loop before `updateDoors`.
   - **Walk loop:** the loop that closes every non-nearest door (walk.ts:599-601) skips `'lobby-entrance'`.
@@ -987,4 +987,4 @@ Run every check after `pnpm build:arcade`, from `apps/web`.
    - the header font rule is helpers.ts:87 (C said :83);
    - Mia's education final is journey.ts:1896 (A said :1891);
    - the CT finals are journey.ts:2138 and :2146.
-10. **The lobby entrance trigger:** the decisions say "a person or the player". It uses B's 3.0 m radius around (0, 10) for both. So the visitor walker (passing at 2.5 m) and a departing patient at the doors also open it, as at a real sensor door. Its door id `'lobby-entrance'` keeps it out of room-move door calls.
+10. **The lobby entrance trigger:** the decisions say "a person or the player". It uses B's 3.0 m radius around (0, 10) for people and 5.5 m for the player, with `openSeconds` 0.9, so the panes are clear before the player reaches them (found while planning: at 3.0 m and 2.15 s they were still opening). So the visitor walker (passing at 2.5 m) and a departing patient at the doors also open it, as at a real sensor door. Its door id `'lobby-entrance'` keeps it out of room-move door calls.
