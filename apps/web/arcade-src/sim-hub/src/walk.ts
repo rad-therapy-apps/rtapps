@@ -26,7 +26,7 @@ import { camera, orbit, canvas } from './scene';
 import { ROOMS, corridorAnchor, doorLabel } from './rooms';
 import type { Room } from './rooms';
 import { cleanPoints } from './helpers';
-import { roomById, player, doors, ceilings, keys } from './main';
+import { roomById, player, doors, ceilings, keys, PLAYER_EYE_Y, REACH_Y } from './main';
 import { showCtQaDock } from './sdk-bridge';
 import {
 	JOURNEY,
@@ -53,12 +53,15 @@ const HUB = new THREE.Vector3(0, 1.68, 0);
 // of the NPC lanes (x 60.9 and east)
 export const TREATMENT_JUNCTION_X = 60.4;
 
+// door reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye, so it feels as before
+const doorReachFrom = new THREE.Vector3();
 export function nearestDoor(maxD = 2.6) {
 	let best = null,
 		bd = maxD;
+	doorReachFrom.set(player.pos.x, REACH_Y, player.pos.z);
 	ROOMS.filter((r) => !r.hub).forEach((r) => {
 		const p = doorPoint(r),
-			d = player.pos.distanceTo(p);
+			d = doorReachFrom.distanceTo(p);
 		if (d < bd) {
 			bd = d;
 			best = { room: r, d };
@@ -359,6 +362,8 @@ function finishTravel() {
 	document.getElementById('travelHUD').classList.remove('show');
 	enableGuidedConversationComposition(arrived);
 	player.pos.copy(camera.position);
+	// walk mode keeps its own eye height, never the guided camera's
+	player.pos.y = PLAYER_EYE_Y;
 	updateRoomUI(arrived);
 	renderRoomList();
 	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
@@ -461,8 +466,10 @@ export function updateDoors(dt) {
 			d.parts[0].rotation.y = -Math.PI * 0.46 * p;
 			d.parts[1].rotation.y = Math.PI * 0.46 * p;
 		} else if (d.type === 'clinicalSlide') {
-			d.parts[0].position.x = -d.gap * 0.245 - d.gap * 0.48 * p;
-			d.parts[1].position.x = d.gap * 0.245 + d.gap * 0.48 * p;
+			// each panel (gap/2 wide, closed at ±gap/4) slides gap/2 into the wall: open, it spans
+			// gap/2..gap from the centre and the opening is clear
+			d.parts[0].position.x = -(d.gap / 4 + d.gap * 0.5 * p);
+			d.parts[1].position.x = d.gap / 4 + d.gap * 0.5 * p;
 		} else {
 			const off = d.gap * 1.02 * p;
 			d.parts.forEach((part) => (part.position.x = off));
@@ -503,14 +510,15 @@ export function setMode(m, announce = true) {
 		if (S.activeRoom) {
 			applyWalkConversationComposition(S.activeRoom, true);
 		} else {
-			player.pos.set(0, 1.65, 5.5);
+			// Walk mode starts outside, on the entrance plaza about 0.5 m north of the curb, east of the
+			// monument sign and aimed past the sign's east end at the doors, so holding W walks in
+			// through the sliding glass clear of the sign and its plants.
+			// S.activeRoom stays null outside; walking in, roomContainingWalkPoint picks up the lobby.
+			player.pos.set(4.2, PLAYER_EYE_Y, 20.4);
 			camera.position.copy(player.pos);
-			const f = focusTargetsForRoom(roomById('lobby'));
-			if (f) aimPlayerAt(f.target);
-			else {
-				player.yaw = 0;
-				player.pitch = 0;
-			}
+			aimPlayerAt(new THREE.Vector3(1.2, 2.0, 10.5));
+			document.getElementById('locText').textContent =
+				'Outside the main entrance · walk in through the doors';
 		}
 		if (announce)
 			toast('Walk mode: use WASD and the mouse to move and look around. Press E to interact.');
@@ -597,6 +605,8 @@ export function updateWalk(dt) {
 	});
 	if (nearest && nd < 2.15) setDoorTarget(nearest.id, true);
 	doors.forEach((d, id) => {
+		// the lobby's glass entrance has its own sensor (npc-behavior.ts updateLobbyEntrance)
+		if (id === 'lobby-entrance') return;
 		if (!nearest || id !== nearest.id || nd >= 2.15) setDoorTarget(id, false);
 	});
 }

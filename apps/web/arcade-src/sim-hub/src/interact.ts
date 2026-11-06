@@ -33,7 +33,7 @@ import {
 	equipmentRoomName
 } from './equipment';
 import { setDoorTarget, doorCenter, doorNormal, beginTravel, nearestDoor, setMode } from './walk';
-import { roomById, player, doors, ROOM_GUIDES, HANDOFFS } from './main';
+import { roomById, player, doors, ROOM_GUIDES, HANDOFFS, REACH_Y } from './main';
 import { PROC_STATE, PROC_SITES, showCtQaDock, syncCtQaProgress } from './sdk-bridge';
 import {
 	focusConversationCamera,
@@ -459,10 +459,13 @@ export function registerInteractable(
 function nearestInteractable(maxD = 2.8) {
 	let best = null,
 		bd = maxD;
-	const wp = new THREE.Vector3();
+	// reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye (PLAYER_EYE_Y), so every
+	// interaction range feels as before
+	const wp = new THREE.Vector3(),
+		from = new THREE.Vector3(player.pos.x, REACH_Y, player.pos.z);
 	for (const it of interactables) {
 		it.object.getWorldPosition(wp);
-		const d = player.pos.distanceTo(wp),
+		const d = from.distanceTo(wp),
 			limit = Math.min(maxD, it.range || maxD);
 		if (d < bd && d <= limit) {
 			bd = d;

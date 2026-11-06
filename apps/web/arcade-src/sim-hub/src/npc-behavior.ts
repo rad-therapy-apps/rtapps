@@ -7,8 +7,7 @@
    owned by main.js — `ROOM_CAST`/`doors` (still-resident journey state) — because other
    still-resident systems read or write them too, so main.js exports them rather than
    duplicating that state here. `JOURNEY`/`journeyActorRoom` moved to ./journey.js in task 9 and
-   are imported back here. `setupAmbulance` moved to ./equipment.js in task 7 and is
-   imported from there instead. `doorPoint`/`setDoorTarget`/`corridorNodesFromHub`/
+   are imported back here. `doorPoint`/`setDoorTarget`/`corridorNodesFromHub`/
    `shortestCorridorRoute`/`shortestCorridorRouteFromPosition`/`makePolylineCurve` moved to
    ./walk.js in task 8 and are imported from there instead. */
 import * as THREE from 'three';
@@ -29,7 +28,6 @@ import {
 	setLegSwing,
 	setLegReach,
 	faceNpcToward,
-	faceAlong,
 	npcBubble,
 	bubbleVis
 } from './npc';
@@ -44,7 +42,6 @@ import {
 } from './walk';
 import { roomById, ROOM_CAST, doors, player } from './main';
 import { JOURNEY, journeyActorRoom, workflowTransitions } from './journey';
-import { setupAmbulance } from './equipment';
 import { ARRIVAL_SPOTS, takeArrivalSpot, releaseArrivalSpot, inRoomPath } from './room-routes';
 import type { ArrivalSpot } from './room-routes';
 
@@ -275,6 +272,34 @@ function collectBlockers() {
 	for (const t of handoffTransitions) addBlocker(t.actor);
 	return blockerBuf;
 }
+// The lobby's glass entrance (rooms.ts buildLobbyEntrance, door id 'lobby-entrance') is a sensor door,
+// like the clinical sliders. Each frame, in every mode, it opens while someone is within
+// ENTRANCE_OPEN_R (horizontal) of the doorway's centre (0, 10), and closes otherwise. Someone means the
+// player in walk mode, or any person: the actors collectBlockers gathers, plus the movers that are
+// people, not vehicles. The player's circle is wider (ENTRANCE_PLAYER_R) so the panes are clear before
+// a walking or sprinting player reaches them. main.ts stepSimulation calls it before updateDoors.
+const ENTRANCE_X = 0,
+	ENTRANCE_Z = 10,
+	ENTRANCE_OPEN_R = 3.0,
+	ENTRANCE_PLAYER_R = 5.5;
+export function updateLobbyEntrance() {
+	const near = (x: number, z: number, r: number) => Math.hypot(x - ENTRANCE_X, z - ENTRANCE_Z) < r;
+	let open = S.mode === 'walk' && near(player.pos.x, player.pos.z, ENTRANCE_PLAYER_R);
+	if (!open) {
+		const b = collectBlockers();
+		for (let i = 0; i < b.length && !open; i += 2) open = near(b[i], b[i + 1], ENTRANCE_OPEN_R);
+	}
+	// a mover is a person when it has a walking rig, which addMover records as `bob: false`
+	for (const m of movers) {
+		if (open) break;
+		open =
+			!m.bob &&
+			visibleInTree(m.group) &&
+			near(m.group.position.x, m.group.position.z, ENTRANCE_OPEN_R);
+	}
+	setDoorTarget('lobby-entrance', open);
+}
+
 export function shouldHold(m, blockers, px, pz, fx, fz) {
 	const ahead = (x, z) => {
 		const dx = x - px,
@@ -540,33 +565,36 @@ export function addMovingActors() {
 	addMover(
 		car,
 		[
-			// Drive lanes: east on z = 32, west on z = 37.5, clear of the HDR suite.
-			[-34, 0, 32],
-			[-22.5, 0, 32],
-			[-11, 0, 32],
-			[0.5, 0, 32],
-			[12.5, 0, 32],
-			[24, 0, 32],
-			[35.5, 0, 32],
-			[47, 0, 32],
-			[48.38, 0, 32.37],
-			[49.38, 0, 33.38],
-			[49.75, 0, 34.75],
-			[49.38, 0, 36.13],
-			[48.38, 0, 37.13],
-			[47, 0, 37.5],
-			[35.5, 0, 37.5],
-			[24, 0, 37.5],
-			[12.5, 0, 37.5],
-			[0.5, 0, 37.5],
-			[-11, 0, 37.5],
-			[-22.5, 0, 37.5],
-			[-34, 0, 37.5],
-			[-35.37, 0, 37.13],
-			[-36.38, 0, 36.13],
-			[-36.75, 0, 34.75],
-			[-36.38, 0, 33.38],
-			[-35.37, 0, 32.37]
+			// Drive lanes: east on z = 31.5, west on z = 37. The U-turns (radius 2.75) sit at x 41 and x -32.5.
+			// The 1.6-scale car turns about its centre, so its rear swings about 1.9 m wide at the start of
+			// each U-turn. These ends keep that swing on the drive: west of the HDR suite (x 45) and inside
+			// curb2 (z 38.94).
+			[-32.5, 0, 31.5],
+			[-22.5, 0, 31.5],
+			[-11, 0, 31.5],
+			[0.5, 0, 31.5],
+			[12.5, 0, 31.5],
+			[24, 0, 31.5],
+			[35.5, 0, 31.5],
+			[41, 0, 31.5],
+			[42.38, 0, 31.87],
+			[43.38, 0, 32.88],
+			[43.75, 0, 34.25],
+			[43.38, 0, 35.63],
+			[42.38, 0, 36.63],
+			[41, 0, 37],
+			[35.5, 0, 37],
+			[24, 0, 37],
+			[12.5, 0, 37],
+			[0.5, 0, 37],
+			[-11, 0, 37],
+			[-22.5, 0, 37],
+			[-32.5, 0, 37],
+			[-33.88, 0, 36.63],
+			[-34.88, 0, 35.63],
+			[-35.25, 0, 34.25],
+			[-34.88, 0, 32.88],
+			[-33.88, 0, 31.87]
 		],
 		0.01123,
 		true,
@@ -574,11 +602,13 @@ export function addMovingActors() {
 		-Math.PI / 2,
 		'car'
 	);
+	// parked on the asphalt east of the entrance plaza, nose west (the cab is at local +x): at vehicle
+	// scale 1.6 it covers x 28.76..33.24, z 21.928..24.072, 0.9 m from the curb, between the stop marks at
+	// x 26 and 36
 	const ambulance = vehicleObject('ambulance');
-	ambulance.position.set(-42, 0, 20);
-	ambulance.rotation.y = Math.atan2(1, 0) - Math.PI / 2;
+	ambulance.position.set(31, 0, 23);
+	ambulance.rotation.y = Math.PI;
 	scene.add(ambulance);
-	setupAmbulance(ambulance);
 	const shuttle = vehicleObject('van', 0x8db292);
 	addMover(
 		shuttle,
@@ -777,55 +807,6 @@ export function addMovingActors() {
 		0,
 		'hdrRunner'
 	);
-}
-
-export function walkSwing(g, sec) {
-	const s = Math.sin(sec * 8) * 0.42;
-	g.traverse((o) => {
-		const r = o.userData?.walkRig;
-		if (r) {
-			r.armLP.rotation.x = s;
-			r.armRP.rotation.x = -s;
-			setLegSwing(r, s * 0.85);
-		}
-	});
-}
-export function advanceRoute(o, route, st, speed, dt, off) {
-	if (st.i >= route.length - 1) return true;
-	const a = route[st.i],
-		b = route[st.i + 1];
-	const dx = b[0] - a[0],
-		dz = b[1] - a[1],
-		len = Math.hypot(dx, dz) || 1;
-	st.d = (st.d || 0) + speed * dt;
-	const f = st.d / len;
-	if (f >= 1) {
-		o.position.set(b[0], 0, b[1]);
-		st.i++;
-		st.d = 0;
-		if (st.i < route.length - 1) {
-			const c = route[st.i + 1];
-			faceAlong(o, c[0] - b[0], c[1] - b[1], off);
-		}
-		return st.i >= route.length - 1;
-	}
-	o.position.set(a[0] + dx * f, 0, a[1] + dz * f);
-	faceAlong(o, dx, dz, off);
-	return false;
-}
-export function advancePed(o, from, to, st, speed, dt) {
-	const dx = to.x - from.x,
-		dz = to.z - from.z,
-		len = Math.hypot(dx, dz) || 1;
-	st.d = (st.d || 0) + speed * dt;
-	const f = st.d / len;
-	if (f >= 1) {
-		o.position.set(to.x, 0, to.z);
-		return true;
-	}
-	o.position.set(from.x + dx * f, 0, from.z + dz * f);
-	o.rotation.y = Math.atan2(dx, dz);
-	return false;
 }
 
 const SEAT_SNAP = 1.0, // how far seatActor looks for a seat

@@ -1,5 +1,5 @@
-/* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons, the ambulance
-   drop-off choreography, operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
+/* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons,
+   operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
    status displays, the LINAC-head/engineering wall stations, and Phase-5 wayfinding signage.
    Verbatim extractions from main.js. `player` (walk-mode position read by
    `updateClinicalEquipment`) and `roomById`/`PRIMARY_PATIENTS`/`doors` stay owned by main.js
@@ -31,16 +31,8 @@ import {
 } from './helpers';
 import { scene, camera, orbit, renderer } from './scene';
 import { wallClock, consoleKeyboard, orientationKiosk, customTextureWallMonitor } from './props';
-import { personFigure, faceAlong, poseCharacter, setLegSwing, SOLE_Y } from './npc';
-import {
-	advanceRoute,
-	advancePed,
-	walkSwing,
-	startNextQueuedMove,
-	stepRise,
-	beginSit,
-	stepSit
-} from './npc-behavior';
+import { poseCharacter, setLegSwing } from './npc';
+import { startNextQueuedMove, stepRise, beginSit, stepSit } from './npc-behavior';
 import {
 	registerInteractable,
 	openLinacHeadLab,
@@ -49,8 +41,7 @@ import {
 	showEquipmentPanel
 } from './interact';
 import { setDoorTarget } from './walk';
-import { roomById, PRIMARY_PATIENTS, doors, player, roomFloors } from './main';
-import { APRON_TOP } from './rooms';
+import { roomById, PRIMARY_PATIENTS, doors, player } from './main';
 import { VAULT2_SETUP_STEPS, vault2StepAt } from './vault-setup-loop';
 import {
 	JOURNEY,
@@ -735,105 +726,6 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	renderer.shadowMap.autoUpdate = shadowAutoUpdate;
 }
 
-/* ---- Ambulance drop-off choreography: pull up, unload, dwell, load, depart ---- */
-const ambState = { phase: 'approach', route: { i: 0, d: 0 }, wait: 0 };
-const AMB_FWD = -Math.PI / 2;
-const AMB_IN = [
-	[-42, 20],
-	[-14, 20],
-	[-3.4, 20],
-	[-2.6, 16],
-	[-2.2, 13.2]
-];
-const AMB_OUT = [
-	[-2.2, 13.2],
-	[-2.9, 16.6],
-	[-8, 20],
-	[-30, 20],
-	[-54, 20]
-];
-const AMB_REAR = { x: -4.2, z: 13.6 },
-	AMB_ENTRY = { x: 0.4, z: 7.8 };
-/* The crew walks between the ambulance bay and the lobby. On the lobby floor it stands at y 0 like
-   every indoor actor; off it, it stands on the bay apron, so its soles touch the ground there too. */
-let lobbyFloorBox = null;
-function crewOnGround(q) {
-	lobbyFloorBox ||= new THREE.Box3().setFromObject(
-		roomFloors.find((f) => f.userData.roomId === 'lobby')
-	);
-	const p = q.position,
-		b = lobbyFloorBox,
-		indoors = p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z;
-	p.y = indoors ? 0 : APRON_TOP - SOLE_Y;
-}
-function ambPatient() {
-	const q = personFigure(0xcfd6da, 0xb9c1c6, 0xe9c39d);
-	q.visible = false;
-	scene.add(q);
-	return q;
-}
-export function setupAmbulance(a) {
-	S.AMB = a;
-	S.ambUnload = ambPatient();
-	S.ambLoad = ambPatient();
-	ambState.phase = 'approach';
-	ambState.route = { i: 0, d: 0 };
-	ambState.wait = 0;
-}
-export function updateAmbulance(dt, sec) {
-	if (!S.AMB) return;
-	const A = ambState;
-	if (A.phase === 'approach') {
-		if (advanceRoute(S.AMB, AMB_IN, A.route, 7.5, dt, AMB_FWD)) {
-			faceAlong(S.AMB, 0, -1, AMB_FWD);
-			A.phase = 'unload';
-			A.route = { i: 0, d: 0 };
-			S.ambUnload.visible = true;
-			S.ambUnload.position.set(AMB_REAR.x, 0, AMB_REAR.z);
-			crewOnGround(S.ambUnload);
-		}
-	} else if (A.phase === 'unload') {
-		walkSwing(S.ambUnload, sec);
-		const unloaded = advancePed(S.ambUnload, AMB_REAR, AMB_ENTRY, A.route, 1.5, dt);
-		crewOnGround(S.ambUnload);
-		if (unloaded) {
-			S.ambUnload.visible = false;
-			A.phase = 'dwell';
-			A.wait = 0;
-		}
-	} else if (A.phase === 'dwell') {
-		A.wait += dt;
-		if (A.wait > 3.4) {
-			A.phase = 'load';
-			A.route = { i: 0, d: 0 };
-			S.ambLoad.visible = true;
-			S.ambLoad.position.set(AMB_ENTRY.x, 0, AMB_ENTRY.z);
-		}
-	} else if (A.phase === 'load') {
-		walkSwing(S.ambLoad, sec);
-		const loaded = advancePed(S.ambLoad, AMB_ENTRY, AMB_REAR, A.route, 1.4, dt);
-		crewOnGround(S.ambLoad);
-		if (loaded) {
-			S.ambLoad.visible = false;
-			A.phase = 'depart';
-			A.route = { i: 0, d: 0 };
-		}
-	} else if (A.phase === 'depart') {
-		if (advanceRoute(S.AMB, AMB_OUT, A.route, 8.6, dt, AMB_FWD)) {
-			A.phase = 'gap';
-			A.wait = 0;
-		}
-	} else if (A.phase === 'gap') {
-		A.wait += dt;
-		if (A.wait > 4.5) {
-			S.AMB.position.set(-42, 0, 20);
-			faceAlong(S.AMB, 1, 0, AMB_FWD);
-			A.phase = 'approach';
-			A.route = { i: 0, d: 0 };
-		}
-	}
-}
-
 export function workflowState(roomId, state, detail, color = '#42d5cf') {
 	ROOM_WORKFLOW[roomId] = { state, detail, color };
 	setStatusBeacon(roomId, state);
@@ -1161,10 +1053,13 @@ export function buildPhase5Wayfinding() {
 		-Math.PI / 2,
 		3.7
 	);
+	// On the junction block's face (x 63.71, rooms.ts buildCorridorInfillWalls), 0.05 m off it. Read from
+	// the walkway facing +x, vault 1 (z -18) is on the left and vault 2 (z 18) on the right. Its back face
+	// faces the block and is never seen, so it passes no back label.
 	makeDirectionalSign(
-		'VAULT 1  ↓   ·   VAULT 2  ↑',
+		'VAULT 1  ←   ·   VAULT 2  →',
 		'Shielded treatment rooms',
-		63.2,
+		63.66,
 		2.88,
 		0,
 		-Math.PI / 2,
@@ -1182,17 +1077,21 @@ export function buildPhase5Wayfinding() {
 	orientationKiosk();
 	// RTApps (#77 phase 2 task 14): tuple-typed so the `...v` spread into makeStatusBeacon's
 	// (roomId, x, y, z, rot) fixed parameter list type-checks instead of widening to number[].
+	// Each status light hangs on the hallway face of its door wall, its back 0.005 m off the face, centred
+	// on the door sign's mid-height (3.05; vaults 3.78) and 0.10 m clear of the sign's back plate, on the
+	// right as you face the door. Both vault lights are on the main-corridor side (toward z 0), above the
+	// red entrance marker, so vault 2's is left of its sign, mirroring vault 1's.
 	const placements: Record<string, [number, number, number, number]> = {
-		consult: [-17.0, 3.12, -2.12, 0],
-		education: [-41.0, 3.12, -2.12, 0],
-		ctsim: [44.0, 3.2, -2.88, 0],
-		ctcontrol: [31.5, 3.1, -3.88, 0],
-		dosimetry: [15.72, 3.12, -49, -Math.PI / 2],
-		physics: [11.72, 3.12, -18, -Math.PI / 2],
-		linaccontrol: [51.0, 3.12, 4.12, 0],
-		vault1: [66.72, 3.55, -18, -Math.PI / 2],
-		vault2: [66.72, 3.55, 18, -Math.PI / 2],
-		hdr: [57.6, 3.15, 23.1, 0]
+		consult: [-15.65, 3.05, -2.85, 0],
+		education: [-39.65, 3.05, -2.85, 0],
+		ctsim: [46.35, 3.05, -2.85, 0],
+		ctcontrol: [33.85, 3.05, -3.85, 0],
+		dosimetry: [1.85, 3.05, -46.65, -Math.PI / 2],
+		physics: [2.85, 3.05, -15.65, -Math.PI / 2],
+		linaccontrol: [48.65, 3.05, 3.85, Math.PI],
+		vault1: [63.64, 3.78, -15.2, -Math.PI / 2],
+		vault2: [63.64, 3.78, 15.2, -Math.PI / 2],
+		hdr: [58.15, 3.05, 21.65, Math.PI / 2]
 	};
 	for (const [id, v] of Object.entries(placements)) makeStatusBeacon(id, ...v);
 }

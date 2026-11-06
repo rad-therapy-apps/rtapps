@@ -18,8 +18,7 @@
 //   d  Hidden    after a 10 s hidden gap nobody moves further than one 0.05 s frame step
 //   f  Feet      every standing or walking person's sole is within 0.03 m of the floor beneath its
 //                shoe (the highest floor slab within 0.1 m of the root: the shoe is 0.2 m long)
-//                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s,
-//                then 8 moments over each of the ambulance crew's walks, unload and load)
+//                (12 moments over one leg-swing cycle after the journey reset, then t = 30 s and 90 s)
 //   g  Seated    every sitter has a seat anchor (props.ts SEATS) within 0.3 m whose top is within
 //                0.02 m of its pelvis (hip pivot - 0.06 x scale) and whose facing is within 20 deg of its own;
 //                seat facing: no seat (wheelchairs aside) faces a wall within 3.0 m, unless its facing
@@ -1018,8 +1017,6 @@ function allPeople() {
 		arr.forEach((e, i) => add(e.g, `${room}:${e.kind}:${i}`));
 	for (const o of NPC.journeyActors())
 		add(o, `journey ${o.userData?.npcRole || o.name || 'actor'}`);
-	add(NPC.state.ambUnload, 'ambulance crew (unload)');
-	add(NPC.state.ambLoad, 'ambulance crew (load)');
 	return [...seen].map(([g, id]) => ({ g, id })).filter(({ g }) => NPC.visibleInTree(g));
 }
 
@@ -1062,30 +1059,6 @@ function checkFeet() {
 	sample('t=30s');
 	stepFor(60);
 	sample('t=90s');
-	// The ambulance crew is only visible while it walks between the bay and the lobby: wait for each
-	// walk, then sample 8 moments 0.6 s apart along it (the walk takes about 5 s).
-	for (const [key, name] of [
-		['ambUnload', 'unload'],
-		['ambLoad', 'load']
-	]) {
-		const crew = NPC.state[key];
-		for (let i = 0; i < 30 * 90 && !(crew && crew.visible); i++) step();
-		if (!(crew && crew.visible)) {
-			readings++;
-			worstRows.push({
-				when: `ambulance ${name}`,
-				id: 'crew never walked in 90 s',
-				sole: NaN,
-				floor: NaN,
-				gap: NaN
-			});
-			continue;
-		}
-		for (let k = 0; k < 8 && crew.visible; k++) {
-			if (k) stepFor(0.6);
-			sample(`ambulance ${name} ${k}/8`);
-		}
-	}
 	return {
 		pass: readings === 0,
 		summary: readings

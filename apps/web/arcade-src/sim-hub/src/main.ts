@@ -37,13 +37,13 @@ import {
 	addMovingActors,
 	updateDutyAnimations,
 	updateNpcExchanges,
-	updateHandoffTransitions
+	updateHandoffTransitions,
+	updateLobbyEntrance
 } from './npc-behavior';
 import {
 	buildClinicalEquipmentLayer,
 	updateClinicalEquipment,
 	updateStatusBeacons,
-	updateAmbulance,
 	renderOperatorLiveFeeds,
 	precompileShaders,
 	buildOperatorLiveConsole,
@@ -409,7 +409,11 @@ export const doors = new Map();
 buildExteriorAmbient();
 
 corridorFloor(-32, 0, 40, 7, C.front); // Patient Services west corridor
-corridorFloor(0, -38, 7, 56, C.technical); // Technical / Education north corridor
+// Technical / Education north corridor; its last 9.5 m stops at the x 2 wall instead of running outdoors
+corridorFloor(0, -38, 7, 56, C.technical, [
+	[0, -33.25, 7, 46.5],
+	[-0.705, -61.25, 5.59, 9.5]
+]);
 corridorFloor(35, 0, 46, 8, C.clinical); // Main Clinical east corridor, x 12..58
 corridorFloor(61, 0, 6, 62, C.vault); // Treatment walkway, x 58..64
 // the junction plate also floors the pocket between the vault entrances (x 64..67, z -4.71..4.71)
@@ -475,14 +479,21 @@ async function toggleAmbience() {
 		);
 }
 
+// The three lobby blades hang over the openings you walk straight through, so each front points ↑.
+// Their backs face the hallways and point back to the lobby.
+const LOBBY_BLADE_BACK: [string, string] = [
+	'MAIN LOBBY  ↑',
+	'Reception · Check-in · Main entrance'
+];
 makeDirectionalSign(
-	'←  PATIENT SERVICES',
+	'PATIENT SERVICES  ↑',
 	'Consult · Counseling · Education · Patient Care',
 	-11.25,
 	2.82,
 	0,
 	Math.PI / 2,
-	3.7
+	3.7,
+	LOBBY_BLADE_BACK
 );
 makeDirectionalSign(
 	'TECHNICAL / EDUCATION  ↑',
@@ -491,16 +502,18 @@ makeDirectionalSign(
 	2.82,
 	-9.35,
 	0,
-	4.2
+	4.2,
+	LOBBY_BLADE_BACK
 );
 makeDirectionalSign(
-	'CLINICAL SERVICES  →',
+	'CLINICAL SERVICES  ↑',
 	'CT Simulation · Leadership · LINAC · HDR',
 	11.25,
 	2.82,
 	0,
 	-Math.PI / 2,
-	3.7
+	3.7,
+	LOBBY_BLADE_BACK
 );
 buildPhase5Wayfinding();
 
@@ -532,8 +545,14 @@ sign.rotation.y = Math.PI;
 scene.add(sign);
 monumentSign(-1.8, 14.25);
 
+// The walk camera's height. NPC eyes are at 1.87 (npc.ts personFigure), so the player meets them eye to
+// eye. Interaction reach (interact.ts nearestInteractable, walk.ts nearestDoor) is measured from
+// REACH_Y, the old eye height, so every reach feels as before. Guided travel keeps its 1.66 route nodes.
+export const PLAYER_EYE_Y = 1.87;
+export const REACH_Y = 1.65;
 export const player = {
-	pos: new THREE.Vector3(0, 1.65, 5.5),
+	// walk mode starts outside the main entrance (walk.ts setMode)
+	pos: new THREE.Vector3(4.2, PLAYER_EYE_Y, 20.4),
 	yaw: Math.PI,
 	pitch: 0,
 	locked: false
@@ -683,6 +702,7 @@ export function stepSimulation(now: number): void {
 		sec = (S.simSec += dt),
 		f = ((stepSimulation as unknown as { _f?: number })._f =
 			((stepSimulation as unknown as { _f?: number })._f || 0) + 1);
+	updateLobbyEntrance();
 	updateDoors(dt);
 	updateWalk(dt);
 	updateTravel(now);
@@ -694,7 +714,6 @@ export function stepSimulation(now: number): void {
 	updateCtCouchMotion(sec);
 	updateJourneyCameraFollow();
 	if (f % 2 === 0) updateNpcExchanges(sec);
-	updateAmbulance(dt, sec);
 	updateStatusBeacons(sec);
 	if (f % 3 === 0) updateClinicalEquipment(sec);
 	updateAmbience();

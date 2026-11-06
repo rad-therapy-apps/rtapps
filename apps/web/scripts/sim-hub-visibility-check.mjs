@@ -7,9 +7,10 @@
 // missing with it ON is a failure, reported with mesh name, room and pose. Nothing is tolerated.
 //
 // Poses (all with the player/camera in a non-overview mode, so culling is live):
-//   - every room: walk pose (room centre, eye height 1.65) and guided pose (the room's `cam`/`look`),
-//     four headings each (0/90/180/270 degrees about the vertical axis)
+//   - every room: walk pose (room centre, eye height 1.87, main.ts PLAYER_EYE_Y) and guided pose (the
+//     room's `cam`/`look`), four headings each (0/90/180/270 degrees about the vertical axis)
 //   - 6 hallway points (2.5 m outside a room door), four headings each
+//   - the walk-mode start outside the main entrance (4.2, 1.87, 20.4), four headings
 //   - elevated cameras (culling is switched off above the wall tops, so all must match exactly):
 //       * the overview->guided descent: beginTravel starts at (12,82,92) and makeRouteToApproach
 //         runs through (0,7.2,15) and (0,2.2,5.2) to the lobby hub. Its Catmull-Rom curve is not
@@ -364,10 +365,12 @@ const report = await page.evaluate(
 				pos[2] - Math.cos(pitch) * Math.cos(a)
 			];
 		};
+		// the walk camera's height (main.ts PLAYER_EYE_Y)
+		const EYE = 1.87;
 		const poses = [];
 		const headings = [0, 90, 180, 270];
 		for (const q of ROOMS) {
-			const wp = [q.x, 1.65, q.z];
+			const wp = [q.x, EYE, q.z];
 			for (const h of headings)
 				poses.push({ name: `${q.id} walk h${h}`, room: q.id, pos: wp, look: yawAim(h, wp, 0) });
 			const gp = q.cam;
@@ -396,7 +399,7 @@ const report = await page.evaluate(
 			const px = q.x + ox * (Math.abs(ox) * (q.w / 2 + 2.5));
 			const pz = q.z + oz * (Math.abs(oz) * (q.d / 2 + 2.5));
 			// keep the x (or z) along the wall as the room's own centre coordinate
-			hall.push({ id, pos: [ox ? px : q.x, 1.65, oz ? pz : q.z] });
+			hall.push({ id, pos: [ox ? px : q.x, EYE, oz ? pz : q.z] });
 		}
 		for (const hp of hall)
 			for (const h of headings)
@@ -411,21 +414,30 @@ const report = await page.evaluate(
 		poses.push({
 			name: 'linaccontrol monitors left',
 			room: 'linaccontrol',
-			pos: [lc.x - 2.5, 1.65, lc.z + 1.37],
+			pos: [lc.x - 2.5, EYE, lc.z + 1.37],
 			look: [lc.x - 6.55, 2.43, lc.z + 1.37]
 		});
 		poses.push({
 			name: 'linaccontrol monitors right',
 			room: 'linaccontrol',
-			pos: [lc.x + 1, 1.65, lc.z - 1.24],
+			pos: [lc.x + 1, EYE, lc.z - 1.24],
 			look: [lc.x - 6.55, 1.8, lc.z - 1.24]
 		});
 		poses.push({
 			name: 'ctcontrol glass into ctsim',
 			room: 'ctcontrol',
-			pos: [cc.x, 1.65, cc.z],
+			pos: [cc.x, EYE, cc.z],
 			look: [cc.x + 8, 1.5, cc.z]
 		});
+		// the walk-mode start outside the main entrance (walk.ts setMode), the first camera a player sees
+		const spawn = [4.2, EYE, 20.4];
+		for (const h of headings)
+			poses.push({
+				name: `outside spawn h${h}`,
+				room: roomAt(spawn[0], spawn[2]),
+				pos: spawn,
+				look: yawAim(h, spawn, 0)
+			});
 
 		// Elevated poses (see header).
 		const lobbyRoom = ROOMS.find((x) => x.hub);

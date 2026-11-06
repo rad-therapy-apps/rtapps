@@ -400,9 +400,6 @@ export function updateNpcLabels() {
 			near ? String(Math.max(0, Math.min(1, (LABEL_FADE_DIST - d) / 1.1))) : '0';
 	}
 }
-export function faceAlong(o, dx, dz, off) {
-	if (dx || dz) o.rotation.y = Math.atan2(dx, dz) + (off || 0);
-}
 
 // One lying-patient figure (hand-built boxes, head toward -x, feet toward +x). Its back is flat: the
 // undersides of the pillow, torso, pelvis, arms, forearms, legs and feet all lie at local y = 0.7025,

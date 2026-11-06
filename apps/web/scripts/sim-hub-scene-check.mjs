@@ -412,8 +412,7 @@ const PLACEMENTS = [
 		[-52, -12, -3, 3, 3.75, 'west hallway'],
 		[-3, 3, -41.5, -10, 3.75, 'technical hallway south'],
 		[-3, 2, -54, -41.5, 3.75, 'technical hallway by dosimetry'],
-		[-2, 2, -56.5, -54, 3.75, 'technical hallway by commons and dosimetry'],
-		[-2, 3, -66, -56.5, 3.75, 'technical hallway north'],
+		[-2, 2, -66, -54, 3.75, 'technical hallway north'],
 		[12, 15, -4, 4, 3.75, 'clinical hallway by the lobby'],
 		[15, 25, -4, 3.5, 3.75, 'clinical hallway by the manager'],
 		[25, 36, -4, 4, 3.75, 'clinical hallway by CT control'],
@@ -448,7 +447,7 @@ const PLACEMENTS = [
 		minY: 3.75
 	},
 	{ id: 'west hallway end wall', pick: { size: [0.18, 3.75, 6], at: [-52, 0] } },
-	{ id: 'technical hallway end wall', pick: { size: [5, 3.75, 0.18], at: [0.5, -66] } },
+	{ id: 'technical hallway end wall', pick: { size: [4, 3.75, 0.18], at: [0, -66] } },
 	// the lobby's hallway openings end at the hallway walls' inner faces (z ±2.91 west, x ±2.91
 	// north, z ±3.91 east), so no slot beside a hallway wall shows the outside
 	...[
@@ -462,11 +461,144 @@ const PLACEMENTS = [
 		id: `lobby ${side} wall meets its hallway wall at ${x}, ${z}`,
 		pick: { size: [w, 4.15, d], at: [x, z], r: 0.05 }
 	})),
-	// the welcome kiosk's screen is on the lobby side (+z) of its stand, so it reads the right way
-	// round from the room
+	// P1-9: the welcome kiosk stands just inside the main entrance, east of the walk-in line. Its screen
+	// is on the doors' side (+z) of its stand, so it reads the right way round as you walk in.
 	{
-		id: 'welcome kiosk screen faces the lobby',
-		pick: { geom: 'PlaneGeometry', size: [1.16, 0.68], at: [5.5, -4.195], r: 0.02 }
+		id: 'welcome kiosk screen faces the entrance',
+		pick: { geom: 'PlaneGeometry', size: [1.16, 0.68], at: [2.6, 6.355], r: 0.02 }
+	},
+	// P1-1 (2026-11-06): each room's status light hangs on the hallway face of its door wall, its back
+	// 0.005 m off the face, right of the door sign; both vault lights are on the main-corridor side
+	...[
+		['consult', -15.65, -2.85, 'z', -2.92, 'min'],
+		['education', -39.65, -2.85, 'z', -2.92, 'min'],
+		['CT room', 46.35, -2.85, 'z', -2.92, 'min'],
+		['CT control', 33.85, -3.85, 'z', -3.92, 'min'],
+		['physics', 2.85, -15.65, 'x', 2.92, 'max'],
+		['dosimetry', 1.85, -46.65, 'x', 1.92, 'max'],
+		['LINAC control', 48.65, 3.85, 'z', 3.92, 'max'],
+		['vault 1', 63.64, -15.2, 'x', 63.71, 'max'],
+		['vault 2', 63.64, 15.2, 'x', 63.71, 'max'],
+		['HDR', 58.15, 21.65, 'x', 58.08, 'min']
+	].map(([room, x, z, axis, face, side]) => ({
+		id: `status light beside the ${room} door sign`,
+		pick: { size: [0.58, 0.24, 0.13], at: [x, z], r: 0.05 },
+		flush: { axis, face, side }
+	})),
+	// P1-2: every closed door leaf spans jamb to jamb (the swing leaf stops 6 mm short of the latch jamb,
+	// so its corner clears it as it opens); the door wall's baseboard stops at the opening. The scene is
+	// measured as the page builds it, with every door closed.
+	{
+		id: 'consult door leaf jamb to jamb',
+		pick: { size: [2.594, 2.55, 0.08], at: [-18.003, -3], r: 0.02 }
+	},
+	{
+		id: 'manager door leaf jamb to jamb',
+		pick: { size: [2.594, 2.55, 0.08], at: [19.997, 3.5], r: 0.02 }
+	},
+	...[-17.35, -18.65].map((z) => ({
+		id: `physics door leaves meet in the middle (leaf at z ${z})`,
+		pick: { size: [1.3, 2.55, 0.08], at: [3, z], r: 0.02 }
+	})),
+	...[30.85, 32.15].map((x) => ({
+		id: `CT control door panels meet in the middle (panel at x ${x})`,
+		pick: { size: [1.3, 2.55, 0.07], at: [x, -4], r: 0.02 }
+	})),
+	{
+		id: 'vault 1 door leaf jamb to jamb',
+		pick: { size: [4.8, 3.15, 0.18], at: [64, -18], r: 0.02 }
+	},
+	{
+		id: 'HDR door leaf jamb to jamb',
+		pick: { size: [2.6, 2.55, 0.18], at: [58, 24], r: 0.02 }
+	},
+	{
+		id: 'consult door-wall baseboard no longer runs across the door',
+		pick: { size: [9.72, 0.18, 0.07], at: [-18, -3.1] },
+		absent: true
+	},
+	...[-21.08, -14.92].map((x) => ({
+		id: `consult door-wall baseboard cut at the door (piece at x ${x})`,
+		pick: { size: [3.56, 0.18, 0.07], at: [x, -3.1], r: 0.02 }
+	})),
+	// P1-11: the lobby's glass entrance is a sliding door; closed, its panes meet in the middle and reach
+	// the jambs (x -2.6..2.6)
+	...[
+		['west', -1.3],
+		['east', 1.3]
+	].map(([side, x]) => ({
+		id: `lobby entrance pane ${side}, closed`,
+		pick: { size: [2.6, 2.7, 0.05], at: [x, 10], r: 0.02 }
+	})),
+	// P1-6: the technical hallway's right wall runs straight along x 2 from dosimetry to the end wall
+	{
+		id: 'technical hallway north right wall on x 2',
+		pick: { size: [0.18, 3.75, 9.5], at: [2, -61.25], r: 0.02 }
+	},
+	{
+		id: 'technical hallway north right wall on x 3 removed',
+		pick: { size: [0.18, 3.75, 9.5], at: [3, -61.25] },
+		absent: true
+	},
+	// P1-7: a solid block fills the pocket between the vault entrances, its face on the vault walls'
+	// corridor face (x 63.71); the junction sign hangs on it; the walkway's supply cart is gone
+	{
+		id: 'junction block flush with the vault walls',
+		pick: { size: [3.08, 5.7, 10.0], at: [65.25, 0], r: 0.02 }
+	},
+	{
+		id: 'junction sign on the block',
+		pick: { geom: 'PlaneGeometry', size: [4.0, 0.76], at: [63.66, 0], r: 0.1, name: '' },
+		flush: { axis: 'x', face: 63.71, side: 'max' }
+	},
+	{
+		id: 'walkway cart removed',
+		pick: { size: [0.4592, 0.78, 0.3116], at: [61.6, -23.2] },
+		absent: true
+	},
+	// P1-12: the plaza light pole stands left of the monument sign (seen from the street), and the sign's
+	// four plants stand at the corners of its planter bed, none inside the slab (pots at scale 0.55)
+	{
+		id: 'light pole left of the monument sign',
+		pick: { geom: 'CylinderGeometry', size: [0.06, 0.08, 4.4], at: [-5.75, 14.25], r: 0.05 }
+	},
+	{
+		id: 'light pole behind the monument sign removed',
+		pick: { geom: 'CylinderGeometry', size: [0.06, 0.08, 4.4], at: [0, 14], r: 0.1 },
+		absent: true
+	},
+	...[
+		['front-left', -4.65, 14.85],
+		['front-right', 1.05, 14.85],
+		['back-left', -4.65, 13.65],
+		['back-right', 1.05, 13.65]
+	].map(([corner, x, z]) => ({
+		id: `monument plant at the ${corner} corner`,
+		pick: { geom: 'CylinderGeometry', size: [0.1485, 0.187, 0.286], at: [x, z], r: 0.05 }
+	})),
+	// P1-13: the ambulance is parked on the asphalt east of the entrance plaza, nose west (its chassis
+	// geometry is 2.8 x 0.24 x 1.3 before the vehicles' 1.6 scale)
+	{
+		id: 'ambulance parked in the lot',
+		pick: { size: [2.8, 0.24, 1.3], at: [31, 23], r: 0.05 }
+	},
+	// P1-14: the ambulance's tyres stand just outside the chassis (track 0.58 local, 0.928 at scale 1.6)
+	// so their round side shows: this one is the front-right wheel of the parked, turned vehicle
+	{
+		id: 'ambulance wheel outside the chassis',
+		pick: { geom: 'CylinderGeometry', size: [0.22, 0.22, 0.18], at: [29.8, 22.072], r: 0.05 },
+		within: [29.79, 29.81, 22.062, 22.082]
+	},
+	// the technical hallway's floor stops at the x 2 wall (z -66..-56.5) instead of running outdoors
+	{
+		id: 'technical hallway one-piece floor is gone',
+		pick: { size: [7, 0.06, 56], at: [0, -38] },
+		absent: true
+	},
+	{ id: 'technical hallway floor, z -56.5..-10', pick: { size: [7, 0.06, 46.5], at: [0, -33.25] } },
+	{
+		id: 'technical hallway floor, z -66..-56.5 stops at the x 2 wall',
+		pick: { size: [5.59, 0.06, 9.5], at: [-0.705, -61.25] }
 	}
 ];
 

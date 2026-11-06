@@ -202,19 +202,29 @@ export function medCartObject(scale = 1, color = 0x7da9c8) {
 }
 
 export function vehicleObject(kind = 'car', color = 0x5c89bf) {
-	const g = new THREE.Group();
+	// The models are built at about half real size, so their parts go in an inner `body` group scaled
+	// 1.6 (chassis: car 3.68 x 1.73 x 1.49 m, van 4.16 x 1.98 x 1.70, ambulance 4.48 x 2.08 x 1.86;
+	// with the tyres the widths are 1.79 / 2.05 / 2.14; wheels r 0.35, still on the ground, standing
+	// just outside the chassis sides so their round side shows). The returned group stays unscaled.
+	// npc-check a measures a mover's meshes in that group's frame, where a scale on the group itself
+	// would cancel out of the footprint it tests.
+	const g = new THREE.Group(),
+		body = new THREE.Group();
+	body.scale.setScalar(1.6);
+	g.add(body);
 	const wheelMat = std(0x20262b, 0.85, 0.12);
 	function addWheel(x, z, r = 0.22, w = 0.18) {
 		const wh = cyl(r, r, w, wheelMat, 16);
-		wh.rotation.z = Math.PI / 2;
+		// the axle runs across the vehicle (local z), so each tyre shows its round side
+		wh.rotation.x = Math.PI / 2;
 		wh.position.set(x, 0.22, z);
-		g.add(wh);
+		body.add(wh);
 	}
 	if (kind === 'ambulance') {
-		g.add(box(2.8, 0.24, 1.3, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
-		g.add(box(2.2, 0.8, 1.18, std(0xf6f7f8, 0.75, 0.02), 0, 0.66, 0));
-		g.add(box(1.0, 0.18, 1.22, std(0xc73138, 0.72, 0.03), 0.45, 0.86, 0));
-		g.add(
+		body.add(box(2.8, 0.24, 1.3, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
+		body.add(box(2.2, 0.8, 1.18, std(0xf6f7f8, 0.75, 0.02), 0, 0.66, 0));
+		body.add(box(1.0, 0.18, 1.22, std(0xc73138, 0.72, 0.03), 0.45, 0.86, 0));
+		body.add(
 			box(
 				0.44,
 				0.42,
@@ -225,7 +235,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.44,
 				0.42,
@@ -236,7 +246,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				-0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.52,
 				0.52,
@@ -247,7 +257,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.52,
 				0.52,
@@ -258,7 +268,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				-0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.3,
 				0.12,
@@ -269,7 +279,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.22
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.3,
 				0.12,
@@ -281,9 +291,9 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 			)
 		);
 	} else if (kind === 'van') {
-		g.add(box(2.6, 0.22, 1.24, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
-		g.add(box(2.22, 0.84, 1.12, std(color, 0.7, 0.04), 0, 0.64, 0));
-		g.add(
+		body.add(box(2.6, 0.22, 1.24, std(0x3d444a, 0.7, 0.08), 0, 0.14, 0));
+		body.add(box(2.22, 0.84, 1.12, std(color, 0.7, 0.04), 0, 0.64, 0));
+		body.add(
 			box(
 				1.0,
 				0.5,
@@ -294,7 +304,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				1.0,
 				0.5,
@@ -305,7 +315,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				-0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.58,
 				0.4,
@@ -316,7 +326,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.56
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.58,
 				0.4,
@@ -328,10 +338,10 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 			)
 		);
 	} else {
-		g.add(box(2.3, 0.2, 1.08, std(0x3d444a, 0.72, 0.08), 0, 0.13, 0));
-		g.add(box(1.95, 0.48, 1.0, std(color, 0.74, 0.04), 0, 0.45, 0));
-		g.add(box(0.9, 0.32, 0.92, std(color, 0.76, 0.04), -0.15, 0.77, 0));
-		g.add(
+		body.add(box(2.3, 0.2, 1.08, std(0x3d444a, 0.72, 0.08), 0, 0.13, 0));
+		body.add(box(1.95, 0.48, 1.0, std(color, 0.74, 0.04), 0, 0.45, 0));
+		body.add(box(0.9, 0.32, 0.92, std(color, 0.76, 0.04), -0.15, 0.77, 0));
+		body.add(
 			box(
 				0.72,
 				0.28,
@@ -342,7 +352,7 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 				0.48
 			)
 		);
-		g.add(
+		body.add(
 			box(
 				0.72,
 				0.28,
@@ -354,10 +364,13 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 			)
 		);
 	}
-	addWheel(0.75, 0.45);
-	addWheel(0.75, -0.45);
-	addWheel(-0.75, 0.45);
-	addWheel(-0.75, -0.45);
+	// the tyres stand just outside the chassis sides (half-width 0.65 / 0.62 / 0.54), so their round
+	// side shows
+	const track = kind === 'ambulance' ? 0.58 : kind === 'van' ? 0.55 : 0.47;
+	addWheel(0.75, track);
+	addWheel(0.75, -track);
+	addWheel(-0.75, track);
+	addWheel(-0.75, -track);
 	return g;
 }
 
@@ -487,9 +500,14 @@ export function monumentSign(x, z) {
 	);
 	face.position.set(x, 1.18, z + 0.19);
 	g.add(face);
-	for (const ox of [-2.6, -1.8, 1.8, 2.6]) {
-		plant(g, x + ox, z - 0.15, 0.55);
-	}
+	// one plant at each corner of the planter bed (6.4 x 1.85), clear of the slab and of the lettering
+	for (const [ox, oz] of [
+		[-2.85, -0.6],
+		[2.85, -0.6],
+		[-2.85, 0.6],
+		[2.85, 0.6]
+	])
+		plant(g, x + ox, z + oz, 0.55);
 }
 
 export function tree(x, z, s = 1) {
@@ -525,6 +543,19 @@ export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48, stand = true) {
 	add(g, m);
 	// a wall-mounted screen has no desk stand under it
 	if (!stand) return;
+	// a dark back shell 0.02 m deep just behind the screen (0.0275..0.0475 m behind its centre), so a desk
+	// monitor shows which way it faces: the screen is one emissive box that looks the same from both sides
+	const back = box(
+		w,
+		h,
+		0.02,
+		MAT.black,
+		x - Math.sin(rot) * 0.0375,
+		y,
+		z - Math.cos(rot) * 0.0375
+	);
+	back.rotation.y = rot;
+	add(g, back);
 	const st = box(0.08, 0.28, 0.08, MAT.black, x, y - h / 2 - 0.14, z);
 	add(g, st);
 }
@@ -1619,11 +1650,12 @@ export function privacyChangingNook(roomId, x, z, rot = 0, label = 'PATIENT CHAN
 export function orientationKiosk() {
 	const g = new THREE.Group();
 	scene.add(g);
-	const x = 5.5,
-		z = -4.3;
+	// just inside the main entrance (the doors are at z 10), east of the walk-in line, square to the doors
+	const x = 2.6,
+		z = 6.25;
 	const pedestal = box(0.72, 1.18, 0.56, std(0x3c5965, 0.6, 0.16), x, 0.59, z);
 	g.add(pedestal);
-	// the screen faces the lobby (+z) and leans back, so it reads the right way round from the room
+	// the screen faces the entrance doors (+z) and leans back, so it reads the right way round as you walk in
 	const screenFrame = box(1.32, 0.86, 0.12, std(0x24343b, 0.5, 0.18), x, 1.48, z + 0.04);
 	screenFrame.rotation.x = -0.18;
 	g.add(screenFrame);

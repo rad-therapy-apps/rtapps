@@ -472,10 +472,6 @@ export function addCirculationProps() {
 	aedWallBox(hall, 2.85, 1.62, -12.92, -Math.PI / 2, 'AED');
 	// on the treatment corridor's west wall (face x = 58.08), facing east into the corridor
 	aedWallBox(hall, 58.15, 1.62, 6.82, Math.PI / 2, 'AED');
-	const cameraPole = medCartObject(0.82, 0x98adb7);
-	cameraPole.position.set(61.6, 0, -23.2);
-	cameraPole.rotation.y = Math.PI / 2;
-	scene.add(cameraPole);
 }
 
 export function doorTypeFor(room: Room) {
@@ -526,9 +522,12 @@ export function buildDoor(room: Room, side, gap) {
 		const mat = type === 'leadershipSwing' ? std(0x705943, 0.78, 0.04) : std(0x8a755f, 0.82, 0.03);
 		const pivot = new THREE.Group();
 		pivot.position.x = -gap / 2;
-		const leaf = box(gap * 0.88, h, 0.08, mat, gap * 0.44, 0, 0);
+		// closed, the leaf spans the opening from the hinge jamb to 6 mm short of the latch jamb, so its
+		// corner swings clear of that jamb
+		const leaf = box(gap - 0.006, h, 0.08, mat, (gap - 0.006) / 2, 0, 0);
 		pivot.add(leaf);
-		if (type === 'patientSwing') addDoorWindow(pivot, gap * 0.49, 0.35, 0.046, gap * 0.22, 0.72);
+		if (type === 'patientSwing')
+			addDoorWindow(pivot, (gap - 0.006) / 2, 0.35, 0.046, gap * 0.22, 0.72);
 		g.add(pivot);
 		d.parts = [pivot];
 		d.openSeconds = type === 'leadershipSwing' ? 1.8 : 2.15;
@@ -538,8 +537,9 @@ export function buildDoor(room: Room, side, gap) {
 			rp = new THREE.Group();
 		lp.position.x = -gap / 2;
 		rp.position.x = gap / 2;
-		const lw = box(gap * 0.48, h, 0.08, mat, gap * 0.24, 0, 0),
-			rw = box(gap * 0.48, h, 0.08, mat, -gap * 0.24, 0, 0);
+		// closed, the two leaves reach their jambs and meet in the middle (seam 0; the faces are hidden)
+		const lw = box(gap / 2, h, 0.08, mat, gap / 4, 0, 0),
+			rw = box(gap / 2, h, 0.08, mat, -gap / 4, 0, 0);
 		lp.add(lw);
 		rp.add(rw);
 		addDoorWindow(lp, gap * 0.24, 0.28, 0.046, gap * 0.18, 0.75);
@@ -549,14 +549,17 @@ export function buildDoor(room: Room, side, gap) {
 		d.openSeconds = 2.4;
 	} else if (type === 'clinicalSlide') {
 		const mat = std(0x9db2ba, 0.36, 0.35, { transparent: true, opacity: 0.82 });
-		const lw = box(gap * 0.47, h, 0.07, mat, -gap * 0.245, 0, 0),
-			rw = box(gap * 0.47, h, 0.07, mat, gap * 0.245, 0, 0);
+		// closed, the two panels reach the jambs and meet in the middle; open, each slides gap/2 into the
+		// wall (walk.ts updateDoors), so the whole opening is clear
+		const lw = box(gap / 2, h, 0.07, mat, -gap / 4, 0, 0),
+			rw = box(gap / 2, h, 0.07, mat, gap / 4, 0, 0);
 		g.add(lw, rw);
 		d.parts = [lw, rw];
 		d.openSeconds = 2.15;
 	} else {
 		const mat = type === 'hdrSlide' ? std(0x75867f, 0.68, 0.42) : std(0x7f898f, 0.72, 0.48);
-		const leaf = box(gap * 0.94, h, 0.18, mat, 0, 0, 0);
+		// closed, the leaf spans jamb to jamb; open (gap * 1.02 aside), it clears the opening
+		const leaf = box(gap, h, 0.18, mat, 0, 0, 0);
 		g.add(leaf);
 		const inset = box(
 			gap * 0.6,
@@ -671,11 +674,32 @@ export function addRoomBaseboards(room: Room) {
 		hz = room.d / 2,
 		y = 0.12,
 		hh = 0.18,
-		m = std(room.vault ? 0x4e5961 : 0x839198, 0.72, 0.08);
-	scene.add(box(room.w - 0.28, hh, 0.07, m, room.x, y, room.z - hz + 0.1));
-	scene.add(box(room.w - 0.28, hh, 0.07, m, room.x, y, room.z + hz - 0.1));
-	scene.add(box(0.07, hh, room.d - 0.28, m, room.x - hx + 0.1, y, room.z));
-	scene.add(box(0.07, hh, room.d - 0.28, m, room.x + hx - 0.1, y, room.z));
+		m = std(room.vault ? 0x4e5961 : 0x839198, 0.72, 0.08),
+		half = (room.vault ? 4.8 : 2.6) / 2;
+	// One wall's board, 0.1 m in from the wall line and 0.14 m short of each corner. On the door wall it
+	// is two pieces that stop at the opening's edges (the door is centred on that wall, its gap as in
+	// buildSide), so no board runs across the doorway.
+	const board = (side, alongX, at) => {
+		const c = alongX ? room.x : room.z,
+			len = (alongX ? room.w : room.d) - 0.28,
+			runs =
+				room.doorSide === side
+					? [
+							[c - len / 2, c - half],
+							[c + half, c + len / 2]
+						]
+					: [[c - len / 2, c + len / 2]];
+		for (const [a, b] of runs)
+			scene.add(
+				alongX
+					? box(b - a, hh, 0.07, m, (a + b) / 2, y, at)
+					: box(0.07, hh, b - a, m, at, y, (a + b) / 2)
+			);
+	};
+	board('zmin', true, room.z - hz + 0.1);
+	board('zmax', true, room.z + hz - 0.1);
+	board('xmin', false, room.x - hx + 0.1);
+	board('xmax', false, room.x + hx - 0.1);
 }
 
 export function addRoomLighting(room: Room, h) {
@@ -754,7 +778,17 @@ export function buildRoom(room: Room) {
 	['zmin', 'zmax', 'xmin', 'xmax'].forEach((s) => buildSide(room, s, h, t, mat));
 	if (room.vault) addVaultDoorwaySigns(room);
 	addRoomBaseboards(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xe9edef), room.x, h, room.z);
+	// the slab's top is flush with the wall tops (h), so no edge shows over the walls from outside; its
+	// underside stays at h - 0.04
+	const ceiling = box(
+		room.w - 0.2,
+		0.04,
+		room.d - 0.2,
+		ceilingMat(0xe9edef),
+		room.x,
+		h - 0.02,
+		room.z
+	);
 	ceiling.castShadow = false;
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
@@ -800,9 +834,23 @@ export function buildLobbyEntrance(r: Room) {
 		box(0.14, h, 0.18, frame, -gap / 2 - 0.07, 0, 0),
 		box(0.14, h, 0.18, frame, gap / 2 + 0.07, 0, 0)
 	);
-	const l = box(gap * 0.47, h, 0.05, glass, -gap * 0.245, 0, 0),
-		rr = box(gap * 0.47, h, 0.05, glass, gap * 0.245, 0, 0);
+	// A sliding glass door, like the clinical sliders. Closed, the panes meet in the middle and reach the
+	// jambs (±2.6). Open, each slides gap/2 into the front wall, so the 5.2 m opening is clear. It opens on
+	// its own sensor (npc-behavior.ts updateLobbyEntrance). Its id is not a room's, so room moves never open
+	// or close it. Like every door, the panes do not collide.
+	const l = box(gap / 2, h, 0.05, glass, -gap / 4, 0, 0),
+		rr = box(gap / 2, h, 0.05, glass, gap / 4, 0, 0);
 	g.add(l, rr);
+	doors.set('lobby-entrance', {
+		group: g,
+		side: 'zmax',
+		type: 'clinicalSlide',
+		progress: 0,
+		target: 0,
+		openSeconds: 0.9,
+		parts: [l, rr],
+		gap
+	});
 	scene.add(g);
 	makeLobbyEntranceSign(r);
 }
@@ -828,7 +876,16 @@ export function buildHubLobby(room: Room) {
 	lobbyWallWithGap('zmin', 5.82, h, t);
 	lobbyWallWithGap('zmax', 5.2, h, t);
 	buildLobbyEntrance(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xf0f3f4), room.x, h, room.z);
+	// the slab's top is flush with the wall tops (h); its underside stays at h - 0.04
+	const ceiling = box(
+		room.w - 0.2,
+		0.04,
+		room.d - 0.2,
+		ceilingMat(0xf0f3f4),
+		room.x,
+		h - 0.02,
+		room.z
+	);
 	scene.add(ceiling);
 	ceilings.push(ceiling);
 	for (let x = -8; x <= 8; x += 4)
@@ -934,11 +991,9 @@ export function addRoomDecor(room: Room) {
 		plant(g, room.x - hx + 1.0, room.z + hz - 1.0, 0.78);
 }
 
-// The ambulance-bay apron in front of the lobby; its top is the outdoor ground the ambulance
-// crew walks on.
+// The light apron of the entrance plaza in front of the lobby.
 const APRON_Y = -0.01,
 	APRON_H = 0.018;
-export const APRON_TOP = APRON_Y + APRON_H / 2;
 export function buildExteriorAmbient() {
 	const ground = new THREE.Mesh(new THREE.PlaneGeometry(360, 300), std(0x6f8d69, 0.98, 0));
 	ground.rotation.x = -Math.PI / 2;
@@ -987,7 +1042,9 @@ export function buildExteriorAmbient() {
 		tree(x, z, s);
 	for (const [x, z] of [
 		[-20, 14],
-		[0, 14],
+		// left of the monument sign seen from the street; the arm (+x) holds the luminaire just west
+		// of the planter
+		[-5.75, 14.25],
 		[20, 14],
 		[-20, 42],
 		[0, 42],
@@ -1518,8 +1575,7 @@ export function buildCorridorInfillWalls() {
 	[
 		[-13, -10],
 		[-26, -23],
-		[-41.5, -36],
-		[-66, -56.5]
+		[-41.5, -36]
 	].forEach((s) => infillV(s[0], s[1], 3));
 	// Clinical corridor and transition toward treatment branch.
 	[
@@ -1532,6 +1588,11 @@ export function buildCorridorInfillWalls() {
 	].forEach((s) => infillH(s[0], s[1], -4));
 	// Treatment branch between the two vault entrances.
 	infillV(-7, 7, 67, 5.7, 0.42);
+	// A solid block fills that pocket (x 63.71..66.79, z -5..5, the vault height). Its face continues the
+	// vault walls' corridor face (x 63.71), so the walkway's east side reads as one wall, and the junction
+	// sign hangs on it (equipment.ts buildPhase5Wayfinding). z ±5 also closes the notches where the vault
+	// west walls end. The pocket's roof, floor plate and back wall stay, hidden inside or under it.
+	wall(65.25, 0, 3.08, 10.0, 5.7, MAT.wallVault, true);
 	// The treatment walkway's outside wall, on the line of LINAC Control's and the HDR suite's east walls
 	// (x 58), 5.7 m like the vault walls opposite, and its two end walls
 	infillV(-31, -4, 58, 5.7);
@@ -1540,9 +1601,12 @@ export function buildCorridorInfillWalls() {
 	infillH(57.91, 64, -31, 5.7);
 	infillH(57.91, 64, 31, 5.7);
 	// the patient-services hallway's west end and the technical hallway's north end (x -3..-2 is the
-	// commons' wall)
+	// commons' wall). The technical hallway's right wall runs on along x 2 past dosimetry (z -56.5) to
+	// that end, so the hallway stays 4 m wide (x -2..2) from the commons to its end, centred on the floor
+	// stripe and the lights.
 	infillV(-3, 3, -52);
-	infillH(-2, 3, -66);
+	infillV(-66, -56.5, 2);
+	infillH(-2, 2, -66);
 }
 
 export function buildVaultMazeEntries() {
@@ -1584,7 +1648,9 @@ export function buildVaultMazeEntries() {
 }
 
 // hub-and-wings corridors
-export function corridorFloor(x, z, w, d, color) {
+// bases: the floor slab pieces as [centre x, centre z, width, depth], for a hallway whose footprint is
+// not one rectangle
+export function corridorFloor(x, z, w, d, color, bases = [[x, z, w, d]]) {
 	const base =
 		color === C.front
 			? 0x778891
@@ -1593,8 +1659,8 @@ export function corridorFloor(x, z, w, d, color) {
 				: color === C.clinical
 					? 0x70898a
 					: 0x59636a;
-	const floor = box(w, 0.06, d, std(base, 0.89, 0.03), x, 0.02, z);
-	scene.add(floor);
+	const mat = std(base, 0.89, 0.03);
+	for (const [bx, bz, bw, bd] of bases) scene.add(box(bw, 0.06, bd, mat, bx, 0.02, bz));
 	const accent = box(
 		w >= d ? w * 0.92 : 0.22,
 		0.018,
@@ -1607,6 +1673,8 @@ export function corridorFloor(x, z, w, d, color) {
 	scene.add(accent);
 }
 
+// The strips cast no shadow. The hallway roofs cast none, so the sun reaches a strip, and its shadow
+// drew a thin diagonal line across the hallway walls.
 export function corridorLightsHorizontal(x0, x1, z, y = 3.72) {
 	for (let x = x0; x <= x1; x += 5) {
 		const l = box(
@@ -1618,6 +1686,7 @@ export function corridorLightsHorizontal(x0, x1, z, y = 3.72) {
 			y,
 			z
 		);
+		l.castShadow = false;
 		scene.add(l);
 	}
 }
@@ -1633,12 +1702,13 @@ export function corridorLightsVertical(z0, z1, x, y = 3.72) {
 			y,
 			z
 		);
+		l.castShadow = false;
 		scene.add(l);
 	}
 }
 
 const ROOF_MAT = ceilingMat(0xe9edef);
-// Roofs over the hallways, like the room ceilings: 0.08 slabs at the wall top (3.75; the treatment
+// Roofs over the hallways: 0.08 slabs centred on the wall top (3.75; the treatment
 // walkway's at 5.7, the vault height), edges on the wall centre lines so they never overlap a room's
 // ceiling (which stops 0.1 m inside its walls). They join `ceilings`, so the overview hides them. Then
 // the walls above the 3.75 rooms that face the walkway, and the lintel over the hallway mouth, are filled
@@ -1656,8 +1726,7 @@ export function buildCorridorRoofs() {
 	// technical hallway: the commons (x -2) and dosimetry (x 2) walls stand 1 m inside its lines
 	roof(-3, 3, -41.5, -10, 3.75);
 	roof(-3, 2, -54, -41.5, 3.75);
-	roof(-2, 2, -56.5, -54, 3.75);
-	roof(-2, 3, -66, -56.5, 3.75);
+	roof(-2, 2, -66, -54, 3.75);
 	// clinical hallway: the manager's (z 3.5) and the CT room's (z -3) walls stand inside its lines
 	roof(12, 15, -4, 4, 3.75);
 	roof(15, 25, -4, 3.5, 3.75);
