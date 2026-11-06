@@ -100,7 +100,55 @@ const SHOTS = [
 	{ name: 'hdr-door', eye: [62.6, 1.7, 21.5], look: [57.5, 1.6, 24.5], ceilings: true },
 	{ name: 'hdr-room', eye: [55.5, 2.4, 19.8], look: [50, 1.0, 29], ceilings: true },
 	{ name: 'overview-treatment', eye: [56, 75, -0.1], look: [56, 0, 0] },
-	{ name: 'overview-roofs', eye: [20, 120, -15.1], look: [20, 0, -15], ceilings: true }
+	{ name: 'overview-roofs', eye: [20, 120, -15.1], look: [20, 0, -15], ceilings: true },
+	// the 2026-11-06 round 3, Part 1 (docs/specs/2026-11-06-sim-hub-scenery-round3-design.md): the status
+	// lights beside the door signs, the doors closed jamb to jamb, a desk monitor's back, the commons sign,
+	// the technical hallway's north end, the LINAC junction, the lobby blades, the kiosk, the walk start
+	// outside, the entrance glass, the monument sign's pole and plants, the parked ambulance and the
+	// vehicles at real size
+	{
+		name: 'door-sign-consult-side',
+		eye: [-13.2, 2.4, -0.6],
+		look: [-17.2, 3.0, -2.6],
+		ceilings: true
+	},
+	{ name: 'door-sign-ctcontrol', eye: [31.5, 1.7, -0.3], look: [31.5, 3.0, -3.9], ceilings: true },
+	{ name: 'door-sign-ctsim', eye: [44, 1.7, 0.6], look: [44, 3.0, -2.9], ceilings: true },
+	{ name: 'door-consult-hall', eye: [-18, 1.5, 0.4], look: [-18, 1.3, -3], ceilings: true },
+	{ name: 'door-physics-hall', eye: [-0.4, 1.5, -18], look: [3, 1.3, -18], ceilings: true },
+	{ name: 'door-ctcontrol-in', eye: [31.5, 1.5, -7.6], look: [31.5, 1.3, -4], ceilings: true },
+	{ name: 'door-vault1-hall', eye: [59.2, 1.8, -18], look: [64, 1.6, -18], ceilings: true },
+	{ name: 'door-hdr-hall', eye: [62.5, 1.5, 24], look: [58, 1.3, 24], ceilings: true },
+	{ name: 'mgr-visitor', eye: [20.6, 1.25, 10.4], look: [20, 1.4, 7.4], ceilings: true },
+	{ name: 'commons-sign', eye: [1.6, 2.5, -60], look: [-2, 3.05, -60], ceilings: true },
+	{ name: 'hall-north-end', eye: [0.5, 1.7, -56], look: [0.5, 1.6, -66], ceilings: true },
+	{ name: 'hall-north-near', eye: [0, 1.7, -50], look: [0, 1.6, -66], ceilings: true },
+	{ name: 'walkway-junction-near', eye: [57.5, 1.7, 0], look: [64, 2.6, 0], ceilings: true },
+	{ name: 'blade-clinical', eye: [5, 1.87, 0.5], look: [11.25, 2.7, 0], ceilings: true },
+	{ name: 'blade-patient', eye: [-5, 1.87, 0.5], look: [-11.25, 2.7, 0], ceilings: true },
+	{ name: 'blade-clinical-back', eye: [13.2, 1.87, 0.5], look: [11.25, 2.8, 0], ceilings: true },
+	{ name: 'lobby-kiosk', eye: [0.6, 1.87, 11.0], look: [2.6, 1.4, 6.25], ceilings: true },
+	{ name: 'outside-spawn', eye: [2.0, 1.87, 20.4], look: [-1.0, 2.0, 10.5], ceilings: true },
+	{ name: 'lobby-entrance', eye: [1.2, 1.87, 11.2], look: [1.6, 1.4, 3], ceilings: true },
+	{ name: 'sign-front', eye: [-1.8, 1.6, 18.5], look: [-1.8, 1.0, 14.25], ceilings: true },
+	{ name: 'sign-top', eye: [-1.8, 6.5, 16.8], look: [-1.8, 0, 14.25], ceilings: true },
+	{ name: 'ambulance-parked', eye: [24, 3.0, 17], look: [31, 0.8, 23], ceilings: true },
+	{
+		name: 'car-side',
+		subject: 'mover:car',
+		u: 0.2,
+		cam: [4.5, 1.2, 0.5],
+		lookY: 0.45,
+		ceilings: true
+	},
+	{
+		name: 'shuttle-side',
+		subject: 'mover:shuttle',
+		u: 0.2,
+		cam: [5, 1.4, 0.5],
+		lookY: 0.5,
+		ceilings: true
+	}
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),

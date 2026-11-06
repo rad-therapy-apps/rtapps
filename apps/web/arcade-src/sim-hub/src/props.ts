@@ -525,6 +525,19 @@ export function monitor(g, x, y, z, rot = 0, w = 0.8, h = 0.48, stand = true) {
 	add(g, m);
 	// a wall-mounted screen has no desk stand under it
 	if (!stand) return;
+	// a dark back shell 0.02 m deep just behind the screen (0.0275..0.0475 m behind its centre), so a desk
+	// monitor shows which way it faces: the screen is one emissive box that looks the same from both sides
+	const back = box(
+		w,
+		h,
+		0.02,
+		MAT.black,
+		x - Math.sin(rot) * 0.0375,
+		y,
+		z - Math.cos(rot) * 0.0375
+	);
+	back.rotation.y = rot;
+	add(g, back);
 	const st = box(0.08, 0.28, 0.08, MAT.black, x, y - h / 2 - 0.14, z);
 	add(g, st);
 }

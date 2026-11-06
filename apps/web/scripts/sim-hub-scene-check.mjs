@@ -467,7 +467,25 @@ const PLACEMENTS = [
 	{
 		id: 'welcome kiosk screen faces the lobby',
 		pick: { geom: 'PlaneGeometry', size: [1.16, 0.68], at: [5.5, -4.195], r: 0.02 }
-	}
+	},
+	// P1-1 (2026-11-06): each room's status light hangs on the hallway face of its door wall, its back
+	// 0.005 m off the face, right of the door sign; both vault lights are on the main-corridor side
+	...[
+		['consult', -15.65, -2.85, 'z', -2.92, 'min'],
+		['education', -39.65, -2.85, 'z', -2.92, 'min'],
+		['CT room', 46.35, -2.85, 'z', -2.92, 'min'],
+		['CT control', 33.85, -3.85, 'z', -3.92, 'min'],
+		['physics', 2.85, -15.65, 'x', 2.92, 'max'],
+		['dosimetry', 1.85, -46.65, 'x', 1.92, 'max'],
+		['LINAC control', 48.65, 3.85, 'z', 3.92, 'max'],
+		['vault 1', 63.64, -15.2, 'x', 63.71, 'max'],
+		['vault 2', 63.64, 15.2, 'x', 63.71, 'max'],
+		['HDR', 58.15, 21.65, 'x', 58.08, 'min']
+	].map(([room, x, z, axis, face, side]) => ({
+		id: `status light beside the ${room} door sign`,
+		pick: { size: [0.58, 0.24, 0.13], at: [x, z], r: 0.05 },
+		flush: { axis, face, side }
+	}))
 ];
 
 function setupError(msg) {

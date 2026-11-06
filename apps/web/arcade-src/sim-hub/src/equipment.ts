@@ -1182,17 +1182,21 @@ export function buildPhase5Wayfinding() {
 	orientationKiosk();
 	// RTApps (#77 phase 2 task 14): tuple-typed so the `...v` spread into makeStatusBeacon's
 	// (roomId, x, y, z, rot) fixed parameter list type-checks instead of widening to number[].
+	// Each status light hangs on the hallway face of its door wall, its back 0.005 m off the face, centred
+	// on the door sign's mid-height (3.05; vaults 3.78) and 0.10 m clear of the sign's back plate, on the
+	// right as you face the door. Both vault lights are on the main-corridor side (toward z 0), above the
+	// red entrance marker, so vault 2's is left of its sign, mirroring vault 1's.
 	const placements: Record<string, [number, number, number, number]> = {
-		consult: [-17.0, 3.12, -2.12, 0],
-		education: [-41.0, 3.12, -2.12, 0],
-		ctsim: [44.0, 3.2, -2.88, 0],
-		ctcontrol: [31.5, 3.1, -3.88, 0],
-		dosimetry: [15.72, 3.12, -49, -Math.PI / 2],
-		physics: [11.72, 3.12, -18, -Math.PI / 2],
-		linaccontrol: [51.0, 3.12, 4.12, 0],
-		vault1: [66.72, 3.55, -18, -Math.PI / 2],
-		vault2: [66.72, 3.55, 18, -Math.PI / 2],
-		hdr: [57.6, 3.15, 23.1, 0]
+		consult: [-15.65, 3.05, -2.85, 0],
+		education: [-39.65, 3.05, -2.85, 0],
+		ctsim: [46.35, 3.05, -2.85, 0],
+		ctcontrol: [33.85, 3.05, -3.85, 0],
+		dosimetry: [1.85, 3.05, -46.65, -Math.PI / 2],
+		physics: [2.85, 3.05, -15.65, -Math.PI / 2],
+		linaccontrol: [48.65, 3.05, 3.85, Math.PI],
+		vault1: [63.64, 3.78, -15.2, -Math.PI / 2],
+		vault2: [63.64, 3.78, 15.2, -Math.PI / 2],
+		hdr: [58.15, 3.05, 21.65, Math.PI / 2]
 	};
 	for (const [id, v] of Object.entries(placements)) makeStatusBeacon(id, ...v);
 }

@@ -84,7 +84,11 @@ export function makeDoorHeaderTexture(room) {
 	const nm = room.name
 		.replace('Treatment Vault 1 — LINAC', 'TREATMENT VAULT 1 · LINAC')
 		.replace('Treatment Vault 2 — LINAC', 'TREATMENT VAULT 2 · LINAC');
-	if (nm.length > 34) x.font = '800 48px Arial';
+	// the name fits 1040 px of the 1200 px canvas (80 px, about 0.25 m of sign, clear each side), at most
+	// 58 px; `|| 1` keeps 58 px under the node canvas stub (scripts/lib/browser-stubs.mjs), which measures
+	// every text 0 px wide
+	const fit = Math.floor((58 * 1040) / (x.measureText(nm.toUpperCase()).width || 1));
+	if (fit < 58) x.font = `800 ${fit}px Arial`;
 	x.textAlign = 'center';
 	x.fillText(nm.toUpperCase(), c.width / 2, 132);
 	x.fillStyle = '#59717a';
