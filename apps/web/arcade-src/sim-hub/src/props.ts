@@ -204,7 +204,7 @@ export function medCartObject(scale = 1, color = 0x7da9c8) {
 export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 	// The models are built at about half real size, so their parts go in an inner `body` group scaled
 	// 1.6 (car 3.68 x 1.73 x 1.49 m, van 4.16 x 1.98 x 1.70, ambulance 4.48 x 2.08 x 1.86; wheels r 0.35,
-	// still on the ground). The returned group stays unscaled. npc-check a measures a mover's meshes in
+	// still on the ground, standing just outside the chassis sides so their round side shows). The returned group stays unscaled. npc-check a measures a mover's meshes in
 	// that group's frame, where a scale on the group itself would cancel out of the footprint it tests.
 	const g = new THREE.Group(),
 		body = new THREE.Group();
@@ -362,10 +362,13 @@ export function vehicleObject(kind = 'car', color = 0x5c89bf) {
 			)
 		);
 	}
-	addWheel(0.75, 0.45);
-	addWheel(0.75, -0.45);
-	addWheel(-0.75, 0.45);
-	addWheel(-0.75, -0.45);
+	// the tyres stand just outside the chassis sides (half-width 0.65 / 0.62 / 0.54), so their round
+	// side shows
+	const track = kind === 'ambulance' ? 0.58 : kind === 'van' ? 0.55 : 0.47;
+	addWheel(0.75, track);
+	addWheel(0.75, -track);
+	addWheel(-0.75, track);
+	addWheel(-0.75, -track);
 	return g;
 }
 

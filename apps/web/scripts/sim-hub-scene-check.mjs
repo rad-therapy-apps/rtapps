@@ -581,6 +581,13 @@ const PLACEMENTS = [
 	{
 		id: 'ambulance parked in the lot',
 		pick: { size: [2.8, 0.24, 1.3], at: [31, 23], r: 0.05 }
+	},
+	// P1-14: the ambulance's tyres stand just outside the chassis (track 0.58 local, 0.928 at scale 1.6)
+	// so their round side shows: this one is the front-left wheel of the parked, turned vehicle
+	{
+		id: 'ambulance wheel outside the chassis',
+		pick: { geom: 'CylinderGeometry', size: [0.22, 0.22, 0.18], at: [29.8, 22.072], r: 0.05 },
+		within: [29.79, 29.81, 22.062, 22.082]
 	}
 ];
 

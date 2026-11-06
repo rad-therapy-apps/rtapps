@@ -1,5 +1,5 @@
-/* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons, the ambulance
-   drop-off choreography, operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
+/* RTApps (#77 sim-hub modularization, task 7): clinical layer, status beacons,
+   operator/CT live-feed CCTV consoles, wall clocks, Phase-4 workflow
    status displays, the LINAC-head/engineering wall stations, and Phase-5 wayfinding signage.
    Verbatim extractions from main.js. `player` (walk-mode position read by
    `updateClinicalEquipment`) and `roomById`/`PRIMARY_PATIENTS`/`doors` stay owned by main.js
