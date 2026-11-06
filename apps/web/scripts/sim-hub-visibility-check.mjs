@@ -10,7 +10,7 @@
 //   - every room: walk pose (room centre, eye height 1.87, main.ts PLAYER_EYE_Y) and guided pose (the
 //     room's `cam`/`look`), four headings each (0/90/180/270 degrees about the vertical axis)
 //   - 6 hallway points (2.5 m outside a room door), four headings each
-//   - the walk-mode start outside the main entrance (2.0, 1.87, 20.4), four headings
+//   - the walk-mode start outside the main entrance (4.2, 1.87, 20.4), four headings
 //   - elevated cameras (culling is switched off above the wall tops, so all must match exactly):
 //       * the overview->guided descent: beginTravel starts at (12,82,92) and makeRouteToApproach
 //         runs through (0,7.2,15) and (0,2.2,5.2) to the lobby hub. Its Catmull-Rom curve is not
@@ -430,7 +430,7 @@ const report = await page.evaluate(
 			look: [cc.x + 8, 1.5, cc.z]
 		});
 		// the walk-mode start outside the main entrance (walk.ts setMode), the first camera a player sees
-		const spawn = [2.0, EYE, 20.4];
+		const spawn = [4.2, EYE, 20.4];
 		for (const h of headings)
 			poses.push({
 				name: `outside spawn h${h}`,

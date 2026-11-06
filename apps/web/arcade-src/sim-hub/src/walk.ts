@@ -510,12 +510,13 @@ export function setMode(m, announce = true) {
 		if (S.activeRoom) {
 			applyWalkConversationComposition(S.activeRoom, true);
 		} else {
-			// Walk mode starts outside, on the entrance plaza about 0.5 m north of the curb, facing the
-			// monument and entrance signs. The walk in runs north along x 2.0 through the sliding glass.
+			// Walk mode starts outside, on the entrance plaza about 0.5 m north of the curb, east of the
+			// monument sign and aimed past the sign's east end at the doors, so holding W walks in
+			// through the sliding glass clear of the sign and its plants.
 			// S.activeRoom stays null outside; walking in, roomContainingWalkPoint picks up the lobby.
-			player.pos.set(2.0, PLAYER_EYE_Y, 20.4);
+			player.pos.set(4.2, PLAYER_EYE_Y, 20.4);
 			camera.position.copy(player.pos);
-			aimPlayerAt(new THREE.Vector3(-1.0, 2.0, 10.5));
+			aimPlayerAt(new THREE.Vector3(1.2, 2.0, 10.5));
 			document.getElementById('locText').textContent =
 				'Outside the main entrance · walk in through the doors';
 		}

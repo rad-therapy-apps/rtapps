@@ -128,7 +128,7 @@ const SHOTS = [
 	{ name: 'blade-patient', eye: [-5, 1.87, 0.5], look: [-11.25, 2.7, 0], ceilings: true },
 	{ name: 'blade-clinical-back', eye: [13.2, 1.87, 0.5], look: [11.25, 2.8, 0], ceilings: true },
 	{ name: 'lobby-kiosk', eye: [0.6, 1.87, 11.0], look: [2.6, 1.4, 6.25], ceilings: true },
-	{ name: 'outside-spawn', eye: [2.0, 1.87, 20.4], look: [-1.0, 2.0, 10.5], ceilings: true },
+	{ name: 'outside-spawn', eye: [4.2, 1.87, 20.4], look: [1.2, 2.0, 10.5], ceilings: true },
 	{ name: 'lobby-entrance', eye: [1.2, 1.87, 11.2], look: [1.6, 1.4, 3], ceilings: true },
 	{ name: 'sign-front', eye: [-1.8, 1.6, 18.5], look: [-1.8, 1.0, 14.25], ceilings: true },
 	{ name: 'sign-top', eye: [-1.8, 6.5, 16.8], look: [-1.8, 0, 14.25], ceilings: true },

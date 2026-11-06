@@ -603,7 +603,7 @@ export function addMovingActors() {
 		'car'
 	);
 	// parked on the asphalt east of the entrance plaza, nose west (the cab is at local +x): at vehicle
-	// scale 1.6 it covers x 28.76..33.24, z 21.96..24.04, 0.9 m from the curb, between the stop marks at
+	// scale 1.6 it covers x 28.76..33.24, z 21.928..24.072, 0.9 m from the curb, between the stop marks at
 	// x 26 and 36
 	const ambulance = vehicleObject('ambulance');
 	ambulance.position.set(31, 0, 23);

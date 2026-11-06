@@ -876,7 +876,16 @@ export function buildHubLobby(room: Room) {
 	lobbyWallWithGap('zmin', 5.82, h, t);
 	lobbyWallWithGap('zmax', 5.2, h, t);
 	buildLobbyEntrance(room);
-	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xf0f3f4), room.x, h, room.z);
+	// the slab's top is flush with the wall tops (h); its underside stays at h - 0.04
+	const ceiling = box(
+		room.w - 0.2,
+		0.04,
+		room.d - 0.2,
+		ceilingMat(0xf0f3f4),
+		room.x,
+		h - 0.02,
+		room.z
+	);
 	scene.add(ceiling);
 	ceilings.push(ceiling);
 	for (let x = -8; x <= 8; x += 4)
@@ -1033,8 +1042,8 @@ export function buildExteriorAmbient() {
 		tree(x, z, s);
 	for (const [x, z] of [
 		[-20, 14],
-		// left of the monument sign seen from the street; the arm (+x) hangs the luminaire over the
-		// planter's west end
+		// left of the monument sign seen from the street; the arm (+x) holds the luminaire just west
+		// of the planter
 		[-5.75, 14.25],
 		[20, 14],
 		[-20, 42],
@@ -1639,7 +1648,9 @@ export function buildVaultMazeEntries() {
 }
 
 // hub-and-wings corridors
-export function corridorFloor(x, z, w, d, color) {
+// bases: the floor slab pieces as [centre x, centre z, width, depth], for a hallway whose footprint is
+// not one rectangle
+export function corridorFloor(x, z, w, d, color, bases = [[x, z, w, d]]) {
 	const base =
 		color === C.front
 			? 0x778891
@@ -1648,8 +1659,8 @@ export function corridorFloor(x, z, w, d, color) {
 				: color === C.clinical
 					? 0x70898a
 					: 0x59636a;
-	const floor = box(w, 0.06, d, std(base, 0.89, 0.03), x, 0.02, z);
-	scene.add(floor);
+	const mat = std(base, 0.89, 0.03);
+	for (const [bx, bz, bw, bd] of bases) scene.add(box(bw, 0.06, bd, mat, bx, 0.02, bz));
 	const accent = box(
 		w >= d ? w * 0.92 : 0.22,
 		0.018,
