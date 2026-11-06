@@ -821,9 +821,11 @@ export function buildHubLobby(room: Room) {
 	floor.userData.roomId = room.id;
 	scene.add(floor);
 	roomFloors.push(floor);
-	lobbyWallWithGap('xmin', 7.2, h, t);
-	lobbyWallWithGap('xmax', 8.0, h, t);
-	lobbyWallWithGap('zmin', 7.0, h, t);
+	// the hallway openings end at the hallway walls' inner faces (walls on z ±3, z ±4 and x ±3, 0.18
+	// thick), so no slot is left beside a hallway wall to see outside through
+	lobbyWallWithGap('xmin', 5.82, h, t);
+	lobbyWallWithGap('xmax', 7.82, h, t);
+	lobbyWallWithGap('zmin', 5.82, h, t);
 	lobbyWallWithGap('zmax', 5.2, h, t);
 	buildLobbyEntrance(room);
 	const ceiling = box(room.w - 0.2, 0.08, room.d - 0.2, ceilingMat(0xf0f3f4), room.x, h, room.z);

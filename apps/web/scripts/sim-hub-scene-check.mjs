@@ -233,12 +233,15 @@ const PLACEMENTS = [
 		pick: { size: [0.34, 0.34, 0.08], at: [35.87, -12.3], y: 2.65, r: 0.1 },
 		flush: { axis: 'x', face: 35.92, side: 'max' }
 	},
-	// R9: a real-size CT gantry (2.1 m tall) stands under the 3.75 m ceiling; the sagittal laser over
-	// it is on the ceiling (slab underside y 3.71), not hanging where the old ring's bore was
+	// R9: the CT gantry, at the owner's 1.25x real size (a 2.625 m ring centred 1.25 m up, so the
+	// couch clears its bore), stands under the 3.75 m ceiling with its foot just under the floor; the
+	// sagittal laser over it is on the ceiling (slab underside y 3.71), not hanging where the old
+	// ring's bore was
 	{
-		id: 'CT gantry real size',
-		pick: { geom: 'TorusGeometry', size: [0.75, 0.3], at: [44, -9.5] },
-		maxY: 2.11
+		id: 'CT gantry 1.25x real size',
+		pick: { geom: 'TorusGeometry', size: [0.9375, 0.375], at: [44, -9.5] },
+		minY: -0.06,
+		maxY: 2.57
 	},
 	{
 		id: 'CT sagittal laser on the ceiling',
@@ -445,7 +448,26 @@ const PLACEMENTS = [
 		minY: 3.75
 	},
 	{ id: 'west hallway end wall', pick: { size: [0.18, 3.75, 6], at: [-52, 0] } },
-	{ id: 'technical hallway end wall', pick: { size: [5, 3.75, 0.18], at: [0.5, -66] } }
+	{ id: 'technical hallway end wall', pick: { size: [5, 3.75, 0.18], at: [0.5, -66] } },
+	// the lobby's hallway openings end at the hallway walls' inner faces (z ±2.91 west, x ±2.91
+	// north, z ±3.91 east), so no slot beside a hallway wall shows the outside
+	...[
+		[0.18, 7.09, -12, 6.455, 'west'],
+		[0.18, 7.09, -12, -6.455, 'west'],
+		[0.18, 6.09, 12, 6.955, 'east'],
+		[0.18, 6.09, 12, -6.955, 'east'],
+		[9.09, 0.18, 7.455, -10, 'north'],
+		[9.09, 0.18, -7.455, -10, 'north']
+	].map(([w, d, x, z, side]) => ({
+		id: `lobby ${side} wall meets its hallway wall at ${x}, ${z}`,
+		pick: { size: [w, 4.15, d], at: [x, z], r: 0.05 }
+	})),
+	// the welcome kiosk's screen is on the lobby side (+z) of its stand, so it reads the right way
+	// round from the room
+	{
+		id: 'welcome kiosk screen faces the lobby',
+		pick: { geom: 'PlaneGeometry', size: [1.16, 0.68], at: [5.5, -4.195], r: 0.02 }
+	}
 ];
 
 function setupError(msg) {
