@@ -700,10 +700,23 @@ export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 			renderer.render(scene, feed.camera);
 		}
 	}
+	/* In walk mode S.activeRoom stays on the last room walked into, so after one visit the CT feeds
+	   would render on everywhere; there the camera has to be in the room, as for the LINAC feeds. */
+	const cameraIn = (id) => {
+		const r = roomById(id);
+		return (
+			!!r &&
+			Math.abs(camera.position.x - r.x) <= r.w / 2 &&
+			Math.abs(camera.position.z - r.z) <= r.d / 2
+		);
+	};
+	const ctRoomShown =
+		S.mode === 'walk'
+			? cameraIn('ctcontrol') || cameraIn('ctsim')
+			: S.activeRoom?.id === 'ctcontrol' || S.activeRoom?.id === 'ctsim';
 	const ctNeeded =
 		CT_OPERATOR_CONSOLE.built &&
-		(S.activeRoom?.id === 'ctcontrol' ||
-			S.activeRoom?.id === 'ctsim' ||
+		(ctRoomShown ||
 			(typeof JOURNEY !== 'undefined' &&
 				JOURNEY.active &&
 				['ctsetup', 'ctscan', 'ctdone'].includes(JOURNEY.stage)));

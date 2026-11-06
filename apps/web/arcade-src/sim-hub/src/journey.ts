@@ -2938,7 +2938,9 @@ export function walkCompositionReady(r) {
 	if (r.id === 'vault2') return player.pos.x > 75.1 && player.pos.z < 17.5;
 	return true;
 }
-export function applyWalkConversationComposition(r, reposition = false) {
+/* `aim` false (the player walking in on their own) updates the room panel but leaves the view where
+   the player is looking: turning it for them mid-walk reads as a jolt. */
+export function applyWalkConversationComposition(r, reposition = false, aim = true) {
 	const f = focusTargetsForRoom(r);
 	if (!r || !f) return;
 	if (reposition) {
@@ -2949,10 +2951,11 @@ export function applyWalkConversationComposition(r, reposition = false) {
 	S.activeRoom = r;
 	updateRoomUI(r);
 	renderRoomList();
-	aimPlayerAt(f.target);
+	if (aim) aimPlayerAt(f.target);
 	S.walkCompositionRoomId = r.id;
-	document.getElementById('locText').textContent =
-		`Current location: ${r.name} · conversation view`;
+	document.getElementById('locText').textContent = aim
+		? `Current location: ${r.name} · conversation view`
+		: `Current location: ${r.name}`;
 }
 export function beginRoutePhase(now) {
 	S.travel.curve = makeRouteToApproach(S.travel.room);

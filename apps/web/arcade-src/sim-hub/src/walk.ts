@@ -550,6 +550,10 @@ function canMove(x, z) {
 	}
 	return true;
 }
+// reused every frame so walking makes no garbage for the collector to pause on
+const walkLookDir = new THREE.Vector3(),
+	walkLookAt = new THREE.Vector3();
+let walkDoorPoints = null;
 export function updateWalk(dt) {
 	if (S.mode !== 'walk' || S.travel) return;
 	const moving = keys.w || keys.s || keys.a || keys.d;
@@ -569,21 +573,22 @@ export function updateWalk(dt) {
 	}
 	const here = roomContainingWalkPoint(player.pos.x, player.pos.z);
 	if (here && walkCompositionReady(here) && S.walkCompositionRoomId !== here.id)
-		applyWalkConversationComposition(here, false);
+		applyWalkConversationComposition(here, false, false);
 	if (!here) S.walkCompositionRoomId = null;
 	const bob = moving ? Math.sin(performance.now() * 0.01 * (keys.shift ? 1.25 : 1)) * 0.022 : 0;
 	camera.position.copy(player.pos);
 	camera.position.y += bob;
-	const dir = new THREE.Vector3(
+	walkLookDir.set(
 		-Math.sin(player.yaw) * Math.cos(player.pitch),
 		Math.sin(player.pitch),
 		-Math.cos(player.yaw) * Math.cos(player.pitch)
 	);
-	camera.lookAt(camera.position.clone().add(dir));
+	camera.lookAt(walkLookAt.copy(camera.position).add(walkLookDir));
 	let nearest = null,
 		nd = 99;
-	ROOMS.filter((r) => !r.hub).forEach((r) => {
-		const dp = doorPoint(r);
+	// the door points never move, so they are worked out once instead of every frame
+	if (!walkDoorPoints) walkDoorPoints = ROOMS.filter((r) => !r.hub).map((r) => [r, doorPoint(r)]);
+	walkDoorPoints.forEach(([r, dp]) => {
 		const d = Math.hypot(player.pos.x - dp.x, player.pos.z - dp.z);
 		if (d < nd) {
 			nd = d;
