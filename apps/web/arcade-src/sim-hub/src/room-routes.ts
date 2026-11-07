@@ -239,7 +239,9 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[-40.8, -7.7], // 3 in front of the patient's chair (stand-up (-41.53, -8.87)): spot [1]
 			[-39.6, -9.2], // 4 off the desk's +x front corner, 0.56 m from it
 			[-39.6, -10.95], // 5 behind the desk's +x end: the navigator's stand-up (-41.69, -10.83)
-			[-42.5, -7.6] // 6 in front of the free chair (Mia's seat, stand-up (-43.10, -9.01)) and the room centre
+			[-42.5, -7.6], // 6 on the free chair's door side (behind it) and the room centre
+			[-43.85, -7.9], // 7 west of the free chair's back
+			[-43.85, -9.0] // 8 west of its front: moves to and from the seat's approach point (-43.10, -9.01) go round its -x side
 		],
 		edges: [
 			[0, 1],
@@ -247,7 +249,9 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[2, 3],
 			[3, 4],
 			[4, 5],
-			[2, 6]
+			[2, 6],
+			[6, 7],
+			[7, 8]
 		]
 	},
 	// the doorway is open floor (the supply counter and both carts stand on the east wall): +x side to
