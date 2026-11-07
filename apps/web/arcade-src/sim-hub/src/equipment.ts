@@ -535,8 +535,8 @@ export function buildCtLiveConsole() {
 	scene.add(g);
 	const rot = Math.PI / 2;
 	// the four screens stand side by side in a 2 x 2 grid on the desk, in front of the backing board
-	// (x 29.98..30.06), facing the operators (+x): status and gantry on the -z side, patient and room on +z
-	const mx = r.x - 1.35;
+	// (x 27.08..27.16), facing the operators (+x): status and gantry on the -z side, patient and room on +z
+	const mx = r.x - 4.25;
 	createOperatorMonitor(
 		g,
 		mx,
@@ -607,7 +607,7 @@ export function buildCtLiveConsole() {
 		'Wide live view of the simulation tabletop and gantry.'
 	);
 	operatorLabel(g, mx, 1.76, r.z + 0.6, rot, 'ROOM WIDE');
-	consoleKeyboard(g, r.x - 0.9, r.z + 0.65, rot);
+	consoleKeyboard(g, r.x - 3.8, r.z + 0.65, rot);
 	CT_OPERATOR_CONSOLE.built = true;
 }
 function ctPatientTarget() {
@@ -1173,8 +1173,8 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'ct_immobilization',
 		roomId: 'ctsim',
-		dx: 6.05,
-		dz: -0.15,
+		dx: 7.42,
+		dz: -1.6,
 		y: 1.1,
 		label: 'CT Immobilization Storage',
 		purpose:
@@ -1204,7 +1204,7 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'ct_console',
 		roomId: 'ctcontrol',
-		dx: -1.2,
+		dx: -3.9,
 		dz: -0.2,
 		y: 1.35,
 		label: 'CT Simulation Control Console',
@@ -1343,8 +1343,8 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'physics_planqa',
 		roomId: 'physics',
-		dx: -2.3,
-		dz: -2.2,
+		dx: 3.37,
+		dz: -4.45, // not the desk's -4.5: keeps the anchor's ring inside the room's cull box (inset 0.05)
 		y: 1.35,
 		label: 'Physics Plan-QA Workstation',
 		purpose:

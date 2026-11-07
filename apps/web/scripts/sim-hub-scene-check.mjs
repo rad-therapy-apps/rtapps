@@ -54,6 +54,8 @@ const CHAIRS = 20,
 //   minY    the box bottom is at this height, within 0.01 (a desk screen: the 0.88 desk top + 0.28 stand)
 //   maxY    the box top is at most this height
 //   within  the box centre is inside [x0, x1, z0, z1] (a desk top)
+//   extent  [x, z]: the box's world size along x and along z, each within 0.01 (which way a box is
+//           turned, when its centre stays where it was)
 //   flush   { axis: 'x' | 'z', face, side: 'min' | 'max' }: the box's `side` along `axis` (the side
 //           toward the wall) is 0 to 0.06 m off the wall's inner face `face`, not past it
 const PLACEMENTS = [
@@ -114,9 +116,9 @@ const PLACEMENTS = [
 	// their walls
 	{
 		id: 'education desk screen',
-		pick: { size: [0.8, 0.48, 0.055], at: [-42, -5.95] },
+		pick: { size: [0.8, 0.48, 0.055], at: [-40.5, -10.0] },
 		minY: 1.16,
-		within: [-43.9, -40.1, -6.75, -5.65]
+		within: [-43.9, -40.1, -10.55, -9.45]
 	},
 	{
 		id: 'education wall screen removed',
@@ -165,7 +167,8 @@ const PLACEMENTS = [
 		pick: { size: [3.1, 1.55, 2.8], at: [-7.5, -43.3] },
 		absent: true
 	},
-	// R7: the manager's desk stands 0.3 m in front of the visitor chairs; its screen faces the manager
+	// R7: the manager's desk stands 0.3 m in front of the visitor chairs; its screen (R3-7) stands on the
+	// desk's door-side +x end, turned to the visitor chairs
 	{
 		id: 'manager desk by the visitor chairs',
 		pick: { size: [2.5, 0.08, 0.85], at: [20, 8.5] },
@@ -173,29 +176,29 @@ const PLACEMENTS = [
 	},
 	{
 		id: 'manager screen on the desk',
-		pick: { size: [1.0, 0.55, 0.055], at: [20, 8.75] },
+		pick: { size: [1.0, 0.55, 0.055], at: [20.7, 8.4] },
 		minY: 1.16,
 		within: [18.75, 21.25, 8.075, 8.925]
 	},
-	// R8: CT control: keyboard and mouse on the console desk (x 29.725..30.875); chairs 0.5 m from
-	// it; the cabinet on the door wall east of the door; the live CT CONTROL board on the back wall
-	// below the room sign; the blank screens gone; the four live screens side by side in front of the
-	// backing board
+	// R8, R3-8: CT control: the console against the west wall (inner face x 27.08), keyboard and mouse
+	// on its desk (x 27.085..27.975); chairs 0.5 m from it; the cabinet on the door wall east of the
+	// door; the live CT CONTROL board on the back wall below the room sign; the blank screens gone; the
+	// four live screens side by side in front of the backing board
 	{
 		id: 'CT control keyboard on the console desk',
-		pick: { size: [0.72, 0.035, 0.24], at: [30.6, -8.35] },
+		pick: { size: [0.72, 0.035, 0.24], at: [27.7, -8.35] },
 		minY: 0.88,
-		within: [29.725, 30.875, -11.6, -6.8]
+		within: [27.085, 27.975, -11.6, -6.8]
 	},
 	{
 		id: 'CT control mouse on the console desk',
-		pick: { size: [1, 1, 1], at: [30.6, -8.83], y: 0.9, r: 0.05 },
+		pick: { size: [1, 1, 1], at: [27.7, -8.83], y: 0.9, r: 0.05 },
 		minY: 0.88,
-		within: [29.725, 30.875, -11.6, -6.8]
+		within: [27.085, 27.975, -11.6, -6.8]
 	},
 	...[-10.15, -9, -7.85].map((z) => ({
 		id: `CT control chair at z ${z} 0.5 m from the desk`,
-		pick: { size: [0.54, 0.1, 0.5], at: [31.65, z], r: 0.05 }
+		pick: { size: [0.54, 0.1, 0.5], at: [28.75, z], r: 0.05 }
 	})),
 	{
 		id: 'CT control cabinet on the door wall',
@@ -225,7 +228,7 @@ const PLACEMENTS = [
 		[-8.4, 1.38, 'ROOM WIDE']
 	].map(([z, y, label]) => ({
 		id: `CT control ${label} screen in front of the board`,
-		pick: { size: [1.14, 0.7, 0.08], at: [30.15, z], y, r: 0.1 }
+		pick: { size: [1.14, 0.7, 0.08], at: [27.25, z], y, r: 0.1 }
 	})),
 	// the CT control intercom speaker is on the window wall beside the window (z -11.25..-6.75), not over it
 	{
@@ -233,15 +236,15 @@ const PLACEMENTS = [
 		pick: { size: [0.34, 0.34, 0.08], at: [35.87, -12.3], y: 2.65, r: 0.1 },
 		flush: { axis: 'x', face: 35.92, side: 'max' }
 	},
-	// R9: the CT gantry, at the owner's 1.25x real size (a 2.625 m ring centred 1.25 m up, so the
-	// couch clears its bore), stands under the 3.75 m ceiling with its foot just under the floor; the
-	// sagittal laser over it is on the ceiling (slab underside y 3.71), not hanging where the old
-	// ring's bore was
+	// R9, R3-9: the CT gantry, at the owner's 1.35x real size (a 2.835 m ring centred 1.31 m up, so the
+	// couch clears its bore glow), stands under the 3.75 m ceiling with its foot 0.1075 m under the
+	// floor, hidden by the 2.1 m base; the sagittal laser over it is on the ceiling (slab underside
+	// y 3.71), not hanging where the old ring's bore was
 	{
-		id: 'CT gantry 1.25x real size',
-		pick: { geom: 'TorusGeometry', size: [0.9375, 0.375], at: [44, -9.5] },
-		minY: -0.06,
-		maxY: 2.57
+		id: 'CT gantry 1.35x real size',
+		pick: { geom: 'TorusGeometry', size: [1.0125, 0.405], at: [44, -9.5] },
+		minY: -0.1075,
+		maxY: 2.73
 	},
 	{
 		id: 'CT sagittal laser on the ceiling',
@@ -599,6 +602,200 @@ const PLACEMENTS = [
 	{
 		id: 'technical hallway floor, z -66..-56.5 stops at the x 2 wall',
 		pick: { size: [5.59, 0.06, 9.5], at: [-0.705, -61.25] }
+	},
+	// R3-1 (2026-11-06): consult: the oncologist's desk, its screen and chair on the west wall (the left
+	// as you walk in), the storage cabinet beside the desk, the brochure rack on the east wall and both
+	// IV poles in the back-right corner. The cabinet and the rack stand on the baseboard's face (0.06 m
+	// off the wall, the flush limit), so they are pinned by their centres.
+	{
+		id: 'consult desk on the west wall',
+		pick: { size: [1.8, 0.08, 0.7], at: [-22.55, -8.4] },
+		flush: { axis: 'x', face: -22.92, side: 'min' }
+	},
+	{
+		id: 'consult desk screen',
+		pick: { size: [0.8, 0.48, 0.055], at: [-22.62, -8.4] },
+		minY: 1.16,
+		within: [-22.9, -22.2, -9.3, -7.5]
+	},
+	{
+		id: 'consult chair behind the desk',
+		pick: { size: [0.55, 0.12, 0.55], at: [-21.65, -8.4], r: 0.05 }
+	},
+	{
+		id: 'consult cabinet beside the desk',
+		pick: { size: [1.5, 1.45, 0.42], at: [-22.65, -10.15] },
+		within: [-22.66, -22.64, -10.16, -10.14],
+		extent: [0.42, 1.5]
+	},
+	{
+		id: 'consult brochure rack on the east wall',
+		pick: { size: [0.08, 1.05, 0.42], at: [-13.35, -10.3], r: 0.05 },
+		within: [-13.36, -13.34, -10.31, -10.29],
+		extent: [0.42, 0.08]
+	},
+	{
+		id: 'consult IV pole A in the back-right corner',
+		pick: { geom: 'CylinderGeometry', size: [0.0264, 0.0264, 1.364], at: [-13.55, -11.45], r: 0.05 }
+	},
+	{
+		id: 'consult IV pole B in the back-right corner',
+		pick: { geom: 'CylinderGeometry', size: [0.027, 0.027, 1.395], at: [-14.25, -11.45], r: 0.05 }
+	},
+	// R3-2: patient care: the supply counter (a drawer counter in place of the plain white block) and
+	// both supply carts on the east wall (the left as you walk in), on the baseboard's face; the
+	// doorway is clear
+	...[
+		['supply counter on the east wall', [2.2, 0.95, 0.55], -21.415, 7.0, [0.55, 2.2]],
+		['cart beside the counter', [0.5152, 0.78, 0.3496], -21.345, 8.6, [0.35, 0.516]],
+		['entrance cart parked on the east wall', [0.532, 0.78, 0.361], -21.35, 9.45, [0.362, 0.532]]
+	].map(([what, size, x, z, extent]) => ({
+		id: `patientcare ${what}`,
+		pick: { size, at: [x, z] },
+		within: [x - 0.01, x + 0.01, z - 0.01, z + 0.01],
+		extent
+	})),
+	{
+		id: 'patientcare entrance clear',
+		pick: { size: [2.2, 0.95, 0.55], at: [-28, 5.5] },
+		absent: true
+	},
+	// R3-3: education: the navigator's desk by the TV wall (1.37 m off it), the navigator's chair
+	// behind it, the patient's chair and the free chair on the door side; the outdoor tree that stood
+	// inside the room is gone (tree() trunk at scale 0.9)
+	{
+		id: 'education desk by the TV wall',
+		pick: { size: [3.8, 0.08, 1.1], at: [-42, -10.0] },
+		within: [-42.01, -41.99, -10.01, -9.99]
+	},
+	...[
+		['navigator', -42.15, -11.15],
+		['patient', -41.9, -8.45],
+		['free', -43.1, -8.45]
+	].map(([who, x, z]) => ({
+		id: `education ${who} chair`,
+		pick: { size: [0.55, 0.12, 0.55], at: [x, z], r: 0.05 }
+	})),
+	{
+		id: 'education tree removed',
+		pick: { geom: 'CylinderGeometry', size: [0.162, 0.216, 2.25], at: [-45, -8] },
+		absent: true
+	},
+	// R3-4: physics: the plan-QA desk in the far corner of the left (-z) wall, under the clock and
+	// beside the PHYSICS PLAN QA board
+	{
+		id: 'physics desk in the far -z corner',
+		pick: { size: [2, 0.08, 0.75], at: [10.87, -22.5] },
+		within: [10.86, 10.88, -22.51, -22.49]
+	},
+	// R3-5: radiobiology: the bench row turned 90 deg about the room centre, so it runs across the room
+	// from the door: each top is 0.7 m along x and 1.6 m along z (the middle bench keeps its centre, so
+	// only its extent shows the turn); the outer benches' microscopes move with them
+	...[-1, 0, 1].map((i) => ({
+		id: `radbio bench ${i} across the room`,
+		pick: { size: [1.6, 0.08, 0.7], at: [-7.5, -31 + 2.2 * i], r: 0.05 },
+		extent: [0.7, 1.6]
+	})),
+	...[-1, 1].map((i) => ({
+		id: `radbio microscope on bench ${i}`,
+		pick: { geom: 'CylinderGeometry', size: [0.12, 0.18, 0.55], at: [-7.5, -31 + 2.2 * i], r: 0.05 }
+	})),
+	// R3-6: dosimetry: both lateral filing cabinets flush on the +z wall, drawers facing the room
+	...[4.6, 13.4].map((x) => ({
+		id: `dosimetry cabinet at x ${x} flush on the +z wall`,
+		pick: { size: [1.6, 1.6, 0.45], at: [x, -41.825] },
+		flush: { axis: 'z', face: -41.58, side: 'max' }
+	})),
+	// R3-8: the CT control console group against the west wall, flush on its inner face (x 27.08): the
+	// desk (0.89 deep), the backing board and its accent strip; the CT supply cart on the same wall at
+	// the console's -z end (its top 0.006 m off the wall)
+	{
+		id: 'CT control console desk against the west wall',
+		pick: { size: [4.8, 0.08, 0.89], at: [27.53, -9.2] },
+		flush: { axis: 'x', face: 27.08, side: 'min' }
+	},
+	{
+		id: 'CT control backing board on the west wall',
+		pick: { size: [0.08, 2.35, 4.2], at: [27.12, -9] },
+		flush: { axis: 'x', face: 27.08, side: 'min' }
+	},
+	{
+		id: 'CT control backing board accent on the board',
+		pick: { size: [0.035, 0.07, 3.8], at: [27.18, -9], r: 0.05 }
+	},
+	{
+		id: 'CT supply cart on the west wall',
+		pick: { size: [0.5456, 0.05, 0.3872], at: [27.28, -12.4], r: 0.05 },
+		flush: { axis: 'x', face: 27.08, side: 'min' }
+	},
+	// R3-9: the CT room. The gantry's bore glow and base at 1.35x; the IV pole beside the couch's head
+	// end, off the doorway; on the east wall the two cabinets, the immobilization rack (its sign on the
+	// wall above it, the intercom speaker raised clear of the sign), the shelf and the stool under it;
+	// the sink's splashback flush on the back wall; the teal light bar on the door wall; the laser
+	// warning outside on the hallway face, left of the door
+	{
+		id: 'CT gantry bore glow at 1.35x',
+		pick: { geom: 'TorusGeometry', size: [0.6075, 0.02], at: [44, -9.5], y: 1.31 }
+	},
+	{
+		id: 'CT gantry base 2.1 m long',
+		pick: { size: [1.0, 0.35, 2.1], at: [44, -9.5], r: 0.05 }
+	},
+	{
+		id: 'CT room IV pole by the couch head',
+		pick: { geom: 'CylinderGeometry', size: [0.0285, 0.0285, 1.4725], at: [38.6, -10.5], r: 0.05 }
+	},
+	...[
+		['A', -16.2],
+		['B', -6.2]
+	].map(([which, z]) => ({
+		id: `CT room cabinet ${which} flush on the east wall`,
+		pick: { size: [2.2, 1.8, 0.5], at: [51.665, z] },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	})),
+	{
+		id: 'CT room sink splash flush on the back wall',
+		pick: { size: [1.52, 0.78, 0.07], at: [48.75, -18.87] },
+		flush: { axis: 'z', face: -18.92, side: 'min' }
+	},
+	{
+		id: 'CT immobilization rack flush on the east wall',
+		pick: { size: [1.7, 2.0, 0.5], at: [51.665, -12.6] },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	},
+	{
+		id: 'CT room shelf on the east wall',
+		pick: { size: [1.2, 0.04, 0.28], at: [51.78, -14.3] },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	},
+	{
+		id: 'CT room stool under the shelf',
+		pick: { geom: 'CylinderGeometry', size: [0.22, 0.22, 0.06], at: [51.3, -14.3], r: 0.05 }
+	},
+	{
+		id: 'CT room speaker above the immobilization sign',
+		pick: { size: [0.34, 0.34, 0.08], at: [51.78, -13.2], y: 2.95, r: 0.1 },
+		minY: 2.78
+	},
+	{
+		id: 'CT room teal bar on the door wall',
+		pick: { size: [7.2, 0.04, 0.08], at: [44, -3.12] },
+		flush: { axis: 'z', face: -3.08, side: 'max' }
+	},
+	{
+		id: 'CT laser plaque outside, left of the door',
+		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [41.6, -2.87], r: 0.05 },
+		flush: { axis: 'z', face: -2.92, side: 'min' }
+	},
+	{
+		id: 'CT immobilization sign on the east wall',
+		pick: { geom: 'PlaneGeometry', size: [2.8, 0.62], at: [51.865, -12.6], name: '', r: 0.05 },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	},
+	{
+		id: 'CT laser plaque inside the room removed',
+		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [51.77, -15.3] },
+		absent: true
 	}
 ];
 
@@ -787,6 +984,15 @@ if (only.has('placements')) {
 			if (m.cx < x0 || m.cx > x1 || m.cz < z0 || m.cz > z1)
 				fails.push(
 					`${e.id}: centre (${f2(m.cx)}, ${f2(m.cz)}) outside x ${x0}..${x1} z ${z0}..${z1}`
+				);
+		}
+		if (e.extent) {
+			const [ex, ez] = e.extent,
+				dx = m.max[0] - m.min[0],
+				dz = m.max[2] - m.min[2];
+			if (Math.abs(dx - ex) > 0.01 || Math.abs(dz - ez) > 0.01)
+				fails.push(
+					`${e.id}: world box ${dx.toFixed(3)} x ${dz.toFixed(3)} m in x and z (expected ${ex} x ${ez}): ${where(m)}`
 				);
 		}
 		if (e.flush) {

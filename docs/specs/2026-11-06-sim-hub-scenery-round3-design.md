@@ -999,6 +999,57 @@ Run every check after `pnpm build:arcade`, from `apps/web`.
   - The entrance's 5.5 m player circle is round, so it also holds the glass open while the player stands near the kiosk inside.
   - The door-gap width (2.6 m, 4.8 m for vaults) is repeated in `buildSide`, `addRoomBaseboards` (rooms.ts) and portals.ts.
 
+### Part 2 as built
+
+- **Commits** (branch `fix/sim-hub-scenery-r3-rooms`):
+  - a81fe71: the plan;
+  - f36be11: R3-1, R3-2 and the Part 2 shot list;
+  - d6510ec: R3-3;
+  - 6b11ebb: R3-4 to R3-6, and the scene check's `extent` test;
+  - ea3b284: R3-7, R3-8;
+  - 4c82eee: R3-9;
+  - fecb099 and 7cdc924: the final review's fixes (Mia's route round the free chair; a pin for the CT immobilization sign, `extent` on five pins, comments).
+- **Final checks, from a clean build:**
+  - scene check: signs PASS (163 panels), legs PASS (20 chairs, 3 couches), placements PASS (189);
+  - NPC check: a–m PASS, with a at 10 movers and 0 wall-clipping samples, f at 14 moments, g at 8 sitters, 9 seats across a work surface and 6 seated patients facing their partner, j at 4 flows, k at 114 at rest, l at 74 routes, m at 66 moments;
+  - closest to furniture: CT control's first hand-over to the CT room passes 2.4 cm from the console desk. No education route is among the closest five. After the Mia fix, the new-patient journey's vault 1 pickup also appears, 0.6 cm from the changing nook's panel;
+  - cull groups: consult 75, patientcare 64, education 57, physics 25, radbio 23, dosimetry 77, manager 45, ctcontrol 124, ctsim 149;
+  - visibility check (Metal): 301 poses, 0 failures;
+  - sim-hub vitest 77/77; `pnpm check`, `pnpm test` (384), smoke and `prettier --check` pass.
+- **Plan-time findings:**
+  - 1 accepted: the ctRunner's return leg turns west earlier. Loop 38.95 m at 0.433 m/s (speed 0.011124), 1.06 m from CT control's Inspect-room camera, 1.11 m off the window wall.
+  - 3 accepted: the `extent` test; the three radbio bench pins use it.
+  - 4 accepted: the CT speaker pin has `minY: 2.78`.
+  - 5 accepted: the nine extra pins. With the final review's sign pin, the total is 189.
+  - 6 alternative: the CT sink at `room.z - 7.51`, so the soap dispenser sits 1 cm inside the cull inset; the sink pin is at [48.75, -18.87].
+- **By-hand checks** (scripted in a browser, Task 6 Step 2):
+  - walking straight in through the consult, patient-care and CT room doors, nothing stops the player; each walk ends 7.2 m inside;
+  - the CT couch slide (in, dwell, out): the lying patient stays at least 0.245 m from the bore glow and 0.256 m from the ring; the couch clears the glow by 0.023 m;
+  - CT control: the ctRunner stays on the window side (x 30.64–34.81), at least 1.57 m from the console, chairs, cart and cabinet. It never passes through the Inspect-room camera. For about 8 s of each 90 s loop it crosses the foreground at about 1.06 m and covers 25–40% of that view. This is accepted, and the owner page asks the owner.
+- **Changes from the text above, each found during the build:**
+  - **Patient-care route (R3-2):** node 4 is at (-29.65, 6.9), with a new node 6 at (-28.7, 6.2) and edges [0,1], [1,2], [0,3], [3,6], [6,4], [4,5].
+    - With the planned nodes, the journey patient's door-to-table route was 0.56 m shorter. That moved the 20-minute spacing timeline: check b failed (walker and journey patient, t 1039.1 s, near (-28.11, 1.21), 0.47 m apart).
+    - The new nodes keep the route at about 7.5 m. Spot [0] now arrives through node 3.
+  - **Physics route (R3-4):** node 2 is [8.0, -17.6], on the door line, instead of [7.4, -18.6].
+    - With the planned node, check b failed at the same place (t 791.2 s, near (-27.93, 1.20), 0.41 m apart). Seventeen other positions also failed, at 0.41–0.49 m.
+  - **Plan-QA anchor (R3-4):** `physics_planqa` dz is -4.45, not the desk's -4.5. At -4.5 its ring reached z -22.988, past the room's cull inset (-22.95), and the physics group dropped to 24 culled.
+  - **Mia in education (R3-3):** the education graph has two more nodes, 7 (-43.85, -7.9) and 8 (-43.85, -9.0), with edges [6,7] and [7,8].
+    - The free chair faces the desk, so its approach point (-43.10, -9.01) is between the chair and the desk. The nearest node was on the chair's door side, so Mia's last leg went through the chair, and Mia's stand-up went back through it.
+    - Check l leaves out the seats within 0.6 m of a move's start, end or own seat, so it could not see this.
+    - Re-traced: Mia is never inside the chair, comes no closer than 0.26 m (root to the seat box, at the approach point), and stays 0.44 m from the desk.
+  - **Stand-up order (R3-3):** Mia and the navigator stand up in the same step (136.25–136.75 s), not Mia first. Left as is.
+  - **ctRunner ring depth (R3-8):** check l's info line reads 1.2 cm, not lower than the old 1.1 cm. Information only.
+- **Known, not fixed (follow-ups for the owner):**
+  - **Check b passes by timing.**
+    - The journey patient walks the main corridor on z 0, then north to the patient-care door point (-28, 2.15). That crosses the background walker's westbound lane (z 1.0) from the side.
+    - The walker holds only for someone within 0.9 m and 50° ahead, and story actors never hold, so whether they meet depends on when the patient gets there. NPC data changes elsewhere can move that moment: even the physics arrival spots did, by a link not yet found.
+    - Options:
+      - the walker also yields to someone crossing its path (this changes what check e tests);
+      - the walker's loop stays clear of the patient-care door (x -29.8..-26.2). The walker loop's comment says it crosses no door; that is wrong and predates this round.
+  - **Check l and the seat being used:** it leaves out the seat a move starts or ends at for the whole move. Leaving it out only during the stand-up or sit-down would need the owner's approval, since it is a check edit.
+  - **Cabinet and rack facing:** the dosimetry and CT cabinet and rack pins check position and flush, not which way the drawers face. The shots confirm it.
+  - **linaccontrol margin:** check l's closest margin for the linaccontrol hand-overs moved from 1.9 cm to 0.1 cm with no change in that room. It depends on timing and predates this round.
+
 ## Out of scope / not changing
 
 **From the decisions:**

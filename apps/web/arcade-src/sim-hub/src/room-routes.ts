@@ -37,20 +37,22 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 		{ x: -28.9, z: -6.7, facing: -2.12 },
 		{ x: -29.6, z: -6.95, facing: -2.16 }
 	],
+	// on the open floor inside the door, facing the seated navigator behind the desk by the TV wall
 	education: [
-		{ x: -41.1, z: -5.4, facing: -2.13 },
-		{ x: -41.5, z: -7.0, facing: -1.55 },
-		{ x: -41.8, z: -5.4, facing: -2.28 }
+		{ x: -41.1, z: -5.4, facing: -2.95 },
+		{ x: -41.5, z: -7.0, facing: -2.98 },
+		{ x: -41.8, z: -5.4, facing: -3.07 }
 	],
 	patientcare: [
 		{ x: -27.4, z: 4.95, facing: 0.53 },
 		{ x: -27.4, z: 6.05, facing: 1.27 },
 		{ x: -26.65, z: 5.5, facing: 0.06 }
 	],
+	// on the room's open floor, facing the physicist at the plan-QA desk in the far -z corner
 	physics: [
-		{ x: 6.4, z: -17.2, facing: -2.66 },
-		{ x: 5.75, z: -17.2, facing: -2.93 },
-		{ x: 6.15, z: -17.8, facing: -2.63 }
+		{ x: 9.0, z: -20.3, facing: 2.14 },
+		{ x: 8.4, z: -19.9, facing: 2.14 },
+		{ x: 9.3, z: -19.7, facing: 2.42 }
 	],
 	// beside the phantom's cart, facing it
 	qa: [
@@ -60,9 +62,9 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 	],
 	// behind the operators' chairs, facing the console
 	ctcontrol: [
-		{ x: 32.75, z: -7.25, facing: -1.57 },
-		{ x: 32.75, z: -8.45, facing: -1.57 },
-		{ x: 33.35, z: -7.85, facing: -1.57 }
+		{ x: 29.85, z: -7.25, facing: -1.57 },
+		{ x: 29.85, z: -8.45, facing: -1.57 },
+		{ x: 30.45, z: -7.85, facing: -1.57 }
 	],
 	ctsim: [
 		{ x: 40.4, z: -7.2, facing: 2.58 },
@@ -194,7 +196,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		nodes: [
 			[-18, -2.15], // 0 door
 			[-18, -3.9], // 1 inside the door
-			[-19.9, -4.6], // 2 -x of the IV pole at (-18.9, -4.8)
+			[-19.9, -4.6], // 2 inside the door's -x half, toward the table's -x end
 			[-19.7, -7.4], // 3 off the table's -x end: the patient steps off it along x
 			[-16.6, -4.9], // 4 +z of the table: Mia's final (-17.2, -5.9) leaves and arrives along z
 			[-16.1, -7.4] // 5 off the table's +x end: spots [0] and [1]
@@ -225,46 +227,54 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[1, 4]
 		]
 	},
-	// in by the door's +x half (the doorway is x -43.3..-40.7), then round the desk (x -43.9..-40.1,
-	// z -6.75..-5.65). Spot [1] (-41.5, -7.0) stands in the 0.59 m gap between the desk and the
-	// chairs: its line to node 4 is clear at body width (0.12 m), not at 0.25 m
+	// in by the door's +x half (the doorway is x -43.3..-40.7), then over the open floor to the
+	// visitor chairs: node 3 in front of the patient's chair, node 6 in front of the free chair, and
+	// round the desk's +x front corner (node 4) to node 5 behind the desk's +x end, the seated
+	// navigator's way out (desk x -43.9..-40.1, z -10.55..-9.45, by the TV wall)
 	education: {
 		nodes: [
 			[-42, -2.15], // 0 door
 			[-40.92, -2.6], // 1 outside the door's +x half
-			[-40.92, -4.0], // 2 inside it
-			[-39.75, -5.3], // 3 +x of the desk: Mia's final and spot [0] arrive and leave along x
-			[-39.6, -7.3], // 4 off the desk's +x end, -z side: the seated patient and spot [1]
-			[-42.9, -5.2], // 5 +z of the desk: spot [2] along x
-			[-44.5, -5.0], // 6 and 7 round the desk's -x end
-			[-44.5, -7.0] // 7 to the navigator (-43.6, -6.95)
+			[-40.92, -4.0], // 2 inside it: spots [0] and [2]
+			[-40.8, -7.7], // 3 in front of the patient's chair (stand-up (-41.53, -8.87)): spot [1]
+			[-39.6, -9.2], // 4 off the desk's +x front corner, 0.56 m from it
+			[-39.6, -10.95], // 5 behind the desk's +x end: the navigator's stand-up (-41.69, -10.83)
+			[-42.5, -7.6], // 6 on the free chair's door side (behind it) and the room centre
+			[-43.85, -7.9], // 7 west of the free chair's back
+			[-43.85, -9.0] // 8 west of its front: moves to and from the seat's approach point (-43.10, -9.01) go round its -x side
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
 			[2, 3],
 			[3, 4],
-			[2, 5],
-			[5, 6],
-			[6, 7]
+			[4, 5],
+			[2, 6],
+			[6, 7],
+			[7, 8]
 		]
 	},
-	// round the cart (-28, 4.4) and the bed (x -29.1..-26.9, z 5.22..5.78) inside the door: +x side
-	// to the arrival spots, -x side to the exam table at (-30.6, 9.8)
+	// the doorway is open floor (the supply counter and both carts stand on the east wall): +x side to
+	// the arrival spots, -x side to the exam table at (-30.6, 9.8). The door leaf swings in along
+	// x -29.3..-29.1 from z 3 to 5.59; node 3 keeps 0.6 m clear of it and edge 3-6 passes about 0.45 m
+	// from its tip. Nodes 4 and 6 are placed so the door -> table route keeps its old length (about
+	// 7.5 m): the spacing check's (b) 20-minute timeline is sensitive to it
 	patientcare: {
 		nodes: [
 			[-28, 2.15], // 0 door
-			[-25.9, 4.6], // 1 +x of the cart and bed: spot [0] arrives along x, clear of the bed
-			[-26.2, 6.2], // 2 +z of the bed's +x end: spots [1], [2] and the nurse
-			[-29.0, 3.7], // 3 inside the door's -x half, clear of the cart
-			[-30.0, 6.5], // 4 -x of the bed
-			[-29.0, 9.0] // 5 +x of the table's stand-up point (-30.6, 9.14): leaves along x
+			[-25.9, 4.6], // 1 +x of the doorway; spot [0] arrives via node 3 (1.45 m, against 1.54 m to here)
+			[-26.2, 6.2], // 2 by spots [1], [2] and the nurse
+			[-28.5, 4.0], // 3 inside the door's -x half, 0.6 m clear of the open leaf
+			[-29.65, 6.9], // 4 -x of the open leaf's tip, toward the exam table; placed with node 6 to keep the 7.5 m route
+			[-29.0, 9.0], // 5 +x of the table's stand-up point (-30.6, 9.14): leaves along x
+			[-28.7, 6.2] // 6 past the open leaf's tip (+z of it), 0.6 m clear
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
 			[0, 3],
-			[3, 4],
+			[3, 6],
+			[6, 4],
 			[4, 5]
 		]
 	},
@@ -276,13 +286,19 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// door to the open floor; the desk stays clear
+	// door to the open floor, then toward the plan-QA desk in the far -z corner (x 9.87..11.87,
+	// z -22.875..-22.125). Node 2 sits on the door line: check b failed with the plan's [7.4, -18.6].
+	// The arrival spots, the physicist and Jordan Price still reach it in a clear straight line
 	physics: {
 		nodes: [
 			[2.15, -18],
-			[4.0, -17.6]
+			[4.0, -17.6],
+			[8.0, -17.6]
 		],
-		edges: [[0, 1]]
+		edges: [
+			[0, 1],
+			[1, 2]
+		]
 	},
 	// in by the door's -z half, past the cabinet at (4.05, -32.9)
 	engineering: {
@@ -339,16 +355,17 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[2, 3]
 		]
 	},
-	// in through the door, then down behind the operators' chairs (seats x 31.4..31.9, backs to 31.88):
-	// the 0.5 m between the console (to x 30.875) and the seats is too narrow to walk
+	// in through the door, then down behind the operators' chairs (seats x 28.50..29.00, backs to
+	// 28.98): the 0.5 m between the console against the west wall (to x 27.975) and the seats is too
+	// narrow to walk
 	ctcontrol: {
 		nodes: [
 			[31.5, -3.15], // 0 door
 			[31.5, -4.5], // 1 inside the door
-			[31.2, -5.6], // 2 toward the console's +z end
-			[32.6, -6.95], // 3 north of the chairs: the therapist (32.7, -6.6) and spot [0]
-			[32.6, -8.5], // 4 behind the chairs: spots [1] and [2], scan place (32.3, -8.45)
-			[32.6, -10.5] // 5 behind the south chair: the partner (31.1, -11.0) leaves along ~18 deg
+			[28.3, -5.6], // 2 toward the console's +z end
+			[29.7, -6.95], // 3 north of the chairs: the therapist (29.8, -6.6) and spot [0]
+			[29.7, -8.5], // 4 behind the chairs: spots [1] and [2], scan place (29.4, -8.45)
+			[29.7, -10.5] // 5 behind the south chair: Avery Woods (28.2, -11.0) leaves along ~18 deg
 		],
 		edges: [
 			[0, 1],
@@ -358,12 +375,12 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[4, 5]
 		]
 	},
-	// from the door round the gantry (base x 43.5..44.5, ring z -10.81..-8.19): -x to the couch side
+	// from the door round the gantry (base x 43.5..44.5, ring z -10.92..-8.08): -x to the couch side
 	// and the changing bench, +x to the far side
 	ctsim: {
 		nodes: [
 			[44, -2.15], // 0 door
-			[43.4, -4.0], // 1 inside the door, clear of the IV pole at (43.5, -5.6)
+			[43.4, -4.0], // 1 inside the door
 			[38.2, -4.4], // 2 Mia's bench final (37.15, -4.4) is reached along x, clear of the coat hook
 			[38.37, -4.93], // 3 the navigator (38.3, -4.7) leaves and arrives along ~290 deg
 			[38.6, -6.1], // 4 toward the couch side: the navigator's next place (39.8, -6.7)

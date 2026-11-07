@@ -449,8 +449,10 @@ export function addCirculationProps() {
 	w2.rotation.y = -1.2;
 	scene.add(w2);
 	const cart1 = medCartObject(0.95, 0x82aeca);
-	cart1.position.set(-28.0, 0, 4.4);
-	cart1.rotation.y = Math.PI;
+	// patient care: parked on the east wall after the supply counter and its cart, drawers facing the
+	// room (-x), so the doorway stays clear (top x -21.56..-21.14, z 9.16..9.74)
+	cart1.position.set(-21.35, 0, 9.45);
+	cart1.rotation.y = -Math.PI / 2;
 	scene.add(cart1);
 	const cart2 = medCartObject(0.92, 0x77b59b);
 	// in the HDR suite, beside the exam table (room centre (51.5, 24))
@@ -458,10 +460,14 @@ export function addCirculationProps() {
 	cart2.rotation.y = Math.PI / 2;
 	scene.add(cart2);
 	const iv1 = ivPoleObject(0.95);
-	iv1.position.set(43.5, 0, -5.6);
+	// CT room: beside the CT couch at the patient's head end, on the -z side away from the door and the
+	// staff lane (base x 38.38..38.82, z -10.72..-10.28, 0.42 m from the couch edge)
+	iv1.position.set(38.6, 0, -10.5);
 	scene.add(iv1);
 	const iv2 = ivPoleObject(0.9);
-	iv2.position.set(-18.9, 0, -4.8);
+	// consult: parked in the back-right corner beside the room's other IV pole, its bag toward the room
+	iv2.position.set(-14.25, 0, -11.45);
+	iv2.rotation.y = -Math.PI / 2;
 	scene.add(iv2);
 	const hall = new THREE.Group();
 	scene.add(hall);
@@ -1032,7 +1038,6 @@ export function buildExteriorAmbient() {
 		[-30, 15, 0.9],
 		[21, 20, 1.1],
 		[34, 16, 0.9],
-		[-45, -8, 0.9],
 		[45, -58, 1.0],
 		[92, 42, 1.2],
 		[105, -28, 1.0],
@@ -1103,15 +1108,24 @@ export function furnish(room: Room) {
 			break;
 		case 'consult':
 			examTable(g, room.x, room.z + 1);
-			desk(g, room.x - 2.5, room.z - 1.8, 1.8, 0.7);
-			monitor(g, room.x - 2.5, 1.35, room.z - 2.0);
-			chair(g, room.x + 2.3, room.z - 1.6);
-			brochureRack(g, room.x + 4.0, room.z - 2.8, Math.PI);
+			// the oncologist's desk along the west wall (the left as you walk in), its top 0.02 m off the
+			// wall face (x -22.90..-22.20, z -9.30..-7.50); the screen on it faces the room (bottom 1.16),
+			// and the chair stands behind the desk, facing it and the screen
+			desk(g, room.x - 4.55, room.z - 0.9, 1.8, 0.7, Math.PI / 2);
+			monitor(g, room.x - 4.62, 1.4, room.z - 0.9, Math.PI / 2);
+			chair(g, room.x - 3.65, room.z - 0.9, -Math.PI / 2);
+			// the patient-leaflet rack on the east wall, its trays toward the room (-x)
+			brochureRack(g, room.x + 4.65, room.z - 2.8, -Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const iv = ivPoleObject(0.88);
-			iv.position.set(room.x + 3.0, 0, room.z + 1.4);
+			// parked in the back-right corner, its bag toward the room (addCirculationProps parks the
+			// room's second pole beside it)
+			iv.position.set(room.x + 4.45, 0, room.z - 3.95);
+			iv.rotation.y = -Math.PI / 2;
 			g.add(iv);
-			cabinetBank(g, room.x + 3.2, room.z - 2.6, 1.5, 1.45, 0.42, Math.PI, 0xe4eaed);
+			// the storage cabinet beside the desk on the west wall (x -22.86..-22.44, z -10.90..-9.40),
+			// drawers facing the room (+x)
+			cabinetBank(g, room.x - 4.65, room.z - 2.65, 1.5, 1.45, 0.42, Math.PI / 2, 0xe4eaed);
 			break;
 		case 'social':
 			couch(g, room.x, room.z + 1.7, Math.PI); // faces the two chairs and the social worker
@@ -1122,23 +1136,29 @@ export function furnish(room: Room) {
 			brochureRack(g, room.x + 4.0, room.z + 2.6, Math.PI / 2);
 			break;
 		case 'education':
-			desk(g, room.x, room.z + 1.3, 3.8, 1.1);
-			// the outer chairs turn in toward the desk's middle, the right one toward the navigator
-			for (let i = -1; i <= 1; i++) {
-				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
-			}
-			// the navigator's computer on the desk, toward its door-side edge, facing the visitor chairs
-			// (-z) so the navigator and the patient read it together
-			monitor(g, room.x, 1.4, room.z + 1.55, Math.PI, 0.8, 0.48);
+			// the navigator's desk by the TV wall (the PATIENT EDUCATION board on the back wall), 1.37 m
+			// off it: top x -43.9..-40.1, z -10.55..-9.45. The navigator sits behind it, the two visitor
+			// chairs stand on the door side, and the resident patient takes the one nearer the monitor. The
+			// monitor stands on the desk's +x end, turned 12 deg past the bisector toward the patient
+			// (bottom 1.16); the navigator's and the patient's chairs turn to face it.
+			desk(g, room.x, room.z - 2.5, 3.8, 1.1);
+			monitor(g, room.x + 1.5, 1.4, room.z - 2.5, -1.25, 0.8, 0.48);
+			chair(g, room.x - 0.15, room.z - 3.65, 0.96); // the navigator's
+			chair(g, room.x + 0.1, room.z - 0.95, 2.41); // the patient's
+			chair(g, room.x - 1.1, room.z - 0.95, Math.PI); // the free chair, facing the desk
 			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
 			examTable(g, room.x - 2.6, room.z + 1.3);
 			examTable(g, room.x + 2.6, room.z + 1.3);
-			add(g, box(2.2, 0.95, 0.55, MAT.white, room.x, 0.55, room.z - 3));
+			// one supply wall on the east wall (the left as you walk in), so the doorway stays clear: the
+			// supply counter, drawers facing the room (-x), at x -21.69..-21.14, z 5.9..8.1; the supply
+			// cart beside it, then the entrance cart (addCirculationProps)
+			cabinetBank(g, room.x + 6.585, room.z - 1.5, 2.2, 0.95, 0.55, -Math.PI / 2, 0xf1f4f5);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const mc = medCartObject(0.92, 0x7eaec1);
-			mc.position.set(room.x + 4.6, 0, room.z - 2.9);
+			mc.position.set(room.x + 6.655, 0, room.z + 0.1);
+			mc.rotation.y = -Math.PI / 2;
 			g.add(mc);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const wc2 = wheelchairObject(0.9, false);
@@ -1154,13 +1174,19 @@ export function furnish(room: Room) {
 				add(g, box(0.45, 0.8, 0.25, MAT.trim, room.x + i * 0.65, 0.5, room.z + 2.8));
 			break;
 		case 'physics':
-			desk(g, room.x - 2.3, room.z - 2.2, 2, 0.75);
+			// the plan-QA desk in the far corner of the left (-z) wall, under the clock and beside the
+			// PHYSICS PLAN QA board: top x 9.87..11.87 (0.05 off the east wall), z -22.875..-22.125
+			desk(g, room.x + 3.37, room.z - 4.5, 2, 0.75);
 			break;
 		case 'radbio':
+			// the bench row runs across the room, left to right as you come in from the door (x -3): on
+			// the room's centre line x, 3.93 m from the door wall, the row x -7.85..-7.15, z -34.0..-28.0;
+			// a microscope on each bench. Turned with rot, not swapped w and d: desk() sizes its base from
+			// w and d
 			for (let i = -1; i <= 1; i++) {
-				desk(g, room.x + i * 2.2, room.z, 1.6, 0.7);
+				desk(g, room.x, room.z + i * 2.2, 1.6, 0.7, Math.PI / 2);
 				const mic = cyl(0.12, 0.18, 0.55, MAT.black);
-				mic.position.set(room.x + i * 2.2, 1.2, room.z);
+				mic.position.set(room.x, 1.2, room.z + i * 2.2);
 				add(g, mic);
 			}
 			break;
@@ -1209,23 +1235,29 @@ export function furnish(room: Room) {
 			// the planning review screen on the centre desk, toward its +z edge, facing Dr Shah's side (-z)
 			monitor(g, room.x, 1.485, room.z + 1.6, Math.PI, 1.2, 0.65);
 			desk(g, room.x, room.z + 1.4, 4.4, 1.0);
-			cabinetBank(g, room.x - 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
-			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
+			// the two lateral filing cabinets flush on the +z wall (backs 0.02 m off its face), drawers
+			// facing the room, symmetric about the room's x; the west one 0.535 m from the potted plant
+			cabinetBank(g, room.x - 4.4, room.z + 7.175, 1.6, 1.6, 0.45, Math.PI, 0xe1e7ea);
+			cabinetBank(g, room.x + 4.4, room.z + 7.175, 1.6, 1.6, 0.45, Math.PI, 0xe1e7ea);
 			break;
 		case 'manager':
 			// the desk stands just in front of the visitor chairs (seat fronts at z = room.z + 1.22), the
-			// manager on its door side facing them; the screen faces the manager
+			// manager on its door side. The screen stands on the desk's door-side +x end (x 20.23..21.19,
+			// z 8.13..8.62), turned 23 deg toward the chairs' middle: the chairs see the screen and the door
+			// its dark back, and it no longer stands between the manager and Chris Evans.
 			desk(g, room.x, room.z + 0.5, 2.5, 0.85);
-			monitor(g, room.x, 1.435, room.z + 0.75, Math.PI, 1.0, 0.55);
+			monitor(g, room.x + 0.7, 1.435, room.z + 0.4, -0.4, 1.0, 0.55);
 			// visitor chairs face the manager's desk
 			chair(g, room.x - 1.0, room.z + 1.5, Math.PI);
 			chair(g, room.x + 1.0, room.z + 1.5, Math.PI);
 			break;
 		case 'ctcontrol':
-			desk(g, room.x - 1.2, room.z - 0.2, 4.8, 1.15, Math.PI / 2);
-			// the operators' chairs face the console, seat fronts 0.5 m from the desk edge (x 30.875)
+			// the console against the west wall (inner face x 27.08), opposite the window: top
+			// x 27.085..27.975, z -11.6..-6.8, 0.89 deep (nothing stands behind the backing board on the wall)
+			desk(g, room.x - 3.97, room.z - 0.2, 4.8, 0.89, Math.PI / 2);
+			// the operators' chairs face the console, seat fronts 0.5 m from the desk edge (x 27.975)
 			for (let i = -1; i <= 1; i++)
-				taskChair(g, room.x + 0.15, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
+				taskChair(g, room.x - 2.75, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
 			// a storage cabinet against the door wall east of the door (x 30.2..32.8), drawers facing in
 			cabinetBank(g, room.x + 3.2, room.z + room.d / 2 - 0.31, 1.6, 1.5, 0.45, Math.PI, 0xdbe3e8);
 			interiorRoomSign(
@@ -1243,7 +1275,10 @@ export function furnish(room: Room) {
 			wallSpeaker(g, room.x + room.w / 2 - 0.13, 2.65, room.z - 3.3, -Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const ccart = medCartObject(0.88, 0x9db4bf);
-			ccart.position.set(room.x + 0.8, 0, room.z - 3.25);
+			// against the west wall at the console's -z end, drawers facing the room (+x), the handle
+			// toward the console; its top 0.006 m off the wall
+			ccart.position.set(room.x - 4.22, 0, room.z - 3.4);
+			ccart.rotation.y = Math.PI / 2;
 			g.add(ccart);
 			registerInteractable(
 				ccart,
@@ -1269,10 +1304,24 @@ export function furnish(room: Room) {
 				'Mobile support for IV fluids or contrast-related care.'
 			);
 			gurneyObject(g, room.x + 4.5, room.z - 4.8, 0);
-			cabinetBank(g, room.x + 6.2, room.z - 5.2, 2.2, 1.8, 0.5, Math.PI, 0xe2e8eb);
-			cabinetBank(g, room.x + 6.2, room.z + 4.8, 2.2, 1.8, 0.5, Math.PI, 0xe2e8eb);
-			immobilizationStorage(g, room.x + 6.05, room.z - 0.15, Math.PI / 2, 'CT IMMOBILIZATION');
-			sinkStation(g, room.x + 4.6, room.z - 6.55, 0);
+			// the two storage cabinets flush on the east wall (x 51.415..51.915), drawers facing the
+			// room: A at z -17.3..-15.1, B at z -7.3..-5.1, 1.7 m from the wheelchair
+			cabinetBank(g, room.x + 7.665, room.z - 5.2, 2.2, 1.8, 0.5, -Math.PI / 2, 0xe2e8eb);
+			cabinetBank(g, room.x + 7.665, room.z + 4.8, 2.2, 1.8, 0.5, -Math.PI / 2, 0xe2e8eb);
+			// the immobilization rack flush on the east wall between cabinet A and the patient-info
+			// screen, facing the room; its sign hangs on the wall above it (x 51.865, y 2.11..2.73)
+			immobilizationStorage(
+				g,
+				room.x + 7.665,
+				room.z - 1.6,
+				-Math.PI / 2,
+				'CT IMMOBILIZATION',
+				-0.2
+			);
+			// the sink's splashback flush on the back wall (its back at z -18.905, so the soap dispenser
+			// stays 1 cm inside the room's cull box); 0.15 m east of the old x keeps the rail and the
+			// sign clear of the back wall's teal panel (to x 47.84)
+			sinkStation(g, room.x + 4.75, room.z - 7.51, 0);
 			framedWallMonitor(
 				g,
 				room.x + 7.78,
@@ -1302,18 +1351,16 @@ export function furnish(room: Room) {
 			wallClock(g, room.x - 2.8, 2.7, room.z - room.d / 2 + 0.13, 0);
 			sanitizerDispenser(g, room.x - 4.2, 1.55, room.z - room.d / 2 + 0.13, 0);
 			gloveBoxRack(g, room.x - 5.1, 1.6, room.z - room.d / 2 + 0.13, 0);
-			wallSpeaker(g, room.x + 7.78, 2.85, room.z - 2.2, -Math.PI / 2);
-			warningPlaque(
-				g,
-				room.x + 7.77,
-				2.25,
-				room.z - 4.3,
-				-Math.PI / 2,
-				'CT SIMULATION',
-				'LASERS MAY BE ACTIVE'
-			);
-			wallShelf(g, room.x + 5.3, 1.35, room.z - 1.4, 1.2, Math.PI);
-			stool(g, room.x + 4.9, room.z - 1.5, 0x688596);
+			// the intercom speaker, raised clear of the immobilization sign's top (box y 2.78..3.12)
+			wallSpeaker(g, room.x + 7.78, 2.95, room.z - 2.2, -Math.PI / 2);
+			// the laser warning belongs at the entrance: on the hallway face of the door wall, left of the
+			// door (x 40.925..42.275, y 1.34..2.16, 0.05 m off the face), below the header sign. It goes in
+			// `scene`, not this room's group: a plaque outside the room in `g` would stop the culling pass
+			// (visibility.ts groupRoomContents) from taking the room's furniture into its cull group.
+			warningPlaque(scene, 41.6, 1.75, -2.87, 0, 'CT SIMULATION', 'LASERS MAY BE ACTIVE');
+			// a shelf on the east wall between cabinet A and the rack (z -14.9..-13.7), the stool under it
+			wallShelf(g, room.x + 7.78, 1.35, room.z - 3.3, 1.2, Math.PI / 2);
+			stool(g, room.x + 7.3, room.z - 3.3, 0x688596);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser1 = box(
 				0.12,
@@ -1784,9 +1831,10 @@ export function addClinicalWallPolish() {
 	g.add(linacPlate);
 	const linacAccent = box(0.035, 0.07, 5.0, glow, 44.18, 3.07, 9);
 	g.add(linacAccent);
-	const ctPlate = box(0.08, 2.35, 4.2, dark, 30.02, 1.75, -9);
+	// CT control's console stands against the room's west wall (inner face x 27.08)
+	const ctPlate = box(0.08, 2.35, 4.2, dark, 27.12, 1.75, -9);
 	g.add(ctPlate);
-	const ctAccent = box(0.035, 0.07, 3.8, glow, 30.08, 2.92, -9);
+	const ctAccent = box(0.035, 0.07, 3.8, glow, 27.18, 2.92, -9);
 	g.add(ctAccent);
 	const v1 = roomById('vault1');
 	if (v1) {
@@ -1797,7 +1845,9 @@ export function addClinicalWallPolish() {
 	}
 	const ct = roomById('ctsim');
 	if (ct) {
-		const l = box(7.2, 0.04, 0.08, glow, ct.x, 3.15, ct.z + 5.8);
+		// the CT room's teal light bar on its door wall's inner face (z -3.08), across the lintel above
+		// the door frame, instead of hanging 2.2 m in from the wall
+		const l = box(7.2, 0.04, 0.08, glow, ct.x, 3.15, ct.z + ct.d / 2 - 0.12);
 		g.add(l);
 	}
 }

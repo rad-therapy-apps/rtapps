@@ -785,6 +785,9 @@ function journeyFocusActors(a, b, roomId) {
 	else if (roomId === 'education') pos = target.clone().add(new THREE.Vector3(2.8, 0.45, 2.3));
 	else if (roomId === 'ctsim') pos = target.clone().add(new THREE.Vector3(3.0, 0.4, 2.0));
 	else if (roomId === 'ctcontrol') pos = target.clone().add(new THREE.Vector3(2.8, 0.4, -2.2));
+	// the physics pair stands by the desk in the far -z corner: the default offset would put the
+	// camera behind the east wall
+	else if (roomId === 'physics') pos = target.clone().add(new THREE.Vector3(-3.0, 0.5, 2.0));
 	else pos = target.clone().add(new THREE.Vector3(3.0, 0.5, 2.0));
 	camera.position.copy(pos);
 	camera.lookAt(target);
@@ -1894,7 +1897,9 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'consult',
 			'education',
-			new THREE.Vector3(-40.9, 0, -5.4),
+			// the free visitor chair's seat anchor: with `sit` she walks to its approach point and sits,
+			// beside the resident patient
+			new THREE.Vector3(-43.1, 0, -8.51),
 			() => {
 				JOURNEY.stage = 'education';
 				JOURNEY.busy = true;
@@ -1923,6 +1928,7 @@ function advanceNewPatientJourney() {
 				followSubject: JOURNEY.newPatient,
 				followTarget: JOURNEY.navigator,
 				cues,
+				sit: true,
 				cameraOptions: { distance: 3.5, side: 1.25 }
 			}
 		);
@@ -2136,7 +2142,7 @@ function advanceNewPatientJourney() {
 				JOURNEY.ctTherapist,
 				'ctsim',
 				'ctcontrol',
-				new THREE.Vector3(32.3, 0, -7.2),
+				new THREE.Vector3(29.4, 0, -7.2),
 				atControl,
 				1.55
 			);
@@ -2144,7 +2150,7 @@ function advanceNewPatientJourney() {
 				JOURNEY.ctControlTherapist,
 				'ctcontrol',
 				'ctcontrol',
-				new THREE.Vector3(32.3, 0, -8.45),
+				new THREE.Vector3(29.4, 0, -8.45),
 				atControl,
 				1.25
 			);

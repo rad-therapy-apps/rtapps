@@ -900,7 +900,16 @@ export function sinkStation(g, x, z, rot = 0) {
 	);
 }
 
-export function immobilizationStorage(g, x, z, rot = 0, label = 'IMMOBILIZATION') {
+// signOffset: how far along the rack's facing its sign stands from the frame's centre (negative:
+// behind it, on the wall the rack stands against)
+export function immobilizationStorage(
+	g,
+	x,
+	z,
+	rot = 0,
+	label = 'IMMOBILIZATION',
+	signOffset = 0.28
+) {
 	const frame = box(1.7, 2.0, 0.5, std(0xcfd8dd, 0.82, 0.04), x, 1.0, z);
 	frame.rotation.y = rot;
 	add(g, frame);
@@ -933,9 +942,9 @@ export function immobilizationStorage(g, x, z, rot = 0, label = 'IMMOBILIZATION'
 	});
 	interiorRoomSign(
 		g,
-		x,
+		x + Math.sin(rot) * signOffset,
 		2.42,
-		z + Math.cos(rot) * 0.28,
+		z + Math.cos(rot) * signOffset,
 		rot,
 		label,
 		'Masks · Vac-Lok · Knee & foot support'
@@ -1293,22 +1302,23 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 }
 
 export function ctScanner(g, room: Room) {
-	// a big-bore CT gantry at 1.25x real size (owner's choice): a 2.625 m ring with a 1.125 m bore,
-	// centred 1.25 m up (its foot sits 0.06 m under the floor, behind the base) so the couch's bottom
-	// corners (y 0.875, z ±0.36) clear the bore by 0.04 m when the couch slides the patient in
-	const ring = new THREE.Mesh(new THREE.TorusGeometry(0.9375, 0.375, 18, 54), MAT.white);
+	// a big-bore CT gantry at 1.35x real size (owner's choice, 2026-11-06): a 2.835 m ring with a
+	// 1.215 m bore, centred 1.31 m up, so the couch's bottom corners (y 0.875, z ±0.36) clear the bore
+	// glow by 0.023 m when the couch slides the patient in. Its foot sinks 0.1075 m under the floor; the
+	// 2.1 m base hides the ring where it meets the base top (the ring's half-width there is 1.043)
+	const ring = new THREE.Mesh(new THREE.TorusGeometry(1.0125, 0.405, 18, 54), MAT.white);
 	ring.rotation.y = Math.PI / 2;
-	ring.position.set(room.x, 1.25, room.z + 1.5);
+	ring.position.set(room.x, 1.31, room.z + 1.5);
 	ring.castShadow = true;
 	add(g, ring);
 	const bore = new THREE.Mesh(
-		new THREE.TorusGeometry(0.5625, 0.02, 14, 48),
+		new THREE.TorusGeometry(0.6075, 0.02, 14, 48),
 		std(0x2b3944, 0.5, 0.1, { emissive: 0x16435a, emissiveIntensity: 0.65 })
 	);
 	bore.rotation.y = Math.PI / 2;
 	bore.position.copy(ring.position);
 	add(g, bore);
-	const base = box(1.0, 0.35, 2.0, MAT.white, room.x, 0.175, room.z + 1.5);
+	const base = box(1.0, 0.35, 2.1, MAT.white, room.x, 0.175, room.z + 1.5);
 	add(g, base);
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
 	add(g, table);

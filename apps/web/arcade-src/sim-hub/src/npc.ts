@@ -616,19 +616,23 @@ export function departmentStaff() {
 		undefined,
 		'social'
 	);
-	place(
+	// the navigator sits behind the desk by the TV wall, turned to the monitor on its +x end; the duty
+	// pose stays 'gesture', so the arm keeps pointing while seated. The resident patient sits in the
+	// visitor chair nearer the monitor, also turned to it.
+	const nav = place(
 		'education',
 		'Patient Navigator',
 		'Helps patients understand appointments, resources and the sequence of care.',
 		0x5c8e9c,
-		-1.6,
-		0.55,
-		0.5,
+		-0.1,
+		-3.62,
+		0.96,
 		0xefc7a4,
 		undefined,
 		'education'
 	);
-	sitPatient('education', 'Reviewing the care pathway and education materials.', 1.1, -0.2, -0.4);
+	seatActor(nav, nav.position);
+	sitPatient('education', 'Reviewing the care pathway and education materials.', 0.14, -1.0, 2.41);
 	place(
 		'patientcare',
 		'Oncology Nurse',
@@ -659,9 +663,9 @@ export function departmentStaff() {
 		'Medical Physicist',
 		'Calibration, dose measurement, QA and technical safety of radiation delivery.',
 		0xb37d45,
-		-2.2,
-		-1.3,
-		0.3,
+		3.37,
+		-3.5,
+		-0.36,
 		0xe8c09f,
 		undefined,
 		'physics'
@@ -671,9 +675,9 @@ export function departmentStaff() {
 		'Radiobiology Educator / Scientist',
 		'Explains the biological response of cells and tissues to radiation.',
 		0xa4795a,
-		0,
 		-1.4,
 		0,
+		Math.PI / 2,
 		0xead0b0,
 		undefined,
 		'radbio'
@@ -734,7 +738,7 @@ export function departmentStaff() {
 		0x6d9c84,
 		0,
 		-0.55,
-		0,
+		-0.7,
 		0xefc8a6,
 		undefined,
 		'manager'
@@ -744,7 +748,7 @@ export function departmentStaff() {
 		'CT Simulation Therapist',
 		'Operates the CT scanner and monitors the patient from the control room.',
 		0x6d8ea9,
-		1.2,
+		-1.7,
 		2.4,
 		Math.PI,
 		0xefc8a6,
@@ -861,7 +865,7 @@ export function departmentStaff() {
 		0x6b91b7,
 		1.6,
 		1.2,
-		-1.2,
+		2.78,
 		0x80543a,
 		{ female: true, hairColor: 0x1d1410 },
 		'support'
@@ -872,9 +876,9 @@ export function departmentStaff() {
 		'Research Assistant',
 		'Reviewing cell-response observations with the radiobiology educator.',
 		0x7390a3,
-		2.0,
 		1.0,
-		-1.1,
+		-2.0,
+		-1.1 + Math.PI / 2,
 		0xd7a17b,
 		{ female: true, hairColor: 0x4b3225 },
 		'desk'
@@ -939,7 +943,7 @@ export function departmentStaff() {
 		0x668ca5,
 		-1.8,
 		1.6,
-		0.65,
+		2.44,
 		0xc28b67,
 		{ hairColor: 0x291c15 },
 		'desk'
@@ -950,7 +954,7 @@ export function departmentStaff() {
 		'Radiation Therapist',
 		'Verifying the simulation protocol and coordinating with the therapist in the scanner room.',
 		0x6c93b2,
-		-0.4,
+		-3.3,
 		-2.0,
 		-Math.PI / 2,
 		0x81563c,
