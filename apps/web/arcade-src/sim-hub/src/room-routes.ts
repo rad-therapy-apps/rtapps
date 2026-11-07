@@ -48,10 +48,11 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 		{ x: -27.4, z: 6.05, facing: 1.27 },
 		{ x: -26.65, z: 5.5, facing: 0.06 }
 	],
+	// on the room's open floor, facing the physicist at the plan-QA desk in the far -z corner
 	physics: [
-		{ x: 6.4, z: -17.2, facing: -2.66 },
-		{ x: 5.75, z: -17.2, facing: -2.93 },
-		{ x: 6.15, z: -17.8, facing: -2.63 }
+		{ x: 9.0, z: -20.3, facing: 2.14 },
+		{ x: 8.4, z: -19.9, facing: 2.14 },
+		{ x: 9.3, z: -19.7, facing: 2.42 }
 	],
 	// beside the phantom's cart, facing it
 	qa: [
@@ -281,13 +282,19 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		],
 		edges: [[0, 1]]
 	},
-	// door to the open floor; the desk stays clear
+	// door to the open floor, then toward the plan-QA desk in the far -z corner (x 9.87..11.87,
+	// z -22.875..-22.125): the arrival spots, the physicist and Jordan Price each reach node 2 in a
+	// clear straight line
 	physics: {
 		nodes: [
 			[2.15, -18],
-			[4.0, -17.6]
+			[4.0, -17.6],
+			[8.0, -17.6]
 		],
-		edges: [[0, 1]]
+		edges: [
+			[0, 1],
+			[1, 2]
+		]
 	},
 	// in by the door's -z half, past the cabinet at (4.05, -32.9)
 	engineering: {

@@ -785,6 +785,9 @@ function journeyFocusActors(a, b, roomId) {
 	else if (roomId === 'education') pos = target.clone().add(new THREE.Vector3(2.8, 0.45, 2.3));
 	else if (roomId === 'ctsim') pos = target.clone().add(new THREE.Vector3(3.0, 0.4, 2.0));
 	else if (roomId === 'ctcontrol') pos = target.clone().add(new THREE.Vector3(2.8, 0.4, -2.2));
+	// the physics pair stands by the desk in the far -z corner: the default offset would put the
+	// camera behind the east wall
+	else if (roomId === 'physics') pos = target.clone().add(new THREE.Vector3(-3.0, 0.5, 2.0));
 	else pos = target.clone().add(new THREE.Vector3(3.0, 0.5, 2.0));
 	camera.position.copy(pos);
 	camera.lookAt(target);

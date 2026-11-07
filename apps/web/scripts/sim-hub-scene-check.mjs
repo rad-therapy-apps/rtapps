@@ -54,6 +54,8 @@ const CHAIRS = 20,
 //   minY    the box bottom is at this height, within 0.01 (a desk screen: the 0.88 desk top + 0.28 stand)
 //   maxY    the box top is at most this height
 //   within  the box centre is inside [x0, x1, z0, z1] (a desk top)
+//   extent  [x, z]: the box's world size along x and along z, each within 0.01 (which way a box is
+//           turned, when its centre stays where it was)
 //   flush   { axis: 'x' | 'z', face, side: 'min' | 'max' }: the box's `side` along `axis` (the side
 //           toward the wall) is 0 to 0.06 m off the wall's inner face `face`, not past it
 const PLACEMENTS = [
@@ -674,7 +676,32 @@ const PLACEMENTS = [
 		id: 'education tree removed',
 		pick: { geom: 'CylinderGeometry', size: [0.162, 0.216, 2.25], at: [-45, -8] },
 		absent: true
-	}
+	},
+	// R3-4: physics: the plan-QA desk in the far corner of the left (-z) wall, under the clock and
+	// beside the PHYSICS PLAN QA board
+	{
+		id: 'physics desk in the far -z corner',
+		pick: { size: [2, 0.08, 0.75], at: [10.87, -22.5] },
+		within: [10.86, 10.88, -22.51, -22.49]
+	},
+	// R3-5: radiobiology: the bench row turned 90 deg about the room centre, so it runs across the room
+	// from the door: each top is 0.7 m along x and 1.6 m along z (the middle bench keeps its centre, so
+	// only its extent shows the turn); the outer benches' microscopes move with them
+	...[-1, 0, 1].map((i) => ({
+		id: `radbio bench ${i} across the room`,
+		pick: { size: [1.6, 0.08, 0.7], at: [-7.5, -31 + 2.2 * i], r: 0.05 },
+		extent: [0.7, 1.6]
+	})),
+	...[-1, 1].map((i) => ({
+		id: `radbio microscope on bench ${i}`,
+		pick: { geom: 'CylinderGeometry', size: [0.12, 0.18, 0.55], at: [-7.5, -31 + 2.2 * i], r: 0.05 }
+	})),
+	// R3-6: dosimetry: both lateral filing cabinets flush on the +z wall, drawers facing the room
+	...[4.6, 13.4].map((x) => ({
+		id: `dosimetry cabinet at x ${x} flush on the +z wall`,
+		pick: { size: [1.6, 1.6, 0.45], at: [x, -41.825] },
+		flush: { axis: 'z', face: -41.58, side: 'max' }
+	}))
 ];
 
 function setupError(msg) {
@@ -862,6 +889,15 @@ if (only.has('placements')) {
 			if (m.cx < x0 || m.cx > x1 || m.cz < z0 || m.cz > z1)
 				fails.push(
 					`${e.id}: centre (${f2(m.cx)}, ${f2(m.cz)}) outside x ${x0}..${x1} z ${z0}..${z1}`
+				);
+		}
+		if (e.extent) {
+			const [ex, ez] = e.extent,
+				dx = m.max[0] - m.min[0],
+				dz = m.max[2] - m.min[2];
+			if (Math.abs(dx - ex) > 0.01 || Math.abs(dz - ez) > 0.01)
+				fails.push(
+					`${e.id}: world box ${dx.toFixed(3)} x ${dz.toFixed(3)} m in x and z (expected ${ex} x ${ez}): ${where(m)}`
 				);
 		}
 		if (e.flush) {

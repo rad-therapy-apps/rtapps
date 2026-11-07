@@ -1343,8 +1343,8 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'physics_planqa',
 		roomId: 'physics',
-		dx: -2.3,
-		dz: -2.2,
+		dx: 3.37,
+		dz: -4.45,
 		y: 1.35,
 		label: 'Physics Plan-QA Workstation',
 		purpose:

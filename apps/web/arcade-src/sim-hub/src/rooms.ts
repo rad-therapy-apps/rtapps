@@ -1172,13 +1172,19 @@ export function furnish(room: Room) {
 				add(g, box(0.45, 0.8, 0.25, MAT.trim, room.x + i * 0.65, 0.5, room.z + 2.8));
 			break;
 		case 'physics':
-			desk(g, room.x - 2.3, room.z - 2.2, 2, 0.75);
+			// the plan-QA desk in the far corner of the left (-z) wall, under the clock and beside the
+			// PHYSICS PLAN QA board: top x 9.87..11.87 (0.05 off the east wall), z -22.875..-22.125
+			desk(g, room.x + 3.37, room.z - 4.5, 2, 0.75);
 			break;
 		case 'radbio':
+			// the bench row runs across the room, left to right as you come in from the door (x -3): on
+			// the room's centre line x, 3.93 m from the door wall, the row x -7.85..-7.15, z -34.0..-28.0;
+			// a microscope on each bench. Turned with rot, not swapped w and d: desk() sizes its base from
+			// w and d
 			for (let i = -1; i <= 1; i++) {
-				desk(g, room.x + i * 2.2, room.z, 1.6, 0.7);
+				desk(g, room.x, room.z + i * 2.2, 1.6, 0.7, Math.PI / 2);
 				const mic = cyl(0.12, 0.18, 0.55, MAT.black);
-				mic.position.set(room.x + i * 2.2, 1.2, room.z);
+				mic.position.set(room.x, 1.2, room.z + i * 2.2);
 				add(g, mic);
 			}
 			break;
@@ -1227,8 +1233,10 @@ export function furnish(room: Room) {
 			// the planning review screen on the centre desk, toward its +z edge, facing Dr Shah's side (-z)
 			monitor(g, room.x, 1.485, room.z + 1.6, Math.PI, 1.2, 0.65);
 			desk(g, room.x, room.z + 1.4, 4.4, 1.0);
-			cabinetBank(g, room.x - 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
-			cabinetBank(g, room.x + 5.2, room.z + 3.7, 1.6, 1.6, 0.45, 0, 0xe1e7ea);
+			// the two lateral filing cabinets flush on the +z wall (backs 0.02 m off its face), drawers
+			// facing the room, symmetric about the room's x; the west one 0.535 m from the potted plant
+			cabinetBank(g, room.x - 4.4, room.z + 7.175, 1.6, 1.6, 0.45, Math.PI, 0xe1e7ea);
+			cabinetBank(g, room.x + 4.4, room.z + 7.175, 1.6, 1.6, 0.45, Math.PI, 0xe1e7ea);
 			break;
 		case 'manager':
 			// the desk stands just in front of the visitor chairs (seat fronts at z = room.z + 1.22), the
