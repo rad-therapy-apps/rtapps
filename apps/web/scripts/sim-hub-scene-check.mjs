@@ -114,9 +114,9 @@ const PLACEMENTS = [
 	// their walls
 	{
 		id: 'education desk screen',
-		pick: { size: [0.8, 0.48, 0.055], at: [-42, -5.95] },
+		pick: { size: [0.8, 0.48, 0.055], at: [-40.5, -10.0] },
 		minY: 1.16,
-		within: [-43.9, -40.1, -6.75, -5.65]
+		within: [-43.9, -40.1, -10.55, -9.45]
 	},
 	{
 		id: 'education wall screen removed',
@@ -652,6 +652,27 @@ const PLACEMENTS = [
 	{
 		id: 'patientcare entrance clear',
 		pick: { size: [2.2, 0.95, 0.55], at: [-28, 5.5] },
+		absent: true
+	},
+	// R3-3: education: the navigator's desk by the TV wall (1.37 m off it), the navigator's chair
+	// behind it, the patient's chair and the free chair on the door side; the outdoor tree that stood
+	// inside the room is gone (tree() trunk at scale 0.9)
+	{
+		id: 'education desk by the TV wall',
+		pick: { size: [3.8, 0.08, 1.1], at: [-42, -10.0] },
+		within: [-42.01, -41.99, -10.01, -9.99]
+	},
+	...[
+		['navigator', -42.15, -11.15],
+		['patient', -41.9, -8.45],
+		['free', -43.1, -8.45]
+	].map(([who, x, z]) => ({
+		id: `education ${who} chair`,
+		pick: { size: [0.55, 0.12, 0.55], at: [x, z], r: 0.05 }
+	})),
+	{
+		id: 'education tree removed',
+		pick: { geom: 'CylinderGeometry', size: [0.162, 0.216, 2.25], at: [-45, -8] },
 		absent: true
 	}
 ];

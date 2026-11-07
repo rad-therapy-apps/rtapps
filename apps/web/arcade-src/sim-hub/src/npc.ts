@@ -616,19 +616,23 @@ export function departmentStaff() {
 		undefined,
 		'social'
 	);
-	place(
+	// the navigator sits behind the desk by the TV wall, turned to the monitor on its +x end; the duty
+	// pose stays 'gesture', so the arm keeps pointing while seated. The resident patient sits in the
+	// visitor chair nearer the monitor, also turned to it.
+	const nav = place(
 		'education',
 		'Patient Navigator',
 		'Helps patients understand appointments, resources and the sequence of care.',
 		0x5c8e9c,
-		-1.6,
-		0.55,
-		0.5,
+		-0.1,
+		-3.62,
+		0.96,
 		0xefc7a4,
 		undefined,
 		'education'
 	);
-	sitPatient('education', 'Reviewing the care pathway and education materials.', 1.1, -0.2, -0.4);
+	seatActor(nav, nav.position);
+	sitPatient('education', 'Reviewing the care pathway and education materials.', 0.14, -1.0, 2.41);
 	place(
 		'patientcare',
 		'Oncology Nurse',

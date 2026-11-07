@@ -1894,7 +1894,9 @@ function advanceNewPatientJourney() {
 			JOURNEY.newPatient,
 			'consult',
 			'education',
-			new THREE.Vector3(-40.9, 0, -5.4),
+			// the free visitor chair's seat anchor: with `sit` she walks to its approach point and sits,
+			// beside the resident patient
+			new THREE.Vector3(-43.1, 0, -8.51),
 			() => {
 				JOURNEY.stage = 'education';
 				JOURNEY.busy = true;
@@ -1923,6 +1925,7 @@ function advanceNewPatientJourney() {
 				followSubject: JOURNEY.newPatient,
 				followTarget: JOURNEY.navigator,
 				cues,
+				sit: true,
 				cameraOptions: { distance: 3.5, side: 1.25 }
 			}
 		);

@@ -37,10 +37,11 @@ export const ARRIVAL_SPOTS: Record<string, ArrivalSpot[]> = {
 		{ x: -28.9, z: -6.7, facing: -2.12 },
 		{ x: -29.6, z: -6.95, facing: -2.16 }
 	],
+	// on the open floor inside the door, facing the seated navigator behind the desk by the TV wall
 	education: [
-		{ x: -41.1, z: -5.4, facing: -2.13 },
-		{ x: -41.5, z: -7.0, facing: -1.55 },
-		{ x: -41.8, z: -5.4, facing: -2.28 }
+		{ x: -41.1, z: -5.4, facing: -2.95 },
+		{ x: -41.5, z: -7.0, facing: -2.98 },
+		{ x: -41.8, z: -5.4, facing: -3.07 }
 	],
 	patientcare: [
 		{ x: -27.4, z: 4.95, facing: 0.53 },
@@ -225,28 +226,27 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[1, 4]
 		]
 	},
-	// in by the door's +x half (the doorway is x -43.3..-40.7), then round the desk (x -43.9..-40.1,
-	// z -6.75..-5.65). Spot [1] (-41.5, -7.0) stands in the 0.59 m gap between the desk and the
-	// chairs: its line to node 4 is clear at body width (0.12 m), not at 0.25 m
+	// in by the door's +x half (the doorway is x -43.3..-40.7), then over the open floor to the
+	// visitor chairs: node 3 in front of the patient's chair, node 6 in front of the free chair, and
+	// round the desk's +x front corner (node 4) to node 5 behind the desk's +x end, the seated
+	// navigator's way out (desk x -43.9..-40.1, z -10.55..-9.45, by the TV wall)
 	education: {
 		nodes: [
 			[-42, -2.15], // 0 door
 			[-40.92, -2.6], // 1 outside the door's +x half
-			[-40.92, -4.0], // 2 inside it
-			[-39.75, -5.3], // 3 +x of the desk: Mia's final and spot [0] arrive and leave along x
-			[-39.6, -7.3], // 4 off the desk's +x end, -z side: the seated patient and spot [1]
-			[-42.9, -5.2], // 5 +z of the desk: spot [2] along x
-			[-44.5, -5.0], // 6 and 7 round the desk's -x end
-			[-44.5, -7.0] // 7 to the navigator (-43.6, -6.95)
+			[-40.92, -4.0], // 2 inside it: spots [0] and [2]
+			[-40.8, -7.7], // 3 in front of the patient's chair (stand-up (-41.53, -8.87)): spot [1]
+			[-39.6, -9.2], // 4 off the desk's +x front corner, 0.56 m from it
+			[-39.6, -10.95], // 5 behind the desk's +x end: the navigator's stand-up (-41.69, -10.83)
+			[-42.5, -7.6] // 6 in front of the free chair (Mia's seat, stand-up (-43.10, -9.01)) and the room centre
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
 			[2, 3],
 			[3, 4],
-			[2, 5],
-			[5, 6],
-			[6, 7]
+			[4, 5],
+			[2, 6]
 		]
 	},
 	// the doorway is open floor (the supply counter and both carts stand on the east wall): +x side to

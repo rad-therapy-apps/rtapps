@@ -1036,7 +1036,6 @@ export function buildExteriorAmbient() {
 		[-30, 15, 0.9],
 		[21, 20, 1.1],
 		[34, 16, 0.9],
-		[-45, -8, 0.9],
 		[45, -58, 1.0],
 		[92, 42, 1.2],
 		[105, -28, 1.0],
@@ -1135,14 +1134,16 @@ export function furnish(room: Room) {
 			brochureRack(g, room.x + 4.0, room.z + 2.6, Math.PI / 2);
 			break;
 		case 'education':
-			desk(g, room.x, room.z + 1.3, 3.8, 1.1);
-			// the outer chairs turn in toward the desk's middle, the right one toward the navigator
-			for (let i = -1; i <= 1; i++) {
-				chair(g, room.x + i * 1.3, room.z - 0.2, -0.4 * i);
-			}
-			// the navigator's computer on the desk, toward its door-side edge, facing the visitor chairs
-			// (-z) so the navigator and the patient read it together
-			monitor(g, room.x, 1.4, room.z + 1.55, Math.PI, 0.8, 0.48);
+			// the navigator's desk by the TV wall (the PATIENT EDUCATION board on the back wall), 1.37 m
+			// off it: top x -43.9..-40.1, z -10.55..-9.45. The navigator sits behind it, the two visitor
+			// chairs stand on the door side, and the resident patient takes the one nearer the monitor. The
+			// monitor stands on the desk's +x end, turned 12 deg past the bisector toward the patient
+			// (bottom 1.16); the navigator's and the patient's chairs turn to face it.
+			desk(g, room.x, room.z - 2.5, 3.8, 1.1);
+			monitor(g, room.x + 1.5, 1.4, room.z - 2.5, -1.25, 0.8, 0.48);
+			chair(g, room.x - 0.15, room.z - 3.65, 0.96); // the navigator's
+			chair(g, room.x + 0.1, room.z - 0.95, 2.41); // the patient's
+			chair(g, room.x - 1.1, room.z - 0.95, Math.PI); // the free chair, facing the desk
 			benchSeat(g, room.x + 4.0, room.z - 2.8, -Math.PI / 2, 1.8, 0x6e8390);
 			break;
 		case 'patientcare':
