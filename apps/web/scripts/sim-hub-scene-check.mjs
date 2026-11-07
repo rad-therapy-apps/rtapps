@@ -236,15 +236,15 @@ const PLACEMENTS = [
 		pick: { size: [0.34, 0.34, 0.08], at: [35.87, -12.3], y: 2.65, r: 0.1 },
 		flush: { axis: 'x', face: 35.92, side: 'max' }
 	},
-	// R9: the CT gantry, at the owner's 1.25x real size (a 2.625 m ring centred 1.25 m up, so the
-	// couch clears its bore), stands under the 3.75 m ceiling with its foot just under the floor; the
-	// sagittal laser over it is on the ceiling (slab underside y 3.71), not hanging where the old
-	// ring's bore was
+	// R9, R3-9: the CT gantry, at the owner's 1.35x real size (a 2.835 m ring centred 1.31 m up, so the
+	// couch clears its bore glow), stands under the 3.75 m ceiling with its foot 0.1075 m under the
+	// floor, hidden by the 2.1 m base; the sagittal laser over it is on the ceiling (slab underside
+	// y 3.71), not hanging where the old ring's bore was
 	{
-		id: 'CT gantry 1.25x real size',
-		pick: { geom: 'TorusGeometry', size: [0.9375, 0.375], at: [44, -9.5] },
-		minY: -0.06,
-		maxY: 2.57
+		id: 'CT gantry 1.35x real size',
+		pick: { geom: 'TorusGeometry', size: [1.0125, 0.405], at: [44, -9.5] },
+		minY: -0.1075,
+		maxY: 2.73
 	},
 	{
 		id: 'CT sagittal laser on the ceiling',
@@ -724,6 +724,70 @@ const PLACEMENTS = [
 		id: 'CT supply cart on the west wall',
 		pick: { size: [0.5456, 0.05, 0.3872], at: [27.28, -12.4], r: 0.05 },
 		flush: { axis: 'x', face: 27.08, side: 'min' }
+	},
+	// R3-9: the CT room. The gantry's bore glow and base at 1.35x; the IV pole beside the couch's head
+	// end, off the doorway; on the east wall the two cabinets, the immobilization rack (its sign on the
+	// wall above it, the intercom speaker raised clear of the sign), the shelf and the stool under it;
+	// the sink's splashback flush on the back wall; the teal light bar on the door wall; the laser
+	// warning outside on the hallway face, left of the door
+	{
+		id: 'CT gantry bore glow at 1.35x',
+		pick: { geom: 'TorusGeometry', size: [0.6075, 0.02], at: [44, -9.5], y: 1.31 }
+	},
+	{
+		id: 'CT gantry base 2.1 m long',
+		pick: { size: [1.0, 0.35, 2.1], at: [44, -9.5], r: 0.05 }
+	},
+	{
+		id: 'CT room IV pole by the couch head',
+		pick: { geom: 'CylinderGeometry', size: [0.0285, 0.0285, 1.4725], at: [38.6, -10.5], r: 0.05 }
+	},
+	...[
+		['A', -16.2],
+		['B', -6.2]
+	].map(([which, z]) => ({
+		id: `CT room cabinet ${which} flush on the east wall`,
+		pick: { size: [2.2, 1.8, 0.5], at: [51.665, z] },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	})),
+	{
+		id: 'CT room sink splash flush on the back wall',
+		pick: { size: [1.52, 0.78, 0.07], at: [48.75, -18.87] },
+		flush: { axis: 'z', face: -18.92, side: 'min' }
+	},
+	{
+		id: 'CT immobilization rack flush on the east wall',
+		pick: { size: [1.7, 2.0, 0.5], at: [51.665, -12.6] },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	},
+	{
+		id: 'CT room shelf on the east wall',
+		pick: { size: [1.2, 0.04, 0.28], at: [51.78, -14.3] },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
+	},
+	{
+		id: 'CT room stool under the shelf',
+		pick: { geom: 'CylinderGeometry', size: [0.22, 0.22, 0.06], at: [51.3, -14.3], r: 0.05 }
+	},
+	{
+		id: 'CT room speaker above the immobilization sign',
+		pick: { size: [0.34, 0.34, 0.08], at: [51.78, -13.2], y: 2.95, r: 0.1 },
+		minY: 2.78
+	},
+	{
+		id: 'CT room teal bar on the door wall',
+		pick: { size: [7.2, 0.04, 0.08], at: [44, -3.12] },
+		flush: { axis: 'z', face: -3.08, side: 'max' }
+	},
+	{
+		id: 'CT laser plaque outside, left of the door',
+		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [41.6, -2.87], r: 0.05 },
+		flush: { axis: 'z', face: -2.92, side: 'min' }
+	},
+	{
+		id: 'CT laser plaque inside the room removed',
+		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [51.77, -15.3] },
+		absent: true
 	}
 ];
 

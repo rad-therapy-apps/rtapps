@@ -1173,8 +1173,8 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 	{
 		id: 'ct_immobilization',
 		roomId: 'ctsim',
-		dx: 6.05,
-		dz: -0.15,
+		dx: 7.42,
+		dz: -1.6,
 		y: 1.1,
 		label: 'CT Immobilization Storage',
 		purpose:

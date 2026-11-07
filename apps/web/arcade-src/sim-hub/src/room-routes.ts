@@ -376,7 +376,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 	ctsim: {
 		nodes: [
 			[44, -2.15], // 0 door
-			[43.4, -4.0], // 1 inside the door, clear of the IV pole at (43.5, -5.6)
+			[43.4, -4.0], // 1 inside the door
 			[38.2, -4.4], // 2 Mia's bench final (37.15, -4.4) is reached along x, clear of the coat hook
 			[38.37, -4.93], // 3 the navigator (38.3, -4.7) leaves and arrives along ~290 deg
 			[38.6, -6.1], // 4 toward the couch side: the navigator's next place (39.8, -6.7)

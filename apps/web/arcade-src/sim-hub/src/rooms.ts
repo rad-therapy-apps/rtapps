@@ -460,7 +460,9 @@ export function addCirculationProps() {
 	cart2.rotation.y = Math.PI / 2;
 	scene.add(cart2);
 	const iv1 = ivPoleObject(0.95);
-	iv1.position.set(43.5, 0, -5.6);
+	// CT room: beside the CT couch at the patient's head end, on the -z side away from the door and the
+	// staff lane (base x 38.38..38.82, z -10.72..-10.28, 0.42 m from the couch edge)
+	iv1.position.set(38.6, 0, -10.5);
 	scene.add(iv1);
 	const iv2 = ivPoleObject(0.9);
 	// consult: parked in the back-right corner beside the room's other IV pole, its bag toward the room
@@ -1302,10 +1304,24 @@ export function furnish(room: Room) {
 				'Mobile support for IV fluids or contrast-related care.'
 			);
 			gurneyObject(g, room.x + 4.5, room.z - 4.8, 0);
-			cabinetBank(g, room.x + 6.2, room.z - 5.2, 2.2, 1.8, 0.5, Math.PI, 0xe2e8eb);
-			cabinetBank(g, room.x + 6.2, room.z + 4.8, 2.2, 1.8, 0.5, Math.PI, 0xe2e8eb);
-			immobilizationStorage(g, room.x + 6.05, room.z - 0.15, Math.PI / 2, 'CT IMMOBILIZATION');
-			sinkStation(g, room.x + 4.6, room.z - 6.55, 0);
+			// the two storage cabinets flush on the east wall (x 51.415..51.915), drawers facing the
+			// room: A at z -17.3..-15.1, B at z -7.3..-5.1, 1.7 m from the wheelchair
+			cabinetBank(g, room.x + 7.665, room.z - 5.2, 2.2, 1.8, 0.5, -Math.PI / 2, 0xe2e8eb);
+			cabinetBank(g, room.x + 7.665, room.z + 4.8, 2.2, 1.8, 0.5, -Math.PI / 2, 0xe2e8eb);
+			// the immobilization rack flush on the east wall between cabinet A and the patient-info
+			// screen, facing the room; its sign hangs on the wall above it (x 51.865, y 2.11..2.73)
+			immobilizationStorage(
+				g,
+				room.x + 7.665,
+				room.z - 1.6,
+				-Math.PI / 2,
+				'CT IMMOBILIZATION',
+				-0.2
+			);
+			// the sink's splashback flush on the back wall (its back at z -18.905, so the soap dispenser
+			// stays 1 cm inside the room's cull box); 0.15 m east of the
+			// old x keeps the rail and the sign clear of the back wall's teal panel (to x 47.84)
+			sinkStation(g, room.x + 4.75, room.z - 7.51, 0);
 			framedWallMonitor(
 				g,
 				room.x + 7.78,
@@ -1335,18 +1351,16 @@ export function furnish(room: Room) {
 			wallClock(g, room.x - 2.8, 2.7, room.z - room.d / 2 + 0.13, 0);
 			sanitizerDispenser(g, room.x - 4.2, 1.55, room.z - room.d / 2 + 0.13, 0);
 			gloveBoxRack(g, room.x - 5.1, 1.6, room.z - room.d / 2 + 0.13, 0);
-			wallSpeaker(g, room.x + 7.78, 2.85, room.z - 2.2, -Math.PI / 2);
-			warningPlaque(
-				g,
-				room.x + 7.77,
-				2.25,
-				room.z - 4.3,
-				-Math.PI / 2,
-				'CT SIMULATION',
-				'LASERS MAY BE ACTIVE'
-			);
-			wallShelf(g, room.x + 5.3, 1.35, room.z - 1.4, 1.2, Math.PI);
-			stool(g, room.x + 4.9, room.z - 1.5, 0x688596);
+			// the intercom speaker, raised clear of the immobilization sign's top (box y 2.78..3.12)
+			wallSpeaker(g, room.x + 7.78, 2.95, room.z - 2.2, -Math.PI / 2);
+			// the laser warning belongs at the entrance: on the hallway face of the door wall, left of the
+			// door (x 40.925..42.275, y 1.34..2.16, 0.05 m off the face), below the header sign. It goes in
+			// `scene`, not this room's group: a plaque outside the room in `g` would stop the culling pass
+			// (visibility.ts groupRoomContents) from taking the room's furniture into its cull group.
+			warningPlaque(scene, 41.6, 1.75, -2.87, 0, 'CT SIMULATION', 'LASERS MAY BE ACTIVE');
+			// a shelf on the east wall between cabinet A and the rack (z -14.9..-13.7), the stool under it
+			wallShelf(g, room.x + 7.78, 1.35, room.z - 3.3, 1.2, Math.PI / 2);
+			stool(g, room.x + 7.3, room.z - 3.3, 0x688596);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const laser1 = box(
 				0.12,
@@ -1831,7 +1845,9 @@ export function addClinicalWallPolish() {
 	}
 	const ct = roomById('ctsim');
 	if (ct) {
-		const l = box(7.2, 0.04, 0.08, glow, ct.x, 3.15, ct.z + 5.8);
+		// the CT room's teal light bar on its door wall's inner face (z -3.08), across the lintel above
+		// the door frame, instead of hanging 2.2 m in from the wall
+		const l = box(7.2, 0.04, 0.08, glow, ct.x, 3.15, ct.z + ct.d / 2 - 0.12);
 		g.add(l);
 	}
 }
