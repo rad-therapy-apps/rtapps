@@ -599,6 +599,60 @@ const PLACEMENTS = [
 	{
 		id: 'technical hallway floor, z -66..-56.5 stops at the x 2 wall',
 		pick: { size: [5.59, 0.06, 9.5], at: [-0.705, -61.25] }
+	},
+	// R3-1 (2026-11-06): consult: the oncologist's desk, its screen and chair on the west wall (the left
+	// as you walk in), the storage cabinet beside the desk, the brochure rack on the east wall and both
+	// IV poles in the back-right corner. The cabinet and the rack stand on the baseboard's face (0.06 m
+	// off the wall, the flush limit), so they are pinned by their centres.
+	{
+		id: 'consult desk on the west wall',
+		pick: { size: [1.8, 0.08, 0.7], at: [-22.55, -8.4] },
+		flush: { axis: 'x', face: -22.92, side: 'min' }
+	},
+	{
+		id: 'consult desk screen',
+		pick: { size: [0.8, 0.48, 0.055], at: [-22.62, -8.4] },
+		minY: 1.16,
+		within: [-22.9, -22.2, -9.3, -7.5]
+	},
+	{
+		id: 'consult chair behind the desk',
+		pick: { size: [0.55, 0.12, 0.55], at: [-21.65, -8.4], r: 0.05 }
+	},
+	{
+		id: 'consult cabinet beside the desk',
+		pick: { size: [1.5, 1.45, 0.42], at: [-22.65, -10.15] },
+		within: [-22.66, -22.64, -10.16, -10.14]
+	},
+	{
+		id: 'consult brochure rack on the east wall',
+		pick: { size: [0.08, 1.05, 0.42], at: [-13.35, -10.3], r: 0.05 },
+		within: [-13.36, -13.34, -10.31, -10.29]
+	},
+	{
+		id: 'consult IV pole A in the back-right corner',
+		pick: { geom: 'CylinderGeometry', size: [0.0264, 0.0264, 1.364], at: [-13.55, -11.45], r: 0.05 }
+	},
+	{
+		id: 'consult IV pole B in the back-right corner',
+		pick: { geom: 'CylinderGeometry', size: [0.027, 0.027, 1.395], at: [-14.25, -11.45], r: 0.05 }
+	},
+	// R3-2: patient care: the supply counter (a drawer counter in place of the plain white block) and
+	// both supply carts on the east wall (the left as you walk in), on the baseboard's face; the
+	// doorway is clear
+	...[
+		['supply counter on the east wall', [2.2, 0.95, 0.55], -21.415, 7.0],
+		['cart beside the counter', [0.5152, 0.78, 0.3496], -21.345, 8.6],
+		['entrance cart parked on the east wall', [0.532, 0.78, 0.361], -21.35, 9.45]
+	].map(([what, size, x, z]) => ({
+		id: `patientcare ${what}`,
+		pick: { size, at: [x, z] },
+		within: [x - 0.01, x + 0.01, z - 0.01, z + 0.01]
+	})),
+	{
+		id: 'patientcare entrance clear',
+		pick: { size: [2.2, 0.95, 0.55], at: [-28, 5.5] },
+		absent: true
 	}
 ];
 

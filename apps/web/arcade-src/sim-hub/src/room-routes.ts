@@ -194,7 +194,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		nodes: [
 			[-18, -2.15], // 0 door
 			[-18, -3.9], // 1 inside the door
-			[-19.9, -4.6], // 2 -x of the IV pole at (-18.9, -4.8)
+			[-19.9, -4.6], // 2 inside the door's -x half, toward the table's -x end
 			[-19.7, -7.4], // 3 off the table's -x end: the patient steps off it along x
 			[-16.6, -4.9], // 4 +z of the table: Mia's final (-17.2, -5.9) leaves and arrives along z
 			[-16.1, -7.4] // 5 off the table's +x end: spots [0] and [1]
@@ -249,22 +249,27 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[6, 7]
 		]
 	},
-	// round the cart (-28, 4.4) and the bed (x -29.1..-26.9, z 5.22..5.78) inside the door: +x side
-	// to the arrival spots, -x side to the exam table at (-30.6, 9.8)
+	// the doorway is open floor (the supply counter and both carts stand on the east wall): +x side to
+	// the arrival spots, -x side to the exam table at (-30.6, 9.8). The door leaf swings in along
+	// x -29.3..-29.1 from z 3 to 5.59; nodes 3 and 6 keep 0.6 m clear of it, and the way round it keeps
+	// the old door -> table length (7.5 m), so the journey patient's timeline is the one the spacing
+	// check (b) was written against
 	patientcare: {
 		nodes: [
 			[-28, 2.15], // 0 door
-			[-25.9, 4.6], // 1 +x of the cart and bed: spot [0] arrives along x, clear of the bed
-			[-26.2, 6.2], // 2 +z of the bed's +x end: spots [1], [2] and the nurse
-			[-29.0, 3.7], // 3 inside the door's -x half, clear of the cart
-			[-30.0, 6.5], // 4 -x of the bed
-			[-29.0, 9.0] // 5 +x of the table's stand-up point (-30.6, 9.14): leaves along x
+			[-25.9, 4.6], // 1 +x of the doorway: spot [0] arrives along x
+			[-26.2, 6.2], // 2 by spots [1], [2] and the nurse
+			[-28.5, 4.0], // 3 inside the door's -x half, 0.6 m clear of the open leaf
+			[-29.65, 6.9], // 4 -x of the open leaf's tip, toward the exam table
+			[-29.0, 9.0], // 5 +x of the table's stand-up point (-30.6, 9.14): leaves along x
+			[-28.7, 6.2] // 6 past the open leaf's tip (+z of it), 0.6 m clear
 		],
 		edges: [
 			[0, 1],
 			[1, 2],
 			[0, 3],
-			[3, 4],
+			[3, 6],
+			[6, 4],
 			[4, 5]
 		]
 	},

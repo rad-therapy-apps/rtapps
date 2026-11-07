@@ -449,8 +449,10 @@ export function addCirculationProps() {
 	w2.rotation.y = -1.2;
 	scene.add(w2);
 	const cart1 = medCartObject(0.95, 0x82aeca);
-	cart1.position.set(-28.0, 0, 4.4);
-	cart1.rotation.y = Math.PI;
+	// patient care: parked on the east wall after the supply counter and its cart, drawers facing the
+	// room (-x), so the doorway stays clear (top x -21.56..-21.14, z 9.16..9.74)
+	cart1.position.set(-21.35, 0, 9.45);
+	cart1.rotation.y = -Math.PI / 2;
 	scene.add(cart1);
 	const cart2 = medCartObject(0.92, 0x77b59b);
 	// in the HDR suite, beside the exam table (room centre (51.5, 24))
@@ -461,7 +463,9 @@ export function addCirculationProps() {
 	iv1.position.set(43.5, 0, -5.6);
 	scene.add(iv1);
 	const iv2 = ivPoleObject(0.9);
-	iv2.position.set(-18.9, 0, -4.8);
+	// consult: parked in the back-right corner beside the room's other IV pole, its bag toward the room
+	iv2.position.set(-14.25, 0, -11.45);
+	iv2.rotation.y = -Math.PI / 2;
 	scene.add(iv2);
 	const hall = new THREE.Group();
 	scene.add(hall);
@@ -1103,15 +1107,24 @@ export function furnish(room: Room) {
 			break;
 		case 'consult':
 			examTable(g, room.x, room.z + 1);
-			desk(g, room.x - 2.5, room.z - 1.8, 1.8, 0.7);
-			monitor(g, room.x - 2.5, 1.35, room.z - 2.0);
-			chair(g, room.x + 2.3, room.z - 1.6);
-			brochureRack(g, room.x + 4.0, room.z - 2.8, Math.PI);
+			// the oncologist's desk along the west wall (the left as you walk in), its top 0.02 m off the
+			// wall face (x -22.90..-22.20, z -9.30..-7.50); the screen on it faces the room (bottom 1.16),
+			// and the chair stands behind the desk, facing it and the screen
+			desk(g, room.x - 4.55, room.z - 0.9, 1.8, 0.7, Math.PI / 2);
+			monitor(g, room.x - 4.62, 1.4, room.z - 0.9, Math.PI / 2);
+			chair(g, room.x - 3.65, room.z - 0.9, -Math.PI / 2);
+			// the patient-leaflet rack on the east wall, its trays toward the room (-x)
+			brochureRack(g, room.x + 4.65, room.z - 2.8, -Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const iv = ivPoleObject(0.88);
-			iv.position.set(room.x + 3.0, 0, room.z + 1.4);
+			// parked in the back-right corner, its bag toward the room (addCirculationProps parks the
+			// room's second pole beside it)
+			iv.position.set(room.x + 4.45, 0, room.z - 3.95);
+			iv.rotation.y = -Math.PI / 2;
 			g.add(iv);
-			cabinetBank(g, room.x + 3.2, room.z - 2.6, 1.5, 1.45, 0.42, Math.PI, 0xe4eaed);
+			// the storage cabinet beside the desk on the west wall (x -22.86..-22.44, z -10.90..-9.40),
+			// drawers facing the room (+x)
+			cabinetBank(g, room.x - 4.65, room.z - 2.65, 1.5, 1.45, 0.42, Math.PI / 2, 0xe4eaed);
 			break;
 		case 'social':
 			couch(g, room.x, room.z + 1.7, Math.PI); // faces the two chairs and the social worker
@@ -1135,10 +1148,14 @@ export function furnish(room: Room) {
 		case 'patientcare':
 			examTable(g, room.x - 2.6, room.z + 1.3);
 			examTable(g, room.x + 2.6, room.z + 1.3);
-			add(g, box(2.2, 0.95, 0.55, MAT.white, room.x, 0.55, room.z - 3));
+			// one supply wall on the east wall (the left as you walk in), so the doorway stays clear: the
+			// supply counter, drawers facing the room (-x), at x -21.69..-21.14, z 5.9..8.1; the supply
+			// cart beside it, then the entrance cart (addCirculationProps)
+			cabinetBank(g, room.x + 6.585, room.z - 1.5, 2.2, 0.95, 0.55, -Math.PI / 2, 0xf1f4f5);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const mc = medCartObject(0.92, 0x7eaec1);
-			mc.position.set(room.x + 4.6, 0, room.z - 2.9);
+			mc.position.set(room.x + 6.655, 0, room.z + 0.1);
+			mc.rotation.y = -Math.PI / 2;
 			g.add(mc);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const wc2 = wheelchairObject(0.9, false);

@@ -66,7 +66,8 @@ const SHOTS = [
 	// legs, the engineering screens and door, the physics room, the QA phantom, the commons screen, the
 	// manager's desk, CT control, the CT gantry, the LINAC control console and east wall, and in each
 	// vault the door signs, the sink, the setup checklist and the status board
-	{ name: 'education-monitor', eye: [-42.0, 1.8, -10.4], look: [-42.0, 1.2, -5.95] },
+	// from the bench side: since round 3 (R3-3) the desk stands where this shot's eye used to be
+	{ name: 'education-monitor', eye: [-38.6, 1.9, -6.6], look: [-40.6, 1.3, -10.0] },
 	{ name: 'dosimetry-monitor', eye: [11.6, 1.9, -50.4], look: [9.0, 1.3, -47.4] },
 	{ name: 'blade-ct', eye: [32.5, 2.2, 2.6], look: [27.8, 2.8, -2.6] },
 	{ name: 'blade-treatment', eye: [41.5, 2.2, -2.6], look: [46.5, 2.8, 2.4] },
@@ -148,7 +149,28 @@ const SHOTS = [
 		cam: [5, 1.4, 0.5],
 		lookY: 0.5,
 		ceilings: true
-	}
+	},
+	// the 2026-11-06 round 3, Part 2 (the rooms): consult, patient care, education, physics,
+	// radiobiology, dosimetry, the manager's office, CT control and the CT room
+	{ name: 'consult-enter', eye: [-18, 1.7, -3.3], look: [-18, 0.9, -9], ceilings: true },
+	{ name: 'consult-westwall', eye: [-15.2, 1.7, -7.5], look: [-22.9, 1.0, -8.5], ceilings: true },
+	{ name: 'patientcare-entrance', eye: [-28, 1.7, 3.3], look: [-28, 0.8, 9], ceilings: true },
+	{ name: 'patientcare-east', eye: [-27.5, 1.8, 6.5], look: [-21.1, 0.8, 7.8], ceilings: true },
+	{ name: 'education-enter', eye: [-42, 1.7, -3.3], look: [-42, 0.9, -9], ceilings: true },
+	{ name: 'education-side', eye: [-38, 1.7, -7], look: [-42, 1.1, -10], ceilings: true },
+	{ name: 'physics-door', eye: [3.6, 1.7, -18], look: [10, 1, -18], ceilings: true },
+	{ name: 'radbio-room', eye: [-3.6, 1.7, -31], look: [-10, 1.0, -31], ceilings: true },
+	{ name: 'radbio-top', eye: [-7.5, 11, -29.5], look: [-7.5, 0, -31] },
+	{ name: 'dosimetry-door', eye: [2.6, 1.7, -49], look: [9, 1, -46], ceilings: true },
+	{ name: 'dosimetry-cabinet-west', eye: [9, 1.7, -52], look: [3.8, 1, -45.3], ceilings: true },
+	{ name: 'mgr-door', eye: [20, 1.7, 3.8], look: [20, 1, 9], ceilings: true },
+	{ name: 'ctcontrol-door', eye: [31.5, 1.75, -4.4], look: [30.5, 1.1, -12.5], ceilings: true },
+	{ name: 'ctcontrol-window-view', eye: [33, 1.7, -9], look: [36, 1.6, -9.5], ceilings: true },
+	{ name: 'ctsim-from-door', eye: [44, 1.75, -3.4], look: [44, 1.1, -13], ceilings: true },
+	{ name: 'ctsim-east-wall', eye: [39, 2, -11], look: [52, 1.3, -11], ceilings: true },
+	{ name: 'ctsim-sink', eye: [46, 1.8, -13.5], look: [48.6, 1, -18.5], ceilings: true },
+	{ name: 'ctsim-hall', eye: [41, 1.7, 1.5], look: [43, 1.9, -2.9], ceilings: true },
+	{ name: 'ctsim-couch-iv', eye: [36.8, 1.9, -13], look: [39.5, 1, -9.8], ceilings: true }
 ];
 
 const SIMHUB = path.join(WEB, 'arcade/sim-hub'),
