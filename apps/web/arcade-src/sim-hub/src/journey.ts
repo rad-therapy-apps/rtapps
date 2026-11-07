@@ -2142,7 +2142,7 @@ function advanceNewPatientJourney() {
 				JOURNEY.ctTherapist,
 				'ctsim',
 				'ctcontrol',
-				new THREE.Vector3(32.3, 0, -7.2),
+				new THREE.Vector3(29.4, 0, -7.2),
 				atControl,
 				1.55
 			);
@@ -2150,7 +2150,7 @@ function advanceNewPatientJourney() {
 				JOURNEY.ctControlTherapist,
 				'ctcontrol',
 				'ctcontrol',
-				new THREE.Vector3(32.3, 0, -8.45),
+				new THREE.Vector3(29.4, 0, -8.45),
 				atControl,
 				1.25
 			);

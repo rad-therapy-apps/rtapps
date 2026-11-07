@@ -1240,18 +1240,22 @@ export function furnish(room: Room) {
 			break;
 		case 'manager':
 			// the desk stands just in front of the visitor chairs (seat fronts at z = room.z + 1.22), the
-			// manager on its door side facing them; the screen faces the manager
+			// manager on its door side. The screen stands on the desk's door-side +x end (x 20.23..21.19,
+			// z 8.13..8.62), turned 23 deg toward the chairs' middle: the chairs see the screen and the door
+			// its dark back, and it no longer stands between the manager and Chris Evans.
 			desk(g, room.x, room.z + 0.5, 2.5, 0.85);
-			monitor(g, room.x, 1.435, room.z + 0.75, Math.PI, 1.0, 0.55);
+			monitor(g, room.x + 0.7, 1.435, room.z + 0.4, -0.4, 1.0, 0.55);
 			// visitor chairs face the manager's desk
 			chair(g, room.x - 1.0, room.z + 1.5, Math.PI);
 			chair(g, room.x + 1.0, room.z + 1.5, Math.PI);
 			break;
 		case 'ctcontrol':
-			desk(g, room.x - 1.2, room.z - 0.2, 4.8, 1.15, Math.PI / 2);
-			// the operators' chairs face the console, seat fronts 0.5 m from the desk edge (x 30.875)
+			// the console against the west wall (inner face x 27.08), opposite the window: top
+			// x 27.085..27.975, z -11.6..-6.8, 0.89 deep (nothing stands behind the backing board on the wall)
+			desk(g, room.x - 3.97, room.z - 0.2, 4.8, 0.89, Math.PI / 2);
+			// the operators' chairs face the console, seat fronts 0.5 m from the desk edge (x 27.975)
 			for (let i = -1; i <= 1; i++)
-				taskChair(g, room.x + 0.15, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
+				taskChair(g, room.x - 2.75, room.z + i * 1.15, -Math.PI / 2, 0x4c6776);
 			// a storage cabinet against the door wall east of the door (x 30.2..32.8), drawers facing in
 			cabinetBank(g, room.x + 3.2, room.z + room.d / 2 - 0.31, 1.6, 1.5, 0.45, Math.PI, 0xdbe3e8);
 			interiorRoomSign(
@@ -1269,7 +1273,10 @@ export function furnish(room: Room) {
 			wallSpeaker(g, room.x + room.w / 2 - 0.13, 2.65, room.z - 3.3, -Math.PI / 2);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const ccart = medCartObject(0.88, 0x9db4bf);
-			ccart.position.set(room.x + 0.8, 0, room.z - 3.25);
+			// against the west wall at the console's -z end, drawers facing the room (+x), the handle
+			// toward the console; its top 0.006 m off the wall
+			ccart.position.set(room.x - 4.22, 0, room.z - 3.4);
+			ccart.rotation.y = Math.PI / 2;
 			g.add(ccart);
 			registerInteractable(
 				ccart,
@@ -1810,9 +1817,10 @@ export function addClinicalWallPolish() {
 	g.add(linacPlate);
 	const linacAccent = box(0.035, 0.07, 5.0, glow, 44.18, 3.07, 9);
 	g.add(linacAccent);
-	const ctPlate = box(0.08, 2.35, 4.2, dark, 30.02, 1.75, -9);
+	// CT control's console stands against the room's west wall (inner face x 27.08)
+	const ctPlate = box(0.08, 2.35, 4.2, dark, 27.12, 1.75, -9);
 	g.add(ctPlate);
-	const ctAccent = box(0.035, 0.07, 3.8, glow, 30.08, 2.92, -9);
+	const ctAccent = box(0.035, 0.07, 3.8, glow, 27.18, 2.92, -9);
 	g.add(ctAccent);
 	const v1 = roomById('vault1');
 	if (v1) {

@@ -167,7 +167,8 @@ const PLACEMENTS = [
 		pick: { size: [3.1, 1.55, 2.8], at: [-7.5, -43.3] },
 		absent: true
 	},
-	// R7: the manager's desk stands 0.3 m in front of the visitor chairs; its screen faces the manager
+	// R7: the manager's desk stands 0.3 m in front of the visitor chairs; its screen (R3-7) stands on the
+	// desk's door-side +x end, turned to the visitor chairs
 	{
 		id: 'manager desk by the visitor chairs',
 		pick: { size: [2.5, 0.08, 0.85], at: [20, 8.5] },
@@ -175,29 +176,29 @@ const PLACEMENTS = [
 	},
 	{
 		id: 'manager screen on the desk',
-		pick: { size: [1.0, 0.55, 0.055], at: [20, 8.75] },
+		pick: { size: [1.0, 0.55, 0.055], at: [20.7, 8.4] },
 		minY: 1.16,
 		within: [18.75, 21.25, 8.075, 8.925]
 	},
-	// R8: CT control: keyboard and mouse on the console desk (x 29.725..30.875); chairs 0.5 m from
-	// it; the cabinet on the door wall east of the door; the live CT CONTROL board on the back wall
-	// below the room sign; the blank screens gone; the four live screens side by side in front of the
-	// backing board
+	// R8, R3-8: CT control: the console against the west wall (inner face x 27.08), keyboard and mouse
+	// on its desk (x 27.085..27.975); chairs 0.5 m from it; the cabinet on the door wall east of the
+	// door; the live CT CONTROL board on the back wall below the room sign; the blank screens gone; the
+	// four live screens side by side in front of the backing board
 	{
 		id: 'CT control keyboard on the console desk',
-		pick: { size: [0.72, 0.035, 0.24], at: [30.6, -8.35] },
+		pick: { size: [0.72, 0.035, 0.24], at: [27.7, -8.35] },
 		minY: 0.88,
-		within: [29.725, 30.875, -11.6, -6.8]
+		within: [27.085, 27.975, -11.6, -6.8]
 	},
 	{
 		id: 'CT control mouse on the console desk',
-		pick: { size: [1, 1, 1], at: [30.6, -8.83], y: 0.9, r: 0.05 },
+		pick: { size: [1, 1, 1], at: [27.7, -8.83], y: 0.9, r: 0.05 },
 		minY: 0.88,
-		within: [29.725, 30.875, -11.6, -6.8]
+		within: [27.085, 27.975, -11.6, -6.8]
 	},
 	...[-10.15, -9, -7.85].map((z) => ({
 		id: `CT control chair at z ${z} 0.5 m from the desk`,
-		pick: { size: [0.54, 0.1, 0.5], at: [31.65, z], r: 0.05 }
+		pick: { size: [0.54, 0.1, 0.5], at: [28.75, z], r: 0.05 }
 	})),
 	{
 		id: 'CT control cabinet on the door wall',
@@ -227,7 +228,7 @@ const PLACEMENTS = [
 		[-8.4, 1.38, 'ROOM WIDE']
 	].map(([z, y, label]) => ({
 		id: `CT control ${label} screen in front of the board`,
-		pick: { size: [1.14, 0.7, 0.08], at: [30.15, z], y, r: 0.1 }
+		pick: { size: [1.14, 0.7, 0.08], at: [27.25, z], y, r: 0.1 }
 	})),
 	// the CT control intercom speaker is on the window wall beside the window (z -11.25..-6.75), not over it
 	{
@@ -701,7 +702,29 @@ const PLACEMENTS = [
 		id: `dosimetry cabinet at x ${x} flush on the +z wall`,
 		pick: { size: [1.6, 1.6, 0.45], at: [x, -41.825] },
 		flush: { axis: 'z', face: -41.58, side: 'max' }
-	}))
+	})),
+	// R3-8: the CT control console group against the west wall, flush on its inner face (x 27.08): the
+	// desk (0.89 deep), the backing board and its accent strip; the CT supply cart on the same wall at
+	// the console's -z end (its top 0.006 m off the wall)
+	{
+		id: 'CT control console desk against the west wall',
+		pick: { size: [4.8, 0.08, 0.89], at: [27.53, -9.2] },
+		flush: { axis: 'x', face: 27.08, side: 'min' }
+	},
+	{
+		id: 'CT control backing board on the west wall',
+		pick: { size: [0.08, 2.35, 4.2], at: [27.12, -9] },
+		flush: { axis: 'x', face: 27.08, side: 'min' }
+	},
+	{
+		id: 'CT control backing board accent on the board',
+		pick: { size: [0.035, 0.07, 3.8], at: [27.18, -9], r: 0.05 }
+	},
+	{
+		id: 'CT supply cart on the west wall',
+		pick: { size: [0.5456, 0.05, 0.3872], at: [27.28, -12.4], r: 0.05 },
+		flush: { axis: 'x', face: 27.08, side: 'min' }
+	}
 ];
 
 function setupError(msg) {

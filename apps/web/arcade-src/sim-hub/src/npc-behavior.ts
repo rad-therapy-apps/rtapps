@@ -652,9 +652,11 @@ export function addMovingActors() {
 		[
 			// Out of CT control at x = 31.45 (door lane), corridor lanes z = -1.4 / -2.6, in at x = 30.65;
 			// the west-bound lane passes north of the parked wheelchair at (28.6, -1.4) at z = -0.85.
-			// Inside CT control the loop stays west of x = 30 (down x = 28, back up x = 29.1), clear of
-			// the idle staff and of where the CT journey and the ctsim handoff leave the therapists
-			// (32.3, -8.45), (32.75, -7.25), (32.3, -7.2).
+			// Inside CT control the loop keeps to the window side (down x = 33.6, back up x = 34.8): 1.1 m
+			// off the window wall, 1.77 m off the back wall and 1.57 m from the door-wall cabinet, clear of
+			// the console group on the west wall, the idle staff and where the CT journey and the ctsim
+			// handoff leave the therapists (29.4, -8.45), (29.85, -7.25), (29.4, -7.2). The loop is
+			// 38.95 m; the speed constant keeps its 0.433 m/s.
 			[31.45, 0, -5.3],
 			[31.45, 0, -4],
 			[31.45, 0, -2.9],
@@ -675,24 +677,22 @@ export function addMovingActors() {
 			[30.65, 0, -3.4],
 			[30.65, 0, -4],
 			[30.65, 0, -4.9],
-			[29.9, 0, -5.3],
-			[28.9, 0, -5.6],
-			[28.2, 0, -6.4],
-			[28, 0, -8],
-			[28, 0, -9.5],
-			[28, 0, -11],
-			[28.1, 0, -11.8],
-			[28.55, 0, -12.15],
-			[29, 0, -11.8],
-			[29.1, 0, -11],
-			[29.1, 0, -9.5],
-			[29.1, 0, -8],
-			[29.1, 0, -7.2],
-			[29.6, 0, -6.6],
-			[30.4, 0, -6],
-			[31, 0, -5.5]
+			[31.2, 0, -5.7],
+			[32.4, 0, -6.1],
+			[33.6, 0, -6.9],
+			[33.6, 0, -8.5],
+			[33.6, 0, -11.0],
+			[33.8, 0, -11.8],
+			[34.2, 0, -12.15],
+			[34.6, 0, -11.8],
+			[34.8, 0, -11.0],
+			[34.8, 0, -8.5],
+			[34.6, 0, -7.5],
+			[34.0, 0, -6.9],
+			[33.4, 0, -6.3],
+			[32.4, 0, -5.25]
 		],
-		0.011397,
+		0.011124,
 		true,
 		0.17,
 		0,
