@@ -625,12 +625,14 @@ const PLACEMENTS = [
 	{
 		id: 'consult cabinet beside the desk',
 		pick: { size: [1.5, 1.45, 0.42], at: [-22.65, -10.15] },
-		within: [-22.66, -22.64, -10.16, -10.14]
+		within: [-22.66, -22.64, -10.16, -10.14],
+		extent: [0.42, 1.5]
 	},
 	{
 		id: 'consult brochure rack on the east wall',
 		pick: { size: [0.08, 1.05, 0.42], at: [-13.35, -10.3], r: 0.05 },
-		within: [-13.36, -13.34, -10.31, -10.29]
+		within: [-13.36, -13.34, -10.31, -10.29],
+		extent: [0.42, 0.08]
 	},
 	{
 		id: 'consult IV pole A in the back-right corner',
@@ -644,13 +646,14 @@ const PLACEMENTS = [
 	// both supply carts on the east wall (the left as you walk in), on the baseboard's face; the
 	// doorway is clear
 	...[
-		['supply counter on the east wall', [2.2, 0.95, 0.55], -21.415, 7.0],
-		['cart beside the counter', [0.5152, 0.78, 0.3496], -21.345, 8.6],
-		['entrance cart parked on the east wall', [0.532, 0.78, 0.361], -21.35, 9.45]
-	].map(([what, size, x, z]) => ({
+		['supply counter on the east wall', [2.2, 0.95, 0.55], -21.415, 7.0, [0.55, 2.2]],
+		['cart beside the counter', [0.5152, 0.78, 0.3496], -21.345, 8.6, [0.35, 0.516]],
+		['entrance cart parked on the east wall', [0.532, 0.78, 0.361], -21.35, 9.45, [0.362, 0.532]]
+	].map(([what, size, x, z, extent]) => ({
 		id: `patientcare ${what}`,
 		pick: { size, at: [x, z] },
-		within: [x - 0.01, x + 0.01, z - 0.01, z + 0.01]
+		within: [x - 0.01, x + 0.01, z - 0.01, z + 0.01],
+		extent
 	})),
 	{
 		id: 'patientcare entrance clear',
@@ -783,6 +786,11 @@ const PLACEMENTS = [
 		id: 'CT laser plaque outside, left of the door',
 		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [41.6, -2.87], r: 0.05 },
 		flush: { axis: 'z', face: -2.92, side: 'min' }
+	},
+	{
+		id: 'CT immobilization sign on the east wall',
+		pick: { geom: 'PlaneGeometry', size: [2.8, 0.62], at: [51.865, -12.6], name: '', r: 0.05 },
+		flush: { axis: 'x', face: 51.92, side: 'max' }
 	},
 	{
 		id: 'CT laser plaque inside the room removed',

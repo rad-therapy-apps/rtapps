@@ -256,16 +256,16 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 	},
 	// the doorway is open floor (the supply counter and both carts stand on the east wall): +x side to
 	// the arrival spots, -x side to the exam table at (-30.6, 9.8). The door leaf swings in along
-	// x -29.3..-29.1 from z 3 to 5.59; nodes 3 and 6 keep 0.6 m clear of it, and the way round it keeps
-	// the old door -> table length (7.5 m), so the journey patient's timeline is the one the spacing
-	// check (b) was written against
+	// x -29.3..-29.1 from z 3 to 5.59; node 3 keeps 0.6 m clear of it and edge 3-6 passes about 0.45 m
+	// from its tip. Nodes 4 and 6 are placed so the door -> table route keeps its old length (about
+	// 7.5 m): the spacing check's (b) 20-minute timeline is sensitive to it
 	patientcare: {
 		nodes: [
 			[-28, 2.15], // 0 door
-			[-25.9, 4.6], // 1 +x of the doorway: spot [0] arrives along x
+			[-25.9, 4.6], // 1 +x of the doorway; spot [0] arrives via node 3 (1.45 m, against 1.54 m to here)
 			[-26.2, 6.2], // 2 by spots [1], [2] and the nurse
 			[-28.5, 4.0], // 3 inside the door's -x half, 0.6 m clear of the open leaf
-			[-29.65, 6.9], // 4 -x of the open leaf's tip, toward the exam table
+			[-29.65, 6.9], // 4 -x of the open leaf's tip, toward the exam table; placed with node 6 to keep the 7.5 m route
 			[-29.0, 9.0], // 5 +x of the table's stand-up point (-30.6, 9.14): leaves along x
 			[-28.7, 6.2] // 6 past the open leaf's tip (+z of it), 0.6 m clear
 		],
@@ -287,8 +287,8 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 		edges: [[0, 1]]
 	},
 	// door to the open floor, then toward the plan-QA desk in the far -z corner (x 9.87..11.87,
-	// z -22.875..-22.125): the arrival spots, the physicist and Jordan Price each reach node 2 in a
-	// clear straight line
+	// z -22.875..-22.125). Node 2 sits on the door line: check b failed with the plan's [7.4, -18.6].
+	// The arrival spots, the physicist and Jordan Price still reach it in a clear straight line
 	physics: {
 		nodes: [
 			[2.15, -18],
@@ -375,7 +375,7 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[4, 5]
 		]
 	},
-	// from the door round the gantry (base x 43.5..44.5, ring z -10.81..-8.19): -x to the couch side
+	// from the door round the gantry (base x 43.5..44.5, ring z -10.92..-8.08): -x to the couch side
 	// and the changing bench, +x to the far side
 	ctsim: {
 		nodes: [

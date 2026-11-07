@@ -1319,8 +1319,8 @@ export function furnish(room: Room) {
 				-0.2
 			);
 			// the sink's splashback flush on the back wall (its back at z -18.905, so the soap dispenser
-			// stays 1 cm inside the room's cull box); 0.15 m east of the
-			// old x keeps the rail and the sign clear of the back wall's teal panel (to x 47.84)
+			// stays 1 cm inside the room's cull box); 0.15 m east of the old x keeps the rail and the
+			// sign clear of the back wall's teal panel (to x 47.84)
 			sinkStation(g, room.x + 4.75, room.z - 7.51, 0);
 			framedWallMonitor(
 				g,

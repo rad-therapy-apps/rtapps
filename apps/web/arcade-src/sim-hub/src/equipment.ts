@@ -1344,7 +1344,7 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 		id: 'physics_planqa',
 		roomId: 'physics',
 		dx: 3.37,
-		dz: -4.45,
+		dz: -4.45, // not the desk's -4.5: keeps the anchor's ring inside the room's cull box (inset 0.05)
 		y: 1.35,
 		label: 'Physics Plan-QA Workstation',
 		purpose:
