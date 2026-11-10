@@ -379,21 +379,19 @@ export function addMovingActors() {
 	addMover(
 		walker,
 		[
-			// Patient-services corridor, south side (lanes z = 1.0 west and z = 2.2 east): the rooms
-			// and the journey routes lie north of it, so no door is crossed.
+			// Patient-services corridor, south side (lanes z = 1.0 west and z = 2.2 east). The side's
+			// one door is patient care's (x -28): patients walk in and out of it across both lanes
+			// from the corridor's centre line, and neither they nor the walker give way side-on, so
+			// the loop turns 2.1 m short of it.
 			[-14, 0, 1.0],
 			[-21, 0, 1.0],
-			[-29, 0, 1.0],
-			[-37, 0, 1.0],
-			[-45, 0, 1.0],
-			[-45.4, 0, 1.1],
-			[-45.75, 0, 1.4],
-			[-45.9, 0, 1.6],
-			[-45.75, 0, 1.8],
-			[-45.4, 0, 2.1],
-			[-45, 0, 2.2],
-			[-37, 0, 2.2],
-			[-29, 0, 2.2],
+			[-25, 0, 1.0],
+			[-25.4, 0, 1.1],
+			[-25.75, 0, 1.4],
+			[-25.9, 0, 1.6],
+			[-25.75, 0, 1.8],
+			[-25.4, 0, 2.1],
+			[-25, 0, 2.2],
 			[-21, 0, 2.2],
 			[-14, 0, 2.2],
 			[-13.6, 0, 2.1],
@@ -402,7 +400,7 @@ export function addMovingActors() {
 			[-13.25, 0, 1.4],
 			[-13.6, 0, 1.1]
 		],
-		0.02028,
+		0.05088, // the old pace (1.35 m/s) on the shorter loop
 		true,
 		0.12,
 		0,
