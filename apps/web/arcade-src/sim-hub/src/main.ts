@@ -103,6 +103,8 @@ import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
 import { enterMode } from './play-mode';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
+import { updatePrompt } from './hud-prompt';
+import { updateControlsBar } from './hud-controls';
 import './sdk-bridge';
 import { isPaused } from './pause';
 import './hub-dialogs';
@@ -683,6 +685,8 @@ export function stepSimulation(now: number): void {
 	if (f % 3 === 0) updateClinicalEquipment(sec);
 	updateAmbience();
 	if (f % 3 === 1) updateInteractionUI();
+	updatePrompt(dt);
+	updateControlsBar(dt);
 	updateNpcLabels();
 	updateJourneyRoomTiming(now);
 	updateWallClocks(now);

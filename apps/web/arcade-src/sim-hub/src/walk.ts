@@ -53,16 +53,17 @@ const HUB = new THREE.Vector3(0, 1.68, 0);
 // of the NPC lanes (x 60.9 and east)
 export const TREATMENT_JUNCTION_X = 60.4;
 
-// door reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye, so it feels as before
+// door reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye, so it feels as before;
+// `accept` lets the E prompt skip a door the player cannot see (interact.ts)
 const doorReachFrom = new THREE.Vector3();
-export function nearestDoor(maxD = 2.6) {
+export function nearestDoor(maxD = 2.6, accept: (room: Room) => boolean = () => true) {
 	let best = null,
 		bd = maxD;
 	doorReachFrom.set(player.pos.x, REACH_Y, player.pos.z);
 	ROOMS.filter((r) => !r.hub).forEach((r) => {
 		const p = doorPoint(r),
 			d = doorReachFrom.distanceTo(p);
-		if (d < bd) {
+		if (d < bd && accept(r)) {
 			bd = d;
 			best = { room: r, d };
 		}
