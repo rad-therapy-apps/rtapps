@@ -11,11 +11,11 @@
    `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved functions) moved along
    with their sole consumers and are not exported. A handful of symbols stay owned by main.js
    because still-resident journey/booking systems read or write them too:
-   `roomById`/`player`/`doors`/`ROOM_GUIDES`/`HANDOFFS` (already exported from main.js per
+   `player`/`HANDOFFS`/`REACH_Y` (already exported from main.js per
    earlier tasks — task 9 moved `focusTargetsForRoom`/`focusConversationCamera`/
    `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES` to
    ./sdk-bridge.js, both imported back here).
-   `setDoorTarget`/`doorCenter`/`doorNormal`/`nearestDoor` are owned by
+   `doorCenter`/`doorNormal`/`nearestDoor`/`getColliders` are owned by
    ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
 import type { Room } from './rooms';
