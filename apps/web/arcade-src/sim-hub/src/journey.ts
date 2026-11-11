@@ -10,7 +10,7 @@
    `moveJourneyActor`/`journeyFocusActors` camera and blocking, `updateJourneyRoomTiming`/
    `roomElapsedLabel`/`journeyActorRoom` per-room dwell tracking, `currentJourneyMeta`/
    `journeyNextLabel`/`journeyProgress`/`updateJourneyUI` HUD state, `showJourneyCheckinIntro`/
-   `showDayTransition`/`startJourneyFromKiosk`, and the conversation-camera composition helpers
+   `showDayTransition`, and the conversation-camera composition helpers
    `focusTargetsForRoom`/`conversationCameraPose`/`focusConversationCamera`/`walkCompositionReady`/
    `applyWalkConversationComposition`/`beginRoutePhase`/`enableGuidedConversationComposition`/
    `beginEntryPhase`. `JOURNEY_ROOM_TIMING`/`JOURNEY_META`/`activeJourneyPatientActor` and the
@@ -18,7 +18,7 @@
    along with their sole consumers and are not exported. `updateJourneyRoomTiming`/`journeyActors`/
    `updateJourneyCameraFollow`/`setJourneyKind`/`applyJourneyPatientFocus`/
    `resetTreatmentJourney`/`startTreatmentJourney`/`advanceTreatmentJourney`/
-   `startJourneyFromKiosk`/`clearJourneyCameraFollow` gained `export` here — main.js's
+   `clearJourneyCameraFollow` gained `export` here — main.js's
    bootstrap/wiring and ./sdk-bridge.js's `focusCtPatientFromControl` call them across the
    module boundary. `roomById`/`ROOM_GUIDES`/`ROOM_CAST`/`PRIMARY_NPCS`/`PRIMARY_PATIENTS`/
    `doors`/`player` stay owned by main.js and are imported back here;
@@ -69,7 +69,7 @@ import {
 	setMode,
 	makePolylineCurve
 } from './walk';
-import { toast, closeKioskDialog, roomInspectPose, updateRoomUI, renderRoomList } from './interact';
+import { toast, roomInspectPose } from './interact';
 import {
 	roomById,
 	ROOM_GUIDES,
@@ -80,7 +80,7 @@ import {
 	player,
 	PLAYER_EYE_Y
 } from './main';
-import { focusCtPatientFromControl } from './sdk-bridge';
+import { focusCtPatientFromControl, showCtQaDock } from './sdk-bridge';
 import { LYING_SURFACES } from './props';
 import { releaseArrivalSpot, clearArrivalSpots } from './room-routes';
 
@@ -615,7 +615,6 @@ function setJourneyCameraFollow(subject, companion = null, opts: JourneyCameraFo
 	};
 	if (document.pointerLockElement) document.exitPointerLock();
 	orbit.enabled = false;
-	document.getElementById('roomLookHint').classList.remove('show');
 }
 export function updateJourneyCameraFollow() {
 	const f = JOURNEY.cameraFollow;
@@ -645,10 +644,6 @@ export function updateJourneyCameraFollow() {
 	if (here && here.id !== JOURNEY.cameraRoomId) {
 		JOURNEY.cameraRoomId = here.id;
 		S.activeRoom = here;
-		updateRoomUI(here);
-		renderRoomList();
-		document.getElementById('locText').textContent =
-			`Following ${currentJourneyMeta().patient} · ${here.name}`;
 	}
 }
 export function setJourneyKind(kind, silent = false) {
@@ -795,8 +790,6 @@ function journeyFocusActors(a, b, roomId) {
 	orbit.enabled = S.mode === 'guided';
 	orbit.update();
 	S.activeRoom = r;
-	updateRoomUI(r);
-	renderRoomList();
 }
 export function resetTreatmentJourney(silent = false) {
 	journeyActors();
@@ -2933,19 +2926,13 @@ export function focusConversationCamera(key) {
 	orbit.enabled = true;
 	orbit.update();
 }
-export function startJourneyFromKiosk(kind) {
-	closeKioskDialog();
-	setJourneyKind(kind, true);
-	setMode('guided', false);
-	startTreatmentJourney();
-}
 export function walkCompositionReady(r) {
 	if (!r) return false;
 	if (r.id === 'vault1') return player.pos.x > 75.1 && player.pos.z > -17.5;
 	if (r.id === 'vault2') return player.pos.x > 75.1 && player.pos.z < 17.5;
 	return true;
 }
-/* `aim` false (the player walking in on their own) updates the room panel but leaves the view where
+/* `aim` false (the player walking in on their own) sets the active room but leaves the view where
    the player is looking: turning it for them mid-walk reads as a jolt. */
 export function applyWalkConversationComposition(r, reposition = false, aim = true) {
 	const f = focusTargetsForRoom(r);
@@ -2956,13 +2943,10 @@ export function applyWalkConversationComposition(r, reposition = false, aim = tr
 		player.pos.y = PLAYER_EYE_Y;
 	}
 	S.activeRoom = r;
-	updateRoomUI(r);
-	renderRoomList();
+	// the CT QA menu belongs to the CT room (it opens with E at the scanner): another room closes it
+	if (r.id !== 'ctsim') showCtQaDock(false);
 	if (aim) aimPlayerAt(f.target);
 	S.walkCompositionRoomId = r.id;
-	document.getElementById('locText').textContent = aim
-		? `Current location: ${r.name} · conversation view`
-		: `Current location: ${r.name}`;
 }
 export function beginRoutePhase(now) {
 	S.travel.curve = makeRouteToApproach(S.travel.room);
@@ -2989,7 +2973,6 @@ export function enableGuidedConversationComposition(r) {
 	orbit.enablePan = false;
 	orbit.enabled = true;
 	orbit.update();
-	document.getElementById('roomLookHint').classList.add('show');
 }
 export function beginEntryPhase(now) {
 	const r = S.travel.room;

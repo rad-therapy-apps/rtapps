@@ -55,15 +55,12 @@ import {
 	updateWorkflowTransitions,
 	updateVault2Board,
 	buildPhase5Wayfinding,
-	workflowState,
-	CLINICAL_FOCUS
+	workflowState
 } from './equipment';
 import {
-	beginTravel,
 	updateTravel,
 	updateDoors,
 	updateWalk,
-	setMode,
 	applyWalkMouseDelta,
 	requestWalkPointerLock
 } from './walk';
@@ -82,11 +79,7 @@ import {
 	lhSetEnergy,
 	lhSetMode,
 	lhUpdateText,
-	showEquipmentPanel,
 	closeEquipmentPanel,
-	bindPanelToggle,
-	renderRoomList,
-	updateFacilityInfo,
 	procRenderSite,
 	procRefreshRelease
 } from './interact';
@@ -96,10 +89,6 @@ import {
 	setJourneyKind,
 	applyJourneyPatientFocus,
 	updateJourneyUI,
-	resetTreatmentJourney,
-	startTreatmentJourney,
-	advanceTreatmentJourney,
-	startJourneyFromKiosk,
 	updateJourneyRoomTiming,
 	updateJourneyCameraFollow
 } from './journey';
@@ -110,8 +99,6 @@ import { isPaused } from './pause';
 import './hub-dialogs';
 
 const clock = new THREE.Clock();
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
 
 export const ROOM_GUIDES = {
 	lobby: 'lobby',
@@ -567,39 +554,6 @@ document.getElementById('sdClose').onclick =
 document.getElementById('sdRestart').onclick = () =>
 	S.activeGuideKey && resetStaffDialogue(S.activeGuideKey);
 
-const studentHelp = document.getElementById('studentHelp');
-const openStudentHelp = () => {
-	if (document.pointerLockElement) document.exitPointerLock();
-	studentHelp?.classList.add('show');
-};
-const closeStudentHelp = () => studentHelp?.classList.remove('show');
-document.getElementById('helpBtn').onclick = openStudentHelp;
-document.getElementById('studentHelpClose').onclick = closeStudentHelp;
-studentHelp?.addEventListener('click', (e) => {
-	if (e.target === studentHelp) closeStudentHelp();
-});
-document.querySelectorAll<HTMLElement>('#modeSeg button').forEach(
-	(b) =>
-		(b.onclick = () => {
-			setMode(b.dataset.mode);
-			if (b.dataset.mode === 'walk') requestWalkPointerLock();
-		})
-);
-document.querySelectorAll<HTMLElement>('#zoneChips button').forEach(
-	(b) =>
-		(b.onclick = () => {
-			document
-				.querySelectorAll<HTMLElement>('#zoneChips button')
-				.forEach((x) => x.classList.toggle('active', x === b));
-			renderRoomList();
-		})
-);
-document.getElementById('homeBtn').onclick = () => beginTravel(roomById('lobby'));
-document.getElementById('backBtn').onclick = () => {
-	const id = S.history.pop();
-	if (id) beginTravel(roomById(id), false);
-	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
-};
 document.getElementById('linacHeadClose').onclick = closeLinacHeadLab;
 document.getElementById('lhPhoton').onclick = () => lhSetMode('photon');
 document.getElementById('lhElectron').onclick = () => lhSetMode('electron');
@@ -620,27 +574,10 @@ lhUpdateText();
 lhDraw();
 document.getElementById('ambientBtn').onclick = toggleAmbience;
 document.getElementById('eqClose').onclick = closeEquipmentPanel;
-document.getElementById('clinicalFocusDetails').onclick = () =>
-	CLINICAL_FOCUS.primary && showEquipmentPanel(CLINICAL_FOCUS.primary);
 document.getElementById('kioskClose').onclick = closeKioskDialog;
-document.getElementById('kioskTreatment').onclick = () => startJourneyFromKiosk('treatment');
-document.getElementById('kioskNewPatient').onclick = () => startJourneyFromKiosk('newpatient');
-document.getElementById('kioskExplore').onclick = () => {
-	closeKioskDialog();
-	setMode('walk');
-};
 document.getElementById('kioskDialog').addEventListener('click', (e) => {
 	if ((e.target as HTMLElement).id === 'kioskDialog') closeKioskDialog();
 });
-document
-	.querySelectorAll<HTMLElement>('#journeyModes button')
-	.forEach((b) => (b.onclick = () => setJourneyKind(b.dataset.journey)));
-document.getElementById('journeyStart').onclick = startTreatmentJourney;
-document.getElementById('journeyNext').onclick = advanceTreatmentJourney;
-document.getElementById('journeyReset').onclick = () => resetTreatmentJourney(false);
-
-bindPanelToggle('roomRail', 'roomRailToggle', '▸', '◂');
-bindPanelToggle('infoPanel', 'infoPanelToggle', '◂', '▸');
 
 labelRenderer.domElement.addEventListener('click', () => {
 	if (S.mode === 'walk') requestWalkPointerLock();
@@ -653,21 +590,10 @@ canvas.addEventListener('mousedown', (e) => {
 		requestWalkPointerLock();
 	}
 });
-canvas.addEventListener('click', (e) => {
-	if (S.mode === 'walk') {
-		requestWalkPointerLock();
-		return;
-	}
-	if (S.mode !== 'overview' || S.travel) return;
-	const rect = canvas.getBoundingClientRect();
-	mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-	mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-	raycaster.setFromCamera(mouse, camera);
-	const hit = raycaster.intersectObjects(roomFloors, false)[0];
-	if (hit) {
-		const r = roomById(hit.object.userData.roomId);
-		if (r) beginTravel(r);
-	}
+// a click locks the pointer for walking; the overview is only the title menu's backdrop now, so a
+// click there no longer starts guided travel to the room under it
+canvas.addEventListener('click', () => {
+	if (S.mode === 'walk') requestWalkPointerLock();
 });
 document.addEventListener('pointerlockchange', () => {
 	player.locked = document.pointerLockElement === canvas;
@@ -754,8 +680,6 @@ function animate(now) {
 	else stepSimulation(now);
 }
 installNpcCheckHook(ROOM_CAST, stepSimulation, HANDOFFS);
-renderRoomList();
-updateFacilityInfo();
 journeyActors();
 setJourneyKind('treatment', true);
 workflowState('lobby', 'OPEN', 'Routine arrivals', '#42d5cf');
