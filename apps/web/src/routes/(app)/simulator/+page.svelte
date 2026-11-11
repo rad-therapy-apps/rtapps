@@ -1,8 +1,8 @@
 <!--
-	What this file does: the Simulator page at `(app)/simulator` — one card per simulator (the
-	radiation oncology center, the LINAC/CT console suite, the gantry position game), each with
-	an entry link into its player, or a disabled "coming soon" button when `load` could not
-	resolve it.
+	What this file does: the Simulator page at `(app)/simulator` — one card, the radiation
+	oncology center, with an entry link into its player, or a disabled "coming soon" button when
+	`load` could not resolve it. The LINAC and CT simulators are inside the center, behind its
+	doors, so they have no card of their own.
 
 	Used here and why: Svelte 5 runes (`$props()`); `resolve()` for every href per
 	`svelte/no-navigation-without-resolve`; the shared `PageHeader`, `Card` and `Icon` kit
@@ -11,18 +11,19 @@
 
 	How it fits the project: the simulators used to sit in a "Simulator" section on every subject
 	page; the owner moved them to their own tab (2026-10-06) because they are not tied to a
-	subject. Each link opens `(app)/subjects/[slug]/activities/[id]`, the same player route the
-	Games shelf uses, so attempts and SDK scoring are unchanged.
+	subject. On 2026-11-11 the LINAC/CT console and gantry game cards went
+	(docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 2): the LINAC/CT simulators are
+	reached through the center's doors, and the gantry game is archived. The link opens
+	`(app)/subjects/[slug]/activities/[id]`, the same player route the Games shelf uses, so
+	attempts and SDK scoring are unchanged.
 
-	Works with: `$app/paths`, `#lib/ui/*`, `./+page.server.ts` (`hub`, `linacConsole`, `gantry`).
+	Works with: `$app/paths`, `#lib/ui/*`, `./+page.server.ts` (`hub`).
 	Used by: `AppShell.svelte`'s "Simulator" nav link; `apps/web/e2e/simulator.e2e.ts`,
 	`long-tail.e2e.ts`, `ui.e2e.ts`.
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Building2 from '@lucide/svelte/icons/building-2';
-	import Monitor from '@lucide/svelte/icons/monitor';
-	import RotateCw from '@lucide/svelte/icons/rotate-cw';
 	import Card from '#lib/ui/Card.svelte';
 	import Icon from '#lib/ui/Icon.svelte';
 	import PageHeader from '#lib/ui/PageHeader.svelte';
@@ -37,7 +38,7 @@
 
 <PageHeader
 	title="Simulator"
-	subtitle="Practise in a virtual radiation oncology center, at the treatment console, and with gantry geometry."
+	subtitle="Practise in a virtual radiation oncology center, with the LINAC and CT simulators inside it."
 />
 
 <ul class="entries">
@@ -45,7 +46,11 @@
 		<h2><Icon icon={Building2} size={22} />Radiation oncology center</h2>
 		<p>
 			Walk the clinic: the lobby, the CT simulator, the treatment vaults and the control room.
-			Follow a guided patient journey or explore on your own, then run the QA walkthrough.
+			Explore on your own and talk to the staff, then run the QA walkthrough.
+		</p>
+		<p>
+			The LINAC and CT simulators are inside the center: walk to the LINAC Control Area or the CT
+			Simulator Room and press E at the door.
 		</p>
 		{#if data.hub}
 			<a
@@ -56,44 +61,6 @@
 		{:else}
 			<button disabled title="The RT simulator arrives in a future update"
 				>Enter the simulator — coming soon</button
-			>
-		{/if}
-	</Card>
-
-	<Card as="li">
-		<h2><Icon icon={Monitor} size={22} />LINAC and CT console</h2>
-		<p>
-			Deliver a treatment fraction from the console: image guidance, couch corrections and beam-on.
-			The CT simulation suite is one door away.
-		</p>
-		{#if data.linacConsole}
-			<a
-				class="entry"
-				href={resolve('/(app)/subjects/[slug]/activities/[id]', data.linacConsole)}
-				data-testid="console-entry">Open the console</a
-			>
-		{:else}
-			<button disabled title="The console arrives in a future update"
-				>Open the console — coming soon</button
-			>
-		{/if}
-	</Card>
-
-	<Card as="li">
-		<h2><Icon icon={RotateCw} size={22} />Gantry position game</h2>
-		<p>
-			See a gantry angle in 3-D and name the beam direction — AP, PA, laterals and obliques —
-			against the clock.
-		</p>
-		{#if data.gantry}
-			<a
-				class="entry"
-				href={resolve('/(app)/subjects/[slug]/activities/[id]', data.gantry)}
-				data-testid="gantry-entry">Play the gantry game</a
-			>
-		{:else}
-			<button disabled title="The gantry game arrives in a future update"
-				>Play the gantry game — coming soon</button
 			>
 		{/if}
 	</Card>

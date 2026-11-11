@@ -17,15 +17,15 @@
    `beginRoutePhase`/`beginEntryPhase`/`focusTargetsForRoom`/`walkCompositionReady`/
    `applyWalkConversationComposition`/`enableGuidedConversationComposition`/
    `showJourneyCheckinIntro` moved to ./journey.js and `showCtQaDock` to ./sdk-bridge.js in
-   task 9, both imported back here. `toast`/`disableRoomInspection`/`enableRoomInspection`/
-   `updateFacilityInfo`/`renderRoomList`/`updateRoomUI` are owned by ./interact.js (task 8's
-   companion module) and imported back here. */
+   task 9, both imported back here. `toast`/`disableRoomInspection`/`enableRoomInspection` are
+   owned by ./interact.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
 import { S } from './state';
 import { camera, orbit, canvas } from './scene';
-import { ROOMS, corridorAnchor, doorLabel } from './rooms';
+import { ROOMS, corridorAnchor } from './rooms';
 import type { Room } from './rooms';
 import { cleanPoints } from './helpers';
+import { noteWalkRoom } from './room-enter';
 import { roomById, player, doors, ceilings, keys, PLAYER_EYE_Y, REACH_Y } from './main';
 import { showCtQaDock } from './sdk-bridge';
 import {
@@ -39,30 +39,24 @@ import {
 	enableGuidedConversationComposition,
 	showJourneyCheckinIntro
 } from './journey';
-import {
-	toast,
-	disableRoomInspection,
-	enableRoomInspection,
-	updateFacilityInfo,
-	renderRoomList,
-	updateRoomUI
-} from './interact';
+import { toast, disableRoomInspection, enableRoomInspection } from './interact';
 
 const HUB = new THREE.Vector3(0, 1.68, 0);
 // the treatment walkway's middle (x 58.09..63.71), 0.5 m west of centre so the guided camera stays clear
 // of the NPC lanes (x 60.9 and east)
 export const TREATMENT_JUNCTION_X = 60.4;
 
-// door reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye, so it feels as before
+// door reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye, so it feels as before;
+// `accept` lets the E prompt skip a door the player cannot see (interact.ts)
 const doorReachFrom = new THREE.Vector3();
-export function nearestDoor(maxD = 2.6) {
+export function nearestDoor(maxD = 2.6, accept: (room: Room) => boolean = () => true) {
 	let best = null,
 		bd = maxD;
 	doorReachFrom.set(player.pos.x, REACH_Y, player.pos.z);
 	ROOMS.filter((r) => !r.hub).forEach((r) => {
 		const p = doorPoint(r),
 			d = doorReachFrom.distanceTo(p);
-		if (d < bd) {
+		if (d < bd && accept(r)) {
 			bd = d;
 			best = { room: r, d };
 		}
@@ -321,15 +315,9 @@ export function beginTravel(room, push = true) {
 	const fromOverview = S.mode === 'overview';
 	if (fromOverview) {
 		S.mode = 'guided';
-		document
-			.querySelectorAll<HTMLElement>('#modeSeg button')
-			.forEach((b) => b.classList.toggle('active', b.dataset.mode === 'guided'));
-		document.getElementById('walkHint').classList.remove('show');
-		document.getElementById('overviewNote').style.display = 'none';
 		orbit.enabled = false;
 		ceilings.forEach((c) => (c.visible = true));
 	} else setMode('guided', false);
-	document.getElementById('roomLookHint').classList.remove('show');
 	orbit.enabled = false;
 	const origin =
 		S.activeRoom && !S.activeRoom.hub && doors.has(S.activeRoom.id) ? S.activeRoom : null;
@@ -342,10 +330,6 @@ export function beginTravel(room, push = true) {
 	};
 	if (origin) setDoorTarget(origin.id, true);
 	else beginRoutePhase(performance.now());
-	document.getElementById('travelName').textContent = `Route to ${room.name}`;
-	document.getElementById('travelPct').textContent = '0%';
-	document.getElementById('travelFill').style.width = '0%';
-	document.getElementById('travelHUD').classList.add('show');
 	orbit.enabled = false;
 	toast(`Guided route to <b>${room.name}</b>`);
 }
@@ -359,16 +343,10 @@ function finishTravel() {
 		setTimeout(() => setDoorTarget(id, false), 1500);
 	}
 	S.travel = null;
-	document.getElementById('travelHUD').classList.remove('show');
 	enableGuidedConversationComposition(arrived);
 	player.pos.copy(camera.position);
 	// walk mode keeps its own eye height, never the guided camera's
 	player.pos.y = PLAYER_EYE_Y;
-	updateRoomUI(arrived);
-	renderRoomList();
-	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
-	document.getElementById('locText').textContent =
-		`Current location: ${arrived.name} · initial view frames the staff interaction`;
 	if (arrived.id === 'lobby' && JOURNEY.introPending) setTimeout(showJourneyCheckinIntro, 350);
 	updateJourneyUI();
 }
@@ -379,9 +357,6 @@ export function updateTravel(now) {
 		const d = doors.get(S.travel.origin.id),
 			elapsed = now - S.travel.phaseStart,
 			wait = (d?.openSeconds || 2) * 1000 + 500;
-		document.getElementById('travelName').textContent = `Opening ${doorLabel(d?.type)}…`;
-		document.getElementById('travelPct').textContent = '5%';
-		document.getElementById('travelFill').style.width = '5%';
 		if (elapsed >= wait) beginRoutePhase(now);
 		return;
 	}
@@ -398,9 +373,6 @@ export function updateTravel(now) {
 			setDoorTarget(S.travel.origin.id, false);
 			S.travel.originClosed = true;
 		}
-		document.getElementById('travelName').textContent = `Traveling through the center · ${r.name}`;
-		document.getElementById('travelPct').textContent = `${Math.round(8 + t * 62)}%`;
-		document.getElementById('travelFill').style.width = `${8 + t * 62}%`;
 		if (t >= 1) {
 			if (r.hub) {
 				finishTravel();
@@ -417,10 +389,6 @@ export function updateTravel(now) {
 			elapsed = now - S.travel.phaseStart,
 			wait = (d?.openSeconds || 2) * 1000 + 650;
 		camera.lookAt(doorCenter(r, 1.55));
-		const q = Math.min(1, elapsed / wait);
-		document.getElementById('travelName').textContent = `Opening ${doorLabel(d?.type)} · ${r.name}`;
-		document.getElementById('travelPct').textContent = `${Math.round(70 + q * 15)}%`;
-		document.getElementById('travelFill').style.width = `${70 + q * 15}%`;
 		if (elapsed >= wait) beginEntryPhase(now);
 		return;
 	}
@@ -448,9 +416,6 @@ export function updateTravel(now) {
 			const target = new THREE.Vector3(...r.look);
 			camera.lookAt(ahead.lerp(target, Math.max(0, (e - 0.72) / 0.28)));
 		}
-		document.getElementById('travelName').textContent = `Entering ${r.name}`;
-		document.getElementById('travelPct').textContent = `${Math.round(85 + t * 15)}%`;
-		document.getElementById('travelFill').style.width = `${85 + t * 15}%`;
 		if (t >= 1) finishTravel();
 	}
 }
@@ -479,14 +444,8 @@ export function updateDoors(dt) {
 
 export function setMode(m, announce = true) {
 	S.mode = m;
-	document
-		.querySelectorAll<HTMLElement>('#modeSeg button')
-		.forEach((b) => b.classList.toggle('active', b.dataset.mode === m));
-	document.getElementById('walkHint').classList.toggle('show', m === 'walk');
-	document.getElementById('overviewNote').style.display = m === 'overview' ? 'block' : 'none';
 	ceilings.forEach((c) => (c.visible = m !== 'overview'));
 	if (m === 'overview') {
-		document.getElementById('roomLookHint').classList.remove('show');
 		if (document.pointerLockElement) document.exitPointerLock();
 		camera.fov = 52;
 		camera.updateProjectionMatrix();
@@ -501,11 +460,7 @@ export function setMode(m, announce = true) {
 		orbit.update();
 		S.activeRoom = null;
 		showCtQaDock(false);
-		document.getElementById('locText').textContent = 'Overview of the full facility.';
-		updateFacilityInfo();
-		renderRoomList();
 	} else if (m === 'walk') {
-		document.getElementById('roomLookHint').classList.remove('show');
 		orbit.enabled = false;
 		if (S.activeRoom) {
 			applyWalkConversationComposition(S.activeRoom, true);
@@ -517,8 +472,6 @@ export function setMode(m, announce = true) {
 			player.pos.set(4.2, PLAYER_EYE_Y, 20.4);
 			camera.position.copy(player.pos);
 			aimPlayerAt(new THREE.Vector3(1.2, 2.0, 10.5));
-			document.getElementById('locText').textContent =
-				'Outside the main entrance · walk in through the doors';
 		}
 		if (announce)
 			toast('Walk mode: use WASD and the mouse to move and look around. Press E to interact.');
@@ -580,6 +533,10 @@ export function updateWalk(dt) {
 		if (canMove(player.pos.x, nz)) player.pos.z = nz;
 	}
 	const here = roomContainingWalkPoint(player.pos.x, player.pos.z);
+	// the CT QA menu closes on the first frame in any other room, before that room's card is due (the
+	// vaults' conversation composition, which also closes it, only starts deep in the entrance maze)
+	if (here && here.id !== 'ctsim') showCtQaDock(false);
+	noteWalkRoom(here, dt); // the room card (hud-roomcard.ts), for every room and the lobby
 	if (here && walkCompositionReady(here) && S.walkCompositionRoomId !== here.id)
 		applyWalkConversationComposition(here, false, false);
 	if (!here) S.walkCompositionRoomId = null;

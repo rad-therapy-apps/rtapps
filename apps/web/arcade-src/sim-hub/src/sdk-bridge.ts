@@ -23,7 +23,6 @@ import * as THREE from 'three';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { setClinicalFocus, clearClinicalFocus, flashCtScanner, pulseCtObject } from './equipment';
-import { beginTravel } from './walk';
 import {
 	toast,
 	openProcedureLab,
@@ -32,9 +31,7 @@ import {
 	procRenderSite,
 	procResetAll,
 	procSetResult,
-	procSetTab,
-	updateRoomUI,
-	renderRoomList
+	procSetTab
 } from './interact';
 import { roomById } from './main';
 import { JOURNEY, clearJourneyCameraFollow } from './journey';
@@ -87,10 +84,6 @@ export function focusCtPatientFromControl() {
 	orbit.target.copy(wp.clone().setY(1.25));
 	orbit.enabled = false;
 	S.activeRoom = roomById('ctcontrol');
-	updateRoomUI(S.activeRoom);
-	renderRoomList();
-	document.getElementById('locText').textContent =
-		'CT Control · observing Mia through the simulation-room window';
 }
 /* ===== v41 · CT / QA Procedures Lab logic ===== */
 // RTApps (#77 phase 2 task 16): typed boundary for the QA payload shapes — the laser/water
@@ -160,6 +153,13 @@ export function showCtQaDock(show = true) {
 	if (!el) return;
 	const inCt = S.activeRoom?.id === 'ctsim';
 	el.classList.toggle('show', !!show && inCt);
+}
+/** E on the CT scanner's "CT QA menu" (props.ts ctScanner): the dock opens, with the pointer free. */
+export function openCtQaMenu() {
+	S.activeRoom = roomById('ctsim'); // the dock and its QA run belong to the CT room
+	if (document.pointerLockElement) document.exitPointerLock();
+	showCtQaDock(true);
+	syncCtQaProgress();
 }
 
 function focusCtQaEquipment(ids, note) {
@@ -279,10 +279,6 @@ document
 	?.addEventListener('click', qaExclusive(ctQaAnimateStartup));
 document.getElementById('ctQaQuickLaser')?.addEventListener('click', qaExclusive(ctQaAnimateLaser));
 document.getElementById('ctQaQuickWater')?.addEventListener('click', qaExclusive(ctQaAnimateWater));
-document.getElementById('ctQaGoRoom')?.addEventListener('click', () => {
-	if (S.activeRoom?.id !== 'ctsim' && !S.travel) beginTravel(roomById('ctsim'));
-	else showCtQaDock(true);
-});
 
 document.getElementById('procedureLab')?.addEventListener('click', (e) => {
 	if ((e.target as HTMLElement)?.id === 'procedureLab') closeProcedureLab();

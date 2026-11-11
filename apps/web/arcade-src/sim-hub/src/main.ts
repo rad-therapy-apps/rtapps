@@ -8,10 +8,7 @@ import {
 	labelRenderer,
 	orbit,
 	canvas,
-	AMBIENCE,
-	initAmbience,
 	updateAmbience,
-	ambienceProfile,
 	updatePerfFloor
 } from './scene';
 import { monumentSign, privacyChangingNook } from './props';
@@ -55,22 +52,18 @@ import {
 	updateWorkflowTransitions,
 	updateVault2Board,
 	buildPhase5Wayfinding,
-	workflowState,
-	CLINICAL_FOCUS
+	workflowState
 } from './equipment';
 import {
-	beginTravel,
 	updateTravel,
 	updateDoors,
 	updateWalk,
-	setMode,
 	applyWalkMouseDelta,
 	requestWalkPointerLock
 } from './walk';
 import {
 	performInteraction,
 	updateInteractionUI,
-	toast,
 	closeStaffDialogue,
 	resetStaffDialogue,
 	closeKioskDialog,
@@ -82,11 +75,7 @@ import {
 	lhSetEnergy,
 	lhSetMode,
 	lhUpdateText,
-	showEquipmentPanel,
 	closeEquipmentPanel,
-	bindPanelToggle,
-	renderRoomList,
-	updateFacilityInfo,
 	procRenderSite,
 	procRefreshRelease
 } from './interact';
@@ -96,20 +85,22 @@ import {
 	setJourneyKind,
 	applyJourneyPatientFocus,
 	updateJourneyUI,
-	resetTreatmentJourney,
-	startTreatmentJourney,
-	advanceTreatmentJourney,
-	startJourneyFromKiosk,
 	updateJourneyRoomTiming,
 	updateJourneyCameraFollow
 } from './journey';
 import { applyVisibility, groupRoomContents } from './visibility';
+import { installMenu } from './menu';
+import { enterMode } from './play-mode';
+import { returnDoorOnBoot } from './return-door';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
+import { updatePrompt } from './hud-prompt';
+import { updateControlsBar } from './hud-controls';
 import './sdk-bridge';
+import { isPaused } from './pause';
+import './hub-dialogs';
+import './hud-roomcard';
 
 const clock = new THREE.Clock();
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
 
 export const ROOM_GUIDES = {
 	lobby: 'lobby',
@@ -447,37 +438,7 @@ privacyChangingNook('ctsim', 37.15, -4.7, 0, 'CT PATIENT CHANGING');
 privacyChangingNook('vault1', 68.7, -14.2, Math.PI / 2, 'TREATMENT CHANGING', 1.16);
 privacyChangingNook('vault2', 68.7, 14.2, Math.PI / 2, 'TREATMENT CHANGING', 1.16);
 
-// Environment, wayfinding, and ambience
-async function toggleAmbience() {
-	initAmbience();
-	if (!AMBIENCE.ctx) {
-		toast('<b>Ambient audio unavailable in this browser.</b>');
-		return;
-	}
-	try {
-		if (AMBIENCE.ctx.state !== 'running') await AMBIENCE.ctx.resume();
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, error object intentionally unused
-	} catch (e) {
-		toast(
-			'<b>Browser audio could not be started.</b><br>Click the page once and try Ambience again.'
-		);
-		return;
-	}
-	AMBIENCE.on = !AMBIENCE.on;
-	const t = AMBIENCE.ctx.currentTime;
-	AMBIENCE.master.gain.cancelScheduledValues(t);
-	if (AMBIENCE.on) {
-		updateAmbience();
-		AMBIENCE.master.gain.setTargetAtTime(ambienceProfile().master, t, 0.08);
-	} else AMBIENCE.master.gain.setTargetAtTime(0, t, 0.1);
-	const b = document.getElementById('ambientBtn');
-	b.classList.toggle('on', AMBIENCE.on);
-	b.textContent = AMBIENCE.on ? '🔊 Ambience On' : '🔇 Ambience Off';
-	if (AMBIENCE.on)
-		toast(
-			'<b>Department ambience enabled.</b><br>You should hear a low room tone that changes between reception, CT, control, and the treatment vaults.'
-		);
-}
+// Environment and wayfinding
 
 // The three lobby blades hang over the openings you walk straight through, so each front points ↑.
 // Their backs face the hallways and point back to the lobby.
@@ -565,39 +526,6 @@ document.getElementById('sdClose').onclick =
 document.getElementById('sdRestart').onclick = () =>
 	S.activeGuideKey && resetStaffDialogue(S.activeGuideKey);
 
-const studentHelp = document.getElementById('studentHelp');
-const openStudentHelp = () => {
-	if (document.pointerLockElement) document.exitPointerLock();
-	studentHelp?.classList.add('show');
-};
-const closeStudentHelp = () => studentHelp?.classList.remove('show');
-document.getElementById('helpBtn').onclick = openStudentHelp;
-document.getElementById('studentHelpClose').onclick = closeStudentHelp;
-studentHelp?.addEventListener('click', (e) => {
-	if (e.target === studentHelp) closeStudentHelp();
-});
-document.querySelectorAll<HTMLElement>('#modeSeg button').forEach(
-	(b) =>
-		(b.onclick = () => {
-			setMode(b.dataset.mode);
-			if (b.dataset.mode === 'walk') requestWalkPointerLock();
-		})
-);
-document.querySelectorAll<HTMLElement>('#zoneChips button').forEach(
-	(b) =>
-		(b.onclick = () => {
-			document
-				.querySelectorAll<HTMLElement>('#zoneChips button')
-				.forEach((x) => x.classList.toggle('active', x === b));
-			renderRoomList();
-		})
-);
-document.getElementById('homeBtn').onclick = () => beginTravel(roomById('lobby'));
-document.getElementById('backBtn').onclick = () => {
-	const id = S.history.pop();
-	if (id) beginTravel(roomById(id), false);
-	(document.getElementById('backBtn') as HTMLButtonElement).disabled = !S.history.length;
-};
 document.getElementById('linacHeadClose').onclick = closeLinacHeadLab;
 document.getElementById('lhPhoton').onclick = () => lhSetMode('photon');
 document.getElementById('lhElectron').onclick = () => lhSetMode('electron');
@@ -610,35 +538,13 @@ document.getElementById('linacHeadCanvas').onclick = lhCanvasClick;
 document.getElementById('linacHeadDialog').addEventListener('click', (e) => {
 	if ((e.target as HTMLElement).id === 'linacHeadDialog') closeLinacHeadLab();
 });
-document.addEventListener('keydown', (e) => {
-	if (e.key === 'Escape' && document.getElementById('linacHeadDialog').classList.contains('show'))
-		closeLinacHeadLab();
-});
 lhUpdateText();
 lhDraw();
-document.getElementById('ambientBtn').onclick = toggleAmbience;
 document.getElementById('eqClose').onclick = closeEquipmentPanel;
-document.getElementById('clinicalFocusDetails').onclick = () =>
-	CLINICAL_FOCUS.primary && showEquipmentPanel(CLINICAL_FOCUS.primary);
 document.getElementById('kioskClose').onclick = closeKioskDialog;
-document.getElementById('kioskTreatment').onclick = () => startJourneyFromKiosk('treatment');
-document.getElementById('kioskNewPatient').onclick = () => startJourneyFromKiosk('newpatient');
-document.getElementById('kioskExplore').onclick = () => {
-	closeKioskDialog();
-	setMode('walk');
-};
 document.getElementById('kioskDialog').addEventListener('click', (e) => {
 	if ((e.target as HTMLElement).id === 'kioskDialog') closeKioskDialog();
 });
-document
-	.querySelectorAll<HTMLElement>('#journeyModes button')
-	.forEach((b) => (b.onclick = () => setJourneyKind(b.dataset.journey)));
-document.getElementById('journeyStart').onclick = startTreatmentJourney;
-document.getElementById('journeyNext').onclick = advanceTreatmentJourney;
-document.getElementById('journeyReset').onclick = () => resetTreatmentJourney(false);
-
-bindPanelToggle('roomRail', 'roomRailToggle', '▸', '◂');
-bindPanelToggle('infoPanel', 'infoPanelToggle', '◂', '▸');
 
 labelRenderer.domElement.addEventListener('click', () => {
 	if (S.mode === 'walk') requestWalkPointerLock();
@@ -651,21 +557,10 @@ canvas.addEventListener('mousedown', (e) => {
 		requestWalkPointerLock();
 	}
 });
-canvas.addEventListener('click', (e) => {
-	if (S.mode === 'walk') {
-		requestWalkPointerLock();
-		return;
-	}
-	if (S.mode !== 'overview' || S.travel) return;
-	const rect = canvas.getBoundingClientRect();
-	mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-	mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-	raycaster.setFromCamera(mouse, camera);
-	const hit = raycaster.intersectObjects(roomFloors, false)[0];
-	if (hit) {
-		const r = roomById(hit.object.userData.roomId);
-		if (r) beginTravel(r);
-	}
+// a click locks the pointer for walking; the overview is only the title menu's backdrop now, so a
+// click there no longer starts guided travel to the room under it
+canvas.addEventListener('click', () => {
+	if (S.mode === 'walk') requestWalkPointerLock();
 });
 document.addEventListener('pointerlockchange', () => {
 	player.locked = document.pointerLockElement === canvas;
@@ -718,6 +613,8 @@ export function stepSimulation(now: number): void {
 	if (f % 3 === 0) updateClinicalEquipment(sec);
 	updateAmbience();
 	if (f % 3 === 1) updateInteractionUI();
+	updatePrompt(dt);
+	updateControlsBar(dt);
 	updateNpcLabels();
 	updateJourneyRoomTiming(now);
 	updateWallClocks(now);
@@ -734,13 +631,24 @@ export function stepSimulation(now: number): void {
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
 }
+// While the game is paused (pause.ts: the Esc settings, a room card) the frame loop skips
+// stepSimulation, and with it updateWalk: nobody moves and no simulation clock runs, but the frame is
+// still drawn. The NPC check calls stepSimulation directly, so it never sees a pause.
+function renderPaused(): void {
+	if (isHidden()) return;
+	clock.getDelta(); // drop the paused time, so the first step after the pause is an ordinary frame
+	// the title menu's backdrop keeps turning while the settings are open over it
+	if (S.mode === 'overview' && !JOURNEY.cameraFollow) orbit.update();
+	applyVisibility(camera);
+	renderer.render(scene, camera);
+	labelRenderer.render(scene, camera);
+}
 function animate(now) {
 	requestAnimationFrame(animate);
-	stepSimulation(now);
+	if (isPaused()) renderPaused();
+	else stepSimulation(now);
 }
 installNpcCheckHook(ROOM_CAST, stepSimulation, HANDOFFS);
-renderRoomList();
-updateFacilityInfo();
 journeyActors();
 setJourneyKind('treatment', true);
 workflowState('lobby', 'OPEN', 'Routine arrivals', '#42d5cf');
@@ -761,4 +669,13 @@ groupRoomContents();
 precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
-setTimeout(() => document.getElementById('studentHelp')?.classList.add('show'), 1150);
+// the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog;
+// back from the LINAC/CT app's Back to the Center, Free Mode starts outside the door the player left
+// through instead (return-door.ts)
+installMenu();
+const backAtDoor = returnDoorOnBoot((id) => {
+	const r = roomById(id);
+	return !!r && !r.hub;
+});
+if (backAtDoor) enterMode('free', { atDoor: backAtDoor });
+else enterMode('title');

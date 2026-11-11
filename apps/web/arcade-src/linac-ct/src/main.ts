@@ -1,6 +1,7 @@
 import './console-patch';
 import './workspace';
 import { S } from './state';
+import { PREF, writePref } from '../../sim-hub/src/prefs';
 import {
 	adaptiveApprove,
 	adaptiveAssess,
@@ -445,7 +446,10 @@ declare global {
 // the hub's own door-fix precedent (commit 4cc341a).
 resolveHubUrl();
 document.getElementById('rtappsBackBtn')?.addEventListener('click', () => {
-	if (S.HUB_URL) window.top.location.href = S.HUB_URL;
+	if (!S.HUB_URL) return;
+	// the hub then starts Free Mode outside the door the player left it through (sim-hub return-door.ts)
+	writePref(PREF.returning, true, 'session');
+	window.top.location.href = S.HUB_URL;
 });
 
 // In-room treatment monitor state. Keep these in the main module scope because

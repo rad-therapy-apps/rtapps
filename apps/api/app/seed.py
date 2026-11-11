@@ -107,7 +107,8 @@ SEED_CALCULATORS: list[tuple[str, str, str]] = [
     ("ALARA: Inverse Square in Practice", "inverse_square", "radiation-protection"),
 ]
 
-# Arcade games (plans 4a/4b), get-or-created by title like the practice calculators.
+# Arcade games (plans 4a/4b), get-or-created by title like the practice calculators. An entry
+# with "archived": True is kept at status "archived" and never published (see the loop in seed()).
 # max_score derivations live in each plan-4b batch's evidence table
 # (.superpowers/sdd/task-N-report.md) and the audit; unbounded games carry heuristic
 # caps (server clamps; percent ≤ 100). completion_only games have no max_score.
@@ -201,9 +202,12 @@ SEED_ARCADE_GAMES: list[dict[str, Any]] = [
         "config": {"arcade_slug": "side-effect-sorcerer", "max_score": 859},
     },
     {
+        # Archived 2026-11-11 (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 2): off
+        # the Simulator page and hidden from students; its row, versions and attempts stay.
         "title": "Gantry Position Guessing Game",
         "subject_slug": "treatment-delivery-procedures",
         "config": {"arcade_slug": "gantry-game", "max_score": 10},
+        "archived": True,
     },
     {
         "title": "LINAC Component Identification",
@@ -602,7 +606,11 @@ async def seed(db: AsyncSession, settings: Settings) -> SeedSummary:
         elif arcade_activity.config != game["config"]:
             arcade_activity.config = game["config"]
             config_changed = True
-        if arcade_activity.status != "published" or config_changed:
+        if game.get("archived"):
+            # Archived: never (re)published. Every student-facing read requires "published",
+            # so this alone hides it; the row, its versions and its attempts stay.
+            arcade_activity.status = "archived"
+        elif arcade_activity.status != "published" or config_changed:
             await publish_activity(db, arcade_activity, educator, change_note="Initial publish")
 
     cohort = await db.scalar(select(Cohort).where(Cohort.join_code == SEED_JOIN_CODE))
