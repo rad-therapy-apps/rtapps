@@ -1,6 +1,6 @@
 # sim-hub title menu, free mode, simulator merge and tutorial: design
 
-**Date:** 2026-11-11. **Status:** draft for the owner's review. The owner chose every screen shown here from browser mockups on 2026-11-11 (the pages are kept, not committed, in `.superpowers/brainstorm/99200-1794416889/content/`). Items still waiting on the owner are listed under Open items.
+**Date:** 2026-11-11. **Status:** approved by the owner on 2026-11-11. The owner chose every screen shown here from browser mockups on 2026-11-11 (the pages are kept, not committed, in `.superpowers/brainstorm/99200-1794416889/content/`).
 
 The work ships as three PRs:
 
@@ -292,7 +292,7 @@ The owner's long-term goal is to rebuild the LINAC and CT simulator rooms inside
    - Done when Jordan reaches the couch side.
 6. **Set Jordan up on the treatment couch.**
    - E at the couch. A decision: choose the setup items from Jordan's simulation record.
-   - Then Jordan lies down (the journey's vault setup pose) and the room lasers come on. The vault partner, Jamie Patel, stands at the other side of the couch.
+   - Then Jordan lies down (the journey's vault setup pose) and the room lasers come on. The vault partner, Jamie Williams, stands at the other side of the couch.
 7. **Leave the vault before treatment.** Done when the player is in LINAC Control. The vault door then closes (`setDoorTarget`).
 8. **Take the check images.**
    - E at the console. A decision: today's images show a small shift; treat as is, or apply the shift first? The answer is to apply the shift.
@@ -320,7 +320,7 @@ The decision wording and the "why" lines come from the existing staff and journe
 - **Starting and leaving:** on start and on exit it calls `resetTreatmentJourney(true)`, so it leaves the world exactly as the NPC check expects.
 - **Hidden actors:** an actor the player is "being" is hidden (`visible = false`), and is skipped by the E prompt and by the movers' blocker list.
 - **The vault 1 couch patient** (`lyingPatient('vault1', …)` in `npc.ts`) is hidden while Jordan is in the vault, as the treatment journey does.
-- **Renaming:** the vault 1 therapist is renamed from "Morgan Reed, RTT" to **Jamie Patel, RTT** (`STAFF_GUIDES.vault1` in `interact.ts`), because the LINAC Control therapist is also Morgan Reed.
+- **Renaming:** the vault 1 therapist is renamed from "Morgan Reed, RTT" to **Jamie Williams, RTT** (`STAFF_GUIDES.vault1` in `interact.ts`), because the LINAC Control therapist is also Morgan Reed.
 
 ### New files
 
@@ -359,26 +359,39 @@ The decision wording and the "why" lines come from the existing staff and journe
 
 ## Worktrees
 
-Each PR gets its own worktree and branch off `main` (after this spec is merged or cherry-picked):
+The owner wants this done as fast as possible, so each PR is split into tasks that run in parallel, each in its own worktree. The controller merges finished tasks into the PR's branch one at a time, rerunning the checks after each, and reviews each task. Each part is still one PR.
 
-| Worktree   | Branch                  | Starts                                                                                                 | Depends on                                                                         |
-| ---------- | ----------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `menu`     | `feat/sim-hub-menu`     | at once                                                                                                | nothing                                                                            |
-| `merge`    | `feat/simulator-merge`  | at once: Simulator page, seed, gantry archive, docs, LINAC/CT back button                              | the hub's return-to-door start waits for PR 1, then rebases                        |
-| `tutorial` | `feat/sim-hub-tutorial` | at once: `tutorial-steps.ts`, `tutorial-math.ts`, the decisions and their tests, the run-through check | the screen wiring, tracker and marker in the game, after PR 1 merges, then rebases |
+**Step 0 (controller, before any dispatch):** a shared foundation commit on `feat/sim-hub-menu`, so the parallel tasks don't collide:
 
-PR 1 also defines the hooks PR 3 uses, written into PR 1's plan:
+- `pause.ts`: `setPaused(reason, on)`, `isPaused()`, `onPauseChange(cb)`; the main loop skips `updateWalk` and `stepSimulation` while paused.
+- `prefs.ts`: the storage keys and try/catch read and write helpers.
+- `play-mode.ts`: the play mode (`'title' | 'free' | 'tutorial'`) with `getPlayMode()`, `enterMode(m)` and `onPlayModeChange(cb)`.
+- `dialogs.ts`: a registry of open-able dialogs (`registerDialog(name, isOpen, close)`, `openDialogName()`), with today's dialogs registered. Esc uses it.
+- Marked slots in `index.html` (markup and CSS) where each task adds its own block.
 
-- `startMode('free' | 'tutorial')`;
-- `setPaused(bool)`;
-- `registerInteractable(..., { enabled?: () => boolean })`, so tutorial-only targets prompt only in the tutorial;
-- `onRoomEnter(cb)`.
+| Task | Worktree          | What                                                                                                   | Starts after              |
+| ---- | ----------------- | ------------------------------------------------------------------------------------------------------ | ------------------------- |
+| 1a   | `menu-title`      | Title menu, Esc settings, Help, Free Mode start, the boot change                                       | step 0                    |
+| 1b   | `menu-prompt`     | E prompt (beside the head, fade and grow, line of sight) and the controls bar                          | step 0                    |
+| 1c   | `menu-roomcard`   | Room pop-up, `onRoomEnter`, "Don't show this again"                                                    | step 0                    |
+| 1d   | `menu-cleanup`    | Remove the old panels, CT QA menu on E, kiosk buttons, no camera flights, null-safe journey HUD writes | step 0                    |
+| 2a   | `merge-page`      | Simulator page with one card, gantry game archived, docs                                               | nothing                   |
+| 2b   | `merge-return`    | Back to the door you left from                                                                         | 1a in `feat/sim-hub-menu` |
+| 3a   | `tutorial-core`   | `tutorial-steps.ts`, `tutorial-math.ts`, decisions, hints, their tests, the run-through check          | nothing                   |
+| 3b   | `tutorial-wiring` | Tracker, marker, role change, end card, NPC choreography in the game                                   | PR 1 merged               |
 
-Each worktree runs its own `pnpm install` and its own checks. CI runs e2e for each PR.
+PR 1's hooks that later tasks use:
 
-## Open items for the owner's review
+- `enterMode('free' | 'tutorial', opts?)` (`play-mode.ts`);
+- `setPaused(reason, on)` (`pause.ts`);
+- `registerInteractable(..., { enabled?: () => boolean })`, so tutorial-only targets prompt only in the tutorial (1b);
+- `onRoomEnter(cb)` (1c).
 
-1. **Decision moments in Chapter 1** (steps 3, 4, 6 and 8): included as recommended. Confirm, or drop them and keep only the walking hints.
-2. **Vault 1 therapist's new name:** Jamie Patel, RTT. Confirm or give another.
-3. **The LINAC/CT activities stay listed on their subject's page** (treatment delivery procedures), because hiding a published activity from lists while keeping it reachable from the center is new work. Confirm that's fine for now.
-4. **The Tutorial entry shows "Coming soon"** between PR 1 and PR 3. Confirm, or hide it until PR 3.
+Each worktree runs its own `pnpm install` and its own checks. The heavy browser checks (NPC, visibility) are staggered so the machine doesn't stall. CI runs e2e once per PR.
+
+## Owner answers to the open items (2026-11-11)
+
+1. **Decision moments in Chapter 1** (steps 3, 4, 6 and 8): kept.
+2. **Vault 1 therapist's new name:** Jamie Williams, RTT.
+3. **The LINAC/CT activities stay listed on their subject's page** for now.
+4. **The Tutorial entry shows "Coming soon"** between PR 1 and PR 3.
