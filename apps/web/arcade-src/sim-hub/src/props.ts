@@ -15,6 +15,7 @@ import { scene } from './scene';
 import { personFigure } from './npc';
 import { add, MAT } from './main';
 import { registerInteractable, openKioskDialog } from './interact';
+import { openCtQaMenu } from './sdk-bridge';
 import { CT_COUCH, ROOM_CLOCKS } from './equipment';
 import { seatActor } from './npc-behavior';
 import type { Room } from './rooms';
@@ -1328,6 +1329,19 @@ export function ctScanner(g, room: Room) {
 	CT_COUCH.bore = bore;
 	CT_COUCH.baseX = table.position.x;
 	add(g, box(2.1, 0.78, 0.65, MAT.metal, room.x - 5.0, 0.5, room.z + 1.5));
+	// E at the gantry's door-facing side opens the CT QA menu (sdk-bridge.ts openCtQaMenu); the 'CT
+	// Simulator Gantry' equipment anchor sits at the ring's centre, 1.45 m further in
+	const qaMenu = new THREE.Object3D();
+	qaMenu.position.set(room.x, 1.3, room.z + 1.5 + 1.45);
+	add(g, qaMenu);
+	registerInteractable(
+		qaMenu,
+		'CT QA menu',
+		'Run the CT morning start-up, laser QC, water phantom QC and the release or hold decision.',
+		3.0,
+		null,
+		() => openCtQaMenu()
+	);
 }
 
 export function emulatorLinacShell(g, room: Room) {

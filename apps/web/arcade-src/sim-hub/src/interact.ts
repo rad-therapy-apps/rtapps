@@ -6,35 +6,35 @@
    kiosk dialog, the CT/QA Procedures Lab (`open/closeProcedureLab`, `proc*` helpers), the
    LINAC-head-lab teaching dialog (`open/closeLinacHeadLab`, `lh*` helpers), the equipment detail
    panel (`showEquipmentPanel`/`closeEquipmentPanel`), room inspection/composition
-   (`enable/disableRoomInspection`, `roomInspectPose`), and room info/list UI
-   (`updateRoomUI`/`renderRoomList`/`updateFacilityInfo`/`bindPanelToggle`/
-   `bindProcedureRoomButtons`/`bindRoomEquipmentButtons`/`roomEquipmentMarkup`). Verbatim
+   (`enable/disableRoomInspection`, `roomInspectPose`). Verbatim
    extractions from main.js. `ROOM_APP_DOORS` (read only by `performInteraction`) and
    `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved functions) moved along
    with their sole consumers and are not exported. A handful of symbols stay owned by main.js
    because still-resident journey/booking systems read or write them too:
-   `roomById`/`player`/`doors`/`ROOM_GUIDES`/`HANDOFFS` (already exported from main.js per
+   `player`/`HANDOFFS`/`REACH_Y` (already exported from main.js per
    earlier tasks — task 9 moved `focusTargetsForRoom`/`focusConversationCamera`/
-   `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES`/
-   `showCtQaDock`/`syncCtQaProgress` to ./sdk-bridge.js, both imported back here).
-   `setDoorTarget`/`doorCenter`/`doorNormal`/`beginTravel`/`nearestDoor`/`setMode` are owned by
+   `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES` to
+   ./sdk-bridge.js, both imported back here).
+   `doorCenter`/`doorNormal`/`nearestDoor`/`getColliders` are owned by
    ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
+import type { Room } from './rooms';
+import { isPaused } from './pause';
+import { PREF, writePref } from './prefs';
+import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
-import { ROOMS } from './rooms';
 import { bubble } from './npc';
 import { startActorHandoff } from './npc-behavior';
 import {
 	EQUIPMENT_BY_ID,
-	EQUIPMENT_BY_ROOM,
 	EQUIPMENT_EXPLORED,
 	EQUIPMENT_SPECS,
 	equipmentRoomName
 } from './equipment';
-import { setDoorTarget, doorCenter, doorNormal, beginTravel, nearestDoor, setMode } from './walk';
-import { roomById, player, doors, ROOM_GUIDES, HANDOFFS, REACH_Y } from './main';
-import { PROC_STATE, PROC_SITES, showCtQaDock, syncCtQaProgress } from './sdk-bridge';
+import { doorCenter, doorNormal, nearestDoor, getColliders } from './walk';
+import { player, HANDOFFS, REACH_Y } from './main';
+import { PROC_STATE, PROC_SITES } from './sdk-bridge';
 import {
 	focusConversationCamera,
 	applyWalkConversationComposition,
@@ -444,6 +444,8 @@ export const STAFF_GUIDES = {
 	}
 };
 
+// `opts.enabled`: the target takes part only while it returns true (the tutorial's own targets, PR 3).
+// An object whose own `visible` is false (an actor the player is playing) is never offered either.
 const interactables = [];
 export function registerInteractable(
 	object,
@@ -451,37 +453,71 @@ export function registerInteractable(
 	detail = '',
 	range = 2.5,
 	guideKey = null,
-	action = null
+	action = null,
+	opts: { enabled?: () => boolean } = {}
 ) {
-	interactables.push({ object, label, detail, range, guideKey, action });
+	interactables.push({ object, label, detail, range, guideKey, action, enabled: opts.enabled });
 	return object;
 }
-function nearestInteractable(maxD = 2.8) {
+// E works on an object within its own range but never past 2.8 m (the old nearestInteractable cap),
+// and on a door within 2.6 m (walk.ts nearestDoor). Reach is measured from a fixed 1.65 m (main.ts
+// REACH_Y), not the eye (PLAYER_EYE_Y), so every interaction range feels as before.
+const REACH_CAP = 2.8,
+	DOOR_REACH = 2.6;
+// Line of sight on the floor plan: a target with a wall between it and the player is skipped, so
+// people in the next room never show a prompt through the wall.
+const inSight = (x: number, z: number) =>
+	!segmentBlocked(player.pos.x, player.pos.z, x, z, getColliders(), SIGHT_END_CLEARANCE);
+// Only what is in front of the player is offered (prompt-math.ts inFront, on the floor plan), so a
+// person behind them never hides the prompt for someone in view, and E never talks to someone unseen.
+const viewDir = new THREE.Vector3();
+const inView = (x: number, z: number) => {
+	camera.getWorldDirection(viewDir);
+	return inFront(viewDir.x, viewDir.z, player.pos.x, player.pos.z, x, z);
+};
+const doorInSight = (room: Room) => {
+	const c = doorCenter(room);
+	return inSight(c.x, c.z) && inView(c.x, c.z);
+};
+function nearestInteractable(lead = 0) {
 	let best = null,
-		bd = maxD;
-	// reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye (PLAYER_EYE_Y), so every
-	// interaction range feels as before
+		bd = Infinity;
 	const wp = new THREE.Vector3(),
 		from = new THREE.Vector3(player.pos.x, REACH_Y, player.pos.z);
 	for (const it of interactables) {
+		if (it.object.visible === false || (it.enabled && !it.enabled())) continue;
 		it.object.getWorldPosition(wp);
 		const d = from.distanceTo(wp),
-			limit = Math.min(maxD, it.range || maxD);
-		if (d < bd && d <= limit) {
+			reach = Math.min(REACH_CAP, it.range || REACH_CAP);
+		if (d < bd && d <= reach + lead && inView(wp.x, wp.z) && inSight(wp.x, wp.z)) {
 			bd = d;
-			best = { ...it, d, pos: wp.clone() };
+			best = { ...it, d, reach, pos: wp.clone() };
 		}
 	}
 	return best;
 }
+/** The nearest interactable or door within its reach + `lead`, decided as before: the interactable
+    wins unless the door is more than 0.25 m nearer. */
+function nearestTarget(lead: number) {
+	const it = nearestInteractable(lead),
+		// only doors that leave the hub for another simulator: every other door opens by itself as
+		// the player walks up (walk.ts updateWalk), so it gets no prompt and E leaves it alone
+		door = nearestDoor(DOOR_REACH + lead, (room) => leavesHub(room) && doorInSight(room));
+	if (it && (!door || it.d <= door.d + 0.25)) return { it, door: null };
+	return door ? { it: null, door } : null;
+}
 
 const ROOM_APP_DOORS = new Set(['LINAC Control Area', 'CT Control Room', 'CT Simulator Room']);
+/** A door that leaves the hub for another simulator, once that simulator's player URL resolved. */
+const leavesHub = (room: Room) =>
+	(!!S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) ||
+	(!!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name));
 
 export function performInteraction() {
-	if (S.mode !== 'walk') return;
-	const it = nearestInteractable();
-	const dr = nearestDoor();
-	if (it && (!dr || it.d <= dr.d + 0.25)) {
+	if (S.mode !== 'walk' || isPaused()) return;
+	const t = nearestTarget(0);
+	if (t?.it) {
+		const it = t.it;
 		if (it.guideKey && STAFF_GUIDES[it.guideKey]) {
 			openStaffDialogue(it.guideKey);
 			return;
@@ -493,54 +529,65 @@ export function performInteraction() {
 		toast(`<b>${it.label}</b><br>${it.detail || 'Interactive object'}`);
 		return;
 	}
-	if (dr) {
-		if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(dr.room.name)) {
-			// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
-			window.top.location.href = S.ROOM_APP_URL;
-			return;
-		}
-		if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(dr.room.name)) {
-			// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
-			window.top.location.href = S.CONSOLE_APP_URL;
-			return;
-		}
-		const d = doors.get(dr.room.id);
-		if (d) setDoorTarget(dr.room.id, d.target < 0.5);
-		toast(`<b>${dr.room.name}</b> · ${d?.target > 0.5 ? 'opening' : 'closing'} door`);
-	}
-}
-export function updateInteractionUI() {
-	const UI = updateInteractionUI as typeof updateInteractionUI & {
-			_ret?: boolean;
-			_p?: boolean;
-			_txt?: string;
-		},
-		ret = document.getElementById('walkReticle'),
-		p = document.getElementById('interactPrompt'),
-		txt = document.getElementById('interactText'),
-		apply = (retOn, pOn, label?) => {
-			if (UI._ret !== retOn) {
-				ret.classList.toggle('show', retOn);
-				UI._ret = retOn;
-			}
-			if (UI._p !== pOn) {
-				p.classList.toggle('show', pOn);
-				UI._p = pOn;
-			}
-			if (pOn && UI._txt !== label) {
-				txt.textContent = label;
-				UI._txt = label;
-			}
-		};
-	if (S.mode !== 'walk' || S.travel) {
-		apply(false, false);
+	if (!t?.door) return;
+	const room = t.door.room;
+	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
+		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app. Its Back to the
+		// Center button brings the player back outside this door (return-door.ts).
+		writePref(PREF.returnDoor, room.id, 'session');
+		window.top.location.href = S.ROOM_APP_URL;
 		return;
 	}
-	const it = nearestInteractable(),
-		dr = nearestDoor();
-	if (it && (!dr || it.d <= dr.d + 0.25)) apply(true, true, `Interact · ${it.label}`);
-	else if (dr) apply(true, true, `Door · ${dr.room.name}`);
-	else apply(true, false);
+	if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)) {
+		// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
+		window.top.location.href = S.CONSOLE_APP_URL;
+		return;
+	}
+}
+
+/** What the E prompt shows; hud-prompt.ts places it beside `object` (or the door) every frame. */
+export type PromptTarget =
+	| {
+			kind: 'thing';
+			object: THREE.Object3D;
+			person: boolean;
+			reach: number;
+			title: string;
+			sub: string;
+	  }
+	| { kind: 'door'; room: Room; reach: number; title: string; sub: string };
+let promptTarget: PromptTarget | null = null;
+export const getPromptTarget = (): PromptTarget | null => promptTarget;
+function pickPromptTarget(): PromptTarget | null {
+	// in reach first, so a full-size prompt is always what E does; else the nearest one fading in
+	const t = nearestTarget(0) ?? nearestTarget(PROMPT_LEAD);
+	if (!t) return null;
+	if (t.door) {
+		const room = t.door.room;
+		return {
+			kind: 'door',
+			room,
+			reach: DOOR_REACH,
+			title: `Enter ${room.name}`,
+			sub: ''
+		};
+	}
+	const it = t.it,
+		guide = it.guideKey ? STAFF_GUIDES[it.guideKey] : null;
+	return {
+		kind: 'thing',
+		object: it.object,
+		person: !!it.object.userData?.npcRole,
+		reach: it.reach,
+		title: guide ? `Talk to ${guide.name}` : it.label,
+		sub: guide ? guide.role : ''
+	};
+}
+/** Every third frame (main.ts stepSimulation): the crosshair, and the E prompt's target. */
+export function updateInteractionUI() {
+	const walking = S.mode === 'walk' && !S.travel;
+	document.getElementById('walkReticle')?.classList.toggle('show', walking);
+	promptTarget = walking ? pickPromptTarget() : null;
 }
 
 export const LINAC_HEAD_LAB = {
@@ -1042,16 +1089,6 @@ export function showEquipmentPanel(id) {
 export function closeEquipmentPanel() {
 	document.getElementById('equipmentPanel').classList.remove('show');
 }
-function roomEquipmentMarkup(roomId) {
-	const items = EQUIPMENT_BY_ROOM[roomId] || [];
-	if (!items.length) return '';
-	return `<div class="eqList"><div class="eqLabel">Clinical equipment in this area</div><div class="eqRoomButtons">${items.map((x) => `<button data-eqid="${x.id}">${x.label}</button>`).join('')}</div></div>`;
-}
-function bindRoomEquipmentButtons() {
-	document
-		.querySelectorAll<HTMLElement>('[data-eqid]')
-		.forEach((b) => (b.onclick = () => showEquipmentPanel(b.dataset.eqid)));
-}
 export function openKioskDialog() {
 	if (document.pointerLockElement) document.exitPointerLock();
 	document.getElementById('kioskDialog').classList.add('show');
@@ -1099,35 +1136,10 @@ export function enableRoomInspection(r) {
 	orbit.enablePan = false;
 	orbit.enabled = true;
 	orbit.update();
-	document.getElementById('roomLookHint').classList.add('show');
 }
 
 export function disableRoomInspection() {
-	document.getElementById('roomLookHint').classList.remove('show');
 	if (S.mode !== 'overview') orbit.enabled = false;
-}
-
-export function renderRoomList() {
-	const zone =
-		document.querySelector<HTMLElement>('#zoneChips button.active')?.dataset.zone || 'all';
-	const host = document.getElementById('roomList');
-	host.innerHTML = '';
-	ROOMS.filter((r) => zone === 'all' || r.zone === zone).forEach((r) => {
-		const b = document.createElement('button');
-		b.className = 'roombtn' + (S.activeRoom?.id === r.id ? ' active' : '');
-		b.style.setProperty('--rc', '#' + r.color.toString(16).padStart(6, '0'));
-		b.innerHTML = `<span class="dot"></span><span><div class="nm">${r.name}</div><div class="sb">${r.kicker}</div></span><span class="arr">›</span>`;
-		b.onclick = () => beginTravel(r);
-		host.appendChild(b);
-	});
-}
-export function updateFacilityInfo() {
-	document.getElementById('infoK').textContent = 'Welcome';
-	document.getElementById('infoTitle').textContent = 'RTApps Radiation Oncology Center';
-	document.getElementById('infoSub').textContent =
-		'Explore departments, meet the team, and follow patient journeys.';
-	document.getElementById('infoBody').innerHTML =
-		`<div class="desc">Explore a simulated radiation oncology center to see how patients, staff, equipment, and departments connect across the care pathway.</div><div class="meta"><div class="mcell"><span>Departments</span><b>${ROOMS.length}</b></div><div class="mcell"><span>Staff conversations</span><b>${Object.keys(STAFF_GUIDES).length}</b></div><div class="mcell"><span>Navigation</span><b>Overview · Guided · Walk</b></div><div class="mcell"><span>Activities</span><b>Talk · Equipment · Journeys</b></div></div><div class="roomIntro"><b>Quick start</b><br>Select a room from the left for Guided Travel, choose Walk to move freely, or start one of the patient journeys below.</div>`;
 }
 
 const PROC_CHOICES = [
@@ -1159,17 +1171,6 @@ export function procSetTab(id) {
 		.forEach((p) => p.classList.toggle('active', p.dataset.pane === id));
 	if (id === 'sitesim') procRenderSite();
 	if (id === 'release') procRefreshRelease();
-}
-function procedureRoomMarkup(roomId) {
-	if (roomId !== 'ctsim') return '';
-	return `<div class="procRoomLaunch"><button id="procedureRoomBtn">Open CT Room Menu / QA</button></div>`;
-}
-function bindProcedureRoomButtons(roomId) {
-	const b = document.getElementById('procedureRoomBtn');
-	if (!b) return;
-	b.onclick = () => {
-		if (roomId === 'ctsim') showCtQaDock(true);
-	};
 }
 function procMarkDone(id, done = true) {
 	document.querySelector(`#procTabs button[data-proc="${id}"]`)?.classList.toggle('done', !!done);
@@ -1258,42 +1259,6 @@ export function procResetAll() {
 	procRenderSite();
 }
 
-export function updateRoomUI(r) {
-	document.getElementById('infoK').textContent = r.kicker;
-	document.getElementById('infoTitle').textContent = r.name;
-	document.getElementById('infoSub').textContent =
-		r.zone === 'front'
-			? 'Patient services / front of house'
-			: r.zone === 'technical'
-				? 'Technical and support services'
-				: 'Clinical treatment services';
-	const key = ROOM_GUIDES[r.id],
-		guide = key ? STAFF_GUIDES[key] : null;
-	const profile =
-		r.id === 'vault1' || r.id === 'vault2'
-			? 'Modern LINAC treatment vault'
-			: r.id === 'hdr'
-				? 'HDR / special procedures'
-				: r.id === 'ctcontrol'
-					? 'CT operator control room'
-					: r.id === 'ctsim'
-						? 'CT simulation'
-						: 'Department area';
-	const staff = guide
-		? `<div class="staffCard"><div class="av">${guide.initials}</div><div><b>${guide.name}</b><span>${guide.role}</span></div></div>`
-		: '';
-	document.getElementById('infoBody').innerHTML =
-		`<div class="desc">${r.desc}</div><div class="meta"><div class="mcell"><span>Department zone</span><b>${r.zone === 'front' ? 'Patient Services' : r.zone === 'technical' ? 'Technical / Support' : 'Clinical'}</b></div><div class="mcell"><span>Room type</span><b>${profile}</b></div></div><div class="roomIntro"><b>What happens here</b><br>${r.what}</div>${staff}${roomEquipmentMarkup(r.id)}${procedureRoomMarkup(r.id)}<div class="iactions ${guide ? 'three' : ''}">${guide ? `<button class="talk" id="talkHere">Talk with staff</button>` : ''}<button class="primary" id="travelHere">Travel / Recenter</button><button id="overviewHere">Facility Overview</button></div>`;
-	document.getElementById('travelHere').onclick = () => beginTravel(r, false);
-	document.getElementById('overviewHere').onclick = () => setMode('overview');
-	bindRoomEquipmentButtons();
-	bindProcedureRoomButtons(r.id);
-	showCtQaDock(r.id === 'ctsim');
-	syncCtQaProgress();
-	const tb = document.getElementById('talkHere');
-	if (tb) tb.onclick = () => openStaffDialogue(key);
-}
-
 export function resetStaffDialogue(key) {
 	const g = STAFF_GUIDES[key];
 	if (!g) return;
@@ -1327,12 +1292,8 @@ export function resetStaffDialogue(key) {
 			[...hh.querySelectorAll('button')].forEach((x) => (x.disabled = true));
 			setTimeout(() => {
 				closeStaffDialogue(false);
+				// the staff member walks to the target room; the camera stays with the player
 				startActorHandoff(key, h);
-				if (h.follow && h.target) {
-					setTimeout(() => {
-						if (!S.travel) beginTravel(roomById(h.target));
-					}, 450);
-				}
 			}, 1150);
 		};
 		hh.appendChild(b);
@@ -1373,44 +1334,4 @@ export function toast(html) {
 		() => t.classList.remove('show'),
 		2300
 	);
-}
-
-export function bindPanelToggle(panelId, buttonId, collapsedLabel, expandedLabel) {
-	const panel = document.getElementById(panelId),
-		btn = document.getElementById(buttonId);
-	let handle = null;
-	if (panelId === 'infoPanel') {
-		handle = document.createElement('button');
-		handle.id = 'infoPanelHandle';
-		handle.className = 'panelToggle';
-		handle.style.position = 'fixed';
-		handle.style.right = '8px';
-		handle.style.top = '86px';
-		handle.style.zIndex = '78';
-		handle.style.display = 'none';
-		handle.textContent = '◂';
-		handle.title = 'Expand info panel';
-		document.body.appendChild(handle);
-		handle.onclick = () => {
-			panel.classList.remove('collapsed');
-			sync();
-		};
-	}
-	function sync() {
-		const collapsed = panel.classList.contains('collapsed');
-		btn.textContent = collapsed ? collapsedLabel : expandedLabel;
-		btn.title = collapsed
-			? panelId === 'roomRail'
-				? 'Expand directory'
-				: 'Expand info panel'
-			: panelId === 'roomRail'
-				? 'Collapse directory'
-				: 'Collapse info panel';
-		if (handle) handle.style.display = collapsed ? 'grid' : 'none';
-	}
-	btn.onclick = () => {
-		panel.classList.toggle('collapsed');
-		sync();
-	};
-	sync();
 }

@@ -159,8 +159,9 @@ try {
 	srv.close();
 	process.exit(2);
 }
-// Leave overview (culling is bypassed there) and let the mode switch settle, then stop time.
-await page.evaluate(() => document.querySelector('#modeSeg button[data-mode="walk"]').click());
+// Leave the title menu's overview (culling is bypassed there) through Free Mode and let the mode
+// switch settle, then stop time.
+await page.evaluate(() => document.querySelector('#menuFree').click());
 await page.waitForTimeout(1500);
 await page.evaluate(() => (window.__V.frozen = true));
 await page.waitForTimeout(300);
