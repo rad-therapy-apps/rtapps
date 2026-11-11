@@ -300,7 +300,8 @@ export const ROOM_GRAPHS: Record<string, RoomGraph> = {
 			[1, 2]
 		]
 	},
-	// in by the door's -z half, past the cabinet at (4.05, -32.9)
+	// in by the door's -z half (laid out round a cabinet that stood at (4.05, -32.9) and has since
+	// moved to the +x wall; kept, as NPC check b's timeline is sensitive to route lengths)
 	engineering: {
 		nodes: [
 			[2.15, -31], // 0 door

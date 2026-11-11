@@ -1191,14 +1191,19 @@ export function furnish(room: Room) {
 			}
 			break;
 		case 'engineering':
-			desk(g, room.x - 1.3, room.z + 2.25, 3.8, 0.92, Math.PI / 10);
+			// square under the big head schematic (-z wall), with 1.0 m of floor between its back edge
+			// and the screen's low shelf (front face z -35.5)
+			desk(g, room.x, room.z - 3.04, 3.8, 0.92);
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const head = cyl(0.65, 0.85, 1.25, MAT.metal);
 			head.position.set(room.x + 3.2, 1.25, room.z + 2.15);
 			add(g, head);
 			add(g, box(1.4, 1.0, 1.1, std(0xc9d6dd, 0.72, 0.06), room.x + 3.2, 0.5, room.z + 2.15));
-			cabinetBank(g, room.x + 3.95, room.z - 2.0, 1.4, 1.42, 0.42, -Math.PI / 2, 0xdbe4e8);
-			cabinetBank(g, room.x - 3.95, room.z - 1.9, 1.4, 1.42, 0.42, Math.PI / 2, 0xdbe4e8);
+			// both cabinets side by side on the +x wall across from the door, touching, drawers to the
+			// room, backs 0.02 m off the wall's face (x 12.92); the pinboard's bottom edge (y 1.40) sits
+			// just behind their tops
+			for (const dz of [-0.7, 0.7])
+				cabinetBank(g, room.x + 4.69, room.z + dz, 1.4, 1.42, 0.42, -Math.PI / 2, 0xdbe4e8);
 			buildLinacHeadWallStation(g, room);
 			buildEngineeringWallSchematics(g, room);
 			break;
