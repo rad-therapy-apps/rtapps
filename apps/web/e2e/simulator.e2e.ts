@@ -1,6 +1,6 @@
 /**
  * What this file does: the end-to-end phase-4 core loop for plan 4c (the simulator world, M8) —
- * a student enters the simulator hub from any subject page's live Simulator entry, drives a
+ * a student enters the simulator hub from the Simulator page's one card (the center), drives a
  * scored QA run through the real `window.RTApps` SDK inside the hub's own iframe, and the
  * educator sees the resulting 75% on the per-attempt Attempts row; a second scenario (the same
  * student, still signed in) navigates straight to the Treatment delivery room app and records a
@@ -8,7 +8,8 @@
  * of which player the student happens to be standing in — and the educator sees it land under the
  * separate "CT simulation" activity instead; a third test asserts the simulator stays behind the
  * same auth gate as the games, and that an authed request for one of the extracted CT scan images
- * carries the plan 4c media cache header.
+ * carries the plan 4c media cache header. The second test also checks that the gantry game,
+ * archived on 2026-11-11, is gone from the Treatment Delivery Procedures Games shelf.
  * Used here and why: Playwright against the running compose stack (baseURL http://localhost:8080,
  * see playwright.config.ts), same as `arcade.e2e.ts`; role/label/testid locators, no CSS
  * selectors. The real `sim-hub`/`linac-ct` apps load in their real iframes and are driven through
@@ -91,6 +92,10 @@ test.describe
 		// as helpers.ts's registerStudent/signIn.
 		await studentPage.waitForLoadState('networkidle');
 		await expect(studentPage.getByTestId('simulator-entry')).toBeVisible();
+		// One card since 2026-11-11: the LINAC/CT simulators are reached through the center's
+		// doors, and the gantry game is archived.
+		await expect(studentPage.getByRole('main').getByRole('listitem')).toHaveCount(1);
+		await expect(studentPage.getByText('press E at the door')).toBeVisible();
 		await studentPage.getByTestId('simulator-entry').click();
 
 		// Lands on the hub activity's player (the resolver's own subject_slug/activity_id, not
@@ -154,6 +159,10 @@ test.describe
 		// simulator-entry click above.
 		await studentPage.waitForLoadState('networkidle');
 		await expect(studentPage.getByRole('heading', { name: 'Games' })).toBeVisible();
+		// Archived on 2026-11-11: the gantry game left this shelf; the LINAC/CT activities stay.
+		await expect(
+			studentPage.getByRole('link', { name: 'Gantry Position Guessing Game' })
+		).toHaveCount(0);
 		await studentPage.getByRole('link', { name: 'Treatment delivery', exact: true }).click();
 		await expect(studentPage).toHaveURL(/\/activities\//);
 
