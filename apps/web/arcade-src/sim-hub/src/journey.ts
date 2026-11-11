@@ -556,7 +556,7 @@ function playIntercomAudio(text) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty -- legacy silent-catch pattern, error intentionally swallowed
 	} catch (e) {}
 }
-function journeyIntercom(actor, text, ms = 12000) {
+export function journeyIntercom(actor, text, ms = 12000) {
 	journeySpeech(actor, text, 'staff', ms);
 	playIntercomAudio(text);
 }
