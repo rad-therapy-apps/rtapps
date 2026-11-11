@@ -108,6 +108,7 @@ import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import './sdk-bridge';
 import { isPaused } from './pause';
 import './hub-dialogs';
+import './hud-roomcard';
 
 const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();

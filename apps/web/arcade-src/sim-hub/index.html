@@ -2360,6 +2360,123 @@
 			/* slot:hud-controls */
 			/* slot:hud-prompt */
 			/* slot:roomcard */
+			#roomPopup {
+				position: fixed;
+				inset: 0;
+				z-index: 230;
+				display: none;
+				place-items: center;
+				background: rgba(4, 8, 11, 0.5);
+			}
+			#roomPopup.show {
+				display: grid;
+			}
+			.rcCard {
+				width: min(560px, calc(100vw - 32px));
+				max-height: calc(100vh - 40px);
+				overflow: auto;
+				padding: 22px 24px;
+				border-radius: var(--radius);
+				border: 1px solid var(--stroke2);
+				background: var(--panel);
+				box-shadow: var(--shadow);
+			}
+			.rcKicker {
+				color: var(--teal);
+				font-size: 15px;
+				font-weight: 850;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+			}
+			#rcName {
+				margin: 6px 0 8px;
+				font-size: 26px;
+				line-height: 1.15;
+			}
+			.rcDesc {
+				margin: 0 0 14px;
+				color: #c9d9df;
+				font-size: 15px;
+				line-height: 1.5;
+			}
+			.rcMeta {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+				margin-bottom: 12px;
+			}
+			.rcMeta div {
+				padding: 9px 11px;
+				border-radius: 10px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.03);
+			}
+			.rcMeta span {
+				display: block;
+				color: var(--dim);
+				font-size: 15px;
+			}
+			.rcMeta b {
+				display: block;
+				margin-top: 2px;
+				font-size: 15px;
+			}
+			.rcWhat {
+				padding: 10px 12px;
+				border-radius: 10px;
+				background: rgba(66, 213, 207, 0.075);
+				border: 1px solid rgba(66, 213, 207, 0.2);
+				font-size: 15px;
+				line-height: 1.5;
+				color: #cce5e4;
+			}
+			.rcWhat b {
+				display: block;
+				margin-bottom: 2px;
+				color: var(--ink);
+			}
+			.rcStaff {
+				margin-top: 12px;
+				display: grid;
+				gap: 2px;
+				font-size: 15px;
+			}
+			.rcStaff span {
+				color: var(--dim);
+			}
+			.rcStaff[hidden] {
+				display: none;
+			}
+			.rcFoot {
+				margin-top: 18px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 12px;
+			}
+			.rcHide {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				color: var(--dim);
+				font-size: 15px;
+				cursor: pointer;
+			}
+			.rcHide input {
+				accent-color: var(--teal);
+				width: 18px;
+				height: 18px;
+			}
+			.rcContinue {
+				border: 0;
+				border-radius: 10px;
+				padding: 10px 22px;
+				background: var(--teal);
+				color: #06231f;
+				font-size: 15px;
+				font-weight: 850;
+				cursor: pointer;
+			}
 			/* slot:tutorial */
 		</style>
 	</head>
@@ -2812,6 +2929,25 @@
 		<!-- slot:hud-controls -->
 		<!-- slot:hud-prompt -->
 		<!-- slot:roomcard -->
+		<div id="roomPopup" role="dialog" aria-modal="true" aria-labelledby="rcName">
+			<div class="rcCard">
+				<div class="rcKicker" id="rcKicker"></div>
+				<h2 id="rcName"></h2>
+				<p class="rcDesc" id="rcDesc"></p>
+				<div class="rcMeta">
+					<div><span>Department zone</span><b id="rcZone"></b></div>
+					<div><span>Room type</span><b id="rcType"></b></div>
+				</div>
+				<div class="rcWhat"><b>What happens here</b><span id="rcWhat"></span></div>
+				<div class="rcStaff" id="rcStaff">
+					<b id="rcStaffName"></b><span>Walk up and press E to talk</span>
+				</div>
+				<div class="rcFoot">
+					<label class="rcHide"><input type="checkbox" id="rcHide" /> Don't show this again</label>
+					<button class="rcContinue" id="rcContinue" type="button">Continue</button>
+				</div>
+			</div>
+		</div>
 		<!-- slot:tutorial -->
 		<canvas id="scene"></canvas>
 

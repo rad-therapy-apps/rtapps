@@ -26,6 +26,7 @@ import { camera, orbit, canvas } from './scene';
 import { ROOMS, corridorAnchor, doorLabel } from './rooms';
 import type { Room } from './rooms';
 import { cleanPoints } from './helpers';
+import { noteWalkRoom } from './room-enter';
 import { roomById, player, doors, ceilings, keys, PLAYER_EYE_Y, REACH_Y } from './main';
 import { showCtQaDock } from './sdk-bridge';
 import {
@@ -580,6 +581,7 @@ export function updateWalk(dt) {
 		if (canMove(player.pos.x, nz)) player.pos.z = nz;
 	}
 	const here = roomContainingWalkPoint(player.pos.x, player.pos.z);
+	noteWalkRoom(here, dt); // the room card (hud-roomcard.ts), for every room and the lobby
 	if (here && walkCompositionReady(here) && S.walkCompositionRoomId !== here.id)
 		applyWalkConversationComposition(here, false, false);
 	if (!here) S.walkCompositionRoomId = null;
