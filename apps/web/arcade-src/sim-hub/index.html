@@ -2357,6 +2357,212 @@
 				cursor: pointer;
 			}
 			/* slot:menu */
+			#titleMenu {
+				position: fixed;
+				inset: 0;
+				z-index: 240;
+				display: none;
+				background: linear-gradient(
+					90deg,
+					rgba(6, 11, 15, 0.94) 0%,
+					rgba(6, 11, 15, 0.8) 40%,
+					rgba(6, 11, 15, 0) 60%
+				);
+			}
+			#titleMenu.show {
+				display: block;
+			}
+			.tmColumn {
+				position: absolute;
+				left: clamp(28px, 7vw, 120px);
+				top: 50%;
+				transform: translateY(-50%);
+				width: min(440px, calc(60vw - 56px));
+			}
+			.tmEyebrow {
+				color: var(--teal);
+				font-size: 15px;
+				font-weight: 850;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+			}
+			#tmTitle {
+				margin: 8px 0 6px;
+				font-size: clamp(30px, 3.6vw, 46px);
+				font-weight: 900;
+				line-height: 1.08;
+				letter-spacing: -0.02em;
+				color: var(--ink);
+			}
+			.tmSub {
+				margin: 0 0 30px;
+				color: var(--dim);
+				font-size: 17px;
+				line-height: 1.45;
+			}
+			.tmEntries {
+				display: grid;
+				gap: 10px;
+			}
+			.tmEntry {
+				display: grid;
+				gap: 4px;
+				text-align: left;
+				padding: 15px 18px;
+				border-radius: var(--radius);
+				border: 1px solid var(--stroke);
+				background: var(--panel);
+				color: var(--ink);
+				cursor: pointer;
+				transition:
+					border-color 0.15s,
+					background 0.15s,
+					transform 0.15s;
+			}
+			.tmEntry b {
+				font-size: 19px;
+			}
+			.tmEntry span {
+				color: var(--dim);
+				font-size: 15px;
+			}
+			.tmEntry:hover:not(:disabled),
+			.tmEntry:focus-visible {
+				border-color: var(--teal);
+				background: rgba(66, 213, 207, 0.12);
+				transform: translateX(4px);
+				outline: none;
+			}
+			.tmEntry:disabled {
+				cursor: default;
+				opacity: 0.55;
+			}
+			.tmFooter {
+				margin-top: 26px;
+				color: var(--dim);
+				font-size: 15px;
+			}
+			#titleMenu kbd,
+			#settingsMenu kbd {
+				color: var(--ink);
+				font-family: monospace;
+				font-size: 15px;
+				background: rgba(255, 255, 255, 0.08);
+				border: 1px solid var(--stroke);
+				padding: 1px 6px;
+				border-radius: 5px;
+			}
+			#settingsMenu {
+				position: fixed;
+				inset: 0;
+				z-index: 260;
+				display: none;
+				place-items: center;
+				background: rgba(4, 8, 11, 0.62);
+			}
+			#settingsMenu.show {
+				display: grid;
+			}
+			.setCard {
+				width: min(420px, calc(100vw - 32px));
+				max-height: calc(100vh - 40px);
+				overflow: auto;
+				display: grid;
+				gap: 10px;
+				padding: 22px;
+				border-radius: var(--radius);
+				border: 1px solid var(--stroke2);
+				background: var(--panel);
+				box-shadow: var(--shadow);
+			}
+			.setK {
+				color: var(--teal);
+				font-size: 15px;
+				font-weight: 850;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+			}
+			#setTitle {
+				margin: 0 0 6px;
+				font-size: 24px;
+			}
+			.setRow {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 11px 14px;
+				border-radius: 10px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.03);
+				font-size: 15px;
+				cursor: pointer;
+			}
+			.setRow input {
+				accent-color: var(--teal);
+				width: 20px;
+				height: 20px;
+				cursor: pointer;
+			}
+			.setBtn {
+				padding: 11px 14px;
+				border-radius: 10px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.04);
+				color: var(--ink);
+				font-size: 15px;
+				font-weight: 800;
+				text-align: left;
+				cursor: pointer;
+			}
+			.setBtn:hover,
+			.setBtn:focus-visible {
+				border-color: var(--teal);
+				outline: none;
+			}
+			.setBtn.primary {
+				background: var(--teal);
+				border-color: transparent;
+				color: #06231f;
+				text-align: center;
+			}
+			.setBtn.warn {
+				background: rgba(255, 106, 115, 0.16);
+				border-color: rgba(255, 106, 115, 0.5);
+			}
+			#setHelpPanel,
+			#setLeave {
+				display: grid;
+				gap: 8px;
+			}
+			#setHelpPanel {
+				padding: 12px 14px;
+				border-radius: 10px;
+				border: 1px solid var(--stroke);
+				background: rgba(255, 255, 255, 0.03);
+				font-size: 15px;
+				color: #c9d9df;
+			}
+			#setHelpPanel p,
+			#setLeave p {
+				margin: 0;
+				line-height: 1.45;
+			}
+			#setLeave p {
+				color: var(--amber);
+				font-size: 15px;
+			}
+			.setKeys {
+				display: grid;
+				grid-template-columns: auto 1fr;
+				gap: 6px 12px;
+				align-items: center;
+				margin-bottom: 4px;
+			}
+			.setBtn[hidden],
+			#setHelpPanel[hidden],
+			#setLeave[hidden] {
+				display: none;
+			}
 			/* slot:hud-controls */
 			/* slot:hud-prompt */
 			/* slot:roomcard */
@@ -2809,6 +3015,51 @@
 
 		<div id="copyright">© 2026 <b>RTApps</b> · Kevin Kindle · Radiation Oncology Center</div>
 		<!-- slot:menu -->
+		<div id="titleMenu" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+			<div class="tmColumn">
+				<div class="tmEyebrow">RTApps</div>
+				<h1 id="tmTitle">Radiation Oncology Center</h1>
+				<p class="tmSub">A walk-through of a working radiation therapy department</p>
+				<div class="tmEntries">
+					<button class="tmEntry" id="menuFree" type="button">
+						<b>Free Mode</b><span>Walk anywhere at your own pace and talk to the staff</span>
+					</button>
+					<button class="tmEntry" id="menuTutorial" type="button" disabled aria-disabled="true">
+						<b>Tutorial</b><span id="menuTutorialSub">Coming soon</span>
+					</button>
+				</div>
+				<div class="tmFooter"><kbd>Esc</kbd> Settings</div>
+			</div>
+		</div>
+		<div id="settingsMenu" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+			<div class="setCard">
+				<div class="setK" id="setKicker">Paused</div>
+				<h2 id="setTitle">Free Mode</h2>
+				<label class="setRow"><span>Sound</span><input type="checkbox" id="setSound" /></label>
+				<label class="setRow">
+					<span>Room introductions</span><input type="checkbox" id="setRoomCards" checked />
+				</label>
+				<button class="setBtn" id="setHelp" type="button" aria-expanded="false">Help</button>
+				<div id="setHelpPanel" hidden>
+					<div class="setKeys">
+						<kbd>W A S D</kbd><span>Move</span> <kbd>Mouse</kbd
+						><span>Look around (click the view first)</span> <kbd>Shift</kbd><span>Run</span>
+						<kbd>E</kbd><span>Talk, use or open what the prompt shows</span> <kbd>Esc</kbd
+						><span>Settings and pause</span>
+					</div>
+					<p>Walk in through the main entrance and explore the departments at your own pace.</p>
+					<p>Walk up to a staff member and press E when the prompt appears to talk with them.</p>
+					<p>Each room introduces itself as you walk in. Turn this off under Room introductions.</p>
+				</div>
+				<button class="setBtn primary" id="setResume" type="button">Resume</button>
+				<button class="setBtn" id="setMainMenu" type="button">Main menu</button>
+				<div id="setLeave" hidden>
+					<p>Leave the tutorial? Your progress in this chapter will be lost.</p>
+					<button class="setBtn warn" id="setLeaveYes" type="button">Leave</button>
+					<button class="setBtn" id="setLeaveNo" type="button">Stay</button>
+				</div>
+			</div>
+		</div>
 		<!-- slot:hud-controls -->
 		<!-- slot:hud-prompt -->
 		<!-- slot:roomcard -->

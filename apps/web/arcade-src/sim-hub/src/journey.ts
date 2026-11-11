@@ -519,6 +519,8 @@ export function journeySpeech(actor, text, kind = 'staff', ms = 10000) {
 	el._journeyTimer = setTimeout(() => (el.style.opacity = '0'), hold);
 }
 function playIntercomAudio(text) {
+	// Settings > Sound off (the default) silences the intercom beeps and speech too (sound.ts)
+	if (!AMBIENCE.on) return;
 	try {
 		initAmbience();
 		if (AMBIENCE.ctx && AMBIENCE.ctx.state !== 'running') AMBIENCE.ctx.resume().catch(() => {});
