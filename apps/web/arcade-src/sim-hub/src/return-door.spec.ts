@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { returnDoorOnBoot } from './return-door';
+import { hallwayFacing, returnDoorOnBoot } from './return-door';
+import type { WallRect } from './prompt-math';
 
 const ROOM_IDS = new Set(['linaccontrol', 'ctcontrol', 'ctsim']);
 const isRoom = (id: string) => ROOM_IDS.has(id);
@@ -61,5 +62,28 @@ describe('returnDoorOnBoot', () => {
 		};
 		installSession({ getItem: fail, setItem: fail, removeItem: fail });
 		expect(returnDoorOnBoot(isRoom)).toBe(null);
+	});
+});
+
+describe('hallwayFacing', () => {
+	const at = { x: 0, z: 0 },
+		out = { x: 0, z: 1 },
+		across: WallRect = { x: 0, z: 2, hw: 20, hd: 0.1 },
+		endAt = (x: number): WallRect => ({ x, z: 1, hw: 0.1, hd: 3 });
+
+	it('faces -x when the corridor is open that way and closed 3 m to +x', () => {
+		expect(hallwayFacing(at, out, [across, endAt(3)])).toEqual({ x: -1, z: 0 });
+	});
+
+	it('faces +x for the mirror case', () => {
+		expect(hallwayFacing(at, out, [across, endAt(-3)])).toEqual({ x: 1, z: 0 });
+	});
+
+	it('returns the door normal when both ends are closed within 1.5 m', () => {
+		expect(hallwayFacing(at, out, [across, endAt(-1.4), endAt(1.4)])).toBe(out);
+	});
+
+	it('takes the first perpendicular on a tie (no walls)', () => {
+		expect(hallwayFacing(at, out, [])).toEqual({ x: -1, z: 0 });
 	});
 });

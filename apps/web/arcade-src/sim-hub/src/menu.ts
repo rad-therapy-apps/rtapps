@@ -16,7 +16,15 @@ import * as THREE from 'three';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { roomById, player, PLAYER_EYE_Y } from './main';
-import { setMode, aimPlayerAt, doorPoint, doorNormal, requestWalkPointerLock } from './walk';
+import { hallwayFacing } from './return-door';
+import {
+	setMode,
+	aimPlayerAt,
+	doorPoint,
+	doorNormal,
+	getColliders,
+	requestWalkPointerLock
+} from './walk';
 import {
 	enterMode,
 	getPlayMode,
@@ -104,15 +112,15 @@ function onMainMenu(): void {
 	else enterMode('title');
 }
 
-/** Free Mode from a room's door: just outside it, facing the hallway (main.ts boot, task 1e). */
+/** Free Mode from a room's door: just outside it, facing along the hallway (main.ts boot, task 1e). */
 function startAtDoor(roomId: string): void {
 	const r = roomById(roomId);
 	if (!r || r.hub) return;
 	const at = doorPoint(r),
-		out = doorNormal(r);
+		dir = hallwayFacing(at, doorNormal(r), getColliders());
 	player.pos.set(at.x, PLAYER_EYE_Y, at.z);
 	camera.position.copy(player.pos);
-	aimPlayerAt(new THREE.Vector3(at.x + out.x * 5, PLAYER_EYE_Y, at.z + out.z * 5));
+	aimPlayerAt(new THREE.Vector3(at.x + dir.x * 5, PLAYER_EYE_Y, at.z + dir.z * 5));
 }
 
 function onModeChange(m: PlayMode, opts: EnterOptions): void {
