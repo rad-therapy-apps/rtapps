@@ -183,6 +183,10 @@ export function installMenu(): void {
 	byId('menuFree')?.addEventListener('click', () => enterMode('free'));
 	byId('menuTutorial')?.addEventListener('click', () => enterMode('tutorial'));
 	byId('titleMenu')?.addEventListener('keydown', onMenuKey);
+	// a click on the overlay outside the entries moves focus to body: put it back so Up/Down/Enter work
+	byId('titleMenu')?.addEventListener('click', (e) => {
+		if (!(e.target as HTMLElement).closest('.tmEntry')) byId('menuFree')?.focus();
+	});
 	registerDialog(
 		'settings',
 		() => settingsOpen,

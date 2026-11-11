@@ -292,40 +292,6 @@
 			#walkReticle.show {
 				display: block;
 			}
-			#interactPrompt {
-				position: fixed;
-				z-index: 82;
-				left: 50%;
-				bottom: 74px;
-				transform: translateX(-50%) translateY(8px);
-				opacity: 0;
-				pointer-events: none;
-				background: rgba(8, 17, 23, 0.94);
-				border: 1px solid rgba(66, 213, 207, 0.38);
-				border-radius: 11px;
-				padding: 8px 12px;
-				color: #c9d9df;
-				font-size: 15px;
-				box-shadow: var(--shadow);
-				transition: 0.16s;
-				white-space: nowrap;
-			}
-			#interactPrompt.show {
-				opacity: 1;
-				transform: translateX(-50%) translateY(0);
-			}
-			#interactPrompt b {
-				display: inline-grid;
-				place-items: center;
-				min-width: 22px;
-				height: 22px;
-				margin-right: 7px;
-				border-radius: 6px;
-				background: var(--teal);
-				color: #06231f;
-				font-size: 15px;
-			}
-
 			/* Department-orientation conversation UI */
 			#staffDialog {
 				position: fixed;
@@ -1180,22 +1146,6 @@
 				margin-top: 3px;
 				font-size: 11px;
 			}
-			.procRoomLaunch {
-				margin-top: 10px;
-				padding-top: 10px;
-				border-top: 1px solid rgba(129, 193, 214, 0.14);
-			}
-			.procRoomLaunch button {
-				width: 100%;
-				border: 1px solid rgba(66, 213, 207, 0.4);
-				background: rgba(66, 213, 207, 0.11);
-				color: #d8f7f4;
-				border-radius: 9px;
-				padding: 9px;
-				font-size: 12px;
-				font-weight: 850;
-				cursor: pointer;
-			}
 			#procedureTopBtn {
 				border: 1px solid rgba(66, 213, 207, 0.35);
 				background: rgba(66, 213, 207, 0.08);
@@ -1772,7 +1722,6 @@
 		</div>
 		<div id="watermark">RTApps</div>
 		<div id="walkReticle"></div>
-		<div id="interactPrompt"><b>E</b><span id="interactText">Interact</span></div>
 		<div id="toast"></div>
 		<div id="equipmentPanel" role="dialog" aria-labelledby="eqTitle">
 			<div class="eqHead">
@@ -1794,8 +1743,11 @@
 		<div id="kioskDialog" role="dialog" aria-modal="true">
 			<div class="kioskCard">
 				<div class="kk">RTApps Radiation Oncology Center</div>
-				<h2>Choose how to explore</h2>
-				<p>Follow a patient journey or explore the departments on your own.</p>
+				<h2>Welcome to the Radiation Oncology Center</h2>
+				<p>
+					Walk up to anyone in the center and press E to talk with them. Esc opens the settings and
+					Help.
+				</p>
 				<div class="kioskChoices">
 					<button class="full" id="kioskClose">
 						<b>Close kiosk</b>Return to the current view.
@@ -2037,7 +1989,7 @@
 			<div class="ctqa-head">
 				<div>
 					<div class="k">CT Simulation Room</div>
-					<h3>CT Room Menu</h3>
+					<h3>CT QA menu</h3>
 					<p>Opened with E at the CT scanner. Launch QA from here.</p>
 				</div>
 				<button id="ctQaClose" type="button">Close</button>

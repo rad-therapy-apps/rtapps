@@ -8,8 +8,10 @@
  * of which player the student happens to be standing in — and the educator sees it land under the
  * separate "CT simulation" activity instead; a third test asserts the simulator stays behind the
  * same auth gate as the games, and that an authed request for one of the extracted CT scan images
- * carries the plan 4c media cache header. The second test also checks that the gantry game,
- * archived on 2026-11-11, is gone from the Treatment Delivery Procedures Games shelf.
+ * carries the plan 4c media cache header; a fourth opens the hub as the seeded educator (the saved
+ * session, no new login) and checks that it starts on the title menu and that Free Mode hides it and
+ * shows the controls bar. The second test also checks that the gantry game, archived on 2026-11-11,
+ * is gone from the Treatment Delivery Procedures Games shelf.
  * Used here and why: Playwright against the running compose stack (baseURL http://localhost:8080,
  * see playwright.config.ts), same as `arcade.e2e.ts`; role/label/testid locators, no CSS
  * selectors. The real `sim-hub`/`linac-ct` apps load in their real iframes and are driven through
@@ -33,14 +35,14 @@
  * "sim-ct-scan" completion-only); the `GET /activities/by-sdk-slug/{slug}` resolver; the live
  * Simulator entry on the Simulator tab, `(app)/simulator` (`data-testid="simulator-entry"`);
  * the arcade media cache header (`cacheControlFor` in `#lib/server/arcade.ts`).
- * Works with: `./helpers` (registerStudent, signIn); the pages under apps/web/src/routes
+ * Works with: `./helpers` (registerStudent, signIn, educatorPage); the pages under apps/web/src/routes
  * ((app)/simulator, (app)/subjects/[slug]/activities/[id], (app)/educator/cohorts/[id],
  * (app)/educator/cohorts/[id]/activities/[aid]) and `#lib/activity/ExternalPlayer.svelte`; the
  * static `apps/web/static/arcade/rtapps-sdk.js` and the `apps/web/arcade/sim-hub`/`linac-ct` apps
  * it's embedded in. Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { registerStudent, signIn } from './helpers';
+import { educatorPage, registerStudent, signIn } from './helpers';
 
 const EDUCATOR = { email: 'educator@example.com', password: 'rtapps-dev-password' };
 
@@ -229,4 +231,27 @@ test('signed-out access to the simulator redirects to login, and an authed asset
 	const res = await page.request.get('/arcade/linac-ct/assets/ct-1.png');
 	expect(res.status()).toBe(200);
 	expect(res.headers()['cache-control']).toBe('private, max-age=3600');
+});
+
+test('the hub starts on the title menu, and Free Mode hides it and shows the controls bar', async ({
+	browser
+}) => {
+	test.setTimeout(180_000); // the same heavy sim-hub bundle as the tests above
+	// The seeded educator's saved session (auth.setup.ts): no new login against the shared limit.
+	const page = await educatorPage(browser);
+	await page.getByRole('link', { name: 'Simulator', exact: true }).click();
+	await page.waitForLoadState('networkidle');
+	await page.getByTestId('simulator-entry').click();
+	await expect(page).toHaveURL(/\/activities\//, { timeout: 15_000 });
+
+	const hub = page.frameLocator('iframe[title="Center QA walkthrough"]');
+	// menu.ts shows the menu once the module script has built the scene, at the very end of boot
+	await expect(hub.locator('#titleMenu')).toBeVisible({ timeout: 60_000 });
+	await expect(hub.locator('#menuTutorial')).toBeDisabled();
+	await expect(hub.locator('#controlsBar')).toBeHidden();
+
+	await hub.locator('#menuFree').click();
+	await expect(hub.locator('#titleMenu')).toBeHidden();
+	await expect(hub.locator('#controlsBar')).toBeVisible();
+	await page.context().close();
 });

@@ -129,9 +129,10 @@ describe('promptSide (viewport 1440 wide, prompt 200 wide)', () => {
 		expect(promptSide(1300, 10, 200, 1, 1440)).toEqual({ side: 'left', edge: 1290 });
 	});
 
-	it('uses the scaled width to decide', () => {
+	it('decides the side at full size, whatever the current scale', () => {
 		expect(promptSide(1100, 10, 200, 0.6, 1440).side).toBe('right');
 		expect(promptSide(1250, 10, 200, 1, 1440).side).toBe('left');
+		expect(promptSide(1250, 10, 200, 0.6, 1440).side).toBe('left');
 	});
 
 	it('never lets the left side pass the left edge: the prompt then sits at the margin', () => {

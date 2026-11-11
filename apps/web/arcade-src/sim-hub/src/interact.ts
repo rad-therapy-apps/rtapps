@@ -19,7 +19,6 @@
    ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
 import type { Room } from './rooms';
-import { getColliders } from './walk';
 import { isPaused } from './pause';
 import { PREF, writePref } from './prefs';
 import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
@@ -33,8 +32,8 @@ import {
 	EQUIPMENT_SPECS,
 	equipmentRoomName
 } from './equipment';
-import { setDoorTarget, doorCenter, doorNormal, nearestDoor } from './walk';
-import { player, doors, HANDOFFS, REACH_Y } from './main';
+import { doorCenter, doorNormal, nearestDoor, getColliders } from './walk';
+import { player, HANDOFFS, REACH_Y } from './main';
 import { PROC_STATE, PROC_SITES } from './sdk-bridge';
 import {
 	focusConversationCamera,
