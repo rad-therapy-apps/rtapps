@@ -1,6 +1,6 @@
 /**
  * What this file does: the end-to-end phase-4 core loop for plan 4c (the simulator world, M8) —
- * a student enters the simulator hub from any subject page's live Simulator entry, drives a
+ * a student enters the simulator hub from the Simulator page's one card (the center), drives a
  * scored QA run through the real `window.RTApps` SDK inside the hub's own iframe, and the
  * educator sees the resulting 75% on the per-attempt Attempts row; a second scenario (the same
  * student, still signed in) navigates straight to the Treatment delivery room app and records a
@@ -92,6 +92,10 @@ test.describe
 		// as helpers.ts's registerStudent/signIn.
 		await studentPage.waitForLoadState('networkidle');
 		await expect(studentPage.getByTestId('simulator-entry')).toBeVisible();
+		// One card since 2026-11-11: the LINAC/CT simulators are reached through the center's
+		// doors, and the gantry game is archived.
+		await expect(studentPage.getByRole('main').getByRole('listitem')).toHaveCount(1);
+		await expect(studentPage.getByText('press E at the door')).toBeVisible();
 		await studentPage.getByTestId('simulator-entry').click();
 
 		// Lands on the hub activity's player (the resolver's own subject_slug/activity_id, not
