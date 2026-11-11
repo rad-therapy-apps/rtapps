@@ -20,6 +20,10 @@
    `setDoorTarget`/`doorCenter`/`doorNormal`/`beginTravel`/`nearestDoor`/`setMode` are owned by
    ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
+import type { Room } from './rooms';
+import { getColliders } from './walk';
+import { isPaused } from './pause';
+import { PROMPT_LEAD, SIGHT_END_CLEARANCE, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { ROOMS } from './rooms';
@@ -444,6 +448,8 @@ export const STAFF_GUIDES = {
 	}
 };
 
+// `opts.enabled`: the target takes part only while it returns true (the tutorial's own targets, PR 3).
+// An object whose own `visible` is false (an actor the player is playing) is never offered either.
 const interactables = [];
 export function registerInteractable(
 	object,
@@ -451,37 +457,64 @@ export function registerInteractable(
 	detail = '',
 	range = 2.5,
 	guideKey = null,
-	action = null
+	action = null,
+	opts: { enabled?: () => boolean } = {}
 ) {
-	interactables.push({ object, label, detail, range, guideKey, action });
+	interactables.push({ object, label, detail, range, guideKey, action, enabled: opts.enabled });
 	return object;
 }
-function nearestInteractable(maxD = 2.8) {
+// E works on an object within its own range but never past 2.8 m (the old nearestInteractable cap),
+// and on a door within 2.6 m (walk.ts nearestDoor). Reach is measured from a fixed 1.65 m (main.ts
+// REACH_Y), not the eye (PLAYER_EYE_Y), so every interaction range feels as before.
+const REACH_CAP = 2.8,
+	DOOR_REACH = 2.6;
+// Line of sight on the floor plan: a target with a wall between it and the player is skipped, so
+// people in the next room never show a prompt through the wall.
+const inSight = (x: number, z: number) =>
+	!segmentBlocked(player.pos.x, player.pos.z, x, z, getColliders(), SIGHT_END_CLEARANCE);
+const doorInSight = (room: Room) => {
+	const c = doorCenter(room);
+	return inSight(c.x, c.z);
+};
+function nearestInteractable(lead = 0) {
 	let best = null,
-		bd = maxD;
-	// reach is measured from a fixed 1.65 m (main.ts REACH_Y), not the eye (PLAYER_EYE_Y), so every
-	// interaction range feels as before
+		bd = Infinity;
 	const wp = new THREE.Vector3(),
 		from = new THREE.Vector3(player.pos.x, REACH_Y, player.pos.z);
 	for (const it of interactables) {
+		if (it.object.visible === false || (it.enabled && !it.enabled())) continue;
 		it.object.getWorldPosition(wp);
 		const d = from.distanceTo(wp),
-			limit = Math.min(maxD, it.range || maxD);
-		if (d < bd && d <= limit) {
+			reach = Math.min(REACH_CAP, it.range || REACH_CAP);
+		if (d < bd && d <= reach + lead && inSight(wp.x, wp.z)) {
 			bd = d;
-			best = { ...it, d, pos: wp.clone() };
+			best = { ...it, d, reach, pos: wp.clone() };
 		}
 	}
 	return best;
 }
+/** The nearest interactable or door within its reach + `lead`, decided as before: the interactable
+    wins unless the door is more than 0.25 m nearer. */
+function nearestTarget(lead: number) {
+	const it = nearestInteractable(lead),
+		// only doors that leave the hub for another simulator: every other door opens by itself as
+		// the player walks up (walk.ts updateWalk), so it gets no prompt and E leaves it alone
+		door = nearestDoor(DOOR_REACH + lead, (room) => leavesHub(room) && doorInSight(room));
+	if (it && (!door || it.d <= door.d + 0.25)) return { it, door: null };
+	return door ? { it: null, door } : null;
+}
 
 const ROOM_APP_DOORS = new Set(['LINAC Control Area', 'CT Control Room', 'CT Simulator Room']);
+/** A door that leaves the hub for another simulator, once that simulator's player URL resolved. */
+const leavesHub = (room: Room) =>
+	(!!S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) ||
+	(!!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name));
 
 export function performInteraction() {
-	if (S.mode !== 'walk') return;
-	const it = nearestInteractable();
-	const dr = nearestDoor();
-	if (it && (!dr || it.d <= dr.d + 0.25)) {
+	if (S.mode !== 'walk' || isPaused()) return;
+	const t = nearestTarget(0);
+	if (t?.it) {
+		const it = t.it;
 		if (it.guideKey && STAFF_GUIDES[it.guideKey]) {
 			openStaffDialogue(it.guideKey);
 			return;
@@ -493,54 +526,63 @@ export function performInteraction() {
 		toast(`<b>${it.label}</b><br>${it.detail || 'Interactive object'}`);
 		return;
 	}
-	if (dr) {
-		if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(dr.room.name)) {
-			// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
-			window.top.location.href = S.ROOM_APP_URL;
-			return;
-		}
-		if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(dr.room.name)) {
-			// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
-			window.top.location.href = S.CONSOLE_APP_URL;
-			return;
-		}
-		const d = doors.get(dr.room.id);
-		if (d) setDoorTarget(dr.room.id, d.target < 0.5);
-		toast(`<b>${dr.room.name}</b> · ${d?.target > 0.5 ? 'opening' : 'closing'} door`);
-	}
-}
-export function updateInteractionUI() {
-	const UI = updateInteractionUI as typeof updateInteractionUI & {
-			_ret?: boolean;
-			_p?: boolean;
-			_txt?: string;
-		},
-		ret = document.getElementById('walkReticle'),
-		p = document.getElementById('interactPrompt'),
-		txt = document.getElementById('interactText'),
-		apply = (retOn, pOn, label?) => {
-			if (UI._ret !== retOn) {
-				ret.classList.toggle('show', retOn);
-				UI._ret = retOn;
-			}
-			if (UI._p !== pOn) {
-				p.classList.toggle('show', pOn);
-				UI._p = pOn;
-			}
-			if (pOn && UI._txt !== label) {
-				txt.textContent = label;
-				UI._txt = label;
-			}
-		};
-	if (S.mode !== 'walk' || S.travel) {
-		apply(false, false);
+	if (!t?.door) return;
+	const room = t.door.room;
+	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
+		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
+		window.top.location.href = S.ROOM_APP_URL;
 		return;
 	}
-	const it = nearestInteractable(),
-		dr = nearestDoor();
-	if (it && (!dr || it.d <= dr.d + 0.25)) apply(true, true, `Interact · ${it.label}`);
-	else if (dr) apply(true, true, `Door · ${dr.room.name}`);
-	else apply(true, false);
+	if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)) {
+		// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
+		window.top.location.href = S.CONSOLE_APP_URL;
+		return;
+	}
+}
+
+/** What the E prompt shows; hud-prompt.ts places it beside `object` (or the door) every frame. */
+export type PromptTarget =
+	| {
+			kind: 'thing';
+			object: THREE.Object3D;
+			person: boolean;
+			reach: number;
+			title: string;
+			sub: string;
+	  }
+	| { kind: 'door'; room: Room; reach: number; title: string; sub: string };
+let promptTarget: PromptTarget | null = null;
+export const getPromptTarget = (): PromptTarget | null => promptTarget;
+function pickPromptTarget(): PromptTarget | null {
+	// in reach first, so a full-size prompt is always what E does; else the nearest one fading in
+	const t = nearestTarget(0) ?? nearestTarget(PROMPT_LEAD);
+	if (!t) return null;
+	if (t.door) {
+		const room = t.door.room;
+		return {
+			kind: 'door',
+			room,
+			reach: DOOR_REACH,
+			title: `Enter ${room.name}`,
+			sub: ''
+		};
+	}
+	const it = t.it,
+		guide = it.guideKey ? STAFF_GUIDES[it.guideKey] : null;
+	return {
+		kind: 'thing',
+		object: it.object,
+		person: !!it.object.userData?.npcRole,
+		reach: it.reach,
+		title: guide ? `Talk to ${guide.name}` : it.label,
+		sub: guide ? guide.role : ''
+	};
+}
+/** Every third frame (main.ts stepSimulation): the crosshair, and the E prompt's target. */
+export function updateInteractionUI() {
+	const walking = S.mode === 'walk' && !S.travel;
+	document.getElementById('walkReticle')?.classList.toggle('show', walking);
+	promptTarget = walking ? pickPromptTarget() : null;
 }
 
 export const LINAC_HEAD_LAB = {

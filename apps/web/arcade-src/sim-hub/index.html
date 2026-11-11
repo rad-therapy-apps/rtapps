@@ -2358,7 +2358,90 @@
 			}
 			/* slot:menu */
 			/* slot:hud-controls */
+			#controlsBar {
+				position: fixed;
+				z-index: 75;
+				bottom: 28px;
+				left: 50%;
+				transform: translateX(-50%);
+				opacity: 0;
+				visibility: hidden;
+				transition:
+					opacity 0.4s,
+					visibility 0s linear 0.4s;
+				background: var(--panel);
+				border: 1px solid var(--stroke);
+				border-radius: 999px;
+				padding: 8px 16px;
+				color: var(--dim);
+				font-size: 15px;
+				white-space: nowrap;
+				box-shadow: var(--shadow);
+				pointer-events: none;
+			}
+			#controlsBar.show {
+				opacity: 1;
+				visibility: visible;
+				transition: opacity 0.4s;
+			}
+			#controlsBar kbd {
+				color: var(--ink);
+				font-family: monospace;
+				font-size: 15px;
+				background: rgba(255, 255, 255, 0.07);
+				padding: 1px 5px;
+				border-radius: 4px;
+			}
 			/* slot:hud-prompt */
+			#ePrompt {
+				position: fixed;
+				left: 0;
+				top: 0;
+				z-index: 82;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 7px 11px 7px 8px;
+				border-radius: 11px;
+				border: 1px solid rgba(66, 213, 207, 0.38);
+				background: rgba(8, 17, 23, 0.9);
+				color: var(--ink);
+				font-size: 15px;
+				white-space: nowrap;
+				box-shadow: var(--shadow);
+				pointer-events: none;
+				transform-origin: 0 50%;
+				opacity: 0;
+				visibility: hidden;
+				will-change: transform, opacity;
+			}
+			#ePrompt.show {
+				visibility: visible;
+			}
+			#ePrompt b {
+				display: inline-grid;
+				place-items: center;
+				min-width: 24px;
+				height: 24px;
+				border-radius: 6px;
+				background: var(--teal);
+				color: #06231f;
+				font-size: 15px;
+			}
+			#ePrompt .epText {
+				display: grid;
+				gap: 1px;
+			}
+			#ePromptTitle {
+				font-weight: 750;
+			}
+			#ePromptSub {
+				color: var(--dim);
+				font-size: 15px;
+			}
+			#ePromptSub[hidden] {
+				display: none;
+			}
 			/* slot:roomcard */
 			/* slot:tutorial */
 		</style>
@@ -2810,7 +2893,17 @@
 		<div id="copyright">© 2026 <b>RTApps</b> · Kevin Kindle · Radiation Oncology Center</div>
 		<!-- slot:menu -->
 		<!-- slot:hud-controls -->
+		<div id="controlsBar" role="status">
+			<kbd>W A S D</kbd> move · <kbd>Mouse</kbd> look · <kbd>Shift</kbd> run · <kbd>E</kbd> interact
+			· <kbd>Esc</kbd> settings
+		</div>
 		<!-- slot:hud-prompt -->
+		<div id="ePrompt" aria-hidden="true">
+			<b>E</b
+			><span class="epText"
+				><span id="ePromptTitle"></span><small id="ePromptSub" hidden></small
+			></span>
+		</div>
 		<!-- slot:roomcard -->
 		<!-- slot:tutorial -->
 		<canvas id="scene"></canvas>
