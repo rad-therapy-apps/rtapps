@@ -1194,11 +1194,24 @@ export function furnish(room: Room) {
 			// square under the big head schematic (-z wall), with 1.0 m of floor between its back edge
 			// and the screen's low shelf (front face z -35.5)
 			desk(g, room.x, room.z - 3.04, 3.8, 0.92);
+			// the treatment head in the middle of the room on a wheeled service stand (the QA phantom
+			// cart's build), sitting on its top plate at the height its base had
+			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
+			const standMat = std(0x8d9aa3, 0.5, 0.35);
+			add(g, box(1.8, 0.06, 1.8, standMat, room.x, 0.595, room.z));
+			add(g, box(1.7, 0.04, 1.7, standMat, room.x, 0.2, room.z));
+			for (const sx of [-0.85, 0.85])
+				for (const sz of [-0.85, 0.85]) {
+					add(g, box(0.06, 0.445, 0.06, standMat, room.x + sx, 0.3425, room.z + sz));
+					const wheel = cyl(0.06, 0.06, 0.05, MAT.black, 12);
+					wheel.rotation.z = Math.PI / 2;
+					wheel.position.set(room.x + sx, 0.06, room.z + sz);
+					add(g, wheel);
+				}
 			// eslint-disable-next-line no-case-declarations -- legacy switch case, lexical decl scoped to this case only (no fallthrough)
 			const head = cyl(0.65, 0.85, 1.25, MAT.metal);
-			head.position.set(room.x + 3.2, 1.25, room.z + 2.15);
+			head.position.set(room.x, 1.25, room.z);
 			add(g, head);
-			add(g, box(1.4, 1.0, 1.1, std(0xc9d6dd, 0.72, 0.06), room.x + 3.2, 0.5, room.z + 2.15));
 			// both cabinets side by side on the +x wall across from the door, touching, drawers to the
 			// room, backs 0.02 m off the wall's face (x 12.92); the pinboard's bottom edge (y 1.40) sits
 			// just behind their tops

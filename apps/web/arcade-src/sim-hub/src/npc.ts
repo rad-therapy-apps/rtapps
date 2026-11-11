@@ -682,14 +682,17 @@ export function departmentStaff() {
 		undefined,
 		'radbio'
 	);
+	// the two engineers stand either side of the treatment head on its stand (room centre), turned
+	// to it: Alex on the door-line's +z side, Omar on its -z side (his route out to QA passes north
+	// of the stand)
 	place(
 		'engineering',
 		'LINAC Field Service Engineer',
 		'Maintains and repairs treatment-machine mechanical, electronic and RF systems.',
 		0xcaa15a,
-		0,
-		0.6,
-		Math.PI,
+		-0.4,
+		1.5,
+		2.88,
 		0xe8c09f,
 		undefined,
 		'engineering'
@@ -889,9 +892,9 @@ export function departmentStaff() {
 		'Service Technician',
 		'Assisting with LINAC service diagnostics and component inspection.',
 		0x87939c,
-		2.4,
-		-1.1,
-		-1.7,
+		0.5,
+		-1.5,
+		-0.32,
 		0x6f4933,
 		{ hairColor: 0x17110e },
 		'inspect'

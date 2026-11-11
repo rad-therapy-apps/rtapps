@@ -826,6 +826,23 @@ const PLACEMENTS = [
 		id: 'engineering desk square under the big screen',
 		pick: { size: [3.8, 0.08, 0.92], at: [8, -34.04], r: 0.01 },
 		extent: [3.8, 0.92]
+	},
+	// ...and the treatment head stands in the middle of the room on a wheeled service stand, sitting
+	// on its top plate (top y 0.625), in place of the pale block it stood in
+	{
+		id: 'engineering treatment head in the middle of the room',
+		pick: { geom: 'CylinderGeometry', size: [0.65, 0.85, 1.25], at: [8, -31], r: 0.01 },
+		minY: 0.625
+	},
+	{
+		id: 'engineering service stand top plate under the head',
+		pick: { size: [1.8, 0.06, 1.8], at: [8, -31], r: 0.01 },
+		maxY: 0.625
+	},
+	{
+		id: 'engineering pale block under the old head removed',
+		pick: { size: [1.4, 1.0, 1.1], at: [11.2, -28.85] },
+		absent: true
 	}
 ];
 
