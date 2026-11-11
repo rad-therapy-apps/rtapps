@@ -54,6 +54,9 @@ export function seatInWorld(s: SeatAnchor): SeatAnchor {
 /** The top a lying patient rests on, per room id: the CT table (ctsim), each vault couch's carbon
     insert (vault1, vault2) and the HDR exam table top (hdr). npc.ts restLyingPatient lies on it. */
 export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
+/** Each vault's room lasers (emulatorLinacShell), by room id: the tutorial turns vault 1's on for
+    Jordan's setup and off otherwise. */
+export const ROOM_LASERS: Record<string, THREE.Line[]> = {};
 /* Registers a seat of a prop centred at (x, z) in group g and turned by rot: (ox, oz) is the seat's
    offset in the prop's own frame, and the sitter faces the prop's +z turned by `turn`. */
 function addSeat(g, kind: SeatKind, x, z, rot, top, ox = 0, oz = 0, turn = 0) {
@@ -1502,6 +1505,7 @@ export function emulatorLinacShell(g, room: Room) {
 	root.add(l1);
 	const l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2), laserMat);
 	root.add(l2);
+	ROOM_LASERS[room.id] = [l1, l2];
 }
 
 export function hdrSuite(g, room: Room) {

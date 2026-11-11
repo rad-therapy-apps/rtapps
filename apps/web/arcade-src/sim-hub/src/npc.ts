@@ -12,7 +12,7 @@ import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { box, sphere, std, chestBadgeTexture, escHtml } from './helpers';
 import { scene, camera } from './scene';
 import { S } from './state';
-import { registerDutyActor, registerNpcExchange, seatActor } from './npc-behavior';
+import { registerDutyActor, registerNpcExchange, seatActor, visibleInTree } from './npc-behavior';
 import { STAFF_GUIDES, registerInteractable } from './interact';
 import { LYING_SURFACES } from './props';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
@@ -367,8 +367,9 @@ export function bubbleVis(b: NpcSpeechElement, on) {
 	if (b._rtappsObj) b._rtappsObj.visible = !!on;
 }
 export function faceNpcToward(a, b) {
-	// a seated figure keeps its seat's facing; turning it would swing its legs through the seat
-	if (a.userData.seated) return;
+	// a seated figure keeps its seat's facing; turning it would swing its legs through the seat; a
+	// lying one stays along its couch or table
+	if (a.userData.seated || a.userData.lying) return;
 	const pa = new THREE.Vector3(),
 		pb = new THREE.Vector3();
 	a.getWorldPosition(pa);
@@ -393,7 +394,8 @@ export function updateNpcLabels() {
 		if (distanceGated && n.farAway && labelFrameCount % LABEL_RECHECK_STRIDE !== 0) continue;
 		n.group.getWorldPosition(wp);
 		const d = cam.distanceTo(wp);
-		const near = d < LABEL_FADE_DIST;
+		// a hidden figure (the one the tutorial player is being) shows no label
+		const near = d < LABEL_FADE_DIST && visibleInTree(n.group);
 		n.farAway = !near;
 		if (n.lab) n.lab.visible = near;
 		/* RTApps perf pass 2: invisible CSS2D objects skip DOM transforms entirely */ n.el.style.opacity =

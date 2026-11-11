@@ -186,6 +186,12 @@ export function updateNpcExchanges(sec) {
 			bubbleVis(sc.bubbleB, false);
 			continue;
 		}
+		// a hidden partner (the figure the tutorial player is being, an empty couch) says nothing
+		if (!visibleInTree(sc.a) || !visibleInTree(sc.b)) {
+			bubbleVis(sc.bubbleA, false);
+			bubbleVis(sc.bubbleB, false);
+			continue;
+		}
 		sc.a.getWorldPosition(pa);
 		sc.b.getWorldPosition(pb);
 		const mid = pa.clone().add(pb).multiplyScalar(0.5),
@@ -866,7 +872,7 @@ function seatFree(s, actor) {
 }
 /** The seat anchor nearest the world point p within `radius`, or null; given `freeFor`, only an
     anchor no other actor is still seated on. */
-function seatNear(p, radius, freeFor = null) {
+export function seatNear(p, radius, freeFor = null) {
 	let best = null,
 		bestD = radius;
 	for (const s of SEATS) {
@@ -1188,7 +1194,8 @@ export function clearMoveQueues() {
 export function startActorHandoff(key, h) {
 	const actor = castActorForHandoff(key, h),
 		target = roomById(h.target);
-	if (!actor || !target) return;
+	// the tutorial's Jordan and vault partner follow its script, not a staff hand-over
+	if (!actor || !target || actor.userData.tutorialLocked) return;
 	// a handoff to a seat in the room a seated actor already sits in ("Have a seat" for a patient
 	// seated in the lobby): nothing to do, rather than stand up and sit down again
 	if (
