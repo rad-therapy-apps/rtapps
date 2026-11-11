@@ -8,7 +8,8 @@
  * of which player the student happens to be standing in — and the educator sees it land under the
  * separate "CT simulation" activity instead; a third test asserts the simulator stays behind the
  * same auth gate as the games, and that an authed request for one of the extracted CT scan images
- * carries the plan 4c media cache header.
+ * carries the plan 4c media cache header. The second test also checks that the gantry game,
+ * archived on 2026-11-11, is gone from the Treatment Delivery Procedures Games shelf.
  * Used here and why: Playwright against the running compose stack (baseURL http://localhost:8080,
  * see playwright.config.ts), same as `arcade.e2e.ts`; role/label/testid locators, no CSS
  * selectors. The real `sim-hub`/`linac-ct` apps load in their real iframes and are driven through
@@ -154,6 +155,10 @@ test.describe
 		// simulator-entry click above.
 		await studentPage.waitForLoadState('networkidle');
 		await expect(studentPage.getByRole('heading', { name: 'Games' })).toBeVisible();
+		// Archived on 2026-11-11: the gantry game left this shelf; the LINAC/CT activities stay.
+		await expect(
+			studentPage.getByRole('link', { name: 'Gantry Position Guessing Game' })
+		).toHaveCount(0);
 		await studentPage.getByRole('link', { name: 'Treatment delivery', exact: true }).click();
 		await expect(studentPage).toHaveURL(/\/activities\//);
 
