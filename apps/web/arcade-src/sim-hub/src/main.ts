@@ -106,6 +106,8 @@ import {
 import { applyVisibility, groupRoomContents } from './visibility';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import './sdk-bridge';
+import { isPaused } from './pause';
+import './hub-dialogs';
 
 const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();
@@ -734,9 +736,22 @@ export function stepSimulation(now: number): void {
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
 }
+// While the game is paused (pause.ts: the Esc settings, a room card) the frame loop skips
+// stepSimulation, and with it updateWalk: nobody moves and no simulation clock runs, but the frame is
+// still drawn. The NPC check calls stepSimulation directly, so it never sees a pause.
+function renderPaused(): void {
+	if (isHidden()) return;
+	clock.getDelta(); // drop the paused time, so the first step after the pause is an ordinary frame
+	// the title menu's backdrop keeps turning while the settings are open over it
+	if (S.mode === 'overview' && !JOURNEY.cameraFollow) orbit.update();
+	applyVisibility(camera);
+	renderer.render(scene, camera);
+	labelRenderer.render(scene, camera);
+}
 function animate(now) {
 	requestAnimationFrame(animate);
-	stepSimulation(now);
+	if (isPaused()) renderPaused();
+	else stepSimulation(now);
 }
 installNpcCheckHook(ROOM_CAST, stepSimulation, HANDOFFS);
 renderRoomList();
