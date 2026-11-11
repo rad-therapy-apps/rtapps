@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
 	PROMPT_LEAD,
+	inFront,
+	promptSide,
 	SIGHT_END_CLEARANCE,
 	promptVisual,
 	segmentBlocked,
@@ -91,5 +93,52 @@ describe('segmentBlocked', () => {
 	it('is clear with no walls, and for a target closer than the clearance', () => {
 		expect(segmentBlocked(-2, -2, -2, 2, [])).toBe(false);
 		expect(segmentBlocked(-2, -0.2, -2, 0.05, walls, SIGHT_END_CLEARANCE)).toBe(false);
+	});
+});
+
+describe('inFront', () => {
+	// facing -z (yaw 0), standing at the origin
+	it('is true for a target ahead, even off to one side', () => {
+		expect(inFront(0, -1, 0, 0, 0, -3)).toBe(true);
+		expect(inFront(0, -1, 0, 0, 4, -1)).toBe(true);
+	});
+
+	it('is false behind the player and level with them', () => {
+		expect(inFront(0, -1, 0, 0, 0, 3)).toBe(false);
+		expect(inFront(0, -1, 0, 0, 2, 0)).toBe(false);
+		expect(inFront(0, -1, 0, 0, 0, 0)).toBe(false);
+	});
+
+	it('measures from the eye, not the origin', () => {
+		expect(inFront(1, 0, 10, 5, 11, 5)).toBe(true);
+		expect(inFront(1, 0, 10, 5, 9, 5)).toBe(false);
+	});
+});
+
+describe('promptSide (viewport 1440 wide, prompt 200 wide)', () => {
+	it('goes right of the target when it fits', () => {
+		expect(promptSide(500, 10, 200, 1, 1440)).toEqual({ side: 'right', edge: 510 });
+	});
+
+	it('still fits right when the scaled width just reaches the margin', () => {
+		expect(promptSide(1222, 10, 200, 1, 1440).side).toBe('right');
+		expect(promptSide(1223, 10, 200, 1, 1440).side).toBe('left');
+	});
+
+	it('flips to the left when it would clip on the right, the right edge at the target minus the gap', () => {
+		expect(promptSide(1300, 10, 200, 1, 1440)).toEqual({ side: 'left', edge: 1290 });
+	});
+
+	it('uses the scaled width to decide', () => {
+		expect(promptSide(1100, 10, 200, 0.6, 1440).side).toBe('right');
+		expect(promptSide(1250, 10, 200, 1, 1440).side).toBe('left');
+	});
+
+	it('never lets the left side pass the left edge: the prompt then sits at the margin', () => {
+		expect(promptSide(300, 10, 400, 1, 500)).toEqual({ side: 'left', edge: 408 });
+	});
+
+	it('clamps a target past the right edge to the margin', () => {
+		expect(promptSide(1600, 10, 200, 1, 1440)).toEqual({ side: 'left', edge: 1432 });
 	});
 });

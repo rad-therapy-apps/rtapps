@@ -82,3 +82,38 @@ function crossesRect(ax: number, az: number, dx: number, dz: number, w: WallRect
 	}
 	return true;
 }
+
+/** Whether the target is in front of the viewer on the floor plan: the dot product of the viewing
+    direction (fx, fz) with the way to the target is positive. A target level with or behind the
+    player is never offered, so the prompt and E agree on who is in view. */
+export function inFront(
+	fx: number,
+	fz: number,
+	eyeX: number,
+	eyeZ: number,
+	tx: number,
+	tz: number
+): boolean {
+	return fx * (tx - eyeX) + fz * (tz - eyeZ) > 0;
+}
+
+/** Which side of its target the prompt sits on, and the screen x of the edge that stays fixed (the
+    left edge on the right side, the right edge on the left side). `anchorX` is the target's screen x,
+    `width` the prompt's unscaled width, `scale` its current scale (it grows away from the fixed
+    edge, toward the viewport's far side). It goes right of the target unless that would pass
+    viewW - margin; then it goes left. The edge is clamped so it never leaves the viewport. */
+export function promptSide(
+	anchorX: number,
+	gap: number,
+	width: number,
+	scale: number,
+	viewW: number,
+	margin = 8
+): { side: 'right' | 'left'; edge: number } {
+	const w = width * scale;
+	if (anchorX + gap + w <= viewW - margin) {
+		return { side: 'right', edge: Math.max(margin, anchorX + gap) };
+	}
+	const edge = Math.min(viewW - margin, Math.max(margin + w, anchorX - gap));
+	return { side: 'left', edge };
+}

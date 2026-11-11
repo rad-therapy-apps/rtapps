@@ -14,12 +14,13 @@ import { player, REACH_Y } from './main';
 import { doorCenter, doorPoint } from './walk';
 import { getPromptTarget, type PromptTarget } from './interact';
 import { onPauseChange } from './pause';
-import { promptVisual, smoothOpacity } from './prompt-math';
+import { promptSide, promptVisual, smoothOpacity } from './prompt-math';
 
 const HEAD_HALF_WIDTH = 0.12,
 	HEAD_TOP_DROP = 0.12,
 	DOOR_PROMPT_Y = 2.0,
-	GAP_PX = 10;
+	GAP_PX = 10,
+	EDGE_MARGIN_PX = 8;
 const el = document.getElementById('ePrompt'),
 	titleEl = document.getElementById('ePromptTitle'),
 	subEl = document.getElementById('ePromptSub');
@@ -34,7 +35,8 @@ let shown = 0,
 	shownScale = 0.6,
 	showing = false,
 	last: PromptTarget | null = null,
-	lastText = '';
+	lastText = '',
+	width = 0; // the prompt's unscaled width, measured when its text changes
 
 function hide(): void {
 	shown = 0;
@@ -88,6 +90,7 @@ export function updatePrompt(dt: number): void {
 				subEl.textContent = picked.sub;
 				subEl.hidden = !picked.sub;
 			}
+			width = el.offsetWidth;
 		}
 		last = picked;
 	}
@@ -106,12 +109,24 @@ export function updatePrompt(dt: number): void {
 	}
 	let gap = GAP_PX;
 	if (t.kind === 'thing' && t.person) {
+		// half the head's on-screen width; the same on either side of the head
 		right.setFromMatrixColumn(camera.matrixWorld, 0);
 		beside.copy(at).addScaledVector(right, HEAD_HALF_WIDTH).project(camera);
 		gap += (Math.abs(beside.x - onScreen.x) / 2) * innerWidth;
 	}
-	const x = ((onScreen.x + 1) / 2) * innerWidth + gap,
+	// beside the target, to its right; on its left when the prompt would run off the right edge. It
+	// grows away from the edge that stays next to the target.
+	const place = promptSide(
+			((onScreen.x + 1) / 2) * innerWidth,
+			gap,
+			width,
+			shownScale,
+			innerWidth,
+			EDGE_MARGIN_PX
+		),
+		x = place.side === 'right' ? place.edge : place.edge - width,
 		y = ((1 - onScreen.y) / 2) * innerHeight;
+	el.style.transformOrigin = place.side === 'right' ? '0 50%' : '100% 50%';
 	el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translateY(-50%) scale(${shownScale.toFixed(3)})`;
 	el.style.opacity = shown.toFixed(3);
 	if (!showing) {
