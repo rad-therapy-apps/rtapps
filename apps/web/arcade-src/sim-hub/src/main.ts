@@ -8,10 +8,7 @@ import {
 	labelRenderer,
 	orbit,
 	canvas,
-	AMBIENCE,
-	initAmbience,
 	updateAmbience,
-	ambienceProfile,
 	updatePerfFloor
 } from './scene';
 import { monumentSign, privacyChangingNook } from './props';
@@ -70,7 +67,6 @@ import {
 import {
 	performInteraction,
 	updateInteractionUI,
-	toast,
 	closeStaffDialogue,
 	resetStaffDialogue,
 	closeKioskDialog,
@@ -104,6 +100,8 @@ import {
 	updateJourneyCameraFollow
 } from './journey';
 import { applyVisibility, groupRoomContents } from './visibility';
+import { installMenu } from './menu';
+import { enterMode } from './play-mode';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import './sdk-bridge';
 import { isPaused } from './pause';
@@ -449,37 +447,7 @@ privacyChangingNook('ctsim', 37.15, -4.7, 0, 'CT PATIENT CHANGING');
 privacyChangingNook('vault1', 68.7, -14.2, Math.PI / 2, 'TREATMENT CHANGING', 1.16);
 privacyChangingNook('vault2', 68.7, 14.2, Math.PI / 2, 'TREATMENT CHANGING', 1.16);
 
-// Environment, wayfinding, and ambience
-async function toggleAmbience() {
-	initAmbience();
-	if (!AMBIENCE.ctx) {
-		toast('<b>Ambient audio unavailable in this browser.</b>');
-		return;
-	}
-	try {
-		if (AMBIENCE.ctx.state !== 'running') await AMBIENCE.ctx.resume();
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, error object intentionally unused
-	} catch (e) {
-		toast(
-			'<b>Browser audio could not be started.</b><br>Click the page once and try Ambience again.'
-		);
-		return;
-	}
-	AMBIENCE.on = !AMBIENCE.on;
-	const t = AMBIENCE.ctx.currentTime;
-	AMBIENCE.master.gain.cancelScheduledValues(t);
-	if (AMBIENCE.on) {
-		updateAmbience();
-		AMBIENCE.master.gain.setTargetAtTime(ambienceProfile().master, t, 0.08);
-	} else AMBIENCE.master.gain.setTargetAtTime(0, t, 0.1);
-	const b = document.getElementById('ambientBtn');
-	b.classList.toggle('on', AMBIENCE.on);
-	b.textContent = AMBIENCE.on ? '🔊 Ambience On' : '🔇 Ambience Off';
-	if (AMBIENCE.on)
-		toast(
-			'<b>Department ambience enabled.</b><br>You should hear a low room tone that changes between reception, CT, control, and the treatment vaults.'
-		);
-}
+// Environment and wayfinding
 
 // The three lobby blades hang over the openings you walk straight through, so each front points ↑.
 // Their backs face the hallways and point back to the lobby.
@@ -612,13 +580,8 @@ document.getElementById('linacHeadCanvas').onclick = lhCanvasClick;
 document.getElementById('linacHeadDialog').addEventListener('click', (e) => {
 	if ((e.target as HTMLElement).id === 'linacHeadDialog') closeLinacHeadLab();
 });
-document.addEventListener('keydown', (e) => {
-	if (e.key === 'Escape' && document.getElementById('linacHeadDialog').classList.contains('show'))
-		closeLinacHeadLab();
-});
 lhUpdateText();
 lhDraw();
-document.getElementById('ambientBtn').onclick = toggleAmbience;
 document.getElementById('eqClose').onclick = closeEquipmentPanel;
 document.getElementById('clinicalFocusDetails').onclick = () =>
 	CLINICAL_FOCUS.primary && showEquipmentPanel(CLINICAL_FOCUS.primary);
@@ -776,4 +739,6 @@ groupRoomContents();
 precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
-setTimeout(() => document.getElementById('studentHelp')?.classList.add('show'), 1150);
+// the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog
+installMenu();
+enterMode('title');
