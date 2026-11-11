@@ -533,6 +533,9 @@ export function updateWalk(dt) {
 		if (canMove(player.pos.x, nz)) player.pos.z = nz;
 	}
 	const here = roomContainingWalkPoint(player.pos.x, player.pos.z);
+	// the CT QA menu closes on the first frame in any other room, before that room's card is due (the
+	// vaults' conversation composition, which also closes it, only starts deep in the entrance maze)
+	if (here && here.id !== 'ctsim') showCtQaDock(false);
 	noteWalkRoom(here, dt); // the room card (hud-roomcard.ts), for every room and the lobby
 	if (here && walkCompositionReady(here) && S.walkCompositionRoomId !== here.id)
 		applyWalkConversationComposition(here, false, false);

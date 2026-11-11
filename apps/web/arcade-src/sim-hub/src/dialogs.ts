@@ -2,7 +2,7 @@
    is open and how to close it. menu.ts's Esc handler closes the open one instead of opening the
    settings, and a pointer-lock loss while one is open (a dialog frees the pointer as it opens) does
    not open the settings. They are tried in registration order: hub-dialogs.ts registers today's
-   dialogs, menu.ts the settings, hud-roomcard.ts the room card. Free of scene and DOM imports so it is
+   dialogs, hud-roomcard.ts the room card, menu.ts the settings. Free of scene and DOM imports so it is
    unit tested in Node (dialogs.spec.ts). */
 interface Dialog {
 	name: string;
