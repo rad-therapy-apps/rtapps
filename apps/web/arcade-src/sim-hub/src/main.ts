@@ -91,6 +91,7 @@ import {
 import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
 import { enterMode } from './play-mode';
+import { returnDoorOnBoot } from './return-door';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import { updatePrompt } from './hud-prompt';
 import { updateControlsBar } from './hud-controls';
@@ -668,6 +669,13 @@ groupRoomContents();
 precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
-// the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog
+// the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog;
+// back from the LINAC/CT app's Back to the Center, Free Mode starts outside the door the player left
+// through instead (return-door.ts)
 installMenu();
-enterMode('title');
+const backAtDoor = returnDoorOnBoot((id) => {
+	const r = roomById(id);
+	return !!r && !r.hub;
+});
+if (backAtDoor) enterMode('free', { atDoor: backAtDoor });
+else enterMode('title');

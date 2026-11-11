@@ -21,6 +21,7 @@ import * as THREE from 'three';
 import type { Room } from './rooms';
 import { getColliders } from './walk';
 import { isPaused } from './pause';
+import { PREF, writePref } from './prefs';
 import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
@@ -532,7 +533,9 @@ export function performInteraction() {
 	if (!t?.door) return;
 	const room = t.door.room;
 	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
-		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app.
+		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app. Its Back to the
+		// Center button brings the player back outside this door (return-door.ts).
+		writePref(PREF.returnDoor, room.id, 'session');
 		window.top.location.href = S.ROOM_APP_URL;
 		return;
 	}
