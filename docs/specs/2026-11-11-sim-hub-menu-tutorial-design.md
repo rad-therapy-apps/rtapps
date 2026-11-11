@@ -5,7 +5,7 @@
 The work ships as three PRs:
 
 1. **Menu and free mode**: the title menu, free mode, the room pop-up, the E prompt and the Esc settings menu. Also removes the old panels.
-2. **Simulator merge**: the LINAC/CT simulator is reached only from inside the center. Also archives the gantry game.
+2. **Simulator merge**: the Simulator page shows only the center, and the gantry game is archived. (The return to the door you left from is task 1e in PR 1.)
 3. **Tutorial, Chapter 1**: Jordan's treatment day, played as the patient and then the therapist.
 
 Paths are relative to `apps/web/arcade-src/sim-hub/src/` unless given in full.
@@ -369,16 +369,16 @@ The owner wants this done as fast as possible, so each PR is split into tasks th
 - `dialogs.ts`: a registry of open-able dialogs (`registerDialog(name, isOpen, close)`, `openDialogName()`), with today's dialogs registered. Esc uses it.
 - Marked slots in `index.html` (markup and CSS) where each task adds its own block.
 
-| Task | Worktree          | What                                                                                                   | Starts after              |
-| ---- | ----------------- | ------------------------------------------------------------------------------------------------------ | ------------------------- |
-| 1a   | `menu-title`      | Title menu, Esc settings, Help, Free Mode start, the boot change                                       | step 0                    |
-| 1b   | `menu-prompt`     | E prompt (beside the head, fade and grow, line of sight) and the controls bar                          | step 0                    |
-| 1c   | `menu-roomcard`   | Room pop-up, `onRoomEnter`, "Don't show this again"                                                    | step 0                    |
-| 1d   | `menu-cleanup`    | Remove the old panels, CT QA menu on E, kiosk buttons, no camera flights, null-safe journey HUD writes | step 0                    |
-| 2a   | `merge-page`      | Simulator page with one card, gantry game archived, docs                                               | nothing                   |
-| 2b   | `merge-return`    | Back to the door you left from                                                                         | 1a in `feat/sim-hub-menu` |
-| 3a   | `tutorial-core`   | `tutorial-steps.ts`, `tutorial-math.ts`, decisions, hints, their tests, the run-through check          | nothing                   |
-| 3b   | `tutorial-wiring` | Tracker, marker, role change, end card, NPC choreography in the game                                   | PR 1 merged               |
+| Task | Worktree          | What                                                                                                   | Starts after                                                                |
+| ---- | ----------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| 1a   | `menu-title`      | Title menu, Esc settings, Help, Free Mode start, the boot change                                       | step 0                                                                      |
+| 1b   | `menu-prompt`     | E prompt (beside the head, fade and grow, line of sight) and the controls bar                          | step 0                                                                      |
+| 1c   | `menu-roomcard`   | Room pop-up, `onRoomEnter`, "Don't show this again"                                                    | step 0                                                                      |
+| 1d   | `menu-cleanup`    | Remove the old panels, CT QA menu on E, kiosk buttons, no camera flights, null-safe journey HUD writes | step 0                                                                      |
+| 2a   | `merge-page`      | Simulator page with one card, gantry game archived, docs                                               | nothing                                                                     |
+| 1e   | `menu-return`     | Back to the door you left from                                                                         | 1d merged into `feat/sim-hub-menu` (part of PR 1, since it needs 1a's boot) |
+| 3a   | `tutorial-core`   | `tutorial-steps.ts`, `tutorial-math.ts`, decisions, hints, their tests, the run-through check          | nothing                                                                     |
+| 3b   | `tutorial-wiring` | Tracker, marker, role change, end card, NPC choreography in the game                                   | PR 1 merged                                                                 |
 
 PR 1's hooks that later tasks use:
 
