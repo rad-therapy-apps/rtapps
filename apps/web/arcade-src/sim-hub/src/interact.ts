@@ -21,7 +21,7 @@ import * as THREE from 'three';
 import type { Room } from './rooms';
 import { getColliders } from './walk';
 import { isPaused } from './pause';
-import { PROMPT_LEAD, SIGHT_END_CLEARANCE, segmentBlocked } from './prompt-math';
+import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { bubble } from './npc';
@@ -468,9 +468,16 @@ const REACH_CAP = 2.8,
 // people in the next room never show a prompt through the wall.
 const inSight = (x: number, z: number) =>
 	!segmentBlocked(player.pos.x, player.pos.z, x, z, getColliders(), SIGHT_END_CLEARANCE);
+// Only what is in front of the player is offered (prompt-math.ts inFront, on the floor plan), so a
+// person behind them never hides the prompt for someone in view, and E never talks to someone unseen.
+const viewDir = new THREE.Vector3();
+const inView = (x: number, z: number) => {
+	camera.getWorldDirection(viewDir);
+	return inFront(viewDir.x, viewDir.z, player.pos.x, player.pos.z, x, z);
+};
 const doorInSight = (room: Room) => {
 	const c = doorCenter(room);
-	return inSight(c.x, c.z);
+	return inSight(c.x, c.z) && inView(c.x, c.z);
 };
 function nearestInteractable(lead = 0) {
 	let best = null,
@@ -482,7 +489,7 @@ function nearestInteractable(lead = 0) {
 		it.object.getWorldPosition(wp);
 		const d = from.distanceTo(wp),
 			reach = Math.min(REACH_CAP, it.range || REACH_CAP);
-		if (d < bd && d <= reach + lead && inSight(wp.x, wp.z)) {
+		if (d < bd && d <= reach + lead && inView(wp.x, wp.z) && inSight(wp.x, wp.z)) {
 			bd = d;
 			best = { ...it, d, reach, pos: wp.clone() };
 		}
