@@ -60,10 +60,10 @@ const CHAIRS = 20,
 //           toward the wall) is 0 to 0.06 m off the wall's inner face `face`, not past it
 const PLACEMENTS = [
 	// R11: a turned cabinet shows its drawer lines on the face it turns to (engineering's east
-	// cabinet faces -x; its front is 0.2058 m from its centre)
+	// cabinets face -x; the front is 0.2058 m from the centre)
 	{
 		id: 'engineering east cabinet drawer line on its front',
-		pick: { size: [1.26, 0.02, 0.015], at: [11.744, -33], y: 0.31, r: 0.05 }
+		pick: { size: [1.26, 0.02, 0.015], at: [12.484, -31.7], y: 0.31, r: 0.05 }
 	},
 	// S and V1: the hallway blades (their front faces; the back face is 'sign-back') stop 0.05 m short
 	// of the corridor face of the room wall they stand off; the vault warning plaques hang side by
@@ -795,6 +795,53 @@ const PLACEMENTS = [
 	{
 		id: 'CT laser plaque inside the room removed',
 		pick: { geom: 'PlaneGeometry', size: [1.35, 0.82], at: [51.77, -15.3] },
+		absent: true
+	},
+	// Engineering (owner, 2026-11-10): both cabinets stand side by side on the east wall, across
+	// from the door, touching each other and facing the room; the door is clear; the desk stands
+	// square under the big screen with 1.0 m of floor between it and the screen's low shelf
+	// (z -35.5)
+	{
+		id: 'engineering cabinet by the door removed',
+		pick: { size: [1.4, 1.42, 0.42], at: [4.05, -32.9] },
+		absent: true
+	},
+	{
+		id: 'engineering cabinet on the east wall, north of the door line',
+		pick: { size: [1.4, 1.42, 0.42], at: [12.69, -31.7], r: 0.01 },
+		extent: [0.42, 1.4],
+		flush: { axis: 'x', face: 12.92, side: 'max' }
+	},
+	{
+		id: 'engineering cabinet on the east wall, south of the door line',
+		pick: { size: [1.4, 1.42, 0.42], at: [12.69, -30.3], r: 0.01 },
+		extent: [0.42, 1.4],
+		flush: { axis: 'x', face: 12.92, side: 'max' }
+	},
+	{
+		id: 'engineering south east cabinet drawer line on its front',
+		pick: { size: [1.26, 0.02, 0.015], at: [12.484, -30.3], y: 0.31, r: 0.05 }
+	},
+	{
+		id: 'engineering desk square under the big screen',
+		pick: { size: [3.8, 0.08, 0.92], at: [8, -34.04], r: 0.01 },
+		extent: [3.8, 0.92]
+	},
+	// ...and the treatment head stands in the middle of the room on a wheeled service stand, sitting
+	// on its top plate (top y 0.625), in place of the pale block it stood in
+	{
+		id: 'engineering treatment head in the middle of the room',
+		pick: { geom: 'CylinderGeometry', size: [0.65, 0.85, 1.25], at: [8, -31], r: 0.01 },
+		minY: 0.625
+	},
+	{
+		id: 'engineering service stand top plate under the head',
+		pick: { size: [1.8, 0.06, 1.8], at: [8, -31], r: 0.01 },
+		maxY: 0.625
+	},
+	{
+		id: 'engineering pale block under the old head removed',
+		pick: { size: [1.4, 1.0, 1.1], at: [11.2, -28.85] },
 		absent: true
 	}
 ];
