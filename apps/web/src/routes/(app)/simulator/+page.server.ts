@@ -1,18 +1,18 @@
 /**
  * What this file does: SSR `load` for `(app)/simulator`. Resolves the player route params of
- * the three simulator entries — the radiation oncology center (the sim-hub activity), the
- * LINAC/CT console suite, and the gantry position game — so the page can link straight to
- * each one's player.
+ * the page's one entry, the radiation oncology center (the sim-hub activity), so the page can
+ * link straight to its player.
  *
  * Used here and why: the simulators are external activities addressed by stable names, never
- * by embedded UUIDs (plan 4c): the hub and the console carry an `sdk_slug`, resolved through
- * `GET /activities/by-sdk-slug/{slug}`; the gantry game is a plain arcade game with only an
- * `arcade_slug`, resolved through `GET /activities/by-arcade-slug/{slug}`. Each lookup is
- * best-effort: a 404 (not seeded, unpublished) or a network failure leaves that entry `null`
- * and the page shows its "coming soon" placeholder, so one missing simulator never breaks the
- * page. The three lookups run in parallel.
+ * by embedded UUIDs (plan 4c): the hub carries an `sdk_slug`, resolved through
+ * `GET /activities/by-sdk-slug/{slug}`. The lookup is best-effort: a 404 (not seeded,
+ * unpublished) or a network failure leaves the entry `null` and the page shows its "coming
+ * soon" placeholder, so a missing simulator never breaks the page. The LINAC/CT console and
+ * gantry game lookups went on 2026-11-11 (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md,
+ * PR 2): the LINAC/CT simulators are reached through the center's doors, and the gantry game is
+ * archived.
  *
- * How it fits the project: `(app)/+layout.server.ts` guarantees a signed-in user. Each entry
+ * How it fits the project: `(app)/+layout.server.ts` guarantees a signed-in user. The entry
  * links to `(app)/subjects/[slug]/activities/[id]`, the same player route as the Games shelf.
  *
  * Works with: `#lib/server/api` (`apiFetch`), `@rtapps/api-client` (`SdkSlugOut`).
@@ -40,10 +40,6 @@ async function resolveEntry(event: RequestEvent, path: string): Promise<Simulato
 }
 
 export const load: PageServerLoad = async (event) => {
-	const [hub, linacConsole, gantry] = await Promise.all([
-		resolveEntry(event, '/activities/by-sdk-slug/sim-hub-qa'),
-		resolveEntry(event, '/activities/by-sdk-slug/sim-linac-fraction'),
-		resolveEntry(event, '/activities/by-arcade-slug/gantry-game')
-	]);
-	return { hub, linacConsole, gantry };
+	const hub = await resolveEntry(event, '/activities/by-sdk-slug/sim-hub-qa');
+	return { hub };
 };

@@ -25,15 +25,16 @@ it must never run against a `prod` environment by mistake.
 
 Works with: pytest-asyncio, httpx.
 Depends on: `migrated_db`, `settings` and `app` fixtures, `TEST_DATABASE_URL` and `make_client` from
-`conftest.py`; `app.seed.seed`; `app.config.Settings`; `app.cohorts.models` (Cohort,
-Enrollment); `app.attempts.models` (Attempt); `app.attempts.rollup` (ActivityResult);
+`conftest.py`; `app.seed` (seed, SEED_PASSWORD); `app.config.Settings`; `app.cohorts.models`
+(Cohort, Enrollment); `app.attempts.models` (Attempt); `app.attempts.rollup` (ActivityResult);
 `app.content.models` (Activity, Lesson); `app.content.activity_models` (DataTable, Quiz,
-Outcome, QuestionOutcome).
+Outcome, QuestionOutcome); `app.content.service` (publish_activity).
 Used by: CI `api` job in `.github/workflows/pr.yml`; `make test-api`.
 """
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 import pytest
 import pytest_asyncio
@@ -53,7 +54,8 @@ from app.cohorts.models import Cohort, Enrollment
 from app.config import Settings
 from app.content.activity_models import DataTable, Outcome, QuestionOutcome, Quiz
 from app.content.models import Activity, ContentVersion, Lesson, Subject
-from app.seed import SeedSummary, seed
+from app.content.service import publish_activity
+from app.seed import SEED_PASSWORD, SeedSummary, seed
 from tests.conftest import TEST_DATABASE_URL, make_client
 
 # Every test in this module runs on one event loop shared with the module-scoped `seeded`
@@ -763,9 +765,11 @@ async def test_seed_batch_3_side_effect_sorcerer(db: AsyncSession) -> None:
 
 
 async def test_seed_batch_3_gantry_position_guessing_game(db: AsyncSession) -> None:
-    """Plan 4b batch 3: Gantry Position Guessing Game — published, kind external, access
-    practice, config with arcade_slug and max_score (10: perfect streak of 10 correct);
-    subject is treatment-delivery-procedures; re-seeding creates 0."""
+    """Plan 4b batch 3: Gantry Position Guessing Game — kind external, access practice,
+    config with arcade_slug and max_score (10: perfect streak of 10 correct); subject is
+    treatment-delivery-procedures; re-seeding creates 0. Archived since 2026-11-11
+    (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 2): a fresh seed creates it at
+    status "archived" and never publishes it, so it has no content version."""
     activity = await db.scalar(
         select(Activity).where(
             Activity.kind == "external", Activity.title == "Gantry Position Guessing Game"
@@ -773,7 +777,8 @@ async def test_seed_batch_3_gantry_position_guessing_game(db: AsyncSession) -> N
     )
     assert activity is not None
     assert activity.kind == "external"
-    assert activity.status == "published"
+    assert activity.status == "archived"
+    assert activity.current_version_id is None
     assert activity.access == "practice"
     assert activity.config == {"arcade_slug": "gantry-game", "max_score": 10}
     subject = await db.get(Subject, activity.subject_id)
@@ -785,6 +790,77 @@ async def test_seed_batch_3_gantry_position_guessing_game(db: AsyncSession) -> N
         .where(Activity.title == "Gantry Position Guessing Game")
     )
     assert count == 1
+
+
+async def test_seed_archives_a_published_gantry_game_and_keeps_its_attempts(
+    app: FastAPI, db: AsyncSession, settings: Settings
+) -> None:
+    """A database seeded before 2026-11-11 holds the gantry game published, perhaps with
+    attempts on it. Re-running seed() flips that row to "archived" in place: no second row,
+    no new version, the attempt kept. From then on no student-facing read finds it (the
+    subject's Games shelf, the by-arcade-slug resolver, the player route, a new attempt),
+    while the student's own results still list the old attempt, and the LINAC/CT and console
+    activities on the same shelf stay listed."""
+    activity = await db.scalar(
+        select(Activity).where(
+            Activity.kind == "external", Activity.title == "Gantry Position Guessing Game"
+        )
+    )
+    educator = await db.scalar(select(User).where(User.email == "educator@example.com"))
+    student = await db.scalar(select(User).where(User.email == "student03@example.com"))
+    assert activity is not None and educator is not None and student is not None
+    # Simulate a database seeded before the archive: the game published, one submitted attempt.
+    version = await publish_activity(db, activity, educator, change_note="Initial publish")
+    attempt = Attempt(
+        user_id=student.id,
+        activity_id=activity.id,
+        content_version_id=version.id,
+        status="submitted",
+        score=7.0,
+        max_score=10.0,
+        percent=70.0,
+        submitted_at=datetime.now(UTC),
+    )
+    db.add(attempt)
+    await db.flush()
+
+    await seed(db, settings)
+    await db.refresh(activity)
+    assert activity.status == "archived"
+    assert activity.current_version_id == version.id
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Activity)
+        .where(Activity.title == "Gantry Position Guessing Game")
+    )
+    assert count == 1
+    kept = await db.scalar(
+        select(func.count()).select_from(Attempt).where(Attempt.id == attempt.id)
+    )
+    assert kept == 1
+
+    # Built here, not via conftest's `client` fixture, for the same event-loop reason as
+    # test_seed_users_can_log_in.
+    async with make_client(app, db) as client:
+        r = await client.post(
+            "/api/v1/auth/login",
+            json={"email": "student03@example.com", "password": SEED_PASSWORD},
+        )
+        assert r.status_code == 200
+        r = await client.get("/api/v1/subjects/treatment-delivery-procedures")
+        assert r.status_code == 200
+        titles = {a["title"] for a in r.json()["activities"]}
+        assert "Gantry Position Guessing Game" not in titles
+        assert {"Treatment delivery", "CT simulation", "Treatment console"} <= titles
+        r = await client.get("/api/v1/activities/by-arcade-slug/gantry-game")
+        assert r.status_code == 404
+        r = await client.get(f"/api/v1/activities/{activity.id}")
+        assert r.status_code == 404
+        r = await client.post(f"/api/v1/activities/{activity.id}/attempts")
+        assert r.status_code == 404
+        r = await client.get("/api/v1/me/results")
+        assert r.status_code == 200
+        assert str(attempt.id) in {row["attempt_id"] for row in r.json()}
 
 
 async def test_seed_batch_3_linac_component_identification(db: AsyncSession) -> None:
