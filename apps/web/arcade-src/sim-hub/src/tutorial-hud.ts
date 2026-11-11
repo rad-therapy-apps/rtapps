@@ -1,9 +1,11 @@
 /* The sim-hub tutorial's screen (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3): the
    tracker card at the top-left (role, objective, hint line, progress, step and walking distance),
    the orange marker and its screen-edge arrow, the check-in and decision dialog, the fade and the
-   role-change card, and the end card. DOM only; tutorial.ts decides what they show. The elements
-   are index.html's slot:tutorial block, looked up once at init (a headless check's stub DOM hands
-   out a new element on every lookup). */
+   role-change card, and the end card. DOM only; tutorial.ts decides what they show. The keyboard
+   focus goes to a decision's first option, to Continue when it appears and to the end card's Keep
+   exploring, so Tab and Enter work without the mouse. The elements are index.html's slot:tutorial
+   block, looked up once at init (a headless check's stub DOM hands out a new element on every
+   lookup). */
 import type { Decision, ExchangeLine, RoleInfo } from './tutorial-steps';
 import type { FeedbackKind } from './tutorial-math';
 
@@ -138,6 +140,7 @@ export function openExchange(title: string, lines: readonly ExchangeLine[]): voi
 		E.tutDialogBody.appendChild(p);
 	}
 	E.tutDialogContinue.hidden = false;
+	E.tutDialogContinue.focus?.();
 }
 
 export function openDecision(d: Decision): void {
@@ -167,6 +170,7 @@ export function openDecision(d: Decision): void {
 		optionButtons.push(b);
 	}
 	E.tutDialogContinue.hidden = true;
+	optionButtons[0]?.focus?.();
 }
 
 /** The answer's feedback: a miss marks the picked option; the answer or a right pick marks the
@@ -187,6 +191,7 @@ export function showFeedback(
 		b.disabled = done;
 	}
 	E.tutDialogContinue.hidden = !done;
+	if (done) E.tutDialogContinue.focus?.();
 }
 
 export function closeDialog(): void {
@@ -205,6 +210,7 @@ export function showRoleCard(r: RoleInfo | null): void {
 
 export function showEnd(on: boolean): void {
 	show(E.tutEnd, on);
+	if (on) E.tutEndExplore.focus?.(); // the primary button, Keep exploring
 }
 
 export function hideTutorialHud(): void {
