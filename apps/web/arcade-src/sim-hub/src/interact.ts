@@ -6,18 +6,16 @@
    kiosk dialog, the CT/QA Procedures Lab (`open/closeProcedureLab`, `proc*` helpers), the
    LINAC-head-lab teaching dialog (`open/closeLinacHeadLab`, `lh*` helpers), the equipment detail
    panel (`showEquipmentPanel`/`closeEquipmentPanel`), room inspection/composition
-   (`enable/disableRoomInspection`, `roomInspectPose`), and room info/list UI
-   (`updateRoomUI`/`renderRoomList`/`updateFacilityInfo`/`bindPanelToggle`/
-   `bindProcedureRoomButtons`/`bindRoomEquipmentButtons`/`roomEquipmentMarkup`). Verbatim
+   (`enable/disableRoomInspection`, `roomInspectPose`). Verbatim
    extractions from main.js. `ROOM_APP_DOORS` (read only by `performInteraction`) and
    `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved functions) moved along
    with their sole consumers and are not exported. A handful of symbols stay owned by main.js
    because still-resident journey/booking systems read or write them too:
    `roomById`/`player`/`doors`/`ROOM_GUIDES`/`HANDOFFS` (already exported from main.js per
    earlier tasks — task 9 moved `focusTargetsForRoom`/`focusConversationCamera`/
-   `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES`/
-   `showCtQaDock`/`syncCtQaProgress` to ./sdk-bridge.js, both imported back here).
-   `setDoorTarget`/`doorCenter`/`doorNormal`/`beginTravel`/`nearestDoor`/`setMode` are owned by
+   `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES` to
+   ./sdk-bridge.js, both imported back here).
+   `setDoorTarget`/`doorCenter`/`doorNormal`/`nearestDoor` are owned by
    ./walk.js (task 8's companion module) and imported back here. */
 import * as THREE from 'three';
 import type { Room } from './rooms';
@@ -26,19 +24,17 @@ import { isPaused } from './pause';
 import { PROMPT_LEAD, SIGHT_END_CLEARANCE, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
-import { ROOMS } from './rooms';
 import { bubble } from './npc';
 import { startActorHandoff } from './npc-behavior';
 import {
 	EQUIPMENT_BY_ID,
-	EQUIPMENT_BY_ROOM,
 	EQUIPMENT_EXPLORED,
 	EQUIPMENT_SPECS,
 	equipmentRoomName
 } from './equipment';
-import { setDoorTarget, doorCenter, doorNormal, beginTravel, nearestDoor, setMode } from './walk';
-import { roomById, player, doors, ROOM_GUIDES, HANDOFFS, REACH_Y } from './main';
-import { PROC_STATE, PROC_SITES, showCtQaDock, syncCtQaProgress } from './sdk-bridge';
+import { setDoorTarget, doorCenter, doorNormal, nearestDoor } from './walk';
+import { player, doors, HANDOFFS, REACH_Y } from './main';
+import { PROC_STATE, PROC_SITES } from './sdk-bridge';
 import {
 	focusConversationCamera,
 	applyWalkConversationComposition,
@@ -1084,16 +1080,6 @@ export function showEquipmentPanel(id) {
 export function closeEquipmentPanel() {
 	document.getElementById('equipmentPanel').classList.remove('show');
 }
-function roomEquipmentMarkup(roomId) {
-	const items = EQUIPMENT_BY_ROOM[roomId] || [];
-	if (!items.length) return '';
-	return `<div class="eqList"><div class="eqLabel">Clinical equipment in this area</div><div class="eqRoomButtons">${items.map((x) => `<button data-eqid="${x.id}">${x.label}</button>`).join('')}</div></div>`;
-}
-function bindRoomEquipmentButtons() {
-	document
-		.querySelectorAll<HTMLElement>('[data-eqid]')
-		.forEach((b) => (b.onclick = () => showEquipmentPanel(b.dataset.eqid)));
-}
 export function openKioskDialog() {
 	if (document.pointerLockElement) document.exitPointerLock();
 	document.getElementById('kioskDialog').classList.add('show');
@@ -1141,35 +1127,10 @@ export function enableRoomInspection(r) {
 	orbit.enablePan = false;
 	orbit.enabled = true;
 	orbit.update();
-	document.getElementById('roomLookHint').classList.add('show');
 }
 
 export function disableRoomInspection() {
-	document.getElementById('roomLookHint').classList.remove('show');
 	if (S.mode !== 'overview') orbit.enabled = false;
-}
-
-export function renderRoomList() {
-	const zone =
-		document.querySelector<HTMLElement>('#zoneChips button.active')?.dataset.zone || 'all';
-	const host = document.getElementById('roomList');
-	host.innerHTML = '';
-	ROOMS.filter((r) => zone === 'all' || r.zone === zone).forEach((r) => {
-		const b = document.createElement('button');
-		b.className = 'roombtn' + (S.activeRoom?.id === r.id ? ' active' : '');
-		b.style.setProperty('--rc', '#' + r.color.toString(16).padStart(6, '0'));
-		b.innerHTML = `<span class="dot"></span><span><div class="nm">${r.name}</div><div class="sb">${r.kicker}</div></span><span class="arr">›</span>`;
-		b.onclick = () => beginTravel(r);
-		host.appendChild(b);
-	});
-}
-export function updateFacilityInfo() {
-	document.getElementById('infoK').textContent = 'Welcome';
-	document.getElementById('infoTitle').textContent = 'RTApps Radiation Oncology Center';
-	document.getElementById('infoSub').textContent =
-		'Explore departments, meet the team, and follow patient journeys.';
-	document.getElementById('infoBody').innerHTML =
-		`<div class="desc">Explore a simulated radiation oncology center to see how patients, staff, equipment, and departments connect across the care pathway.</div><div class="meta"><div class="mcell"><span>Departments</span><b>${ROOMS.length}</b></div><div class="mcell"><span>Staff conversations</span><b>${Object.keys(STAFF_GUIDES).length}</b></div><div class="mcell"><span>Navigation</span><b>Overview · Guided · Walk</b></div><div class="mcell"><span>Activities</span><b>Talk · Equipment · Journeys</b></div></div><div class="roomIntro"><b>Quick start</b><br>Select a room from the left for Guided Travel, choose Walk to move freely, or start one of the patient journeys below.</div>`;
 }
 
 const PROC_CHOICES = [
@@ -1201,17 +1162,6 @@ export function procSetTab(id) {
 		.forEach((p) => p.classList.toggle('active', p.dataset.pane === id));
 	if (id === 'sitesim') procRenderSite();
 	if (id === 'release') procRefreshRelease();
-}
-function procedureRoomMarkup(roomId) {
-	if (roomId !== 'ctsim') return '';
-	return `<div class="procRoomLaunch"><button id="procedureRoomBtn">Open CT Room Menu / QA</button></div>`;
-}
-function bindProcedureRoomButtons(roomId) {
-	const b = document.getElementById('procedureRoomBtn');
-	if (!b) return;
-	b.onclick = () => {
-		if (roomId === 'ctsim') showCtQaDock(true);
-	};
 }
 function procMarkDone(id, done = true) {
 	document.querySelector(`#procTabs button[data-proc="${id}"]`)?.classList.toggle('done', !!done);
@@ -1300,42 +1250,6 @@ export function procResetAll() {
 	procRenderSite();
 }
 
-export function updateRoomUI(r) {
-	document.getElementById('infoK').textContent = r.kicker;
-	document.getElementById('infoTitle').textContent = r.name;
-	document.getElementById('infoSub').textContent =
-		r.zone === 'front'
-			? 'Patient services / front of house'
-			: r.zone === 'technical'
-				? 'Technical and support services'
-				: 'Clinical treatment services';
-	const key = ROOM_GUIDES[r.id],
-		guide = key ? STAFF_GUIDES[key] : null;
-	const profile =
-		r.id === 'vault1' || r.id === 'vault2'
-			? 'Modern LINAC treatment vault'
-			: r.id === 'hdr'
-				? 'HDR / special procedures'
-				: r.id === 'ctcontrol'
-					? 'CT operator control room'
-					: r.id === 'ctsim'
-						? 'CT simulation'
-						: 'Department area';
-	const staff = guide
-		? `<div class="staffCard"><div class="av">${guide.initials}</div><div><b>${guide.name}</b><span>${guide.role}</span></div></div>`
-		: '';
-	document.getElementById('infoBody').innerHTML =
-		`<div class="desc">${r.desc}</div><div class="meta"><div class="mcell"><span>Department zone</span><b>${r.zone === 'front' ? 'Patient Services' : r.zone === 'technical' ? 'Technical / Support' : 'Clinical'}</b></div><div class="mcell"><span>Room type</span><b>${profile}</b></div></div><div class="roomIntro"><b>What happens here</b><br>${r.what}</div>${staff}${roomEquipmentMarkup(r.id)}${procedureRoomMarkup(r.id)}<div class="iactions ${guide ? 'three' : ''}">${guide ? `<button class="talk" id="talkHere">Talk with staff</button>` : ''}<button class="primary" id="travelHere">Travel / Recenter</button><button id="overviewHere">Facility Overview</button></div>`;
-	document.getElementById('travelHere').onclick = () => beginTravel(r, false);
-	document.getElementById('overviewHere').onclick = () => setMode('overview');
-	bindRoomEquipmentButtons();
-	bindProcedureRoomButtons(r.id);
-	showCtQaDock(r.id === 'ctsim');
-	syncCtQaProgress();
-	const tb = document.getElementById('talkHere');
-	if (tb) tb.onclick = () => openStaffDialogue(key);
-}
-
 export function resetStaffDialogue(key) {
 	const g = STAFF_GUIDES[key];
 	if (!g) return;
@@ -1369,12 +1283,8 @@ export function resetStaffDialogue(key) {
 			[...hh.querySelectorAll('button')].forEach((x) => (x.disabled = true));
 			setTimeout(() => {
 				closeStaffDialogue(false);
+				// the staff member walks to the target room; the camera stays with the player
 				startActorHandoff(key, h);
-				if (h.follow && h.target) {
-					setTimeout(() => {
-						if (!S.travel) beginTravel(roomById(h.target));
-					}, 450);
-				}
 			}, 1150);
 		};
 		hh.appendChild(b);
@@ -1415,44 +1325,4 @@ export function toast(html) {
 		() => t.classList.remove('show'),
 		2300
 	);
-}
-
-export function bindPanelToggle(panelId, buttonId, collapsedLabel, expandedLabel) {
-	const panel = document.getElementById(panelId),
-		btn = document.getElementById(buttonId);
-	let handle = null;
-	if (panelId === 'infoPanel') {
-		handle = document.createElement('button');
-		handle.id = 'infoPanelHandle';
-		handle.className = 'panelToggle';
-		handle.style.position = 'fixed';
-		handle.style.right = '8px';
-		handle.style.top = '86px';
-		handle.style.zIndex = '78';
-		handle.style.display = 'none';
-		handle.textContent = '◂';
-		handle.title = 'Expand info panel';
-		document.body.appendChild(handle);
-		handle.onclick = () => {
-			panel.classList.remove('collapsed');
-			sync();
-		};
-	}
-	function sync() {
-		const collapsed = panel.classList.contains('collapsed');
-		btn.textContent = collapsed ? collapsedLabel : expandedLabel;
-		btn.title = collapsed
-			? panelId === 'roomRail'
-				? 'Expand directory'
-				: 'Expand info panel'
-			: panelId === 'roomRail'
-				? 'Collapse directory'
-				: 'Collapse info panel';
-		if (handle) handle.style.display = collapsed ? 'grid' : 'none';
-	}
-	btn.onclick = () => {
-		panel.classList.toggle('collapsed');
-		sync();
-	};
-	sync();
 }
