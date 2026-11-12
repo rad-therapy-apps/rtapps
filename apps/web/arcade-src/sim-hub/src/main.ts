@@ -90,6 +90,7 @@ import {
 } from './journey';
 import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
+import { initTutorial, updateTutorial } from './tutorial';
 import { enterMode } from './play-mode';
 import { returnDoorOnBoot } from './return-door';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
@@ -605,6 +606,7 @@ export function stepSimulation(now: number): void {
 	updateDutyAnimations(sec);
 	updateHandoffTransitions(sec);
 	updateWorkflowTransitions(sec);
+	updateTutorial(dt);
 	updateVault2Board(sec);
 	updateCtCouchMotion(sec);
 	updateJourneyCameraFollow();
@@ -673,6 +675,8 @@ setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 // back from the LINAC/CT app's Back to the Center, Free Mode starts outside the door the player left
 // through instead (return-door.ts)
 installMenu();
+// after installMenu, which starts with the Tutorial entry disabled (menu.ts)
+initTutorial();
 const backAtDoor = returnDoorOnBoot((id) => {
 	const r = roomById(id);
 	return !!r && !r.hub;
