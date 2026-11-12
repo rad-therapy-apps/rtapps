@@ -51,7 +51,7 @@ services:
   # runner came out as zero volumes ("failed to find writable volumes", every upload 500).
   # Eight 1 GB volumes is far more than dev/CI media needs and fits any disk.
   storage:
-    image: chrislusf/seaweedfs:4.48
+    image: chrislusf/seaweedfs:4.52
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
