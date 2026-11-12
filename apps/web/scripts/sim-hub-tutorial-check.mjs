@@ -5,8 +5,9 @@
 // `window.__TUTORIAL` (src/tutorial.ts), and plays Chapter 1 twice on a simulated clock
 // (performance.now and setTimeout run on it, Math.random is seeded), as sim-hub-npc-check.mjs
 // does. The player is moved to each target, turns to it and presses E (the real
-// performInteraction), answers each decision and follows Jordan on the escorts. Room introduction cards are switched off
-// through the page's own preference (localStorage simhub.roomCards.enabled = false).
+// performInteraction), answers each decision and follows Jordan on the escorts. Room introduction
+// cards are switched off through the page's own preference (localStorage
+// simhub.roomCards.enabled = false).
 //   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; the 60 s and 120 s walking hints and the 20 s E hint show; on the
 //          walk to Vault 1 the player runs ahead and Jordan waits at a stop ("Wait for Jordan");

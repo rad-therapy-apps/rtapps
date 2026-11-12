@@ -163,14 +163,7 @@ function dispatch(ev: TutorialEvent): void {
 function perform(e: Effect): void {
 	switch (e.type) {
 		case 'showStep': {
-			const st = CHAPTER_1[e.step - 1];
-			hud.showTracker({
-				role: ROLES[st.role],
-				step: st.n,
-				total: CHAPTER_1.length,
-				objective: st.objective,
-				progress: progressOf(machine)
-			});
+			showTrackerFor(CHAPTER_1[e.step - 1]);
 			route = [];
 			routeFor = '';
 			return;
@@ -235,6 +228,11 @@ function roleChange(role: Role): void {
 			hud.setFade(false);
 			after(TUTORIAL_TIMING.roleFadeMs, () => {
 				roleCardOpen = false;
+				if (role === 'therapist') {
+					// the mouse still turns the player under the card: play resumes facing the console
+					player.yaw = WORLD.therapistStart.yaw;
+					player.pitch = WORLD.therapistStart.pitch;
+				}
 				setPaused('tutorial', false);
 				dispatch({ type: 'roleChangeDone' });
 			});
@@ -264,8 +262,20 @@ function becomeRole(role: Role): void {
 	);
 	journeySpeech(JOURNEY.controlPartner, LINES.controlAlert, 'staff', 11000);
 }
+function showTrackerFor(st: Step): void {
+	hud.showTracker({
+		role: ROLES[st.role],
+		step: st.n,
+		total: CHAPTER_1.length,
+		objective: st.objective,
+		progress: progressOf(machine)
+	});
+}
 function openEnd(): void {
 	endOpen = true;
+	// the tracker behind the card shows the chapter done: a full bar and no distance left
+	showTrackerFor(CHAPTER_1[machine.step - 1]);
+	hud.setDistance('');
 	hud.placeMarker(null);
 	hud.placeEdge(null);
 	hud.showEnd(true);
@@ -619,6 +629,9 @@ function buildRoute(st: Step): Pt[] {
 	proxy.position.set(from[0], 0, from[1]);
 	const pts = curvePoints(movementPathFor(proxy, null, st.target.roomId, at(dest)));
 	const out = [...pre, ...(pts.length > 1 ? pts : [from, dest])];
+	// the next stop is the farthest one in plain sight: a rebuilt route never starts at a node
+	// already passed, and an in-room hop goes straight
+	while (out.length > 2 && !lineBlocked(out[0], out[2], getColliders())) out.splice(1, 1);
 	return out.length > 1 ? out : [p, dest];
 }
 /** The marker and the tracker's distance for this frame; returns the walking distance. */
@@ -641,22 +654,31 @@ function updateMarker(st: Step, dt: number): number {
 	const d = remainingDistance(route, stopIdx, p);
 	hud.setDistance(formatDistance(d));
 	const stop = route[stopIdx];
-	// at the last stop the E prompt or the room takes over
-	const there = stop && stopIdx === route.length - 1 && dist(p, stop) < MARKER_SWITCH_R;
-	if (machine.phase !== 'active' || !stop || there) {
+	// at the last stop the room or the E prompt takes over; an E target not yet on screen keeps the
+	// edge arrow, pointing at it, until the player turns to it and its prompt shows
+	const there = stop && stopIdx === route.length - 1 && dist(p, stop) < MARKER_SWITCH_R,
+		eTarget = there
+			? anchors.find((x) => x.step === st && x.obj.position.y !== PARKED_Y)?.obj
+			: undefined;
+	if (machine.phase !== 'active' || !stop || (there && !eTarget)) {
 		hud.placeMarker(null);
 		hud.placeEdge(null);
 		return d;
 	}
 	const label = `${st.target.place} · ${formatDistance(d)}`;
 	camera.updateMatrixWorld();
-	markerWorld.set(stop[0], 1.6, stop[1]);
+	if (eTarget) markerWorld.copy(eTarget.position);
+	else markerWorld.set(stop[0], 1.6, stop[1]);
 	const behind = markerView.copy(markerWorld).applyMatrix4(camera.matrixWorldInverse).z > 0;
 	markerWorld.project(camera);
 	const a = edgeArrow(markerWorld.x, markerWorld.y, behind, 0.06);
 	if (!a.onScreen) {
 		hud.placeMarker(null);
 		hud.placeEdge({ x: a.x, y: a.y, angle: a.angle, label });
+	} else if (eTarget) {
+		// on screen: its E prompt is there
+		hud.placeMarker(null);
+		hud.placeEdge(null);
 	} else if (lineBlocked(p, stop, getColliders())) {
 		// never through a wall: hide it and rebuild the route from here next frame
 		hud.placeMarker(null);
