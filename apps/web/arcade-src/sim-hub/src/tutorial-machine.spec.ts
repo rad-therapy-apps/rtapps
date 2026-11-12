@@ -199,7 +199,7 @@ describe('walking steps', () => {
 		});
 		let r = run(atStep(7), held(true));
 		expect(r.s.hint).toBe(WAIT_FOR_JAMIE);
-		expect(r.s.hint).toBe('Waiting for Jamie Williams to leave the vault.');
+		expect(r.s.hint).toBe('Waiting for Jamie Williams to join you.');
 		r = run(r.s, held(false));
 		expect(r.effects.at(-1)).toEqual({ type: 'hint', text: null });
 	});

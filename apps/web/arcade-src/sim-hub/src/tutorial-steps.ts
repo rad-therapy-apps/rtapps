@@ -162,7 +162,7 @@ export interface Step {
 
 export const WAIT_FOR_JORDAN = 'Wait for Jordan';
 /** Step 7's line while the player is in LINAC Control and Jamie Williams is still walking out. */
-export const WAIT_FOR_JAMIE = 'Waiting for Jamie Williams to leave the vault.';
+export const WAIT_FOR_JAMIE = 'Waiting for Jamie Williams to join you.';
 export const eHintText = (name: string): string =>
 	`Walk up to ${name} and press E when the prompt appears.`;
 
