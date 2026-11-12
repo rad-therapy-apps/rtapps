@@ -10,8 +10,9 @@
  * same auth gate as the games, and that an authed request for one of the extracted CT scan images
  * carries the plan 4c media cache header; a fourth opens the hub as the seeded educator (the saved
  * session, no new login) and checks that it starts on the title menu and that Free Mode hides it and
- * shows the controls bar. The second test also checks that the gantry game, archived on 2026-11-11,
- * is gone from the Treatment Delivery Procedures Games shelf.
+ * shows the controls bar; a fifth starts the Tutorial from the title menu and checks the tracker's
+ * step 1. The second test also checks that the gantry game, archived on 2026-11-11, is gone from the
+ * Treatment Delivery Procedures Games shelf.
  * Used here and why: Playwright against the running compose stack (baseURL http://localhost:8080,
  * see playwright.config.ts), same as `arcade.e2e.ts`; role/label/testid locators, no CSS
  * selectors. The real `sim-hub`/`linac-ct` apps load in their real iframes and are driven through
@@ -247,11 +248,35 @@ test('the hub starts on the title menu, and Free Mode hides it and shows the con
 	const hub = page.frameLocator('iframe[title="Center QA walkthrough"]');
 	// menu.ts shows the menu once the module script has built the scene, at the very end of boot
 	await expect(hub.locator('#titleMenu')).toBeVisible({ timeout: 60_000 });
-	await expect(hub.locator('#menuTutorial')).toBeDisabled();
+	await expect(hub.locator('#menuTutorial')).toBeEnabled();
 	await expect(hub.locator('#controlsBar')).toBeHidden();
 
 	await hub.locator('#menuFree').click();
 	await expect(hub.locator('#titleMenu')).toBeHidden();
 	await expect(hub.locator('#controlsBar')).toBeVisible();
+	await page.context().close();
+});
+
+test('Tutorial on the title menu starts Chapter 1 with the tracker at step 1', async ({
+	browser
+}) => {
+	test.setTimeout(180_000); // the same heavy sim-hub bundle as the tests above
+	// The seeded educator's saved session (auth.setup.ts): no new login against the shared limit.
+	const page = await educatorPage(browser);
+	await page.getByRole('link', { name: 'Simulator', exact: true }).click();
+	await page.waitForLoadState('networkidle');
+	await page.getByTestId('simulator-entry').click();
+	await expect(page).toHaveURL(/\/activities\//, { timeout: 15_000 });
+
+	const hub = page.frameLocator('iframe[title="Center QA walkthrough"]');
+	await expect(hub.locator('#titleMenu')).toBeVisible({ timeout: 60_000 });
+	await expect(hub.locator('#menuTutorial')).toBeEnabled();
+	await hub.locator('#menuTutorial').click();
+	await expect(hub.locator('#titleMenu')).toBeHidden();
+	const tracker = hub.getByTestId('tutorial-tracker');
+	await expect(tracker).toBeVisible();
+	await expect(tracker).toContainText('Step 1 of 11');
+	await expect(tracker).toContainText('Patient · Jordan Ellis');
+	await expect(tracker).toContainText('Go inside and check in at reception.');
 	await page.context().close();
 });

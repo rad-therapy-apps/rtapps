@@ -1710,6 +1710,314 @@
 				cursor: pointer;
 			}
 			/* slot:tutorial */
+			.tut-tracker {
+				position: fixed;
+				z-index: 70;
+				top: 16px;
+				left: 16px;
+				width: min(330px, calc(100vw - 32px));
+				padding: 14px 16px;
+				background: var(--panel);
+				border: 1px solid var(--stroke);
+				border-radius: var(--radius);
+				box-shadow: var(--shadow);
+				color: var(--ink);
+				display: none;
+				pointer-events: none;
+			}
+			.tut-tracker.show {
+				display: block;
+			}
+			.tut-who {
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				padding-bottom: 10px;
+				border-bottom: 1px solid var(--stroke);
+			}
+			.tut-av {
+				flex: none;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 900;
+				background: rgba(117, 184, 255, 0.2);
+				color: #9ccaff;
+				border: 1px solid rgba(117, 184, 255, 0.53);
+			}
+			.tut-k {
+				display: block;
+				font-size: 11px;
+				letter-spacing: 0.16em;
+				text-transform: uppercase;
+				color: var(--dim);
+				font-weight: 700;
+			}
+			.tut-who b {
+				display: block;
+				font-size: 16px;
+			}
+			.tut-lab {
+				margin-top: 10px;
+				font-size: 11px;
+				letter-spacing: 0.16em;
+				text-transform: uppercase;
+				color: var(--amber);
+				font-weight: 800;
+			}
+			.tut-txt {
+				margin: 4px 0;
+				font-size: 18px;
+				font-weight: 800;
+			}
+			.tut-hint {
+				display: none;
+				margin-top: 6px;
+				padding: 6px 8px;
+				border-left: 3px solid var(--amber);
+				background: rgba(255, 188, 99, 0.1);
+				font-size: 14px;
+				color: var(--ink);
+			}
+			.tut-hint.show {
+				display: block;
+			}
+			.tut-bar {
+				height: 6px;
+				margin-top: 10px;
+				border-radius: 6px;
+				overflow: hidden;
+				background: rgba(255, 255, 255, 0.12);
+			}
+			.tut-bar i {
+				display: block;
+				height: 100%;
+				width: 0;
+				background: var(--teal);
+				transition: width 0.4s;
+			}
+			.tut-meta {
+				display: flex;
+				justify-content: space-between;
+				margin-top: 6px;
+				font-size: 13px;
+				color: var(--dim);
+			}
+			.tut-marker,
+			.tut-edge {
+				position: fixed;
+				z-index: 60;
+				display: none;
+				transform: translate(-50%, -50%);
+				text-align: center;
+				pointer-events: none;
+			}
+			.tut-marker.show,
+			.tut-edge.show {
+				display: block;
+			}
+			.tut-gem {
+				width: 26px;
+				height: 26px;
+				margin: 0 auto;
+				background: var(--amber);
+				border-radius: 4px;
+				transform: rotate(45deg);
+				box-shadow: 0 0 18px rgba(255, 188, 99, 0.9);
+			}
+			.tut-arr {
+				width: 0;
+				height: 0;
+				margin: 0 auto;
+				border-top: 16px solid transparent;
+				border-bottom: 16px solid transparent;
+				border-left: 22px solid var(--amber);
+				filter: drop-shadow(0 0 8px rgba(255, 188, 99, 0.8));
+			}
+			.tut-lbl {
+				margin-top: 12px;
+				padding: 3px 9px;
+				border-radius: 6px;
+				background: rgba(0, 0, 0, 0.6);
+				color: var(--ink);
+				font-size: 15px;
+				font-weight: 800;
+				white-space: nowrap;
+			}
+			.tut-edge .tut-lbl {
+				position: absolute;
+				top: 100%;
+				left: 50%;
+				transform: translateX(-50%);
+			}
+			.tut-edge.left .tut-lbl {
+				left: 0;
+				transform: none;
+			}
+			.tut-edge.right .tut-lbl {
+				left: auto;
+				right: 0;
+				transform: none;
+			}
+			.tut-edge.bottom .tut-lbl {
+				top: auto;
+				bottom: 100%;
+				margin: 0 0 12px;
+			}
+			.tut-dialog,
+			.tut-end {
+				position: fixed;
+				z-index: 185;
+				inset: 0;
+				display: none;
+				place-items: center;
+				background: rgba(4, 8, 11, 0.45);
+			}
+			.tut-dialog.show,
+			.tut-end.show {
+				display: grid;
+			}
+			.tut-card {
+				width: min(560px, calc(100vw - 32px));
+				max-height: calc(100vh - 48px);
+				overflow: auto;
+				padding: 18px 20px;
+				background: rgba(9, 17, 23, 0.965);
+				border: 1px solid rgba(66, 213, 207, 0.38);
+				border-radius: 18px;
+				box-shadow: var(--shadow);
+				color: var(--ink);
+			}
+			.tut-title {
+				font-size: 20px;
+				font-weight: 800;
+				margin-bottom: 8px;
+			}
+			.tut-body {
+				font-size: 16px;
+				line-height: 1.45;
+			}
+			.tut-line b {
+				color: var(--teal);
+			}
+			.tut-context {
+				display: grid;
+				gap: 4px;
+				margin: 8px 0;
+			}
+			.tut-row {
+				display: flex;
+				justify-content: space-between;
+				gap: 12px;
+				padding: 5px 8px;
+				border: 1px solid var(--stroke);
+				border-radius: 8px;
+				font-size: 14px;
+			}
+			.tut-row span {
+				color: var(--dim);
+			}
+			.tut-options {
+				display: grid;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			.tut-option,
+			.tut-continue,
+			.tut-endrow button {
+				font: inherit;
+				font-size: 15px;
+				text-align: left;
+				padding: 10px 12px;
+				border-radius: 10px;
+				border: 1px solid var(--stroke2);
+				background: var(--panel2);
+				color: var(--ink);
+				cursor: pointer;
+			}
+			.tut-option:hover:not(:disabled) {
+				border-color: var(--teal);
+			}
+			.tut-option.tried {
+				border-color: var(--red);
+				opacity: 0.75;
+			}
+			.tut-option.right {
+				border-color: var(--green);
+				background: rgba(101, 221, 160, 0.14);
+			}
+			.tut-feedback {
+				display: none;
+				margin-top: 10px;
+				padding: 8px 10px;
+				border-radius: 8px;
+				font-size: 15px;
+			}
+			.tut-feedback.show {
+				display: block;
+			}
+			.tut-feedback.hint1,
+			.tut-feedback.hint2 {
+				background: rgba(255, 106, 115, 0.12);
+				border: 1px solid rgba(255, 106, 115, 0.45);
+			}
+			.tut-feedback.reveal {
+				background: rgba(255, 188, 99, 0.12);
+				border: 1px solid rgba(255, 188, 99, 0.5);
+			}
+			.tut-feedback.correct {
+				background: rgba(101, 221, 160, 0.12);
+				border: 1px solid rgba(101, 221, 160, 0.5);
+			}
+			.tut-continue {
+				margin-top: 12px;
+				float: right;
+				border-color: var(--teal);
+			}
+			.tut-fade {
+				position: fixed;
+				z-index: 230;
+				inset: 0;
+				background: #000;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.6s;
+			}
+			.tut-fade.show {
+				opacity: 1;
+			}
+			.tut-rolecard {
+				position: fixed;
+				z-index: 235;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				display: none;
+				text-align: center;
+				color: var(--ink);
+				pointer-events: none;
+			}
+			.tut-rolecard.show {
+				display: block;
+			}
+			.tut-rolecard b {
+				display: block;
+				margin-top: 8px;
+				font-size: 30px;
+				font-weight: 900;
+			}
+			.tut-endrow {
+				display: flex;
+				justify-content: flex-end;
+				gap: 10px;
+				margin-top: 16px;
+			}
+			.tut-endrow .tut-primary {
+				border-color: var(--teal);
+				background: rgba(66, 213, 207, 0.16);
+			}
 		</style>
 	</head>
 	<body>
@@ -2095,6 +2403,59 @@
 			</div>
 		</div>
 		<!-- slot:tutorial -->
+		<div id="tutTracker" class="tut-tracker" data-testid="tutorial-tracker">
+			<div class="tut-who">
+				<div id="tutAvatar" class="tut-av">JE</div>
+				<div><span class="tut-k">Your role</span><b id="tutRole">Patient · Jordan Ellis</b></div>
+			</div>
+			<div class="tut-lab">Objective</div>
+			<div id="tutObjective" class="tut-txt" aria-live="polite"></div>
+			<div id="tutHint" class="tut-hint"></div>
+			<div class="tut-bar"><i id="tutBar"></i></div>
+			<div class="tut-meta">
+				<span id="tutStep">Step 1 of 11</span><span id="tutDistance"></span>
+			</div>
+		</div>
+		<div id="tutMarker" class="tut-marker" aria-hidden="true">
+			<div class="tut-gem"></div>
+			<div id="tutMarkerLabel" class="tut-lbl"></div>
+		</div>
+		<div id="tutEdge" class="tut-edge" aria-hidden="true">
+			<div id="tutEdgeArrow" class="tut-arr"></div>
+			<div id="tutEdgeLabel" class="tut-lbl"></div>
+		</div>
+		<div
+			id="tutDialog"
+			class="tut-dialog"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="tutDialogTitle"
+		>
+			<div class="tut-card">
+				<div id="tutDialogTitle" class="tut-title"></div>
+				<div id="tutDialogBody" class="tut-body"></div>
+				<div id="tutDialogContext" class="tut-context"></div>
+				<div id="tutDialogOptions" class="tut-options"></div>
+				<div id="tutDialogFeedback" class="tut-feedback"></div>
+				<button id="tutDialogContinue" class="tut-continue" type="button" hidden>Continue</button>
+			</div>
+		</div>
+		<div id="tutFade" class="tut-fade"></div>
+		<div id="tutRoleCard" class="tut-rolecard" aria-live="polite">
+			<span class="tut-k">You are now</span><b id="tutRoleCardName"></b>
+		</div>
+		<div id="tutEnd" class="tut-end" role="dialog" aria-modal="true" aria-labelledby="tutEndTitle">
+			<div class="tut-card">
+				<div id="tutEndTitle" class="tut-title">Chapter 1 complete</div>
+				<p class="tut-body">
+					You followed Jordan’s treatment day as the patient and as the radiation therapist.
+				</p>
+				<div class="tut-endrow">
+					<button id="tutEndMenu" type="button">Main menu</button>
+					<button id="tutEndExplore" class="tut-primary" type="button">Keep exploring</button>
+				</div>
+			</div>
+		</div>
 		<canvas id="scene"></canvas>
 
 		<div id="linacHeadDialog" role="dialog" aria-modal="true" aria-labelledby="linacHeadTitle">

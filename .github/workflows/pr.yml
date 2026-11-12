@@ -128,6 +128,12 @@ jobs:
       - run: node scripts/sim-hub-npc-check.mjs
         working-directory: apps/web
         timeout-minutes: 5
+      # sim-hub tutorial run-through (PR 3): Chapter 1 played headlessly twice (wrong answers, then
+      # right); every step completes, the tutorial's walks stay clear of the walls, and leaving puts
+      # the journey actors back as the NPC check expects.
+      - run: node scripts/sim-hub-tutorial-check.mjs
+        working-directory: apps/web
+        timeout-minutes: 5
 
   # Full-stack flow: boot the dev compose stack (same file as `make dev`), seed it, run the
   # Playwright test through Caddy on :8080, always upload the report and tear down volumes.

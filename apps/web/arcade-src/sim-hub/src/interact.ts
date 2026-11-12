@@ -20,6 +20,7 @@
 import * as THREE from 'three';
 import type { Room } from './rooms';
 import { isPaused } from './pause';
+import { getPlayMode } from './play-mode';
 import { PREF, writePref } from './prefs';
 import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
 import { S } from './state';
@@ -380,9 +381,9 @@ export const STAFF_GUIDES = {
 		]
 	},
 	vault1: {
-		name: 'Morgan Reed, RTT',
+		name: 'Jamie Williams, RTT',
 		role: 'Radiation Therapist · Treatment Vault 1',
-		initials: 'MR',
+		initials: 'JW',
 		intro:
 			'I position patients on the LINAC couch, reproduce the simulation setup, acquire verification imaging and deliver the prescribed external-beam treatment.',
 		questions: [
@@ -508,10 +509,12 @@ function nearestTarget(lead: number) {
 }
 
 const ROOM_APP_DOORS = new Set(['LINAC Control Area', 'CT Control Room', 'CT Simulator Room']);
-/** A door that leaves the hub for another simulator, once that simulator's player URL resolved. */
+/** A door that leaves the hub for another simulator, once that simulator's player URL resolved;
+    none in the tutorial, where leaving would end the chapter (no prompt, and E leaves it alone). */
 const leavesHub = (room: Room) =>
-	(!!S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) ||
-	(!!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name));
+	getPlayMode() !== 'tutorial' &&
+	((!!S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) ||
+		(!!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)));
 
 export function performInteraction() {
 	if (S.mode !== 'walk' || isPaused()) return;
