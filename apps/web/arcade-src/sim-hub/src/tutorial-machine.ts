@@ -5,7 +5,7 @@
    performs (tracker, dialog, hint line, role change, world actions). It holds the hint timers and
    the decision miss counter, mirroring the CT console's validateTechnique: "Not yet." with a hint,
    a stronger hint, then the answer and its reason at the third miss. */
-import { CHAPTER_1, WAIT_FOR_JORDAN, eHintText } from './tutorial-steps';
+import { CHAPTER_1, WAIT_FOR_JAMIE, WAIT_FOR_JORDAN, eHintText } from './tutorial-steps';
 import type { Role, Step, StepAction, TargetId } from './tutorial-steps';
 import {
 	eHintDue,
@@ -42,7 +42,14 @@ export interface TutorialState {
 
 export type TutorialEvent =
 	| { type: 'start' }
-	| { type: 'tick'; dt: number; distance: number; escortAhead?: boolean }
+	| {
+			type: 'tick';
+			dt: number;
+			distance: number;
+			escortAhead?: boolean;
+			/** At the step's room, held there until Jamie Williams has walked out (step 7). */
+			heldForJamie?: boolean;
+	  }
 	| { type: 'pressedE'; target: TargetId }
 	| { type: 'reachedTarget' }
 	| { type: 'answered'; option: string }
@@ -151,11 +158,13 @@ export function reduceTutorial(
 				eHint = s.eHint || (pressE && eHintDue(near));
 			const hint = ev.escortAhead
 				? WAIT_FOR_JORDAN
-				: eHint
-					? eHintText(cur.target.name)
-					: hintLevel
-						? cur.hints[hintLevel - 1]
-						: null;
+				: ev.heldForJamie
+					? WAIT_FOR_JAMIE
+					: eHint
+						? eHintText(cur.target.name)
+						: hintLevel
+							? cur.hints[hintLevel - 1]
+							: null;
 			if (hint !== s.hint) fx.push({ type: 'hint', text: hint });
 			return out({ ...s, stuck, near, hintLevel, eHint, hint });
 		}

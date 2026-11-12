@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { OFF, progressOf, reduceTutorial } from './tutorial-machine';
 import type { Effect, TutorialEvent, TutorialState } from './tutorial-machine';
-import { CHAPTER_1, WAIT_FOR_JORDAN, eHintText } from './tutorial-steps';
+import { CHAPTER_1, WAIT_FOR_JAMIE, WAIT_FOR_JORDAN, eHintText } from './tutorial-steps';
 
 // Runs events from `s`, collecting every effect.
 function run(s: TutorialState, ...events: TutorialEvent[]) {
@@ -190,6 +190,20 @@ describe('walking steps', () => {
 		expect(r.effects.at(-1)).toEqual({ type: 'hint', text: null });
 	});
 
+	it('says the waiting line while step 7 is held for Jamie Williams', () => {
+		const held = (on: boolean): TutorialEvent => ({
+			type: 'tick',
+			dt: 0.25,
+			distance: 0,
+			heldForJamie: on
+		});
+		let r = run(atStep(7), held(true));
+		expect(r.s.hint).toBe(WAIT_FOR_JAMIE);
+		expect(r.s.hint).toBe('Waiting for Jamie Williams to leave the vault.');
+		r = run(r.s, held(false));
+		expect(r.effects.at(-1)).toEqual({ type: 'hint', text: null });
+	});
+
 	it('completes an escort when Jordan arrives', () => {
 		const r = run(atStep(5), { type: 'reachedTarget' });
 		expect(r.s.step).toBe(6);
@@ -222,7 +236,10 @@ describe('the whole chapter', () => {
 			all.push(...r.effects);
 		};
 		go({ type: 'start' });
-		while (s.phase !== 'done') {
+		// capped, so a machine that never finishes fails here instead of hanging the run
+		for (let i = 0; s.phase !== 'done'; i++) {
+			if (i >= 500)
+				throw new Error(`not done after 500 rounds: step ${s.step}, phase '${s.phase}'`);
 			const step = CHAPTER_1[s.step - 1];
 			if (s.phase === 'roleChange') go({ type: 'roleChangeDone' });
 			else if (s.phase === 'waiting') go(...ticks(1, 0));

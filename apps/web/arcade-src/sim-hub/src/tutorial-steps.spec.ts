@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { CHAPTER_1, LINES, ROLES, WORLD, eHintText } from './tutorial-steps';
+import {
+	CHAPTER_1,
+	LINES,
+	ROLES,
+	WAIT_FOR_JAMIE,
+	WAIT_FOR_JORDAN,
+	WORLD,
+	eHintText
+} from './tutorial-steps';
 import type { StepAction } from './tutorial-steps';
 
 const ACTIONS: StepAction[] = [
@@ -25,7 +33,12 @@ const ACTIONS: StepAction[] = [
 
 // every string in Chapter 1 that a player reads
 function texts(): string[] {
-	const out: string[] = [eHintText('Jordan'), ...Object.values(LINES)];
+	const out: string[] = [
+		eHintText('Jordan'),
+		WAIT_FOR_JORDAN,
+		WAIT_FOR_JAMIE,
+		...Object.values(LINES)
+	];
 	for (const s of CHAPTER_1) {
 		out.push(s.objective, s.target.place, s.target.name, ...s.hints);
 		if (s.target.label) out.push(s.target.label);

@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import { S } from './state';
 import { camera, scene } from './scene';
 import { ROOMS } from './rooms';
-import { player, PLAYER_EYE_Y, REACH_Y, PRIMARY_NPCS, roomById, doors } from './main';
+import { player, PLAYER_EYE_Y, REACH_Y, PRIMARY_NPCS, ROOM_CAST, roomById, doors } from './main';
 import {
 	aimPlayerAt,
 	getColliders,
@@ -374,6 +374,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 	lasersOn: () => setLasers(true),
 	jamieAcrossCouch: () => {
 		const v = JOURNEY.vaultTherapist;
+		journeySpeech(v, LINES.jamieSetup, 'staff', 11000);
 		moveJourneyActor(
 			v,
 			'vault1',
@@ -382,14 +383,13 @@ const ACTIONS: Record<StepAction, () => void> = {
 			() => {
 				faceNpcToward(v, JOURNEY.couchPatient);
 				poseCharacter(v, 'support');
-				journeySpeech(v, LINES.jamieSetup, 'staff', 11000);
 			},
 			1.2
 		);
 	},
+	// queued behind the walk round the couch: the leaving line is a cue, said as this walk starts
 	jamieToControl: () => {
 		const v = JOURNEY.vaultTherapist;
-		journeySpeech(v, LINES.jamieLeaving, 'staff', 10000);
 		moveJourneyActor(
 			v,
 			'vault1',
@@ -399,11 +399,13 @@ const ACTIONS: Record<StepAction, () => void> = {
 				v.rotation.y = -Math.PI / 2; // facing the console
 				poseCharacter(v, 'console');
 			},
-			1.88
+			1.88,
+			{ cues: [{ at: 0, text: LINES.jamieLeaving, ms: 10000 }] }
 		);
 	},
 	holdVaultClosed: () => {
 		vaultHeld = true;
+		hideElena(true);
 		setDoorTarget('vault1', false);
 		workflowState(
 			'vault1',
@@ -452,6 +454,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 	},
 	releaseVaultDoor: () => {
 		vaultHeld = false;
+		hideElena(false);
 	},
 	jamieBackIn: () => {
 		const v = JOURNEY.vaultTherapist;
@@ -494,6 +497,24 @@ const ACTIONS: Record<StepAction, () => void> = {
 	},
 	jordanThanks: () => journeySpeech(JOURNEY.patient, LINES.jordanThanks, 'patient', 10000)
 };
+
+/* Elena Torres, Jamie Williams's partner beside the couch, is out of sight while the vault door is
+   shut for the beam: Jordan stays alone in the vault, and LINAC Control's camera feeds frame the
+   couch. Found by name (npc.ts setNamedNpcRole); nothing happens if she is not there. */
+const ELENA = 'Elena Torres';
+let elenaHidden: THREE.Object3D | null = null;
+function hideElena(hide: boolean): void {
+	if (!hide) {
+		if (elenaHidden) elenaHidden.visible = true;
+		elenaHidden = null;
+		return;
+	}
+	const e = (ROOM_CAST.vault1 ?? []).find((x) => x.g.userData.npcName === ELENA)?.g,
+		[x, z] = e ? xzOf(e) : [0, 0];
+	if (!e || !e.visible || roomContainingWalkPoint(x, z)?.id !== 'vault1') return;
+	e.visible = false;
+	elenaHidden = e;
+}
 
 /* ---- Jordan's escorts: the journey's moves, held at each door and corner for the player ---- */
 function startEscort(legs: Leg[]): void {
@@ -730,6 +751,15 @@ function ensureAnchors(): void {
 }
 
 /* ---- start, exit and the frame ---- */
+/** The people the tutorial's script speaks for, locked while it runs: no hand-over takes them and
+    they trade no background exchange lines (npc-behavior.ts startActorHandoff, updateNpcExchanges).
+    Jordan, Jamie Williams, Morgan Reed and Maya Brooks. */
+const scripted = () => [
+	JOURNEY.patient,
+	JOURNEY.vaultTherapist,
+	JOURNEY.therapist,
+	PRIMARY_NPCS.lobby
+];
 function startTutorial(): void {
 	if (active) exitTutorial();
 	ensureAnchors();
@@ -737,8 +767,7 @@ function startTutorial(): void {
 	active = true;
 	JOURNEY.patient.visible = false; // the player is Jordan
 	JOURNEY.couchPatient.visible = false; // the couch stays empty until Jordan lies down
-	JOURNEY.patient.userData.tutorialLocked = true;
-	JOURNEY.vaultTherapist.userData.tutorialLocked = true;
+	for (const a of scripted()) a.userData.tutorialLocked = true;
 	setLasers(false);
 	workflowState('linaccontrol', 'READY', 'Vault 1 scheduled for Jordan Ellis', '#42d5cf');
 	workflowState('vault1', 'AVAILABLE', 'Awaiting patient arrival', '#65dda0');
@@ -761,11 +790,10 @@ function exitTutorial(): void {
 	chair = null;
 	route = [];
 	routeFor = '';
-	for (const a of [JOURNEY.patient, JOURNEY.vaultTherapist]) {
-		a.userData.tutorialLocked = false;
-		a.userData.inHandoff = false;
-	}
+	for (const a of scripted()) a.userData.tutorialLocked = false;
+	for (const a of [JOURNEY.patient, JOURNEY.vaultTherapist]) a.userData.inHandoff = false;
 	JOURNEY.therapist.visible = true;
+	hideElena(false);
 	setLasers(true);
 	resetTreatmentJourney(true);
 }
@@ -793,12 +821,11 @@ export function updateTutorial(dt: number): void {
 		return;
 	}
 	// in LINAC Control, with Jamie Williams out of the vault too: nobody stays in for the beam
-	if (
+	const inRoom =
 		machine.phase === 'active' &&
 		st.trigger === 'enterRoom' &&
-		roomContainingWalkPoint(p[0], p[1])?.id === st.target.roomId &&
-		!actorHasTransition(JOURNEY.vaultTherapist)
-	) {
+		roomContainingWalkPoint(p[0], p[1])?.id === st.target.roomId;
+	if (inRoom && !actorHasTransition(JOURNEY.vaultTherapist)) {
 		dispatch({ type: 'reachedTarget' });
 		return;
 	}
@@ -807,7 +834,8 @@ export function updateTutorial(dt: number): void {
 		type: 'tick',
 		dt,
 		distance: esc ? esc.remaining : d,
-		escortAhead: !!esc && escortAhead(esc.gap, d, esc.remaining)
+		escortAhead: !!esc && escortAhead(esc.gap, d, esc.remaining),
+		heldForJamie: inRoom
 	});
 }
 

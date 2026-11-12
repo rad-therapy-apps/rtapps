@@ -180,7 +180,10 @@ export function updateNpcExchanges(sec) {
 			sc.a.userData?.handoffCompleted ||
 			sc.b.userData?.handoffCompleted ||
 			sc.a.userData?.inHandoff ||
-			sc.b.userData?.inHandoff
+			sc.b.userData?.inHandoff ||
+			// the tutorial's scripted people (tutorial.ts) say only the tutorial's lines
+			sc.a.userData?.tutorialLocked ||
+			sc.b.userData?.tutorialLocked
 		) {
 			bubbleVis(sc.bubbleA, false);
 			bubbleVis(sc.bubbleB, false);

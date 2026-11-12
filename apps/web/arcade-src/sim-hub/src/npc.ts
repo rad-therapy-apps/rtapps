@@ -334,6 +334,7 @@ export function setNpcRole(group, role, detail = 'Clinical team member', guideKe
 }
 function setNamedNpcRole(group, name, role, detail = 'Clinical team member') {
 	group.userData.npcRole = role;
+	group.userData.npcName = name;
 	group.userData.interactionDetail = detail;
 	addChestBadge(group, name, role);
 	const el = document.createElement('div');
