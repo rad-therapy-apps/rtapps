@@ -785,17 +785,56 @@ function lhRound(ctx, x, y, w, h, r = 8) {
 	ctx.fill();
 	ctx.stroke();
 }
-function lhBox(ctx, id, label, x, y, w, h, fill = '#e6edf1', stroke = '#7b929e') {
+type LhText = {
+	t: string;
+	font: string;
+	color: string;
+	x: number;
+	y: number;
+	align: CanvasTextAlign;
+};
+// Clear space (px) between a box's text and its border, left and right.
+const LH_PAD = 24;
+function lhWrap(ctx, text: string, maxW: number) {
+	const lines: string[] = [];
+	let cur = '';
+	for (const word of text.split(' ')) {
+		const t = cur ? `${cur} ${word}` : word;
+		if (cur && ctx.measureText(t).width > maxW) {
+			lines.push(cur);
+			cur = word;
+		} else cur = t;
+	}
+	if (cur) lines.push(cur);
+	return lines;
+}
+// Draws a box sized to its label (never narrower than minW); the text is queued so it
+// can be painted after the beam highlight. Returns the box width.
+function lhBox(
+	ctx,
+	texts: LhText[],
+	id,
+	label,
+	cx,
+	cy,
+	minW,
+	h,
+	fill = '#e6edf1',
+	stroke = '#7b929e',
+	color = '#213944'
+) {
+	const font = '800 18px Arial';
+	ctx.font = font;
+	const w = Math.max(minW, Math.ceil(ctx.measureText(label).width) + 2 * LH_PAD);
+	const x = cx - w / 2,
+		y = cy - h / 2;
 	ctx.fillStyle = fill;
 	ctx.strokeStyle = stroke;
 	ctx.lineWidth = 2;
 	lhRound(ctx, x, y, w, h, 8);
-	ctx.fillStyle = '#213944';
-	ctx.font = '800 17px Arial';
-	ctx.textAlign = 'center';
-	ctx.textBaseline = 'middle';
-	ctx.fillText(label, x + w / 2, y + h / 2);
+	texts.push({ t: label, font, color, x: cx, y: cy, align: 'center' });
 	LINAC_HEAD_LAB.hit.push({ id, x, y, w, h });
+	return w;
 }
 export function lhDraw() {
 	const c = document.getElementById('linacHeadCanvas') as HTMLCanvasElement | null;
@@ -807,6 +846,7 @@ export function lhDraw() {
 	q.fillStyle = '#ffffff';
 	q.fillRect(0, 0, c.width, c.height);
 	LINAC_HEAD_LAB.hit = [];
+	const texts: LhText[] = [];
 	q.fillStyle = '#173844';
 	q.font = '900 28px Arial';
 	q.textAlign = 'left';
@@ -815,112 +855,161 @@ export function lhDraw() {
 	q.font = '700 16px Arial';
 	q.fillText('Generic educational treatment-head schematic · click components for details', 30, 67);
 	// accelerator / bending section
+	const wgY = 150,
+		magX = 240,
+		magY = 88,
+		magH = 156,
+		exitY = 192;
+	q.font = '900 19px Arial';
+	const magW = Math.max(220, Math.ceil(q.measureText('BENDING MAGNET').width) + 2 * LH_PAD);
+	const magCx = magX + magW / 2;
 	q.strokeStyle = '#8ba0aa';
 	q.lineWidth = 15;
 	q.beginPath();
-	q.moveTo(70, 128);
-	q.lineTo(260, 128);
-	q.stroke();
-	q.fillStyle = '#607782';
-	q.font = '800 16px Arial';
-	q.fillText('Accelerating waveguide', 72, 104);
-	q.strokeStyle = '#2f7de1';
-	q.lineWidth = 5;
-	q.beginPath();
-	q.moveTo(95, 128);
-	q.lineTo(260, 128);
-	q.quadraticCurveTo(338, 128, 338, 205);
+	q.moveTo(70, wgY);
+	q.lineTo(magX + 10, wgY);
 	q.stroke();
 	q.fillStyle = '#dfe8ec';
 	q.strokeStyle = '#728a96';
 	q.lineWidth = 2;
-	lhRound(q, 255, 92, 166, 115, 16);
-	q.fillStyle = '#183943';
-	q.font = '900 18px Arial';
-	q.textAlign = 'center';
-	q.fillText('BENDING MAGNET', 338, 113);
-	q.fillStyle = '#45626f';
-	q.font = '700 15px Arial';
-	q.fillText('turns/directs e⁻ beam', 338, 181);
-	LINAC_HEAD_LAB.hit.push({ id: 'bending', x: 255, y: 92, w: 166, h: 115 });
-	const cx = 500;
+	lhRound(q, magX, magY, magW, magH, 16);
+	q.strokeStyle = '#2f7de1';
+	q.lineWidth = 5;
+	q.beginPath();
+	q.moveTo(95, wgY);
+	q.lineTo(magCx - 60, wgY);
+	q.quadraticCurveTo(magCx, wgY, magCx, exitY);
+	q.stroke();
+	texts.push(
+		{ t: 'Accelerating', font: '800 19px Arial', color: '#3f5a66', x: 70, y: 100, align: 'left' },
+		{ t: 'waveguide', font: '800 19px Arial', color: '#3f5a66', x: 70, y: 122, align: 'left' },
+		{
+			t: 'BENDING MAGNET',
+			font: '900 19px Arial',
+			color: '#183943',
+			x: magCx,
+			y: magY + 26,
+			align: 'center'
+		},
+		{
+			t: 'turns/directs e⁻ beam',
+			font: '700 15px Arial',
+			color: '#45626f',
+			x: magCx,
+			y: magY + magH - 18,
+			align: 'center'
+		}
+	);
+	LINAC_HEAD_LAB.hit.push({ id: 'bending', x: magX, y: magY, w: magW, h: magH });
+	const cx = 610;
 	const ys = {
 		target: 155,
-		primary: 235,
+		primary: 245,
 		carousel: 322,
 		chamber: 407,
 		jaws: 485,
 		mlc: 558,
 		applicator: 620
 	};
+	const half: Record<string, number> = {};
 	// electron incoming path to head
 	q.strokeStyle = '#2f7de1';
 	q.lineWidth = 5;
 	q.beginPath();
-	q.moveTo(338, 205);
-	q.lineTo(cx, 205);
-	q.lineTo(cx, ys.target - 26);
+	q.moveTo(magCx, exitY);
+	q.lineTo(cx, exitY);
+	q.lineTo(cx, ys.target + 26);
 	q.stroke();
 	// Target / bypass
 	if (m === 'photon') {
-		lhBox(q, 'target', 'X-RAY TARGET', cx - 85, ys.target - 24, 170, 48, '#ffe0c5', '#db7a31');
+		half.target =
+			lhBox(q, texts, 'target', 'X-RAY TARGET', cx, ys.target, 200, 52, '#ffe0c5', '#db7a31') / 2;
 	} else {
 		q.save();
 		q.setLineDash([8, 6]);
 		q.strokeStyle = '#9aa9af';
-		q.strokeRect(cx - 85, ys.target - 24, 170, 48);
+		q.lineWidth = 2;
+		q.strokeRect(cx - 105, ys.target - 30, 210, 60);
 		q.restore();
-		q.fillStyle = '#607782';
-		q.font = '800 16px Arial';
-		q.textAlign = 'center';
-		q.fillText('TARGET RETRACTED / BYPASS', cx, ys.target);
-		LINAC_HEAD_LAB.hit.push({ id: 'target', x: cx - 85, y: ys.target - 24, w: 170, h: 48 });
+		texts.push(
+			{
+				t: 'TARGET RETRACTED',
+				font: '800 16px Arial',
+				color: '#566f7a',
+				x: cx,
+				y: ys.target - 10,
+				align: 'center'
+			},
+			{
+				t: '/ BYPASS',
+				font: '800 16px Arial',
+				color: '#566f7a',
+				x: cx,
+				y: ys.target + 10,
+				align: 'center'
+			}
+		);
+		half.target = 105;
+		LINAC_HEAD_LAB.hit.push({ id: 'target', x: cx - 105, y: ys.target - 30, w: 210, h: 60 });
 	}
-	lhBox(
-		q,
-		'primary',
-		'PRIMARY COLLIMATOR',
-		cx - 112,
-		ys.primary - 25,
-		224,
-		50,
-		'#dce6ea',
-		'#607985'
-	);
-	lhBox(
-		q,
-		'carousel',
-		m === 'photon' ? 'FLATTENING FILTER' : 'SCATTERING FOIL',
-		cx - 122,
-		ys.carousel - 28,
-		244,
-		56,
-		m === 'photon' ? '#eadbff' : '#fff2b7',
-		m === 'photon' ? '#7d57ba' : '#c39a16'
-	);
-	lhBox(
-		q,
-		'chamber',
-		'MONITOR ION CHAMBER',
-		cx - 116,
-		ys.chamber - 24,
-		232,
-		48,
-		'#d6ebff',
-		'#4387be'
-	);
-	// jaws
+	half.primary =
+		lhBox(
+			q,
+			texts,
+			'primary',
+			'PRIMARY COLLIMATOR',
+			cx,
+			ys.primary,
+			230,
+			50,
+			'#dce6ea',
+			'#607985'
+		) / 2;
+	half.carousel =
+		lhBox(
+			q,
+			texts,
+			'carousel',
+			m === 'photon' ? 'FLATTENING FILTER' : 'SCATTERING FOIL',
+			cx,
+			ys.carousel,
+			230,
+			56,
+			m === 'photon' ? '#eadbff' : '#fff2b7',
+			m === 'photon' ? '#7d57ba' : '#c39a16'
+		) / 2;
+	half.chamber =
+		lhBox(
+			q,
+			texts,
+			'chamber',
+			'MONITOR ION CHAMBER',
+			cx,
+			ys.chamber,
+			240,
+			50,
+			'#d6ebff',
+			'#4387be'
+		) / 2;
+	// jaws: dark blocks, so the label sits to their left on white
 	q.fillStyle = '#434f56';
 	q.strokeStyle = '#252d31';
+	q.lineWidth = 2;
 	q.fillRect(cx - 150, ys.jaws - 22, 112, 44);
 	q.fillRect(cx + 38, ys.jaws - 22, 112, 44);
 	q.strokeRect(cx - 150, ys.jaws - 22, 112, 44);
 	q.strokeRect(cx + 38, ys.jaws - 22, 112, 44);
-	q.fillStyle = '#263c46';
-	q.font = '900 17px Arial';
-	q.textAlign = 'center';
-	q.fillText('SECONDARY JAWS', cx, ys.jaws);
+	half.jaws = 150;
+	const sideLabel = (id: string, label: string, hw: number, y: number, color: string) => {
+		const font = '900 18px Arial';
+		q.font = font;
+		const endX = cx - hw - 16,
+			tw = Math.ceil(q.measureText(label).width);
+		texts.push({ t: label, font, color, x: endX, y, align: 'right' });
+		LINAC_HEAD_LAB.hit.push({ id, x: endX - tw - 8, y: y - 16, w: tw + 16, h: 32 });
+	};
 	LINAC_HEAD_LAB.hit.push({ id: 'jaws', x: cx - 150, y: ys.jaws - 26, w: 300, h: 52 });
+	sideLabel('jaws', 'SECONDARY JAWS', 150, ys.jaws, '#263c46');
 	// MLC leaves: active field shaping for photon mode; fully retracted/inactive for the conventional electron mode represented here.
 	if (m === 'photon') {
 		q.fillStyle = '#6b7680';
@@ -929,15 +1018,15 @@ export function lhDraw() {
 			q.fillRect(cx - 162, ys.mlc - 29 + i * 8, 127 - i * 7, 6);
 			q.fillRect(cx + 35 + i * 7, ys.mlc - 29 + i * 8, 127 - i * 7, 6);
 		}
-		q.fillStyle = '#263c46';
-		q.font = '900 17px Arial';
-		q.fillText('MULTILEAF COLLIMATOR (MLC)', cx, ys.mlc + 42);
+		half.mlc = 162;
+		LINAC_HEAD_LAB.hit.push({ id: 'mlc', x: cx - 183, y: ys.mlc - 32, w: 366, h: 82 });
+		sideLabel('mlc', 'MULTILEAF COLLIMATOR (MLC)', 162, ys.mlc, '#263c46');
 	} else {
 		q.fillStyle = '#9ba7ad';
 		q.strokeStyle = '#65757d';
 		for (let i = 0; i < 7; i++) {
-			q.fillRect(cx - 190, ys.mlc - 29 + i * 8, 62, 6);
-			q.fillRect(cx + 128, ys.mlc - 29 + i * 8, 62, 6);
+			q.fillRect(cx - 178, ys.mlc - 29 + i * 8, 50, 6);
+			q.fillRect(cx + 128, ys.mlc - 29 + i * 8, 50, 6);
 		}
 		q.save();
 		q.setLineDash([8, 6]);
@@ -945,27 +1034,27 @@ export function lhDraw() {
 		q.lineWidth = 2;
 		q.strokeRect(cx - 116, ys.mlc - 32, 232, 58);
 		q.restore();
-		q.fillStyle = '#4f6570';
-		q.font = '900 17px Arial';
-		q.fillText('MLC RETRACTED · INACTIVE', cx, ys.mlc + 42);
+		half.mlc = 178;
+		LINAC_HEAD_LAB.hit.push({ id: 'mlc', x: cx - 183, y: ys.mlc - 32, w: 366, h: 82 });
+		sideLabel('mlc', 'MLC RETRACTED · INACTIVE', 178, ys.mlc, '#3f5560');
 	}
-	LINAC_HEAD_LAB.hit.push({ id: 'mlc', x: cx - 195, y: ys.mlc - 32, w: 390, h: 82 });
 	if (m === 'electron') {
-		q.strokeStyle = '#47947f';
-		q.lineWidth = 3;
-		q.strokeRect(cx - 116, ys.applicator - 18, 232, 37);
-		q.fillStyle = '#297865';
-		q.font = '900 16px Arial';
-		q.fillText('ELECTRON APPLICATOR / INSERT', cx, ys.applicator);
-		LINAC_HEAD_LAB.hit.push({
-			id: 'applicator',
-			x: cx - 116,
-			y: ys.applicator - 22,
-			w: 232,
-			h: 44
-		});
+		half.applicator =
+			lhBox(
+				q,
+				texts,
+				'applicator',
+				'ELECTRON APPLICATOR / INSERT',
+				cx,
+				ys.applicator,
+				232,
+				42,
+				'#dff3ec',
+				'#47947f',
+				'#1f6b59'
+			) / 2;
 	}
-	// labels right side
+	// labels right side, level with their parts
 	const labels = [
 		['target', m === 'photon' ? 'Target: e⁻ → x-rays' : 'Target bypass'],
 		['primary', 'Fixed primary collimation'],
@@ -975,45 +1064,54 @@ export function lhDraw() {
 		['mlc', m === 'photon' ? 'Field shaping / modulation' : 'MLC retracted / inactive']
 	];
 	if (m === 'electron') labels.push(['applicator', 'Electron field definition']);
-	q.textAlign = 'left';
-	q.font = '700 15px Arial';
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy destructuring pattern, 'id' unused here
-	labels.forEach(([id, lab], i) => {
-		const y = 145 + i * 69;
-		q.fillStyle = '#415b67';
-		q.fillText(lab, 700, y);
+	const lblX = 812,
+		lblFont = '700 16px Arial';
+	q.font = lblFont;
+	labels.forEach(([id, lab]) => {
+		const y = ys[id];
+		const lines = lhWrap(q, lab, 980 - lblX - 10);
+		lines.forEach((ln, i) =>
+			texts.push({
+				t: ln,
+				font: lblFont,
+				color: '#35505c',
+				x: lblX,
+				y: y + (i - (lines.length - 1) / 2) * 20,
+				align: 'left'
+			})
+		);
 		q.strokeStyle = '#b4c3c9';
 		q.lineWidth = 1.5;
 		q.beginPath();
-		q.moveTo(662, y - 5);
-		q.lineTo(690, y - 5);
+		q.moveTo(cx + half[id] + 8, y);
+		q.lineTo(lblX - 8, y);
 		q.stroke();
 	});
 	// beam path and progress highlight
 	const points: [number, number][] =
 		m === 'photon'
 			? [
-					[338, 205],
-					[500, 131],
-					[500, 180],
-					[500, 235],
-					[500, 322],
-					[500, 407],
-					[500, 485],
-					[500, 558],
-					[500, 646]
+					[magCx, exitY],
+					[cx, exitY],
+					[cx, ys.target],
+					[cx, ys.primary],
+					[cx, ys.carousel],
+					[cx, ys.chamber],
+					[cx, ys.jaws],
+					[cx, ys.mlc],
+					[cx, 646]
 				]
 			: [
-					[338, 205],
-					[500, 131],
-					[500, 180],
-					[500, 235],
-					[500, 322],
-					[500, 407],
-					[500, 485],
-					[500, 558],
-					[500, 620],
-					[500, 646]
+					[magCx, exitY],
+					[cx, exitY],
+					[cx, ys.target],
+					[cx, ys.primary],
+					[cx, ys.carousel],
+					[cx, ys.chamber],
+					[cx, ys.jaws],
+					[cx, ys.mlc],
+					[cx, ys.applicator],
+					[cx, 646]
 				];
 	q.strokeStyle = m === 'photon' ? 'rgba(242,190,39,.34)' : 'rgba(54,168,141,.34)';
 	q.lineWidth = 18;
@@ -1037,6 +1135,16 @@ export function lhDraw() {
 		}
 		q.stroke();
 	}
+	// all labels last, so the beam highlight never dims them
+	q.textBaseline = 'middle';
+	texts.forEach((tx) => {
+		q.font = tx.font;
+		q.fillStyle = tx.color;
+		q.textAlign = tx.align;
+		q.fillText(tx.t, tx.x, tx.y);
+	});
+	q.textBaseline = 'alphabetic';
+	q.textAlign = 'left';
 	// selected component outline
 	const hit = LINAC_HEAD_LAB.hit.find((h) => h.id === LINAC_HEAD_LAB.selected);
 	if (hit) {
