@@ -1,7 +1,12 @@
+import { readSide } from './side';
+
 (function () {
 	'use strict';
 	const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
 		document.getElementById(id) as T | null;
+	// Free Mode fixes: opened from a hub CT door the app is the CT simulator (brand, landing and
+	// Home Queue are the CT queue's); from LINAC Control, the LINAC one (side.ts)
+	const side = readSide();
 	const text = (id) => ($(id)?.textContent || '—').trim() || '—';
 	const checkedIn = new Set();
 	let openCaseValue = null;
@@ -66,9 +71,13 @@
 		rtv2MonitorHost = screen;
 		const shell = document.createElement('div');
 		shell.id = 'rtv2ConsoleShell';
+		const brand =
+			side === 'ct'
+				? '<b>RTApps CT Simulation</b><span>CT Simulator · Clinical Emulator</span>'
+				: '<b>RTApps LINAC Treatment</b><span>Record and Verify mode · Clinical Emulator</span>';
 		shell.innerHTML = `
       <header class="rtv2-header">
-        <div class="rtv2-brand"><span class="rtv2-radmark" aria-hidden="true">☢</span><div><b>RTApps LINAC Treatment</b><span>Record and Verify mode · Clinical Emulator</span></div></div>
+        <div class="rtv2-brand"><span class="rtv2-radmark" aria-hidden="true">☢</span><div>${brand}</div></div>
         <div class="rtv2-header-mid"><span>Primary User: Therapist</span><b id="rtv2HeaderPatient">No patient open</b></div>
         <div class="rtv2-header-right"><span id="rtv2Clock">--:--:--</span><button id="rtv2HomeBtn" type="button">Home Queue</button></div>
       </header>
@@ -225,8 +234,9 @@
 	function enterLandingQueue() {
 		const shell = $('rtv2ConsoleShell');
 		if (!shell) return;
-		$('rtv2CTHome')?.classList.remove('active');
-		$('rtv2Home')?.classList.add('active');
+		// the CT queue is workspace.ts's; from a CT door it is the landing queue
+		$('rtv2CTHome')?.classList.toggle('active', side === 'ct');
+		$('rtv2Home')?.classList.toggle('active', side !== 'ct');
 		$('rtv2Chart')?.classList.remove('active');
 		document.body.classList.add('rtv2-landing');
 		$('rtv2LINACQueueTab')?.classList.add('active');

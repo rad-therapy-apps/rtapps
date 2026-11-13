@@ -451,6 +451,28 @@ document.getElementById('rtappsBackBtn')?.addEventListener('click', () => {
 	writePref(PREF.returning, true, 'session');
 	window.top.location.href = S.HUB_URL;
 });
+// Free Mode fixes: the button sits at the top left of whichever header shows. Its markup is in
+// #appHeader (the room views); it moves before the queue header's brand on the queue screen
+// (body.rtv2-landing, console-patch.ts) and into the CT workspace's header while that covers the
+// page (workspace.ts). The observer runs before the next paint, so it never shows in the wrong one.
+(function () {
+	const back = document.getElementById('rtappsBackBtn'),
+		ctWorkspace = document.getElementById('ctSimWorkspace');
+	if (!back) return;
+	const host = () =>
+		ctWorkspace?.classList.contains('open')
+			? ctWorkspace.querySelector('.ctws-header')
+			: document.body.classList.contains('rtv2-landing')
+				? document.querySelector('#rtv2ConsoleShell .rtv2-brand')
+				: document.getElementById('appHeader');
+	const place = () => {
+		const h = host();
+		if (h && back.parentElement !== h) h.prepend(back);
+	};
+	const watch = new MutationObserver(place);
+	watch.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+	if (ctWorkspace) watch.observe(ctWorkspace, { attributes: true, attributeFilter: ['class'] });
+})();
 
 // In-room treatment monitor state. Keep these in the main module scope because
 // createTreatmentMonitor3D(), renderTreatmentMonitor(), and the case loader all share them.
