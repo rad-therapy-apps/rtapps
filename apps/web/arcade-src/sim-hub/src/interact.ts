@@ -22,7 +22,7 @@ import type { Room } from './rooms';
 import { isPaused } from './pause';
 import { getPlayMode } from './play-mode';
 import { PREF, writePref } from './prefs';
-import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
+import { SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { bubble } from './npc';
@@ -461,8 +461,10 @@ export function registerInteractable(
 	return object;
 }
 // E works on an object within its own range but never past 2.8 m (the old nearestInteractable cap),
-// and on a door within 2.6 m (walk.ts nearestDoor). Reach is measured from a fixed 1.65 m (main.ts
-// REACH_Y), not the eye (PLAYER_EYE_Y), so every interaction range feels as before.
+// and on a door within 2.6 m (walk.ts nearestDoor). Equipment is measured in 3D from a fixed 1.65 m
+// (main.ts REACH_Y), not the eye (PLAYER_EYE_Y), so its range feels as before. A person is measured
+// along the floor, from the player to their feet: their group origin sits at the floor, so the 3D
+// measure would cut a 2.4 m range to about 1.7 m, short of where the prompt shows.
 const REACH_CAP = 2.8,
 	DOOR_REACH = 2.6;
 // Line of sight on the floor plan: a target with a wall between it and the player is skipped, so
@@ -480,7 +482,10 @@ const doorInSight = (room: Room) => {
 	const c = doorCenter(room);
 	return inSight(c.x, c.z) && inView(c.x, c.z);
 };
-function nearestInteractable(lead = 0) {
+// A later registration wins a tie within this many metres: the tutorial's E target over a person
+// (tutorial.ts ensureAnchors) sits at the same floor distance as the person's own interactable.
+const TIE_EPS = 1e-6;
+function nearestInteractable() {
 	let best = null,
 		bd = Infinity;
 	const wp = new THREE.Vector3(),
@@ -488,22 +493,24 @@ function nearestInteractable(lead = 0) {
 	for (const it of interactables) {
 		if (it.object.visible === false || (it.enabled && !it.enabled())) continue;
 		it.object.getWorldPosition(wp);
-		const d = from.distanceTo(wp),
+		const d = it.object.userData?.npcRole
+				? Math.hypot(wp.x - player.pos.x, wp.z - player.pos.z)
+				: from.distanceTo(wp),
 			reach = Math.min(REACH_CAP, it.range || REACH_CAP);
-		if (d < bd && d <= reach + lead && inView(wp.x, wp.z) && inSight(wp.x, wp.z)) {
+		if (d <= bd + TIE_EPS && d <= reach && inView(wp.x, wp.z) && inSight(wp.x, wp.z)) {
 			bd = d;
 			best = { ...it, d, reach, pos: wp.clone() };
 		}
 	}
 	return best;
 }
-/** The nearest interactable or door within its reach + `lead`, decided as before: the interactable
+/** The nearest interactable or door within its reach, decided as before: the interactable
     wins unless the door is more than 0.25 m nearer. */
-function nearestTarget(lead: number) {
-	const it = nearestInteractable(lead),
+function nearestTarget() {
+	const it = nearestInteractable(),
 		// only doors that leave the hub for another simulator: every other door opens by itself as
 		// the player walks up (walk.ts updateWalk), so it gets no prompt and E leaves it alone
-		door = nearestDoor(DOOR_REACH + lead, (room) => leavesHub(room) && doorInSight(room));
+		door = nearestDoor(DOOR_REACH, (room) => leavesHub(room) && doorInSight(room));
 	if (it && (!door || it.d <= door.d + 0.25)) return { it, door: null };
 	return door ? { it: null, door } : null;
 }
@@ -518,7 +525,7 @@ const leavesHub = (room: Room) =>
 
 export function performInteraction() {
 	if (S.mode !== 'walk' || isPaused()) return;
-	const t = nearestTarget(0);
+	const t = nearestTarget();
 	if (t?.it) {
 		const it = t.it;
 		if (it.guideKey && STAFF_GUIDES[it.guideKey]) {
@@ -554,23 +561,21 @@ export type PromptTarget =
 			kind: 'thing';
 			object: THREE.Object3D;
 			person: boolean;
-			reach: number;
 			title: string;
 			sub: string;
 	  }
-	| { kind: 'door'; room: Room; reach: number; title: string; sub: string };
+	| { kind: 'door'; room: Room; title: string; sub: string };
 let promptTarget: PromptTarget | null = null;
 export const getPromptTarget = (): PromptTarget | null => promptTarget;
 function pickPromptTarget(): PromptTarget | null {
-	// in reach first, so a full-size prompt is always what E does; else the nearest one fading in
-	const t = nearestTarget(0) ?? nearestTarget(PROMPT_LEAD);
+	// only what E acts on right now, so the prompt and E always agree
+	const t = nearestTarget();
 	if (!t) return null;
 	if (t.door) {
 		const room = t.door.room;
 		return {
 			kind: 'door',
 			room,
-			reach: DOOR_REACH,
 			title: `Enter ${room.name}`,
 			sub: ''
 		};
@@ -581,7 +586,6 @@ function pickPromptTarget(): PromptTarget | null {
 		kind: 'thing',
 		object: it.object,
 		person: !!it.object.userData?.npcRole,
-		reach: it.reach,
 		title: guide ? `Talk to ${guide.name}` : it.label,
 		sub: guide ? guide.role : ''
 	};
@@ -1323,7 +1327,7 @@ export function closeStaffDialogue(restore = true) {
 	document.getElementById('staffDialog').classList.remove('show');
 	S.activeGuideKey = null;
 	if (restore && S.activeRoom && !S.travel) {
-		if (S.mode === 'walk') applyWalkConversationComposition(S.activeRoom, false);
+		if (S.mode === 'walk') applyWalkConversationComposition(S.activeRoom, false, false);
 		else enableRoomInspection(S.activeRoom);
 	}
 }
