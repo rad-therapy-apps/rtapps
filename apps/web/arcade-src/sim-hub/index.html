@@ -349,8 +349,8 @@
 				position: fixed;
 				z-index: 180;
 				left: 50%;
-				bottom: 24px;
-				transform: translate(-50%, 24px);
+				top: 50%;
+				transform: translate(-50%, calc(-50% + 24px));
 				width: min(940px, calc(100vw - 32px));
 				max-height: calc(100vh - 48px);
 				display: flex;
@@ -370,7 +370,7 @@
 			#staffDialog.show {
 				opacity: 1;
 				pointer-events: auto;
-				transform: translate(-50%, 0);
+				transform: translate(-50%, -50%);
 			}
 			.sdHead {
 				display: grid;
@@ -559,9 +559,6 @@
 				cursor: default;
 			}
 			@media (max-width: 650px) {
-				#staffDialog {
-					bottom: 10px;
-				}
 				.sdBody {
 					grid-template-columns: 1fr;
 				}
