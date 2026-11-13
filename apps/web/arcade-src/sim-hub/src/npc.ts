@@ -329,7 +329,8 @@ export function setNpcRole(group, role, detail = 'Clinical team member', guideKe
 	lab.position.set(0, 2.18, 0);
 	group.add(lab);
 	npcRoleLabels.push({ group, el, lab });
-	registerInteractable(group, role, detail, 2.4, guideKey);
+	// E only for people with a conversation; the rest keep their label and badge but offer no prompt
+	if (guide) registerInteractable(group, role, detail, 2.4, guideKey);
 	return group;
 }
 function setNamedNpcRole(group, name, role, detail = 'Clinical team member') {
@@ -344,7 +345,6 @@ function setNamedNpcRole(group, name, role, detail = 'Clinical team member') {
 	lab.position.set(0, 2.18, 0);
 	group.add(lab);
 	npcRoleLabels.push({ group, el, lab });
-	registerInteractable(group, `${name} · ${role}`, detail, 2.4, null);
 	return group;
 }
 // RTApps (#77 phase 2 task 13): npcBubble stashes the CSS2DObject it creates directly on the

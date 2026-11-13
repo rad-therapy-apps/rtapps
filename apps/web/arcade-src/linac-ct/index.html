@@ -1154,31 +1154,50 @@
 				background: #321b1b;
 				color: #ffb3b3;
 			}
-			/* RTApps (plan 4c): back-link to the simulator hub. */
+			/* RTApps (plan 4c): back-link to the simulator hub. Free Mode fixes: at the top left of
+			   whichever header shows (main.ts moves it): the app header on the room views, before the
+			   brand on the queue screen, the CT workspace's header while that is open. Width and margin
+			   are reset because the page's generic select/button rule (width: 100%) stretched it into a
+			   full-width bar along the bottom. */
 			#rtappsBackBtn {
-				position: fixed;
-				bottom: 12px;
-				right: 12px;
-				z-index: 9500;
-				padding: 6px 12px;
+				flex: 0 0 auto;
+				width: auto;
+				margin: 0;
+				padding: 9px 14px;
 				font:
-					700 11px/1 Consolas,
-					monospace;
-				letter-spacing: 0.04em;
-				color: #eef3f8;
-				background: rgba(16, 22, 29, 0.88);
-				border: 1px solid rgba(160, 178, 198, 0.28);
-				border-radius: 7px;
+					700 13px/1 Inter,
+					'Segoe UI',
+					Arial,
+					sans-serif;
+				letter-spacing: 0.02em;
+				white-space: nowrap;
+				color: #eaf3fb;
+				background: rgba(255, 255, 255, 0.08);
+				border: 1px solid rgba(255, 255, 255, 0.35);
+				border-radius: 8px;
 				cursor: pointer;
-				backdrop-filter: blur(6px);
 			}
 			#rtappsBackBtn:hover:not(:disabled) {
-				background: #2a3542;
+				background: rgba(255, 255, 255, 0.18);
+				border-color: rgba(255, 255, 255, 0.6);
 			}
 			#rtappsBackBtn:disabled {
 				opacity: 0.4;
 				cursor: default;
 				pointer-events: none;
+			}
+			.rtv2-brand > #rtappsBackBtn {
+				margin-right: 16px;
+			}
+			#appHeader > #rtappsBackBtn {
+				padding: 7px 12px;
+				font-size: 12px;
+			}
+			#appHeader .app-title-wrap {
+				margin-right: auto;
+			}
+			.ctws-header:has(> #rtappsBackBtn) {
+				grid-template-columns: auto minmax(280px, 1fr) auto auto;
 			}
 
 			#mainGameArea {
@@ -9116,10 +9135,6 @@
 		</style>
 	</head>
 	<body>
-		<!-- RTApps (plan 4c): back-link to the simulator hub; stays disabled until the hub URL resolves. -->
-		<button id="rtappsBackBtn" type="button" disabled title="Back to the center">
-			&larr; Back to the Center
-		</button>
 		<div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">
 			<div id="startCard">
 				<h1 id="startTitle">LINAC Divergence &amp; Beam Characteristics Simulator</h1>
@@ -9163,6 +9178,11 @@
 
 		<div id="loadingScreen">Loading 3D Assets...</div>
 		<header id="appHeader">
+			<!-- RTApps (plan 4c): back-link to the simulator hub; stays disabled until the hub URL resolves.
+			     Free Mode fixes: at the top left of whichever header shows (main.ts moves it). -->
+			<button id="rtappsBackBtn" type="button" disabled title="Back to the center">
+				&larr; Back to the Center
+			</button>
 			<div class="app-title-wrap">
 				<span class="app-kicker">RTApps · Treatment Vault</span>
 				<h1>LINAC Fundamentals Emulator</h1>

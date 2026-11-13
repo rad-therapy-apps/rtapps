@@ -724,8 +724,8 @@ function anchorPoint(st: Step, p: Pt): Pt | null {
 	if (sp.kind === 'segment') return closestOnSegment(p, sp.a, sp.b);
 	return null;
 }
-/* At reach height over the target (a person's own interactable is at their feet, so this one is
-   always nearer), or the point of a desk or couch edge nearest the player (in front of every
+/* At reach height over the target (a person is measured along the floor, so this one ties with theirs
+   and wins, being registered later: interact.ts TIE_EPS), or the point of a desk or couch edge nearest the player (in front of every
    screen or panel behind that edge). */
 function ensureAnchors(): void {
 	if (anchors.length) return;

@@ -22,7 +22,7 @@ import type { Room } from './rooms';
 import { isPaused } from './pause';
 import { getPlayMode } from './play-mode';
 import { PREF, writePref } from './prefs';
-import { PROMPT_LEAD, SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
+import { SIGHT_END_CLEARANCE, inFront, segmentBlocked } from './prompt-math';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { bubble } from './npc';
@@ -35,7 +35,9 @@ import {
 } from './equipment';
 import { doorCenter, doorNormal, nearestDoor, getColliders } from './walk';
 import { player, HANDOFFS, REACH_Y } from './main';
-import { PROC_STATE, PROC_SITES } from './sdk-bridge';
+import { PROC_STATE, PROC_SITES, getCtAppUrl } from './sdk-bridge';
+import { roomAppHref } from './room-app-url';
+import { createPager } from './pager';
 import {
 	focusConversationCamera,
 	applyWalkConversationComposition,
@@ -461,8 +463,10 @@ export function registerInteractable(
 	return object;
 }
 // E works on an object within its own range but never past 2.8 m (the old nearestInteractable cap),
-// and on a door within 2.6 m (walk.ts nearestDoor). Reach is measured from a fixed 1.65 m (main.ts
-// REACH_Y), not the eye (PLAYER_EYE_Y), so every interaction range feels as before.
+// and on a door within 2.6 m (walk.ts nearestDoor). Equipment is measured in 3D from a fixed 1.65 m
+// (main.ts REACH_Y), not the eye (PLAYER_EYE_Y), so its range feels as before. A person is measured
+// along the floor, from the player to their feet: their group origin sits at the floor, so the 3D
+// measure would cut a 2.4 m range to about 1.7 m, short of where the prompt shows.
 const REACH_CAP = 2.8,
 	DOOR_REACH = 2.6;
 // Line of sight on the floor plan: a target with a wall between it and the player is skipped, so
@@ -480,7 +484,10 @@ const doorInSight = (room: Room) => {
 	const c = doorCenter(room);
 	return inSight(c.x, c.z) && inView(c.x, c.z);
 };
-function nearestInteractable(lead = 0) {
+// A later registration wins a tie within this many metres: the tutorial's E target over a person
+// (tutorial.ts ensureAnchors) sits at the same floor distance as the person's own interactable.
+const TIE_EPS = 1e-6;
+function nearestInteractable() {
 	let best = null,
 		bd = Infinity;
 	const wp = new THREE.Vector3(),
@@ -488,22 +495,24 @@ function nearestInteractable(lead = 0) {
 	for (const it of interactables) {
 		if (it.object.visible === false || (it.enabled && !it.enabled())) continue;
 		it.object.getWorldPosition(wp);
-		const d = from.distanceTo(wp),
+		const d = it.object.userData?.npcRole
+				? Math.hypot(wp.x - player.pos.x, wp.z - player.pos.z)
+				: from.distanceTo(wp),
 			reach = Math.min(REACH_CAP, it.range || REACH_CAP);
-		if (d < bd && d <= reach + lead && inView(wp.x, wp.z) && inSight(wp.x, wp.z)) {
+		if (d <= bd + TIE_EPS && d <= reach && inView(wp.x, wp.z) && inSight(wp.x, wp.z)) {
 			bd = d;
 			best = { ...it, d, reach, pos: wp.clone() };
 		}
 	}
 	return best;
 }
-/** The nearest interactable or door within its reach + `lead`, decided as before: the interactable
+/** The nearest interactable or door within its reach, decided as before: the interactable
     wins unless the door is more than 0.25 m nearer. */
-function nearestTarget(lead: number) {
-	const it = nearestInteractable(lead),
+function nearestTarget() {
+	const it = nearestInteractable(),
 		// only doors that leave the hub for another simulator: every other door opens by itself as
 		// the player walks up (walk.ts updateWalk), so it gets no prompt and E leaves it alone
-		door = nearestDoor(DOOR_REACH + lead, (room) => leavesHub(room) && doorInSight(room));
+		door = nearestDoor(DOOR_REACH, (room) => leavesHub(room) && doorInSight(room));
 	if (it && (!door || it.d <= door.d + 0.25)) return { it, door: null };
 	return door ? { it: null, door } : null;
 }
@@ -518,7 +527,7 @@ const leavesHub = (room: Room) =>
 
 export function performInteraction() {
 	if (S.mode !== 'walk' || isPaused()) return;
-	const t = nearestTarget(0);
+	const t = nearestTarget();
 	if (t?.it) {
 		const it = t.it;
 		if (it.guideKey && STAFF_GUIDES[it.guideKey]) {
@@ -535,10 +544,15 @@ export function performInteraction() {
 	if (!t?.door) return;
 	const room = t.door.room;
 	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
-		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app. Its Back to the
-		// Center button brings the player back outside this door (return-door.ts).
+		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app, the CT doors on
+		// its CT side and LINAC Control on its LINAC side (room-app-url.ts). Its Back to the Center
+		// button brings the player back outside this door (return-door.ts).
 		writePref(PREF.returnDoor, room.id, 'session');
-		window.top.location.href = S.ROOM_APP_URL;
+		window.top.location.href = roomAppHref(
+			room.id,
+			{ linac: S.ROOM_APP_URL, ct: getCtAppUrl() },
+			window.location.href
+		);
 		return;
 	}
 	if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)) {
@@ -554,23 +568,21 @@ export type PromptTarget =
 			kind: 'thing';
 			object: THREE.Object3D;
 			person: boolean;
-			reach: number;
 			title: string;
 			sub: string;
 	  }
-	| { kind: 'door'; room: Room; reach: number; title: string; sub: string };
+	| { kind: 'door'; room: Room; title: string; sub: string };
 let promptTarget: PromptTarget | null = null;
 export const getPromptTarget = (): PromptTarget | null => promptTarget;
 function pickPromptTarget(): PromptTarget | null {
-	// in reach first, so a full-size prompt is always what E does; else the nearest one fading in
-	const t = nearestTarget(0) ?? nearestTarget(PROMPT_LEAD);
+	// only what E acts on right now, so the prompt and E always agree
+	const t = nearestTarget();
 	if (!t) return null;
 	if (t.door) {
 		const room = t.door.room;
 		return {
 			kind: 'door',
 			room,
-			reach: DOOR_REACH,
 			title: `Enter ${room.name}`,
 			sub: ''
 		};
@@ -581,7 +593,6 @@ function pickPromptTarget(): PromptTarget | null {
 		kind: 'thing',
 		object: it.object,
 		person: !!it.object.userData?.npcRole,
-		reach: it.reach,
 		title: guide ? `Talk to ${guide.name}` : it.label,
 		sub: guide ? guide.role : ''
 	};
@@ -711,6 +722,7 @@ export function openLinacHeadLab() {
 	if (document.pointerLockElement) document.exitPointerLock();
 	document.getElementById('linacHeadDialog')?.classList.add('show');
 	lhReset(false);
+	lhPager.open();
 	setTimeout(() => lhDraw(), 30);
 }
 export function closeLinacHeadLab() {
@@ -775,17 +787,56 @@ function lhRound(ctx, x, y, w, h, r = 8) {
 	ctx.fill();
 	ctx.stroke();
 }
-function lhBox(ctx, id, label, x, y, w, h, fill = '#e6edf1', stroke = '#7b929e') {
+type LhText = {
+	t: string;
+	font: string;
+	color: string;
+	x: number;
+	y: number;
+	align: CanvasTextAlign;
+};
+// Clear space (px) between a box's text and its border, left and right.
+const LH_PAD = 24;
+function lhWrap(ctx, text: string, maxW: number) {
+	const lines: string[] = [];
+	let cur = '';
+	for (const word of text.split(' ')) {
+		const t = cur ? `${cur} ${word}` : word;
+		if (cur && ctx.measureText(t).width > maxW) {
+			lines.push(cur);
+			cur = word;
+		} else cur = t;
+	}
+	if (cur) lines.push(cur);
+	return lines;
+}
+// Draws a box sized to its label (never narrower than minW); the text is queued so it
+// can be painted after the beam highlight. Returns the box width.
+function lhBox(
+	ctx,
+	texts: LhText[],
+	id,
+	label,
+	cx,
+	cy,
+	minW,
+	h,
+	fill = '#e6edf1',
+	stroke = '#7b929e',
+	color = '#213944'
+) {
+	const font = '800 18px Arial';
+	ctx.font = font;
+	const w = Math.max(minW, Math.ceil(ctx.measureText(label).width) + 2 * LH_PAD);
+	const x = cx - w / 2,
+		y = cy - h / 2;
 	ctx.fillStyle = fill;
 	ctx.strokeStyle = stroke;
 	ctx.lineWidth = 2;
 	lhRound(ctx, x, y, w, h, 8);
-	ctx.fillStyle = '#213944';
-	ctx.font = '800 17px Arial';
-	ctx.textAlign = 'center';
-	ctx.textBaseline = 'middle';
-	ctx.fillText(label, x + w / 2, y + h / 2);
+	texts.push({ t: label, font, color, x: cx, y: cy, align: 'center' });
 	LINAC_HEAD_LAB.hit.push({ id, x, y, w, h });
+	return w;
 }
 export function lhDraw() {
 	const c = document.getElementById('linacHeadCanvas') as HTMLCanvasElement | null;
@@ -797,6 +848,7 @@ export function lhDraw() {
 	q.fillStyle = '#ffffff';
 	q.fillRect(0, 0, c.width, c.height);
 	LINAC_HEAD_LAB.hit = [];
+	const texts: LhText[] = [];
 	q.fillStyle = '#173844';
 	q.font = '900 28px Arial';
 	q.textAlign = 'left';
@@ -805,112 +857,161 @@ export function lhDraw() {
 	q.font = '700 16px Arial';
 	q.fillText('Generic educational treatment-head schematic · click components for details', 30, 67);
 	// accelerator / bending section
+	const wgY = 150,
+		magX = 240,
+		magY = 88,
+		magH = 156,
+		exitY = 192;
+	q.font = '900 19px Arial';
+	const magW = Math.max(220, Math.ceil(q.measureText('BENDING MAGNET').width) + 2 * LH_PAD);
+	const magCx = magX + magW / 2;
 	q.strokeStyle = '#8ba0aa';
 	q.lineWidth = 15;
 	q.beginPath();
-	q.moveTo(70, 128);
-	q.lineTo(260, 128);
-	q.stroke();
-	q.fillStyle = '#607782';
-	q.font = '800 16px Arial';
-	q.fillText('Accelerating waveguide', 72, 104);
-	q.strokeStyle = '#2f7de1';
-	q.lineWidth = 5;
-	q.beginPath();
-	q.moveTo(95, 128);
-	q.lineTo(260, 128);
-	q.quadraticCurveTo(338, 128, 338, 205);
+	q.moveTo(70, wgY);
+	q.lineTo(magX + 10, wgY);
 	q.stroke();
 	q.fillStyle = '#dfe8ec';
 	q.strokeStyle = '#728a96';
 	q.lineWidth = 2;
-	lhRound(q, 255, 92, 166, 115, 16);
-	q.fillStyle = '#183943';
-	q.font = '900 18px Arial';
-	q.textAlign = 'center';
-	q.fillText('BENDING MAGNET', 338, 113);
-	q.fillStyle = '#45626f';
-	q.font = '700 15px Arial';
-	q.fillText('turns/directs e⁻ beam', 338, 181);
-	LINAC_HEAD_LAB.hit.push({ id: 'bending', x: 255, y: 92, w: 166, h: 115 });
-	const cx = 500;
+	lhRound(q, magX, magY, magW, magH, 16);
+	q.strokeStyle = '#2f7de1';
+	q.lineWidth = 5;
+	q.beginPath();
+	q.moveTo(95, wgY);
+	q.lineTo(magCx - 60, wgY);
+	q.quadraticCurveTo(magCx, wgY, magCx, exitY);
+	q.stroke();
+	texts.push(
+		{ t: 'Accelerating', font: '800 19px Arial', color: '#3f5a66', x: 70, y: 100, align: 'left' },
+		{ t: 'waveguide', font: '800 19px Arial', color: '#3f5a66', x: 70, y: 122, align: 'left' },
+		{
+			t: 'BENDING MAGNET',
+			font: '900 19px Arial',
+			color: '#183943',
+			x: magCx,
+			y: magY + 26,
+			align: 'center'
+		},
+		{
+			t: 'turns/directs e⁻ beam',
+			font: '700 15px Arial',
+			color: '#45626f',
+			x: magCx,
+			y: magY + magH - 18,
+			align: 'center'
+		}
+	);
+	LINAC_HEAD_LAB.hit.push({ id: 'bending', x: magX, y: magY, w: magW, h: magH });
+	const cx = 610;
 	const ys = {
 		target: 155,
-		primary: 235,
+		primary: 245,
 		carousel: 322,
 		chamber: 407,
 		jaws: 485,
 		mlc: 558,
 		applicator: 620
 	};
+	const half: Record<string, number> = {};
 	// electron incoming path to head
 	q.strokeStyle = '#2f7de1';
 	q.lineWidth = 5;
 	q.beginPath();
-	q.moveTo(338, 205);
-	q.lineTo(cx, 205);
-	q.lineTo(cx, ys.target - 26);
+	q.moveTo(magCx, exitY);
+	q.lineTo(cx, exitY);
+	q.lineTo(cx, ys.target + 26);
 	q.stroke();
 	// Target / bypass
 	if (m === 'photon') {
-		lhBox(q, 'target', 'X-RAY TARGET', cx - 85, ys.target - 24, 170, 48, '#ffe0c5', '#db7a31');
+		half.target =
+			lhBox(q, texts, 'target', 'X-RAY TARGET', cx, ys.target, 200, 52, '#ffe0c5', '#db7a31') / 2;
 	} else {
 		q.save();
 		q.setLineDash([8, 6]);
 		q.strokeStyle = '#9aa9af';
-		q.strokeRect(cx - 85, ys.target - 24, 170, 48);
+		q.lineWidth = 2;
+		q.strokeRect(cx - 105, ys.target - 30, 210, 60);
 		q.restore();
-		q.fillStyle = '#607782';
-		q.font = '800 16px Arial';
-		q.textAlign = 'center';
-		q.fillText('TARGET RETRACTED / BYPASS', cx, ys.target);
-		LINAC_HEAD_LAB.hit.push({ id: 'target', x: cx - 85, y: ys.target - 24, w: 170, h: 48 });
+		texts.push(
+			{
+				t: 'TARGET RETRACTED',
+				font: '800 16px Arial',
+				color: '#566f7a',
+				x: cx,
+				y: ys.target - 10,
+				align: 'center'
+			},
+			{
+				t: '/ BYPASS',
+				font: '800 16px Arial',
+				color: '#566f7a',
+				x: cx,
+				y: ys.target + 10,
+				align: 'center'
+			}
+		);
+		half.target = 105;
+		LINAC_HEAD_LAB.hit.push({ id: 'target', x: cx - 105, y: ys.target - 30, w: 210, h: 60 });
 	}
-	lhBox(
-		q,
-		'primary',
-		'PRIMARY COLLIMATOR',
-		cx - 112,
-		ys.primary - 25,
-		224,
-		50,
-		'#dce6ea',
-		'#607985'
-	);
-	lhBox(
-		q,
-		'carousel',
-		m === 'photon' ? 'FLATTENING FILTER' : 'SCATTERING FOIL',
-		cx - 122,
-		ys.carousel - 28,
-		244,
-		56,
-		m === 'photon' ? '#eadbff' : '#fff2b7',
-		m === 'photon' ? '#7d57ba' : '#c39a16'
-	);
-	lhBox(
-		q,
-		'chamber',
-		'MONITOR ION CHAMBER',
-		cx - 116,
-		ys.chamber - 24,
-		232,
-		48,
-		'#d6ebff',
-		'#4387be'
-	);
-	// jaws
+	half.primary =
+		lhBox(
+			q,
+			texts,
+			'primary',
+			'PRIMARY COLLIMATOR',
+			cx,
+			ys.primary,
+			230,
+			50,
+			'#dce6ea',
+			'#607985'
+		) / 2;
+	half.carousel =
+		lhBox(
+			q,
+			texts,
+			'carousel',
+			m === 'photon' ? 'FLATTENING FILTER' : 'SCATTERING FOIL',
+			cx,
+			ys.carousel,
+			230,
+			56,
+			m === 'photon' ? '#eadbff' : '#fff2b7',
+			m === 'photon' ? '#7d57ba' : '#c39a16'
+		) / 2;
+	half.chamber =
+		lhBox(
+			q,
+			texts,
+			'chamber',
+			'MONITOR ION CHAMBER',
+			cx,
+			ys.chamber,
+			240,
+			50,
+			'#d6ebff',
+			'#4387be'
+		) / 2;
+	// jaws: dark blocks, so the label sits to their left on white
 	q.fillStyle = '#434f56';
 	q.strokeStyle = '#252d31';
+	q.lineWidth = 2;
 	q.fillRect(cx - 150, ys.jaws - 22, 112, 44);
 	q.fillRect(cx + 38, ys.jaws - 22, 112, 44);
 	q.strokeRect(cx - 150, ys.jaws - 22, 112, 44);
 	q.strokeRect(cx + 38, ys.jaws - 22, 112, 44);
-	q.fillStyle = '#263c46';
-	q.font = '900 17px Arial';
-	q.textAlign = 'center';
-	q.fillText('SECONDARY JAWS', cx, ys.jaws);
+	half.jaws = 150;
+	const sideLabel = (id: string, label: string, hw: number, y: number, color: string) => {
+		const font = '900 18px Arial';
+		q.font = font;
+		const endX = cx - hw - 16,
+			tw = Math.ceil(q.measureText(label).width);
+		texts.push({ t: label, font, color, x: endX, y, align: 'right' });
+		LINAC_HEAD_LAB.hit.push({ id, x: endX - tw - 8, y: y - 16, w: tw + 16, h: 32 });
+	};
 	LINAC_HEAD_LAB.hit.push({ id: 'jaws', x: cx - 150, y: ys.jaws - 26, w: 300, h: 52 });
+	sideLabel('jaws', 'SECONDARY JAWS', 150, ys.jaws, '#263c46');
 	// MLC leaves: active field shaping for photon mode; fully retracted/inactive for the conventional electron mode represented here.
 	if (m === 'photon') {
 		q.fillStyle = '#6b7680';
@@ -919,15 +1020,15 @@ export function lhDraw() {
 			q.fillRect(cx - 162, ys.mlc - 29 + i * 8, 127 - i * 7, 6);
 			q.fillRect(cx + 35 + i * 7, ys.mlc - 29 + i * 8, 127 - i * 7, 6);
 		}
-		q.fillStyle = '#263c46';
-		q.font = '900 17px Arial';
-		q.fillText('MULTILEAF COLLIMATOR (MLC)', cx, ys.mlc + 42);
+		half.mlc = 162;
+		LINAC_HEAD_LAB.hit.push({ id: 'mlc', x: cx - 183, y: ys.mlc - 32, w: 366, h: 82 });
+		sideLabel('mlc', 'MULTILEAF COLLIMATOR (MLC)', 162, ys.mlc, '#263c46');
 	} else {
 		q.fillStyle = '#9ba7ad';
 		q.strokeStyle = '#65757d';
 		for (let i = 0; i < 7; i++) {
-			q.fillRect(cx - 190, ys.mlc - 29 + i * 8, 62, 6);
-			q.fillRect(cx + 128, ys.mlc - 29 + i * 8, 62, 6);
+			q.fillRect(cx - 178, ys.mlc - 29 + i * 8, 50, 6);
+			q.fillRect(cx + 128, ys.mlc - 29 + i * 8, 50, 6);
 		}
 		q.save();
 		q.setLineDash([8, 6]);
@@ -935,27 +1036,27 @@ export function lhDraw() {
 		q.lineWidth = 2;
 		q.strokeRect(cx - 116, ys.mlc - 32, 232, 58);
 		q.restore();
-		q.fillStyle = '#4f6570';
-		q.font = '900 17px Arial';
-		q.fillText('MLC RETRACTED · INACTIVE', cx, ys.mlc + 42);
+		half.mlc = 178;
+		LINAC_HEAD_LAB.hit.push({ id: 'mlc', x: cx - 183, y: ys.mlc - 32, w: 366, h: 82 });
+		sideLabel('mlc', 'MLC RETRACTED · INACTIVE', 178, ys.mlc, '#3f5560');
 	}
-	LINAC_HEAD_LAB.hit.push({ id: 'mlc', x: cx - 195, y: ys.mlc - 32, w: 390, h: 82 });
 	if (m === 'electron') {
-		q.strokeStyle = '#47947f';
-		q.lineWidth = 3;
-		q.strokeRect(cx - 116, ys.applicator - 18, 232, 37);
-		q.fillStyle = '#297865';
-		q.font = '900 16px Arial';
-		q.fillText('ELECTRON APPLICATOR / INSERT', cx, ys.applicator);
-		LINAC_HEAD_LAB.hit.push({
-			id: 'applicator',
-			x: cx - 116,
-			y: ys.applicator - 22,
-			w: 232,
-			h: 44
-		});
+		half.applicator =
+			lhBox(
+				q,
+				texts,
+				'applicator',
+				'ELECTRON APPLICATOR / INSERT',
+				cx,
+				ys.applicator,
+				232,
+				42,
+				'#dff3ec',
+				'#47947f',
+				'#1f6b59'
+			) / 2;
 	}
-	// labels right side
+	// labels right side, level with their parts
 	const labels = [
 		['target', m === 'photon' ? 'Target: e⁻ → x-rays' : 'Target bypass'],
 		['primary', 'Fixed primary collimation'],
@@ -965,45 +1066,54 @@ export function lhDraw() {
 		['mlc', m === 'photon' ? 'Field shaping / modulation' : 'MLC retracted / inactive']
 	];
 	if (m === 'electron') labels.push(['applicator', 'Electron field definition']);
-	q.textAlign = 'left';
-	q.font = '700 15px Arial';
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy destructuring pattern, 'id' unused here
-	labels.forEach(([id, lab], i) => {
-		const y = 145 + i * 69;
-		q.fillStyle = '#415b67';
-		q.fillText(lab, 700, y);
+	const lblX = 812,
+		lblFont = '700 16px Arial';
+	q.font = lblFont;
+	labels.forEach(([id, lab]) => {
+		const y = ys[id];
+		const lines = lhWrap(q, lab, 980 - lblX - 10);
+		lines.forEach((ln, i) =>
+			texts.push({
+				t: ln,
+				font: lblFont,
+				color: '#35505c',
+				x: lblX,
+				y: y + (i - (lines.length - 1) / 2) * 20,
+				align: 'left'
+			})
+		);
 		q.strokeStyle = '#b4c3c9';
 		q.lineWidth = 1.5;
 		q.beginPath();
-		q.moveTo(662, y - 5);
-		q.lineTo(690, y - 5);
+		q.moveTo(cx + half[id] + 8, y);
+		q.lineTo(lblX - 8, y);
 		q.stroke();
 	});
 	// beam path and progress highlight
 	const points: [number, number][] =
 		m === 'photon'
 			? [
-					[338, 205],
-					[500, 131],
-					[500, 180],
-					[500, 235],
-					[500, 322],
-					[500, 407],
-					[500, 485],
-					[500, 558],
-					[500, 646]
+					[magCx, exitY],
+					[cx, exitY],
+					[cx, ys.target],
+					[cx, ys.primary],
+					[cx, ys.carousel],
+					[cx, ys.chamber],
+					[cx, ys.jaws],
+					[cx, ys.mlc],
+					[cx, 646]
 				]
 			: [
-					[338, 205],
-					[500, 131],
-					[500, 180],
-					[500, 235],
-					[500, 322],
-					[500, 407],
-					[500, 485],
-					[500, 558],
-					[500, 620],
-					[500, 646]
+					[magCx, exitY],
+					[cx, exitY],
+					[cx, ys.target],
+					[cx, ys.primary],
+					[cx, ys.carousel],
+					[cx, ys.chamber],
+					[cx, ys.jaws],
+					[cx, ys.mlc],
+					[cx, ys.applicator],
+					[cx, 646]
 				];
 	q.strokeStyle = m === 'photon' ? 'rgba(242,190,39,.34)' : 'rgba(54,168,141,.34)';
 	q.lineWidth = 18;
@@ -1027,6 +1137,16 @@ export function lhDraw() {
 		}
 		q.stroke();
 	}
+	// all labels last, so the beam highlight never dims them
+	q.textBaseline = 'middle';
+	texts.forEach((tx) => {
+		q.font = tx.font;
+		q.fillStyle = tx.color;
+		q.textAlign = tx.align;
+		q.fillText(tx.t, tx.x, tx.y);
+	});
+	q.textBaseline = 'alphabetic';
+	q.textAlign = 'left';
 	// selected component outline
 	const hit = LINAC_HEAD_LAB.hit.find((h) => h.id === LINAC_HEAD_LAB.selected);
 	if (hit) {
@@ -1048,6 +1168,47 @@ export function lhAnimate() {
 	};
 	requestAnimationFrame(run);
 }
+const LH_SIDE_MIN = 300; // the side notes' narrowest column beside the schematic
+/** Fits the head lab to the frame (pager.ts runs it before laying out the side notes): the schematic
+    scales to the room under the controls, keeping its shape (never stretched), and the side notes
+    take the rest. Narrow frames (index.html, max-width 900px) stack the notes under the schematic. */
+function lhFit() {
+	const canvas = document.getElementById('linacHeadCanvas') as HTMLCanvasElement,
+		wrap = canvas.parentElement,
+		grid = wrap.parentElement,
+		card = grid.parentElement,
+		px = (v: string) => parseFloat(v) || 0,
+		c = getComputedStyle(card),
+		w = getComputedStyle(wrap),
+		ratio = canvas.width / canvas.height;
+	// the grid's room: the card at its tallest, less what sits above the grid and the card's bottom
+	const room =
+		px(c.maxHeight) -
+		(grid.getBoundingClientRect().top - card.getBoundingClientRect().top) -
+		px(c.paddingBottom) -
+		px(c.borderBottomWidth);
+	const frameW =
+			px(w.paddingLeft) + px(w.paddingRight) + px(w.borderLeftWidth) + px(w.borderRightWidth),
+		frameH =
+			px(w.paddingTop) + px(w.paddingBottom) + px(w.borderTopWidth) + px(w.borderBottomWidth),
+		gap = px(getComputedStyle(grid).columnGap);
+	let cw: number;
+	if (matchMedia('(max-width: 900px)').matches) {
+		// stacked: the schematic takes the width, or 60% of the height, whichever is less
+		cw = Math.min(grid.clientWidth - frameW, (room * 0.6 - frameH) * ratio);
+		grid.style.gridTemplateColumns = '';
+		grid.style.gridTemplateRows = `${cw / ratio + frameH}px minmax(0, 1fr)`;
+		grid.style.height = `${room}px`;
+	} else {
+		cw = Math.min(grid.clientWidth - gap - LH_SIDE_MIN - frameW, (room - frameH) * ratio);
+		grid.style.gridTemplateColumns = `${cw + frameW}px minmax(0, 1fr)`;
+		grid.style.gridTemplateRows = '';
+		grid.style.height = `${cw / ratio + frameH}px`;
+	}
+	canvas.style.width = `${cw}px`;
+	canvas.style.height = `${cw / ratio}px`;
+}
+// the canvas is drawn at 980 × 650 and shown scaled: a click is mapped back through its on-screen box
 export function lhCanvasClick(e) {
 	const c = e.currentTarget,
 		r = c.getBoundingClientRect(),
@@ -1088,6 +1249,7 @@ export function showEquipmentPanel(id) {
 	document.getElementById('eqProgress').textContent =
 		`Equipment explored: ${EQUIPMENT_EXPLORED.size} of ${EQUIPMENT_SPECS.length}`;
 	document.getElementById('equipmentPanel').classList.add('show');
+	eqPager.open();
 }
 export function closeEquipmentPanel() {
 	document.getElementById('equipmentPanel').classList.remove('show');
@@ -1161,6 +1323,7 @@ export function openProcedureLab(tab = 'startup') {
 	document.getElementById('procedureLab')?.classList.add('show');
 	procSetTab(tab);
 	procRefreshRelease();
+	procPager.open();
 }
 export function closeProcedureLab() {
 	document.getElementById('procedureLab')?.classList.remove('show');
@@ -1174,6 +1337,7 @@ export function procSetTab(id) {
 		.forEach((p) => p.classList.toggle('active', p.dataset.pane === id));
 	if (id === 'sitesim') procRenderSite();
 	if (id === 'release') procRefreshRelease();
+	procPager.go(0);
 }
 function procMarkDone(id, done = true) {
 	document.querySelector(`#procTabs button[data-proc="${id}"]`)?.classList.toggle('done', !!done);
@@ -1262,12 +1426,25 @@ export function procResetAll() {
 	procRenderSite();
 }
 
+/** One exchange of the conversation (the intro, or a question and its answer), a page of its own:
+    shown at once, with the earlier ones a page back each. */
+function staffExchange(...lines: [kind: string, who: string, msg: string][]) {
+	const host = document.getElementById('staffTranscript'),
+		ex = document.createElement('div');
+	ex.className = 'sdExchange';
+	for (const [kind, who, msg] of lines) {
+		bubble(kind, who, msg); // npc.ts adds the bubble to the transcript: move it into the exchange
+		ex.appendChild(host.lastElementChild);
+	}
+	host.appendChild(ex);
+	staffPager.go(Infinity);
+}
 export function resetStaffDialogue(key) {
 	const g = STAFF_GUIDES[key];
 	if (!g) return;
 	S.activeGuideKey = key;
 	document.getElementById('staffTranscript').innerHTML = '';
-	bubble('staff', g.name, g.intro);
+	staffExchange(['staff', g.name, g.intro]);
 	const q = document.getElementById('sdQuestions');
 	q.innerHTML = '';
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, index 'i' unused here
@@ -1275,8 +1452,7 @@ export function resetStaffDialogue(key) {
 		const b = document.createElement('button');
 		b.textContent = question;
 		b.onclick = () => {
-			bubble('patient', 'Patient', question);
-			bubble('staff', g.name, answer);
+			staffExchange(['patient', 'Patient', question], ['staff', g.name, answer]);
 			b.disabled = true;
 		};
 		q.appendChild(b);
@@ -1290,8 +1466,9 @@ export function resetStaffDialogue(key) {
 		const b = document.createElement('button');
 		b.textContent = h.label;
 		b.onclick = () => {
-			if (h.patient) bubble('patient', 'Patient', h.patient);
-			bubble('staff', g.name, h.staff);
+			const lines: [string, string, string][] = [['staff', g.name, h.staff]];
+			if (h.patient) lines.unshift(['patient', 'Patient', h.patient]);
+			staffExchange(...lines);
 			[...hh.querySelectorAll('button')].forEach((x) => (x.disabled = true));
 			setTimeout(() => {
 				closeStaffDialogue(false);
@@ -1318,15 +1495,47 @@ function openStaffDialogue(key) {
 	document.getElementById('sdRole').textContent = g.role;
 	resetStaffDialogue(key);
 	document.getElementById('staffDialog').classList.add('show');
+	staffPager.open();
 }
 export function closeStaffDialogue(restore = true) {
 	document.getElementById('staffDialog').classList.remove('show');
 	S.activeGuideKey = null;
 	if (restore && S.activeRoom && !S.travel) {
-		if (S.mode === 'walk') applyWalkConversationComposition(S.activeRoom, false);
+		if (S.mode === 'walk') applyWalkConversationComposition(S.activeRoom, false, false);
 		else enableRoomInspection(S.activeRoom);
 	}
 }
+
+/* Pop-up pages (pager.ts): the staff dialogue a page an exchange; the equipment panel, the head
+   lab's side notes and the CT QA lab's active tab a page of blocks at a time when they do not fit. */
+const shown = (id: string) => () =>
+	document.getElementById(id)?.classList.contains('show') ?? false;
+const staffPager = createPager({
+	isOpen: shown('staffDialog'),
+	body: document.getElementById('staffTranscript'),
+	bar: document.getElementById('sdPager'),
+	each: true
+});
+const eqPager = createPager({
+	isOpen: shown('equipmentPanel'),
+	body: document.getElementById('eqBody'),
+	bar: document.getElementById('eqPager'),
+	card: document.getElementById('equipmentPanel')
+});
+const lhPager = createPager({
+	isOpen: shown('linacHeadDialog'),
+	body: document.getElementById('lhNotes'),
+	bar: document.getElementById('lhPager'),
+	prepare: lhFit
+});
+const procBody = document.getElementById('procBody');
+const procPager = createPager({
+	isOpen: shown('procedureLab'),
+	body: procBody,
+	blocks: () => [...(procBody.querySelector('.procPane.active')?.children ?? [])] as HTMLElement[],
+	bar: document.getElementById('procPager'),
+	card: procBody.parentElement
+});
 
 export function toast(html) {
 	const t = document.getElementById('toast');
