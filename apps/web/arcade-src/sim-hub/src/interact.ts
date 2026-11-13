@@ -36,6 +36,7 @@ import {
 import { doorCenter, doorNormal, nearestDoor, getColliders } from './walk';
 import { player, HANDOFFS, REACH_Y } from './main';
 import { PROC_STATE, PROC_SITES } from './sdk-bridge';
+import { createPager } from './pager';
 import {
 	focusConversationCamera,
 	applyWalkConversationComposition,
@@ -711,6 +712,7 @@ export function openLinacHeadLab() {
 	if (document.pointerLockElement) document.exitPointerLock();
 	document.getElementById('linacHeadDialog')?.classList.add('show');
 	lhReset(false);
+	lhPager.open();
 	setTimeout(() => lhDraw(), 30);
 }
 export function closeLinacHeadLab() {
@@ -1048,6 +1050,47 @@ export function lhAnimate() {
 	};
 	requestAnimationFrame(run);
 }
+const LH_SIDE_MIN = 300; // the side notes' narrowest column beside the schematic
+/** Fits the head lab to the frame (pager.ts runs it before laying out the side notes): the schematic
+    scales to the room under the controls, keeping its shape (never stretched), and the side notes
+    take the rest. Narrow frames (index.html, max-width 900px) stack the notes under the schematic. */
+function lhFit() {
+	const canvas = document.getElementById('linacHeadCanvas') as HTMLCanvasElement,
+		wrap = canvas.parentElement,
+		grid = wrap.parentElement,
+		card = grid.parentElement,
+		px = (v: string) => parseFloat(v) || 0,
+		c = getComputedStyle(card),
+		w = getComputedStyle(wrap),
+		ratio = canvas.width / canvas.height;
+	// the grid's room: the card at its tallest, less what sits above the grid and the card's bottom
+	const room =
+		px(c.maxHeight) -
+		(grid.getBoundingClientRect().top - card.getBoundingClientRect().top) -
+		px(c.paddingBottom) -
+		px(c.borderBottomWidth);
+	const frameW =
+			px(w.paddingLeft) + px(w.paddingRight) + px(w.borderLeftWidth) + px(w.borderRightWidth),
+		frameH =
+			px(w.paddingTop) + px(w.paddingBottom) + px(w.borderTopWidth) + px(w.borderBottomWidth),
+		gap = px(getComputedStyle(grid).columnGap);
+	let cw: number;
+	if (matchMedia('(max-width: 900px)').matches) {
+		// stacked: the schematic takes the width, or 60% of the height, whichever is less
+		cw = Math.min(grid.clientWidth - frameW, (room * 0.6 - frameH) * ratio);
+		grid.style.gridTemplateColumns = '';
+		grid.style.gridTemplateRows = `${cw / ratio + frameH}px minmax(0, 1fr)`;
+		grid.style.height = `${room}px`;
+	} else {
+		cw = Math.min(grid.clientWidth - gap - LH_SIDE_MIN - frameW, (room - frameH) * ratio);
+		grid.style.gridTemplateColumns = `${cw + frameW}px minmax(0, 1fr)`;
+		grid.style.gridTemplateRows = '';
+		grid.style.height = `${cw / ratio + frameH}px`;
+	}
+	canvas.style.width = `${cw}px`;
+	canvas.style.height = `${cw / ratio}px`;
+}
+// the canvas is drawn at 980 × 650 and shown scaled: a click is mapped back through its on-screen box
 export function lhCanvasClick(e) {
 	const c = e.currentTarget,
 		r = c.getBoundingClientRect(),
@@ -1088,6 +1131,7 @@ export function showEquipmentPanel(id) {
 	document.getElementById('eqProgress').textContent =
 		`Equipment explored: ${EQUIPMENT_EXPLORED.size} of ${EQUIPMENT_SPECS.length}`;
 	document.getElementById('equipmentPanel').classList.add('show');
+	eqPager.open();
 }
 export function closeEquipmentPanel() {
 	document.getElementById('equipmentPanel').classList.remove('show');
@@ -1161,6 +1205,7 @@ export function openProcedureLab(tab = 'startup') {
 	document.getElementById('procedureLab')?.classList.add('show');
 	procSetTab(tab);
 	procRefreshRelease();
+	procPager.open();
 }
 export function closeProcedureLab() {
 	document.getElementById('procedureLab')?.classList.remove('show');
@@ -1174,6 +1219,7 @@ export function procSetTab(id) {
 		.forEach((p) => p.classList.toggle('active', p.dataset.pane === id));
 	if (id === 'sitesim') procRenderSite();
 	if (id === 'release') procRefreshRelease();
+	procPager.go(0);
 }
 function procMarkDone(id, done = true) {
 	document.querySelector(`#procTabs button[data-proc="${id}"]`)?.classList.toggle('done', !!done);
@@ -1262,12 +1308,25 @@ export function procResetAll() {
 	procRenderSite();
 }
 
+/** One exchange of the conversation (the intro, or a question and its answer), a page of its own:
+    shown at once, with the earlier ones a page back each. */
+function staffExchange(...lines: [kind: string, who: string, msg: string][]) {
+	const host = document.getElementById('staffTranscript'),
+		ex = document.createElement('div');
+	ex.className = 'sdExchange';
+	for (const [kind, who, msg] of lines) {
+		bubble(kind, who, msg); // npc.ts adds the bubble to the transcript: move it into the exchange
+		ex.appendChild(host.lastElementChild);
+	}
+	host.appendChild(ex);
+	staffPager.go(Infinity);
+}
 export function resetStaffDialogue(key) {
 	const g = STAFF_GUIDES[key];
 	if (!g) return;
 	S.activeGuideKey = key;
 	document.getElementById('staffTranscript').innerHTML = '';
-	bubble('staff', g.name, g.intro);
+	staffExchange(['staff', g.name, g.intro]);
 	const q = document.getElementById('sdQuestions');
 	q.innerHTML = '';
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy pattern, index 'i' unused here
@@ -1275,8 +1334,7 @@ export function resetStaffDialogue(key) {
 		const b = document.createElement('button');
 		b.textContent = question;
 		b.onclick = () => {
-			bubble('patient', 'Patient', question);
-			bubble('staff', g.name, answer);
+			staffExchange(['patient', 'Patient', question], ['staff', g.name, answer]);
 			b.disabled = true;
 		};
 		q.appendChild(b);
@@ -1290,8 +1348,9 @@ export function resetStaffDialogue(key) {
 		const b = document.createElement('button');
 		b.textContent = h.label;
 		b.onclick = () => {
-			if (h.patient) bubble('patient', 'Patient', h.patient);
-			bubble('staff', g.name, h.staff);
+			const lines: [string, string, string][] = [['staff', g.name, h.staff]];
+			if (h.patient) lines.unshift(['patient', 'Patient', h.patient]);
+			staffExchange(...lines);
 			[...hh.querySelectorAll('button')].forEach((x) => (x.disabled = true));
 			setTimeout(() => {
 				closeStaffDialogue(false);
@@ -1318,6 +1377,7 @@ function openStaffDialogue(key) {
 	document.getElementById('sdRole').textContent = g.role;
 	resetStaffDialogue(key);
 	document.getElementById('staffDialog').classList.add('show');
+	staffPager.open();
 }
 export function closeStaffDialogue(restore = true) {
 	document.getElementById('staffDialog').classList.remove('show');
@@ -1327,6 +1387,37 @@ export function closeStaffDialogue(restore = true) {
 		else enableRoomInspection(S.activeRoom);
 	}
 }
+
+/* Pop-up pages (pager.ts): the staff dialogue a page an exchange; the equipment panel, the head
+   lab's side notes and the CT QA lab's active tab a page of blocks at a time when they do not fit. */
+const shown = (id: string) => () =>
+	document.getElementById(id)?.classList.contains('show') ?? false;
+const staffPager = createPager({
+	isOpen: shown('staffDialog'),
+	body: document.getElementById('staffTranscript'),
+	bar: document.getElementById('sdPager'),
+	each: true
+});
+const eqPager = createPager({
+	isOpen: shown('equipmentPanel'),
+	body: document.getElementById('eqBody'),
+	bar: document.getElementById('eqPager'),
+	card: document.getElementById('equipmentPanel')
+});
+const lhPager = createPager({
+	isOpen: shown('linacHeadDialog'),
+	body: document.getElementById('lhNotes'),
+	bar: document.getElementById('lhPager'),
+	prepare: lhFit
+});
+const procBody = document.getElementById('procBody');
+const procPager = createPager({
+	isOpen: shown('procedureLab'),
+	body: procBody,
+	blocks: () => [...(procBody.querySelector('.procPane.active')?.children ?? [])] as HTMLElement[],
+	bar: document.getElementById('procPager'),
+	card: procBody.parentElement
+});
 
 export function toast(html) {
 	const t = document.getElementById('toast');

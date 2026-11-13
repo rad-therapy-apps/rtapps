@@ -8,7 +8,8 @@
      the entry's click. 'title' goes back to the turning overview and shows the menu.
    - Settings (#settingsMenu): Sound, Room introductions (its #setRoomCards box is wired by
      hud-roomcard.ts), Help, Resume and Main menu (not on the title; in the tutorial it asks first,
-     inline: the player has no confirm()). It pauses the game (pause.ts). It opens when the pointer
+     inline: the player has no confirm()). Help is a screen of its own in the card, with Back to
+     settings; its content pages when it does not fit (pager.ts). It pauses the game (pause.ts). It opens when the pointer
      lock is lost while walking with nothing open (the browser keeps Esc to itself while locked), and
      on an Esc keydown while the pointer is free; Esc with a dialog open closes that dialog
      (dialogs.ts). menu-rules.ts holds those rules. */
@@ -37,6 +38,7 @@ import { closeOpenDialog, openDialogName, registerDialog } from './dialogs';
 import { PREF, readPref, writePref } from './prefs';
 import { escKeyAction, lockLossOpensSettings } from './menu-rules';
 import { applySoundPrefOnFirstGesture, setSound } from './sound';
+import { createPager, type Pager } from './pager';
 
 /** About four minutes a turn at 60 frames a second (OrbitControls turns 2π/3600 × speed a frame). */
 const TITLE_ORBIT_SPEED = 0.25;
@@ -51,7 +53,8 @@ const byId = <T extends HTMLElement = HTMLElement>(id: string) =>
 	document.getElementById(id) as T | null;
 let settingsOpen = false,
 	autoOpenedAt = -Infinity,
-	wasLocked = false;
+	wasLocked = false,
+	helpPager: Pager | null = null;
 
 export function setTutorialAvailable(on: boolean): void {
 	const entry = byId<HTMLButtonElement>('menuTutorial'),
@@ -63,10 +66,20 @@ export function setTutorialAvailable(on: boolean): void {
 	if (line) line.textContent = on ? TUTORIAL_LINE : 'Coming soon';
 }
 
+/** The settings' main screen, or Help in its place (the card keeps its size; Help pages instead). */
 function showHelp(on: boolean): void {
-	const panel = byId('setHelpPanel');
-	if (panel) panel.hidden = !on;
-	byId('setHelp')?.setAttribute('aria-expanded', String(on));
+	const mode = getPlayMode(),
+		kicker = byId('setKicker'),
+		title = byId('setTitle'),
+		main = byId('setMain'),
+		help = byId('setHelpScreen');
+	if (kicker)
+		kicker.textContent =
+			mode === 'title' ? 'Settings' : on ? `${MODE_NAMES[mode]} · Settings` : 'Paused';
+	if (title) title.textContent = on ? 'Help' : MODE_NAMES[mode];
+	if (main) main.hidden = on;
+	if (help) help.hidden = !on;
+	if (on) helpPager?.open();
 }
 
 function showLeave(on: boolean): void {
@@ -80,14 +93,9 @@ function showLeave(on: boolean): void {
 function openSettings(): void {
 	if (settingsOpen) return;
 	settingsOpen = true;
-	const mode = getPlayMode(),
-		kicker = byId('setKicker'),
-		title = byId('setTitle'),
-		mainMenu = byId('setMainMenu'),
+	const mainMenu = byId('setMainMenu'),
 		sound = byId<HTMLInputElement>('setSound');
-	if (kicker) kicker.textContent = mode === 'title' ? 'Settings' : 'Paused';
-	if (title) title.textContent = MODE_NAMES[mode];
-	if (mainMenu) mainMenu.hidden = mode === 'title';
+	if (mainMenu) mainMenu.hidden = getPlayMode() === 'title';
 	showHelp(false);
 	showLeave(false);
 	if (sound) sound.checked = readPref<unknown>(PREF.sound, false) === true;
@@ -201,7 +209,20 @@ export function installMenu(): void {
 		() => closeSettings(false)
 	);
 	byId('setResume')?.addEventListener('click', () => closeSettings(true));
-	byId('setHelp')?.addEventListener('click', () => showHelp(byId('setHelpPanel')?.hidden === true));
+	helpPager = createPager({
+		isOpen: () => settingsOpen && byId('setHelpScreen')?.hidden === false,
+		body: byId('setHelpPanel'),
+		bar: byId('setHelpPager'),
+		card: document.querySelector<HTMLElement>('#settingsMenu .setCard') ?? undefined
+	});
+	byId('setHelp')?.addEventListener('click', () => {
+		showHelp(true);
+		byId('setHelpBack')?.focus();
+	});
+	byId('setHelpBack')?.addEventListener('click', () => {
+		showHelp(false);
+		byId('setHelp')?.focus();
+	});
 	byId('setMainMenu')?.addEventListener('click', onMainMenu);
 	byId('setLeaveYes')?.addEventListener('click', () => enterMode('title'));
 	byId('setLeaveNo')?.addEventListener('click', () => {
