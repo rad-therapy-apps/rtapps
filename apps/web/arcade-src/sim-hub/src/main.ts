@@ -522,12 +522,8 @@ export const player = {
 // RTApps (#77 phase 2 task 16): typed boundary for the pressed-key registry, read by walk.ts.
 export const keys: Record<string, boolean> = {};
 
-// × also hands the mouse back to looking around: the click is the gesture pointer lock needs, so the
-// player doesn't have to click the view again
-document.getElementById('sdClose').onclick = () => {
-	closeStaffDialogue();
-	requestWalkPointerLock();
-};
+// closing with × also hands the mouse back to looking around (hub-dialogs.ts)
+document.getElementById('sdClose').onclick = () => closeStaffDialogue();
 document.getElementById('sdRestart').onclick = () =>
 	S.activeGuideKey && resetStaffDialogue(S.activeGuideKey);
 

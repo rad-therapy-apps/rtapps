@@ -33,7 +33,7 @@ import {
 	EQUIPMENT_SPECS,
 	equipmentRoomName
 } from './equipment';
-import { doorCenter, doorNormal, nearestDoor, getColliders } from './walk';
+import { doorCenter, doorNormal, nearestDoor, getColliders, requestWalkPointerLock } from './walk';
 import { player, HANDOFFS, REACH_Y } from './main';
 import { PROC_STATE, PROC_SITES, getCtAppUrl } from './sdk-bridge';
 import { roomAppHref } from './room-app-url';
@@ -1472,6 +1472,8 @@ export function resetStaffDialogue(key) {
 			[...hh.querySelectorAll('button')].forEach((x) => (x.disabled = true));
 			setTimeout(() => {
 				closeStaffDialogue(false);
+				// back to looking around: the button's click still counts as the gesture 1.15 s later
+				requestWalkPointerLock();
 				// the staff member walks to the target room; the camera stays with the player
 				startActorHandoff(key, h);
 			}, 1150);
