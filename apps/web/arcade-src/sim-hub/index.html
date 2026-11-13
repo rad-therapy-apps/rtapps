@@ -292,15 +292,67 @@
 			#walkReticle.show {
 				display: block;
 			}
-			/* Department-orientation conversation UI */
+			/* Pop-up pages (src/pager.ts): a pop-up whose content does not fit shows it a page at a
+			   time; the bar holds only ‹, the count and › */
+			.pgOff {
+				display: none !important;
+			}
+			.pager {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+				padding: 8px 13px;
+				border-top: 1px solid rgba(129, 193, 214, 0.16);
+			}
+			.pager[hidden] {
+				display: none;
+			}
+			.pgCount {
+				font-size: 14px;
+				font-weight: 800;
+				letter-spacing: 0.05em;
+				color: #e8f1f4;
+			}
+			.pager button {
+				width: 36px;
+				height: 30px;
+				border-radius: 9px;
+				border: 1px solid rgba(66, 213, 207, 0.4);
+				background: rgba(66, 213, 207, 0.1);
+				color: #dff9f6;
+				font-size: 18px;
+				line-height: 1;
+				cursor: pointer;
+			}
+			.pager button:hover:not(:disabled) {
+				background: rgba(66, 213, 207, 0.18);
+			}
+			.pager button:disabled {
+				opacity: 0.3;
+				cursor: default;
+			}
+			.pager.light {
+				border-top-color: #ccdbe1;
+			}
+			.pager.light .pgCount {
+				color: #1d2b33;
+			}
+			.pager.light button {
+				border-color: #7fb9bf;
+				background: #e3f3f3;
+				color: #14555b;
+			}
+			/* Department-orientation conversation UI: the conversation on the left, a page an
+			   exchange; the questions and the next step on the right */
 			#staffDialog {
 				position: fixed;
 				z-index: 180;
 				left: 50%;
 				bottom: 24px;
 				transform: translate(-50%, 24px);
-				width: min(680px, calc(100vw - 32px));
-				max-height: min(72vh, 650px);
+				width: min(940px, calc(100vw - 32px));
+				max-height: calc(100vh - 48px);
 				display: flex;
 				flex-direction: column;
 				opacity: 0;
@@ -366,11 +418,29 @@
 			.sdClose:hover {
 				background: rgba(255, 255, 255, 0.12);
 			}
+			.sdBody {
+				display: grid;
+				grid-template-columns: 1.15fr 1fr;
+				flex: 1 1 auto;
+				min-height: 0;
+			}
+			.sdConvo {
+				display: flex;
+				flex-direction: column;
+				min-width: 0;
+				border-right: 1px solid rgba(129, 193, 214, 0.13);
+			}
 			#staffTranscript {
+				flex: 1 1 auto;
+				min-height: 0;
+				overflow: hidden;
 				padding: 13px 14px 4px;
-				overflow: auto;
-				min-height: 110px;
-				max-height: 300px;
+			}
+			.sdAsk {
+				display: flex;
+				flex-direction: column;
+				min-width: 0;
+				padding-top: 6px;
 			}
 			.chatBubble {
 				max-width: 86%;
@@ -415,8 +485,8 @@
 			}
 			.sdQuestions {
 				display: flex;
+				flex-direction: column;
 				gap: 6px;
-				flex-wrap: wrap;
 				padding: 5px 14px 12px;
 			}
 			.sdQuestions button {
@@ -492,9 +562,12 @@
 				#staffDialog {
 					bottom: 10px;
 				}
-				.sdQuestions {
-					max-height: 140px;
-					overflow: auto;
+				.sdBody {
+					grid-template-columns: 1fr;
+				}
+				.sdConvo {
+					border-right: 0;
+					border-bottom: 1px solid rgba(129, 193, 214, 0.13);
 				}
 			}
 
@@ -506,7 +579,9 @@
 				bottom: 48px;
 				width: min(360px, calc(100vw - 28px));
 				max-height: 72vh;
-				overflow: auto;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
 				opacity: 0;
 				pointer-events: none;
 				transform: translateY(14px);
@@ -557,10 +632,16 @@
 				cursor: pointer;
 			}
 			.eqBody {
+				flex: 1 1 auto;
+				min-height: 0;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				gap: 9px;
 				padding: 11px 13px 13px;
 			}
 			.eqSection {
-				margin: 0 0 9px;
+				margin: 0;
 				padding: 8px 9px;
 				border-radius: 9px;
 				background: rgba(255, 255, 255, 0.03);
@@ -581,7 +662,6 @@
 				font-size: 15px;
 				color: #8fa5ad;
 				text-align: right;
-				margin-top: 4px;
 			}
 			#kioskDialog {
 				position: fixed;
@@ -674,10 +754,14 @@
 				opacity: 1;
 				pointer-events: auto;
 			}
+			/* The head lab fits the frame: interact.ts lhFit scales the schematic to the room under
+			   the controls (never stretched) and the side notes page (pager.ts) */
 			.linacHeadCard {
 				width: min(1180px, calc(100vw - 36px));
 				max-height: calc(100vh - 34px);
-				overflow: auto;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
 				background: #f7fafc;
 				color: #1f2937;
 				border: 1px solid rgba(66, 213, 207, 0.45);
@@ -757,8 +841,9 @@
 				margin: 0 3px;
 			}
 			.linacHeadGrid {
+				flex: none;
 				display: grid;
-				grid-template-columns: minmax(620px, 1.65fr) minmax(310px, 0.85fr);
+				grid-template-columns: minmax(0, 1.65fr) minmax(0, 0.85fr);
 				gap: 16px;
 			}
 			.linacHeadCanvasWrap {
@@ -773,27 +858,28 @@
 				display: block;
 				width: 100%;
 				height: auto;
-				min-height: 570px;
+				margin: 0 auto;
 				background: #fff;
 				border: 0;
 				border-radius: 8px;
 			}
-			.linacHeadHint {
-				position: absolute;
-				left: 20px;
-				bottom: 18px;
-				background: rgba(14, 32, 40, 0.88);
-				color: #effbfc;
-				padding: 7px 10px;
-				border-radius: 7px;
-				font-size: 15px;
-				font-weight: 700;
-				pointer-events: none;
-			}
 			.linacHeadSide {
 				display: flex;
 				flex-direction: column;
+				min-width: 0;
+				min-height: 0;
+			}
+			.lhNotes {
+				display: flex;
+				flex-direction: column;
 				gap: 12px;
+				flex: 1 1 auto;
+				min-height: 0;
+				overflow: hidden;
+			}
+			.linacHeadSide .pager {
+				margin-top: 10px;
+				padding: 8px 0 0;
 			}
 			.lhBox {
 				background: #eef4f7;
@@ -841,20 +927,9 @@
 				display: inline-block;
 				flex: 0 0 auto;
 			}
-			.lhFooter {
-				margin-top: 12px;
-				padding-top: 11px;
-				border-top: 1px solid #d2dde2;
-				color: #647985;
-				font-size: 15px;
-				line-height: 1.45;
-			}
 			@media (max-width: 900px) {
 				.linacHeadGrid {
 					grid-template-columns: 1fr;
-				}
-				.linacHeadCanvasWrap canvas {
-					min-height: 500px;
 				}
 			}
 			@media (max-width: 680px) {
@@ -863,9 +938,6 @@
 				}
 				.linacHeadTop {
 					flex-direction: column;
-				}
-				.linacHeadCanvasWrap canvas {
-					min-height: 430px;
 				}
 				.linacHeadControls .divider {
 					display: none;
@@ -882,14 +954,15 @@
 				justify-content: center;
 				background: rgba(3, 8, 12, 0.78);
 				backdrop-filter: blur(9px);
-				padding: 18px;
+				padding: 12px;
 			}
 			#procedureLab.show {
 				display: flex;
 			}
+			/* the active tab's content pages when it does not fit (pager.ts) */
 			.procCard {
 				width: min(1040px, 96vw);
-				max-height: 92vh;
+				max-height: calc(100vh - 24px);
 				overflow: hidden;
 				background: #0e1821;
 				color: #e9f3f6;
@@ -897,7 +970,7 @@
 				border-radius: 18px;
 				box-shadow: 0 28px 90px rgba(0, 0, 0, 0.65);
 				display: grid;
-				grid-template-rows: auto auto 1fr;
+				grid-template-rows: auto auto minmax(0, 1fr) auto;
 			}
 			.procHead {
 				display: flex;
@@ -962,7 +1035,7 @@
 				color: #69e2a6;
 			}
 			.procBody {
-				overflow: auto;
+				overflow: hidden;
 				padding: 14px 16px 18px;
 			}
 			.procPane {
@@ -1410,7 +1483,8 @@
 				width: min(420px, calc(100vw - 32px));
 				max-height: calc(100vh - 40px);
 				overflow: auto;
-				display: grid;
+				display: flex;
+				flex-direction: column;
 				gap: 10px;
 				padding: 22px;
 				border-radius: var(--radius);
@@ -1472,12 +1546,33 @@
 				background: rgba(255, 106, 115, 0.16);
 				border-color: rgba(255, 106, 115, 0.5);
 			}
+			/* the main screen, or Help: a screen of its own whose content pages (pager.ts) */
+			.setScreen {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				min-height: 0;
+			}
+			.setScreen[hidden] {
+				display: none;
+			}
+			#setHelpScreen {
+				flex: 1 1 auto;
+			}
+			#setHelpScreen .pager {
+				border-top: 0;
+				padding: 0 2px;
+			}
 			#setHelpPanel,
 			#setLeave {
 				display: grid;
 				gap: 8px;
 			}
 			#setHelpPanel {
+				flex: 1 1 auto;
+				min-height: 0;
+				overflow: hidden;
+				align-content: start;
 				padding: 12px 14px;
 				border-radius: 10px;
 				border: 1px solid var(--stroke);
@@ -1502,7 +1597,6 @@
 				margin-bottom: 4px;
 			}
 			.setBtn[hidden],
-			#setHelpPanel[hidden],
 			#setLeave[hidden] {
 				display: none;
 			}
@@ -2040,13 +2134,14 @@
 				</div>
 				<button class="eqClose" id="eqClose" aria-label="Close equipment information">×</button>
 			</div>
-			<div class="eqBody">
+			<div class="eqBody" id="eqBody">
 				<div class="eqSection"><b>What it is / why it matters</b><span id="eqPurpose"></span></div>
 				<div class="eqSection"><b>Who uses it</b><span id="eqUsers"></span></div>
 				<div class="eqSection"><b>What to notice</b><span id="eqNotice"></span></div>
 				<div class="eqSection"><b>Safety / workflow context</b><span id="eqSafety"></span></div>
 				<div class="eqProgress" id="eqProgress">Equipment explored: 0</div>
 			</div>
+			<div class="pager" id="eqPager" hidden></div>
 		</div>
 		<div id="kioskDialog" role="dialog" aria-modal="true">
 			<div class="kioskCard">
@@ -2073,12 +2168,19 @@
 				</div>
 				<button class="sdClose" id="sdClose" aria-label="Close conversation">×</button>
 			</div>
-			<div id="staffTranscript"></div>
-			<div class="sdPrompt">Common questions patients ask</div>
-			<div class="sdQuestions" id="sdQuestions"></div>
-			<div class="sdNext" id="sdNext">
-				<div class="sdPrompt">Close the conversation / next step</div>
-				<div class="sdHandoffs" id="sdHandoffs"></div>
+			<div class="sdBody">
+				<div class="sdConvo">
+					<div id="staffTranscript"></div>
+					<div class="pager" id="sdPager" hidden></div>
+				</div>
+				<div class="sdAsk">
+					<div class="sdPrompt">Common questions patients ask</div>
+					<div class="sdQuestions" id="sdQuestions"></div>
+					<div class="sdNext" id="sdNext">
+						<div class="sdPrompt">Next step</div>
+						<div class="sdHandoffs" id="sdHandoffs"></div>
+					</div>
+				</div>
 			</div>
 			<div class="sdFoot">
 				<span>Questions and workflows may vary by patient and department.</span
@@ -2106,7 +2208,7 @@
 					<button data-proc="sitesim">4 · Site CT Sim</button>
 					<button data-proc="release">5 · Release / Hold</button>
 				</div>
-				<div class="procBody">
+				<div class="procBody" id="procBody">
 					<section class="procPane active" data-pane="startup">
 						<div class="procIntro">
 							<b>CT Morning Start-Up.</b> Before the first patient, verify the scanner and room are
@@ -2290,6 +2392,7 @@
 						</div>
 					</section>
 				</div>
+				<div class="pager" id="procPager" hidden></div>
 			</div>
 		</div>
 
@@ -2345,28 +2448,36 @@
 			<div class="setCard">
 				<div class="setK" id="setKicker">Paused</div>
 				<h2 id="setTitle">Free Mode</h2>
-				<label class="setRow"><span>Sound</span><input type="checkbox" id="setSound" /></label>
-				<label class="setRow">
-					<span>Room introductions</span><input type="checkbox" id="setRoomCards" checked />
-				</label>
-				<button class="setBtn" id="setHelp" type="button" aria-expanded="false">Help</button>
-				<div id="setHelpPanel" hidden>
-					<div class="setKeys">
-						<kbd>W A S D</kbd><span>Move</span> <kbd>Mouse</kbd
-						><span>Look around (click the view first)</span> <kbd>Shift</kbd><span>Run</span>
-						<kbd>E</kbd><span>Talk, use or open what the prompt shows</span> <kbd>Esc</kbd
-						><span>Settings and pause</span>
+				<div class="setScreen" id="setMain">
+					<label class="setRow"><span>Sound</span><input type="checkbox" id="setSound" /></label>
+					<label class="setRow">
+						<span>Room introductions</span><input type="checkbox" id="setRoomCards" checked />
+					</label>
+					<button class="setBtn" id="setHelp" type="button">Help</button>
+					<button class="setBtn primary" id="setResume" type="button">Resume</button>
+					<button class="setBtn" id="setMainMenu" type="button">Main menu</button>
+					<div id="setLeave" hidden>
+						<p>Leave the tutorial? Your progress in this chapter will be lost.</p>
+						<button class="setBtn warn" id="setLeaveYes" type="button">Leave</button>
+						<button class="setBtn" id="setLeaveNo" type="button">Stay</button>
 					</div>
-					<p>Walk in through the main entrance and explore the departments at your own pace.</p>
-					<p>Walk up to a staff member and press E when the prompt appears to talk with them.</p>
-					<p>Each room introduces itself as you walk in. Turn this off under Room introductions.</p>
 				</div>
-				<button class="setBtn primary" id="setResume" type="button">Resume</button>
-				<button class="setBtn" id="setMainMenu" type="button">Main menu</button>
-				<div id="setLeave" hidden>
-					<p>Leave the tutorial? Your progress in this chapter will be lost.</p>
-					<button class="setBtn warn" id="setLeaveYes" type="button">Leave</button>
-					<button class="setBtn" id="setLeaveNo" type="button">Stay</button>
+				<div class="setScreen" id="setHelpScreen" hidden>
+					<div id="setHelpPanel">
+						<div class="setKeys">
+							<kbd>W A S D</kbd><span>Move</span> <kbd>Mouse</kbd
+							><span>Look around (click the view first)</span> <kbd>Shift</kbd><span>Run</span>
+							<kbd>E</kbd><span>Talk, use or open what the prompt shows</span> <kbd>Esc</kbd
+							><span>Settings and pause</span>
+						</div>
+						<p>Walk in through the main entrance and explore the departments at your own pace.</p>
+						<p>Walk up to a staff member and press E when the prompt appears to talk with them.</p>
+						<p>
+							Each room introduces itself as you walk in. Turn this off under Room introductions.
+						</p>
+					</div>
+					<div class="pager" id="setHelpPager" hidden></div>
+					<button class="setBtn" id="setHelpBack" type="button">‹ Back to settings</button>
 				</div>
 			</div>
 		</div>
@@ -2490,39 +2601,44 @@
 				<div class="linacHeadGrid">
 					<div class="linacHeadCanvasWrap">
 						<canvas id="linacHeadCanvas" width="980" height="650"></canvas>
-						<div class="linacHeadHint">Select a component on the schematic for details.</div>
 					</div>
 					<div class="linacHeadSide">
-						<div class="lhBox lhMode">
-							<h3 id="lhModeTitle">Photon Mode · 6 MV</h3>
-							<p id="lhNarrative"></p>
-						</div>
-						<div class="lhBox lhComponent">
-							<h3 id="lhComponentTitle">Select a component</h3>
-							<p id="lhComponentText">
-								Click any labeled component in the treatment-head schematic to review its role in
-								the beam path.
-							</p>
-						</div>
-						<div class="lhBox lhCompare">
-							<h3>Photon vs Electron</h3>
-							<p id="lhCompareText"></p>
-						</div>
-						<div class="lhBox">
-							<h3>Beam legend</h3>
-							<div class="lhLegend">
-								<span><i class="lhDot" style="background: #2f7de1"></i>Accelerated electrons</span
-								><span><i class="lhDot" style="background: #f2be27"></i>Photon beam</span
-								><span><i class="lhDot" style="background: #36a88d"></i>Clinical electrons</span
-								><span><i class="lhDot" style="background: #8b5cf6"></i>Selected component</span>
+						<div class="lhNotes" id="lhNotes">
+							<div class="lhBox lhMode">
+								<h3 id="lhModeTitle">Photon Mode · 6 MV</h3>
+								<p id="lhNarrative"></p>
+							</div>
+							<div class="lhBox lhComponent">
+								<h3 id="lhComponentTitle">Select a component</h3>
+								<p id="lhComponentText">
+									Click any labeled component in the treatment-head schematic to review its role in
+									the beam path.
+								</p>
+							</div>
+							<div class="lhBox lhCompare">
+								<h3>Photon vs Electron</h3>
+								<p id="lhCompareText"></p>
+							</div>
+							<div class="lhBox">
+								<h3>Beam legend</h3>
+								<div class="lhLegend">
+									<span><i class="lhDot" style="background: #2f7de1"></i>Accelerated electrons</span
+									><span><i class="lhDot" style="background: #f2be27"></i>Photon beam</span
+									><span><i class="lhDot" style="background: #36a88d"></i>Clinical electrons</span
+									><span><i class="lhDot" style="background: #8b5cf6"></i>Selected component</span>
+								</div>
+							</div>
+							<div class="lhBox">
+								<h3>About this schematic</h3>
+								<p>
+									This learning schematic is simplified. In the electron mode shown here, the MLC is
+									retracted and inactive; the electron applicator/cone and insert define the field.
+									Actual LINAC designs vary by manufacturer.
+								</p>
 							</div>
 						</div>
+						<div class="pager light" id="lhPager" hidden></div>
 					</div>
-				</div>
-				<div class="lhFooter">
-					This learning schematic is simplified. In the electron mode shown here, the MLC is
-					retracted and inactive; the electron applicator/cone and insert define the field. Actual
-					LINAC designs vary by manufacturer.
 				</div>
 			</div>
 		</div>
