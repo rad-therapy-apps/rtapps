@@ -35,7 +35,8 @@ import {
 } from './equipment';
 import { doorCenter, doorNormal, nearestDoor, getColliders } from './walk';
 import { player, HANDOFFS, REACH_Y } from './main';
-import { PROC_STATE, PROC_SITES } from './sdk-bridge';
+import { PROC_STATE, PROC_SITES, getCtAppUrl } from './sdk-bridge';
+import { roomAppHref } from './room-app-url';
 import {
 	focusConversationCamera,
 	applyWalkConversationComposition,
@@ -542,10 +543,15 @@ export function performInteraction() {
 	if (!t?.door) return;
 	const room = t.door.room;
 	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
-		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app. Its Back to the
-		// Center button brings the player back outside this door (return-door.ts).
+		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app, the CT doors on
+		// its CT side and LINAC Control on its LINAC side (room-app-url.ts). Its Back to the Center
+		// button brings the player back outside this door (return-door.ts).
 		writePref(PREF.returnDoor, room.id, 'session');
-		window.top.location.href = S.ROOM_APP_URL;
+		window.top.location.href = roomAppHref(
+			room.id,
+			{ linac: S.ROOM_APP_URL, ct: getCtAppUrl() },
+			window.location.href
+		);
 		return;
 	}
 	if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)) {

@@ -52,10 +52,20 @@ declare global {
 // RTApps (plan 4c): prefetch the room app's player URL once; if it can't resolve
 // (activity unseeded/unpublished, or offline), ROOM_APP_URL stays null and the three
 // wired doors keep their legacy in-hub behavior instead of going dead.
+// Free Mode fixes: the two CT doors lead to the CT simulation activity's player instead
+// (room-app-url.ts); while that URL is unresolved they use ROOM_APP_URL's player.
+let ctAppUrl: string | null = null;
+/** The CT simulation activity's player URL, or null until it resolves. */
+export const getCtAppUrl = () => ctAppUrl;
 if (window.RTApps) {
 	window.RTApps.activityUrl('sim-linac-fraction')
 		.then(function (url) {
 			S.ROOM_APP_URL = url;
+		})
+		.catch(function () {});
+	window.RTApps.activityUrl('sim-ct-scan')
+		.then(function (url) {
+			ctAppUrl = url;
 		})
 		.catch(function () {});
 }

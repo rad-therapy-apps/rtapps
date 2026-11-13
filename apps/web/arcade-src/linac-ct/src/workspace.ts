@@ -1,8 +1,11 @@
 import type { ParentToCtMessage, CtToParentMessage } from './ct-protocol';
+import { readSide } from './side';
 
 (function () {
 	'use strict';
 	const $ = (id) => document.getElementById(id);
+	// Free Mode fixes: opened from a hub door the app keeps to that door's queue (side.ts)
+	const side = readSide();
 	const CT_CASES = [
 		{
 			key: 'prostate',
@@ -70,7 +73,7 @@ import type { ParentToCtMessage, CtToParentMessage } from './ct-protocol';
     <div id="rtv2CTQueueRows" class="rtv2-queue-rows"></div>`;
 		shell.appendChild(home);
 		const headerRight = shell.querySelector('.rtv2-header-right');
-		if (headerRight && !$('rtv2QueueSwitcher')) {
+		if (!side && headerRight && !$('rtv2QueueSwitcher')) {
 			const sw = document.createElement('div');
 			sw.id = 'rtv2QueueSwitcher';
 			sw.setAttribute('aria-label', 'Select clinical queue');
@@ -222,6 +225,7 @@ import type { ParentToCtMessage, CtToParentMessage } from './ct-protocol';
 			return;
 		}
 		bindWorkspace();
+		if (side === 'ct') showCTQueue();
 		if ($('rtv2CTHome')?.classList.contains('active')) {
 			$('rtv2LINACQueueTab')?.classList.remove('active');
 			$('rtv2CTQueueTab')?.classList.add('active');
@@ -230,5 +234,8 @@ import type { ParentToCtMessage, CtToParentMessage } from './ct-protocol';
 			$('rtv2CTQueueTab')?.classList.remove('active');
 		}
 	}
-	boot();
+	// after console-patch.ts's init (registered first, it builds the shell on load), so a CT landing
+	// replaces the shell's first paint rather than following it
+	if (document.readyState === 'complete') boot();
+	else window.addEventListener('load', boot, { once: true });
 })();
