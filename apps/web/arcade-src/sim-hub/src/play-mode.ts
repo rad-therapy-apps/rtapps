@@ -2,10 +2,14 @@
    (Free Mode) or 'tutorial'. enterMode records the mode and tells the listeners; menu.ts's listener
    does the switch itself (the camera, walk mode, the menu), the HUD modules show or hide their parts.
    Free of scene and DOM imports so it is unit tested in Node (play-mode.spec.ts). */
+import type { ReturnView } from './return-door';
+
 export type PlayMode = 'title' | 'free' | 'tutorial';
-/** `atDoor`: a room id; the walk starts just outside that room's door, facing the hallway. */
+/** `atDoor`: a room id; the walk starts at that room's door, facing the hallway unless `view` says. */
 export interface EnterOptions {
 	atDoor?: string;
+	/** with atDoor: stand and look exactly as the player did when they left (return-door.ts) */
+	view?: ReturnView;
 }
 
 let mode: PlayMode = 'title';

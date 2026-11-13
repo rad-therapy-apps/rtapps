@@ -92,7 +92,7 @@ import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
 import { initTutorial, updateTutorial } from './tutorial';
 import { enterMode } from './play-mode';
-import { returnDoorOnBoot } from './return-door';
+import { returnDoorOnBoot, takeReturnView } from './return-door';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import { updatePrompt } from './hud-prompt';
 import { updateControlsBar } from './hud-controls';
@@ -678,8 +678,9 @@ installMenu();
 // after installMenu, which starts with the Tutorial entry disabled (menu.ts)
 initTutorial();
 const backAtDoor = returnDoorOnBoot((id) => {
-	const r = roomById(id);
-	return !!r && !r.hub;
-});
-if (backAtDoor) enterMode('free', { atDoor: backAtDoor });
+		const r = roomById(id);
+		return !!r && !r.hub;
+	}),
+	backView = takeReturnView();
+if (backAtDoor) enterMode('free', { atDoor: backAtDoor, view: backView ?? undefined });
 else enterMode('title');

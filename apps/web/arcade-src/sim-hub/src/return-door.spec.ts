@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { hallwayFacing, returnDoorOnBoot } from './return-door';
+import { hallwayFacing, returnDoorOnBoot, takeReturnView } from './return-door';
 import type { WallRect } from './prompt-math';
 
 const ROOM_IDS = new Set(['linaccontrol', 'ctcontrol', 'ctsim']);
@@ -85,5 +85,26 @@ describe('hallwayFacing', () => {
 
 	it('takes the first perpendicular on a tie (no walls)', () => {
 		expect(hallwayFacing(at, out, [])).toEqual({ x: -1, z: 0 });
+	});
+});
+
+describe('takeReturnView', () => {
+	it('gives back where the player stood and looked as they left, and takes it', () => {
+		session.set('simhub.returnView', JSON.stringify({ x: 12.5, z: -3, yaw: 1.2, pitch: -0.1 }));
+		expect(takeReturnView()).toEqual({ x: 12.5, z: -3, yaw: 1.2, pitch: -0.1 });
+		expect(session.has('simhub.returnView')).toBe(false);
+		expect(takeReturnView()).toBe(null);
+	});
+
+	it('ignores a missing or malformed view', () => {
+		expect(takeReturnView()).toBe(null);
+		session.set('simhub.returnView', '"linaccontrol"');
+		expect(takeReturnView()).toBe(null);
+		session.set('simhub.returnView', JSON.stringify({ x: 1, z: 2, yaw: 'left', pitch: 0 }));
+		expect(takeReturnView()).toBe(null);
+		session.set('simhub.returnView', JSON.stringify({ x: 1, z: 2, yaw: 0 }));
+		expect(takeReturnView()).toBe(null);
+		session.set('simhub.returnView', 'not json');
+		expect(takeReturnView()).toBe(null);
 	});
 });

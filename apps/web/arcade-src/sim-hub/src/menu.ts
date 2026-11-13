@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import { S } from './state';
 import { camera, orbit } from './scene';
 import { roomById, player, PLAYER_EYE_Y } from './main';
-import { hallwayFacing } from './return-door';
+import { hallwayFacing, type ReturnView } from './return-door';
 import {
 	setMode,
 	aimPlayerAt,
@@ -120,10 +120,18 @@ function onMainMenu(): void {
 	else enterMode('title');
 }
 
-/** Free Mode from a room's door: just outside it, facing along the hallway (main.ts boot, task 1e). */
-function startAtDoor(roomId: string): void {
+/** Free Mode from a room's door (main.ts boot, task 1e): where the player stood and looking the way
+    they looked as they left, or, without that, just outside the door facing along the hallway. */
+function startAtDoor(roomId: string, view?: ReturnView): void {
 	const r = roomById(roomId);
 	if (!r || r.hub) return;
+	if (view) {
+		player.pos.set(view.x, PLAYER_EYE_Y, view.z);
+		player.yaw = view.yaw;
+		player.pitch = view.pitch;
+		camera.position.copy(player.pos);
+		return;
+	}
 	const at = doorPoint(r),
 		dir = hallwayFacing(at, doorNormal(r), getColliders());
 	player.pos.set(at.x, PLAYER_EYE_Y, at.z);
@@ -147,7 +155,7 @@ function onModeChange(m: PlayMode, opts: EnterOptions): void {
 	orbit.autoRotate = false;
 	S.activeRoom = null; // walk.ts setMode starts on the plaza only when no room is active
 	setMode('walk', false);
-	if (opts.atDoor) startAtDoor(opts.atDoor);
+	if (opts.atDoor) startAtDoor(opts.atDoor, opts.view);
 	requestWalkPointerLock();
 }
 
