@@ -193,7 +193,11 @@
         }).catch(function () {});
     }
     document.getElementById('rtappsBackBtn')?.addEventListener('click', function () {
-        if (HUB_URL) window.top.location.href = HUB_URL;
+        if (!HUB_URL) return;
+        // the hub then starts Free Mode where the player left it, looking the same way (sim-hub
+        // return-door.ts; the same sessionStorage flag as linac-ct's Back to the Center)
+        try { sessionStorage.setItem('simhub.returning', 'true'); } catch (e) {}
+        window.top.location.href = HUB_URL;
     });
 </script>
 </body>

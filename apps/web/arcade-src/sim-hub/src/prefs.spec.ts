@@ -44,6 +44,7 @@ describe('PREF', () => {
 			roomCardsEnabled: 'simhub.roomCards.enabled',
 			sound: 'simhub.sound',
 			returnDoor: 'simhub.returnDoor',
+			returnView: 'simhub.returnView',
 			returning: 'simhub.returning'
 		});
 	});

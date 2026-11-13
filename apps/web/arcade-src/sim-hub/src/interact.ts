@@ -543,11 +543,20 @@ export function performInteraction() {
 	}
 	if (!t?.door) return;
 	const room = t.door.room;
+	// the app's Back to the Center brings the player back here, standing and looking as now
+	// (return-door.ts)
+	const rememberLeaving = () => {
+		writePref(PREF.returnDoor, room.id, 'session');
+		writePref(
+			PREF.returnView,
+			{ x: player.pos.x, z: player.pos.z, yaw: player.yaw, pitch: player.pitch },
+			'session'
+		);
+	};
 	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
 		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app, the CT doors on
-		// its CT side and LINAC Control on its LINAC side (room-app-url.ts). Its Back to the Center
-		// button brings the player back outside this door (return-door.ts).
-		writePref(PREF.returnDoor, room.id, 'session');
+		// its CT side and LINAC Control on its LINAC side (room-app-url.ts)
+		rememberLeaving();
 		window.top.location.href = roomAppHref(
 			room.id,
 			{ linac: S.ROOM_APP_URL, ct: getCtAppUrl() },
@@ -557,6 +566,7 @@ export function performInteraction() {
 	}
 	if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)) {
 		// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
+		rememberLeaving();
 		window.top.location.href = S.CONSOLE_APP_URL;
 		return;
 	}

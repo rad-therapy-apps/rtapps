@@ -1,7 +1,7 @@
-/* Back to the door you left from (sim-hub menu, task 1e). Leaving through a LINAC/CT room-app door,
-   interact.ts performInteraction writes PREF.returnDoor (the room id, sessionStorage: the arcade
-   pages share the app's origin and tab); the LINAC/CT app's Back to the Center button writes
-   PREF.returning. On boot main.ts asks here where to start. Both values are taken (read and removed)
+/* Back to the door you left from (sim-hub menu, task 1e). Leaving through a door to the LINAC/CT or
+   console app, interact.ts performInteraction writes PREF.returnDoor (the room id, sessionStorage: the
+   arcade pages share the app's origin and tab) and PREF.returnView (where the player stood and
+   looked); that app's Back to the Center button writes PREF.returning. On boot main.ts asks here where to start. Both values are taken (read and removed)
    every time, so only a real Back to the Center return skips the title menu and an old door is never
    reused. Free of scene and DOM imports so it is unit tested in Node (return-door.spec.ts). */
 import { PREF, takePref } from './prefs';
@@ -12,6 +12,23 @@ export function returnDoorOnBoot(isRoom: (id: string) => boolean): string | null
 	const returning = takePref<unknown>(PREF.returning, false, 'session'),
 		door = takePref<unknown>(PREF.returnDoor, null, 'session');
 	return returning === true && typeof door === 'string' && isRoom(door) ? door : null;
+}
+
+export interface ReturnView {
+	x: number;
+	z: number;
+	yaw: number;
+	pitch: number;
+}
+
+/** Where the player stood and which way they looked as they left (PREF.returnView), so a return puts
+    the view back as it was. Taken every boot like the door; null when missing or malformed. */
+export function takeReturnView(): ReturnView | null {
+	const v = takePref<unknown>(PREF.returnView, null, 'session');
+	if (!v || typeof v !== 'object') return null;
+	const { x, z, yaw, pitch } = v as Record<string, unknown>;
+	const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
+	return finite(x) && finite(z) && finite(yaw) && finite(pitch) ? { x, z, yaw, pitch } : null;
 }
 
 const PROBE_START = 0.6, // m out from the door, where the clear run is measured from

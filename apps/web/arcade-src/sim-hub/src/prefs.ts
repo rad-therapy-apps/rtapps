@@ -11,9 +11,11 @@ export const PREF = {
 	roomCardsEnabled: 'simhub.roomCards.enabled',
 	/** localStorage, JSON boolean, default false: Settings > Sound */
 	sound: 'simhub.sound',
-	/** sessionStorage, JSON string room id, written as the hub leaves through a room-app door */
+	/** sessionStorage, JSON string room id, written as the hub leaves through a door to another app */
 	returnDoor: 'simhub.returnDoor',
-	/** sessionStorage, JSON boolean, written by the LINAC/CT app's Back to the Center button */
+	/** sessionStorage, JSON {x, z, yaw, pitch}: where the player stood and looked as they left */
+	returnView: 'simhub.returnView',
+	/** sessionStorage, JSON boolean, written by the LINAC/CT and console apps' Back to the Center */
 	returning: 'simhub.returning'
 } as const;
 
