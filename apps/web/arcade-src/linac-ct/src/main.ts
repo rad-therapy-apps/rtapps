@@ -472,6 +472,7 @@ document.getElementById('rtappsBackBtn')?.addEventListener('click', () => {
 	const watch = new MutationObserver(place);
 	watch.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 	if (ctWorkspace) watch.observe(ctWorkspace, { attributes: true, attributeFilter: ['class'] });
+	place();
 })();
 
 // In-room treatment monitor state. Keep these in the main module scope because

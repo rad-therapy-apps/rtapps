@@ -406,7 +406,8 @@ import { readSide } from './side';
 		syncRoomNav();
 		syncMachineControlStates();
 		const name = text('consoleActivePatient');
-		$('rtv2HeaderPatient').textContent = name;
+		// the CT side's header never names the LINAC console's patient
+		$('rtv2HeaderPatient').textContent = side === 'ct' ? 'No patient open' : name;
 		$('rtv2PatientName').textContent = name;
 		$('rtv2PatientSubtitle').textContent = text('consolePatientRefSubtitle');
 		$('rtv2MRN').textContent = text('consoleRefMRN');
