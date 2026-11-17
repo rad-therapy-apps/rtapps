@@ -98,6 +98,7 @@ import { updatePrompt } from './hud-prompt';
 import { updateControlsBar } from './hud-controls';
 import './sdk-bridge';
 import { isPaused } from './pause';
+import { openDialogName } from './dialogs';
 import './hub-dialogs';
 import './hud-roomcard';
 
@@ -587,7 +588,15 @@ document.addEventListener('keydown', (e) => {
 	const k = e.key.toLowerCase();
 	keys[k] = true;
 	if (k === 'e' && !e.repeat) performInteraction();
+	// A key press is a gesture the browser accepts for pointer lock, so the first one after the mouse
+	// was freed (back from the LINAC/CT or console app, or a pop-up closed with Esc) turns mouse look
+	// back on without a click on the view. Not while a pop-up, the settings or a form field has the
+	// keys, and never for Esc, which browsers don't count.
+	if (k !== 'escape' && !isPaused() && openDialogName() === null && !isFormField(e.target))
+		requestWalkPointerLock();
 });
+const isFormField = (t: EventTarget | null) =>
+	t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName));
 document.addEventListener('keyup', (e) => {
 	keys[e.key.toLowerCase()] = false;
 });

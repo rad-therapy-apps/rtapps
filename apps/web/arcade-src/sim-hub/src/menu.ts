@@ -155,7 +155,12 @@ function onModeChange(m: PlayMode, opts: EnterOptions): void {
 	orbit.autoRotate = false;
 	S.activeRoom = null; // walk.ts setMode starts on the plaza only when no room is active
 	setMode('walk', false);
-	if (opts.atDoor) startAtDoor(opts.atDoor, opts.view);
+	if (opts.atDoor) {
+		startAtDoor(opts.atDoor, opts.view);
+		// back from another app the center loads with the keyboard on the page around it: take it, so
+		// W A S D work at once and the first key press turns mouse look on (main.ts)
+		window.focus();
+	}
 	requestWalkPointerLock();
 }
 
