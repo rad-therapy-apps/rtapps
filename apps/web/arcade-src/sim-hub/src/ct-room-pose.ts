@@ -2,8 +2,9 @@
    pose (shared/console-protocol.ts CtPose, table travel and height as 0..1 fractions) mapped onto
    the center's own CT table (equipment.ts CT_COUCH: home x, the 3.15 m slide into the bore, and
    today's top height), who drives the table (the console while its panel is open, the journey's
-   couch moves otherwise), the rotor's spin, the model's fit and which figures lie on the table. Free
-   of scene and DOM imports so it is unit tested in Node (ct-room-pose.spec.ts). */
+   couch moves otherwise), the rotor's spin, the model's fit, the pedestal's stretch and which
+   figures lie on the table. Free of scene and DOM imports so it is unit tested in Node
+   (ct-room-pose.spec.ts). */
 import type { ConsoleKind, CtPose } from '../../shared/console-protocol';
 
 /** The center's CT table: home x of its centre, how far it slides into the bore (+x), today's top. */
@@ -61,9 +62,10 @@ export function fitScale(modelRingDiameter: number, centerRingDiameter: number):
 	return centerRingDiameter / modelRingDiameter;
 }
 
-/** The pedestal's height scale so it stands from the floor to the underside of the top. */
-export function baseScaleY(undersideY: number, naturalHeight: number): number {
-	return undersideY / naturalHeight;
+/** The pedestal's height scale, 1 at home, so it still meets the top when the top rises by `rise`
+    metres from today's height (negative when it is lowered). */
+export function pedestalScaleY(homeHeight: number, rise: number): number {
+	return (homeHeight + rise) / homeHeight;
 }
 
 /** A figure's centre on the floor plan and its lowest point. */

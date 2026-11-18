@@ -8,7 +8,7 @@ import {
 	roomShows,
 	rotorAngle,
 	fitScale,
-	baseScaleY,
+	pedestalScaleY,
 	liesOn
 } from './ct-room-pose';
 
@@ -84,13 +84,14 @@ describe('rotorAngle', () => {
 	});
 });
 
-describe('fitScale and baseScaleY', () => {
+describe('fitScale and pedestalScaleY', () => {
 	it("scales the suite's 23-unit ring to the center's 2.835 m", () => {
 		expect(fitScale(23, 2.835) * 23).toBeCloseTo(2.835);
 	});
-	it('stretches the pedestal from the floor to the underside of the top', () => {
-		expect(baseScaleY(0.9, 1.2)).toBeCloseTo(0.75);
-		expect(baseScaleY(1.2, 1.2)).toBe(1);
+	it('keeps the pedestal as built at home and stretches it with the top', () => {
+		expect(pedestalScaleY(0.78, 0)).toBe(1);
+		expect(pedestalScaleY(0.78, 0.3)).toBeCloseTo(1.08 / 0.78);
+		expect(pedestalScaleY(0.78, -0.3)).toBeCloseTo(0.48 / 0.78);
 	});
 });
 
