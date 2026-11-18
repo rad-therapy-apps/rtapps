@@ -101,6 +101,7 @@ import { updatePrompt } from './hud-prompt';
 import { updateControlsBar } from './hud-controls';
 import './sdk-bridge';
 import { isPaused } from './pause';
+import { startVaultLinac } from './vault-linac';
 import { openDialogName } from './dialogs';
 import './hub-dialogs';
 import './hud-roomcard';
@@ -697,6 +698,7 @@ ceilings.forEach((c) => (c.visible = false));
 groupRoomContents();
 precompileShaders();
 initCtRoomLook();
+startVaultLinac(); // Vault 1 takes the LINAC app's machine once its model loads
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 // the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog;
