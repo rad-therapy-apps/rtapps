@@ -9133,6 +9133,180 @@
 				}
 			}
 		</style>
+		<style id="rtappsConsoleView">
+			/*
+       Console mode (?view=console, src/console-mode.ts): the app fills the center's console panel
+       (about 1100×640 to 1600×900). The center shows Vault 1 and its camera feeds, so the vault
+       view, the camera bank, the in-room pendant and every way out of the app are gone; the two
+       clinical monitors share the whole frame. Nothing here applies without body.linac-console-view.
+    */
+			body.linac-console-view {
+				background: #0b1118 !important;
+				overflow: hidden !important;
+			}
+			body.linac-console-view #appHeader,
+			body.linac-console-view #appFooter,
+			body.linac-console-view #mainGameArea,
+			body.linac-console-view #bottomMachineControls,
+			body.linac-console-view #startScreen,
+			body.linac-console-view #loadingScreen,
+			body.linac-console-view #cctvDeskMonitor,
+			body.linac-console-view #rtv2RoomNav,
+			body.linac-console-view #rtappsBackBtn,
+			body.linac-console-view #rtv2QueueSwitcher,
+			body.linac-console-view #ctSimWorkspace,
+			body.linac-console-view #dicomModal {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console .operator-console-panel {
+				top: 0 !important;
+				height: 100vh !important;
+				width: 100vw !important;
+				max-width: none !important;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr) !important;
+				grid-template-rows: minmax(0, 1fr) !important;
+				grid-template-areas: 'workflow patient' !important;
+				gap: 8px !important;
+				padding: 8px !important;
+				background: #0b1118 !important;
+			}
+			body.linac-console-view.control-room-mode .operator-console-panel::before,
+			body.linac-console-view.control-room-mode .operator-console-panel::after,
+			body.linac-console-view.control-room-mode #workflowDeskMonitor::before,
+			body.linac-console-view.control-room-mode #workflowDeskMonitor::after,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor::before,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor::after {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor,
+			body.linac-console-view.control-room-mode.rt-v2-console #patientInfoDeskMonitor {
+				padding: 5px !important;
+				border-radius: 10px !important;
+				box-shadow: inset 0 0 0 1px rgba(190, 205, 218, 0.12) !important;
+			}
+			body.linac-console-view.control-room-mode #workflowDeskMonitor .monitor-screen,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor .monitor-screen {
+				max-height: none !important;
+				border-radius: 7px !important;
+			}
+			/* An open workflow window is the whole second screen: with the reference cards behind it
+			   gone, nothing can scroll the window off the top of the screen. */
+			body.linac-console-view.console-app-open
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> :not(#consoleWorkflowDock) {
+				display: none !important;
+			}
+			/* The window's title stays on one line in the narrower panel */
+			body.linac-console-view #consoleWorkflowDock .console-dock-eyebrow {
+				display: block !important;
+				flex: 1 1 auto;
+				min-width: 0;
+				overflow: hidden;
+				font-size: 13px;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view #consoleWorkflowDock #consoleDockClose {
+				flex: 0 0 auto !important;
+				width: auto !important;
+			}
+			/* The R&V delivery screen fits the second screen's width: plan / actual tables side by
+			   side with the beam controls and interlocks under them (the app's own narrow layout), a
+			   shorter camera strip, and the whole screen scrolling as one page */
+			body.linac-console-view #consoleWorkflowDockBody #deliveryPanel.open,
+			body.linac-console-view #consoleWorkflowDockBody #deliveryPanel #rtv2DeliveryAlt {
+				height: auto !important;
+			}
+			body.linac-console-view .rtv2d-body {
+				grid-template-columns: 150px minmax(0, 1fr);
+			}
+			body.linac-console-view .rtv2d-hero {
+				min-height: 96px;
+			}
+			body.linac-console-view .rtv2d-content {
+				flex: 0 0 auto;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			}
+			body.linac-console-view .rtv2d-panel.side {
+				grid-column: 1 / -1;
+			}
+			body.linac-console-view .rtv2d-panel-head,
+			body.linac-console-view .rtv2d-table-row {
+				grid-template-columns: minmax(56px, 1fr) minmax(0, 76px) minmax(0, 76px);
+				gap: 5px;
+			}
+			body.linac-console-view .rtv2d-table,
+			body.linac-console-view .rtv2d-sidebar {
+				overflow: visible;
+			}
+			/* Held machine keys (src/console-keys.ts): a press-and-hold must not scroll or select */
+			body.linac-console-view #rtv2MachinePanel [data-console-target],
+			#consoleMoveToField {
+				touch-action: none;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+			body.linac-console-view #rtv2MachinePanel .console-move-title {
+				margin-top: 7px;
+			}
+			#consoleMoveToField {
+				width: 100%;
+				min-height: 30px;
+				margin: 0;
+				padding: 4px 6px;
+				border: 1px solid #67b8e9;
+				border-radius: 3px;
+				background: linear-gradient(#2b6a95, #1f5174);
+				color: #fff;
+				font-size: 9px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			#consoleMoveToField:hover {
+				filter: brightness(1.13);
+			}
+			#consoleMoveToField.active {
+				background: #3a8fc6;
+				box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+			}
+			/* Below the widest panels, the Imaging / Room keys and the extra workflows go two to a row
+			   so their labels fit */
+			@media (max-width: 1400px) {
+				body.linac-console-view #rtv2MachinePanel .rtv2-control-group:first-child .rtv2-button-grid,
+				body.linac-console-view #rtv2MachinePanel .rtv2-advanced-workflows {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+			/* What the console refused, and why: posted to the center as a mistake too */
+			#consoleRefusal {
+				position: fixed;
+				left: 50%;
+				top: 10px;
+				z-index: 10050;
+				max-width: min(760px, calc(100vw - 40px));
+				padding: 10px 16px;
+				border: 1px solid #e0737b;
+				border-radius: 8px;
+				background: #5a1d24;
+				box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+				color: #fff3f3;
+				font:
+					600 13px/1.35 'Segoe UI',
+					Arial,
+					sans-serif;
+				opacity: 0;
+				pointer-events: none;
+				transform: translate(-50%, -8px);
+				transition:
+					opacity 0.18s ease,
+					transform 0.18s ease;
+			}
+			#consoleRefusal.show {
+				opacity: 1;
+				transform: translate(-50%, 0);
+			}
+		</style>
 	</head>
 	<body>
 		<div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">

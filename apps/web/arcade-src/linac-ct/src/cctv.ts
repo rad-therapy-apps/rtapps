@@ -2,11 +2,13 @@ import * as THREE from 'three-linac';
 import { S } from './state';
 import { cameraSceneA, cameraSceneB, cameraSceneC } from './dom';
 import { GANTRY_PLANE_Z_TARGET } from './scene';
+import { CONSOLE } from './console-hooks';
 
 export const cctvFeeds = [];
 
 export function setupCCTVFeeds() {
-	if (!Array.isArray(cctvFeeds)) return;
+	// console mode: the center shows its own Vault 1 camera feeds, so no feed renderers here
+	if (!Array.isArray(cctvFeeds) || CONSOLE.console) return;
 	cctvFeeds.length = 0;
 	const defs = [
 		{
