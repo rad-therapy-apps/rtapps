@@ -758,7 +758,9 @@ export function wire() {
 			if ((b as HTMLButtonElement).disabled) hold.stop();
 			else step();
 		});
-		b.addEventListener('pointerdown', hold.start);
+		b.addEventListener('pointerdown', (e) => {
+			if ((e as PointerEvent).button === 0) hold.start();
+		});
 		['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((t) =>
 			b.addEventListener(t, hold.stop)
 		);

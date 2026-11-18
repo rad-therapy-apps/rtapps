@@ -66,6 +66,7 @@ export function startStateStream() {
 		if (gate(pose, step, performance.now()))
 			postToParent({ type: 'rtapps-ct-state', pose, step } satisfies CtStateMsg);
 	};
-	setInterval(tick, 33);
+	// polled at twice the gate's rate, so a change is never held back a whole period
+	setInterval(tick, 16);
 	tick();
 }
