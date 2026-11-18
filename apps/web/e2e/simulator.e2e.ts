@@ -169,10 +169,16 @@ test.describe
 		await studentPage.getByRole('link', { name: 'Treatment delivery', exact: true }).click();
 		await expect(studentPage).toHaveURL(/\/activities\//);
 
-		// #rtappsBackBtn ("← Back to the Center") is static markup in the linac-ct shell.
+		// Treatment delivery now opens the center itself (arcade_slug sim-hub) with
+		// ?start=linaccontrol, so the iframe is the hub: #watermark is its static markup, and
+		// the player must have put the activity's start_room on the iframe URL.
 		const roomFrameLocator = studentPage.frameLocator('iframe[title="Treatment delivery"]');
-		await expect(roomFrameLocator.locator('#rtappsBackBtn')).toBeAttached();
-		const roomFrame = studentPage.frames().find((f) => f.url().includes('/arcade/linac-ct'))!;
+		await expect(roomFrameLocator.locator('#watermark')).toBeAttached();
+		await expect(studentPage.locator('iframe[title="Treatment delivery"]')).toHaveAttribute(
+			'src',
+			'/arcade/sim-hub/index.html?start=linaccontrol'
+		);
+		const roomFrame = studentPage.frames().find((f) => f.url().includes('/arcade/sim-hub'))!;
 		await roomFrame.waitForFunction(
 			() => (window as unknown as RTAppsGlobal).RTApps !== undefined,
 			{ timeout: 30_000 }
