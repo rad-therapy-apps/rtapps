@@ -47,6 +47,7 @@ const IDS = [
 	'tutFade',
 	'tutRoleCard',
 	'tutRoleCardName',
+	'tutWalkCard',
 	'tutEnd',
 	'tutEndMenu',
 	'tutEndExplore'
@@ -199,8 +200,16 @@ export function closeDialog(): void {
 	optionButtons = [];
 }
 
-export function setFade(on: boolean): void {
+/** The black screen; `ms` is a fade length other than the stylesheet's (the escorts' slow fade). */
+export function setFade(on: boolean, ms?: number): void {
+	E.tutFade.style.transitionDuration = ms ? `${ms}ms` : '';
 	show(E.tutFade, on);
+}
+
+/** The line on the black while Jordan's walk is skipped (tutorial.ts walkUnderFade). */
+export function showWalkCard(text: string | null): void {
+	show(E.tutWalkCard, !!text);
+	if (text) E.tutWalkCard.textContent = text;
 }
 
 export function showRoleCard(r: RoleInfo | null): void {
@@ -221,6 +230,7 @@ export function hideTutorialHud(): void {
 	closeDialog();
 	setFade(false);
 	showRoleCard(null);
+	showWalkCard(null);
 	showEnd(false);
 	shownDistance = '';
 }

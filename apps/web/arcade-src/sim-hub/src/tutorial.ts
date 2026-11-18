@@ -15,6 +15,7 @@ import { ROOMS } from './rooms';
 import { player, PLAYER_EYE_Y, REACH_Y, PRIMARY_NPCS, ROOM_CAST, roomById, doors } from './main';
 import {
 	aimPlayerAt,
+	canMove,
 	getColliders,
 	doorPoint,
 	insidePoint,
@@ -23,7 +24,7 @@ import {
 	requestWalkPointerLock
 } from './walk';
 import { registerInteractable, performInteraction } from './interact';
-import { movementPathFor, seatNear, seatActor, actorHasTransition } from './npc-behavior';
+import { movementPathFor, seatNear, seatActor, actorHasTransition, stepRise } from './npc-behavior';
 import { poseCharacter, faceNpcToward, setPatientGown } from './npc';
 import {
 	JOURNEY,
@@ -52,13 +53,16 @@ import {
 	closestOnSegment,
 	dist,
 	edgeArrow,
+	entryDistance,
 	escortAhead,
 	escortStops,
 	formatDistance,
 	invSmoothstep,
 	lineBlocked,
 	offRoute,
+	pointAlong,
 	remainingDistance,
+	routeFrom,
 	routeLength,
 	smoothstep,
 	stepEscort
@@ -72,7 +76,7 @@ interface Move {
 	curve: THREE.CurvePath<THREE.Vector3>;
 	start: number;
 	duration: number;
-	rise: unknown;
+	rise: Parameters<typeof stepRise>[1] | null;
 }
 interface Leg {
 	from: string;
@@ -104,6 +108,7 @@ let seatedAt: THREE.Vector3 | null = null;
 let vaultHeld = false;
 let dialogOpen = false,
 	roleCardOpen = false,
+	walkFade = false,
 	endOpen = false;
 let lastAnswer: string | null = null;
 const timers = new Set<ReturnType<typeof setTimeout>>();
@@ -334,7 +339,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 	escortToVault: () => {
 		workflowState('lobby', 'IN TRANSIT', 'Jordan and therapist en route to Vault 1', '#42d5cf');
 		workflowState('vault1', 'PATIENT ARRIVING', 'Treatment team preparing room', '#6fb6ff');
-		startEscort([
+		startEscort(LINES.walkToVault, [
 			{
 				from: 'lobby',
 				to: 'vault1',
@@ -486,7 +491,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 		workflowState('lobby', 'DEPARTING', 'Jordan Ellis · treatment complete', '#65dda0');
 		workflowState('vault1', 'AVAILABLE', 'Room turnover complete', '#65dda0');
 		workflowState('linaccontrol', 'READY', 'Preparing for next scheduled patient', '#42d5cf');
-		startEscort([
+		startEscort(LINES.walkToLobby, [
 			{
 				from: 'vault1',
 				to: 'lobby',
@@ -517,7 +522,7 @@ function hideElena(hide: boolean): void {
 }
 
 /* ---- Jordan's escorts: the journey's moves, held at each door and corner for the player ---- */
-function startEscort(legs: Leg[]): void {
+function startEscort(line: string, legs: Leg[]): void {
 	escort = {
 		legs,
 		leg: 0,
@@ -527,6 +532,70 @@ function startEscort(legs: Leg[]): void {
 		hold: { next: 0, holding: false },
 		length: 0
 	};
+	walkUnderFade(line);
+}
+/* The long walk happens under a slow fade (the owner's call, 2026-11-18): the screen goes black
+   with one line, Jordan and the player are moved on along Jordan's route to just short of the room
+   it leads into (skipToDoor), and play resumes as the picture comes back, for the last stretch. */
+function walkUnderFade(line: string): void {
+	walkFade = true;
+	setPaused('tutorial', true);
+	hud.setDistance(''); // the last step's 0 m, until the walk's own distance after the fade
+	hud.placeMarker(null);
+	hud.placeEdge(null);
+	hud.setFade(true, TUTORIAL_TIMING.walkFadeMs);
+	after(TUTORIAL_TIMING.walkFadeMs, () => {
+		const look = skipToDoor();
+		hud.showWalkCard(line);
+		after(TUTORIAL_TIMING.walkCardMs, () => {
+			hud.showWalkCard(null);
+			hud.setFade(false, TUTORIAL_TIMING.walkFadeMs);
+			// the mouse still turns the player under the black: the picture comes back facing Jordan
+			if (look) aimPlayerAt(look);
+			walkFade = false;
+			setPaused('tutorial', false);
+		});
+	});
+}
+/** Under the black: Jordan's first leg starts `WORLD.doorLead` short of the room it leads into,
+    already standing, with the player `WORLD.playerBehind` behind Jordan, looking past Jordan to
+    where the route enters the room (or as far back along the route, if a wall is there); returns the point the player looks at (Jordan's head), or null when
+    Jordan walks the whole way (the move is queued behind another, or the route never enters the
+    room). */
+function skipToDoor(): THREE.Vector3 | null {
+	const to = escort.legs[0].to;
+	beginLeg();
+	const t = escort.t;
+	if (!t) return null;
+	const pts = curvePoints(t.curve),
+		entry = entryDistance(pts, ([x, z]) => roomContainingWalkPoint(x, z)?.id === to);
+	if (entry === null) return null;
+	const d = Math.max(0, entry - WORLD.doorLead),
+		rest = routeFrom(pts, d);
+	if (rest.length < 2) return null;
+	const p = JOURNEY.patient;
+	if (t.rise) stepRise(p, t.rise, t.rise.end); // out of the chair at once: the rise's last frame
+	t.rise = null;
+	const curve = new THREE.CurvePath<THREE.Vector3>();
+	for (let i = 1; i < rest.length; i++)
+		curve.add(new THREE.LineCurve3(at(rest[i - 1]), at(rest[i])));
+	t.curve = curve;
+	t.start = S.simSec;
+	t.duration = routeLength(rest) / WORLD.escortSpeed;
+	attachLeg(); // the stops and length of the shortened route
+	p.position.copy(at(rest[0]));
+	p.rotation.y = Math.atan2(rest[1][0] - rest[0][0], rest[1][1] - rest[0][1]);
+	poseCharacter(p, 'neutral');
+	const [ex, ez] = pointAlong(pts, entry).p,
+		k = WORLD.playerBehind / (Math.hypot(ex - rest[0][0], ez - rest[0][1]) || 1);
+	let x = rest[0][0] - (ex - rest[0][0]) * k,
+		z = rest[0][1] - (ez - rest[0][1]) * k;
+	if (!canMove(x, z) || lineBlocked(rest[0], [x, z], getColliders()))
+		[x, z] = pointAlong(pts, d - WORLD.playerBehind).p;
+	player.pos.set(x, PLAYER_EYE_Y, z);
+	const look = at(rest[0]).setY(PLAYER_EYE_Y - 0.15);
+	aimPlayerAt(look);
+	return look;
 }
 function beginLeg(): void {
 	const i = escort.leg,
@@ -780,7 +849,7 @@ function exitTutorial(): void {
 	queue.length = 0;
 	machine = OFF;
 	hud.hideTutorialHud();
-	dialogOpen = roleCardOpen = endOpen = false;
+	dialogOpen = roleCardOpen = walkFade = endOpen = false;
 	lastAnswer = null;
 	setPaused('tutorial', false);
 	if (seatedAt) player.pos.y = PLAYER_EYE_Y;
@@ -806,6 +875,12 @@ export function updateTutorial(dt: number): void {
 		camera.position.copy(seatedAt);
 	}
 	if (vaultHeld) setDoorTarget('vault1', false); // closed for the beam, whoever walks up to it
+	if (walkFade) {
+		// nothing moves on under the black: Jordan's walk starts when play resumes (the game is
+		// paused meanwhile; the NPC check never pauses, so its clock is held here)
+		if (escort?.t) escort.t.start = S.simSec;
+		return;
+	}
 	const esc = updateEscort(),
 		st = CHAPTER_1[machine.step - 1];
 	if (!st) return;
@@ -855,8 +930,10 @@ function installCheckHook(): void {
 				vaultHeld,
 				dialogOpen,
 				roleCardOpen,
+				walkFade,
 				endOpen,
-				escortHolding: !!escort?.hold.holding
+				escortHolding: !!escort?.hold.holding,
+				escortLength: escort?.length ?? null
 			}),
 			/** Where the marker leads for the current step. */
 			standPoint: () =>
@@ -901,7 +978,7 @@ export function initTutorial(): void {
 	});
 	registerDialog(
 		'tutorial',
-		() => dialogOpen || roleCardOpen || endOpen,
+		() => dialogOpen || roleCardOpen || walkFade || endOpen,
 		() => {
 			if (dialogOpen) dispatch({ type: 'closeDialog' });
 			else if (endOpen) keepExploring();

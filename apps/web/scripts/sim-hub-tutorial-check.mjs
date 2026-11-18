@@ -5,13 +5,17 @@
 // `window.__TUTORIAL` (src/tutorial.ts), and plays Chapter 1 twice on a simulated clock
 // (performance.now and setTimeout run on it, Math.random is seeded), as sim-hub-npc-check.mjs
 // does. The player is moved to each target, turns to it and presses E (the real
-// performInteraction), answers each decision and follows Jordan on the escorts. Room introduction
+// performInteraction), answers each decision and follows Jordan on the escorts. Each escort starts
+// under a fade that moves Jordan and the player on to just short of the destination room; after it
+// the player stands clear of the walls, a few metres behind Jordan, with under 25 m of the first leg
+// left (the whole walk to Vault 1 was about 100 m). Room introduction
 // cards are switched off through the page's own preference (localStorage
 // simhub.roomCards.enabled = false).
 //   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; the 60 s and 120 s walking hints and the 20 s E hint show; on the
-//          walk to Vault 1 the player runs ahead and Jordan waits at a stop ("Wait for Jordan");
-//          the end card's Keep exploring leaves the player where they stand, in free mode
+//          walk to Vault 1 the player stays where the fade left them and Jordan waits at a stop;
+//          on the walk back the player runs ahead to reception ("Wait for Jordan"); the end
+//          card's Keep exploring leaves the player where they stand, in free mode
 //   run 2  every decision answered right; the end card's Main menu goes back to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
@@ -35,6 +39,9 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const STEP_MS = 1000 / 30;
 const WALL_R = 0.2; // the root circle checked against the wall colliders (NPC check k and l)
 const STEP_LIMIT_S = 300; // the longest a step may take (an escort is the longest)
+const PLAYER_R = 0.32; // the player's walk collision margin (src/walk.ts canMove)
+const FADE_LIMIT_S = 10; // the escort's fade: 1.5 s to black, 1 s of its line (src/tutorial-steps.ts)
+const AFTER_FADE_M = 25; // the most of the first leg left after the fade (m)
 const MAX_DETAIL = 30;
 
 function setupError(msg) {
@@ -130,6 +137,12 @@ function wallReach(x, z) {
 	return deepest;
 }
 
+// whether the player could stand at (x, z): src/walk.ts canMove
+const playerBlocked = (x, z) =>
+	NPC.colliders.some(
+		(c) => Math.abs(x - c.x) < c.hw + PLAYER_R && Math.abs(z - c.z) < c.hd + PLAYER_R
+	);
+
 // every frame of a run: each tutorial move's walker against the walls
 let wallHits = [],
 	movesSeen = new Set();
@@ -198,7 +211,8 @@ function report(part, fails, summary) {
 }
 
 // One play-through. `wrong`: answer every decision wrong three times; also exercises the hints,
-// Jordan's wait and Keep exploring. Otherwise answers right and leaves by Main menu.
+// Jordan's wait, "Wait for Jordan" and Keep exploring. Otherwise answers right and leaves by Main
+// menu.
 function play(wrong) {
 	const name = wrong ? 'run 1 (wrong answers)' : 'run 2 (right answers)';
 	const fails = [],
@@ -224,7 +238,8 @@ function play(wrong) {
 		if (T.state().hint !== 'Walk up to Maya Brooks and press E when the prompt appears.')
 			fails.push(`no E hint after 20 s within 6 m (hint: ${T.state().hint})`);
 	}
-	let testedWait = false;
+	let testedWait = false,
+		testedAhead = false;
 	while (T.state().phase !== 'done' && !fails.length) {
 		const s = T.state(),
 			st = T.steps[s.step - 1];
@@ -288,27 +303,47 @@ function play(wrong) {
 			if (!stepUntil(() => T.state().step !== s.step, 120))
 				fails.push(`step ${s.step}: not completed in ${st.target.place}`);
 		} else {
-			// escort: walk beside Jordan; on run 1's walk to Vault 1, run ahead once and come back
+			// escort: the fade moves Jordan and the player on; then walk beside Jordan. On run 1 the
+			// player stays put once on the walk to Vault 1 and runs ahead once on the walk back.
+			if (!stepUntil(() => !T.state().walkFade, FADE_LIMIT_S)) {
+				fails.push(`step ${s.step}: the fade did not end in ${FADE_LIMIT_S} s`);
+				break;
+			}
+			const j = xz(J.patient),
+				[px, pz] = T.playerPos(),
+				gap = Math.hypot(j.x - px, j.z - pz),
+				left = T.state().escortLength;
+			if (playerBlocked(px, pz))
+				fails.push(`step ${s.step}: after the fade the player is in a wall at (${px}, ${pz})`);
+			if (gap < 1 || gap > 3)
+				fails.push(`step ${s.step}: after the fade the player is ${gap.toFixed(2)} m from Jordan`);
+			if (!(left > 0 && left < AFTER_FADE_M))
+				fails.push(`step ${s.step}: after the fade Jordan has ${left} m of the first leg left`);
 			const follow = () => {
 				const p = xz(J.patient);
 				T.placePlayer(p.x + 0.8, p.z + 0.8);
 			};
+			if (wrong && s.step === 5) {
+				testedWait = true;
+				const held = stepUntil(() => T.state().escortHolding, 30);
+				const at = xz(J.patient);
+				stepFor(2);
+				const still = xz(J.patient);
+				if (!held) fails.push('step 5: Jordan did not wait at a stop for the player');
+				else if (Math.hypot(still.x - at.x, still.z - at.z) > 1e-6)
+					fails.push('step 5: Jordan moved on while waiting');
+			}
+			if (wrong && s.step === 11) {
+				testedAhead = true;
+				const [dx, dz] = st.target.spec.final;
+				T.placePlayer(dx + 1, dz + 1); // at reception: far ahead of Jordan
+				stepFor(0.5);
+				if (T.state().hint !== 'Wait for Jordan')
+					fails.push(`step 11: no "Wait for Jordan" while far ahead (hint: ${T.state().hint})`);
+			}
 			let frames = 0;
 			const going = () => T.state().step === s.step && T.state().phase === 'active';
 			while (going() && frames++ < (STEP_LIMIT_S * 1000) / STEP_MS) {
-				if (wrong && s.step === 5 && !testedWait && frames === 240) {
-					testedWait = true;
-					T.placePlayer(73.15, -15.3); // inside Vault 1: far ahead of Jordan
-					const held = stepUntil(() => T.state().escortHolding, 30);
-					const at = xz(J.patient);
-					stepFor(2);
-					const still = xz(J.patient);
-					if (!held) fails.push('step 5: Jordan did not wait at a stop for the player');
-					else if (Math.hypot(still.x - at.x, still.z - at.z) > 1e-6)
-						fails.push('step 5: Jordan moved on while waiting');
-					if (T.state().hint !== 'Wait for Jordan')
-						fails.push(`step 5: no "Wait for Jordan" while far ahead (hint: ${T.state().hint})`);
-				}
 				follow();
 				step();
 			}
@@ -325,6 +360,7 @@ function play(wrong) {
 			fails.push(`steps played ${JSON.stringify(order)}`);
 		if (!T.state().endOpen) fails.push('no end card');
 		if (wrong && !testedWait) fails.push("Jordan's wait was not exercised");
+		if (wrong && !testedAhead) fails.push('"Wait for Jordan" was not exercised');
 	}
 	report(
 		`${name}: steps`,

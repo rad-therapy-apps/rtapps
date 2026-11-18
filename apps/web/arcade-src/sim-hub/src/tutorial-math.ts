@@ -209,6 +209,41 @@ export function stepEscort(
 	return { hold: { next, holding: false }, holdAt: null };
 }
 
+/** The point `d` metres along the route (clamped to its ends) and the index of the route point
+    after it. */
+export function pointAlong(pts: readonly Pt[], d: number): { p: Pt; next: number } {
+	let left = Math.max(0, d);
+	for (let i = 1; i < pts.length; i++) {
+		const a = pts[i - 1],
+			b = pts[i],
+			len = dist(a, b);
+		if (left < len) {
+			const t = left / len;
+			return { p: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], next: i };
+		}
+		left -= len;
+	}
+	return { p: pts[pts.length - 1], next: pts.length };
+}
+
+/** The route from `d` metres along it to its end. */
+export function routeFrom(pts: readonly Pt[], d: number): Pt[] {
+	const { p, next } = pointAlong(pts, d);
+	return [p, ...pts.slice(next)];
+}
+
+/** How far along the route it first comes inside a room, checked every `step` metres: the first
+    distance where `inside` holds, or null if it never does. */
+export function entryDistance(
+	pts: readonly Pt[],
+	inside: (p: Pt) => boolean,
+	step = 0.25
+): number | null {
+	const total = routeLength(pts);
+	for (let d = 0; d < total; d += step) if (inside(pointAlong(pts, d).p)) return d;
+	return pts.length && inside(pts[pts.length - 1]) ? total : null;
+}
+
 /** Whether to show "Wait for Jordan": the player more than `r` from Jordan and nearer the end. */
 export function escortAhead(
 	gap: number,

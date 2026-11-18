@@ -65,10 +65,22 @@ export const WORLD = {
 	jamieBack: [76.3, -16.0] as Pt,
 	/** The eye above the seat top when seated: standing eye 1.87 - hip 1.06 + hip to pelvis 0.06. */
 	seatedEyeAboveSeat: 0.87,
-	escortSpeed: 1.52
+	/** Jordan's average pace on the escorts' last stretch (m/s): the journey's ease peaks at 1.5
+	    times it, 3.3 m/s, about the player's walk (walk.ts, 3.35). */
+	escortSpeed: 2.2,
+	/** After the fade (tutorial.ts walkUnderFade), Jordan stands this far short of the room the walk
+	    leads into along Jordan's route, and the player this far behind Jordan (m). */
+	doorLead: 2.5,
+	playerBehind: 1.8
 };
 
-export const TUTORIAL_TIMING = { roleFadeMs: 600, roleCardMs: 2500 };
+export const TUTORIAL_TIMING = {
+	roleFadeMs: 600,
+	roleCardMs: 2500,
+	/** The escorts' slow fade, each way, and how long its line shows on the black. */
+	walkFadeMs: 1500,
+	walkCardMs: 1000
+};
 
 export type TargetId =
 	'maya' | 'chair' | 'console' | 'jordan' | 'couch' | 'linaccontrol' | 'vault1' | 'reception';
@@ -178,7 +190,9 @@ export const LINES = {
 	jamieLeaving: 'Stay still, Jordan. We’ll talk to you over the intercom before treatment begins.',
 	shiftVerified: 'Correction verified against the treatment record.',
 	jordanOffCouch: 'Thank you. I’ve changed and I’m ready to go.',
-	jordanThanks: 'That went smoothly. See you tomorrow.'
+	jordanThanks: 'That went smoothly. See you tomorrow.',
+	walkToVault: 'You walk Jordan to Vault 1.',
+	walkToLobby: 'You walk Jordan back to reception.'
 };
 
 const CONSOLE_HINTS: readonly [string, string] = [
@@ -332,7 +346,7 @@ export const CHAPTER_1: readonly Step[] = [
 		trigger: 'escortArrived',
 		hints: [
 			'Jordan waits at each door and corner until you are within 5 m. Stay close.',
-			'Follow the TREATMENT AREA signs, then the VAULT 1 sign at the end of the walkway.'
+			'Follow Jordan through the Vault 1 door and the maze to the changing area, then the couch.'
 		],
 		onStart: ['escortToVault']
 	},
@@ -496,7 +510,7 @@ export const CHAPTER_1: readonly Step[] = [
 		trigger: 'escortArrived',
 		hints: [
 			'Jordan waits at each door and corner until you are within 5 m. Stay close.',
-			'Follow the MAIN LOBBY signs back to reception.'
+			'Follow Jordan into the lobby to the front desk, where Maya Brooks stands.'
 		],
 		onStart: ['escortToLobby'],
 		onComplete: ['jordanThanks']

@@ -4,6 +4,7 @@ import {
 	closestOnSegment,
 	edgeArrow,
 	eHintDue,
+	entryDistance,
 	escortAhead,
 	escortStops,
 	formatDistance,
@@ -12,7 +13,9 @@ import {
 	missFeedback,
 	newStuckTimer,
 	offRoute,
+	pointAlong,
 	remainingDistance,
+	routeFrom,
 	routeLength,
 	smoothstep,
 	stepEscort,
@@ -205,6 +208,36 @@ describe('escort stops and holds', () => {
 		expect(escortAhead(12.1, 30, 40)).toBe(true);
 		expect(escortAhead(11.9, 30, 40)).toBe(false);
 		expect(escortAhead(20, 50, 40)).toBe(false);
+	});
+});
+
+describe('the escort moved on to the doorway', () => {
+	it('finds the point a distance along the route, clamped to its ends', () => {
+		expect(pointAlong(L, 1.5)).toEqual({ p: [1.5, 0], next: 1 });
+		expect(pointAlong(L, 3)).toEqual({ p: [3, 0], next: 2 });
+		expect(pointAlong(L, 5)).toEqual({ p: [3, 2], next: 2 });
+		expect(pointAlong(L, -1)).toEqual({ p: [0, 0], next: 1 });
+		expect(pointAlong(L, 9)).toEqual({ p: [3, 4], next: 3 });
+	});
+
+	it('cuts the route at a distance, keeping the rest of its points', () => {
+		expect(routeFrom(L, 1)).toEqual([
+			[1, 0],
+			[3, 0],
+			[3, 4]
+		]);
+		expect(routeFrom(L, 5)).toEqual([
+			[3, 2],
+			[3, 4]
+		]);
+		expect(routeLength(routeFrom(L, 2.5))).toBeCloseTo(4.5);
+	});
+
+	it('measures how far the route goes before it comes inside a room', () => {
+		// the room is everything north of z = 1: the route enters it 1 m up its second leg
+		expect(entryDistance(L, ([, z]) => z > 1)).toBeCloseTo(4.25);
+		expect(entryDistance(L, ([x]) => x < 1)).toBe(0);
+		expect(entryDistance(L, ([x]) => x > 5)).toBe(null);
 	});
 });
 
