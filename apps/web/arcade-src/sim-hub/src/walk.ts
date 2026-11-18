@@ -503,7 +503,8 @@ export function applyWalkMouseDelta(dx, dy) {
 	player.pitch = Math.max(-1.12, Math.min(1.12, player.pitch - dy * 0.0024));
 }
 
-function canMove(x, z) {
+/** Whether the player can stand at (x, z): inside the world and clear of every wall collider. */
+export function canMove(x, z) {
 	if (x < -58 || x > 94 || z < -70 || z > 38) return false;
 	const rad = 0.32;
 	for (const c of colliders) {
