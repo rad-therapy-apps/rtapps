@@ -12,6 +12,8 @@ import {
 	drawTopogram,
 	lerp
 } from './imaging';
+import { createHoldRepeater } from './hold-repeat';
+import { consoleMode } from './bridge';
 import { ctStepLabel, COUCH_Y_LOW, COUCH_Y_HIGH } from './ct-state';
 import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room';
 /* ---------------- CT PROTOCOL LIBRARY ---------------- */
@@ -746,8 +748,23 @@ export function wire() {
 		const m = (b as HTMLElement).dataset.couch;
 		const ax = m[0],
 			sgn = m.slice(1) === '1' ? 1 : -1;
-		(b as HTMLElement).onclick = () =>
-			moveCouch(ax === 'x' ? sgn : 0, ax === 'y' ? sgn : 0, ax === 'z' ? sgn : 0);
+		const step = () => moveCouch(ax === 'x' ? sgn : 0, ax === 'y' ? sgn : 0, ax === 'z' ? sgn : 0);
+		if (!consoleMode) {
+			(b as HTMLElement).onclick = step;
+			return;
+		}
+		// Console mode: press and hold repeats; a keyboard click (detail 0) is one step.
+		const hold = createHoldRepeater(() => {
+			if ((b as HTMLButtonElement).disabled) hold.stop();
+			else step();
+		});
+		b.addEventListener('pointerdown', hold.start);
+		['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((t) =>
+			b.addEventListener(t, hold.stop)
+		);
+		b.addEventListener('click', (e) => {
+			if ((e as MouseEvent).detail === 0) step();
+		});
 	});
 	$('btnSetIso').onclick = setIso;
 	$('rotChk').onchange = (e) => {
