@@ -9197,6 +9197,57 @@
 				> :not(#consoleWorkflowDock) {
 				display: none !important;
 			}
+			/* The window's title stays on one line in the narrower panel */
+			body.linac-console-view #consoleWorkflowDock .console-dock-eyebrow {
+				display: block !important;
+				flex: 1 1 auto;
+				min-width: 0;
+				overflow: hidden;
+				font-size: 13px;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view #consoleWorkflowDock #consoleDockClose {
+				flex: 0 0 auto !important;
+				width: auto !important;
+			}
+			/* The R&V delivery screen fits the second screen's width: plan / actual tables side by
+			   side with the beam controls and interlocks under them (the app's own narrow layout), a
+			   shorter camera strip, and the whole screen scrolling as one page */
+			body.linac-console-view #consoleWorkflowDockBody #deliveryPanel.open,
+			body.linac-console-view #consoleWorkflowDockBody #deliveryPanel #rtv2DeliveryAlt {
+				height: auto !important;
+			}
+			body.linac-console-view .rtv2d-body {
+				grid-template-columns: 150px minmax(0, 1fr);
+			}
+			body.linac-console-view .rtv2d-hero {
+				min-height: 96px;
+			}
+			body.linac-console-view .rtv2d-content {
+				flex: 0 0 auto;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			}
+			body.linac-console-view .rtv2d-panel.side {
+				grid-column: 1 / -1;
+			}
+			body.linac-console-view .rtv2d-panel-head,
+			body.linac-console-view .rtv2d-table-row {
+				grid-template-columns: minmax(56px, 1fr) minmax(0, 76px) minmax(0, 76px);
+				gap: 5px;
+			}
+			body.linac-console-view .rtv2d-table,
+			body.linac-console-view .rtv2d-sidebar {
+				overflow: visible;
+			}
+			/* Below the widest panels, the Imaging / Room keys and the extra workflows go two to a row
+			   so their labels fit */
+			@media (max-width: 1400px) {
+				body.linac-console-view #rtv2MachinePanel .rtv2-control-group:first-child .rtv2-button-grid,
+				body.linac-console-view #rtv2MachinePanel .rtv2-advanced-workflows {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
 			/* What the console refused, and why: posted to the center as a mistake too */
 			#consoleRefusal {
 				position: fixed;
