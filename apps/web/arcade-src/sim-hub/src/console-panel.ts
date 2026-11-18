@@ -6,15 +6,18 @@
    - Each console's iframe loads on its first open and stays alive while the player is in the
      center: closing hides it, reopening shows it where it was; another scenario reloads it.
    - Messages from a console are taken only from its iframe's window and the center's own origin,
-     checked against the contract (console-panel-messages.ts) and emitted on console-bus.ts.
-     The center answers the LINAC console's ready with the workspace to show (rtapps-linac-open)
-     and sends the Vault 1 door and the people inside (rtapps-linac-room) on ready, on open and
-     whenever they change. A finished CT scan in the free scenario records 'sim-ct-scan'.
+     checked against the contract (console-panel-messages.ts) and emitted on console-bus.ts; after
+     a load only its ready passes until it comes (from the scenario asked for). The center answers
+     the LINAC console's ready with the workspace to show (rtapps-linac-open) and sends the Vault 1
+     door and whether the player is inside (rtapps-linac-room) on ready, on open and whenever they
+     change. A finished CT scan in the free scenario records 'sim-ct-scan'.
+   - Opening closes the other pop-ups (the equipment card, a conversation, the room card…), so none
+     sits over the panel or takes its Esc; the settings and the Tutorial's cards stay.
    - The camera slots in the panel are holes: while it is open, main.ts calls renderConsoleFeeds
      after the frame, which draws each feed camera straight onto the main canvas at its slot's
      rectangle (scissor and viewport), with no render targets or pixel copies. The LINAC panel shows
-     three of Vault 1's CCTV cameras (equipment.ts vaultFeedCamera), the CT panel one CT room camera
-     (setCtFeedCamera, else a fixed camera placed here).
+     three of Vault 1's CCTV cameras (equipment.ts vaultFeedCamera), the CT panel the CT room's
+     'CT Table Wide' camera (ctFeedCamera): the control desks' own feed cameras.
    The Tutorial uses openConsole, closeConsole and isConsoleOpen; with ?npccheck they are on
    window.__NPC too, with the messages seen and sent and the console-bus channels. */
 import * as THREE from 'three';
@@ -28,6 +31,7 @@ import type {
 import { ctComplete, ctPose, linacEvents, linacPose, panelOpen } from './console-bus';
 import {
 	consoleUrl,
+	gateMessage,
 	linacRoom,
 	messageFrom,
 	readCtMessage,
@@ -40,9 +44,8 @@ import { camera, canvas, renderer, scene } from './scene';
 import { doors, keys, player } from './main';
 import { roomContainingWalkPoint } from './walk';
 import { applyVisibility } from './visibility';
-import { visibleInTree } from './npc-behavior';
-import { vaultFeedCamera } from './equipment';
-import { closeOpenDialog, registerDialog } from './dialogs';
+import { ctFeedCamera, vaultFeedCamera } from './equipment';
+import { closeDialogsExcept, closeOpenDialog, registerDialog } from './dialogs';
 import { onPlayModeChange } from './play-mode';
 
 const TITLES: Record<ConsoleKind, string> = {
@@ -54,6 +57,8 @@ const FRAME_TITLES: Record<ConsoleKind, string> = {
 	ct: 'CT simulation console'
 };
 const KEPT = 60; // messages kept for the check hook
+// the dialogs an opening panel leaves open: the settings, the Tutorial's cards and the panel itself
+const STAY_OPEN = ['settings', 'tutorial', 'console'];
 
 interface ConsoleFrame {
 	el: HTMLIFrameElement;
@@ -66,7 +71,7 @@ interface ConsoleFrame {
 	workspace: LinacWorkspace;
 	/** LINAC: the vault state last sent */
 	room: LinacRoomMsg | null;
-	/** CT: the scan keys recorded as 'sim-ct-scan' */
+	/** CT: the scan keys recorded as 'sim-ct-scan' by this page load */
 	recorded: Set<string>;
 }
 const frames: Partial<Record<ConsoleKind, ConsoleFrame>> = {};
@@ -98,6 +103,7 @@ export function openConsole(
 	}
 	if (shown === kind) return;
 	if (shown) closeConsole();
+	closeDialogsExcept(STAY_OPEN);
 	shown = kind;
 	if (panel) panel.dataset.kind = kind;
 	if (titleEl) titleEl.textContent = TITLES[kind];
@@ -121,9 +127,10 @@ export function closeConsole(): void {
 	panel?.classList.remove('show');
 	document.body.classList.remove('consoleOpen');
 	releaseKeys();
-	// the keyboard back to the center from the console page, if it had it
+	// the keyboard back to the center from the console page, if it had it (no focus() in the Node
+	// checks' stubbed window)
 	f?.el.blur();
-	window.focus();
+	window.focus?.();
 	panelOpen.emit(null);
 }
 
@@ -134,7 +141,7 @@ function releaseKeys(): void {
 
 function loadFrame(kind: ConsoleKind, scenario: ConsoleScenario): ConsoleFrame {
 	let f = frames[kind];
-	const src = consoleUrl(kind, scenario, location.origin);
+	const src = consoleUrl(kind, scenario, location.href);
 	if (!f) {
 		const el = document.createElement('iframe');
 		el.className = 'cpFrame';
@@ -153,7 +160,14 @@ function loadFrame(kind: ConsoleKind, scenario: ConsoleScenario): ConsoleFrame {
 		host?.appendChild(el);
 		return f;
 	}
-	Object.assign(f, { scenario, loaded: false, ready: false, workspace: 'queue', room: null });
+	Object.assign(f, {
+		scenario,
+		loaded: false,
+		ready: false,
+		workspace: 'queue',
+		room: null,
+		recorded: new Set()
+	});
 	f.el.src = src;
 	showLoading();
 	return f;
@@ -196,17 +210,18 @@ function onMessage(e: MessageEvent): void {
 	);
 	const looksLikeConsole =
 		typeof e.data?.type === 'string' && /^rtapps-(linac|ct)-/.test(e.data.type);
-	const m = kind === 'linac' ? readLinacMessage(e.data) : kind ? readCtMessage(e.data) : null;
-	if (!m) {
+	const m = kind === 'linac' ? readLinacMessage(e.data) : kind ? readCtMessage(e.data) : null,
+		f = kind ? frames[kind] : null,
+		gate = m ? gateMessage(m, f.ready, f.scenario) : 'drop';
+	if (gate === 'drop') {
 		if (looksLikeConsole) ignored++;
 		return;
 	}
+	if (gate === 'ready') f.ready = true;
 	seen.push({ kind, message: m });
 	if (seen.length > KEPT) seen.shift();
-	const f = frames[kind];
 	switch (m.type) {
 		case 'rtapps-linac-ready':
-			f.ready = true;
 			post({ type: 'rtapps-linac-open', workspace: f.workspace });
 			sendRoom(true);
 			return;
@@ -217,7 +232,6 @@ function onMessage(e: MessageEvent): void {
 			linacEvents.emit(m.event);
 			return;
 		case 'rtapps-ct-ready':
-			f.ready = true;
 			return;
 		case 'rtapps-ct-state':
 			ctPose.emit(m.pose);
@@ -233,30 +247,13 @@ function onMessage(e: MessageEvent): void {
 }
 
 /* ---- the vault as the LINAC console's door interlock sees it ---- */
-const THERAPIST = /therapist/i;
-let therapists: THREE.Object3D[] | null = null; // every therapist figure, found once
-const at = new THREE.Vector3();
-const inVault1 = (x: number, z: number) => roomContainingWalkPoint(x, z)?.id === 'vault1';
-function staffInVault(): boolean {
-	if (S.mode === 'walk' && inVault1(player.pos.x, player.pos.z)) return true;
-	if (!therapists) {
-		const found: THREE.Object3D[] = [];
-		scene.traverse((o) => {
-			if (THERAPIST.test(o.userData?.npcRole ?? '')) found.push(o);
-		});
-		therapists = found;
-	}
-	// a hidden figure is not there: the one the player is playing, or Elena out of sight for the beam
-	return therapists.some((g) => {
-		if (!visibleInTree(g)) return false;
-		g.getWorldPosition(at);
-		return inVault1(at.x, at.z);
-	});
-}
+// the room the player walks in (the therapists standing in Vault 1 in Free Mode do not count)
+const playerRoom = () =>
+	S.mode === 'walk' ? (roomContainingWalkPoint(player.pos.x, player.pos.z)?.id ?? null) : null;
 function sendRoom(force = false): void {
 	const f = frames.linac;
 	if (!f?.ready) return;
-	const room = linacRoom(doors.get('vault1')?.progress ?? 0, staffInVault());
+	const room = linacRoom(doors.get('vault1')?.progress ?? 0, playerRoom());
 	if (!force && sameRoom(f.room, room)) return;
 	f.room = room;
 	post(room);
@@ -267,32 +264,17 @@ export function updateConsoleRoom(): void {
 }
 
 /* ---- the camera slots ---- */
-let ctFeed: THREE.PerspectiveCamera | null = null;
-/** The CT room's feed camera (ct-room-look.ts ctRoomFeedCamera), once that module has one. */
-export function setCtFeedCamera(cam: THREE.PerspectiveCamera): void {
-	ctFeed = cam;
-}
-// Until then a fixed camera high in the CT Simulator Room's corner, made on first use: an Object3D
-// draws Math.random for its uuid, and the NPC check seeds Math.random.
-let ctFallback: THREE.PerspectiveCamera | null = null;
-function ctFeedCamera(): THREE.PerspectiveCamera {
-	if (ctFeed) return ctFeed;
-	if (!ctFallback) {
-		ctFallback = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 60);
-		ctFallback.position.set(49.5, 3.1, -3.8); // the room's door-side corner: the ring and the table
-		ctFallback.lookAt(41.0, 0.9, -9.6);
-	}
-	return ctFallback;
-}
 const feedCamera = (kind: ConsoleKind, name: string) =>
-	kind === 'ct' ? ctFeedCamera() : vaultFeedCamera(name);
+	kind === 'ct' ? ctFeedCamera(name) : vaultFeedCamera(name);
 
 // m, past the far corner of Vault 1 (30 x 26 m) or the CT room. The room culling (visibility.ts)
 // cannot see the vault maze's walls, so a feed facing the vault door would otherwise draw the
 // hallway and the rooms beyond it: about 1,500 draw calls a frame instead of about 250.
 const FEED_FAR = 30;
 let slots: { kind: ConsoleKind; name: string; el: HTMLElement }[] | null = null;
-let view: THREE.PerspectiveCamera | null = null; // each feed is drawn through this copy
+// each feed is drawn through this copy, made on first use: an Object3D draws Math.random for its
+// uuid, and the NPC check seeds Math.random
+let view: THREE.PerspectiveCamera | null = null;
 const size = new THREE.Vector2();
 /** While the panel is open, after the frame (main.ts): each feed camera drawn into its slot. */
 export function renderConsoleFeeds(): void {
@@ -342,7 +324,8 @@ export function initConsolePanel(): void {
 			isConsoleOpen,
 			/** The console messages the panel accepted (the last 60, oldest first), as checked. */
 			consoleMessages: () => seen.map((s) => ({ ...s })),
-			/** Console-looking messages turned away: a wrong window or origin, or a bad shape. */
+			/** Console-looking messages turned away: a wrong window or origin, a bad shape, or any but
+			    ready from a console not ready yet. */
 			consoleIgnored: () => ignored,
 			/** What the center sent the LINAC console (the last 60). */
 			consoleSent: () => [...sent],

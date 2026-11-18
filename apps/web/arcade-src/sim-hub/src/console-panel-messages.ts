@@ -1,8 +1,8 @@
 /* The console panel's message rules (docs/specs/2026-11-18-consoles-in-center-design.md, part 5):
    the URL each console opens at, which console a message came from (the window that sent it and
    its origin, nothing else), the shape checks every console message passes before console-panel.ts
-   emits it on console-bus.ts, the vault state the center sends the LINAC console, and when a
-   finished CT scan is recorded. The shapes are the contract in shared/console-protocol.ts. Free of
+   emits it on console-bus.ts, which messages wait for the console's ready, the vault state the
+   center sends the LINAC console, and when a finished CT scan is recorded. The shapes are the contract in shared/console-protocol.ts. Free of
    scene and DOM imports so it is unit tested in Node (console-panel-messages.spec.ts). */
 import {
 	CONSOLE_SCENARIO_PARAM,
@@ -26,9 +26,10 @@ const CONSOLE_PAGES: Record<ConsoleKind, string> = {
 
 /** The console page in console mode, on the center's own origin:
     LINAC `index.html?view=console&side=linac[&scenario=tutorial]`,
-    CT `ct-suite.html?view=console[&scenario=tutorial]`. */
-export function consoleUrl(kind: ConsoleKind, scenario: ConsoleScenario, origin: string): string {
-	const url = new URL(CONSOLE_PAGES[kind], origin);
+    CT `ct-suite.html?view=console[&scenario=tutorial]`. `base` is the center page's own URL
+    (location.href; the Node checks' stubbed location has no origin). */
+export function consoleUrl(kind: ConsoleKind, scenario: ConsoleScenario, base: string): string {
+	const url = new URL(CONSOLE_PAGES[kind], base);
 	url.searchParams.set(CONSOLE_VIEW_PARAM, CONSOLE_VIEW_VALUE);
 	if (kind === 'linac') url.searchParams.set('side', 'linac');
 	if (scenario === 'tutorial') url.searchParams.set(CONSOLE_SCENARIO_PARAM, 'tutorial');
@@ -154,10 +155,30 @@ export function readCtMessage(data: unknown): CtToCenterMessage | null {
 	return null;
 }
 
+/** What the panel does with a checked message, from a console that has (`ready`) or has not yet
+    posted ready since its page last loaded, opened for `scenario`. Its ready makes it ready, the
+    LINAC's only from the scenario asked for; until then every other message is dropped: it is
+    early, or left over from the page before a reload (the iframe keeps its window). */
+export function gateMessage(
+	msg: LinacToCenterMessage | CtToCenterMessage,
+	ready: boolean,
+	scenario: ConsoleScenario
+): 'ready' | 'accept' | 'drop' {
+	if (msg.type === 'rtapps-linac-ready') return msg.scenario === scenario ? 'ready' : 'drop';
+	if (msg.type === 'rtapps-ct-ready') return 'ready';
+	return ready ? 'accept' : 'drop';
+}
+
 /** The vault as the LINAC console's door interlock reads it: the door is closed only when it is
-    fully shut (walk.ts updateDoors progress 0). */
-export function linacRoom(doorProgress: number, staffInVault: boolean): LinacRoomMsg {
-	return { type: 'rtapps-linac-room', doorClosed: doorProgress <= 0, staffInVault };
+    fully shut (walk.ts updateDoors progress 0), and staff are in the vault only when the player is
+    (`playerRoom`, the room the player stands in): the therapists who stand there in Free Mode are
+    scenery. */
+export function linacRoom(doorProgress: number, playerRoom: string | null): LinacRoomMsg {
+	return {
+		type: 'rtapps-linac-room',
+		doorClosed: doorProgress <= 0,
+		staffInVault: playerRoom === 'vault1'
+	};
 }
 
 export function sameRoom(a: LinacRoomMsg | null, b: LinacRoomMsg): boolean {

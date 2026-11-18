@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	consoleUrl,
+	gateMessage,
 	linacRoom,
 	messageFrom,
 	readCtMessage,
@@ -10,23 +11,31 @@ import {
 } from './console-panel-messages';
 
 const ORIGIN = 'https://rtapps.example';
+// the center page's own URL, as location.href gives it
+const CENTER = 'https://rtapps.example/arcade/sim-hub/index.html?npccheck&hq';
 
 describe('consoleUrl', () => {
 	it('opens the LINAC console in console mode on the LINAC side, on the center’s origin', () => {
-		expect(consoleUrl('linac', 'free', ORIGIN)).toBe(
+		expect(consoleUrl('linac', 'free', CENTER)).toBe(
 			'https://rtapps.example/arcade/linac-ct/index.html?view=console&side=linac'
 		);
-		expect(consoleUrl('linac', 'tutorial', ORIGIN)).toBe(
+		expect(consoleUrl('linac', 'tutorial', CENTER)).toBe(
 			'https://rtapps.example/arcade/linac-ct/index.html?view=console&side=linac&scenario=tutorial'
 		);
 	});
 
 	it('opens the CT console in console mode', () => {
-		expect(consoleUrl('ct', 'free', ORIGIN)).toBe(
+		expect(consoleUrl('ct', 'free', CENTER)).toBe(
 			'https://rtapps.example/arcade/linac-ct/ct-suite.html?view=console'
 		);
-		expect(consoleUrl('ct', 'tutorial', 'http://127.0.0.1:4173')).toBe(
+		expect(consoleUrl('ct', 'tutorial', 'http://127.0.0.1:4173/arcade/sim-hub/')).toBe(
 			'http://127.0.0.1:4173/arcade/linac-ct/ct-suite.html?view=console&scenario=tutorial'
+		);
+	});
+
+	it('builds from the Node checks’ stubbed location too, which has an href but no origin', () => {
+		expect(consoleUrl('linac', 'tutorial', 'http://localhost/')).toBe(
+			'http://localhost/arcade/linac-ct/index.html?view=console&side=linac&scenario=tutorial'
 		);
 	});
 });
@@ -230,26 +239,76 @@ describe('readCtMessage', () => {
 	});
 });
 
+describe('gateMessage', () => {
+	const state = {
+		type: 'rtapps-linac-state' as const,
+		pose: POSE,
+		mrn: null,
+		workspace: 'queue' as const
+	};
+	const event = {
+		type: 'rtapps-linac-event' as const,
+		event: { kind: 'treatment-complete' as const, mrn: 'TUT-680314' }
+	};
+
+	it('makes the LINAC console ready only on a ready from the scenario asked for', () => {
+		expect(
+			gateMessage({ type: 'rtapps-linac-ready', scenario: 'tutorial' }, false, 'tutorial')
+		).toBe('ready');
+		expect(gateMessage({ type: 'rtapps-linac-ready', scenario: 'free' }, false, 'tutorial')).toBe(
+			'drop'
+		);
+		expect(gateMessage({ type: 'rtapps-linac-ready', scenario: 'free' }, true, 'free')).toBe(
+			'ready'
+		);
+	});
+
+	it('drops every other message until the console is ready: early, or left by the page before', () => {
+		expect(gateMessage(state, false, 'free')).toBe('drop');
+		expect(gateMessage(event, false, 'tutorial')).toBe('drop');
+		expect(gateMessage(state, true, 'free')).toBe('accept');
+		expect(gateMessage(event, true, 'tutorial')).toBe('accept');
+	});
+
+	it('gates the CT console on its ready alone (it has no scenario)', () => {
+		const ctState = {
+			type: 'rtapps-ct-state' as const,
+			pose: { tableTravel: 0, tableHeight: 0, scanning: false, xrayOn: false, lasersOn: true },
+			step: 'Position'
+		};
+		expect(gateMessage({ type: 'rtapps-ct-ready' }, false, 'tutorial')).toBe('ready');
+		expect(gateMessage(ctState, false, 'free')).toBe('drop');
+		expect(gateMessage(ctState, true, 'free')).toBe('accept');
+	});
+});
+
 describe('linacRoom and sameRoom', () => {
 	it('counts the door closed only when it is fully shut', () => {
-		expect(linacRoom(0, false)).toEqual({
+		expect(linacRoom(0, 'linaccontrol')).toEqual({
 			type: 'rtapps-linac-room',
 			doorClosed: true,
 			staffInVault: false
 		});
-		expect(linacRoom(0.02, false).doorClosed).toBe(false);
-		expect(linacRoom(1, true)).toEqual({
+		expect(linacRoom(0.02, 'linaccontrol').doorClosed).toBe(false);
+		expect(linacRoom(1, 'vault1')).toEqual({
 			type: 'rtapps-linac-room',
 			doorClosed: false,
 			staffInVault: true
 		});
 	});
 
+	it('has staff in the vault only while the player is in Vault 1', () => {
+		expect(linacRoom(0, 'vault1').staffInVault).toBe(true);
+		expect(linacRoom(0, 'vault2').staffInVault).toBe(false);
+		expect(linacRoom(0, 'linaccontrol').staffInVault).toBe(false);
+		expect(linacRoom(0, null).staffInVault).toBe(false);
+	});
+
 	it('sees a change in either field, and nothing sent yet as a change', () => {
-		const shut = linacRoom(0, false);
-		expect(sameRoom(shut, linacRoom(0, false))).toBe(true);
-		expect(sameRoom(shut, linacRoom(0.5, false))).toBe(false);
-		expect(sameRoom(shut, linacRoom(0, true))).toBe(false);
+		const shut = linacRoom(0, null);
+		expect(sameRoom(shut, linacRoom(0, 'lobby'))).toBe(true);
+		expect(sameRoom(shut, linacRoom(0.5, null))).toBe(false);
+		expect(sameRoom(shut, linacRoom(0, 'vault1'))).toBe(false);
 		expect(sameRoom(null, shut)).toBe(false);
 	});
 });
