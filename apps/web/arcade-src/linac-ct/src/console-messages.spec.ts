@@ -8,6 +8,8 @@ import {
 	poseFromReadout,
 	samePose,
 	shiftLengthMm,
+	STATE_MIN_GAP_MS,
+	statePostDue,
 	type BeamState,
 	type MachineReadout
 } from './console-messages';
@@ -114,6 +116,10 @@ describe('the machine pose the console reports', () => {
 		expect(poseFromReadout({ ...readout, gantry: 182.46 }).gantry).toBe(182.5);
 		expect(poseFromReadout({ ...readout, collimator: 725 }).collimator).toBe(5);
 		expect(Object.is(poseFromReadout({ ...readout, couchAngle: -0.01 }).couchAngle, 0)).toBe(true);
+		// a moving gantry's in-between angles come out clean
+		expect(poseFromReadout({ ...readout, gantry: 0.30000000000001 }).gantry).toBe(0.3);
+		expect(poseFromReadout({ ...readout, gantry: 360.3 }).gantry).toBe(0.3);
+		expect(poseFromReadout({ ...readout, gantry: 179.96 }).gantry).toBe(180);
 	});
 
 	it('reads the hardware flags and survives missing numbers', () => {
@@ -136,6 +142,31 @@ describe('the machine pose the console reports', () => {
 		expect(samePose(a, poseFromReadout({ ...readout, kvOn: true }))).toBe(false);
 		expect(samePose(null, a)).toBe(false);
 		expect(samePose(null, null)).toBe(true);
+	});
+});
+
+describe('the state stream rate', () => {
+	it('never posts more than 30 times in any second, however the timer jitters', () => {
+		const posts: number[] = [];
+		let last: number | null = null;
+		// a timer meant for every 17 ms that fires anywhere from 12 to 22 ms apart
+		for (let t = 0, i = 0; t < 5000; t += 12 + ((i++ * 7) % 11))
+			if (statePostDue(t, last)) posts.push((last = t));
+		let worst = 0;
+		for (let i = 0; i < posts.length; i++) {
+			let j = i;
+			while (j < posts.length && posts[j] - posts[i] < 1000) j++;
+			worst = Math.max(worst, j - i);
+		}
+		expect(worst).toBeLessThanOrEqual(30);
+		// and keeps the stream close to that: a moving gantry still reads smoothly
+		expect(worst).toBeGreaterThanOrEqual(20);
+	});
+
+	it('posts the first state at once', () => {
+		expect(statePostDue(5, null)).toBe(true);
+		expect(statePostDue(5 + STATE_MIN_GAP_MS - 1, 5)).toBe(false);
+		expect(statePostDue(5 + STATE_MIN_GAP_MS, 5)).toBe(true);
 	});
 });
 

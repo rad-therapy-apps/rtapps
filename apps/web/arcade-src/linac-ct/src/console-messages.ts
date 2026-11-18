@@ -81,10 +81,11 @@ export interface MachineReadout {
 }
 
 const num = (v: unknown) => (Number.isFinite(Number(v)) ? Number(v) : 0);
-/** Degrees to 0.1°, wrapped into 0..360 (so -0.01 and 359.99 both read 0). */
+/** Degrees wrapped into 0..360, then to 0.1° (so -0.01 and 359.99 both read 0, and 360.3 reads
+    0.3 with no float noise left from the wrap). */
 const angle = (v: unknown) => {
-	const a = Math.round(num(v) * 10) / 10;
-	return (((a % 360) + 360) % 360) + 0;
+	const a = Math.round((((num(v) % 360) + 360) % 360) * 10) / 10;
+	return a === 360 ? 0 : a + 0;
 };
 /** To 0.01 (cm), which is 0.1 mm. */
 const hundredths = (v: unknown) => Math.round(num(v) * 100) / 100 + 0;
@@ -107,6 +108,14 @@ export function poseFromReadout(m: MachineReadout): LinacPose {
 		beamOn: !!m.beamOn,
 		lasersOn: !!m.lasersOn
 	};
+}
+
+/** The shortest gap between two state posts, so that no second ever holds more than 30. */
+export const STATE_MIN_GAP_MS = 34;
+
+/** Whether a state post may go now, `lastPostAt` being the last one's time (ms), or null. */
+export function statePostDue(now: number, lastPostAt: number | null): boolean {
+	return lastPostAt === null || now - lastPostAt >= STATE_MIN_GAP_MS;
 }
 
 export function samePose(a: LinacPose | null, b: LinacPose | null): boolean {

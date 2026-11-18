@@ -22,6 +22,7 @@ import {
 	parseCenterMessage,
 	poseFromReadout,
 	samePose,
+	statePostDue,
 	type SixAxis
 } from './console-messages';
 import {
@@ -45,7 +46,7 @@ import {
 import { syncRoomViewButtons } from './travel';
 import { syncOperatorConsole } from './main';
 
-const STATE_INTERVAL_MS = 34; // under 30 posts a second
+const STATE_TICK_MS = 17; // the pose is checked this often; statePostDue spaces the posts
 const REFUSAL_SHOW_MS = 6000;
 
 /** The workflow panels and the workspace each one is; the advanced workflow panels keep the last. */
@@ -61,6 +62,7 @@ let lastWorkflow: LinacWorkspace = 'setup';
 let settled = false;
 let pendingOpen: LinacWorkspace | null = null;
 let posted: { pose: LinacPose; mrn: string | null; workspace: LinacWorkspace } | null = null;
+let postedAt: number | null = null;
 
 function post(msg: LinacToCenterMessage) {
 	window.parent.postMessage(msg, location.origin);
@@ -131,7 +133,10 @@ function tick() {
 		mrn = workspace === 'queue' ? null : openChartMrn();
 	if (posted && samePose(posted.pose, pose) && posted.mrn === mrn && posted.workspace === workspace)
 		return;
+	const now = performance.now();
+	if (!statePostDue(now, postedAt)) return; // the change goes out on a later tick
 	posted = { pose, mrn, workspace };
+	postedAt = now;
 	post({ type: 'rtapps-linac-state', pose, mrn, workspace });
 }
 
@@ -216,7 +221,7 @@ export function startConsoleMode() {
 		settled = true;
 		post({ type: 'rtapps-linac-ready', scenario: CONSOLE.scenario });
 		tick();
-		setInterval(tick, STATE_INTERVAL_MS);
+		setInterval(tick, STATE_TICK_MS);
 		if (pendingOpen) openWorkspace(pendingOpen);
 		pendingOpen = null;
 	});
