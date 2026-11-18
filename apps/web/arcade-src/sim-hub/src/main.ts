@@ -42,6 +42,7 @@ import {
 	updateClinicalEquipment,
 	updateStatusBeacons,
 	renderOperatorLiveFeeds,
+	aimOperatorFeeds,
 	precompileShaders,
 	buildOperatorLiveConsole,
 	buildCtLiveConsole,
@@ -91,6 +92,7 @@ import {
 import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
 import { initTutorial, updateTutorial } from './tutorial';
+import { initCtRoomLook } from './ct-room-look';
 import { enterMode } from './play-mode';
 import { startRoomFromSearch } from './start-room';
 import { returnDoorOnBoot, takeReturnView } from './return-door';
@@ -102,6 +104,12 @@ import { isPaused } from './pause';
 import { openDialogName } from './dialogs';
 import './hub-dialogs';
 import './hud-roomcard';
+import {
+	initConsolePanel,
+	isConsoleOpen,
+	renderConsoleFeeds,
+	updateConsoleRoom
+} from './console-panel';
 
 const clock = new THREE.Clock();
 
@@ -570,7 +578,7 @@ document.addEventListener('pointerlockchange', () => {
 	S.walkDragLook = false;
 });
 document.addEventListener('mousemove', (e) => {
-	if (S.mode !== 'walk') return;
+	if (S.mode !== 'walk' || isConsoleOpen()) return;
 	if (player.locked) {
 		applyWalkMouseDelta(e.movementX, e.movementY);
 		return;
@@ -586,11 +594,14 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('mouseup', () => (S.walkDragLook = false));
 window.addEventListener('blur', () => (S.walkDragLook = false));
 document.addEventListener('keydown', (e) => {
+	// the console panel has the keys while it is open (console-panel.ts): no walking, no E, no mouse
+	// look; Esc still closes it (menu.ts)
+	if (isConsoleOpen()) return;
 	const k = e.key.toLowerCase();
 	keys[k] = true;
 	if (k === 'e' && !e.repeat) performInteraction();
 	// A key press is a gesture the browser accepts for pointer lock, so the first one after the mouse
-	// was freed (back from the LINAC/CT or console app, or a pop-up closed with Esc) turns mouse look
+	// was freed (back from the console emulator app, or a pop-up closed with Esc) turns mouse look
 	// back on without a click on the view. Not while a pop-up, the settings or a form field has the
 	// keys, and never for Esc, which browsers don't count.
 	if (k !== 'escape' && !isPaused() && openDialogName() === null && !isFormField(e.target))
@@ -636,12 +647,17 @@ export function stepSimulation(now: number): void {
 		(S.mode === 'overview' || (S.mode === 'guided' && S.activeRoom && !S.travel))
 	)
 		orbit.update();
-	renderOperatorLiveFeeds(now);
+	// the control desks' monitors are under the console panel while it is open: not drawn, but their
+	// cameras keep following the patient, as the panel draws its feeds through them
+	if (isConsoleOpen()) aimOperatorFeeds();
+	else renderOperatorLiveFeeds(now);
 	// After the feeds, so a feed render cannot consume the flag.
 	if (f % 4 === 1) renderer.shadowMap.needsUpdate = true;
 	applyVisibility(camera);
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
+	if (f % 6 === 0) updateConsoleRoom();
+	renderConsoleFeeds(); // the console panel's camera slots, onto the frame just drawn
 }
 // While the game is paused (pause.ts: the Esc settings, a room card) the frame loop skips
 // stepSimulation, and with it updateWalk: nobody moves and no simulation clock runs, but the frame is
@@ -654,6 +670,7 @@ function renderPaused(): void {
 	applyVisibility(camera);
 	renderer.render(scene, camera);
 	labelRenderer.render(scene, camera);
+	renderConsoleFeeds();
 }
 function animate(now) {
 	requestAnimationFrame(animate);
@@ -679,14 +696,16 @@ procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
 groupRoomContents();
 precompileShaders();
+initCtRoomLook();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 // the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog;
-// back from the LINAC/CT app's Back to the Center, Free Mode starts outside the door the player left
-// through instead (return-door.ts)
+// back from the console emulator's Back to the Center (the Learning Commons door), Free Mode starts
+// outside the door the player left through instead (return-door.ts)
 installMenu();
 // after installMenu, which starts with the Tutorial entry disabled (menu.ts)
 initTutorial();
+initConsolePanel();
 const backAtDoor = returnDoorOnBoot((id) => {
 		const r = roomById(id);
 		return !!r && !r.hub;

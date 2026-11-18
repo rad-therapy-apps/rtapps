@@ -78,8 +78,8 @@ export interface LinacOpenMsg {
 	workspace: LinacWorkspace;
 }
 /** Center → LINAC: the vault as the center sees it, sent on open and whenever it changes. The
-    console's door interlock reads `doorClosed`; `staffInVault` is true while the player or a
-    therapist is inside Vault 1. */
+    console's door interlock reads `doorClosed`; `staffInVault` is true while the player is inside
+    Vault 1 (the therapists who stand there in Free Mode don't count, and nothing blocks on it). */
 export interface LinacRoomMsg {
 	type: 'rtapps-linac-room';
 	doorClosed: boolean;

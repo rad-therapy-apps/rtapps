@@ -12,7 +12,6 @@ import type { Travel } from './walk';
 // RTApps (#77 phase 2 task 11): typed boundary for `S`. Unions/types derived
 // from every actual assignment site across the sim-hub modules (grep `S.<member> =`).
 interface SimHubState {
-	ROOM_APP_URL: string | null;
 	CONSOLE_APP_URL: string | null;
 	CONSOLE_APP_DOORS: Set<string>;
 	mode: 'overview' | 'guided' | 'walk';
@@ -35,7 +34,6 @@ interface SimHubState {
 }
 
 export const S: SimHubState = {
-	ROOM_APP_URL: null,
 	CONSOLE_APP_URL: null,
 	CONSOLE_APP_DOORS: new Set(['Learning Commons / Staff Education']),
 	mode: 'overview',

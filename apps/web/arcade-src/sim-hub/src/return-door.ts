@@ -1,7 +1,9 @@
-/* Back to the door you left from (sim-hub menu, task 1e). Leaving through a door to the LINAC/CT or
-   console app, interact.ts performInteraction writes PREF.returnDoor (the room id, sessionStorage: the
-   arcade pages share the app's origin and tab) and PREF.returnView (where the player stood and
-   looked); that app's Back to the Center button writes PREF.returning. On boot main.ts asks here where to start. Both values are taken (read and removed)
+/* Back to the door you left from (sim-hub menu, task 1e). Leaving through the Learning Commons door
+   to the console emulator, interact.ts performInteraction writes PREF.returnDoor (the room id,
+   sessionStorage: the arcade pages share the app's origin and tab) and PREF.returnView (where the
+   player stood and looked); that app's Back to the Center button writes PREF.returning (so does the
+   LINAC/CT app's, which no door leads to now: with no door written, its return opens the title
+   menu). On boot main.ts asks here where to start. Both values are taken (read and removed)
    every time, so only a real Back to the Center return skips the title menu and an old door is never
    reused. Free of scene and DOM imports so it is unit tested in Node (return-door.spec.ts). */
 import { PREF, takePref } from './prefs';

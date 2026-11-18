@@ -1305,7 +1305,30 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 	);
 }
 
+/** The CT scanner ctScanner builds, for ct-room-look.ts, which swaps the CT suite's model in for its
+    ring, pedestal and table top and drives it from the CT console: the group the scanner is built
+    in (inside the room's furnishing, so it is culled with the room), the ring and bore glow the
+    model replaces (the base under the ring stays), the pedestal, the bore's centre and the ring's
+    outer diameter the model is fitted to, the table top's height, and the x-ray warning lamp's face.
+    The table itself is CT_COUCH.table (equipment.ts). */
+export const CT_SCANNER = {
+	group: null as THREE.Group | null,
+	gantry: [] as THREE.Object3D[],
+	pedestal: null as THREE.Object3D | null,
+	boreCenter: new THREE.Vector3(),
+	ringDiameter: 2.835,
+	topY: 0,
+	xrayLamp: null as THREE.MeshBasicMaterial | null
+};
+/** The x-ray lamp face's colour when lit and when dark (it multiplies the face's texture). */
+export const XRAY_LAMP_ON = 0xffffff,
+	XRAY_LAMP_OFF = 0x3a3a3a;
+
 export function ctScanner(g, room: Room) {
+	const s = new THREE.Group();
+	s.name = 'ct-scanner';
+	g.add(s);
+	CT_SCANNER.group = s;
 	// a big-bore CT gantry at 1.35x real size (owner's choice, 2026-11-06): a 2.835 m ring with a
 	// 1.215 m bore, centred 1.31 m up, so the couch's bottom corners (y 0.875, z ±0.36) clear the bore
 	// glow by 0.023 m when the couch slides the patient in. Its foot sinks 0.1075 m under the floor; the
@@ -1314,24 +1337,28 @@ export function ctScanner(g, room: Room) {
 	ring.rotation.y = Math.PI / 2;
 	ring.position.set(room.x, 1.31, room.z + 1.5);
 	ring.castShadow = true;
-	add(g, ring);
+	add(s, ring);
 	const bore = new THREE.Mesh(
 		new THREE.TorusGeometry(0.6075, 0.02, 14, 48),
 		std(0x2b3944, 0.5, 0.1, { emissive: 0x16435a, emissiveIntensity: 0.65 })
 	);
 	bore.rotation.y = Math.PI / 2;
 	bore.position.copy(ring.position);
-	add(g, bore);
+	add(s, bore);
 	const base = box(1.0, 0.35, 2.1, MAT.white, room.x, 0.175, room.z + 1.5);
-	add(g, base);
+	add(s, base);
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
-	add(g, table);
+	add(s, table);
 	CT_COUCH.table = table;
 	LYING_SURFACES[room.id] = table;
 	CT_COUCH.ring = ring;
 	CT_COUCH.bore = bore;
 	CT_COUCH.baseX = table.position.x;
-	add(g, box(2.1, 0.78, 0.65, MAT.metal, room.x - 5.0, 0.5, room.z + 1.5));
+	CT_SCANNER.pedestal = add(s, box(2.1, 0.78, 0.65, MAT.metal, room.x - 5.0, 0.5, room.z + 1.5));
+	CT_SCANNER.gantry = [ring, bore];
+	CT_SCANNER.boreCenter.copy(ring.position);
+	CT_SCANNER.topY = table.position.y + 0.15 / 2;
+	CT_SCANNER.xrayLamp = ctXrayLamp(g, room);
 	// E at the gantry's door-facing side opens the CT QA menu (sdk-bridge.ts openCtQaMenu); the 'CT
 	// Simulator Gantry' equipment anchor sits at the ring's centre, 1.45 m further in
 	const qaMenu = new THREE.Object3D();
@@ -1345,6 +1372,35 @@ export function ctScanner(g, room: Room) {
 		null,
 		() => openCtQaMenu()
 	);
+}
+
+/* The "X-RAY ON" warning lamp over the CT room's door, on the door wall's inner face (z -3.08),
+   facing into the room: between the door frame's head (to y 2.71) and the teal light bar (y 3.13).
+   Returns its face's material; ct-room-look.ts lights it while the CT console has x-ray on. */
+function ctXrayLamp(g, room: Room) {
+	const z = room.z + room.d / 2 - 0.08;
+	g.add(box(0.8, 0.26, 0.05, std(0x1b2228, 0.6, 0.2), room.x, 2.92, z - 0.025));
+	const c = document.createElement('canvas');
+	c.width = 512;
+	c.height = 160;
+	const q = c.getContext('2d');
+	q.fillStyle = '#3a0805';
+	q.fillRect(0, 0, 512, 160);
+	q.strokeStyle = '#ff6a55';
+	q.lineWidth = 8;
+	q.strokeRect(10, 10, 492, 140);
+	q.fillStyle = '#ff7a66';
+	q.textAlign = 'center';
+	q.font = '900 84px Arial';
+	q.fillText('X-RAY ON', 256, 110);
+	const tx = new THREE.CanvasTexture(c);
+	tx.colorSpace = THREE.SRGBColorSpace;
+	const mat = new THREE.MeshBasicMaterial({ map: tx, color: XRAY_LAMP_OFF });
+	const face = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.2), mat);
+	face.position.set(room.x, 2.92, z - 0.052);
+	face.rotation.y = Math.PI;
+	g.add(face);
+	return mat;
 }
 
 export function emulatorLinacShell(g, room: Room) {

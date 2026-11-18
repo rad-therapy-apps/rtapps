@@ -97,9 +97,9 @@ test.describe
 		await studentPage.waitForLoadState('networkidle');
 		await expect(studentPage.getByTestId('simulator-entry')).toBeVisible();
 		// One card since 2026-11-11: the LINAC/CT simulators are reached through the center's
-		// doors, and the gantry game is archived.
+		// console desks, and the gantry game is archived.
 		await expect(studentPage.getByRole('main').getByRole('listitem')).toHaveCount(1);
-		await expect(studentPage.getByText('press E at the door')).toBeVisible();
+		await expect(studentPage.getByText('press E at the console')).toBeVisible();
 		await studentPage.getByTestId('simulator-entry').click();
 
 		// Lands on the hub activity's player (the resolver's own subject_slug/activity_id, not

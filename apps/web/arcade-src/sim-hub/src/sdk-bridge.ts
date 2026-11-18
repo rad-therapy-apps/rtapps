@@ -1,7 +1,7 @@
 /* RTApps (#77 sim-hub modularization, task 9 — final extraction): the RTApps SDK integration
    surface and the CT/QA procedures flow. Verbatim extractions from main.js: the sdk_slug
-   fetch-resolvers that prefetch `S.ROOM_APP_URL`/`S.CONSOLE_APP_URL` from
-   `window.RTApps.activityUrl` (run as side effects of importing this module — the
+   fetch-resolver that prefetches `S.CONSOLE_APP_URL` from
+   `window.RTApps.activityUrl` (run as a side effect of importing this module — the
    `window.CONSOLE_APP_URL` mirror assignment is preserved byte-for-byte since e2e reads it via
    `frame.evaluate`), `focusCtPatientFromControl` (CT QA control-room camera cut), and the whole
    CT/QA Procedures Lab logic block (`PROC_STATE`/`PROC_SITES` state, `CT_QA_ANIM`,
@@ -49,31 +49,11 @@ declare global {
 	}
 }
 
-// RTApps (plan 4c): prefetch the room app's player URL once; if it can't resolve
-// (activity unseeded/unpublished, or offline), ROOM_APP_URL stays null and the three
-// wired doors keep their legacy in-hub behavior instead of going dead.
-// Free Mode fixes: the two CT doors lead to the CT simulation activity's player instead
-// (room-app-url.ts); while that URL is unresolved they use ROOM_APP_URL's player.
-let ctAppUrl: string | null = null;
-/** The CT simulation activity's player URL, or null until it resolves. */
-export const getCtAppUrl = () => ctAppUrl;
-if (window.RTApps) {
-	window.RTApps.activityUrl('sim-linac-fraction')
-		.then(function (url) {
-			S.ROOM_APP_URL = url;
-		})
-		.catch(function () {});
-	window.RTApps.activityUrl('sim-ct-scan')
-		.then(function (url) {
-			ctAppUrl = url;
-		})
-		.catch(function () {});
-}
+// The LINAC and CT consoles open inside the center (console-panel.ts), which records the CT
+// simulation activity ('sim-ct-scan') itself; their doors no longer leave the hub.
 // RTApps (plan 4d): prefetch the console emulator's player URL once; if it can't resolve
 // (activity unseeded/unpublished, or offline), CONSOLE_APP_URL stays null and the
-// Learning Commons door keeps its legacy in-hub behavior instead of going dead. A
-// parallel, independent pair alongside ROOM_APP_URL/ROOM_APP_DOORS (not merged into it) —
-// that set's semantics are "leads to sim-linac-fraction" and this leads elsewhere.
+// Learning Commons door keeps its legacy in-hub behavior instead of going dead.
 window.CONSOLE_APP_URL = null; // also mirrored onto `window` (module scripts don't leak top-level vars there) so e2e can read the prefetch gate via frame.evaluate
 if (window.RTApps && window.RTApps.activityUrl) {
 	window.RTApps.activityUrl('sim-console')
