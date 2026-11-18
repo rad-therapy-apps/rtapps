@@ -56,12 +56,6 @@ const PANEL_WORKSPACES: [string, LinacWorkspace][] = [
 	['chargeCapturePanel', 'delivery'],
 	['oisPanel', 'delivery']
 ];
-/** The chart's workflow buttons (console-patch.ts launchWorkflow) for each workspace. */
-const WORKFLOW_FOR: Record<Exclude<LinacWorkspace, 'queue'>, string> = {
-	setup: 'setup',
-	igrt: 'igrt',
-	delivery: 'delivery'
-};
 
 let lastWorkflow: LinacWorkspace = 'setup';
 let settled = false;
@@ -152,7 +146,8 @@ function openWorkspace(workspace: LinacWorkspace) {
 		return;
 	}
 	if (document.body.classList.contains('rtv2-landing')) consoleShell.showChart();
-	consoleShell.launchWorkflow(WORKFLOW_FOR[workspace]);
+	// the chart's workflow buttons share the workspaces' names (console-patch.ts launchWorkflow)
+	consoleShell.launchWorkflow(workspace);
 }
 
 /** The door interlock and the console's door readouts follow the center's vault door. */
