@@ -7,11 +7,10 @@
    LINAC-head-lab teaching dialog (`open/closeLinacHeadLab`, `lh*` helpers), the equipment detail
    panel (`showEquipmentPanel`/`closeEquipmentPanel`), room inspection/composition
    (`enable/disableRoomInspection`, `roomInspectPose`). Verbatim
-   extractions from main.js. `ROOM_APP_DOORS` (read only by `performInteraction`) and
-   `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved functions) moved along
-   with their sole consumers and are not exported. While the console panel is open
-   (console-panel.ts) E does nothing and no prompt shows. A handful of symbols stay owned by main.js
-   because still-resident journey/booking systems read or write them too:
+   extractions from main.js. `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved
+   functions) moved along with their sole consumers and are not exported. While the console panel
+   is open (console-panel.ts) E does nothing and no prompt shows. A handful of symbols stay owned
+   by main.js because still-resident journey/booking systems read or write them too:
    `player`/`HANDOFFS`/`REACH_Y` (already exported from main.js per
    earlier tasks — task 9 moved `focusTargetsForRoom`/`focusConversationCamera`/
    `applyWalkConversationComposition` to ./journey.js and `PROC_STATE`/`PROC_SITES` to
@@ -36,8 +35,7 @@ import {
 } from './equipment';
 import { doorCenter, doorNormal, nearestDoor, getColliders, requestWalkPointerLock } from './walk';
 import { player, HANDOFFS, REACH_Y } from './main';
-import { PROC_STATE, PROC_SITES, getCtAppUrl } from './sdk-bridge';
-import { roomAppHref } from './room-app-url';
+import { PROC_STATE, PROC_SITES } from './sdk-bridge';
 import { isConsoleOpen } from './console-panel';
 import { createPager } from './pager';
 import {
@@ -519,13 +517,12 @@ function nearestTarget() {
 	return door ? { it: null, door } : null;
 }
 
-const ROOM_APP_DOORS = new Set(['LINAC Control Area', 'CT Control Room', 'CT Simulator Room']);
-/** A door that leaves the hub for another simulator, once that simulator's player URL resolved;
-    none in the tutorial, where leaving would end the chapter (no prompt, and E leaves it alone). */
+/** A door that leaves the hub for another simulator (the Learning Commons door to the console
+    emulator), once its player URL resolved; none in the tutorial, where leaving would end the
+    chapter (no prompt, and E leaves it alone). The LINAC and CT doors open as the player walks up,
+    like every other door: their consoles open in the panel at the console desks. */
 const leavesHub = (room: Room) =>
-	getPlayMode() !== 'tutorial' &&
-	((!!S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) ||
-		(!!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)));
+	getPlayMode() !== 'tutorial' && !!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name);
 
 export function performInteraction() {
 	if (S.mode !== 'walk' || isPaused() || isConsoleOpen()) return;
@@ -555,17 +552,6 @@ export function performInteraction() {
 			'session'
 		);
 	};
-	if (S.ROOM_APP_URL && ROOM_APP_DOORS.has(room.name)) {
-		// RTApps (plan 4c): these three doors leave the hub for the LINAC/CT room app, the CT doors on
-		// its CT side and LINAC Control on its LINAC side (room-app-url.ts)
-		rememberLeaving();
-		window.top.location.href = roomAppHref(
-			room.id,
-			{ linac: S.ROOM_APP_URL, ct: getCtAppUrl() },
-			window.location.href
-		);
-		return;
-	}
 	if (S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)) {
 		// RTApps (plan 4d): the Learning Commons door leaves the hub for the console emulator.
 		rememberLeaving();
