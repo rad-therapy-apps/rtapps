@@ -19,7 +19,8 @@
    console/journey sequence and by ./interact.js's equipment panel) are exported here and
    imported back into those. The LINAC and CT Control console desks open their console in the panel
    (console-panel.ts) instead of the equipment panel, and that panel's camera strip draws three of
-   the Vault 1 CCTV cameras (`vaultFeedCamera`). */
+   the Vault 1 CCTV cameras (`vaultFeedCamera`) or the CT room's (`ctFeedCamera`), which
+   `aimOperatorFeeds` keeps aimed while the panel covers the desk monitors. */
 import * as THREE from 'three';
 import { S } from './state';
 import { applyVisibility } from './visibility';
@@ -527,6 +528,11 @@ export function buildOperatorLiveConsole() {
 }
 
 const CT_OPERATOR_CONSOLE = { built: false, feeds: [], screens: [], lastRender: 0 };
+/** A CT room camera of the CT Control desk's feeds, by feed name ('CT Table Wide' etc.), for the
+    console panel (console-panel.ts); null before the desk is built. */
+export function ctFeedCamera(name: string): THREE.PerspectiveCamera | null {
+	return CT_OPERATOR_CONSOLE.feeds.find((f) => f.name === name)?.camera ?? null;
+}
 function createCtFeed(name, pos, target, fov = 40) {
 	const rt = new THREE.WebGLRenderTarget(800, 450);
 	rt.texture.colorSpace = THREE.SRGBColorSpace;
@@ -666,6 +672,18 @@ export function precompileShaders() {
 	renderer.setRenderTarget(feed.renderTarget);
 	renderer.compile(scene, feed.camera);
 	renderer.setRenderTarget(null);
+}
+/** While the console panel is open (main.ts) the desk monitors are not drawn, but their cameras keep
+    aiming at the patient as renderOperatorLiveFeeds does: the panel draws its feeds through them. */
+export function aimOperatorFeeds() {
+	if (OPERATOR_CONSOLE.built) {
+		const t = activeVaultPatientTarget();
+		for (const feed of OPERATOR_CONSOLE.feeds) feed.camera.lookAt(t);
+	}
+	if (CT_OPERATOR_CONSOLE.built) {
+		const t = ctPatientTarget();
+		for (const feed of CT_OPERATOR_CONSOLE.feeds) feed.camera.lookAt(t);
+	}
 }
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass

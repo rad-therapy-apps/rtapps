@@ -42,6 +42,7 @@ import {
 	updateClinicalEquipment,
 	updateStatusBeacons,
 	renderOperatorLiveFeeds,
+	aimOperatorFeeds,
 	precompileShaders,
 	buildOperatorLiveConsole,
 	buildCtLiveConsole,
@@ -598,7 +599,7 @@ document.addEventListener('keydown', (e) => {
 	keys[k] = true;
 	if (k === 'e' && !e.repeat) performInteraction();
 	// A key press is a gesture the browser accepts for pointer lock, so the first one after the mouse
-	// was freed (back from the LINAC/CT or console app, or a pop-up closed with Esc) turns mouse look
+	// was freed (back from the console emulator app, or a pop-up closed with Esc) turns mouse look
 	// back on without a click on the view. Not while a pop-up, the settings or a form field has the
 	// keys, and never for Esc, which browsers don't count.
 	if (k !== 'escape' && !isPaused() && openDialogName() === null && !isFormField(e.target))
@@ -644,8 +645,10 @@ export function stepSimulation(now: number): void {
 		(S.mode === 'overview' || (S.mode === 'guided' && S.activeRoom && !S.travel))
 	)
 		orbit.update();
-	// the control desks' monitors are under the console panel while it is open; it draws its own feeds
-	if (!isConsoleOpen()) renderOperatorLiveFeeds(now);
+	// the control desks' monitors are under the console panel while it is open: not drawn, but their
+	// cameras keep following the patient, as the panel draws its feeds through them
+	if (isConsoleOpen()) aimOperatorFeeds();
+	else renderOperatorLiveFeeds(now);
 	// After the feeds, so a feed render cannot consume the flag.
 	if (f % 4 === 1) renderer.shadowMap.needsUpdate = true;
 	applyVisibility(camera);
@@ -694,8 +697,8 @@ precompileShaders();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 // the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog;
-// back from the LINAC/CT app's Back to the Center, Free Mode starts outside the door the player left
-// through instead (return-door.ts)
+// back from the console emulator's Back to the Center (the Learning Commons door), Free Mode starts
+// outside the door the player left through instead (return-door.ts)
 installMenu();
 // after installMenu, which starts with the Tutorial entry disabled (menu.ts)
 initTutorial();
