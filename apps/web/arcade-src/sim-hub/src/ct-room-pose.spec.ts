@@ -12,9 +12,10 @@ import {
 	liesOn
 } from './ct-room-pose';
 
+// the CT console's start: table out and lowest
 const pose: CtPose = {
 	tableTravel: 0,
-	tableHeight: 0.5,
+	tableHeight: 0,
 	scanning: false,
 	xrayOn: false,
 	lasersOn: false
@@ -28,19 +29,21 @@ describe('tableTarget', () => {
 		expect(tableTarget({ ...pose, tableTravel: 1 }, range).x).toBeCloseTo(43.25);
 		expect(tableTarget({ ...pose, tableTravel: 0.5 }, range).x).toBeCloseTo(41.675);
 	});
-	it("keeps today's top height at the console's middle height", () => {
-		expect(tableTarget(pose, range).topY).toBeCloseTo(1.025);
-		expect(tableTarget({ ...pose, tableHeight: 0 }, range).topY).toBeCloseTo(
-			1.025 - TABLE_HEIGHT_SPAN / 2
+	it("puts the console's start pose at the table's rest: home, today's top height", () => {
+		expect(tableTarget(pose, range)).toEqual({ x: 40.1, topY: 1.025 });
+	});
+	it('raises the top from there by up to TABLE_HEIGHT_SPAN', () => {
+		expect(tableTarget({ ...pose, tableHeight: 0.5 }, range).topY).toBeCloseTo(
+			1.025 + TABLE_HEIGHT_SPAN / 2
 		);
 		expect(tableTarget({ ...pose, tableHeight: 1 }, range).topY).toBeCloseTo(
-			1.025 + TABLE_HEIGHT_SPAN / 2
+			1.025 + TABLE_HEIGHT_SPAN
 		);
 	});
 	it('clamps fractions outside 0..1', () => {
 		const t = tableTarget({ ...pose, tableTravel: 1.4, tableHeight: -0.3 }, range);
 		expect(t.x).toBeCloseTo(43.25);
-		expect(t.topY).toBeCloseTo(1.025 - TABLE_HEIGHT_SPAN / 2);
+		expect(t.topY).toBeCloseTo(1.025);
 	});
 });
 

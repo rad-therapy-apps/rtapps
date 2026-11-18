@@ -14,9 +14,10 @@ export interface CtTableRange {
 	topY: number;
 }
 
-/** How far the top rises and falls (metres, lowest to highest) around today's height. The CT
-    suite's table moves 6 units either way (ct-state.ts COUCH_Y_LOW/HIGH), 0.3 m at the scale of
-    its 34-unit (1.7 m) patient. Today's height is the console's middle (0.5), where it starts. */
+/** How far the top rises (metres) from today's height, the console's lowest, to its highest. The
+    CT suite's table moves 12 units from lowest to highest (ct-state.ts COUCH_Y_LOW/HIGH), 0.6 m at
+    the scale of its 34-unit (1.7 m) patient. The console starts out and lowest, so its start pose is
+    the center's table at rest; at the top a patient lying feet first still clears either bore. */
 export const TABLE_HEIGHT_SPAN = 0.6;
 /** The rotor's turn while scanning, radians a second (the suite's own, room.ts animate). */
 export const ROTOR_SPEED = 4.2;
@@ -27,7 +28,7 @@ const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 export function tableTarget(pose: CtPose, r: CtTableRange): { x: number; topY: number } {
 	return {
 		x: r.baseX + clamp01(pose.tableTravel) * r.inDist,
-		topY: r.topY + (clamp01(pose.tableHeight) - 0.5) * TABLE_HEIGHT_SPAN
+		topY: r.topY + clamp01(pose.tableHeight) * TABLE_HEIGHT_SPAN
 	};
 }
 
