@@ -2113,6 +2113,136 @@
 				border-color: var(--teal);
 				background: rgba(66, 213, 207, 0.16);
 			}
+			/* The console panel (console-panel.ts): a console in an iframe over the center, which shows
+			   dimmed around the card (its spread shadow) and live in the camera slots. The slots are
+			   holes: the feed cameras are drawn onto the canvas behind them, so the card paints no
+			   background of its own, only its parts do, in solid colours. */
+			#consolePanel {
+				position: fixed;
+				inset: 0;
+				z-index: 170;
+				display: none;
+				place-items: center;
+			}
+			#consolePanel.show {
+				display: grid;
+			}
+			body.consoleOpen #labels {
+				visibility: hidden;
+			}
+			.cpCard {
+				width: min(1560px, calc(100vw - 64px));
+				height: min(980px, calc(100vh - 40px));
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+				border: 1px solid #205b59;
+				border-radius: 18px;
+				box-shadow: 0 0 0 100vmax rgba(4, 9, 14, 0.58);
+			}
+			.cpHead {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 12px;
+				padding: 8px 10px 8px 16px;
+				border-bottom: 1px solid var(--stroke);
+				background:
+					linear-gradient(100deg, rgba(66, 213, 207, 0.12), rgba(117, 184, 255, 0.04)), #091117;
+			}
+			.cpHead h2 {
+				margin: 0;
+				font-size: 16px;
+				font-weight: 850;
+			}
+			.cpClose {
+				padding: 4px 12px;
+				border-radius: 999px;
+				border: 1px solid var(--stroke2);
+				background: rgba(255, 255, 255, 0.05);
+				color: #dce9ed;
+				font-size: 15px;
+				cursor: pointer;
+			}
+			.cpClose:hover {
+				background: rgba(255, 255, 255, 0.12);
+			}
+			.cpBody {
+				flex: 1 1 auto;
+				min-height: 0;
+				display: flex;
+			}
+			.cpFrames {
+				position: relative;
+				flex: 1 1 auto;
+				min-width: 0;
+				border-right: 1px solid var(--stroke);
+				background: #091117;
+			}
+			.cpFrame {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				border: 0;
+				background: #091117;
+			}
+			.cpFrame[hidden] {
+				display: none;
+			}
+			/* until the console's page has loaded: "Starting the console…" */
+			#consolePanel.loading .cpFrame {
+				visibility: hidden;
+			}
+			.cpLoading {
+				position: absolute;
+				inset: 0;
+				display: none;
+				place-items: center;
+				color: var(--dim);
+				font-size: 15px;
+			}
+			#consolePanel.loading .cpLoading {
+				display: grid;
+			}
+			.cpFeeds {
+				flex: 0 0 clamp(210px, 19vw, 360px);
+				display: flex;
+				flex-direction: column;
+			}
+			#consolePanel[data-kind='linac'] .cpFeeds[data-kind='ct'],
+			#consolePanel[data-kind='ct'] .cpFeeds[data-kind='linac'] {
+				display: none;
+			}
+			.cpFeedsK {
+				padding: 9px 10px 7px;
+				background: #091117;
+				font-size: 15px;
+				font-weight: 850;
+				letter-spacing: 0.11em;
+				text-transform: uppercase;
+				color: var(--teal);
+			}
+			/* the border is the card around each hole */
+			.cpFeed {
+				border: 0 solid #091117;
+				border-width: 0 10px 10px;
+			}
+			.cpSlot {
+				aspect-ratio: 16 / 9;
+				box-shadow: inset 0 0 0 1px rgba(66, 213, 207, 0.35);
+			}
+			.cpFeed span {
+				display: block;
+				padding: 5px 0 0;
+				background: #091117;
+				font-size: 15px;
+				color: #9cc4cb;
+			}
+			.cpFeedsRest {
+				flex: 1 1 auto;
+				background: #091117;
+			}
 		</style>
 	</head>
 	<body>
@@ -2566,6 +2696,45 @@
 				<div class="tut-endrow">
 					<button id="tutEndMenu" type="button">Main menu</button>
 					<button id="tutEndExplore" class="tut-primary" type="button">Keep exploring</button>
+				</div>
+			</div>
+		</div>
+		<div id="consolePanel" role="dialog" aria-modal="true" aria-labelledby="cpTitle">
+			<div class="cpCard">
+				<div class="cpHead">
+					<h2 id="cpTitle">LINAC Treatment Console</h2>
+					<button class="cpClose" id="cpClose" type="button" aria-label="Close the console">
+						× Close
+					</button>
+				</div>
+				<div class="cpBody">
+					<div class="cpFrames" id="cpFrames">
+						<div class="cpLoading">Starting the console…</div>
+					</div>
+					<div class="cpFeeds" data-kind="linac">
+						<div class="cpFeedsK">Vault 1 cameras</div>
+						<div class="cpFeed">
+							<div class="cpSlot" data-kind="linac" data-feed="Overhead"></div>
+							<span>Overhead</span>
+						</div>
+						<div class="cpFeed">
+							<div class="cpSlot" data-kind="linac" data-feed="Table close-up"></div>
+							<span>Patient view</span>
+						</div>
+						<div class="cpFeed">
+							<div class="cpSlot" data-kind="linac" data-feed="Wide room"></div>
+							<span>Vault wide</span>
+						</div>
+						<div class="cpFeedsRest"></div>
+					</div>
+					<div class="cpFeeds" data-kind="ct">
+						<div class="cpFeedsK">CT room camera</div>
+						<div class="cpFeed">
+							<div class="cpSlot" data-kind="ct" data-feed="CT Table Wide"></div>
+							<span>Room wide</span>
+						</div>
+						<div class="cpFeedsRest"></div>
+					</div>
 				</div>
 			</div>
 		</div>
