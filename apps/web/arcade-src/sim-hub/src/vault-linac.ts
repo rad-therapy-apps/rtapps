@@ -14,16 +14,21 @@
    where today's couch top is (props.ts LYING_SURFACES.vault1), where every lying patient is placed.
    The console's home has the couch at treatment height, about 0.44 m higher; the parked couch
    rises to it when the console's poses come in, so the gantry clears the couch all the way round.
-   The lasers follow only the console's own switch, when a pose turns it (and the Tutorial's,
-   through ROOM_LASERS). Colliders, seats, stand points and routes are unchanged.
-   setVaultMonitorPatient (from vault-linac-monitor.ts) names the patient on the in-room monitors. */
+   The couch's equipment anchor rides it too. The lasers follow only the console's own switch, when
+   a pose turns it (and the Tutorial's, through ROOM_LASERS). Colliders, seats, stand points and
+   routes are unchanged. The in-room monitors name whoever lies on the couch (from the start, model
+   or not); the Tutorial names its patient instead with setVaultMonitorPatient (from
+   vault-linac-monitor.ts). */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { LinacPose } from '../../shared/console-protocol';
 import { linacPose } from './console-bus';
 import { scene } from './scene';
 import { LINAC_SHELLS, LINAC_VAULT_MOUNTS, LYING_SURFACES, ROOM_LASERS } from './props';
+import { EQUIPMENT_BY_ID } from './equipment';
+import { JOURNEY, currentJourneyMeta } from './journey';
 import { LINAC_MODEL_URL } from './vault-linac-files';
+import { setVaultMonitorOccupant } from './vault-linac-monitor';
 import {
 	clampPose,
 	parkedPose,
@@ -96,9 +101,13 @@ interface Rider {
 	setPos: THREE.Vector3;
 	setQuat: THREE.Quaternion;
 }
-/** The lying patients on Vault 1's couch, by figure: where the game placed each (base, for the
-    parked couch) and where this module last put it. */
+/** What rides Vault 1's couch, by object: the lying patients on it (Jordan's and Mia's figures)
+    and the couch's equipment anchor (equipment.ts 'linac_couch', E for its details), each with
+    where the game placed it (base, for the parked couch) and where this module last put it. */
 const riders = new Map<THREE.Object3D, Rider>();
+const lyingRiders: THREE.Object3D[] = [];
+/** The couch anchor's focus ring on the floor, which follows the anchor in x and z. */
+let couchRing: THREE.Object3D | null = null;
 
 const goal = () => target ?? parkedPose(fit);
 
@@ -119,10 +128,21 @@ export function vaultLinacState(): {
 	return { loaded: !!parts, parked: !target, target: goal(), current, fit };
 }
 
-/** Loads the LINAC app's vault and follows the console's poses; once, after the center starts. */
+/** Loads the LINAC app's vault and follows the console's poses; once, after the center starts.
+    The in-room monitors follow who lies on the couch from now on, model or not. */
 export function startVaultLinac(): void {
 	if (started) return;
 	started = true;
+	findRiders();
+	showOccupant();
+	let last = performance.now();
+	const tick = (t: number) => {
+		requestAnimationFrame(tick);
+		if (parts) step(Math.min(0.1, Math.max(0, (t - last) / 1000)));
+		showOccupant();
+		last = t;
+	};
+	requestAnimationFrame(tick);
 	linacPose.on((p) => {
 		target = clampPose(p, target ?? current ?? parkedPose(fit));
 		if (target.lasersOn !== consoleLasers) {
@@ -141,6 +161,52 @@ export function startVaultLinac(): void {
 	} catch {
 		/* the old machine stays */
 	}
+}
+
+/* The lying patients over today's couch top (props.ts VAULT1_LYING puts them there) and the
+   couch's equipment anchor: they move with the couch board once the LINAC model is in. */
+function findRiders(): void {
+	const board = LYING_SURFACES.vault1;
+	if (!board) return;
+	board.updateWorldMatrix(true, false);
+	const footprint = new THREE.Box3()
+		.setFromObject(board)
+		.expandByVector(new THREE.Vector3(0.3, 1, 0.3));
+	const ride = (o: THREE.Object3D) =>
+		riders.set(o, {
+			base: new THREE.Matrix4().compose(o.position, o.quaternion, o.scale),
+			setPos: o.position.clone(),
+			setQuat: o.quaternion.clone()
+		});
+	for (const o of scene.children)
+		if (o.userData.lying && footprint.containsPoint(o.position)) {
+			ride(o);
+			lyingRiders.push(o);
+		}
+	const anchor = EQUIPMENT_BY_ID.linac_couch;
+	if (anchor) {
+		ride(anchor.anchor);
+		couchRing = anchor.ring;
+	}
+}
+
+/* The journey's patient name for a figure lying on the couch, else null: Jordan on the treatment
+   journey, Mia on the new-patient one (journey.ts), or a figure named as a person. */
+function patientName(o: THREE.Object3D): string | null {
+	if (o.userData.npcName) return o.userData.npcName;
+	const onCouch =
+		(o === JOURNEY.couchPatient && JOURNEY.jordanOnCouch) ||
+		(o === JOURNEY.miaTreatmentPatient && JOURNEY.miaOnTreatmentCouch);
+	return onCouch ? currentJourneyMeta().patient : null;
+}
+let occupantShown: string | undefined;
+/** Tells the in-room monitors who lies on the couch now (the first figure shown on it). */
+function showOccupant(): void {
+	const o = lyingRiders.find((r) => r.visible),
+		who = o ? (patientName(o) ?? '') : null;
+	if (who === occupantShown) return;
+	occupantShown = who;
+	setVaultMonitorOccupant(who === null ? null : { name: who || null });
 }
 
 function install(model: THREE.Object3D): void {
@@ -203,26 +269,10 @@ function install(model: THREE.Object3D): void {
 	apply(partPose(current));
 	parts.couchTopBoard.updateWorldMatrix(true, false);
 	parkedBoardInverse.copy(parts.couchTopBoard.matrixWorld).invert();
-	// the lying patients over today's couch top ride the couch (Jordan's and Mia's figures)
-	const footprint = old.clone().expandByVector(new THREE.Vector3(0.3, 1, 0.3));
-	for (const o of scene.children)
-		if (o.userData.lying && footprint.containsPoint(o.position))
-			riders.set(o, {
-				base: new THREE.Matrix4().compose(o.position, o.quaternion, o.scale),
-				setPos: o.position.clone(),
-				setQuat: o.quaternion.clone()
-			});
 	// the tutorial's laser switch now reaches the app's lasers
 	const lasersWereOn = (ROOM_LASERS.vault1 ?? []).every((l) => l.visible);
 	ROOM_LASERS.vault1 = [parts.lasers];
 	parts.lasers.visible = lasersWereOn;
-	let last = performance.now();
-	const tick = (t: number) => {
-		requestAnimationFrame(tick);
-		step(Math.min(0.1, Math.max(0, (t - last) / 1000)));
-		last = t;
-	};
-	requestAnimationFrame(tick);
 }
 
 function apply(p: LinacPartPose): void {
@@ -252,7 +302,8 @@ const move = new THREE.Matrix4(),
 	quat = new THREE.Quaternion(),
 	scl = new THREE.Vector3();
 
-/** One frame: the parts close on the goal, then each rider is put on the couch where it moved. */
+/** One frame: the parts close on the goal, then each rider is put on the couch where it moved
+    (the anchor's floor ring under it). */
 function step(dt: number): void {
 	current = smoothPose(current, goal(), dt);
 	apply(partPose(current));
@@ -268,4 +319,7 @@ function step(dt: number): void {
 		r.setPos.copy(pos);
 		r.setQuat.copy(quat);
 	}
+	const anchor = EQUIPMENT_BY_ID.linac_couch?.anchor;
+	if (couchRing && anchor)
+		couchRing.position.set(anchor.position.x, couchRing.position.y, anchor.position.z);
 }
