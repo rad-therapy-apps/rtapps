@@ -437,8 +437,12 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 		syncRoomNav();
 		syncMachineControlStates();
 		const name = text('consoleActivePatient');
-		// the CT side's header never names the LINAC console's patient
-		$('rtv2HeaderPatient').textContent = side === 'ct' ? 'No patient open' : name;
+		// the CT side's header never names the LINAC console's patient, and the console tutorial's
+		// names nobody until a chart is open, so the queue gives nothing away
+		$('rtv2HeaderPatient').textContent =
+			side === 'ct' || (CONSOLE.scenario === 'tutorial' && openCaseValue === null)
+				? 'No patient open'
+				: name;
 		$('rtv2PatientName').textContent = name;
 		$('rtv2PatientSubtitle').textContent = text('consolePatientRefSubtitle');
 		$('rtv2MRN').textContent = text('consoleRefMRN');
