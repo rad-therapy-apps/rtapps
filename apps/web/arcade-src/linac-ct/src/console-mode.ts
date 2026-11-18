@@ -213,6 +213,11 @@ export function startConsoleMode() {
 			});
 		}
 	});
+	// the image-guidance steps name the console's keys, not the in-room pendant (linac-igrt.ts too)
+	const igrtSteps = document.querySelector('#igrtPanel .igrt-head p');
+	if (igrtSteps)
+		igrtSteps.textContent =
+			'Acquire → review correction → drive the couch from the console keys → verify residual.';
 	applyRoom(consoleRoom.doorClosed, consoleRoom.staffInVault);
 	window.addEventListener('message', onMessage);
 	document.addEventListener('click', onBeamPress, true);

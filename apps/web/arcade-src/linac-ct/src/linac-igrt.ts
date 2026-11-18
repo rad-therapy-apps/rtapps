@@ -27,7 +27,7 @@ import {
 	setPendantLCD,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
 } from './linac-safety';
-import { consoleEvent, consoleMistake } from './console-hooks';
+import { CONSOLE, consoleEvent, consoleMistake } from './console-hooks';
 import { shiftLengthMm } from './console-messages';
 
 // RTApps (#77 phase 2 task 19): honest 6DOF couch-shift shape for
@@ -401,6 +401,16 @@ function igrtViewSVG(
             </svg><div class="plane-meta"><span>${label} · ${bodyLabel}</span><span>${residualText}</span></div><span class="label">Residual patient position</span></div>`;
 }
 
+// Console mode has no in-room pendant: the same controls are the chart's Machine / Imaging keys.
+const CONSOLE_WORDS = {
+	increments: 'Exact couch-key increments',
+	extend: (mv: boolean) =>
+		`Press ${mv ? 'MV / EPID' : 'kV Imaging'} on the Machine / Imaging console to ${mv ? 'extend the MV panel' : 'extend the kV imaging arms'}`,
+	correct:
+		'Apply the recommended correction from the Machine / Imaging console: press Motion Enable, then the couch keys or hold Move to field; residuals update live.',
+	attainable: 'couch-key increments'
+};
+
 export function renderClinicalIGRT() {
 	if (!igrtPanel) return;
 	const pat = document.getElementById('igrtPatient'),
@@ -419,7 +429,7 @@ export function renderClinicalIGRT() {
 	const tolNote = document.getElementById('igrtToleranceFootnote'),
 		it = activeIGRTTolerances();
 	if (tolNote)
-		tolNote.innerHTML = `Displayed values are <b>remaining couch corrections</b>. Exact pendant increments: 1 mm translation / 0.5° rotation. Plane mapping: <b>Axial = LAT + VRT + Roll</b>; <b>Coronal = LAT + LNG + Yaw</b>; <b>Sagittal = VRT + LNG + Pitch</b>. ${srsRequired() ? '<b>SRS high-precision tolerance:</b>' : 'Tolerance:'} translation ±${it.translation} mm; rotation ±${it.rotation}°. Treatment couch angle is a separate noncoplanar delivery coordinate and is not part of the 6DOF registration correction. <b>Alignment verification and treatment clearance are separate:</b> clearance is evaluated per selected field in Delivery.`;
+		tolNote.innerHTML = `Displayed values are <b>remaining couch corrections</b>. ${CONSOLE.console ? CONSOLE_WORDS.increments : 'Exact pendant increments'}: 1 mm translation / 0.5° rotation. Plane mapping: <b>Axial = LAT + VRT + Roll</b>; <b>Coronal = LAT + LNG + Yaw</b>; <b>Sagittal = VRT + LNG + Pitch</b>. ${srsRequired() ? '<b>SRS high-precision tolerance:</b>' : 'Tolerance:'} translation ±${it.translation} mm; rotation ±${it.rotation}°. Treatment couch angle is a separate noncoplanar delivery coordinate and is not part of the 6DOF registration correction. <b>Alignment verification and treatment clearance are separate:</b> clearance is evaluated per selected field in Delivery.`;
 	const ready = igrtHardwareReady();
 	if (hard) {
 		hard.textContent =
@@ -460,7 +470,7 @@ export function renderClinicalIGRT() {
 				S.clinicalIGRT.clearance?.safe === false
 					? `<div class="igrt-attainable" style="color:#ffd27a">Pre-treatment trajectory clearance will be rechecked after alignment correction. Imaging acquisition remains available.</div>`
 					: `<div class="igrt-attainable">✓ Baseline treatment trajectory preflight clear.</div>`;
-			status.innerHTML = `Daily setup error created from planned couch baseline <b>${base}</b> (VRT / LNG / LAT). Use the pendant to ${S.clinicalIGRT.mode === 'MV Pair' ? 'extend the MV panel' : 'extend the kV imaging arms'}, then acquire images.${preflightNote}`;
+			status.innerHTML = `Daily setup error created from planned couch baseline <b>${base}</b> (VRT / LNG / LAT). ${CONSOLE.console ? CONSOLE_WORDS.extend(S.clinicalIGRT.mode === 'MV Pair') : `Use the pendant to ${S.clinicalIGRT.mode === 'MV Pair' ? 'extend the MV panel' : 'extend the kV imaging arms'}`}, then acquire images.${preflightNote}`;
 		} else {
 			const targetObj = getIGRTExpectedAbsoluteCouch();
 			const target = targetObj
@@ -481,7 +491,7 @@ export function renderClinicalIGRT() {
 				S.clinicalIGRT.clearance?.field !== selectedFieldClearance?.field
 					? `<div class="igrt-attainable" style="color:#a9bac4">Whole-plan preflight also identified a hold on ${S.clinicalIGRT.clearance?.field || 'another field'} · G ${Number(S.clinicalIGRT.clearance?.angle || 0).toFixed(0)}°. Each field is handled independently in Delivery.</div>`
 					: '';
-			status.innerHTML = `Registration complete. Baseline couch: <b>${base}</b>. Post-IGRT treatment target: <b>${target}</b>. Use ONLY the couch controls on the pendant to apply the recommended correction; residuals update live.${S.clinicalIGRT.attainable ? '<div class="igrt-attainable">✓ Generated correction is attainable with 1 mm / 0.5° pendant increments from this machine position.</div>' : '<div class="igrt-attainable" style="color:#ffb3b8">The couch correction path is not attainable from this machine position. Reposition the machine and create a new daily setup.</div>'}${clearanceText}${wholePlanNote}`;
+			status.innerHTML = `Registration complete. Baseline couch: <b>${base}</b>. Post-IGRT treatment target: <b>${target}</b>. ${CONSOLE.console ? CONSOLE_WORDS.correct : 'Use ONLY the couch controls on the pendant to apply the recommended correction; residuals update live.'}${S.clinicalIGRT.attainable ? `<div class="igrt-attainable">✓ Generated correction is attainable with 1 mm / 0.5° ${CONSOLE.console ? CONSOLE_WORDS.attainable : 'pendant increments'} from this machine position.</div>` : '<div class="igrt-attainable" style="color:#ffb3b8">The couch correction path is not attainable from this machine position. Reposition the machine and create a new daily setup.</div>'}${clearanceText}${wholePlanNote}`;
 		}
 	}
 	const residual = getIGRTResidual();
