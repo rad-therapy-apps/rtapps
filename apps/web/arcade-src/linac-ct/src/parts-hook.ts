@@ -42,8 +42,10 @@ function stripHidden(root: THREE.Object3D, keep: Set<THREE.Object3D>) {
 }
 
 function collect(): ExportedParts {
-	const named = (o: THREE.Object3D, name: string) => {
-		o.name = name;
+	const missing: string[] = [];
+	const named = (o: THREE.Object3D | undefined, name: string) => {
+		if (!o) missing.push(name);
+		else o.name = name;
 		return o;
 	};
 	// the driven parts (vault-linac-pose.ts maps the console's pose onto them)
@@ -123,6 +125,8 @@ function collect(): ExportedParts {
 		sign,
 		...lights
 	];
+	// a part the app no longer builds the way this hook finds it: say which, before anything is written
+	if (missing.length) throw new Error(`parts not found in the LINAC app: ${missing.join(', ')}`);
 	for (const p of parts) stripHidden(p, keep);
 	const canvasOf = (mesh: THREE.Mesh) =>
 		((mesh.material as THREE.MeshStandardMaterial).map as THREE.CanvasTexture)
