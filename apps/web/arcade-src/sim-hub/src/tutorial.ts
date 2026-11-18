@@ -5,13 +5,14 @@
    movementPathFor, so it goes through doors and room graphs, never walls), the check-in and the
    decisions, the role change, Jordan's escorts with their waits, the vault door and the end card.
    The console steps (3, 6, 8, 9; docs/specs/2026-11-18-consoles-in-center-design.md, part 6) open
-   the LINAC console through openStepConsole and listen to it on console-bus.ts (linacEvents, and
-   panelOpen for the player closing it early); Jordan's name goes on the Vault 1 monitors through
-   showJordanOnVaultMonitors. Leaving play mode 'tutorial' resets the journey again, so the world is
+   the LINAC console in its panel (console-panel.ts) through openStepConsole and listen to it on
+   console-bus.ts (linacEvents, and panelOpen for the player closing it early); Jordan's name goes
+   on the Vault 1 monitors through showJordanOnVaultMonitors. Leaving play mode 'tutorial' resets the journey again, so the world is
    left as the NPC check expects. Outside the tutorial nothing here runs: updateTutorial returns at
    once, the console events are ignored, and the E targets are made on the first start and disabled
    otherwise. With ?npccheck it exposes window.__TUTORIAL for scripts/sim-hub-tutorial-check.mjs,
-   which drives the console steps by emitting their events on linacEvents (no iframe there). */
+   which drives the console steps by emitting their events on linacEvents (the console page never
+   loads there). */
 import * as THREE from 'three';
 import { S } from './state';
 import { camera, scene } from './scene';
@@ -74,6 +75,7 @@ import {
 import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
 import { linacEvents, panelOpen } from './console-bus';
+import { closeConsole, openConsole } from './console-panel';
 import { TUTORIAL_PATIENTS } from '../../shared/console-protocol';
 import type { LinacEvent, LinacWorkspace } from '../../shared/console-protocol';
 
@@ -118,8 +120,8 @@ let dialogOpen = false,
 	walkFade = false,
 	endOpen = false;
 let lastAnswer: string | null = null;
-/** The console the tutorial has open (openStepConsole), and whether Jordan is on the Vault 1
-    monitors (showJordanOnVaultMonitors). */
+/** The console the tutorial asked for and has open (openStepConsole), and whether Jordan is on the
+    Vault 1 monitors (showJordanOnVaultMonitors). */
 let consoleShown: { kind: 'linac'; workspace: LinacWorkspace } | null = null;
 let jordanOnMonitors = false;
 const timers = new Set<ReturnType<typeof setTimeout>>();
@@ -223,15 +225,17 @@ function perform(e: Effect): void {
 
 /* ---- the LINAC console and the Vault 1 monitors (console-panel.ts and vault-linac.ts) ---- */
 /** Every console step opens the console here: the LINAC console, tutorial scenario, at `workspace`.
-    The game is not paused; the tracker sits above the panel for the console hints. */
+    The game is not paused; the tracker docks on the panel for the console hints. */
 function openStepConsole(workspace: LinacWorkspace): void {
 	consoleShown = { kind: 'linac', workspace };
-	hud.setOverConsole(true);
+	openConsole('linac', { workspace, scenario: 'tutorial' });
+	hud.dockOnConsole(true);
 }
 function closeStepConsole(): void {
 	if (!consoleShown) return;
-	consoleShown = null;
-	hud.setOverConsole(false);
+	consoleShown = null; // first, so the panel's close is not taken for the player's
+	hud.dockOnConsole(false);
+	closeConsole();
 }
 /** Jordan Ellis as the patient on the Vault 1 treatment monitors, from the chart opening at step 3
     until the tutorial ends; off, the monitors go back to the center's own patient. */
@@ -242,7 +246,7 @@ function showJordanOnVaultMonitors(on: boolean): void {
 function consolePanelClosed(): void {
 	if (!consoleShown) return;
 	consoleShown = null;
-	hud.setOverConsole(false);
+	hud.dockOnConsole(false);
 	dispatch({ type: 'consoleClosed' });
 }
 
@@ -996,8 +1000,10 @@ function installCheckHook(): void {
 			patients: TUTORIAL_PATIENTS,
 			/** An event from the LINAC console, as console-panel.ts emits it. */
 			consoleEvent: (ev: LinacEvent) => linacEvents.emit(ev),
-			/** The player closing the console panel, as console-panel.ts reports it. */
-			closePanel: () => panelOpen.emit(null),
+			/** The player closing the console panel (its × or Esc). */
+			closePanel: () => closeConsole(),
+			/** Whether the tracker is docked on the console panel. */
+			docked: () => document.body.classList.contains('tut-docked'),
 			answer,
 			cont: () => dispatch({ type: 'continue' }),
 			mainMenu,

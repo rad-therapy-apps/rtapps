@@ -7,23 +7,25 @@
 // does. The player is moved to each target, turns to it and presses E (the real
 // performInteraction), answers each decision, plays each console step and follows Jordan on the
 // escorts. A console step (3, 6, 8, 9; docs/specs/2026-11-18-consoles-in-center-design.md part 6)
-// has no iframe here: E must ask for the LINAC console at the step's workspace (the hook's
-// state().console), and the console's events are emitted on console-bus.ts linacEvents through
-// the hook, as console-panel.ts emits them; the step completes on Jordan's events, in order, and
-// the console closes a beat later. Each escort starts under a fade that moves Jordan and the
-// player on to just short of the destination room; after it the player stands clear of the walls,
-// a few metres behind Jordan, with under 25 m of the first leg left (the whole walk to Vault 1 was
-// about 100 m). Room introduction cards are switched off through the page's own preference
-// (localStorage simhub.roomCards.enabled = false).
+// opens the console panel (console-panel.ts), but its page never loads here: E must open the
+// LINAC console at the step's workspace (the hook's state().console and the panel's
+// isConsoleOpen), with the tracker docked on the panel, and the console's events are emitted on
+// console-bus.ts linacEvents through the hook, as the panel emits them; the step completes on
+// Jordan's events, in order, and the console closes a beat later. Each escort starts under a fade
+// that moves Jordan and the player on to just short of the destination room; after it the player
+// stands clear of the walls, a few metres behind Jordan, with under 25 m of the first leg left (the
+// whole walk to Vault 1 was about 100 m). Room introduction cards are switched off through the
+// page's own preference (localStorage simhub.roomCards.enabled = false).
 //   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; on every console step three misses (a look-alike's chart and
 //          check-in at the schedule, the console's refusals elsewhere) show hint 1, hint 2 and the
 //          reveal in the hint line, an event out of order does nothing, and the panel closed early
-//          leaves the step and its hint, with E at the console's stand point (where Jamie Williams
-//          stood at steps 8 and 9) opening it again; the 60 s and 120 s walking hints and the 20 s
-//          E hint show; on the walk to Vault 1 the player stays where the fade left them and Jordan
-//          waits at a stop; on the walk back the player runs ahead to reception ("Wait for
-//          Jordan"); the end card's Keep exploring leaves the player where they stand, in free mode
+//          leaves the step and its hint and undocks the tracker, with E at the console's stand point
+//          (where Jamie Williams stood at steps 8 and 9) opening it again; the 60 s and 120 s
+//          walking hints and the 20 s E hint show; on the walk to Vault 1 the player stays where the
+//          fade left them and Jordan waits at a stop; on the walk back the player runs ahead to
+//          reception ("Wait for Jordan"); the end card's Keep exploring leaves the player where they
+//          stand, in free mode
 //   run 2  every decision answered right, every console step pressed from its stand point and
 //          done without a miss; the end card's Main menu goes back to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
@@ -212,6 +214,8 @@ function worldState() {
 		moves: NPC.workflowTransitions.length,
 		lasers: T.lasersOn(),
 		console: T.state().console,
+		panel: NPC.isConsoleOpen(),
+		docked: T.docked(),
 		monitors: T.state().jordanOnMonitors
 	});
 }
@@ -228,10 +232,12 @@ function playConsole(n, st, wrong, fails) {
 		opened = () =>
 			T.state().phase === 'console' &&
 			T.state().console?.kind === 'linac' &&
-			T.state().console?.workspace === c.workspace;
+			T.state().console?.workspace === c.workspace &&
+			NPC.isConsoleOpen() &&
+			T.docked();
 	if (!opened()) {
 		fails.push(
-			`step ${n}: E did not open the console at '${c.workspace}' (console ${JSON.stringify(T.state().console)}, phase '${T.state().phase}')`
+			`step ${n}: E did not open the console at '${c.workspace}' (console ${JSON.stringify(T.state().console)}, phase '${T.state().phase}', panel open ${NPC.isConsoleOpen()}, tracker docked ${T.docked()})`
 		);
 		return;
 	}
@@ -259,9 +265,15 @@ function playConsole(n, st, wrong, fails) {
 		// the panel closed early: the step stays, its last hint too, and E opens the console again
 		T.closePanel();
 		const closed = T.state();
-		if (closed.console !== null || closed.phase !== 'active' || closed.step !== n)
+		if (
+			closed.console !== null ||
+			closed.phase !== 'active' ||
+			closed.step !== n ||
+			NPC.isConsoleOpen() ||
+			T.docked()
+		)
 			fails.push(
-				`step ${n}: closing the panel early left console ${JSON.stringify(closed.console)}, phase '${closed.phase}', step ${closed.step}`
+				`step ${n}: closing the panel early left console ${JSON.stringify(closed.console)}, phase '${closed.phase}', step ${closed.step}, panel open ${NPC.isConsoleOpen()}, tracker docked ${T.docked()}`
 			);
 		stepFor(0.5);
 		if (T.state().hint !== c.reveal)
@@ -288,10 +300,10 @@ function playConsole(n, st, wrong, fails) {
 	}
 	if (n === 3 && !T.state().jordanOnMonitors)
 		fails.push('step 3: Jordan is not on the Vault 1 monitors after the chart opened');
-	if (!T.state().console)
+	if (!T.state().console || !NPC.isConsoleOpen())
 		fails.push(`step ${n}: the console closed with no beat to show the result`);
 	stepFor(CONSOLE_BEAT_S);
-	if (T.state().console)
+	if (T.state().console || NPC.isConsoleOpen() || T.docked())
 		fails.push(`step ${n}: the console is still open ${CONSOLE_BEAT_S} s after the step completed`);
 }
 
