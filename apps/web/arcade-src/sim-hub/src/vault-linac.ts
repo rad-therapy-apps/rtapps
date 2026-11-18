@@ -14,8 +14,9 @@
    where today's couch top is (props.ts LYING_SURFACES.vault1), where every lying patient is placed.
    The console's home has the couch at treatment height, about 0.44 m higher; the parked couch
    rises to it when the console's poses come in, so the gantry clears the couch all the way round.
-   Colliders, seats, stand points and routes are unchanged. setVaultMonitorPatient (from
-   vault-linac-monitor.ts) names the patient on the in-room monitors. */
+   The lasers follow only the console's own switch, when a pose turns it (and the Tutorial's,
+   through ROOM_LASERS). Colliders, seats, stand points and routes are unchanged.
+   setVaultMonitorPatient (from vault-linac-monitor.ts) names the patient on the in-room monitors. */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { LinacPose } from '../../shared/console-protocol';
@@ -83,9 +84,10 @@ let fit: CouchFit = { drop: 0, retract: 0 };
 let target: LinacPose | null = null;
 /** The pose the parts show now, on its way to the target. */
 let current: LinacPose | null = null;
-/** The laser state last taken from a pose: the lasers change only when it does, so the Tutorial's
-    own switching (tutorial.ts setLasers, through ROOM_LASERS) holds in between. */
-let lasersFromPose: boolean | null = null;
+/** The console's laser switch as its last pose had it: Vault 1's lasers (ROOM_LASERS.vault1) change
+    only when a pose from the console turns it, so the Tutorial's own switching (tutorial.ts
+    setLasers) holds in between; parking leaves them alone. */
+let consoleLasers: boolean | null = null;
 /** The couch board's world matrix at the parked pose, inverted: a rider's move is the board's
     move since then. */
 const parkedBoardInverse = new THREE.Matrix4();
@@ -101,7 +103,7 @@ const riders = new Map<THREE.Object3D, Rider>();
 const goal = () => target ?? parkedPose(fit);
 
 /** Puts Vault 1's machine back to its parked pose (the couch lowered to today's lying top, gantry
-    at 0, lasers on); the console's next pose takes it from there. */
+    at 0; the lasers stay as they are); the console's next pose takes it from there. */
 export function resetLinacPose(): void {
 	target = null;
 }
@@ -123,6 +125,10 @@ export function startVaultLinac(): void {
 	started = true;
 	linacPose.on((p) => {
 		target = clampPose(p, target ?? current ?? parkedPose(fit));
+		if (target.lasersOn !== consoleLasers) {
+			consoleLasers = target.lasersOn;
+			for (const l of ROOM_LASERS.vault1 ?? []) l.visible = consoleLasers;
+		}
 	});
 	// a failed load, or one that cannot even start (the Node checks' relative URL), keeps the old machine
 	try {
@@ -210,7 +216,6 @@ function install(model: THREE.Object3D): void {
 	const lasersWereOn = (ROOM_LASERS.vault1 ?? []).every((l) => l.visible);
 	ROOM_LASERS.vault1 = [parts.lasers];
 	parts.lasers.visible = lasersWereOn;
-	lasersFromPose = goal().lasersOn;
 	let last = performance.now();
 	const tick = (t: number) => {
 		requestAnimationFrame(tick);
@@ -249,13 +254,8 @@ const move = new THREE.Matrix4(),
 
 /** One frame: the parts close on the goal, then each rider is put on the couch where it moved. */
 function step(dt: number): void {
-	const g = goal();
-	current = smoothPose(current, g, dt);
+	current = smoothPose(current, goal(), dt);
 	apply(partPose(current));
-	if (g.lasersOn !== lasersFromPose) {
-		lasersFromPose = g.lasersOn;
-		for (const l of ROOM_LASERS.vault1 ?? []) l.visible = g.lasersOn;
-	}
 	parts.couch.updateMatrixWorld(true);
 	move.multiplyMatrices(parts.couchTopBoard.matrixWorld, parkedBoardInverse);
 	for (const [o, r] of riders) {

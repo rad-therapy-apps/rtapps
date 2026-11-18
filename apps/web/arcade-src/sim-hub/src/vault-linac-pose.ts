@@ -82,7 +82,6 @@ export interface LinacPartPose {
 	epid: { y: number; z: number; rotX: number };
 	kvArms: boolean;
 	beam: boolean;
-	lasers: boolean;
 }
 
 const CM = 0.01;
@@ -100,8 +99,8 @@ export function jawOffset(cm: number): number {
 }
 
 /** The app's home pose (gantry and couch at 0, a 10 x 10 cm field) with the couch parked by `fit`:
-    the pose Vault 1 stands in until the console sends one, and after resetLinacPose. The room
-    lasers are on, as the center has always shown them. */
+    the pose Vault 1 stands in until the console sends one, and after resetLinacPose. Its lasersOn
+    is not shown: Vault 1's lasers follow only the console's own switch (and the Tutorial's). */
 export function parkedPose(fit: CouchFit): LinacPose {
 	return {
 		gantry: 0,
@@ -147,7 +146,7 @@ export function clampPose(p: LinacPose, prev: LinacPose): LinacPose {
 	};
 }
 
-/** The part transforms for a pose (linac-safety.ts and main.ts: gantry rotation.z = -angle,
+/** The part transforms for a pose, lasers aside (linac-safety.ts and main.ts: gantry rotation.z = -angle,
     collimator rotation.y = +angle, couch turntable rotation.y = +angle, couch x -= lat, couch
     y += vrt, couch top z -= lng). */
 export function partPose(p: LinacPose): LinacPartPose {
@@ -171,8 +170,7 @@ export function partPose(p: LinacPose): LinacPartPose {
 		jawY2: APP.jawPlane + jawOffset(p.jawY2) + APP.jawThickness,
 		epid: p.epidOut ? { ...APP.epidOut } : { ...APP.epidHome },
 		kvArms: p.kvArmsOut,
-		beam: p.beamOn,
-		lasers: p.lasersOn
+		beam: p.beamOn
 	};
 }
 

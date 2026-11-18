@@ -77,7 +77,7 @@ describe('Vault 1 LINAC pose: couch translations in cm, shown at true scale', ()
 	});
 });
 
-describe('Vault 1 LINAC pose: jaws, imagers, beam and lasers', () => {
+describe('Vault 1 LINAC pose: jaws, imagers and beam', () => {
 	it('places each jaw edge from 0.03 m (0 cm) to 0.25 m (12.5 cm) off the beam axis', () => {
 		expect(jawOffset(0)).toBeCloseTo(0.03);
 		expect(jawOffset(12.5)).toBeCloseTo(0.25);
@@ -89,13 +89,13 @@ describe('Vault 1 LINAC pose: jaws, imagers, beam and lasers', () => {
 		expect(p.jawY2).toBeCloseTo(APP.jawPlane + 0.25 + APP.jawThickness);
 	});
 
-	it('extends the EPID under the patient or parks it, and shows kV arms, beam and lasers as told', () => {
-		const out = partPose(pose({ epidOut: true, kvArmsOut: true, beamOn: true, lasersOn: true }));
+	it('extends the EPID under the patient or parks it, and shows kV arms and beam as told', () => {
+		const out = partPose(pose({ epidOut: true, kvArmsOut: true, beamOn: true }));
 		expect(out.epid).toEqual(APP.epidOut);
-		expect([out.kvArms, out.beam, out.lasers]).toEqual([true, true, true]);
+		expect([out.kvArms, out.beam]).toEqual([true, true]);
 		const home = partPose(HOME);
 		expect(home.epid).toEqual(APP.epidHome);
-		expect([home.kvArms, home.beam, home.lasers]).toEqual([false, false, false]);
+		expect([home.kvArms, home.beam]).toEqual([false, false]);
 	});
 });
 
@@ -132,12 +132,11 @@ describe('Vault 1 LINAC pose: checks on a console pose', () => {
 });
 
 describe('Vault 1 LINAC pose: parked couch', () => {
-	it('lowers and pulls back the couch by the fit, with the gantry at 0 and the lasers on', () => {
+	it('lowers and pulls back the couch by the fit, with the gantry at 0', () => {
 		const p = parkedPose({ drop: 0.4375, retract: 1.16 });
 		expect(p.couchVrt).toBeCloseTo(-43.75);
 		expect(p.couchLng).toBeCloseTo(-116);
 		expect([p.gantry, p.couchAngle, p.couchLat]).toEqual([0, 0, 0]);
-		expect(p.lasersOn).toBe(true);
 		const t = partPose(p);
 		expect(t.couchY).toBeCloseTo(APP.couchHome.y - 0.4375);
 		expect(t.couchTopZ).toBeCloseTo(APP.couchTopHomeZ + 1.16);
