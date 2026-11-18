@@ -799,6 +799,7 @@ export function buildRoom(room: Room) {
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
 	ceilings.push(ceiling);
+	if (room.id === 'ctsim') ctSimFinish(room, floor, ceiling);
 	addRoomLighting(room, h);
 	addRoomDecor(room);
 	furnish(room);
@@ -952,6 +953,10 @@ export function addRoomDecor(room: Room) {
 		plant(g, 8.6, -6.4, 1.15);
 		plant(g, -8.4, 6.3, 1.05);
 		wallArt(g, 7.8, 2.25, -9.86, 0, 2.8, 1.1, 0x347e91);
+		return;
+	}
+	if (room.id === 'ctsim') {
+		ctSimLightPanel(g, room);
 		return;
 	}
 	const backSide =
@@ -1868,6 +1873,94 @@ export function addClinicalWallPolish() {
 		const l = box(7.2, 0.04, 0.08, glow, ct.x, 3.15, ct.z + ct.d / 2 - 0.12);
 		g.add(l);
 	}
+}
+
+/* The CT Simulator room's finish, after the CT suite's dark scan room (linac-ct ct-suite room.ts)
+   and the approved look (docs/specs/2026-11-18-consoles-in-center-design.md, part 2): a dark floor
+   with a faint grid, dark linings on the walls' inner faces and a dark ceiling. The walls themselves
+   are shared with CT Control and the hallway, so they keep their own faces; the linings stand 4 mm in
+   front of them with the room's door and window openings left clear. Lights, signs and equipment
+   keep their look. buildRoom calls it for ctsim; the suite's teal light panel is ctSimLightPanel. */
+const CT_SIM_FLOOR = '#141c24',
+	CT_SIM_GRID = 'rgba(120,170,190,0.28)',
+	CT_SIM_GRID_CELL = 1.2,
+	CT_SIM_WALL = 0x1a2530,
+	CT_SIM_CEILING = 0x18222b;
+function ctSimFinish(room: Room, floor: THREE.Mesh, ceiling: THREE.Mesh) {
+	const c = document.createElement('canvas');
+	c.width = c.height = 256;
+	const q = c.getContext('2d');
+	q.fillStyle = CT_SIM_FLOOR;
+	q.fillRect(0, 0, 256, 256);
+	q.strokeStyle = CT_SIM_GRID;
+	q.lineWidth = 2;
+	q.strokeRect(1, 1, 254, 254);
+	const grid = new THREE.CanvasTexture(c);
+	grid.wrapS = grid.wrapT = THREE.RepeatWrapping;
+	grid.colorSpace = THREE.SRGBColorSpace;
+	grid.anisotropy = 8;
+	grid.repeat.set((room.w - 0.15) / CT_SIM_GRID_CELL, (room.d - 0.15) / CT_SIM_GRID_CELL);
+	floor.material = new THREE.MeshStandardMaterial({ map: grid, roughness: 0.85 });
+	ceiling.material = new THREE.MeshBasicMaterial({ color: CT_SIM_CEILING });
+	// the linings: inner faces 0.08 m off the wall lines (t 0.16), up to the ceiling's underside, with
+	// the openings buildSide leaves (door 2.6 m wide to y 2.65, window over y 1.0..2.82). The window
+	// opening is only the part CT Control's own 4.5 m window (on the same wall line) leaves clear: the
+	// rest of the CT room's 4.5 m window has CT Control's wall right behind its glass
+	const mat = std(CT_SIM_WALL, 0.8, 0.02),
+		inset = 0.084,
+		top = 3.71;
+	const lining = (side: string, a: number, b: number, y0: number, y1: number) => {
+		const p = new THREE.Mesh(new THREE.PlaneGeometry(b - a, y1 - y0), mat);
+		p.receiveShadow = true;
+		const m = (a + b) / 2,
+			y = (y0 + y1) / 2;
+		if (side === 'zmin') p.position.set(m, y, room.z - room.d / 2 + inset);
+		else if (side === 'zmax') p.position.set(m, y, room.z + room.d / 2 - inset);
+		else if (side === 'xmin') p.position.set(room.x - room.w / 2 + inset, y, m);
+		else p.position.set(room.x + room.w / 2 - inset, y, m);
+		p.rotation.y = { zmin: 0, zmax: Math.PI, xmin: Math.PI / 2, xmax: -Math.PI / 2 }[side];
+		scene.add(p);
+	};
+	for (const side of ['zmin', 'zmax', 'xmin', 'xmax']) {
+		const alongX = side[0] === 'z',
+			mid = alongX ? room.x : room.z,
+			lo = mid - (alongX ? room.w : room.d) / 2 + inset,
+			hi = mid + (alongX ? room.w : room.d) / 2 - inset;
+		if (room.doorSide === side) {
+			lining(side, lo, mid - 1.3, 0, top);
+			lining(side, mid + 1.3, hi, 0, top);
+			lining(side, mid - 1.3, mid + 1.3, 2.65, top);
+		} else if (room.windowSide === side) {
+			const cc = roomById('ctcontrol'),
+				w0 = Math.max(mid - 2.25, cc ? cc.z - 2.25 : -Infinity),
+				w1 = Math.min(mid + 2.25, cc ? cc.z + 2.25 : Infinity);
+			lining(side, lo, w0, 0, top);
+			lining(side, w1, hi, 0, top);
+			lining(side, w0, w1, 0, 1.0);
+			lining(side, w0, w1, 2.82, top);
+		} else lining(side, lo, hi, 0, top);
+	}
+}
+/* The CT suite's teal light panel (its scan room's control-window glow) on the CT room's back wall,
+   behind the room's sign, status screen and clock and clear of the sink (from x 47.9): a dark teal
+   face over a faint teal glow. addRoomDecor puts it up in place of the accent panel. */
+function ctSimLightPanel(g: THREE.Group, room: Room) {
+	const z = room.z - room.d / 2 + 0.08,
+		w = 7.0,
+		h = 2.2,
+		y = 2.4;
+	const glow = new THREE.Mesh(
+		new THREE.PlaneGeometry(w + 0.3, h + 0.3),
+		new THREE.MeshBasicMaterial({ color: 0x35d6c4, transparent: true, opacity: 0.15 })
+	);
+	glow.position.set(room.x, y, z + 0.01);
+	g.add(glow);
+	const face = new THREE.Mesh(
+		new THREE.PlaneGeometry(w, h),
+		new THREE.MeshBasicMaterial({ color: 0x0e3a44 })
+	);
+	face.position.set(room.x, y, z + 0.015);
+	g.add(face);
 }
 
 export function corridorAnchor(room: Room) {

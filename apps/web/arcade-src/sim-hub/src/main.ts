@@ -91,6 +91,7 @@ import {
 import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
 import { initTutorial, updateTutorial } from './tutorial';
+import { initCtRoomLook } from './ct-room-look';
 import { enterMode } from './play-mode';
 import { startRoomFromSearch } from './start-room';
 import { returnDoorOnBoot, takeReturnView } from './return-door';
@@ -679,6 +680,7 @@ procRefreshRelease();
 ceilings.forEach((c) => (c.visible = false));
 groupRoomContents();
 precompileShaders();
+initCtRoomLook();
 requestAnimationFrame(animate);
 setTimeout(() => document.getElementById('loader').classList.add('hide'), 900);
 // the title menu (menu.ts) opens over the turning overview, in place of the old "How to use" dialog;

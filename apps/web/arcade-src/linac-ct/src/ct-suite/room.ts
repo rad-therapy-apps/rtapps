@@ -1,6 +1,7 @@
 import * as THREE from 'three-ct';
 import { OrbitControls } from 'three-ct/addons/controls/OrbitControls.js';
 import { S } from './console';
+import { installPartsHook } from './parts-hook';
 /* ============================================================
    1) 3D SCAN ROOM
    ============================================================ */
@@ -71,6 +72,7 @@ export function initThree() {
 	requestAnimationFrame(onResize);
 	setTimeout(onResize, 120);
 	renderer.setAnimationLoop(animate);
+	installPartsHook();
 }
 
 export function createRoom() {
