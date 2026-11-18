@@ -12,6 +12,7 @@ import {
 	drawTopogram,
 	lerp
 } from './imaging';
+import { ctStepLabel } from './ct-state';
 import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room';
 /* ---------------- CT PROTOCOL LIBRARY ---------------- */
 // RTApps (#77 phase 2 task 20): typed shape for entries in `PROTOCOLS`. The demo
@@ -380,8 +381,13 @@ interface CtSuiteState {
 	techKv: number;
 	techMas: number;
 	couchZ: number;
+	// Table height, scene units. Kept here so console mode (no room) still has it.
+	couchY: number;
 	isoSet: boolean;
 	scanning: boolean;
+	// A topogram is being acquired, and x-ray is on: both read by the state stream (ct-state.ts).
+	topogramming: boolean;
+	xray: boolean;
 	rotating: boolean;
 	motion: boolean;
 	motionAmp: number;
@@ -408,8 +414,11 @@ export const S: CtSuiteState = {
 	techKv: 120,
 	techMas: 220,
 	couchZ: 0, // scene units; +out / -in
+	couchY: 0,
 	isoSet: false,
 	scanning: false,
+	topogramming: false,
+	xray: false,
 	rotating: false,
 	motion: false,
 	motionAmp: 0.5,
@@ -448,6 +457,7 @@ export function setStatus(text, cls) {
 }
 
 export function setXray(on) {
+	S.xray = !!on;
 	$('xrayInd').classList.toggle('on', on);
 }
 
@@ -501,8 +511,7 @@ export function buildSteps() {
 
 export function setStep(n) {
 	S.step = n;
-	$('conStep').textContent =
-		`Step ${n} · ${['', 'Protocol', 'Habitus / Technique', 'Position', 'Topogram', 'Range', 'Scan'][n]}`;
+	$('conStep').textContent = ctStepLabel(n);
 	document.querySelectorAll('#workflowSteps .step').forEach((el) => {
 		const k = +(el as HTMLElement).dataset.step;
 		el.classList.toggle('done', k < n);
@@ -633,6 +642,7 @@ export function updateRangeLabels() {
 export function moveCouch(dx, dy, dz) {
 	if (S.scanning) return;
 	S.couchZ = Math.max(-16, Math.min(20, S.couchZ + dz * 1.2));
+	S.couchY += dy * 0.6;
 	if (couchGroup) {
 		couchGroup.position.x = (couchGroup.position.x || 0) + dx * 0.6;
 		couchGroup.position.y = (couchGroup.position.y || 0) + dy * 0.6;
@@ -667,14 +677,17 @@ export function wire() {
 		.querySelectorAll('[data-view]')
 		.forEach((b) => ((b as HTMLElement).onclick = () => setView((b as HTMLElement).dataset.view)));
 	$('btnSkin').onclick = () => {
+		if (!skinGroup) return; // console mode has no room
 		skinGroup.visible = !skinGroup.visible;
 		$('btnSkin').style.color = skinGroup.visible ? '' : 'var(--cyan)';
 	};
 	$('btnBone').onclick = () => {
+		if (!boneGroup) return;
 		boneGroup.visible = !boneGroup.visible;
 		$('btnBone').style.color = boneGroup.visible ? 'var(--cyan)' : '';
 	};
 	$('btnOrgans').onclick = () => {
+		if (!organGroup) return;
 		organGroup.visible = !organGroup.visible;
 		$('btnOrgans').style.color = organGroup.visible ? 'var(--cyan)' : '';
 	};

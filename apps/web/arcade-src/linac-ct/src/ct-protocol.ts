@@ -27,5 +27,8 @@ export interface CtCompleteMsg {
 	series: string;
 	images: number;
 }
+/** Console mode only: the scanner pose and workflow step (see shared/console-protocol.ts). */
+export type { CtStateMsg } from '../../shared/console-protocol';
+import type { CtStateMsg } from '../../shared/console-protocol';
 export type ParentToCtMessage = CtViewMsg | CtCaseMsg;
-export type CtToParentMessage = CtReadyMsg | CtCaseLoadedMsg | CtCompleteMsg;
+export type CtToParentMessage = CtReadyMsg | CtCaseLoadedMsg | CtCompleteMsg | CtStateMsg;
