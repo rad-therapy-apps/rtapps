@@ -190,6 +190,35 @@ class TestExternalActivitySnapshot:
         assert body["snapshot"]["external"]["completion_only"] is False
 
 
+class TestExternalStartRoom:
+    async def _snapshot(self, db: AsyncSession, config: dict[str, Any]) -> dict[str, Any]:
+        subject = await _ensure_subject(db)
+        activity = Activity(
+            kind="external",
+            ref_id=new_id(),
+            title="Room start",
+            subject_id=subject.id,
+            status="draft",
+            access="practice",
+            config=config,
+        )
+        db.add(activity)
+        await db.flush()
+        version = await publish_activity(db, activity, author=None, change_note="test")
+        return version.snapshot["external"]
+
+    async def test_allowed_start_room_is_pinned(self, db: AsyncSession) -> None:
+        for room in ("linaccontrol", "ctcontrol"):
+            ext = await self._snapshot(db, {"arcade_slug": "sim-hub", "start_room": room})
+            assert ext["start_room"] == room
+
+    async def test_unknown_or_missing_start_room_is_none(self, db: AsyncSession) -> None:
+        bad = await self._snapshot(db, {"arcade_slug": "sim-hub", "start_room": "lobby"})
+        assert bad["start_room"] is None
+        none = await self._snapshot(db, {"arcade_slug": "sim-hub"})
+        assert none["start_room"] is None
+
+
 class TestExternalActivitySubmit:
     async def test_external_attempt_submit_records_clamped_score(
         self, client: AsyncClient, db: AsyncSession

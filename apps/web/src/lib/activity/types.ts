@@ -96,6 +96,9 @@ export type ExternalSnapshot = {
 		// Mirrors the activity's config; true for games that report a bare completion instead of
 		// a score (plan 4b).
 		completion_only?: boolean;
+		// Room the sim-hub center opens in ('linaccontrol' | 'ctcontrol'); absent/null for every
+		// other game. The player passes it on as `?start=<room>`.
+		start_room?: string | null;
 		subject: { slug: string; title: string };
 	};
 };

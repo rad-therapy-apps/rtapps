@@ -96,6 +96,31 @@ describe('ExternalPlayer', () => {
 		await waitForAttemptStart(post);
 	});
 
+	// Scenario: an activity that opens the center at a control room (start_room in its snapshot).
+	// Invariant: the iframe keeps the explicit /index.html and adds ?start=<room>.
+	it('adds ?start=<room> to the iframe src when the snapshot has a start_room', async () => {
+		const post: Post = vi.fn(async () => ({
+			data: { ...baseAttempt, items: [] },
+			error: undefined
+		})) as unknown as Post;
+		const roomSnapshot: ExternalSnapshot = {
+			activity: { id: 'activity-1', kind: 'external', title: 'CT simulation' },
+			external: {
+				arcade_slug: 'sim-hub',
+				max_score: null,
+				completion_only: true,
+				start_room: 'ctcontrol',
+				subject: { slug: 'radiation-biology', title: 'Radiation Biology' }
+			}
+		};
+
+		await render(ExternalPlayer, { activityId: 'activity-1', snapshot: roomSnapshot, post });
+
+		const iframe = document.querySelector('iframe');
+		expect(iframe?.getAttribute('src')).toBe('/arcade/sim-hub/index.html?start=ctcontrol');
+		await waitForAttemptStart(post);
+	});
+
 	// Scenario: the arcade shim posts a same-origin result once the attempt has started.
 	// Invariant: submit is posted with exactly {score}, and the result panel shows the returned
 	// percent with no pass/fail badge (practice semantics for games in 4a).

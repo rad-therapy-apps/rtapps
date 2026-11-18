@@ -92,6 +92,7 @@ import { applyVisibility, groupRoomContents } from './visibility';
 import { installMenu } from './menu';
 import { initTutorial, updateTutorial } from './tutorial';
 import { enterMode } from './play-mode';
+import { startRoomFromSearch } from './start-room';
 import { returnDoorOnBoot, takeReturnView } from './return-door';
 import { isHidden, installNpcCheckHook } from './npc-check-hook';
 import { updatePrompt } from './hud-prompt';
@@ -691,5 +692,8 @@ const backAtDoor = returnDoorOnBoot((id) => {
 		return !!r && !r.hub;
 	}),
 	backView = takeReturnView();
+// an activity opens the center at a control room (?start=, start-room.ts): Free Mode at that door
+const startRoom = backAtDoor ? null : startRoomFromSearch(location.search);
 if (backAtDoor) enterMode('free', { atDoor: backAtDoor, view: backView ?? undefined });
+else if (startRoom) enterMode('free', { atDoor: startRoom });
 else enterMode('title');

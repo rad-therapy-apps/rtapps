@@ -138,9 +138,13 @@
 	<!-- #52: src is the explicit /index.html, never the bare directory URL — SvelteKit
 	     308-strips a trailing slash regardless of route trailingSlash options (verified
 	     empirically), and a stripped URL breaks relative script/style refs in multi-file
-	     games. -->
+	     games. `?start=` tells the sim-hub center which room to open in. -->
 	<iframe
-		src={`/arcade/${snapshot.external.arcade_slug}/index.html`}
+		src={`/arcade/${snapshot.external.arcade_slug}/index.html${
+			snapshot.external.start_room
+				? `?start=${encodeURIComponent(snapshot.external.start_room)}`
+				: ''
+		}`}
 		title={snapshot.activity.title}
 		class="arcade-frame"
 	></iframe>
