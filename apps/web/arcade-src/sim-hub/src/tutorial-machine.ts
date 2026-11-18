@@ -1,8 +1,8 @@
 /* The sim-hub tutorial's step machine (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3):
    a pure reducer over Chapter 1's steps (tutorial-steps.ts). Events in (start, a frame's tick with
    the walking distance, E on a target, reaching a target, an answer, Continue, closing the dialog,
-   an event from the LINAC console, the player closing the console, the role change finishing,
-   stop); a new state and a list of effects out, which tutorial.ts performs (tracker, dialog, hint
+   an event from the LINAC console, its beam turning on or off, the player closing the console, the
+   role change finishing, stop); a new state and a list of effects out, which tutorial.ts performs (tracker, dialog, hint
    line, console, role change, world actions). It holds the hint timers and the miss counter of a
    decision or a console step, mirroring the CT console's validateTechnique: "Not yet." with a
    hint, a stronger hint, then the answer and its reason at the third miss. A console step
@@ -47,6 +47,8 @@ export interface TutorialState {
 	progress: number;
 	/** The console step's last miss feedback, kept in the hint line while the console is closed. */
 	missHint: string | null;
+	/** The console's beam as the step's world actions last showed it (ConsoleTask.beam). */
+	beamOn: boolean;
 	/** The decision was answered right, or its answer shown: Continue completes the step. */
 	resolved: boolean;
 	/** Seconds left of the step's afterSeconds ('waiting'). */
@@ -79,6 +81,8 @@ export type TutorialEvent =
 	| { type: 'closeDialog' }
 	/** An event from the LINAC console (console-bus.ts linacEvents). */
 	| { type: 'linac'; event: LinacEvent }
+	/** The LINAC console's beam, from each pose it posts (console-bus.ts linacPose). */
+	| { type: 'beam'; on: boolean }
 	/** The player closed the console panel. */
 	| { type: 'consoleClosed' }
 	| { type: 'roleChangeDone' }
@@ -108,6 +112,7 @@ export const OFF: TutorialState = {
 	misses: 0,
 	progress: 0,
 	missHint: null,
+	beamOn: false,
 	resolved: false,
 	wait: 0,
 	stuck: newStuckTimer(),
@@ -251,6 +256,14 @@ export function reduceTutorial(
 			if (progress < task.done.length) return out({ ...s, progress });
 			fx.push({ type: 'closeConsole' });
 			return out(trigger({ ...s, progress, phase: 'active' }));
+		}
+		case 'beam': {
+			// the step's boards follow the console's beam: on, and off between fields
+			const beam = cur?.console?.beam;
+			if (!beam || (s.phase !== 'console' && s.phase !== 'active') || ev.on === s.beamOn)
+				return out(s);
+			actions([ev.on ? beam.on : beam.off]);
+			return out({ ...s, beamOn: ev.on });
 		}
 		case 'consoleClosed': {
 			// closed before the step is done: the step stays, and E opens the console again

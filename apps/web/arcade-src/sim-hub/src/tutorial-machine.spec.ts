@@ -202,6 +202,23 @@ describe('console steps', () => {
 		expect(r.s.step).toBe(10);
 	});
 
+	it('shows the beam on the boards while the console’s beam is on, between fields when it is off', () => {
+		const beam = (on: boolean): TutorialEvent => ({ type: 'beam', on });
+		let r = run(atStep(9), { type: 'pressedE', target: 'console' }, beam(false));
+		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'delivery' }]);
+		r = run(r.s, beam(true), beam(true));
+		expect(actions(r.effects)).toEqual(['beamOn']);
+		r = run(r.s, beam(false), beam(true), beam(false));
+		expect(actions(r.effects)).toEqual(['betweenFields', 'beamOn', 'betweenFields']);
+		// still followed with the console closed; TREATMENT COMPLETE comes with the step's end
+		r = run(r.s, { type: 'consoleClosed' }, beam(true), linac('treatment-complete'));
+		expect(actions(r.effects)).toEqual(['beamOn', 'beamOff', 'releaseVaultDoor', 'jamieBackIn']);
+		expect(r.s.beamOn).toBe(false);
+		// no boards outside the delivery step
+		for (const s of [atStep(8), atStep(10), { ...atStep(9), phase: 'roleChange' as const }])
+			expect(run(s, beam(true))).toEqual({ s, effects: [] });
+	});
+
 	it('keeps the step when the console is closed early: E opens it again, with its misses kept', () => {
 		let r = run(atStep(3), { type: 'pressedE', target: 'console' }, mistake, {
 			type: 'consoleClosed'

@@ -9,13 +9,13 @@
 // escorts. A console step (3, 6, 8, 9; docs/specs/2026-11-18-consoles-in-center-design.md part 6)
 // opens the console panel (console-panel.ts), but its page never loads here: E must open the
 // LINAC console at the step's workspace (the hook's state().console and the panel's
-// isConsoleOpen), with the tracker docked on the panel, and the console's events are emitted on
-// console-bus.ts linacEvents through the hook, as the panel emits them; the step completes on
-// Jordan's events, in order, and the console closes a beat later. Each escort starts under a fade
-// that moves Jordan and the player on to just short of the destination room; after it the player
-// stands clear of the walls, a few metres behind Jordan, with under 25 m of the first leg left (the
-// whole walk to Vault 1 was about 100 m). Room introduction cards are switched off through the
-// page's own preference (localStorage simhub.roomCards.enabled = false).
+// isConsoleOpen), with the tracker docked on the panel, and the console's events and poses are
+// emitted on console-bus.ts linacEvents and linacPose through the hook, as the panel emits them;
+// the step completes on Jordan's events, in order, and the console closes a beat later. Each
+// escort starts under a fade that moves Jordan and the player on to just short of the destination
+// room; after it the player stands clear of the walls, a few metres behind Jordan, with under 25 m
+// of the first leg left (the whole walk to Vault 1 was about 100 m). Room introduction cards are
+// switched off through the page's own preference (localStorage simhub.roomCards.enabled = false).
 //   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; on every console step three misses (a look-alike's chart and
 //          check-in at the schedule, the console's refusals elsewhere) show hint 1, hint 2 and the
@@ -30,7 +30,9 @@
 //          done without a miss; the end card's Main menu goes back to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
-// lies down; Jordan is on the Vault 1 monitors from the chart opening at step 3; every move the
+// lies down; Jordan is on the Vault 1 monitors from the chart opening at step 3; at step 9 the
+// Vault 1 board shows BEAM ON while the console's beam is on, BETWEEN FIELDS when it goes off and
+// TREATMENT COMPLETE at the end; every move the
 // tutorial makes (Jordan's escorts, Jamie Williams's walks) keeps the 0.2 m circle round the
 // walker's root clear of the wall colliders on every frame (as NPC check l does); the marker's
 // route never crosses a wall collider; and after leaving, the journey actors, the people's
@@ -290,10 +292,23 @@ function playConsole(n, st, wrong, fails) {
 				`step ${n}: E at ${st.target.name}'s stand point did not open the console again (phase '${T.state().phase}')`
 			);
 	}
+	if (c.beam) {
+		// the boards follow the console's beam: two fields, on and off
+		const vault = [];
+		for (const on of [true, true, false, true, false]) {
+			T.consolePose(pose(on));
+			vault.push(T.boards().vault1);
+		}
+		const want = ['BEAM ON', 'BEAM ON', 'BETWEEN FIELDS', 'BEAM ON', 'BETWEEN FIELDS'];
+		if (JSON.stringify(vault) !== JSON.stringify(want))
+			fails.push(`step ${n}: the Vault 1 board over two fields was ${JSON.stringify(vault)}`);
+	}
 	for (const kind of c.done) {
 		if (T.state().step !== n) fails.push(`step ${n}: completed before '${kind}'`);
 		T.consoleEvent({ kind, mrn: jordan });
 	}
+	if (c.beam && T.boards().vault1 !== 'TREATMENT COMPLETE')
+		fails.push(`step ${n}: the Vault 1 board at the end is '${T.boards().vault1}'`);
 	if (T.state().step === n) {
 		fails.push(`step ${n}: not completed by ${c.done.join(', ')}`);
 		return;
@@ -306,6 +321,24 @@ function playConsole(n, st, wrong, fails) {
 	if (T.state().console || NPC.isConsoleOpen() || T.docked())
 		fails.push(`step ${n}: the console is still open ${CONSOLE_BEAT_S} s after the step completed`);
 }
+
+// A LINAC console pose (shared/console-protocol.ts LinacPose) at rest, with the beam `beamOn`.
+const pose = (beamOn) => ({
+	gantry: 0,
+	collimator: 0,
+	couchAngle: 0,
+	couchVrt: 0,
+	couchLng: 0,
+	couchLat: 0,
+	jawX1: -5,
+	jawX2: 5,
+	jawY1: -5,
+	jawY2: 5,
+	kvArmsOut: false,
+	epidOut: false,
+	beamOn,
+	lasersOn: true
+});
 
 const results = [];
 function report(part, fails, summary) {

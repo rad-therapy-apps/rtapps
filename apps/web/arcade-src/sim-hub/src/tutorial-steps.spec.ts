@@ -25,6 +25,8 @@ const ACTIONS: StepAction[] = [
 	'jamieToControl',
 	'holdVaultClosed',
 	'shiftApplied',
+	'beamOn',
+	'betweenFields',
 	'beamOff',
 	'releaseVaultDoor',
 	'jamieBackIn',
@@ -132,6 +134,9 @@ describe('Chapter 1 steps', () => {
 		expect(CHAPTER_1[2].onTrigger).toEqual(['jordanOnMonitors']);
 		expect(CHAPTER_1[7].onTrigger).toEqual(['shiftApplied']);
 		expect(CHAPTER_1[8].onComplete).toEqual(['beamOff']);
+		// the boards follow the console's beam at step 9 only
+		expect(CHAPTER_1.filter((s) => s.console?.beam).map((s) => s.n)).toEqual([9]);
+		expect(CHAPTER_1[8].console!.beam).toEqual({ on: 'beamOn', off: 'betweenFields' });
 	});
 
 	it('gives every decision exactly one correct answer and three feedback lines', () => {
@@ -192,7 +197,12 @@ describe('Chapter 1 steps', () => {
 
 	it('uses only the actions tutorial.ts performs', () => {
 		for (const s of CHAPTER_1)
-			for (const a of [...(s.onStart ?? []), ...(s.onTrigger ?? []), ...(s.onComplete ?? [])])
+			for (const a of [
+				...(s.onStart ?? []),
+				...(s.onTrigger ?? []),
+				...(s.onComplete ?? []),
+				...(s.console?.beam ? [s.console.beam.on, s.console.beam.off] : [])
+			])
 				expect(ACTIONS, `step ${s.n}`).toContain(a);
 	});
 

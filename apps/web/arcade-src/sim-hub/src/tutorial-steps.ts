@@ -130,6 +130,8 @@ export type StepAction =
 	| 'jamieToControl'
 	| 'holdVaultClosed'
 	| 'shiftApplied'
+	| 'beamOn'
+	| 'betweenFields'
 	| 'beamOff'
 	| 'releaseVaultDoor'
 	| 'jamieBackIn'
@@ -177,6 +179,9 @@ export interface ConsoleTask {
 	hints: readonly [string, string];
 	/** From the third miss on: what to do, and why. */
 	reveal: string;
+	/** The world actions as the console's beam (its pose stream, console-bus.ts linacPose) turns on
+	    and off during the step. */
+	beam?: { on: StepAction; off: StepAction };
 }
 
 export interface Step {
@@ -461,7 +466,8 @@ export const CHAPTER_1: readonly Step[] = [
 				'Each field needs Enable Beam, then Beam On. Deliver the AP field, then the PA field.'
 			],
 			reveal:
-				'When the checklist is all green, press Enable Beam, then Beam On, for the AP field and then the PA field. The interlocks hold the beam until the room, the setup and the images are verified.'
+				'When the checklist is all green, press Enable Beam, then Beam On, for the AP field and then the PA field. The interlocks hold the beam until the room, the setup and the images are verified.',
+			beam: { on: 'beamOn', off: 'betweenFields' }
 		},
 		onComplete: ['beamOff']
 	},
