@@ -19,6 +19,8 @@ import {
 	interactionScenes
 } from './npc-behavior';
 import { SEATS, seatInWorld } from './props';
+import { linacPose } from './console-bus';
+import { resetLinacPose, setVaultMonitorPatient, vaultLinacState } from './vault-linac';
 import {
 	JOURNEY,
 	LOBBY_PICKUP,
@@ -112,7 +114,15 @@ export function installNpcCheckHook(
 			/** Where the journey's lobby pickup seats the patient and stops the therapist. */
 			LOBBY_PICKUP,
 			/** The staff-patient speech exchanges (registerNpcExchange): { a, b, ... } pairs. */
-			interactionScenes
+			interactionScenes,
+			/** Vault 1's LINAC (vault-linac.ts): `linacPose.emit(pose)` drives it as the console
+			    would, `reset` parks it, `setPatient` names the monitors' patient, `state` reads it. */
+			vaultLinac: {
+				linacPose,
+				reset: resetLinacPose,
+				setPatient: setVaultMonitorPatient,
+				state: vaultLinacState
+			}
 		}
 	});
 }

@@ -50,6 +50,7 @@ import {
 import { renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
 import type { SpecialSetupSpec } from './delivery/types';
 import { renderClinicalIGRT } from './linac-igrt';
+import './parts-hook'; // ?export-parts only: scripts/export-linac-model.mjs
 
 const roomCeilingFixtureMats = [];
 export const controlRoomAccentMats = [];

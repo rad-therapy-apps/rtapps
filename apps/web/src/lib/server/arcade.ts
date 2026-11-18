@@ -28,14 +28,27 @@ export const ARCADE_TYPES: Record<string, string> = {
 	'.mp3': 'audio/mpeg',
 	'.wav': 'audio/wav',
 	'.json': 'application/json',
-	'.woff2': 'font/woff2'
+	'.woff2': 'font/woff2',
+	// 3D models (the center's Vault 1 LINAC, sim-hub/public/models)
+	'.glb': 'model/gltf-binary'
 };
 
 /** Cache policy (plan 4c): media/font assets are immutable-in-practice and large (the
  *  simulator's extracted PNGs) → an hour of private caching; HTML and scripts stay
  *  uncacheable so app updates land immediately. */
 export function cacheControlFor(ext: string): string {
-	return ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.mp3', '.wav', '.woff2'].includes(ext)
+	return [
+		'.png',
+		'.jpg',
+		'.jpeg',
+		'.gif',
+		'.webp',
+		'.svg',
+		'.mp3',
+		'.wav',
+		'.woff2',
+		'.glb'
+	].includes(ext)
 		? 'private, max-age=3600'
 		: 'no-cache';
 }

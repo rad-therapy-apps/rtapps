@@ -18,6 +18,7 @@ import { registerInteractable, openKioskDialog } from './interact';
 import { openCtQaMenu } from './sdk-bridge';
 import { CT_COUCH, ROOM_CLOCKS } from './equipment';
 import { seatActor } from './npc-behavior';
+import { vaultMonitorTexture } from './vault-linac-monitor';
 import type { Room } from './rooms';
 
 export type SeatKind = 'chair' | 'couch' | 'bench' | 'taskChair' | 'wheelchair' | 'examTable';
@@ -54,9 +55,26 @@ export function seatInWorld(s: SeatAnchor): SeatAnchor {
 /** The top a lying patient rests on, per room id: the CT table (ctsim), each vault couch's carbon
     insert (vault1, vault2) and the HDR exam table top (hdr). npc.ts restLyingPatient lies on it. */
 export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
+/** Where a patient lies on Vault 1's couch (npc.ts departmentStaff, journey.ts), from the room's
+    centre: head first toward the gantry and supine, as the LINAC app's cases (HFS), and at the app's
+    patient size (0.72 of the center's lying figure: 1.68 m long), so that at treatment height the
+    pelvis is under the beam and the head clears the gantry's face. vault-linac.ts parks the LINAC
+    couch 1.16 m back from its treatment position, so here the pelvis (0.5 m along the figure, x 0.72)
+    lies that far short of the isocentre (room.x + 1.2), and 0.04 m more, which keeps the head 0.02 m
+    off the gantry; the figure's footprint stays on today's couch top (LYING_SURFACES.vault1). */
+export const VAULT1_LYING = {
+	dx: 1.2 - 1.16 - 0.04 + 0.5 * 0.72,
+	dz: 0,
+	ry: Math.PI,
+	scale: 0.72
+} as const;
 /** Each vault's room lasers (emulatorLinacShell), by room id: the tutorial turns vault 1's on for
-    Jordan's setup and off otherwise. */
-export const ROOM_LASERS: Record<string, THREE.Line[]> = {};
+    Jordan's setup and off otherwise. Vault 1's become the LINAC app's lasers once vault-linac.ts
+    has loaded its model. */
+export const ROOM_LASERS: Record<string, THREE.Object3D[]> = {};
+/** Each vault's machine and couch as emulatorLinacShell builds them, by room id: vault-linac.ts
+    hides vault 1's when the LINAC app's model takes its place. */
+export const LINAC_SHELLS: Record<string, THREE.Group> = {};
 /* Registers a seat of a prop centred at (x, z) in group g and turned by rot: (ox, oz) is the seat's
    offset in the prop's own frame, and the sitter faces the prop's +z turned by `turn`. */
 function addSeat(g, kind: SeatKind, x, z, rot, top, ox = 0, oz = 0, turn = 0) {
@@ -1417,6 +1435,7 @@ export function emulatorLinacShell(g, room: Room) {
 	root.position.set(room.x + 1.2, 0, room.z);
 	root.rotation.y = -Math.PI / 2;
 	g.add(root);
+	LINAC_SHELLS[room.id] = root;
 	// floor pad / isocenter cue
 	const pad = cyl(3.0, 3.0, 0.05, std(0x56616a, 0.82, 0.05), 56);
 	pad.position.set(0, 0.055, 0);
@@ -1562,6 +1581,70 @@ export function emulatorLinacShell(g, room: Room) {
 	const l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2), laserMat);
 	root.add(l2);
 	ROOM_LASERS[room.id] = [l1, l2];
+}
+
+/** Vault 1's LINAC fit-out mounts (linacVaultFitOut): the two in-room treatment monitors and the
+    radiation sign, each a group on its wall that faces the room (its +z) and is scaled from the
+    LINAC app's size. vault-linac.ts hangs the app's monitor frame and sign (linac-vault.glb) in
+    them once the model has loaded; each monitor mount already holds its screen, so the screens
+    name the couch patient (vault-linac-monitor.ts) with or without the model. `fallback` is what
+    Vault 1 shows until then (and for good, if the model never loads): the monitors' plain frames
+    and the room's own ceiling lights (rooms.ts); vault-linac.ts hides them when the model is in. */
+export const LINAC_VAULT_MOUNTS: {
+	monitors: THREE.Group[];
+	sign: THREE.Group | null;
+	fallback: THREE.Object3D[];
+} = {
+	monitors: [],
+	sign: null,
+	fallback: []
+};
+/* The app's monitor (linac-ct scene.ts createTreatmentMonitor3D) is a 6.15 x 3.62 m frame, its back
+   0.08 m behind its centre and its 5.56 x 3.13 m screen 0.096 m in front; at 0.65 it is 4 m wide.
+   The app's radiation sign is a 1.7 m square. */
+const LINAC_MONITOR_SCALE = 0.65,
+	LINAC_MONITOR_BACK = 0.08,
+	LINAC_SIGN_SCALE = 0.9;
+export function linacVaultFitOut(g, room: Room) {
+	// the inner faces of the 0.58 m vault walls on the +x and +z sides
+	const xFace = room.x + room.w / 2 - 0.29,
+		zFace = room.z + room.d / 2 - 0.29;
+	// a mount whose back is 0.01 m off the wall face at (x, z), facing the room along rot
+	const mount = (x, y, z, rot, k, back) => {
+		const m = new THREE.Group(),
+			off = back * k + 0.01;
+		m.position.set(x + Math.sin(rot) * off, y, z + Math.cos(rot) * off);
+		m.rotation.y = rot;
+		m.scale.setScalar(k);
+		g.add(m);
+		return m;
+	};
+	const screenMat = new THREE.MeshBasicMaterial({ map: vaultMonitorTexture(), toneMapped: false });
+	// one behind the gantry on the +x wall; one on the +z wall between the live status board
+	// (equipment.ts, x room.x - 2.39 .. room.x + 1.29) and the immobilization shelf's sign (from
+	// room.x + 6.2)
+	for (const [x, z, rot] of [
+		[xFace, room.z, -Math.PI / 2],
+		[room.x + 3.8, zFace, Math.PI]
+	]) {
+		const m = mount(x, 2.75, z, rot, LINAC_MONITOR_SCALE, LINAC_MONITOR_BACK);
+		const screen = new THREE.Mesh(new THREE.PlaneGeometry(5.56, 3.13), screenMat);
+		screen.position.z = 0.096;
+		m.add(screen);
+		// a plain frame the size of the app's, until its own comes with the model
+		const frame = box(6.15, 3.62, 0.16, std(0x1f2730, 0.52, 0.22));
+		m.add(frame);
+		LINAC_VAULT_MOUNTS.fallback.push(frame);
+		registerInteractable(
+			screen,
+			'In-room treatment monitor',
+			'Shows the therapists in the vault who is on the treatment couch.',
+			2.4
+		);
+		LINAC_VAULT_MOUNTS.monitors.push(m);
+	}
+	// on the +x wall between the wall art (room.z - 8.6) and the emergency stop (room.z - 3.4)
+	LINAC_VAULT_MOUNTS.sign = mount(xFace, 2.6, room.z - 6.4, -Math.PI / 2, LINAC_SIGN_SCALE, 0);
 }
 
 export function hdrSuite(g, room: Room) {
