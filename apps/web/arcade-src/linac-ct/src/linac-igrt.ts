@@ -27,6 +27,8 @@ import {
 	setPendantLCD,
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
 } from './linac-safety';
+import { consoleEvent, consoleMistake } from './console-hooks';
+import { shiftLengthMm } from './console-messages';
 
 // RTApps (#77 phase 2 task 19): honest 6DOF couch-shift shape for
 // `S.clinicalIGRT.baseline`/`.correction`. Exported so state.ts can tighten those
@@ -565,6 +567,10 @@ export function startClinicalIGRT() {
 		const status = document.getElementById('igrtAcqStatus');
 		if (status)
 			status.innerHTML = `<b>Baseline setup not verified.</b> Before creating the daily IGRT error, set the couch to the planned case position <b>${target}</b> (VRT / LNG / LAT).`;
+		consoleMistake(
+			'baseline-required',
+			`Baseline setup not verified. Set the couch to the planned position ${target} (VRT / LNG / LAT) before New Daily Setup.`
+		);
 		return;
 	}
 	if (Math.abs(Number(S.clinicalIGRT.clearancePlacementOffset) || 0) > 1e-9) {
@@ -598,7 +604,16 @@ export function startClinicalIGRT() {
 	};
 	S.clinicalIGRT.couchTopBasePos = S.couchTopGroup ? S.couchTopGroup.position.clone() : null;
 	S.clinicalIGRT.couchTopBaseRot = S.couchTopGroup ? S.couchTopGroup.rotation.clone() : null;
-	const generated = generateAttainableIGRTSetup(S.clinicalIGRT.mode);
+	// a case with a fixed daily error (the console tutorial's) always needs the same correction
+	const fixed = S.activeTreatmentCase.dailySetupError,
+		fixedCorrection = fixed && correctionFromIGRTError(fixed);
+	const generated = fixed
+		? {
+				error: { ...fixed },
+				correction: fixedCorrection,
+				attainable: isIGRTCorrectionAttainable(fixed, fixedCorrection)
+			}
+		: generateAttainableIGRTSetup(S.clinicalIGRT.mode);
 	S.clinicalIGRT.error = generated.error;
 	S.clinicalIGRT.correction = generated.correction;
 	S.clinicalIGRT.attainable = generated.attainable;
@@ -613,6 +628,7 @@ export function startClinicalIGRT() {
 export function acquireClinicalIGRT() {
 	if (!S.clinicalIGRT.active) {
 		setPendantLCD('IGRT', 'Create a daily setup first');
+		consoleMistake('no-daily-setup', 'Create a daily setup first: press New Daily Setup.');
 		return;
 	}
 	if (!igrtHardwareReady()) {
@@ -622,6 +638,12 @@ export function acquireClinicalIGRT() {
 				: 'Extend the kV arms with the pendant first';
 		setPendantLCD('IMAGING NOT READY', msg);
 		renderClinicalIGRT();
+		consoleMistake(
+			'imaging-not-ready',
+			S.clinicalIGRT.mode === 'MV Pair'
+				? 'Imaging not ready. Extend the MV panel (MV / EPID) before you acquire images.'
+				: 'Imaging not ready. Extend the kV arms (kV Imaging) before you acquire images.'
+		);
 		return;
 	}
 	S.clinicalIGRT.acquired = true;
@@ -635,11 +657,17 @@ export function acquireClinicalIGRT() {
 	setPendantLCD(S.clinicalIGRT.mode, 'REGISTRATION COMPLETE');
 	renderClinicalIGRT();
 	renderTreatmentMonitor();
+	consoleEvent({
+		kind: 'images-acquired',
+		mrn: S.activeTreatmentCase.mrn,
+		shiftMm: shiftLengthMm(S.clinicalIGRT.correction)
+	});
 }
 
 export function verifyClinicalIGRT() {
 	if (!S.clinicalIGRT.acquired) {
 		setPendantLCD('IGRT', 'Acquire images first');
+		consoleMistake('verify-before-images', 'Acquire images before you verify the alignment.');
 		return;
 	}
 	const r = getIGRTResidual();
@@ -682,6 +710,13 @@ export function verifyClinicalIGRT() {
 	renderClinicalIGRT();
 	renderTreatmentMonitor();
 	renderTreatmentDeliveryPanel();
+	if (S.clinicalIGRT.verified)
+		consoleEvent({ kind: 'alignment-verified', mrn: S.activeTreatmentCase.mrn });
+	else
+		consoleMistake(
+			'verify-before-shift',
+			'Correction pending · drive the couch until all residual values are within tolerance.'
+		);
 }
 
 export function resetClinicalIGRTForCase() {

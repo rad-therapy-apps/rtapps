@@ -7,6 +7,7 @@ import { setTextById } from '../main';
 import { setPendantLCD } from '../linac-safety';
 import { oisLogEvent, renderOISPanel } from './ois';
 import { renderTreatmentDeliveryPanel } from './treatment-delivery';
+import { consoleEvent, consoleMistake } from '../console-hooks';
 
 export const IMMOBILIZATION_DEVICE_META = {
 	headMask: { name: 'Short Head Mask', color: '#7fd8f7', dark: '#254c61' },
@@ -329,6 +330,8 @@ export function verifyImmobilizationSelection() {
 	renderTreatmentDeliveryPanel();
 	renderTreatmentMonitor();
 	renderOISPanel();
+	if (ok) consoleEvent({ kind: 'setup-complete', mrn: S.activeTreatmentCase?.mrn || '' });
+	else consoleMistake('setup-hold', S.immobilizationWorkflow.lastFeedback);
 }
 
 export function clearImmobilizationSelection() {

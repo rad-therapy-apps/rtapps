@@ -9133,6 +9133,99 @@
 				}
 			}
 		</style>
+		<style id="rtappsConsoleView">
+			/*
+       Console mode (?view=console, src/console-mode.ts): the app fills the center's console panel
+       (about 1100×640 to 1600×900). The center shows Vault 1 and its camera feeds, so the vault
+       view, the camera bank, the in-room pendant and every way out of the app are gone; the two
+       clinical monitors share the whole frame. Nothing here applies without body.linac-console-view.
+    */
+			body.linac-console-view {
+				background: #0b1118 !important;
+				overflow: hidden !important;
+			}
+			body.linac-console-view #appHeader,
+			body.linac-console-view #appFooter,
+			body.linac-console-view #mainGameArea,
+			body.linac-console-view #bottomMachineControls,
+			body.linac-console-view #startScreen,
+			body.linac-console-view #loadingScreen,
+			body.linac-console-view #cctvDeskMonitor,
+			body.linac-console-view #rtv2RoomNav,
+			body.linac-console-view #rtappsBackBtn,
+			body.linac-console-view #rtv2QueueSwitcher,
+			body.linac-console-view #ctSimWorkspace,
+			body.linac-console-view #dicomModal {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console .operator-console-panel {
+				top: 0 !important;
+				height: 100vh !important;
+				width: 100vw !important;
+				max-width: none !important;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr) !important;
+				grid-template-rows: minmax(0, 1fr) !important;
+				grid-template-areas: 'workflow patient' !important;
+				gap: 8px !important;
+				padding: 8px !important;
+				background: #0b1118 !important;
+			}
+			body.linac-console-view.control-room-mode .operator-console-panel::before,
+			body.linac-console-view.control-room-mode .operator-console-panel::after,
+			body.linac-console-view.control-room-mode #workflowDeskMonitor::before,
+			body.linac-console-view.control-room-mode #workflowDeskMonitor::after,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor::before,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor::after {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor,
+			body.linac-console-view.control-room-mode.rt-v2-console #patientInfoDeskMonitor {
+				padding: 5px !important;
+				border-radius: 10px !important;
+				box-shadow: inset 0 0 0 1px rgba(190, 205, 218, 0.12) !important;
+			}
+			body.linac-console-view.control-room-mode #workflowDeskMonitor .monitor-screen,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor .monitor-screen {
+				max-height: none !important;
+				border-radius: 7px !important;
+			}
+			/* An open workflow window is the whole second screen: with the reference cards behind it
+			   gone, nothing can scroll the window off the top of the screen. */
+			body.linac-console-view.console-app-open
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> :not(#consoleWorkflowDock) {
+				display: none !important;
+			}
+			/* What the console refused, and why: posted to the center as a mistake too */
+			#consoleRefusal {
+				position: fixed;
+				left: 50%;
+				top: 10px;
+				z-index: 10050;
+				max-width: min(760px, calc(100vw - 40px));
+				padding: 10px 16px;
+				border: 1px solid #e0737b;
+				border-radius: 8px;
+				background: #5a1d24;
+				box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+				color: #fff3f3;
+				font:
+					600 13px/1.35 'Segoe UI',
+					Arial,
+					sans-serif;
+				opacity: 0;
+				pointer-events: none;
+				transform: translate(-50%, -8px);
+				transition:
+					opacity 0.18s ease,
+					transform 0.18s ease;
+			}
+			#consoleRefusal.show {
+				opacity: 1;
+				transform: translate(-50%, 0);
+			}
+		</style>
 	</head>
 	<body>
 		<div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">

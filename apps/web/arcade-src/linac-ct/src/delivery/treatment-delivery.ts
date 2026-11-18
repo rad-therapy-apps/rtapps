@@ -37,6 +37,7 @@ import { cranialSRSRequired } from './stereotactic';
 import { motionRequired, currentMotionGateOpen } from './motion';
 import { oisLogEvent } from './ois';
 import { renderElectronBolusDeliveryTask } from './electron-bolus';
+import { consoleEvent } from '../console-hooks';
 
 const DELIVERY_SPEED_FACTOR = 4;
 
@@ -300,6 +301,16 @@ function finishTreatmentDelivery() {
 	);
 	renderTreatmentDeliveryPanel();
 	renderTreatmentMonitor();
+	const mrn = S.activeTreatmentCase?.mrn || '';
+	consoleEvent({
+		kind: 'field-delivered',
+		mrn,
+		field: deliveryCasePlan()?.field || '',
+		index: S.treatmentDelivery.activeFieldIndex,
+		of: getTreatmentFields().length
+	});
+	// the last prescribed field ends the treatment; closing the fraction (charge capture) comes after
+	if (allDone) consoleEvent({ kind: 'treatment-complete', mrn });
 }
 
 function deliveryTick(now) {

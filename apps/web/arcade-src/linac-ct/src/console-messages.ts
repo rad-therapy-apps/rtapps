@@ -162,19 +162,21 @@ export interface Refusal {
 	message: string;
 }
 
-/** Mistake codes for the interlocks a learner meets most; any other failed check is 'interlock'. */
-const INTERLOCK_CODES: Record<string, string> = {
-	'Vault door closed': 'door-open',
-	'Immobilization / indexing verified': 'setup-not-verified',
-	'Treatment geometry matches plan': 'geometry-mismatch',
-	'Image guidance verified': 'igrt-not-verified',
-	'Imaging hardware retracted': 'imaging-out',
-	'In-room motion locked': 'motion-armed'
-};
+/** Mistake codes for the interlocks a learner meets most, the most basic step first: an
+    unverified alignment, for one, also leaves the couch off the planned position, so it is coded
+    before the geometry it causes. Any other failed check is 'interlock'. */
+const INTERLOCK_CODES: [string, string][] = [
+	['Vault door closed', 'door-open'],
+	['Immobilization / indexing verified', 'setup-not-verified'],
+	['Image guidance verified', 'igrt-not-verified'],
+	['Treatment geometry matches plan', 'geometry-mismatch'],
+	['Imaging hardware retracted', 'imaging-out'],
+	['In-room motion locked', 'motion-armed']
+];
 
 /** Why the console refuses Enable Beam ('enable') or Beam On ('on') right now, or null when the
-    press goes ahead (or, while the beam is already on, has nothing to refuse). The code comes from
-    the first failed interlock; the message lists every failed one as the checklist shows it. */
+    press goes ahead (or, while the beam is already on, has nothing to refuse). The code names the
+    most basic failed interlock; the message lists every failed one as the checklist shows it. */
 export function beamRefusal(kind: 'enable' | 'on', s: BeamState): Refusal | null {
 	if (s.delivering) return null;
 	const action = kind === 'on' ? 'Beam On' : 'Enable Beam';
@@ -186,7 +188,8 @@ export function beamRefusal(kind: 'enable' | 'on', s: BeamState): Refusal | null
 	if (!s.ready) {
 		const failed = s.checks.filter((c) => !c.ok);
 		return {
-			code: INTERLOCK_CODES[failed[0]?.name] ?? 'interlock',
+			code:
+				INTERLOCK_CODES.find(([name]) => failed.some((c) => c.name === name))?.[1] ?? 'interlock',
 			message: `${action} refused. Treatment holds: ${failed.map((c) => `${c.name} (${c.detail})`).join('; ')}.`
 		};
 	}

@@ -192,18 +192,22 @@ describe('refused Enable Beam and Beam On', () => {
 		});
 	});
 
-	it('codes an early Beam On by its first failed interlock and lists them all', () => {
+	it('codes an early Beam On by its most basic failed interlock and lists them all in order', () => {
 		const r = beamRefusal(
 			'on',
 			hold(
+				['Treatment geometry matches plan', 'Review parameter mismatches'],
 				['Image guidance verified', 'Registration / correction incomplete'],
 				['Imaging hardware retracted', 'kV extended']
 			)
 		);
 		expect(r.code).toBe('igrt-not-verified');
 		expect(r.message).toBe(
-			'Beam On refused. Treatment holds: Image guidance verified (Registration / correction incomplete); Imaging hardware retracted (kV extended).'
+			'Beam On refused. Treatment holds: Treatment geometry matches plan (Review parameter mismatches); Image guidance verified (Registration / correction incomplete); Imaging hardware retracted (kV extended).'
 		);
+		expect(
+			beamRefusal('on', hold(['Image guidance verified', 'x'], ['Vault door closed', 'y'])).code
+		).toBe('door-open');
 		expect(beamRefusal('on', hold(['Something new', 'x'])).code).toBe('interlock');
 	});
 
