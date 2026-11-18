@@ -55,6 +55,19 @@ export function seatInWorld(s: SeatAnchor): SeatAnchor {
 /** The top a lying patient rests on, per room id: the CT table (ctsim), each vault couch's carbon
     insert (vault1, vault2) and the HDR exam table top (hdr). npc.ts restLyingPatient lies on it. */
 export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
+/** Where a patient lies on Vault 1's couch (npc.ts departmentStaff, journey.ts), from the room's
+    centre: head first toward the gantry and supine, as the LINAC app's cases (HFS), and at the app's
+    patient size (0.72 of the center's lying figure: 1.68 m long), so that at treatment height the
+    pelvis is under the beam and the head clears the gantry's face. vault-linac.ts parks the LINAC
+    couch 1.16 m back from its treatment position, so here the pelvis (0.5 m along the figure, x 0.72)
+    lies that far short of the isocentre (room.x + 1.2), and 0.04 m more, which keeps the head 0.02 m
+    off the gantry; the figure's footprint stays on today's couch top (LYING_SURFACES.vault1). */
+export const VAULT1_LYING = {
+	dx: 1.2 - 1.16 - 0.04 + 0.5 * 0.72,
+	dz: 0,
+	ry: Math.PI,
+	scale: 0.72
+} as const;
 /** Each vault's room lasers (emulatorLinacShell), by room id: the tutorial turns vault 1's on for
     Jordan's setup and off otherwise. Vault 1's become the LINAC app's lasers once vault-linac.ts
     has loaded its model. */

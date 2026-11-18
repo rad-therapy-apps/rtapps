@@ -39,10 +39,11 @@ export const APP = {
 } as const;
 
 /** The safe range the center shows a console pose in (cm, degrees as signed angles). The couch
-    stays clear of the floor and of the gantry; anything outside is held at the edge. */
+    stays clear of the floor and of the gantry (Vault 1's patient lies with its head at the board's
+    gantry end, 0.02 m off the gantry: props.ts VAULT1_LYING); anything outside is held at the edge. */
 export const LIMITS = {
 	couchVrt: [-50, 15],
-	couchLng: [-120, 50],
+	couchLng: [-120, 2],
 	couchLat: [-25, 25],
 	couchAngle: [-95, 95],
 	jaw: [0, 12.5]
