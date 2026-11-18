@@ -251,6 +251,8 @@ function install(model: THREE.Object3D): void {
 	if (sign && LINAC_VAULT_MOUNTS.sign) at(sign, LINAC_VAULT_MOUNTS.sign);
 	shell.parent.add(frame);
 	shell.visible = false;
+	// the center's own ceiling lights and plain monitor frames make way for the app's
+	for (const o of LINAC_VAULT_MOUNTS.fallback) o.visible = false;
 	parts = { frame, ...(found as Omit<Parts, 'frame'>) };
 	// the parked couch: its board's top and middle on today's couch top
 	frame.updateMatrixWorld(true);

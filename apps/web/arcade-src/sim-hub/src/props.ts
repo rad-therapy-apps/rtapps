@@ -1531,10 +1531,17 @@ export function emulatorLinacShell(g, room: Room) {
     radiation sign, each a group on its wall that faces the room (its +z) and is scaled from the
     LINAC app's size. vault-linac.ts hangs the app's monitor frame and sign (linac-vault.glb) in
     them once the model has loaded; each monitor mount already holds its screen, so the screens
-    name the couch patient (vault-linac-monitor.ts) with or without the model. */
-export const LINAC_VAULT_MOUNTS: { monitors: THREE.Group[]; sign: THREE.Group | null } = {
+    name the couch patient (vault-linac-monitor.ts) with or without the model. `fallback` is what
+    Vault 1 shows until then (and for good, if the model never loads): the monitors' plain frames
+    and the room's own ceiling lights (rooms.ts); vault-linac.ts hides them when the model is in. */
+export const LINAC_VAULT_MOUNTS: {
+	monitors: THREE.Group[];
+	sign: THREE.Group | null;
+	fallback: THREE.Object3D[];
+} = {
 	monitors: [],
-	sign: null
+	sign: null,
+	fallback: []
 };
 /* The app's monitor (linac-ct scene.ts createTreatmentMonitor3D) is a 6.15 x 3.62 m frame, its back
    0.08 m behind its centre and its 5.56 x 3.13 m screen 0.096 m in front; at 0.65 it is 4 m wide.
@@ -1568,6 +1575,10 @@ export function linacVaultFitOut(g, room: Room) {
 		const screen = new THREE.Mesh(new THREE.PlaneGeometry(5.56, 3.13), screenMat);
 		screen.position.z = 0.096;
 		m.add(screen);
+		// a plain frame the size of the app's, until its own comes with the model
+		const frame = box(6.15, 3.62, 0.16, std(0x1f2730, 0.52, 0.22));
+		m.add(frame);
+		LINAC_VAULT_MOUNTS.fallback.push(frame);
 		registerInteractable(
 			screen,
 			'In-room treatment monitor',

@@ -60,6 +60,7 @@ import {
 	ctScanner,
 	emulatorLinacShell,
 	linacVaultFitOut,
+	LINAC_VAULT_MOUNTS,
 	hdrSuite
 } from './props';
 import { add, MAT, roomFloors, ceilings, doors, roomById } from './main';
@@ -710,8 +711,11 @@ export function addRoomBaseboards(room: Room) {
 	board('xmax', false, room.x + hx - 0.1);
 }
 
-export function addRoomLighting(room: Room, h) {
-	const prof = roomLightProfile(room);
+/** Adds the room's light fixtures and accent cove; returns them (Vault 1's make way for the LINAC
+    app's light panels, vault-linac.ts). */
+export function addRoomLighting(room: Room, h): THREE.Mesh[] {
+	const prof = roomLightProfile(room),
+		made: THREE.Mesh[] = [];
 	const count = Math.max(1, Math.floor(room.w / 4.5));
 	for (let i = 0; i < count; i++) {
 		const lx = room.x - room.w / 2 + 2 + (room.w - 4) * (count === 1 ? 0.5 : i / (count - 1 || 1));
@@ -726,6 +730,7 @@ export function addRoomLighting(room: Room, h) {
 		);
 		fixture.castShadow = false;
 		scene.add(fixture);
+		made.push(fixture);
 	}
 	const accent = zoneAccentColor(room);
 	const cove = box(
@@ -739,6 +744,8 @@ export function addRoomLighting(room: Room, h) {
 	);
 	cove.castShadow = false;
 	scene.add(cove);
+	made.push(cove);
+	return made;
 }
 
 export function zoneFloorColor(room: Room) {
@@ -882,8 +889,9 @@ export function buildRoom(room: Room) {
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
 	ceilings.push(ceiling);
-	// Vault 1's light panels are the LINAC app's (vault-linac.ts)
-	if (!linac) addRoomLighting(room, h);
+	const lights = addRoomLighting(room, h);
+	// until the LINAC app's light panels come with its model (vault-linac.ts)
+	if (linac) LINAC_VAULT_MOUNTS.fallback.push(...lights);
 	addRoomDecor(room);
 	furnish(room);
 }
@@ -1868,14 +1876,15 @@ export function buildCorridorRoofs() {
 
 export function clinicalCeilingAccents(roomId) {
 	const r = roomById(roomId);
-	// Vault 1's ceiling has the LINAC app's light panels instead (vault-linac.ts)
-	if (!r || roomId === 'vault1') return;
+	if (!r) return;
 	const h = r.vault ? 5.55 : 3.62;
 	const g = new THREE.Group();
 	scene.add(g);
+	// Vault 1's make way for the LINAC app's light panels once its model is in (vault-linac.ts)
+	if (roomId === 'vault1') LINAC_VAULT_MOUNTS.fallback.push(g);
 	const lightMat = std(0xeafcff, 0.22, 0, { emissive: 0xd9fbff, emissiveIntensity: 1.55 });
 	const trimMat = std(0x70878f, 0.62, 0.08);
-	if (roomId === 'vault2') {
+	if (roomId === 'vault1' || roomId === 'vault2') {
 		for (const z of [r.z - 6.5, r.z - 2.2, r.z + 2.2, r.z + 6.5]) {
 			const p = box(5.6, 0.025, 0.42, lightMat, r.x, h, z);
 			g.add(p);
