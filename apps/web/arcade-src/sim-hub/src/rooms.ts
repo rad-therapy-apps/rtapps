@@ -59,12 +59,14 @@ import {
 	biohazardBox,
 	ctScanner,
 	emulatorLinacShell,
+	linacVaultFitOut,
 	hdrSuite
 } from './props';
 import { add, MAT, roomFloors, ceilings, doors, roomById } from './main';
 import { registerInteractable } from './interact';
 import { doorNormal, doorCenter, TREATMENT_JUNCTION_X } from './walk';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment';
+import { linacTextureUrl } from './vault-linac-files';
 
 // RTApps (#77 phase 2 task 12): typed boundary for the ROOMS layout table — fields
 // derived from every property literal actually present across the table entries below
@@ -763,11 +765,91 @@ function ceilingMat(c) {
 	return std(c, 0.95, 0, { emissive: c, emissiveIntensity: 0.6 });
 }
 
+/* Vault 1's LINAC finish (docs/specs/2026-11-18-consoles-in-center-design.md, part 1): the LINAC
+   app's tiled floor, cream wall panels with the blue stripe and ceiling tiles, from the textures
+   scripts/export-linac-model.mjs exports. A surface w x h m repeats its texture at the app's scale:
+   the floor's every 6 m, a wall panel 4 m wide and 7.55 m high (so the stripe sits as low as in the
+   app), the ceiling's every 4.8 m. Until the picture arrives (never, in the Node checks, which load
+   nothing) a surface shows the finish's plain colour. The ceiling is drawn unlit, so the
+   hemisphere light's ground colour cannot shade it (ceilingMat glows for the same reason). */
+const LINAC_FINISH = {
+	floor: { color: 0xc9ccd1, tile: [6, 6] },
+	wall: { color: 0xe7e3da, tile: [4, 7.55] },
+	ceiling: { color: 0xdfe3e7, tile: [4.8, 4.8] }
+} as const;
+const linacTextures: Partial<Record<keyof typeof LINAC_FINISH, Promise<THREE.Texture>>> = {};
+function linacFinish(kind: keyof typeof LINAC_FINISH, w: number, h: number) {
+	const f = LINAC_FINISH[kind],
+		mat =
+			kind === 'ceiling'
+				? new THREE.MeshBasicMaterial({ color: f.color })
+				: new THREE.MeshStandardMaterial({
+						color: f.color,
+						roughness: kind === 'floor' ? 0.92 : 0.9,
+						metalness: 0
+					});
+	(linacTextures[kind] ??= new THREE.TextureLoader().loadAsync(linacTextureUrl(kind))).then(
+		(t) => {
+			const map = t.clone();
+			map.wrapS = map.wrapT = THREE.RepeatWrapping;
+			map.colorSpace = THREE.SRGBColorSpace;
+			map.anisotropy = 8;
+			map.repeat.set(w / f.tile[0], h / f.tile[1]);
+			mat.map = map;
+			// the ceiling keeps its tint over the picture, as in the approved look
+			if (kind !== 'ceiling') mat.color.set(0xffffff);
+			mat.needsUpdate = true;
+		},
+		() => {}
+	);
+	return mat;
+}
+/* Vault 1's walls take the LINAC finish on their room side only (the corridor faces keep the
+   center's look): a panel 0.01 m off each wall's inner face (0.29 m in from the wall line), from
+   the floor's top to the ceiling's underside. On the door wall the panels stop at the 4.8 m doorway
+   (buildSide) and one more covers the wall over it, above the 2.65 m opening. */
+function linacVaultWallPanels(room: Room, h: number) {
+	const y0 = 0.065,
+		y1 = h - 0.04,
+		inX = room.w / 2 - 0.3,
+		inZ = room.d / 2 - 0.3,
+		lenX = room.w - 0.58,
+		lenZ = room.d - 0.58,
+		half = 4.8 / 2;
+	const panel = (len, bottom, x, z, rot) => {
+		const p = new THREE.Mesh(
+			new THREE.PlaneGeometry(len, y1 - bottom),
+			linacFinish('wall', len, y1 - bottom)
+		);
+		p.position.set(x, (bottom + y1) / 2, z);
+		p.rotation.y = rot;
+		p.receiveShadow = true;
+		scene.add(p);
+	};
+	panel(lenX, y0, room.x, room.z - inZ, 0);
+	panel(lenX, y0, room.x, room.z + inZ, Math.PI);
+	panel(lenZ, y0, room.x + inX, room.z, -Math.PI / 2);
+	// the door wall (xmin): either side of the doorway, and over it
+	const side = (lenZ / 2 - half) / 2 + half;
+	panel(lenZ / 2 - half, y0, room.x - inX, room.z - side, Math.PI / 2);
+	panel(lenZ / 2 - half, y0, room.x - inX, room.z + side, Math.PI / 2);
+	panel(2 * half, 2.65, room.x - inX, room.z, Math.PI / 2);
+}
+
 export function buildRoom(room: Room) {
 	const h = room.vault ? 5.7 : 3.75,
 		t = room.vault ? 0.58 : 0.16,
-		mat = room.vault ? MAT.wallVault : MAT.wall;
-	const floor = box(room.w - 0.15, 0.07, room.d - 0.15, floorMatFor(room), room.x, 0.03, room.z);
+		mat = room.vault ? MAT.wallVault : MAT.wall,
+		linac = room.id === 'vault1';
+	const floor = box(
+		room.w - 0.15,
+		0.07,
+		room.d - 0.15,
+		linac ? linacFinish('floor', room.w - 0.15, room.d - 0.15) : floorMatFor(room),
+		room.x,
+		0.03,
+		room.z
+	);
 	floor.userData.roomId = room.id;
 	scene.add(floor);
 	roomFloors.push(floor);
@@ -782,6 +864,7 @@ export function buildRoom(room: Room) {
 	);
 	scene.add(stripe);
 	['zmin', 'zmax', 'xmin', 'xmax'].forEach((s) => buildSide(room, s, h, t, mat));
+	if (linac) linacVaultWallPanels(room, h);
 	if (room.vault) addVaultDoorwaySigns(room);
 	addRoomBaseboards(room);
 	// the slab's top is flush with the wall tops (h), so no edge shows over the walls from outside; its
@@ -790,7 +873,7 @@ export function buildRoom(room: Room) {
 		room.w - 0.2,
 		0.04,
 		room.d - 0.2,
-		ceilingMat(0xe9edef),
+		linac ? linacFinish('ceiling', room.w - 0.2, room.d - 0.2) : ceilingMat(0xe9edef),
 		room.x,
 		h - 0.02,
 		room.z
@@ -799,7 +882,8 @@ export function buildRoom(room: Room) {
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
 	ceilings.push(ceiling);
-	addRoomLighting(room, h);
+	// Vault 1's light panels are the LINAC app's (vault-linac.ts)
+	if (!linac) addRoomLighting(room, h);
 	addRoomDecor(room);
 	furnish(room);
 }
@@ -1436,40 +1520,8 @@ export function furnish(room: Room) {
 			break;
 		case 'vault1':
 			emulatorLinacShell(g, room);
-			framedWallMonitor(
-				g,
-				room.x + room.w / 2 - 0.32,
-				2.18,
-				room.z + 5.0,
-				-Math.PI / 2,
-				4.25,
-				2.28,
-				'IN-ROOM PATIENT INFO',
-				'Treatment setup and verification',
-				[
-					['Patient', 'LINAC treatment patient'],
-					['Position', 'Supine, treatment couch'],
-					['Immobilization', 'Site-specific device indexed'],
-					['Status', 'Setup ready / verify imaging']
-				]
-			);
-			framedWallMonitor(
-				g,
-				room.x + room.w / 2 - 0.32,
-				2.18,
-				room.z - 4.8,
-				-Math.PI / 2,
-				4.0,
-				2.18,
-				'SETUP CHECKLIST',
-				'Pre-treatment room tasks',
-				[
-					['Identity', '2 identifiers verified'],
-					['Couch', 'Indexed / accessory check'],
-					['Imaging', 'Verification pending'],
-					['Beam status', 'Standby']
-				]
-			);
+			// the LINAC app's in-room treatment monitors and radiation sign (vault-linac.ts)
+			linacVaultFitOut(g, room);
 			immobilizationStorage(
 				g,
 				room.x + 7.6,
@@ -1494,9 +1546,10 @@ export function furnish(room: Room) {
 			wallClock(g, room.x + 8.7, 3.2, room.z - room.d / 2 + 0.35, 0);
 			sanitizerDispenser(g, room.x - 4.4, 1.6, room.z - room.d / 2 + 0.34, 0);
 			gloveBoxRack(g, room.x - 5.3, 1.65, room.z - room.d / 2 + 0.34, 0);
-			emergencyStopPanel(g, room.x + room.w / 2 - 0.34, 1.55, room.z - 1.6, -Math.PI / 2);
+			// either side of the in-room monitor on the +x wall (room.z - 2 .. room.z + 2)
+			emergencyStopPanel(g, room.x + room.w / 2 - 0.34, 1.55, room.z - 3.4, -Math.PI / 2);
 			emergencyStopPanel(g, room.x - room.w / 2 + 0.45, 1.55, room.z + 1.2, Math.PI / 2);
-			wallSpeaker(g, room.x + room.w / 2 - 0.34, 3.15, room.z + 1.8, -Math.PI / 2);
+			wallSpeaker(g, room.x + room.w / 2 - 0.34, 3.15, room.z + 3.4, -Math.PI / 2);
 			warningPlaque(
 				g,
 				room.x - room.w / 2 + 0.32,
@@ -1509,7 +1562,7 @@ export function furnish(room: Room) {
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
-			// clear of the setup checklist screen (room.z - 6.89 .. room.z - 2.71)
+			// clear of the radiation sign (room.z - 7.17 .. room.z - 5.63)
 			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 8.6, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
 			break;
 		case 'vault2':
@@ -1675,18 +1728,20 @@ export function buildCorridorInfillWalls() {
 }
 
 export function buildVaultMazeEntries() {
-	const h = 4.55,
-		m = MAT.wallVault;
-	function straightHallWithTurn(z, turnPositive = true) {
+	const h = 4.55;
+	// Vault 1's maze takes the LINAC wall finish (buildRoom's linacFinish), each wall's panels
+	// repeated over its own length; vault 2's keeps the vault wall
+	function straightHallWithTurn(z, turnPositive = true, linac = false) {
 		const hallCenterX = 67.9,
 			hallLength = 7.2,
-			halfWidth = 2.55;
+			halfWidth = 2.55,
+			m = (len) => (linac ? linacFinish('wall', len, h) : MAT.wallVault);
 		// long straight shielded hall from entry door
-		wall(hallCenterX, z - halfWidth, hallLength, 0.42, h, m, true);
-		wall(hallCenterX, z + halfWidth, hallLength, 0.42, h, m, true);
+		wall(hallCenterX, z - halfWidth, hallLength, 0.42, h, m(hallLength), true);
+		wall(hallCenterX, z + halfWidth, hallLength, 0.42, h, m(hallLength), true);
 		// single inside corner / baffle that creates the L-turn before the room opens up
 		const cornerZ = turnPositive ? z - 1.3 : z + 1.3;
-		wall(71.65, cornerZ, 0.42, 2.7, h, m, true);
+		wall(71.65, cornerZ, 0.42, 2.7, h, m(2.7), true);
 		// floor guidance stripe showing straight hall and corner turn
 		const stripe = box(7.05, 0.02, 0.22, std(0xff737b, 0.52, 0.02), 67.8, 0.07, z);
 		scene.add(stripe);
@@ -1708,7 +1763,7 @@ export function buildVaultMazeEntries() {
 		scene.add(marker);
 	}
 	// Vault 1 turns toward higher Z into the open treatment space; Vault 2 mirrors toward lower Z.
-	straightHallWithTurn(-18, true);
+	straightHallWithTurn(-18, true, true);
 	straightHallWithTurn(18, false);
 }
 
@@ -1813,13 +1868,14 @@ export function buildCorridorRoofs() {
 
 export function clinicalCeilingAccents(roomId) {
 	const r = roomById(roomId);
-	if (!r) return;
+	// Vault 1's ceiling has the LINAC app's light panels instead (vault-linac.ts)
+	if (!r || roomId === 'vault1') return;
 	const h = r.vault ? 5.55 : 3.62;
 	const g = new THREE.Group();
 	scene.add(g);
 	const lightMat = std(0xeafcff, 0.22, 0, { emissive: 0xd9fbff, emissiveIntensity: 1.55 });
 	const trimMat = std(0x70878f, 0.62, 0.08);
-	if (roomId === 'vault1' || roomId === 'vault2') {
+	if (roomId === 'vault2') {
 		for (const z of [r.z - 6.5, r.z - 2.2, r.z + 2.2, r.z + 6.5]) {
 			const p = box(5.6, 0.025, 0.42, lightMat, r.x, h, z);
 			g.add(p);
