@@ -1,13 +1,16 @@
 /* The sim-hub tutorial's screen (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3): the
    tracker card at the top-left (role, objective, hint line, progress, step and walking distance),
    the orange marker and its screen-edge arrow, the check-in and decision dialog, the fade and the
-   role-change card, and the end card. DOM only; tutorial.ts decides what they show. The keyboard
+   role-change card, and the end card. While a console step's console is open the tracker sits
+   above the console panel, and its hint line carries the console hints (docs/specs/2026-11-18-
+   consoles-in-center-design.md, part 6). DOM only; tutorial.ts decides what they show. The keyboard
    focus goes to a decision's first option, to Continue when it appears and to the end card's Keep
    exploring, so Tab and Enter work without the mouse. The elements are index.html's slot:tutorial
    block, looked up once at init (a headless check's stub DOM hands out a new element on every
    lookup). */
 import type { Decision, ExchangeLine, RoleInfo } from './tutorial-steps';
 import type { FeedbackKind } from './tutorial-math';
+import type { MissKind } from './tutorial-machine';
 
 export interface HudHandlers {
 	answer(id: string): void;
@@ -82,9 +85,15 @@ export function showTracker(v: TrackerView | null): void {
 	E.tutBar.style.width = `${Math.round(v.progress * 100)}%`;
 }
 
-export function setHint(text: string | null): void {
+/** The hint line; `kind` styles a console step's miss feedback as the decisions' feedback is. */
+export function setHint(text: string | null, kind?: MissKind): void {
 	E.tutHint.textContent = text ?? '';
-	show(E.tutHint, !!text);
+	E.tutHint.className = `tut-hint${text ? ' show' : ''}${text && kind ? ` ${kind}` : ''}`;
+}
+
+/** The tracker above the console panel (a console step's console is open), or back under it. */
+export function setOverConsole(on: boolean): void {
+	E.tutTracker.classList.toggle('over-console', on);
 }
 
 export function setDistance(text: string): void {
@@ -224,6 +233,7 @@ export function showEnd(on: boolean): void {
 
 export function hideTutorialHud(): void {
 	showTracker(null);
+	setOverConsole(false);
 	setHint(null);
 	placeMarker(null);
 	placeEdge(null);

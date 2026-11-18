@@ -1,7 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { OFF, progressOf, reduceTutorial } from './tutorial-machine';
+import {
+	OFF,
+	consoleMissText,
+	consoleOutcome,
+	progressOf,
+	reduceTutorial
+} from './tutorial-machine';
 import type { Effect, TutorialEvent, TutorialState } from './tutorial-machine';
-import { CHAPTER_1, WAIT_FOR_JAMIE, WAIT_FOR_JORDAN, eHintText } from './tutorial-steps';
+import {
+	CHAPTER_1,
+	JORDAN_MRN,
+	WAIT_FOR_JAMIE,
+	WAIT_FOR_JORDAN,
+	eHintText
+} from './tutorial-steps';
+import type { ConsoleProgressKind } from './tutorial-steps';
+import { TUTORIAL_PATIENTS } from '../../shared/console-protocol';
+import type { LinacEvent } from '../../shared/console-protocol';
 
 // Runs events from `s`, collecting every effect.
 function run(s: TutorialState, ...events: TutorialEvent[]) {
@@ -31,6 +46,18 @@ const atStep = (n: number): TutorialState => ({
 	phase: 'active',
 	step: n
 });
+// an event from the LINAC console, for Jordan unless another MRN is given
+const linac = (
+	kind: Exclude<LinacEvent['kind'], 'mistake' | 'field-delivered' | 'images-acquired'>,
+	mrn: string = JORDAN_MRN
+): TutorialEvent => ({
+	type: 'linac',
+	event: { kind, mrn }
+});
+const mistake: TutorialEvent = {
+	type: 'linac',
+	event: { kind: 'mistake', workspace: 'queue', code: 'wrong-patient', message: 'Not the patient.' }
+};
 
 describe('starting', () => {
 	it('opens step 1 with no hint', () => {
@@ -90,29 +117,168 @@ describe('E steps', () => {
 		expect(r.s.phase).toBe('active');
 		expect(r.effects[0]).toEqual({ type: 'showStep', step: 3 });
 	});
+});
 
-	it('counts the beam down for 10 s, then turns it off', () => {
+describe('console steps', () => {
+	const schedule = CHAPTER_1[2].console!;
+
+	it('opens the console at the step’s workspace on E, and completes on Jordan’s chart', () => {
+		let r = run(atStep(3), { type: 'pressedE', target: 'console' });
+		expect(r.s.phase).toBe('console');
+		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'queue' }]);
+		// checking Jordan in is on the way: nothing yet
+		r = run(r.s, linac('checked-in'));
+		expect(r.effects).toEqual([]);
+		r = run(r.s, linac('chart-opened'));
+		expect(r.effects.slice(0, 2)).toEqual([
+			{ type: 'closeConsole' },
+			{ type: 'action', action: 'jordanOnMonitors' }
+		]);
+		expect(r.s.step).toBe(4);
+		expect(r.s.phase).toBe('active');
+	});
+
+	it('opens Patient Setup at the couch and runs step 6’s world actions on setup-complete', () => {
+		let r = run(atStep(6), { type: 'pressedE', target: 'couch' });
+		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'setup' }]);
+		r = run(r.s, linac('setup-complete'));
+		expect(actions(r.effects)).toEqual([
+			'jordanOnCouch',
+			'lasersOn',
+			'jamieAcrossCouch',
+			'jamieToControl'
+		]);
+		expect(r.s.step).toBe(7);
+	});
+
+	it('counts a mistake, or another patient’s chart or check-in, as a miss: hint 1, hint 2, then the reveal', () => {
+		const open = run(atStep(3), { type: 'pressedE', target: 'console' }).s;
+		const r = run(
+			open,
+			mistake,
+			linac('chart-opened', TUTORIAL_PATIENTS.jordanLookalike.mrn),
+			linac('checked-in', TUTORIAL_PATIENTS.jody.mrn),
+			mistake
+		);
+		expect(r.effects).toEqual([
+			{ type: 'hint', text: `Not yet. ${schedule.hints[0]}`, kind: 'hint1' },
+			{ type: 'hint', text: `Not yet. ${schedule.hints[1]}`, kind: 'hint2' },
+			{ type: 'hint', text: schedule.reveal, kind: 'reveal' },
+			{ type: 'hint', text: schedule.reveal, kind: 'reveal' }
+		]);
+		expect(r.s.misses).toBe(4);
+		expect(r.s.step).toBe(3);
+		expect(r.s.phase).toBe('console');
+		// the right chart still completes the step
+		expect(run(r.s, linac('chart-opened')).s.step).toBe(4);
+	});
+
+	it('completes step 8 on alignment-verified only after shift-applied', () => {
+		let r = run(atStep(8), { type: 'pressedE', target: 'console' });
+		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'igrt' }]);
+		r = run(r.s, linac('alignment-verified'));
+		expect(r.s.step).toBe(8);
+		expect(r.effects).toEqual([]);
+		r = run(r.s, linac('shift-applied'));
+		expect(r.s.progress).toBe(1);
+		expect(r.effects).toEqual([]);
+		r = run(r.s, linac('alignment-verified'));
+		expect(actions(r.effects)).toEqual(['shiftApplied']);
+		expect(r.effects[0]).toEqual({ type: 'closeConsole' });
+		expect(r.s.step).toBe(9);
+	});
+
+	it('completes step 9 on treatment-complete, not on a field, and then opens the door', () => {
 		let r = run(atStep(9), { type: 'pressedE', target: 'console' });
-		expect(actions(r.effects)).toEqual(['beamOn']);
-		expect(hints(r.effects)).toEqual(['Beam on · 10 s']);
-		r = run(r.s, ...ticks(1, 0));
-		expect(hints(r.effects)).toEqual(['Beam on · 9 s']);
-		r = run(r.s, ...ticks(9, 0));
+		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'delivery' }]);
+		r = run(r.s, {
+			type: 'linac',
+			event: { kind: 'field-delivered', mrn: JORDAN_MRN, field: 'AP', index: 1, of: 2 }
+		});
+		expect(r.s.step).toBe(9);
+		r = run(r.s, linac('treatment-complete'));
+		expect(r.effects[0]).toEqual({ type: 'closeConsole' });
 		expect(actions(r.effects)).toEqual(['beamOff', 'releaseVaultDoor', 'jamieBackIn']);
 		expect(r.s.step).toBe(10);
+	});
+
+	it('keeps the step when the console is closed early: E opens it again, with its misses kept', () => {
+		let r = run(atStep(3), { type: 'pressedE', target: 'console' }, mistake, {
+			type: 'consoleClosed'
+		});
+		expect(r.s.phase).toBe('active');
+		expect(r.s.step).toBe(3);
+		// the miss stays in the hint line while the console is closed, over the E hint
+		r = run(r.s, ...ticks(30, 1));
+		expect(r.s.hint).toBe(`Not yet. ${schedule.hints[0]}`);
+		expect(hints(r.effects)).toEqual([]);
+		r = run(r.s, { type: 'pressedE', target: 'console' }, mistake);
+		expect(r.effects).toEqual([
+			{ type: 'openConsole', workspace: 'queue' },
+			{ type: 'hint', text: `Not yet. ${schedule.hints[1]}`, kind: 'hint2' }
+		]);
+	});
+
+	it('completes a console step while its console is closed (a beam left running)', () => {
+		const r = run(
+			atStep(9),
+			{ type: 'pressedE', target: 'console' },
+			{ type: 'consoleClosed' },
+			linac('treatment-complete')
+		);
+		expect(r.s.step).toBe(10);
+	});
+
+	it('ignores console events outside a console step, and closing when nothing is open', () => {
+		for (const s of [OFF, atStep(4), atStep(7), { ...atStep(4), phase: 'dialog' as const }])
+			for (const ev of [mistake, linac('chart-opened'), linac('treatment-complete')])
+				expect(run(s, ev)).toEqual({ s, effects: [] });
+		expect(run(atStep(3), { type: 'consoleClosed' })).toEqual({ s: atStep(3), effects: [] });
+		// the next step's event during this one does nothing either
+		expect(run(atStep(3), linac('setup-complete'))).toEqual({ s: atStep(3), effects: [] });
+	});
+
+	it('reads a console event: a miss, the step’s next event, or nothing', () => {
+		const { jody, jordanLookalike } = TUTORIAL_PATIENTS;
+		const cases: [LinacEvent, ConsoleProgressKind | undefined, 'miss' | 'progress' | null][] = [
+			[{ kind: 'mistake', workspace: 'igrt', code: 'x', message: 'm' }, 'shift-applied', 'miss'],
+			[{ kind: 'chart-opened', mrn: jody.mrn }, 'chart-opened', 'miss'],
+			[{ kind: 'checked-in', mrn: jordanLookalike.mrn }, 'chart-opened', 'miss'],
+			[{ kind: 'chart-opened', mrn: JORDAN_MRN }, 'chart-opened', 'progress'],
+			[{ kind: 'checked-in', mrn: JORDAN_MRN }, 'chart-opened', null],
+			// another patient's later events are neither Jordan's nor misses
+			[{ kind: 'setup-complete', mrn: jody.mrn }, 'setup-complete', null],
+			[{ kind: 'alignment-verified', mrn: JORDAN_MRN }, 'shift-applied', null],
+			[{ kind: 'treatment-complete', mrn: JORDAN_MRN }, undefined, null]
+		];
+		for (const [ev, next, want] of cases)
+			expect(consoleOutcome(ev, next), `${ev.kind} waiting for ${next}`).toBe(want);
+	});
+
+	it('words the misses as the decisions do: "Not yet." with a hint, then the reveal', () => {
+		expect(consoleMissText(schedule, 1)).toEqual({
+			kind: 'hint1',
+			text: `Not yet. ${schedule.hints[0]}`
+		});
+		expect(consoleMissText(schedule, 2)).toEqual({
+			kind: 'hint2',
+			text: `Not yet. ${schedule.hints[1]}`
+		});
+		expect(consoleMissText(schedule, 3)).toEqual({ kind: 'reveal', text: schedule.reveal });
+		expect(consoleMissText(schedule, 7).kind).toBe('reveal');
 	});
 });
 
 describe('decisions', () => {
-	const open = run(atStep(3), { type: 'pressedE', target: 'console' }).s;
-	const d = CHAPTER_1[2].decision!;
+	const open = run(atStep(4), { type: 'pressedE', target: 'jordan' }).s;
+	const d = CHAPTER_1[3].decision!;
 
 	it('gives a hint, a stronger hint, then the answer with its reason at the third miss', () => {
 		const { s, effects } = run(
 			open,
 			{ type: 'answered', option: 'a' },
-			{ type: 'answered', option: 'c' },
-			{ type: 'answered', option: 'a' }
+			{ type: 'answered', option: 'b' },
+			{ type: 'answered', option: 'd' }
 		);
 		expect(effects).toEqual([
 			{ type: 'feedback', kind: 'hint1', text: `Not yet. ${d.hints[0]}` },
@@ -120,17 +286,17 @@ describe('decisions', () => {
 			{ type: 'feedback', kind: 'reveal', text: `${d.reveal} ${d.reason}` }
 		]);
 		expect(s.resolved).toBe(true);
-		const next = run(s, { type: 'answered', option: 'b' }, { type: 'continue' });
+		const next = run(s, { type: 'answered', option: 'c' }, { type: 'continue' });
 		expect(next.effects[0]).toEqual({ type: 'closeDialog' });
-		expect(next.s.step).toBe(4);
+		expect(next.s.step).toBe(5);
 	});
 
 	it('accepts the right answer with its reason, and Continue completes the step', () => {
-		const r = run(open, { type: 'answered', option: 'b' });
+		const r = run(open, { type: 'answered', option: 'c' });
 		expect(r.effects).toEqual([
 			{ type: 'feedback', kind: 'correct', text: `Correct. ${d.reason}` }
 		]);
-		expect(run(r.s, { type: 'continue' }).s.step).toBe(4);
+		expect(run(r.s, { type: 'continue' }).s.step).toBe(5);
 	});
 
 	it('ignores Continue before the decision is answered', () => {
@@ -142,23 +308,14 @@ describe('decisions', () => {
 		let r = run(open, { type: 'answered', option: 'a' }, { type: 'closeDialog' });
 		expect(r.s.phase).toBe('active');
 		expect(r.effects.at(-1)).toEqual({ type: 'closeDialog' });
-		r = run(r.s, { type: 'pressedE', target: 'console' }, { type: 'answered', option: 'c' });
+		r = run(r.s, { type: 'pressedE', target: 'jordan' }, { type: 'answered', option: 'b' });
 		expect(r.effects.at(-1)).toMatchObject({ type: 'feedback', kind: 'hint2' });
 	});
 
 	it('runs the step’s actions after the answer', () => {
-		const r = run(
-			run(atStep(6), { type: 'pressedE', target: 'couch' }).s,
-			{ type: 'answered', option: 'c' },
-			{ type: 'continue' }
-		);
-		expect(actions(r.effects)).toEqual([
-			'jordanOnCouch',
-			'lasersOn',
-			'jamieAcrossCouch',
-			'jamieToControl'
-		]);
-		expect(r.s.step).toBe(7);
+		const r = run(open, { type: 'answered', option: 'c' }, { type: 'continue' });
+		expect(actions(r.effects)).toEqual(['jordanConfirms', 'escortToVault']);
+		expect(r.s.step).toBe(5);
 	});
 });
 
@@ -227,6 +384,7 @@ describe('the E-step hint', () => {
 
 describe('the whole chapter', () => {
 	// plays every step the way the run-through check does, answering each decision wrong three times
+	// and making three mistakes on each console step before its events for Jordan
 	function playThrough() {
 		let s = OFF;
 		const all: Effect[] = [];
@@ -249,6 +407,11 @@ describe('the whole chapter', () => {
 				const wrong = step.decision?.options.find((o) => !o.correct);
 				if (wrong) for (let i = 0; i < 3; i++) go({ type: 'answered', option: wrong.id });
 				if (s.phase === 'dialog') go({ type: 'continue' });
+				if (s.phase === 'console') {
+					go(mistake, mistake, mistake);
+					for (const kind of step.console!.done)
+						go({ type: 'linac', event: { kind, mrn: JORDAN_MRN } } as TutorialEvent);
+				}
 			}
 		}
 		return { s, all };
@@ -262,7 +425,13 @@ describe('the whole chapter', () => {
 		expect(
 			all.filter((e) => e.type === 'showStep').map((e) => (e as { step: number }).step)
 		).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-		expect(all.filter((e) => e.type === 'feedback' && e.kind === 'reveal')).toHaveLength(4);
+		// step 4's decision, and the four console steps
+		expect(all.filter((e) => e.type === 'feedback' && e.kind === 'reveal')).toHaveLength(1);
+		expect(all.filter((e) => e.type === 'hint' && e.kind === 'reveal')).toHaveLength(4);
+		expect(
+			all.filter((e) => e.type === 'openConsole').map((e) => (e as { workspace: string }).workspace)
+		).toEqual(['queue', 'setup', 'igrt', 'delivery']);
+		expect(all.filter((e) => e.type === 'closeConsole')).toHaveLength(4);
 	});
 
 	it('runs every world action once, in order', () => {
@@ -270,6 +439,7 @@ describe('the whole chapter', () => {
 			'pickChair',
 			'sitPlayer',
 			'intercomToControl',
+			'jordanOnMonitors',
 			'jordanConfirms',
 			'escortToVault',
 			'jordanOnCouch',
@@ -278,7 +448,6 @@ describe('the whole chapter', () => {
 			'jamieToControl',
 			'holdVaultClosed',
 			'shiftApplied',
-			'beamOn',
 			'beamOff',
 			'releaseVaultDoor',
 			'jamieBackIn',
@@ -294,6 +463,8 @@ describe('the whole chapter', () => {
 			{ type: 'pressedE', target: 'reception' },
 			{ type: 'reachedTarget' },
 			{ type: 'continue' },
+			mistake,
+			linac('treatment-complete'),
 			...ticks(1, 0)
 		] as TutorialEvent[])
 			expect(run(s, ev)).toEqual({ s, effects: [] });

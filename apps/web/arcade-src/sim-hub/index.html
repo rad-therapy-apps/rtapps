@@ -1819,6 +1819,11 @@
 			.tut-tracker.show {
 				display: block;
 			}
+			/* a console step's console is open: above the console panel (console-panel.ts), under the
+			   fade and the role card */
+			.tut-tracker.over-console {
+				z-index: 225;
+			}
 			.tut-who {
 				display: flex;
 				gap: 10px;
@@ -1874,6 +1879,15 @@
 			}
 			.tut-hint.show {
 				display: block;
+			}
+			/* a console step's miss feedback, coloured as a decision's (.tut-feedback) */
+			.tut-hint.hint1,
+			.tut-hint.hint2 {
+				border-left-color: var(--red);
+				background: rgba(255, 106, 115, 0.12);
+			}
+			.tut-hint.reveal {
+				background: rgba(255, 188, 99, 0.16);
 			}
 			.tut-bar {
 				height: 6px;

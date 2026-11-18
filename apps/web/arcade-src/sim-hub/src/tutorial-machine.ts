@@ -1,12 +1,29 @@
 /* The sim-hub tutorial's step machine (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3):
    a pure reducer over Chapter 1's steps (tutorial-steps.ts). Events in (start, a frame's tick with
    the walking distance, E on a target, reaching a target, an answer, Continue, closing the dialog,
-   the role change finishing, stop); a new state and a list of effects out, which tutorial.ts
-   performs (tracker, dialog, hint line, role change, world actions). It holds the hint timers and
-   the decision miss counter, mirroring the CT console's validateTechnique: "Not yet." with a hint,
-   a stronger hint, then the answer and its reason at the third miss. */
-import { CHAPTER_1, WAIT_FOR_JAMIE, WAIT_FOR_JORDAN, eHintText } from './tutorial-steps';
-import type { Role, Step, StepAction, TargetId } from './tutorial-steps';
+   an event from the LINAC console, the player closing the console, the role change finishing,
+   stop); a new state and a list of effects out, which tutorial.ts performs (tracker, dialog, hint
+   line, console, role change, world actions). It holds the hint timers and the miss counter of a
+   decision or a console step, mirroring the CT console's validateTechnique: "Not yet." with a
+   hint, a stronger hint, then the answer and its reason at the third miss. A console step
+   (docs/specs/2026-11-18-consoles-in-center-design.md, part 6) opens the console on E and is
+   triggered by Jordan's events on it, in order; its misses show in the hint line. */
+import {
+	CHAPTER_1,
+	JORDAN_MRN,
+	WAIT_FOR_JAMIE,
+	WAIT_FOR_JORDAN,
+	eHintText
+} from './tutorial-steps';
+import type {
+	ConsoleProgressKind,
+	ConsoleTask,
+	Role,
+	Step,
+	StepAction,
+	TargetId
+} from './tutorial-steps';
+import type { LinacEvent, LinacWorkspace } from '../../shared/console-protocol';
 import {
 	eHintDue,
 	missFeedback,
@@ -17,14 +34,19 @@ import {
 } from './tutorial-math';
 import type { FeedbackKind, StuckTimer } from './tutorial-math';
 
-export type Phase = 'off' | 'active' | 'dialog' | 'waiting' | 'roleChange' | 'done';
+/** 'console': a console step's console is open (E opened it, and the player has not closed it). */
+export type Phase = 'off' | 'active' | 'dialog' | 'console' | 'waiting' | 'roleChange' | 'done';
 
 export interface TutorialState {
 	phase: Phase;
 	/** The current step, 1-based (0 when off). */
 	step: number;
-	/** Wrong answers to the current step's decision. */
+	/** Wrong answers to the current step's decision, or misses on its console. */
 	misses: number;
+	/** How many of the console step's events (ConsoleTask.done) have come, in order. */
+	progress: number;
+	/** The console step's last miss feedback, kept in the hint line while the console is closed. */
+	missHint: string | null;
 	/** The decision was answered right, or its answer shown: Continue completes the step. */
 	resolved: boolean;
 	/** Seconds left of the step's afterSeconds ('waiting'). */
@@ -55,6 +77,10 @@ export type TutorialEvent =
 	| { type: 'answered'; option: string }
 	| { type: 'continue' }
 	| { type: 'closeDialog' }
+	/** An event from the LINAC console (console-bus.ts linacEvents). */
+	| { type: 'linac'; event: LinacEvent }
+	/** The player closed the console panel. */
+	| { type: 'consoleClosed' }
 	| { type: 'roleChangeDone' }
 	| { type: 'stop' };
 
@@ -64,14 +90,24 @@ export type Effect =
 	| { type: 'openDialog'; step: number }
 	| { type: 'feedback'; kind: FeedbackKind; text: string }
 	| { type: 'closeDialog' }
-	| { type: 'hint'; text: string | null }
+	/** Open the LINAC console, tutorial scenario, at this workspace. */
+	| { type: 'openConsole'; workspace: LinacWorkspace }
+	/** The console step is done: close the console after a beat (tutorial.ts). */
+	| { type: 'closeConsole' }
+	/** `kind`: the line is a console step's miss feedback. */
+	| { type: 'hint'; text: string | null; kind?: MissKind }
 	| { type: 'roleChange'; role: Role }
 	| { type: 'complete' };
+
+/** The feedback of a console step's miss (tutorial-math.ts missFeedback). */
+export type MissKind = Exclude<FeedbackKind, 'correct'>;
 
 export const OFF: TutorialState = {
 	phase: 'off',
 	step: 0,
 	misses: 0,
+	progress: 0,
+	missHint: null,
 	resolved: false,
 	wait: 0,
 	stuck: newStuckTimer(),
@@ -85,8 +121,29 @@ function fresh(step: number, phase: Phase): TutorialState {
 	return { ...OFF, phase, step, stuck: newStuckTimer() };
 }
 
-function countdownText(template: string, secondsLeft: number): string {
-	return template.replace('{s}', String(Math.max(0, Math.ceil(secondsLeft - 1e-9))));
+/** What a LINAC console event means to a console step waiting for `next`, the next of its events
+    for Jordan: a miss (the console refused an action, or another patient's chart was opened or
+    check-in made), that next event, or nothing (an event of another step, or out of order). */
+export function consoleOutcome(
+	ev: LinacEvent,
+	next: ConsoleProgressKind | undefined,
+	mrn: string = JORDAN_MRN
+): 'miss' | 'progress' | null {
+	if (ev.kind === 'mistake') return 'miss';
+	if (ev.mrn !== mrn) return ev.kind === 'chart-opened' || ev.kind === 'checked-in' ? 'miss' : null;
+	return ev.kind === next ? 'progress' : null;
+}
+
+/** The hint line for the n-th miss on a console step: hint 1, hint 2, then the reveal. */
+export function consoleMissText(
+	task: ConsoleTask,
+	misses: number
+): { kind: MissKind; text: string } {
+	const kind = missFeedback(misses);
+	return {
+		kind,
+		text: kind === 'reveal' ? task.reveal : `Not yet. ${task.hints[kind === 'hint1' ? 0 : 1]}`
+	};
 }
 
 /** The share of the chapter done, for the tracker's bar: completed steps over all steps. */
@@ -128,11 +185,7 @@ export function reduceTutorial(
 	const trigger = (st: TutorialState): TutorialState => {
 		if (!cur) return st;
 		actions(cur.onTrigger);
-		if (cur.afterSeconds) {
-			const hint = cur.countdown ? countdownText(cur.countdown, cur.afterSeconds) : null;
-			if (hint !== st.hint) fx.push({ type: 'hint', text: hint });
-			return { ...st, phase: 'waiting', wait: cur.afterSeconds, hint };
-		}
+		if (cur.afterSeconds) return { ...st, phase: 'waiting', wait: cur.afterSeconds };
 		return complete(st);
 	};
 
@@ -146,9 +199,7 @@ export function reduceTutorial(
 			if (s.phase === 'waiting') {
 				const wait = s.wait - ev.dt;
 				if (wait <= 1e-9) return out(complete({ ...s, wait: 0 }));
-				const hint = cur.countdown ? countdownText(cur.countdown, wait) : null;
-				if (hint !== s.hint) fx.push({ type: 'hint', text: hint });
-				return out({ ...s, wait, hint });
+				return out({ ...s, wait });
 			}
 			if (s.phase !== 'active') return out(s);
 			const pressE = cur.trigger === 'pressE',
@@ -156,15 +207,17 @@ export function reduceTutorial(
 				near = pressE ? stepNear(s.near, ev.dt, ev.distance) : 0,
 				hintLevel = Math.max(s.hintLevel, stuckLevel(stuck.idle)) as 0 | 1 | 2,
 				eHint = s.eHint || (pressE && eHintDue(near));
+			const walking = eHint
+				? eHintText(cur.target.name)
+				: hintLevel
+					? cur.hints[hintLevel - 1]
+					: null;
+			// a console step's last miss stays in the hint line: the player has found the console
 			const hint = ev.escortAhead
 				? WAIT_FOR_JORDAN
 				: ev.heldForJamie
 					? WAIT_FOR_JAMIE
-					: eHint
-						? eHintText(cur.target.name)
-						: hintLevel
-							? cur.hints[hintLevel - 1]
-							: null;
+					: (s.missHint ?? walking);
 			if (hint !== s.hint) fx.push({ type: 'hint', text: hint });
 			return out({ ...s, stuck, near, hintLevel, eHint, hint });
 		}
@@ -175,7 +228,34 @@ export function reduceTutorial(
 				fx.push({ type: 'openDialog', step: s.step });
 				return out({ ...s, phase: 'dialog', resolved: false });
 			}
+			if (cur.console) {
+				fx.push({ type: 'openConsole', workspace: cur.console.workspace });
+				return out({ ...s, phase: 'console' });
+			}
 			return out(trigger(s));
+		}
+		case 'linac': {
+			// only the current console step's console counts, open or closed (a beam the player left
+			// running still completes the step)
+			const task = cur?.console;
+			if (!task || (s.phase !== 'console' && s.phase !== 'active')) return out(s);
+			const outcome = consoleOutcome(ev.event, task.done[s.progress]);
+			if (outcome === 'miss') {
+				const misses = s.misses + 1,
+					{ kind, text } = consoleMissText(task, misses);
+				fx.push({ type: 'hint', text, kind });
+				return out({ ...s, misses, missHint: text, hint: text });
+			}
+			if (outcome !== 'progress') return out(s);
+			const progress = s.progress + 1;
+			if (progress < task.done.length) return out({ ...s, progress });
+			fx.push({ type: 'closeConsole' });
+			return out(trigger({ ...s, progress, phase: 'active' }));
+		}
+		case 'consoleClosed': {
+			// closed before the step is done: the step stays, and E opens the console again
+			if (!cur?.console || s.phase !== 'console') return out(s);
+			return out({ ...s, phase: 'active' });
 		}
 		case 'reachedTarget': {
 			if (!cur || s.phase !== 'active' || cur.trigger === 'pressE') return out(s);
