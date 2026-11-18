@@ -98,6 +98,10 @@ async def _subject_ref(db: AsyncSession, activity: Activity) -> dict[str, str] |
     return {"slug": subject.slug, "title": subject.title} if subject else None
 
 
+# Rooms an external activity may ask the sim-hub center to start in (`?start=<room>`).
+EXTERNAL_START_ROOMS = ("linaccontrol", "ctcontrol")
+
+
 async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[str, Any]:
     """Resolve any activity's working copy into one snapshot document (unstripped)."""
     # Lesson activities use the existing pipeline.
@@ -219,10 +223,6 @@ async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[
             },
         }
     raise ValueError(f"unknown activity kind {activity.kind}")
-
-
-# Rooms an external activity may ask the sim-hub center to start in (`?start=<room>`).
-EXTERNAL_START_ROOMS = ("linaccontrol", "ctcontrol")
 
 
 def strip_activity_answers(snapshot: dict[str, Any]) -> dict[str, Any]:

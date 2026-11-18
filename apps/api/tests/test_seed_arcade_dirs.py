@@ -19,10 +19,11 @@ from pathlib import Path
 
 
 def test_seed_simulator_arcade_directories_exist_on_disk() -> None:
-    """The sim-hub and linac-ct arcade apps referenced by the three plan 4c simulator
-    activities' `arcade_slug`, plus the four plan 4d shim/console arcade apps, must
-    actually be built and present on disk, not just referenced by a seed row. A plain
-    repo-relative file check, not seed data, so no `db`/`settings` fixtures are needed."""
+    """The sim-hub app the three plan 4c simulator activities' `arcade_slug` reference, the
+    linac-ct app whose consoles the center opens in its console panels, plus the four plan 4d
+    shim/console arcade apps, must actually be built and present on disk, not just referenced
+    by a seed row. A plain repo-relative file check, not seed data, so no `db`/`settings`
+    fixtures are needed."""
     repo_root = Path(__file__).resolve().parents[3]
     # sim-hub is Vite-built from arcade-src/ (#77): apps/web/arcade/sim-hub/ is gitignored
     # build output produced by `pnpm --filter web build`, so a fresh checkout only carries
