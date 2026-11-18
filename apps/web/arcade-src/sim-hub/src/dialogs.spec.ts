@@ -53,6 +53,20 @@ describe('dialogs', () => {
 		expect(a.d.closes).toBe(0);
 	});
 
+	it('closes every open dialog but the ones kept', () => {
+		const a = dialog(true),
+			b = dialog(false),
+			keep = dialog(true),
+			c = dialog(true);
+		D.registerDialog('a', a.isOpen, a.close);
+		D.registerDialog('b', b.isOpen, b.close);
+		D.registerDialog('keep', keep.isOpen, keep.close);
+		D.registerDialog('c', c.isOpen, c.close);
+		D.closeDialogsExcept(['keep', 'console']);
+		expect([a.d.closes, b.d.closes, keep.d.closes, c.d.closes]).toEqual([1, 0, 0, 1]);
+		expect(D.openDialogName()).toBe('keep');
+	});
+
 	it('replaces a dialog registered again under the same name, in its place', () => {
 		const old = dialog(true),
 			later = dialog(true),

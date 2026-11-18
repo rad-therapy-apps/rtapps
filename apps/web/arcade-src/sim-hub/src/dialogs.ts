@@ -31,3 +31,9 @@ export function closeOpenDialog(): boolean {
 	d.close();
 	return true;
 }
+
+/** Closes every open dialog except those named in `keep` (the console panel closes the pop-ups
+    under it as it opens, console-panel.ts). */
+export function closeDialogsExcept(keep: readonly string[]): void {
+	for (const d of dialogs) if (!keep.includes(d.name) && d.isOpen()) d.close();
+}
