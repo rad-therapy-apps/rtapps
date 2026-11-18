@@ -208,10 +208,21 @@ async def build_activity_snapshot(db: AsyncSession, activity: Activity) -> dict[
                 "arcade_slug": activity.config.get("arcade_slug"),
                 "max_score": activity.config.get("max_score"),
                 "completion_only": activity.config.get("completion_only", False),
+                # Room the center starts in (consoles-in-center); only the two console
+                # rooms are allowed, anything else is dropped so the player never sends it.
+                "start_room": (
+                    start_room
+                    if (start_room := activity.config.get("start_room")) in EXTERNAL_START_ROOMS
+                    else None
+                ),
                 "subject": subject,
             },
         }
     raise ValueError(f"unknown activity kind {activity.kind}")
+
+
+# Rooms an external activity may ask the sim-hub center to start in (`?start=<room>`).
+EXTERNAL_START_ROOMS = ("linaccontrol", "ctcontrol")
 
 
 def strip_activity_answers(snapshot: dict[str, Any]) -> dict[str, Any]:

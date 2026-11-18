@@ -1086,9 +1086,10 @@ async def test_seed_creates_center_qa_walkthrough(db: AsyncSession) -> None:
 
 async def test_seed_creates_treatment_delivery(db: AsyncSession) -> None:
     """Plan 4c: Treatment delivery — one of the two completion-only room activities
-    served by the linac-ct app; published, kind external, access practice, no numeric
-    score, config carries sdk_slug sim-linac-fraction and no max_score key; subject is
-    treatment-delivery-procedures; re-seeding creates 0."""
+    served by the sim-hub center (starting at the LINAC control room); published, kind
+    external, access practice, no numeric score, config carries sdk_slug sim-linac-fraction,
+    start_room linaccontrol and no max_score key; subject is treatment-delivery-procedures;
+    re-seeding creates 0."""
     activity = await db.scalar(
         select(Activity).where(Activity.kind == "external", Activity.title == "Treatment delivery")
     )
@@ -1097,9 +1098,10 @@ async def test_seed_creates_treatment_delivery(db: AsyncSession) -> None:
     assert activity.status == "published"
     assert activity.access == "practice"
     assert activity.config == {
-        "arcade_slug": "linac-ct",
+        "arcade_slug": "sim-hub",
         "sdk_slug": "sim-linac-fraction",
         "completion_only": True,
+        "start_room": "linaccontrol",
     }
     assert "max_score" not in activity.config
     subject = await db.get(Subject, activity.subject_id)
@@ -1113,8 +1115,7 @@ async def test_seed_creates_treatment_delivery(db: AsyncSession) -> None:
 
 async def test_seed_creates_ct_simulation(db: AsyncSession) -> None:
     """Plan 4c: CT simulation — the other completion-only room activity served by the
-    same linac-ct app (both share arcade_slug: entering either activity's player shows
-    the same served app; only sdk_slug distinguishes their result streams); published,
+    sim-hub center, starting at the CT control room (start_room ctcontrol); published,
     kind external, access practice, no numeric score, config carries sdk_slug
     sim-ct-scan and no max_score key; subject is treatment-delivery-procedures;
     re-seeding creates 0."""
@@ -1126,9 +1127,10 @@ async def test_seed_creates_ct_simulation(db: AsyncSession) -> None:
     assert activity.status == "published"
     assert activity.access == "practice"
     assert activity.config == {
-        "arcade_slug": "linac-ct",
+        "arcade_slug": "sim-hub",
         "sdk_slug": "sim-ct-scan",
         "completion_only": True,
+        "start_room": "ctcontrol",
     }
     assert "max_score" not in activity.config
     subject = await db.get(Subject, activity.subject_id)
