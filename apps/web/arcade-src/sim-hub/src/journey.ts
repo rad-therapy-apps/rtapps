@@ -82,6 +82,7 @@ import {
 } from './main';
 import { focusCtPatientFromControl, showCtQaDock } from './sdk-bridge';
 import { LYING_SURFACES } from './props';
+import { resetLinacPose } from './vault-linac';
 import { releaseArrivalSpot, clearArrivalSpots } from './room-routes';
 
 const JOURNEY_ROOM_TIMING = { roomId: null, enteredAt: 0, lastPatient: null };
@@ -839,6 +840,7 @@ export function resetTreatmentJourney(silent = false) {
 	setPatientGown(JOURNEY.ctSimPatient, false);
 	setPatientGown(JOURNEY.miaTreatmentPatient, false);
 	resetCtCouchMotion();
+	resetLinacPose();
 	workflowState('lobby', 'OPEN', 'Routine arrivals', '#42d5cf');
 	workflowState('linaccontrol', 'READY', 'Treatment team available', '#42d5cf');
 	workflowState('vault1', 'AVAILABLE', 'Room ready for next patient', '#65dda0');
