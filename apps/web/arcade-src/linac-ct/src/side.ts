@@ -1,7 +1,7 @@
-/* Which side of the app a hub door opened (Free Mode fixes). The hub's CT doors add `side=ct` to
-   the player page's URL and its LINAC Control Area door `side=linac` (sim-hub room-app-url.ts).
-   The app runs in that page's same-origin iframe, whose own URL has no query, so the top window is
-   read first and the app's own URL second. A side keeps the app to that side's queue: no switcher,
+/* Which side of the app to open (Free Mode fixes). `side=ct` or `side=linac` rides in the URL: the
+   center's console panel opens the LINAC console with `side=linac` (sim-hub console-panel.ts),
+   and a player page may carry it in its own query. The app may run in a page's same-origin iframe,
+   whose own URL has no query, so the top window is read first and the app's own URL second. A side keeps the app to that side's queue: no switcher,
    and Home Queue leads back to it. No side (opened from the Games shelf) keeps both queues.
    Read by console-patch.ts (brand, landing queue) and workspace.ts (switcher, CT landing). */
 export type Side = 'ct' | 'linac';
