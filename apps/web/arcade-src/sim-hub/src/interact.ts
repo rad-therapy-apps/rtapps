@@ -9,7 +9,8 @@
    (`enable/disableRoomInspection`, `roomInspectPose`). Verbatim
    extractions from main.js. `ROOM_APP_DOORS` (read only by `performInteraction`) and
    `LH_COMPONENTS`/`PROC_CHOICES` (read only by their respective moved functions) moved along
-   with their sole consumers and are not exported. A handful of symbols stay owned by main.js
+   with their sole consumers and are not exported. While the console panel is open
+   (console-panel.ts) E does nothing and no prompt shows. A handful of symbols stay owned by main.js
    because still-resident journey/booking systems read or write them too:
    `player`/`HANDOFFS`/`REACH_Y` (already exported from main.js per
    earlier tasks — task 9 moved `focusTargetsForRoom`/`focusConversationCamera`/
@@ -37,6 +38,7 @@ import { doorCenter, doorNormal, nearestDoor, getColliders, requestWalkPointerLo
 import { player, HANDOFFS, REACH_Y } from './main';
 import { PROC_STATE, PROC_SITES, getCtAppUrl } from './sdk-bridge';
 import { roomAppHref } from './room-app-url';
+import { isConsoleOpen } from './console-panel';
 import { createPager } from './pager';
 import {
 	focusConversationCamera,
@@ -526,7 +528,7 @@ const leavesHub = (room: Room) =>
 		(!!S.CONSOLE_APP_URL && S.CONSOLE_APP_DOORS.has(room.name)));
 
 export function performInteraction() {
-	if (S.mode !== 'walk' || isPaused()) return;
+	if (S.mode !== 'walk' || isPaused() || isConsoleOpen()) return;
 	const t = nearestTarget();
 	if (t?.it) {
 		const it = t.it;
@@ -609,7 +611,7 @@ function pickPromptTarget(): PromptTarget | null {
 }
 /** Every third frame (main.ts stepSimulation): the crosshair, and the E prompt's target. */
 export function updateInteractionUI() {
-	const walking = S.mode === 'walk' && !S.travel;
+	const walking = S.mode === 'walk' && !S.travel && !isConsoleOpen();
 	document.getElementById('walkReticle')?.classList.toggle('show', walking);
 	promptTarget = walking ? pickPromptTarget() : null;
 }
