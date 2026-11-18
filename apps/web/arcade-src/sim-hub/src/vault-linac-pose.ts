@@ -181,8 +181,9 @@ export function partPose(p: LinacPose): LinacPartPose {
 export const SMOOTHING = { tau: 0.06, couchSpeed: 50 } as const;
 
 /** `cur` moved toward `target` over `dt` seconds: each number closes the gap by 1 - e^(-dt/tau)
-    (angles the short way round, so 359 to 1 passes 0), couch translations at most
-    SMOOTHING.couchSpeed; a gap under 0.001 closes; flags are the target's. */
+    (the gantry and collimator the short way round, so 359 to 1 passes 0; the couch angle as a
+    signed angle, so 95 to 265 passes 0, never the 180 the couch cannot reach), couch translations
+    at most SMOOTHING.couchSpeed; a gap under 0.001 closes; flags are the target's. */
 export function smoothPose(cur: LinacPose, target: LinacPose, dt: number): LinacPose {
 	const k = 1 - Math.exp(-Math.max(0, dt) / SMOOTHING.tau),
 		maxStep = SMOOTHING.couchSpeed * Math.max(0, dt);
@@ -195,7 +196,7 @@ export function smoothPose(cur: LinacPose, target: LinacPose, dt: number): Linac
 		...target,
 		gantry: turn(cur.gantry, target.gantry),
 		collimator: turn(cur.collimator, target.collimator),
-		couchAngle: turn(cur.couchAngle, target.couchAngle),
+		couchAngle: wrap360(ease(signed(cur.couchAngle), signed(target.couchAngle))),
 		couchVrt: ease(cur.couchVrt, target.couchVrt, maxStep),
 		couchLng: ease(cur.couchLng, target.couchLng, maxStep),
 		couchLat: ease(cur.couchLat, target.couchLat, maxStep),

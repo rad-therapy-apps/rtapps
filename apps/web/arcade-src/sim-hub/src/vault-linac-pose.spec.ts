@@ -169,6 +169,20 @@ describe('Vault 1 LINAC pose: smoothing', () => {
 		expect(cur.gantry).toBeCloseTo(10, 1);
 	});
 
+	it('turns the couch through 0, never through the 180 it cannot reach', () => {
+		let cur = pose({ couchAngle: 95 });
+		const seen: number[] = [];
+		for (let i = 0; i < 60; i++) {
+			cur = smoothPose(cur, pose({ couchAngle: 265 }), 1 / 60);
+			seen.push(cur.couchAngle);
+		}
+		// every step is within the couch's +-95 degrees (0..95 or 265..360), going down through 0
+		expect(seen.every((a) => a <= 95 || a >= 265)).toBe(true);
+		const signed = seen.map((a) => (a > 180 ? a - 360 : a));
+		expect(signed.every((a, i) => i === 0 || a <= signed[i - 1])).toBe(true);
+		expect(cur.couchAngle).toBeCloseTo(265, 1);
+	});
+
 	it('moves the couch no faster than its top speed, and takes the flags at once', () => {
 		const target = pose({ couchLng: 100, beamOn: true });
 		const next = smoothPose(HOME, target, 0.1);
