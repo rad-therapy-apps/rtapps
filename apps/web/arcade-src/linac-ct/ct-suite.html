@@ -912,6 +912,29 @@
 			body.rtapps-console-mode .botbar {
 				grid-template-columns: 1fr 1.4fr 1fr;
 			}
+			/* Console panel (?view=console): two columns that fill the panel's iframe at any size from
+			   about 1100 x 640 up, so the narrow-window rules above must not stack them. */
+			body.rtapps-panel-mode .main {
+				grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr) !important;
+			}
+			body.rtapps-panel-mode .app {
+				grid-template-columns: minmax(0, 1fr);
+			}
+			body.rtapps-panel-mode .topbar {
+				min-width: 0;
+				gap: 10px;
+			}
+			body.rtapps-panel-mode .pt-banner {
+				min-width: 0;
+				gap: 12px;
+				overflow: hidden;
+			}
+			body.rtapps-panel-mode .col.controls {
+				grid-column: auto;
+			}
+			body.rtapps-panel-mode .botbar {
+				grid-template-columns: 1fr 1.4fr 1fr;
+			}
 			.rtapps-embedded-badge {
 				position: fixed;
 				right: 12px;

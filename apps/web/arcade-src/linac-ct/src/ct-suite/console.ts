@@ -12,7 +12,7 @@ import {
 	drawTopogram,
 	lerp
 } from './imaging';
-import { ctStepLabel } from './ct-state';
+import { ctStepLabel, COUCH_Y_LOW, COUCH_Y_HIGH } from './ct-state';
 import { setView, couchGroup, laserGroup, skinGroup, boneGroup, organGroup } from './room';
 /* ---------------- CT PROTOCOL LIBRARY ---------------- */
 // RTApps (#77 phase 2 task 20): typed shape for entries in `PROTOCOLS`. The demo
@@ -642,7 +642,7 @@ export function updateRangeLabels() {
 export function moveCouch(dx, dy, dz) {
 	if (S.scanning) return;
 	S.couchZ = Math.max(-16, Math.min(20, S.couchZ + dz * 1.2));
-	S.couchY += dy * 0.6;
+	S.couchY = Math.max(COUCH_Y_LOW, Math.min(COUCH_Y_HIGH, S.couchY + dy * 0.6));
 	if (couchGroup) {
 		couchGroup.position.x = (couchGroup.position.x || 0) + dx * 0.6;
 		couchGroup.position.y = (couchGroup.position.y || 0) + dy * 0.6;
