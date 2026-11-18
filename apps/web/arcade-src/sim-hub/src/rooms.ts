@@ -1737,19 +1737,44 @@ export function buildCorridorInfillWalls() {
 
 export function buildVaultMazeEntries() {
 	const h = 4.55;
-	// Vault 1's maze takes the LINAC wall finish (buildRoom's linacFinish), each wall's panels
-	// repeated over its own length; vault 2's keeps the vault wall
+	// Vault 1's maze takes the LINAC wall finish: the walls in its plain cream, a panel of the
+	// finish (buildRoom's linacFinish) 0.01 m off each long face, so the ends and tops are not
+	// streaked by a texture laid out for the faces; vault 2's keeps the vault wall
+	const cream = new THREE.MeshStandardMaterial({
+		color: LINAC_FINISH.wall.color,
+		roughness: 0.9,
+		metalness: 0
+	});
+	const panels = (x, z, len, alongX) => {
+		for (const side of [-1, 1]) {
+			const p = new THREE.Mesh(
+				new THREE.PlaneGeometry(len, h - 0.065),
+				linacFinish('wall', len, h - 0.065)
+			);
+			const off = side * (0.21 + 0.01);
+			p.position.set(alongX ? x : x + off, (h + 0.065) / 2, alongX ? z + off : z);
+			// each faces away from its wall: +z/-z for a wall along x, +x/-x for one along z
+			p.rotation.y = alongX ? (side > 0 ? 0 : Math.PI) : side > 0 ? Math.PI / 2 : -Math.PI / 2;
+			p.receiveShadow = true;
+			scene.add(p);
+		}
+	};
 	function straightHallWithTurn(z, turnPositive = true, linac = false) {
 		const hallCenterX = 67.9,
 			hallLength = 7.2,
 			halfWidth = 2.55,
-			m = (len) => (linac ? linacFinish('wall', len, h) : MAT.wallVault);
+			m = linac ? cream : MAT.wallVault;
 		// long straight shielded hall from entry door
-		wall(hallCenterX, z - halfWidth, hallLength, 0.42, h, m(hallLength), true);
-		wall(hallCenterX, z + halfWidth, hallLength, 0.42, h, m(hallLength), true);
+		wall(hallCenterX, z - halfWidth, hallLength, 0.42, h, m, true);
+		wall(hallCenterX, z + halfWidth, hallLength, 0.42, h, m, true);
 		// single inside corner / baffle that creates the L-turn before the room opens up
 		const cornerZ = turnPositive ? z - 1.3 : z + 1.3;
-		wall(71.65, cornerZ, 0.42, 2.7, h, m(2.7), true);
+		wall(71.65, cornerZ, 0.42, 2.7, h, m, true);
+		if (linac) {
+			panels(hallCenterX, z - halfWidth, hallLength, true);
+			panels(hallCenterX, z + halfWidth, hallLength, true);
+			panels(71.65, cornerZ, 2.7, false);
+		}
 		// floor guidance stripe showing straight hall and corner turn
 		const stripe = box(7.05, 0.02, 0.22, std(0xff737b, 0.52, 0.02), 67.8, 0.07, z);
 		scene.add(stripe);
