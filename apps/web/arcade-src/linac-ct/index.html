@@ -9240,6 +9240,36 @@
 			body.linac-console-view .rtv2d-sidebar {
 				overflow: visible;
 			}
+			/* Held machine keys (src/console-keys.ts): a press-and-hold must not scroll or select */
+			body.linac-console-view #rtv2MachinePanel [data-console-target],
+			#consoleMoveToField {
+				touch-action: none;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+			body.linac-console-view #rtv2MachinePanel .console-move-title {
+				margin-top: 7px;
+			}
+			#consoleMoveToField {
+				width: 100%;
+				min-height: 30px;
+				margin: 0;
+				padding: 4px 6px;
+				border: 1px solid #67b8e9;
+				border-radius: 3px;
+				background: linear-gradient(#2b6a95, #1f5174);
+				color: #fff;
+				font-size: 9px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			#consoleMoveToField:hover {
+				filter: brightness(1.13);
+			}
+			#consoleMoveToField.active {
+				background: #3a8fc6;
+				box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+			}
 			/* Below the widest panels, the Imaging / Room keys and the extra workflows go two to a row
 			   so their labels fit */
 			@media (max-width: 1400px) {

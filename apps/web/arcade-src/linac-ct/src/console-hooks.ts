@@ -38,7 +38,15 @@ export function consoleEvent(e: ConsoleEvent): void {
 	sink?.event(e);
 }
 
+let mistakes = 0;
+
 /** The console just refused an action; `message` is what the console shows the learner. */
 export function consoleMistake(code: string, message: string): void {
+	mistakes++;
 	sink?.mistake(code, message);
+}
+
+/** How many actions the console has refused so far (a held key stops at a refusal). */
+export function consoleMistakeCount(): number {
+	return mistakes;
 }

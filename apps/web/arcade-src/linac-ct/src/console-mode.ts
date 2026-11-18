@@ -8,7 +8,8 @@
    each step the workflow reports through console-hooks.ts, with every refused action as a
    `mistake` that is also shown in the console's refusal bar. In: rtapps-linac-open switches
    workspace the way the chart's own buttons do; rtapps-linac-room sets the vault door the door
-   interlock reads. Started by main.ts once the app has booted. */
+   interlock reads. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
+   Started by main.ts once the app has booted. */
 import type {
 	LinacPose,
 	LinacToCenterMessage,
@@ -33,6 +34,7 @@ import {
 	setConsoleSink
 } from './console-hooks';
 import { consoleShell, shellSettled } from './console-patch';
+import { installConsoleKeys } from './console-keys';
 import { TREATMENT_CASES } from './delivery/cases';
 import { renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
 import { activeIGRTTolerances } from './delivery/stereotactic';
@@ -219,6 +221,7 @@ export function startConsoleMode() {
 	consoleShell.onChartOpened(() => (lastWorkflow = 'setup'));
 	shellSettled.then(() => {
 		settled = true;
+		installConsoleKeys();
 		post({ type: 'rtapps-linac-ready', scenario: CONSOLE.scenario });
 		tick();
 		setInterval(tick, STATE_TICK_MS);
