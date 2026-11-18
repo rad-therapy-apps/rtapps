@@ -62,13 +62,14 @@ let rotor = 0,
 	lastTick = 0,
 	feedCamera: THREE.PerspectiveCamera | null = null;
 
-/** The camera the CT console panel shows as its room feed: high in the CT room's corner by the
-    control window, looking at the scanner and the length of the table. */
+/** The camera the CT console panel shows as its room feed: high on the CT room's control-window
+    wall (x 36), between the window and the door, looking at the gantry's face and the length of
+    the table. 16:9; the panel may set its own aspect. */
 export function ctRoomFeedCamera(): THREE.Camera {
 	if (!feedCamera) {
 		feedCamera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 220);
-		feedCamera.position.set(36.6, 2.75, -14.6);
-		feedCamera.lookAt(42.2, 1.15, -9.5);
+		feedCamera.position.set(36.5, 2.9, -6.4);
+		feedCamera.lookAt(42.6, 1.1, -10.2);
 		feedCamera.updateMatrixWorld();
 	}
 	return feedCamera;
