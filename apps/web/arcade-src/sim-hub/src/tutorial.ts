@@ -392,7 +392,8 @@ const ACTIONS: Record<StepAction, () => void> = {
 			1.2
 		);
 	},
-	// queued behind the walk round the couch: the leaving line is a cue, said as this walk starts
+	// queued behind the walk round the couch: the leaving line is a cue, said as this walk starts.
+	// Jamie stands behind the operators' chairs, clear of the console's E target
 	jamieToControl: () => {
 		const v = JOURNEY.vaultTherapist;
 		moveJourneyActor(
@@ -401,8 +402,8 @@ const ACTIONS: Record<StepAction, () => void> = {
 			'linaccontrol',
 			at(WORLD.jamieControl),
 			() => {
-				v.rotation.y = -Math.PI / 2; // facing the console
-				poseCharacter(v, 'console');
+				v.rotation.y = -Math.PI / 2; // facing the console's screens
+				poseCharacter(v, 'neutral');
 			},
 			1.88,
 			{ cues: [{ at: 0, text: LINES.jamieLeaving, ms: 10000 }] }

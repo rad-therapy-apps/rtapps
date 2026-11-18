@@ -4,8 +4,9 @@
    step starts, is triggered and completes. The decision wording and the reasons come from the
    staff and journey text (interact.ts STAFF_GUIDES, journey.ts JOURNEY_META and the journey's
    lines). Plain data, so its spec runs without the scene. Positions are world [x, z] in metres;
-   the escort and Jamie's finals are the journey's own (journey.ts), so their routes are the ones
-   the NPC check walks. */
+   the escort and Jamie's vault finals are the journey's own (journey.ts), so their routes are the
+   ones the NPC check walks. Jamie's spot in LINAC Control is the Tutorial's own (the tutorial check
+   walks it against the walls). */
 import type { Pt } from './tutorial-math';
 
 export type Role = 'patient' | 'therapist';
@@ -60,8 +61,11 @@ export const WORLD = {
 	/** Jamie Williams across the couch: on the line from the vault graph's node off the couch's -x
 	    end (room-routes.ts vault1 node 6) to Elena Torres's place. */
 	jamieAcross: [76.3, -20.0] as Pt,
-	/** Jamie at the console, and back in the vault (journey.ts, the vault therapist's finals). */
-	jamieControl: [45.56, 8.6] as Pt,
+	/** Jamie in LINAC Control, behind the operators' chairs facing the console (the journey's spot,
+	    45.56, 8.6, is in the aisle in front of the desk, where E would talk to Jamie instead of
+	    opening the console), and back in the vault (journey.ts, the vault therapist's final). Off
+	    room-routes.ts linaccontrol node 6, so the walk in keeps behind the chairs. */
+	jamieControl: [47.7, 10.3] as Pt,
 	jamieBack: [76.3, -16.0] as Pt,
 	/** The eye above the seat top when seated: standing eye 1.87 - hip 1.06 + hip to pelvis 0.06. */
 	seatedEyeAboveSeat: 0.87,

@@ -141,6 +141,16 @@ describe('Chapter 1 steps', () => {
 		for (const s of CHAPTER_1) if (s.afterSeconds) expect(s.trigger, `step ${s.n}`).toBe('pressE');
 	});
 
+	it('puts Jamie Williams behind the player at the console desk, never in front of it', () => {
+		// the player faces the desk (-x) from its stand line: Jamie is behind them, out of E's view,
+		// and farther from them than the desk edge is
+		const [jx] = WORLD.jamieControl,
+			standX = WORLD.console.stand[0],
+			edgeX = WORLD.console.a[0];
+		expect(jx).toBeGreaterThan(standX + 1);
+		expect(jx - standX).toBeGreaterThan(standX - edgeX);
+	});
+
 	it('uses only the actions tutorial.ts performs', () => {
 		for (const s of CHAPTER_1)
 			for (const a of [...(s.onStart ?? []), ...(s.onTrigger ?? []), ...(s.onComplete ?? [])])
