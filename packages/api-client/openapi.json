@@ -3363,7 +3363,7 @@
   "paths": {
     "/api/v1/activities/by-arcade-slug/{slug}": {
       "get": {
-        "description": "The `by-sdk-slug` resolver for plain arcade games, which carry only an\n`arcade_slug` in their config (no SDK scoring, so no `sdk_slug`). Same filters and\nsame 404 contract; added for the Simulator page, whose gantry-game entry is one of\nthese. If several published externals share an `arcade_slug` (linac-ct does), the\nfirst row wins \u2014 callers that need a specific one use `by-sdk-slug`.",
+        "description": "The `by-sdk-slug` resolver for plain arcade games, which carry only an\n`arcade_slug` in their config (no SDK scoring, so no `sdk_slug`). Same filters and\nsame 404 contract; added for the Simulator page, whose gantry-game entry is one of\nthese. If several published externals share an `arcade_slug` (sim-hub does), the\nfirst row wins \u2014 callers that need a specific one use `by-sdk-slug`.",
         "operationId": "resolve_arcade_slug_api_v1_activities_by_arcade_slug__slug__get",
         "parameters": [
           {
