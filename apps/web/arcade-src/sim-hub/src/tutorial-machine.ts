@@ -45,6 +45,9 @@ export interface TutorialState {
 	misses: number;
 	/** How many of the console step's events (ConsoleTask.done) have come, in order. */
 	progress: number;
+	/** This step has opened its console: only then do the console's events count for it (not the
+	    last step's, still open for its close-out). */
+	consoleOpened: boolean;
 	/** The console step's last miss feedback, kept in the hint line while the console is closed. */
 	missHint: string | null;
 	/** The console's beam as the step's world actions last showed it (ConsoleTask.beam). */
@@ -98,6 +101,8 @@ export type Effect =
 	| { type: 'openConsole'; workspace: LinacWorkspace }
 	/** The console step is done: close the console after a beat (tutorial.ts). */
 	| { type: 'closeConsole' }
+	/** The console step is done: "Correct." and why, in the hint line for a few seconds. */
+	| { type: 'correct'; text: string }
 	/** `kind`: the line is a console step's miss feedback. */
 	| { type: 'hint'; text: string | null; kind?: MissKind }
 	| { type: 'roleChange'; role: Role }
@@ -111,6 +116,7 @@ export const OFF: TutorialState = {
 	step: 0,
 	misses: 0,
 	progress: 0,
+	consoleOpened: false,
 	missHint: null,
 	beamOn: false,
 	resolved: false,
@@ -235,15 +241,20 @@ export function reduceTutorial(
 			}
 			if (cur.console) {
 				fx.push({ type: 'openConsole', workspace: cur.console.workspace });
-				return out({ ...s, phase: 'console' });
+				// the walking and E hints are done with; a miss's hint stays for the reopened console
+				const hint = s.missHint;
+				if (hint !== s.hint) fx.push({ type: 'hint', text: hint });
+				return out({ ...s, phase: 'console', consoleOpened: true, hint });
 			}
 			return out(trigger(s));
 		}
 		case 'linac': {
-			// only the current console step's console counts, open or closed (a beam the player left
-			// running still completes the step)
+			// only the console this step opened counts, open or closed (closing the panel holds the beam,
+			// and reopening it lets the player resume); the last step's, still open for its close-out,
+			// does not
 			const task = cur?.console;
-			if (!task || (s.phase !== 'console' && s.phase !== 'active')) return out(s);
+			if (!task || !s.consoleOpened || (s.phase !== 'console' && s.phase !== 'active'))
+				return out(s);
 			const outcome = consoleOutcome(ev.event, task.done[s.progress]);
 			if (outcome === 'miss') {
 				const misses = s.misses + 1,
@@ -254,13 +265,18 @@ export function reduceTutorial(
 			if (outcome !== 'progress') return out(s);
 			const progress = s.progress + 1;
 			if (progress < task.done.length) return out({ ...s, progress });
-			fx.push({ type: 'closeConsole' });
+			fx.push({ type: 'closeConsole' }, { type: 'correct', text: `Correct. ${task.reason}` });
 			return out(trigger({ ...s, progress, phase: 'active' }));
 		}
 		case 'beam': {
 			// the step's boards follow the console's beam: on, and off between fields
 			const beam = cur?.console?.beam;
-			if (!beam || (s.phase !== 'console' && s.phase !== 'active') || ev.on === s.beamOn)
+			if (
+				!beam ||
+				!s.consoleOpened ||
+				(s.phase !== 'console' && s.phase !== 'active') ||
+				ev.on === s.beamOn
+			)
 				return out(s);
 			actions([ev.on ? beam.on : beam.off]);
 			return out({ ...s, beamOn: ev.on });

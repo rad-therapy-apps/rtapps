@@ -52,7 +52,7 @@ import { setTutorialAvailable } from './menu';
 import { CHAPTER_1, LINES, ROLES, TUTORIAL_TIMING, WORLD } from './tutorial-steps';
 import type { Role, Step, StepAction } from './tutorial-steps';
 import { OFF, progressOf, reduceTutorial } from './tutorial-machine';
-import type { Effect, TutorialEvent, TutorialState } from './tutorial-machine';
+import type { Effect, MissKind, TutorialEvent, TutorialState } from './tutorial-machine';
 import {
 	ESCORT_WAIT_R,
 	MARKER_SWITCH_R,
@@ -123,10 +123,15 @@ let dialogOpen = false,
 	walkFade = false,
 	endOpen = false;
 let lastAnswer: string | null = null;
-/** The console the tutorial asked for and has open (openStepConsole), and whether Jordan is on the
-    Vault 1 monitors (showJordanOnVaultMonitors). */
-let consoleShown: { kind: 'linac'; workspace: LinacWorkspace } | null = null;
+/** The console the tutorial asked for and has open (openStepConsole; `fresh`: its page reloaded
+    for this play of the chapter), whether the next opening asks for a fresh page, and whether
+    Jordan is on the Vault 1 monitors (showJordanOnVaultMonitors). */
+let consoleShown: { kind: 'linac'; workspace: LinacWorkspace; fresh: boolean } | null = null;
+let freshConsole = true;
 let jordanOnMonitors = false;
+/** A console step's "Correct." line while it shows, and the hint line to put back after it. */
+let correctLine: string | null = null;
+let hintAfter: { text: string | null; kind?: MissKind } = { text: null };
 const timers = new Set<ReturnType<typeof setTimeout>>();
 let route: Pt[] = [];
 let stopIdx = 1;
@@ -216,8 +221,22 @@ function perform(e: Effect): void {
 			return;
 		}
 		case 'hint':
+			// held under a "Correct." line until it goes, unless it is a miss's
+			hintAfter = { text: e.text, kind: e.kind };
+			if (correctLine && !e.kind) return;
+			correctLine = null;
 			hud.setHint(e.text, e.kind);
 			return;
+		case 'correct': {
+			const line = (correctLine = e.text);
+			hud.setHint(line, 'correct');
+			after(TUTORIAL_TIMING.correctMs, () => {
+				if (correctLine !== line) return;
+				correctLine = null;
+				hud.setHint(hintAfter.text, hintAfter.kind);
+			});
+			return;
+		}
 		case 'roleChange':
 			roleChange(e.role);
 			return;
@@ -228,11 +247,14 @@ function perform(e: Effect): void {
 }
 
 /* ---- the LINAC console and the Vault 1 monitors (console-panel.ts and vault-linac.ts) ---- */
-/** Every console step opens the console here: the LINAC console, tutorial scenario, at `workspace`.
-    The game is not paused; the tracker docks on the panel for the console hints. */
+/** Every console step opens the console here: the LINAC console, tutorial scenario, at `workspace`;
+    the first opening of each play of the chapter reloads its page, so Jordan is not already
+    checked in from an earlier play. The game is not paused; the tracker docks on the panel for the
+    console hints. */
 function openStepConsole(workspace: LinacWorkspace): void {
-	consoleShown = { kind: 'linac', workspace };
-	openConsole('linac', { workspace, scenario: 'tutorial' });
+	consoleShown = { kind: 'linac', workspace, fresh: freshConsole };
+	openConsole('linac', { workspace, scenario: 'tutorial', fresh: freshConsole });
+	freshConsole = false;
 	hud.dockOnConsole(true);
 }
 function closeStepConsole(): void {
@@ -901,6 +923,7 @@ const scripted = () => [
 function startTutorial(): void {
 	if (active) exitTutorial();
 	ensureAnchors();
+	freshConsole = true;
 	resetTreatmentJourney(true);
 	active = true;
 	JOURNEY.patient.visible = false; // the player is Jordan
@@ -920,6 +943,7 @@ function exitTutorial(): void {
 	hud.hideTutorialHud();
 	dialogOpen = roleCardOpen = walkFade = endOpen = false;
 	lastAnswer = null;
+	correctLine = null;
 	closeStepConsole();
 	showJordanOnVaultMonitors(false);
 	setPaused('tutorial', false);
@@ -1000,6 +1024,7 @@ function installCheckHook(): void {
 				seated: !!seatedAt,
 				vaultHeld,
 				console: consoleShown,
+				correct: correctLine,
 				jordanOnMonitors,
 				dialogOpen,
 				roleCardOpen,

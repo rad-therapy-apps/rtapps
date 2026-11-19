@@ -46,7 +46,7 @@ function texts(): string[] {
 	for (const s of CHAPTER_1) {
 		out.push(s.objective, s.target.place, s.target.name, ...s.hints);
 		if (s.target.label) out.push(s.target.label);
-		if (s.console) out.push(...s.console.hints, s.console.reveal);
+		if (s.console) out.push(...s.console.hints, s.console.reveal, s.console.reason);
 		for (const l of s.exchange ?? []) out.push(l.who, l.text);
 		const d = s.decision;
 		if (d) {
@@ -125,7 +125,8 @@ describe('Chapter 1 steps', () => {
 			expect(s.decision ?? s.exchange ?? s.afterSeconds, `step ${s.n}`).toBeUndefined();
 			const c = s.console!;
 			expect(c.hints[0], `step ${s.n}`).not.toBe(c.hints[1]);
-			for (const l of [...c.hints, c.reveal]) expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
+			for (const l of [...c.hints, c.reveal, c.reason])
+				expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
 		}
 	});
 

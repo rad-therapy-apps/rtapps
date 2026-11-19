@@ -12,7 +12,6 @@
    lookup). */
 import type { Decision, ExchangeLine, RoleInfo } from './tutorial-steps';
 import type { FeedbackKind } from './tutorial-math';
-import type { MissKind } from './tutorial-machine';
 
 export interface HudHandlers {
 	answer(id: string): void;
@@ -93,8 +92,9 @@ export function showTracker(v: TrackerView | null): void {
 	placeDock();
 }
 
-/** The hint line; `kind` styles a console step's miss feedback as the decisions' feedback is. */
-export function setHint(text: string | null, kind?: MissKind): void {
+/** The hint line; `kind` styles a console step's miss feedback or its "Correct." line as a
+    decision's feedback is. */
+export function setHint(text: string | null, kind?: FeedbackKind): void {
 	E.tutHint.textContent = text ?? '';
 	E.tutHint.className = `tut-hint${text ? ' show' : ''}${text && kind ? ` ${kind}` : ''}`;
 	placeDock();
@@ -116,8 +116,9 @@ export function dockOnConsole(on: boolean): void {
 	placeEdge(null);
 	placeDock();
 }
-/* Along the bottom of the frame area, inside its border; the console's page is shortened by the
-   strip's height (index.html, body.tut-docked), which changes with the hint line. */
+/* Along the bottom of the frame area, inside its border. The strip's height is fixed (index.html,
+   --tut-dock-h: two lines of hint) and the console's page is shortened by it, so a new hint never
+   makes the console page reflow. */
 function placeDock(): void {
 	if (!docked || !consoleFrames) return;
 	const r = consoleFrames.getBoundingClientRect(),
@@ -125,7 +126,6 @@ function placeDock(): void {
 	s.left = `${r.left + consoleFrames.clientLeft}px`;
 	s.width = `${consoleFrames.clientWidth}px`;
 	s.bottom = `${innerHeight - r.bottom}px`;
-	document.body.style.setProperty('--tut-dock-h', `${E.tutTracker.offsetHeight}px`);
 }
 
 export function setDistance(text: string): void {
