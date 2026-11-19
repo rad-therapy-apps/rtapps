@@ -38,6 +38,7 @@ import {
 	moveJourneyActor,
 	resetTreatmentJourney,
 	journeySpeech,
+	clearJourneySpeech,
 	journeyIntercom,
 	workflowTransitions
 } from './journey';
@@ -75,10 +76,9 @@ import {
 } from './tutorial-math';
 import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
-import { linacEvents, linacPose, panelOpen } from './console-bus';
+import { linacEvents, linacPose, panelOpen, vaultMonitorPatient } from './console-bus';
 import { closeConsole, openConsole } from './console-panel';
 import { ROOM_WORKFLOW } from './journey';
-import { setVaultMonitorPatient } from './vault-linac';
 import { TUTORIAL_PATIENTS } from '../../shared/console-protocol';
 import type { LinacEvent, LinacPose, LinacWorkspace } from '../../shared/console-protocol';
 
@@ -185,6 +185,7 @@ function perform(e: Effect): void {
 	switch (e.type) {
 		case 'showStep': {
 			showTrackerFor(CHAPTER_1[e.step - 1]);
+			clearJourneySpeech(JOURNEY.patient);
 			route = [];
 			routeFor = '';
 			return;
@@ -244,7 +245,7 @@ function closeStepConsole(): void {
     until the tutorial ends; off, the monitors go back to naming whoever lies on the couch. */
 function showJordanOnVaultMonitors(on: boolean): void {
 	jordanOnMonitors = on;
-	setVaultMonitorPatient(on ? ROLES.patient.name : null);
+	vaultMonitorPatient.emit(on ? ROLES.patient.name : null);
 }
 /** The player closed the console panel before the step was done: the step stays, E opens it again. */
 function consolePanelClosed(): void {
@@ -422,6 +423,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 	},
 	// the journey's vault setup pose: Jordan's figure gives way to the couch patient, in a gown
 	jordanOnCouch: () => {
+		clearJourneySpeech(JOURNEY.patient);
 		JOURNEY.patient.visible = false;
 		JOURNEY.couchPatient.visible = true;
 		setPatientGown(JOURNEY.couchPatient, true);
