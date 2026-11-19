@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	CHAPTER_1,
+	JORDAN_MRN,
 	LINES,
 	ROLES,
 	WAIT_FOR_JAMIE,
@@ -9,11 +10,13 @@ import {
 	eHintText
 } from './tutorial-steps';
 import type { StepAction } from './tutorial-steps';
+import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
 
 const ACTIONS: StepAction[] = [
 	'pickChair',
 	'sitPlayer',
 	'intercomToControl',
+	'jordanOnMonitors',
 	'jordanConfirms',
 	'escortToVault',
 	'jordanOnCouch',
@@ -23,6 +26,7 @@ const ACTIONS: StepAction[] = [
 	'holdVaultClosed',
 	'shiftApplied',
 	'beamOn',
+	'betweenFields',
 	'beamOff',
 	'releaseVaultDoor',
 	'jamieBackIn',
@@ -42,7 +46,7 @@ function texts(): string[] {
 	for (const s of CHAPTER_1) {
 		out.push(s.objective, s.target.place, s.target.name, ...s.hints);
 		if (s.target.label) out.push(s.target.label);
-		if (s.countdown) out.push(s.countdown);
+		if (s.console) out.push(...s.console.hints, s.console.reveal);
 		for (const l of s.exchange ?? []) out.push(l.who, l.text);
 		const d = s.decision;
 		if (d) {
@@ -93,8 +97,46 @@ describe('Chapter 1 steps', () => {
 		expect(CHAPTER_1.filter((s) => s.trigger === 'escortArrived').map((s) => s.n)).toEqual([5, 11]);
 	});
 
-	it('has the decisions at steps 3, 4, 6 and 8', () => {
-		expect(CHAPTER_1.filter((s) => s.decision).map((s) => s.n)).toEqual([3, 4, 6, 8]);
+	it('has the decision at step 4 and the console at steps 3, 6, 8 and 9', () => {
+		expect(CHAPTER_1.filter((s) => s.decision).map((s) => s.n)).toEqual([4]);
+		expect(CHAPTER_1.filter((s) => s.console).map((s) => s.n)).toEqual([3, 6, 8, 9]);
+	});
+
+	it('opens the console at each console step’s workspace, done on Jordan’s events', () => {
+		const at = (n: number) => CHAPTER_1[n - 1];
+		expect([3, 6, 8, 9].map((n) => at(n).console!.workspace)).toEqual([
+			'queue',
+			'setup',
+			'igrt',
+			'delivery'
+		]);
+		expect([3, 6, 8, 9].map((n) => at(n).console!.done)).toEqual([
+			['chart-opened'],
+			['setup-complete'],
+			['shift-applied', 'alignment-verified'],
+			['treatment-complete']
+		]);
+		expect(JORDAN_MRN).toBe(TUTORIAL_PATIENTS.jordan.mrn);
+		// the storyboard's E prompts: at the console desk, and at the couch
+		for (const n of [3, 8, 9]) expect(at(n).target.label).toBe('Open the treatment console');
+		expect(at(6).target.label).toBe('Open Patient Setup');
+		for (const s of CHAPTER_1.filter((x) => x.console)) {
+			expect(s.trigger, `step ${s.n}`).toBe('pressE');
+			expect(s.decision ?? s.exchange ?? s.afterSeconds, `step ${s.n}`).toBeUndefined();
+			const c = s.console!;
+			expect(c.hints[0], `step ${s.n}`).not.toBe(c.hints[1]);
+			for (const l of [...c.hints, c.reveal]) expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
+		}
+	});
+
+	it('keeps step 6’s world actions for when the setup is complete', () => {
+		expect(CHAPTER_1[5].onTrigger).toEqual(['jordanOnCouch', 'lasersOn', 'jamieAcrossCouch']);
+		expect(CHAPTER_1[2].onTrigger).toEqual(['jordanOnMonitors']);
+		expect(CHAPTER_1[7].onTrigger).toEqual(['shiftApplied']);
+		expect(CHAPTER_1[8].onComplete).toEqual(['beamOff']);
+		// the boards follow the console's beam at step 9 only
+		expect(CHAPTER_1.filter((s) => s.console?.beam).map((s) => s.n)).toEqual([9]);
+		expect(CHAPTER_1[8].console!.beam).toEqual({ on: 'beamOn', off: 'betweenFields' });
 	});
 
 	it('gives every decision exactly one correct answer and three feedback lines', () => {
@@ -113,37 +155,54 @@ describe('Chapter 1 steps', () => {
 		}
 	});
 
-	it('does not put the correct answer in the same place in every decision', () => {
-		const at = CHAPTER_1.filter((s) => s.decision).map((s) =>
-			s.decision!.options.findIndex((o) => o.correct)
-		);
-		expect(new Set(at).size).toBeGreaterThan(1);
+	it('does not put a decision’s correct answer first', () => {
+		for (const s of CHAPTER_1.filter((x) => x.decision))
+			expect(s.decision!.options[0].correct, `step ${s.n}`).toBeUndefined();
 	});
 
-	it('tells Jordan’s identity at check-in, which the schedule answer then matches', () => {
-		const said = (CHAPTER_1[0].exchange ?? []).map((l) => l.text).join(' ');
+	it('tells Jordan’s identity at check-in, which the console’s schedule then matches', () => {
+		const j = TUTORIAL_PATIENTS.jordan,
+			said = (CHAPTER_1[0].exchange ?? []).map((l) => l.text).join(' ');
 		expect(said).toContain('Jordan Ellis');
-		expect(said).toContain('March 14, 1968');
-		expect(said).toContain('Vault 1');
-		const right = CHAPTER_1[2].decision!.options.find((o) => o.correct)!.text;
-		expect(right).toContain('March 14, 1968');
-		expect(right).toContain('Vault 1');
+		expect(said).toContain(j.born);
+		expect(said).toContain(j.vault);
+		expect(said).toContain(j.time);
+		const schedule = CHAPTER_1[2].console!;
+		expect(schedule.hints[1]).toContain(j.born);
+		for (const v of [j.name, j.born, j.vault, j.time]) expect(schedule.reveal).toContain(v);
+		// the look-alikes are told apart by the date of birth and the vault
+		expect(TUTORIAL_PATIENTS.jordanLookalike.born).not.toBe(j.born);
+		expect(TUTORIAL_PATIENTS.jody.vault).not.toBe(j.vault);
 		expect(CHAPTER_1[3].decision!.options.find((o) => o.correct)!.text).toBe(
 			'Full name and date of birth'
 		);
-		expect(CHAPTER_1[7].decision!.options.find((o) => o.correct)!.text).toMatch(/^Apply the/);
+		expect(CHAPTER_1[7].console!.hints[1]).toContain(`${TUTORIAL_SHIFT_MM} mm`);
 	});
 
-	it('waits 6 s after sitting down and counts down 10 s of beam', () => {
+	it('waits 6 s after sitting down; the console runs the beam', () => {
 		expect(CHAPTER_1[1].afterSeconds).toBe(6);
-		expect(CHAPTER_1[8].afterSeconds).toBe(10);
-		expect(CHAPTER_1[8].countdown).toContain('{s}');
+		expect(CHAPTER_1.filter((s) => s.afterSeconds).map((s) => s.n)).toEqual([2]);
 		for (const s of CHAPTER_1) if (s.afterSeconds) expect(s.trigger, `step ${s.n}`).toBe('pressE');
+	});
+
+	it('puts Jamie Williams behind the player at the console desk, never in front of it', () => {
+		// the player faces the desk (-x) from its stand line: Jamie is behind them, out of E's view,
+		// and farther from them than the desk edge is
+		const [jx] = WORLD.jamieControl,
+			standX = WORLD.console.stand[0],
+			edgeX = WORLD.console.a[0];
+		expect(jx).toBeGreaterThan(standX + 1);
+		expect(jx - standX).toBeGreaterThan(standX - edgeX);
 	});
 
 	it('uses only the actions tutorial.ts performs', () => {
 		for (const s of CHAPTER_1)
-			for (const a of [...(s.onStart ?? []), ...(s.onTrigger ?? []), ...(s.onComplete ?? [])])
+			for (const a of [
+				...(s.onStart ?? []),
+				...(s.onTrigger ?? []),
+				...(s.onComplete ?? []),
+				...(s.console?.beam ? [s.console.beam.on, s.console.beam.off] : [])
+			])
 				expect(ACTIONS, `step ${s.n}`).toContain(a);
 	});
 

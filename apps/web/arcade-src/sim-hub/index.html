@@ -1819,6 +1819,51 @@
 			.tut-tracker.show {
 				display: block;
 			}
+			/* a console step's console is open (tutorial-hud.ts dockOnConsole): the objective and the
+			   hint line in a strip along the bottom of the console panel's frame area, above the panel
+			   (z 170) and under the fade and the role card; left, width and bottom come from the frame
+			   area, and the console's page is shortened by the strip's height */
+			.tut-tracker.docked {
+				z-index: 225;
+				top: auto;
+				padding: 6px 12px;
+				border: 0;
+				border-top: 1px solid var(--stroke);
+				border-radius: 0 0 0 17px;
+				background: #091117;
+				box-shadow: none;
+			}
+			.tut-tracker.docked.show {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.tut-tracker.docked .tut-who,
+			.tut-tracker.docked .tut-bar,
+			.tut-tracker.docked .tut-meta {
+				display: none;
+			}
+			.tut-tracker.docked .tut-lab {
+				flex: none;
+				margin: 0;
+			}
+			.tut-tracker.docked .tut-txt {
+				flex: 0 1 auto;
+				max-width: 38%;
+				margin: 0;
+				font-size: 15px;
+			}
+			.tut-tracker.docked .tut-hint {
+				flex: 1 1 0;
+				min-width: 0;
+				margin: 0;
+				padding: 4px 8px;
+				font-size: 13.5px;
+				line-height: 1.35;
+			}
+			body.tut-docked #consolePanel .cpFrame {
+				height: calc(100% - var(--tut-dock-h, 0px));
+			}
 			.tut-who {
 				display: flex;
 				gap: 10px;
@@ -1874,6 +1919,15 @@
 			}
 			.tut-hint.show {
 				display: block;
+			}
+			/* a console step's miss feedback, coloured as a decision's (.tut-feedback) */
+			.tut-hint.hint1,
+			.tut-hint.hint2 {
+				border-left-color: var(--red);
+				background: rgba(255, 106, 115, 0.12);
+			}
+			.tut-hint.reveal {
+				background: rgba(255, 188, 99, 0.16);
 			}
 			.tut-bar {
 				height: 6px;

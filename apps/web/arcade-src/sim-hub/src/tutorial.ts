@@ -3,11 +3,17 @@
    resets the treatment journey (resetTreatmentJourney(true)), hides the figure the player is being
    and plays the steps: the tracker, the door-by-door marker (built with the NPC route builder
    movementPathFor, so it goes through doors and room graphs, never walls), the check-in and the
-   decisions, the role change, Jordan's escorts with their waits, the vault door, the beam and the
-   end card. Leaving play mode 'tutorial' resets the journey again, so the world is left as the NPC
-   check expects. Outside the tutorial nothing here runs: updateTutorial returns at once, and the E
-   targets are made on the first start and disabled otherwise. With ?npccheck it exposes
-   window.__TUTORIAL for scripts/sim-hub-tutorial-check.mjs. */
+   decisions, the role change, Jordan's escorts with their waits, the vault door and the end card.
+   The console steps (3, 6, 8, 9; docs/specs/2026-11-18-consoles-in-center-design.md, part 6) open
+   the LINAC console in its panel (console-panel.ts) through openStepConsole and listen to it on
+   console-bus.ts (linacEvents; linacPose, whose beam the status boards show at step 9; and
+   panelOpen for the player closing it early); Jordan's name goes on the Vault 1 monitors through
+   showJordanOnVaultMonitors. Leaving play mode 'tutorial' resets the journey again, so the world is
+   left as the NPC check expects. Outside the tutorial nothing here runs: updateTutorial returns at
+   once, the console events are ignored, and the E targets are made on the first start and disabled
+   otherwise. With ?npccheck it exposes window.__TUTORIAL for scripts/sim-hub-tutorial-check.mjs,
+   which drives the console steps by emitting their events on linacEvents (the console page never
+   loads there). */
 import * as THREE from 'three';
 import { S } from './state';
 import { camera, scene } from './scene';
@@ -69,6 +75,12 @@ import {
 } from './tutorial-math';
 import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
+import { linacEvents, linacPose, panelOpen } from './console-bus';
+import { closeConsole, openConsole } from './console-panel';
+import { ROOM_WORKFLOW } from './journey';
+import { setVaultMonitorPatient } from './vault-linac';
+import { TUTORIAL_PATIENTS } from '../../shared/console-protocol';
+import type { LinacEvent, LinacPose, LinacWorkspace } from '../../shared/console-protocol';
 
 /** A journey move as equipment.ts updateWorkflowTransitions runs it (journey.ts beginJourneyMove). */
 interface Move {
@@ -111,6 +123,10 @@ let dialogOpen = false,
 	walkFade = false,
 	endOpen = false;
 let lastAnswer: string | null = null;
+/** The console the tutorial asked for and has open (openStepConsole), and whether Jordan is on the
+    Vault 1 monitors (showJordanOnVaultMonitors). */
+let consoleShown: { kind: 'linac'; workspace: LinacWorkspace } | null = null;
+let jordanOnMonitors = false;
 const timers = new Set<ReturnType<typeof setTimeout>>();
 let route: Pt[] = [];
 let stopIdx = 1;
@@ -187,8 +203,19 @@ function perform(e: Effect): void {
 		case 'closeDialog':
 			closeDialog();
 			return;
+		case 'openConsole':
+			openStepConsole(e.workspace);
+			return;
+		case 'closeConsole': {
+			// after a beat, so the player sees the result; not a console opened since (step 8 to 9)
+			const shown = consoleShown;
+			after(TUTORIAL_TIMING.consoleCloseMs, () => {
+				if (consoleShown === shown) closeStepConsole();
+			});
+			return;
+		}
 		case 'hint':
-			hud.setHint(e.text);
+			hud.setHint(e.text, e.kind);
 			return;
 		case 'roleChange':
 			roleChange(e.role);
@@ -197,6 +224,34 @@ function perform(e: Effect): void {
 			openEnd();
 			return;
 	}
+}
+
+/* ---- the LINAC console and the Vault 1 monitors (console-panel.ts and vault-linac.ts) ---- */
+/** Every console step opens the console here: the LINAC console, tutorial scenario, at `workspace`.
+    The game is not paused; the tracker docks on the panel for the console hints. */
+function openStepConsole(workspace: LinacWorkspace): void {
+	consoleShown = { kind: 'linac', workspace };
+	openConsole('linac', { workspace, scenario: 'tutorial' });
+	hud.dockOnConsole(true);
+}
+function closeStepConsole(): void {
+	if (!consoleShown) return;
+	consoleShown = null; // first, so the panel's close is not taken for the player's
+	hud.dockOnConsole(false);
+	closeConsole();
+}
+/** Jordan Ellis as the patient on the Vault 1 treatment monitors, from the chart opening at step 3
+    until the tutorial ends; off, the monitors go back to naming whoever lies on the couch. */
+function showJordanOnVaultMonitors(on: boolean): void {
+	jordanOnMonitors = on;
+	setVaultMonitorPatient(on ? ROLES.patient.name : null);
+}
+/** The player closed the console panel before the step was done: the step stays, E opens it again. */
+function consolePanelClosed(): void {
+	if (!consoleShown) return;
+	consoleShown = null;
+	hud.dockOnConsole(false);
+	dispatch({ type: 'consoleClosed' });
 }
 
 /* ---- dialogs, the role change and the end card (each pauses the game) ---- */
@@ -335,6 +390,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 		camera.position.copy(seatedAt);
 	},
 	intercomToControl: () => journeyIntercom(PRIMARY_NPCS.lobby, LINES.intercomToControl, 9000),
+	jordanOnMonitors: () => showJordanOnVaultMonitors(true),
 	jordanConfirms: () => journeySpeech(JOURNEY.patient, LINES.jordanConfirms, 'patient', 10000),
 	escortToVault: () => {
 		workflowState('lobby', 'IN TRANSIT', 'Jordan and therapist en route to Vault 1', '#42d5cf');
@@ -392,7 +448,8 @@ const ACTIONS: Record<StepAction, () => void> = {
 			1.2
 		);
 	},
-	// queued behind the walk round the couch: the leaving line is a cue, said as this walk starts
+	// queued behind the walk round the couch: the leaving line is a cue, said as this walk starts.
+	// Jamie stands behind the operators' chairs, clear of the console's E target
 	jamieToControl: () => {
 		const v = JOURNEY.vaultTherapist;
 		moveJourneyActor(
@@ -401,8 +458,8 @@ const ACTIONS: Record<StepAction, () => void> = {
 			'linaccontrol',
 			at(WORLD.jamieControl),
 			() => {
-				v.rotation.y = -Math.PI / 2; // facing the console
-				poseCharacter(v, 'console');
+				v.rotation.y = -Math.PI / 2; // facing the console's screens
+				poseCharacter(v, 'neutral');
 			},
 			1.88,
 			{ cues: [{ at: 0, text: LINES.jamieLeaving, ms: 10000 }] }
@@ -434,6 +491,7 @@ const ACTIONS: Record<StepAction, () => void> = {
 		);
 		journeySpeech(JOURNEY.controlPartner, LINES.shiftVerified, 'staff', 10000);
 	},
+	// step 9, as the console's beam turns on and off (its pose stream)
 	beamOn: () => {
 		workflowState(
 			'vault1',
@@ -446,6 +504,15 @@ const ACTIONS: Record<StepAction, () => void> = {
 			'MONITORING',
 			'Vault 1 treatment in progress · CCTV and intercom active',
 			'#ff737b'
+		);
+	},
+	betweenFields: () => {
+		workflowState('vault1', 'BETWEEN FIELDS', 'Beam off · patient monitored remotely', '#ffb454');
+		workflowState(
+			'linaccontrol',
+			'MONITORING',
+			'Vault 1 between fields · CCTV and intercom active',
+			'#ffb454'
 		);
 	},
 	beamOff: () => {
@@ -851,6 +918,8 @@ function exitTutorial(): void {
 	hud.hideTutorialHud();
 	dialogOpen = roleCardOpen = walkFade = endOpen = false;
 	lastAnswer = null;
+	closeStepConsole();
+	showJordanOnVaultMonitors(false);
 	setPaused('tutorial', false);
 	if (seatedAt) player.pos.y = PLAYER_EYE_Y;
 	seatedAt = null;
@@ -928,6 +997,8 @@ function installCheckHook(): void {
 				active,
 				seated: !!seatedAt,
 				vaultHeld,
+				console: consoleShown,
+				jordanOnMonitors,
 				dialogOpen,
 				roleCardOpen,
 				walkFade,
@@ -953,6 +1024,21 @@ function installCheckHook(): void {
 				if (a && a.obj.position.y !== PARKED_Y) aimPlayerAt(a.obj.position);
 			},
 			pressE: () => performInteraction(),
+			/** The LINAC console's patients (shared/console-protocol.ts TUTORIAL_PATIENTS). */
+			patients: TUTORIAL_PATIENTS,
+			/** An event from the LINAC console, as console-panel.ts emits it. */
+			consoleEvent: (ev: LinacEvent) => linacEvents.emit(ev),
+			/** The player closing the console panel (its × or Esc). */
+			closePanel: () => closeConsole(),
+			/** A pose from the LINAC console, as console-panel.ts emits it. */
+			consolePose: (pose: LinacPose) => linacPose.emit(pose),
+			/** The Vault 1 and LINAC Control status boards. */
+			boards: () => ({
+				vault1: ROOM_WORKFLOW.vault1?.state ?? null,
+				linaccontrol: ROOM_WORKFLOW.linaccontrol?.state ?? null
+			}),
+			/** Whether the tracker is docked on the console panel. */
+			docked: () => document.body.classList.contains('tut-docked'),
 			answer,
 			cont: () => dispatch({ type: 'continue' }),
 			mainMenu,
@@ -987,6 +1073,15 @@ export function initTutorial(): void {
 	onPlayModeChange((m) => {
 		if (m === 'tutorial') startTutorial();
 		else if (active) exitTutorial();
+	});
+	linacEvents.on((event) => {
+		if (active) dispatch({ type: 'linac', event });
+	});
+	linacPose.on((pose) => {
+		if (active) dispatch({ type: 'beam', on: pose.beamOn });
+	});
+	panelOpen.on((kind) => {
+		if (active && kind === null) consolePanelClosed();
 	});
 	setTutorialAvailable(true);
 	installCheckHook();
