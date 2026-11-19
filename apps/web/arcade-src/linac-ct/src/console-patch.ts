@@ -292,11 +292,14 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 			syncMirror();
 			renderQueue();
 			const msg = $('rtv2ClinicalMessage');
-			// console mode has no ENTER VAULT: the player walks into Vault 1 in the center
+			// console mode has no ENTER VAULT. In the tutorial the player walks into Vault 1 for the
+			// couch; in the free scenario the couch opens only an info card, so setup is on the console
 			if (msg)
-				msg.textContent = CONSOLE.console
-					? 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; for hands-on setup at the couch, go into Vault 1.'
-					: 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; select ENTER VAULT when hands-on in-room setup is required.';
+				msg.textContent = !CONSOLE.console
+					? 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; select ENTER VAULT when hands-on in-room setup is required.'
+					: CONSOLE.scenario === 'tutorial'
+						? 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; for hands-on setup at the couch, go into Vault 1.'
+						: 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; use Patient Setup on the console for setup.';
 			chartOpenedListeners.forEach((l) => l());
 			consoleEvent({ kind: 'chart-opened', mrn: caseMrn(value) });
 		}, 80);

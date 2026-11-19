@@ -9,7 +9,7 @@
  * unpublished) or a network failure leaves the entry `null` and the page shows its "coming
  * soon" placeholder, so a missing simulator never breaks the page. The LINAC/CT console and
  * gantry game lookups went on 2026-11-11 (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md,
- * PR 2): the LINAC/CT simulators are reached through the center's doors, and the gantry game is
+ * PR 2): the LINAC/CT simulators are reached at the console desks in the center, and the gantry game is
  * archived.
  *
  * How it fits the project: `(app)/+layout.server.ts` guarantees a signed-in user. The entry

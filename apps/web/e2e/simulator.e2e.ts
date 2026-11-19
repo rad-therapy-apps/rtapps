@@ -151,7 +151,7 @@ test.describe
 		await expect(attemptRow.locator('td').nth(2)).toHaveText('75.0%');
 	});
 
-	test('room app completions record against the resolved slug, independent of the current player', async () => {
+	test('the center records completions by activity slug, independent of the current player', async () => {
 		test.setTimeout(180_000); // the room app is a heavy three.js bundle; CI's 2-core runner timed out at 90s with the SDK chain proven complete server-side (PR #71 run 1)
 
 		// The student from the test above is still signed in (same Page/context, never signed
