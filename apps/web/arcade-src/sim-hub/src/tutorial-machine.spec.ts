@@ -194,7 +194,7 @@ describe('console steps', () => {
 		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'delivery' }]);
 		r = run(r.s, {
 			type: 'linac',
-			event: { kind: 'field-delivered', mrn: JORDAN_MRN, field: 'AP', index: 1, of: 2 }
+			event: { kind: 'field-delivered', mrn: JORDAN_MRN, field: 'Right Lateral', index: 1, of: 2 }
 		});
 		expect(r.s.step).toBe(9);
 		r = run(r.s, linac('treatment-complete'));
