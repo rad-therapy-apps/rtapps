@@ -1,9 +1,10 @@
 /* The LINAC console's tutorial scenario (`?view=console&scenario=tutorial`, docs/specs/
    2026-11-18-consoles-in-center-design.md part 3): the queue holds the Tutorial's three schedule
    entries in TUTORIAL_PATIENTS, in the storyboard's order (Jordan's look-alike first, then Jordan,
-   then Jody). Jordan's case copies the app's first treatment case (3D-CRT prostate AP/PA, 6 MV,
-   Vac-Lok and knee support) under Jordan's identity, and its daily setup error makes today's check
-   images ask for the TUTORIAL_SHIFT_MM couch correction. The two look-alikes are queue rows only:
+   then Jody). Jordan's case copies the app's whole-brain case (lateral opposed, 6 MV, short head
+   mask and headrest, MV image pair; found by its site, not its place in the list) under Jordan's
+   identity, and its daily setup error makes today's check images ask for the TUTORIAL_SHIFT_MM
+   couch correction. The two look-alikes are queue rows only:
    console-patch.ts refuses to check them in or open their charts. main.ts swaps these cases in for
    TREATMENT_CASES and drops their saved R&V sessions; console-patch.ts reads the queue details
    and the refusals. Free of scene and DOM
@@ -23,8 +24,8 @@ interface TutorialEntry {
 
 /** The queue, top to bottom. */
 export const TUTORIAL_QUEUE: readonly TutorialEntry[] = [
-	{ ...TUTORIAL_PATIENTS.jordanLookalike, site: 'Prostate' },
-	{ ...TUTORIAL_PATIENTS.jordan, site: 'Prostate' },
+	{ ...TUTORIAL_PATIENTS.jordanLookalike, site: 'Whole Brain' },
+	{ ...TUTORIAL_PATIENTS.jordan, site: 'Whole Brain' },
 	{ ...TUTORIAL_PATIENTS.jody, site: 'Left Breast' }
 ];
 /** Jordan's row in TUTORIAL_QUEUE, which is also the case the app loads at boot. */
@@ -32,8 +33,9 @@ export const JORDAN_QUEUE_INDEX = TUTORIAL_QUEUE.findIndex(
 	(e) => e.mrn === TUTORIAL_PATIENTS.jordan.mrn
 );
 
-/** Today's setup error on Jordan's couch: the patient lies TUTORIAL_SHIFT_MM low, so the check
-    images ask the couch to go up by that much (linac-igrt.ts turns an error into a correction). */
+/** Today's setup error on Jordan's couch: the head lies TUTORIAL_SHIFT_MM low in the headrest, so
+    the lateral check image asks the couch to go up by that much (linac-igrt.ts turns an error into
+    a correction). */
 export const TUTORIAL_DAILY_ERROR = {
 	lat: 0,
 	lng: 0,
@@ -43,9 +45,17 @@ export const TUTORIAL_DAILY_ERROR = {
 	yaw: 0
 };
 
-/** The three tutorial cases, in TUTORIAL_QUEUE order. `base` is the app's first treatment case,
-    after main.ts has applied its immobilization rules and setup refinements; it is not changed. */
-export function buildTutorialCases(base: TreatmentCase): TreatmentCase[] {
+/** The site of the app's case that Jordan's copies. */
+export const TUTORIAL_BASE_SITE = { siteKey: 'brain', siteLabel: 'Whole Brain' } as const;
+
+/** The three tutorial cases, in TUTORIAL_QUEUE order, each a copy of the whole-brain case in
+    `cases` (the app's treatment cases, after main.ts has applied their immobilization rules and
+    setup refinements; none is changed). */
+export function buildTutorialCases(cases: readonly TreatmentCase[]): TreatmentCase[] {
+	const base = cases.find(
+		(c) => c.siteKey === TUTORIAL_BASE_SITE.siteKey && c.siteLabel === TUTORIAL_BASE_SITE.siteLabel
+	);
+	if (!base) throw new Error('The tutorial needs the whole-brain treatment case');
 	return TUTORIAL_QUEUE.map((entry) => {
 		const c: TreatmentCase = structuredClone(base);
 		c.patient = entry.name;

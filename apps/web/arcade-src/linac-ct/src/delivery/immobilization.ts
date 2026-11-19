@@ -481,12 +481,12 @@ function updateImmobilizationPatientVisuals() {
 				opacity: 0.78
 			});
 		if (id === 'headMask' || id === 'hnMask') {
+			// the shell's flattening is in its geometry, not its scale: the clearance proxies
+			// (linac-safety.ts) shrink a mesh's local box by its smallest scale, which made a scaled
+			// shell read 0.27 m nearer than it is and held lateral fields such as a whole brain's
 			const r = id === 'hnMask' ? 0.18 : 0.145,
-				m = new THREE.Mesh(
-					new THREE.SphereGeometry(r, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.7),
-					mat
-				);
-			m.scale.set(1, 0.55, 1.05);
+				shell = new THREE.SphereGeometry(r, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.7),
+				m = new THREE.Mesh(shell.scale(1, 0.55, 1.05), mat);
 			m.rotation.x = Math.PI;
 			m.position.set(0, 0.125, -0.88);
 			S.immobilizationPatientGroup.add(m);

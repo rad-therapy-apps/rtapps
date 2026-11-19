@@ -10297,10 +10297,11 @@
 			     queue     the queue as it is; the screens under it go
 			     chart     Jordan's identity, large (the chart opens as step 3 ends)
 			     setup     Patient Setup across the whole frame, with the patient's chips back on top
-			     igrt      image guidance, beside a column of the keys step 8 presses: kV Imaging, the
-			               couch's Vert / Long / Lat, Move to field and Motion Enable
+			     igrt      image guidance, beside a column of the keys step 8 presses: MV / EPID (Jordan's
+			               whole-brain plan images with the MV panel), the couch's Vert / Long / Lat, Move
+			               to field and Motion Enable
 			     delivery  the R&V delivery screen (fields, MU, interlocks), beside a column of the keys
-			               step 9 presses: Move to field, kV Imaging (to stow the arms), Motion Enable and
+			               step 9 presses: Move to field, MV / EPID (to stow the panel), Motion Enable and
 			               the beam keys
 			   Inside a step's screen there is no way off it: Home Queue and the window's Close go. */
 			body.linac-console-view.linac-tutorial-focus.tut-focus-queue.rtv2-landing
@@ -10596,7 +10597,7 @@
 					.rtv2-control-group .rtv2-advanced-workflows,
 					.rtv2-control-group:nth-child(2) > .rtv2-button-grid,
 					.rtv2-control-group:first-child
-						[data-console-target]:not([data-console-target='consoleKV']),
+						[data-console-target]:not([data-console-target='consoleMV']),
 					[data-console-target^='consoleTable'],
 					[data-console-target^='consoleRoll'],
 					[data-console-target^='consolePitch'],
@@ -10774,7 +10775,7 @@
 				span {
 				font-size: 9px !important;
 			}
-			/* image guidance: kV Imaging, the couch, then Move to field; the beam keys go */
+			/* image guidance: MV / EPID, the couch, then Move to field; the beam keys go */
 			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
 				#workflowDeskMonitor
 				:is(#rtv2EnableBeam, #rtv2BeamOn, #rtv2BeamHold) {
@@ -10872,7 +10873,7 @@
 					height: 220px;
 				}
 			}
-			/* delivery: Move to field, then kV Imaging; the couch goes */
+			/* delivery: Move to field, then MV / EPID; the couch goes */
 			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
 				#workflowDeskMonitor
 				.rtv2-control-group:nth-child(3) {
@@ -10906,6 +10907,18 @@
 				#consoleWorkflowDockBody
 				.rtv2d-body {
 				grid-template-columns: 168px minmax(0, 1fr) !important;
+			}
+			/* each field's MU under its name, so whole names such as Right Lateral fit the column */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-field-row {
+				grid-template-columns: 14px minmax(0, 1fr);
+				row-gap: 2px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-field-mu {
+				grid-column: 2;
 			}
 			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
 				#consoleWorkflowDockBody

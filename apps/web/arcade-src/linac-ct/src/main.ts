@@ -504,9 +504,9 @@ TREATMENT_CASES.forEach((c) => {
 	}
 });
 // Console mode, tutorial scenario: the queue holds only the Tutorial's three entries, built from the
-// first case now that its setup refinements are in (tutorial-cases.ts)
+// whole-brain case now that its setup refinements are in (tutorial-cases.ts)
 if (CONSOLE.scenario === 'tutorial') {
-	TREATMENT_CASES.splice(0, TREATMENT_CASES.length, ...buildTutorialCases(TREATMENT_CASES[0]));
+	TREATMENT_CASES.splice(0, TREATMENT_CASES.length, ...buildTutorialCases(TREATMENT_CASES));
 	// and every play starts with a fresh R&V record, not the last play's
 	forgetOISSessions(isTutorialSessionKey);
 }

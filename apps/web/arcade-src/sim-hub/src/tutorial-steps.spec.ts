@@ -11,6 +11,8 @@ import {
 } from './tutorial-steps';
 import type { StepAction } from './tutorial-steps';
 import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
+import { TREATMENT_CASES } from '../../linac-ct/src/delivery/cases';
+import { buildTutorialCases, JORDAN_QUEUE_INDEX } from '../../linac-ct/src/tutorial-cases';
 
 const ACTIONS: StepAction[] = [
 	'pickChair',
@@ -178,6 +180,25 @@ describe('Chapter 1 steps', () => {
 			'Full name and date of birth'
 		);
 		expect(CHAPTER_1[7].console!.hints[1]).toContain(`${TUTORIAL_SHIFT_MM} mm`);
+	});
+
+	it("names the devices, imaging and fields of Jordan's whole-brain case on the LINAC console", () => {
+		const jordan = buildTutorialCases(TREATMENT_CASES)[JORDAN_QUEUE_INDEX],
+			said = (n: number) => {
+				const c = CHAPTER_1[n - 1].console!;
+				return [...c.hints, c.reveal, c.reason].join(' ');
+			};
+		// the console shelf's names for headMask and headrest (linac-ct delivery/immobilization.ts)
+		expect(jordan.immobilization.required).toEqual(['headMask', 'headrest']);
+		expect(said(6)).toContain('short head mask');
+		expect(said(6)).toContain('headrest');
+		expect(said(6)).not.toMatch(/vac-lok|knee/i);
+		// an MV-imaged plan: the MV panel, not the kV arms
+		expect(jordan.planned.imaging).toMatch(/^MV/);
+		expect(CHAPTER_1[7].console!.hints[0]).toContain('MV / EPID');
+		expect(said(8)).not.toMatch(/\bkV\b/);
+		for (const f of jordan.fields) expect(said(9)).toContain(`${f.name.toLowerCase()} field`);
+		expect(said(9)).not.toMatch(/\b(AP|PA)\b/);
 	});
 
 	it('waits 6 s after sitting down; the console runs the beam', () => {

@@ -58,12 +58,13 @@ export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
 /** Where a patient lies on Vault 1's couch (npc.ts departmentStaff, journey.ts), from the room's
     centre: head first toward the gantry and supine, as the LINAC app's cases (HFS), and at the app's
     patient size (0.72 of the center's lying figure: 1.68 m long), so that at treatment height the
-    pelvis is under the beam and the head clears the gantry's face. vault-linac.ts parks the LINAC
-    couch 1.16 m back from its treatment position, so here the pelvis (0.5 m along the figure, x 0.72)
-    lies that far short of the isocentre (room.x + 1.2), and 0.04 m more, which keeps the head 0.02 m
-    off the gantry; the figure's footprint stays on today's couch top (LYING_SURFACES.vault1). */
+    head is at the isocentre, as in the Tutorial's whole-brain case, and the lateral beams cross it.
+    vault-linac.ts parks the LINAC couch 1.16 m back from its treatment position, so here the head's
+    centre (0.72 m along the figure, x 0.72) lies that far short of the isocentre (room.x + 1.2); the
+    figure's footprint stays on today's couch top (LYING_SURFACES.vault1) and on the LINAC's couch
+    board, and the gantry turns round the head clear of it. */
 export const VAULT1_LYING = {
-	dx: 1.2 - 1.16 - 0.04 + 0.5 * 0.72,
+	dx: 1.2 - 1.16 - 0.72 * 0.72,
 	dz: 0,
 	ry: Math.PI,
 	scale: 0.72

@@ -31,7 +31,7 @@ import {
 } from './walk';
 import { registerInteractable, performInteraction } from './interact';
 import { movementPathFor, seatNear, seatActor, actorHasTransition, stepRise } from './npc-behavior';
-import { poseCharacter, faceNpcToward, setPatientGown } from './npc';
+import { poseCharacter, faceNpcToward } from './npc';
 import {
 	JOURNEY,
 	LOBBY_PICKUP,
@@ -423,11 +423,8 @@ const ACTIONS: Record<StepAction, () => void> = {
 				from: 'lobby',
 				to: 'vault1',
 				final: WORLD.changingArea,
-				arrive: () => {
-					setPatientGown(JOURNEY.patient, true);
-					setPatientGown(JOURNEY.couchPatient, true);
-					journeySpeech(JOURNEY.patient, LINES.jordanChanged, 'patient', 10000);
-				}
+				// a whole-brain patient keeps their own clothes: Jordan only takes off glasses and jewelry
+				arrive: () => journeySpeech(JOURNEY.patient, LINES.jordanChanged, 'patient', 10000)
 			},
 			{
 				from: 'vault1',
@@ -443,12 +440,12 @@ const ACTIONS: Record<StepAction, () => void> = {
 			}
 		]);
 	},
-	// the journey's vault setup pose: Jordan's figure gives way to the couch patient, in a gown
+	// the journey's vault setup pose: Jordan's figure gives way to the couch patient, in the same
+	// light clothes
 	jordanOnCouch: () => {
 		clearJourneySpeech(JOURNEY.patient);
 		JOURNEY.patient.visible = false;
 		JOURNEY.couchPatient.visible = true;
-		setPatientGown(JOURNEY.couchPatient, true);
 		workflowState(
 			'vault1',
 			'PATIENT SETUP',
@@ -569,8 +566,6 @@ const ACTIONS: Record<StepAction, () => void> = {
 	jordanOffCouch: () => {
 		const p = JOURNEY.patient;
 		JOURNEY.couchPatient.visible = false;
-		setPatientGown(JOURNEY.couchPatient, false);
-		setPatientGown(p, false);
 		p.position.set(WORLD.offCouch[0], 0, WORLD.offCouch[1]);
 		p.rotation.y = Math.atan2(player.pos.x - p.position.x, player.pos.z - p.position.z);
 		p.visible = true;

@@ -14,10 +14,12 @@
 //           check-in and chart complete the step, and the panel closes a beat later
 //   step 6  Patient Setup at the couch: Jordan's devices dragged onto the table, the checks ticked,
 //           Verify; the step completes
-//   step 8  image guidance: a new daily setup, the kV arms out, the images, the couch correction
-//           from the console's keys, Verify Alignment
-//   step 9  delivery: the AP field, then the PA field after Move to field; Vault 1's gantry
-//           (window.__NPC.vaultLinac) passes the angles between and ends at 180; the Vault 1
+//   step 8  image guidance (Jordan's whole-brain plan images with the MV panel): a new daily
+//           setup, the MV panel out, the images, the couch correction from the console's keys,
+//           Verify Alignment
+//   step 9  delivery: the right lateral field (gantry 270), then the left lateral field (90), each
+//           after Move to field; Vault 1's gantry (window.__NPC.vaultLinac) passes the angles
+//           between, one way, and ends at the field's angle (0 to 270, then 270 to 90); the Vault 1
 //           board shows BEAM ON while the beam is on, BETWEEN FIELDS between the fields and
 //           TREATMENT COMPLETE at the end
 //   then    a second play from the title, steps 1-3: the console's page boots fresh, so
@@ -488,7 +490,7 @@ try {
 	await frame.locator('#igrtNewSetup').waitFor({ state: 'visible' });
 	await noScroll.scan(frame, 'image guidance, on opening');
 	await click('#igrtNewSetup');
-	await consoleKey('consoleKV');
+	await consoleKey('consoleMV');
 	n = await eventCount();
 	await click('#igrtAcquire');
 	const acquired = await nextEvent('images-acquired', n);
@@ -513,7 +515,7 @@ try {
 			await consoleKey(`console${AXIS[axis]}${v > 0 ? 'Plus' : 'Minus'}`);
 	}
 	await nextEvent('shift-applied', n);
-	await consoleKey('consoleKV'); // stowed for the beam
+	await consoleKey('consoleMV'); // stowed for the beam
 	await click('#igrtVerify');
 	await stepIs(9);
 	await until('the panel to close after the beat', () => !window.__NPC.isConsoleOpen());
@@ -537,46 +539,63 @@ try {
 					.filter((m) => m.message.type === 'rtapps-linac-state')
 					.at(-1)?.message.pose
 		);
-	for (const [index, field, gantry] of [
-		[0, 'AP', 0],
-		[1, 'PA', 180]
+	// the signed turn from angle a to angle b the shortest way round, -180..180 (degrees)
+	const turn = (a, b) => ((b - a + 540) % 360) - 180;
+	// Jordan's whole-brain fields (linac-ct delivery/cases.ts, the whole-brain case), each with the
+	// gantry angle it starts from: 0 at the setup, then the first field's
+	for (const [index, field, gantry, from] of [
+		[0, 'Right Lateral', 270, 0],
+		[1, 'Left Lateral', 90, 270]
 	]) {
-		if (index > 0) {
-			await click(`#rtv2dFieldList .rtv2d-field-row[data-index="${index}"]`);
-			await tut(() => (window.__gantry = []));
-			await noScroll.scan(frame, 'delivery, before holding Move to field');
-			const hold = frame.locator('#consoleMoveToField');
-			await hold.scrollIntoViewIfNeeded();
-			const box = await hold.boundingBox();
-			await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-			await page.mouse.down();
-			const t0 = Date.now();
-			while (Date.now() - t0 < MOTION_MS && (await pose())?.gantry !== gantry) await sleep(100);
-			await page.mouse.up();
-			expect(
-				(await pose())?.gantry === gantry,
-				`Move to field turned the console's gantry to ${gantry} (${(await pose())?.gantry})`
-			);
-			// Vault 1's machine follows: the angles between, then 180
-			await until(
-				'Vault 1 gantry at 180',
-				() => Math.abs(window.__NPC.vaultLinac.state().current.gantry - 180) < 0.5
-			);
-			// sampled once a frame: a few angles even at a software renderer's frame rate
-			const between = await tut(() => window.__gantry.filter((g) => g > 1 && g < 179));
-			const rising = between.every((g, i) => i === 0 || g >= between[i - 1]);
-			expect(
-				between.length >= 5 && rising,
-				`Vault 1's gantry turned through the angles between AP and PA, one way (${between.map((g) => g.toFixed(0)).join(', ')})`
-			);
-		}
+		if (index > 0) await click(`#rtv2dFieldList .rtv2d-field-row[data-index="${index}"]`);
+		expect(
+			(await pose())?.gantry === from,
+			`the console's gantry is at ${from} before the ${field} field (${(await pose())?.gantry})`
+		);
+		await tut(() => (window.__gantry = []));
+		await noScroll.scan(frame, 'delivery, before holding Move to field');
+		const hold = frame.locator('#consoleMoveToField');
+		await hold.scrollIntoViewIfNeeded();
+		const box = await hold.boundingBox();
+		await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+		await page.mouse.down();
+		const t0 = Date.now();
+		while (Date.now() - t0 < MOTION_MS && (await pose())?.gantry !== gantry) await sleep(100);
+		await page.mouse.up();
+		expect(
+			(await pose())?.gantry === gantry,
+			`Move to field turned the console's gantry to ${gantry} (${(await pose())?.gantry})`
+		);
+		// Vault 1's machine follows: the angles between, then the field's
+		await until(
+			`Vault 1 gantry at ${gantry}`,
+			(g) =>
+				Math.abs(((window.__NPC.vaultLinac.state().current.gantry - g + 540) % 360) - 180) < 0.5,
+			WAIT_MS,
+			gantry
+		);
+		// sampled once a frame: a few angles even at a software renderer's frame rate. Each sample
+		// as the turn so far from the start (small steps between samples, so each the shortest
+		// way): all of one sign, the whole turn from the start to the field, a few in between
+		const seen = await tut(() => window.__gantry);
+		const turned = [];
+		for (const [i, g] of seen.entries())
+			turned.push((i ? turned[i - 1] : 0) + turn(i ? seen[i - 1] : from, g));
+		const travel = Math.abs(turn(from, gantry)),
+			total = turned.at(-1),
+			oneWay = turned.every((t, i) => !i || Math.sign(t - turned[i - 1]) !== -Math.sign(total)),
+			between = turned.filter((t) => Math.abs(t) > 1 && Math.abs(t) < travel - 1);
+		expect(
+			Math.abs(Math.abs(total) - travel) < 1 && oneWay && between.length >= 5,
+			`Vault 1's gantry turned from ${from} to the ${field} field's ${gantry} through the angles between, one way (${seen.map((g) => g.toFixed(0)).join(', ')})`
+		);
 		n = await eventCount();
 		const boardsFrom = (await tut(() => window.__boards)).length;
 		await click('#rtv2EnableBeam');
 		await click('#rtv2BeamOn');
 		const delivered = await nextEvent('field-delivered', n, MOTION_MS);
 		expect(delivered.field === field, `field-delivered ${field} (${delivered.field})`);
-		// the board as each pose came in: BEAM ON while the beam was on, BETWEEN FIELDS after AP
+		// the board as each pose came in: BEAM ON while the beam was on, BETWEEN FIELDS after the first
 		await until(
 			`the Vault 1 board to show BEAM ON during ${field}${index === 0 ? ', then BETWEEN FIELDS' : ''}`,
 			([from, after]) => {
@@ -605,8 +624,8 @@ try {
 		'images-acquired',
 		'shift-applied',
 		'alignment-verified',
-		'field-delivered:AP',
-		'field-delivered:PA',
+		'field-delivered:Right Lateral',
+		'field-delivered:Left Lateral',
 		'treatment-complete'
 	];
 	expect(

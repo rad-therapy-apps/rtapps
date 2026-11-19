@@ -223,12 +223,12 @@ export const LINES = {
 	controlAlert:
 		'Jordan Ellis just checked in at reception. Vault 1 is ready: open today’s schedule.',
 	jordanConfirms: 'Jordan Ellis, March 14, 1968. I’m ready to go back.',
-	jordanChanged: 'I’m changed and ready to continue.',
+	jordanChanged: 'I’ve taken off my glasses, earrings and hairpins. I’m ready to continue.',
 	jamieSetup:
 		'You’re in position. I’m checking the support placement, couch index, and your alignment before we take the check images.',
 	jamieLeaving: 'Stay still, Jordan. We’ll talk to you over the intercom before treatment begins.',
 	shiftVerified: 'Correction verified against the treatment record.',
-	jordanOffCouch: 'Thank you. I’ve changed and I’m ready to go.',
+	jordanOffCouch: 'Thank you. I’ve got my glasses and earrings back on, and I’m ready to go.',
 	jordanThanks: 'That went smoothly. See you tomorrow.',
 	walkToVault: 'You walk Jordan to Vault 1.',
 	walkToLobby: 'You walk Jordan back to reception.'
@@ -400,12 +400,12 @@ export const CHAPTER_1: readonly Step[] = [
 			done: ['setup-complete'],
 			hints: [
 				'Compare each part with the setup order: the devices, position, indexing and preparation.',
-				'The setup order calls for the Vac-Lok and the knee support, head first and supine.'
+				'The setup order calls for the short head mask and the headrest, head first and supine.'
 			],
 			reveal:
-				'Place the Vac-Lok and the knee support, confirm position, indexing and preparation, then verify the setup.',
+				'Place the short head mask and the headrest, confirm position, indexing and preparation, then verify the setup.',
 			reason:
-				'Each day’s setup reproduces the position, supports and indexing documented at CT simulation, so Jordan lies where the plan expects.'
+				'Each day’s setup reproduces the headrest, the mask and the indexing documented at CT simulation, so Jordan’s head lies where the plan expects.'
 		},
 		onTrigger: ['jordanOnCouch', 'lasersOn', 'jamieAcrossCouch']
 	},
@@ -446,7 +446,7 @@ export const CHAPTER_1: readonly Step[] = [
 			workspace: 'igrt',
 			done: ['shift-applied', 'alignment-verified'],
 			hints: [
-				'The images find this kind of difference before the beam is on. Press New Daily Setup and kV Imaging, then Acquire Images.',
+				'The images find this kind of difference before the beam is on. Press New Daily Setup and MV / EPID, then Acquire Images.',
 				`Today’s images show Jordan ${TUTORIAL_SHIFT_MM} mm off the plan. Press Motion Enable, then the couch keys, until the residuals are in tolerance.`
 			],
 			reveal:
@@ -477,12 +477,12 @@ export const CHAPTER_1: readonly Step[] = [
 			done: ['treatment-complete'],
 			hints: [
 				'The beam waits until every interlock on the checklist is green. Read the one that is not.',
-				'Each field needs Enable Beam, then Beam On. Deliver the AP field, then the PA field.'
+				'Each field needs Move to field, then Enable Beam and Beam On. Deliver the right lateral field, then the left lateral field.'
 			],
 			reveal:
-				'When the checklist is all green, press Enable Beam, then Beam On: the AP field first, then the PA field.',
+				'Hold Move to field until the checklist is all green, then press Enable Beam and Beam On: the right lateral field first, then the left lateral field.',
 			reason:
-				'The beam came on only once the room, the setup and the images were verified, and both fields were delivered as planned.',
+				'The beam came on only once the room, the setup and the images were verified, and both lateral fields were delivered as planned.',
 			beam: { on: 'beamOn', off: 'betweenFields' }
 		},
 		onComplete: ['beamOff']

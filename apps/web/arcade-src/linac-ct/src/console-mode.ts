@@ -42,6 +42,8 @@ import { consoleShell, shellSettled } from './console-patch';
 import { installConsoleKeys, releaseConsoleKeys } from './console-keys';
 import { TREATMENT_CASES } from './delivery/cases';
 import { holdTreatmentDelivery, renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
+import { parseFirstNumber, parseJawSpec } from './delivery/plan';
+import { updateMLCPositions } from './scene';
 import { activeIGRTTolerances } from './delivery/stereotactic';
 import { getIGRTApplied, getIGRTResidual } from './linac-igrt';
 import {
@@ -255,8 +257,15 @@ export function startConsoleMode() {
 	S.currentRoomView = 'control';
 	syncRoomViewButtons('control');
 	if (CONSOLE.scenario === 'tutorial') {
-		// Jordan's plan is a 10 × 10 field; a jaw setting saved by an earlier session must not hold it
-		setCenteredJawField(10, 10);
+		// the jaws and MLC start at Jordan's field apertures (both lateral fields: 18 × 18 cm, a 16 cm
+		// conformal MLC), as the record-and-verify system sets them, since the Tutorial's delivery
+		// step has no aperture keys; a setting saved by an earlier session must not hold them
+		const g = S.activeTreatmentCase.fields[0].geometry,
+			jaws = parseJawSpec(g.jaws);
+		setCenteredJawField(jaws.x1 + jaws.x2, jaws.y1 + jaws.y2);
+		fundamentalState.mlc = parseFirstNumber(g.mlcAperture);
+		fundamentalState.mlcShape = g.mlcShape;
+		updateMLCPositions();
 		syncFundamentalReadouts();
 		document.body.classList.add('linac-tutorial-focus');
 	}
