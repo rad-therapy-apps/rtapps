@@ -452,7 +452,8 @@ declare global {
 // renders/enables when it resolves (activity unseeded/unpublished, or offline leaves
 // HUB_URL null and the button stays disabled instead of going dead). Same pattern as
 // the hub's own door-fix precedent (commit 4cc341a).
-resolveHubUrl();
+// console mode has no Back to the Center, so it skips the lookup
+if (!CONSOLE.console) resolveHubUrl();
 document.getElementById('rtappsBackBtn')?.addEventListener('click', () => {
 	if (!S.HUB_URL) return;
 	// the hub then starts Free Mode outside the door the player left it through (sim-hub return-door.ts)
