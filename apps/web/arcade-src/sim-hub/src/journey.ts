@@ -523,9 +523,16 @@ export function journeySpeech(actor, text, kind = 'staff', ms = 10000) {
 		actor.userData.journeyBubble = el;
 	}
 	el.textContent = text;
-	el.style.opacity = '1';
+	bubbleVis(el, true);
 	clearTimeout(el._journeyTimer);
-	el._journeyTimer = setTimeout(() => (el.style.opacity = '0'), hold);
+	el._journeyTimer = setTimeout(() => bubbleVis(el, false), hold);
+}
+/** Takes down the line `actor` is saying (the Tutorial does, as its steps move on). */
+export function clearJourneySpeech(actor) {
+	const el = actor?.userData.journeyBubble;
+	if (!el) return;
+	clearTimeout(el._journeyTimer);
+	bubbleVis(el, false);
 }
 function playIntercomAudio(text) {
 	// Settings > Sound off (the default) silences the intercom beeps and speech too (sound.ts)
