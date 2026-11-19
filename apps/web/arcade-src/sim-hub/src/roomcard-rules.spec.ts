@@ -5,6 +5,7 @@ import {
 	roomZoneLabel,
 	setRoomCardsEnabled,
 	shouldShowRoomCard,
+	shouldShowRoomCardNow,
 	type RoomCardPrefs
 } from './roomcard-rules';
 
@@ -63,5 +64,31 @@ describe('room card rules', () => {
 			'CT simulation',
 			'Department area'
 		]);
+	});
+
+	describe('in the Tutorial, once per room per play', () => {
+		it('shows a room on its first entry', () => {
+			expect(shouldShowRoomCardNow('vault1', fresh, 'tutorial', new Set())).toBe(true);
+		});
+
+		it('does not show it again on a second entry in the same play', () => {
+			const shown = new Set(['vault1']);
+			expect(shouldShowRoomCardNow('vault1', fresh, 'tutorial', shown)).toBe(false);
+			expect(shouldShowRoomCardNow('lobby', fresh, 'tutorial', shown)).toBe(true);
+		});
+
+		it('shows it again in a new play (the set is emptied)', () => {
+			expect(shouldShowRoomCardNow('vault1', fresh, 'tutorial', new Set())).toBe(true);
+		});
+
+		it('leaves Free Mode showing the card on every entry', () => {
+			expect(shouldShowRoomCardNow('vault1', fresh, 'free', new Set(['vault1']))).toBe(true);
+		});
+
+		it('shows nothing with room introductions off', () => {
+			const off = { enabled: false, hidden: [] };
+			expect(shouldShowRoomCardNow('vault1', off, 'tutorial', new Set())).toBe(false);
+			expect(shouldShowRoomCardNow('vault1', off, 'free', new Set())).toBe(false);
+		});
 	});
 });
