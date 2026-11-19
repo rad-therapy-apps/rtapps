@@ -18,6 +18,8 @@ import type {
 import { S } from './state';
 import {
 	beamRefusal,
+	clearsRefusal,
+	workspaceClearsRefusal,
 	correctionApplied,
 	fromCenter,
 	parseCenterMessage,
@@ -62,6 +64,8 @@ const PANEL_WORKSPACES: [string, LinacWorkspace][] = [
 
 let lastWorkflow: LinacWorkspace = 'setup';
 let settled = false;
+let shownWorkspace: LinacWorkspace = 'queue';
+let refusalAt = 0;
 let pendingOpen: LinacWorkspace | null = null;
 let posted: { pose: LinacPose; mrn: string | null; workspace: LinacWorkspace } | null = null;
 let postedAt: number | null = null;
@@ -95,10 +99,17 @@ function currentPose(): LinacPose {
 	});
 }
 
-/* ----- the refusal bar: every mistake shows at the top of the console for a few seconds ----- */
+/* ----- the refusal bar: every mistake shows at the top of the console for a few seconds, or until
+   the learner's next action succeeds or the workspace changes ----- */
 let refusalBar: HTMLElement | null = null;
 let refusalTimer = 0;
+function hideRefusal() {
+	clearTimeout(refusalTimer);
+	refusalBar?.classList.remove('show');
+}
 function showRefusal(message: string) {
+	shownWorkspace = currentWorkspace();
+	refusalAt = performance.now();
 	if (!refusalBar) {
 		refusalBar = document.createElement('div');
 		refusalBar.id = 'consoleRefusal';
@@ -133,6 +144,9 @@ function tick() {
 	const pose = currentPose(),
 		workspace = currentWorkspace(),
 		mrn = workspace === 'queue' ? null : openChartMrn();
+	if (workspaceClearsRefusal(shownWorkspace, workspace, performance.now() - refusalAt))
+		hideRefusal();
+	shownWorkspace = workspace;
 	if (posted && samePose(posted.pose, pose) && posted.mrn === mrn && posted.workspace === workspace)
 		return;
 	const now = performance.now();
@@ -208,7 +222,10 @@ export function startConsoleMode() {
 		syncFundamentalReadouts();
 	}
 	setConsoleSink({
-		event: (event) => post({ type: 'rtapps-linac-event', event }),
+		event: (event) => {
+			if (clearsRefusal(event.kind)) hideRefusal();
+			post({ type: 'rtapps-linac-event', event });
+		},
 		mistake: (code, message) => {
 			showRefusal(message);
 			post({

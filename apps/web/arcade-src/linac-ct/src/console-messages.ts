@@ -31,6 +31,25 @@ export function consoleViewFromSearch(search: string): ConsoleView {
 	};
 }
 
+/** Whether this event ends the refusal bar: any event but a mistake means the learner's next action
+    went through, so the old refusal no longer applies. */
+export function clearsRefusal(kind: string): boolean {
+	return kind !== 'mistake';
+}
+
+/** A refused Beam On / Enable Beam opens the delivery panel in the same moment, so a workspace change
+    only clears the refusal once it has been up this long. */
+export const REFUSAL_WORKSPACE_GRACE_MS = 1000;
+
+/** Whether moving from one workspace to another ends the refusal bar shown `sinceMs` ago. */
+export function workspaceClearsRefusal(
+	before: LinacWorkspace,
+	now: LinacWorkspace,
+	sinceMs: number
+): boolean {
+	return before !== now && sinceMs > REFUSAL_WORKSPACE_GRACE_MS;
+}
+
 const WORKSPACES: readonly LinacWorkspace[] = ['queue', 'setup', 'igrt', 'delivery'];
 
 export function isLinacWorkspace(value: unknown): value is LinacWorkspace {
