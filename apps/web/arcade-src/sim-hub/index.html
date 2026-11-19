@@ -1822,10 +1822,15 @@
 			/* a console step's console is open (tutorial-hud.ts dockOnConsole): the objective and the
 			   hint line in a strip along the bottom of the console panel's frame area, above the panel
 			   (z 170) and under the fade and the role card; left, width and bottom come from the frame
-			   area, and the console's page is shortened by the strip's height */
+			   area. Its height is fixed, two lines of hint (the longest console hint fits them at a
+			   1280 px wide window), and the console's page is shortened by it, so it never reflows. */
+			body.tut-docked {
+				--tut-dock-h: 58px;
+			}
 			.tut-tracker.docked {
 				z-index: 225;
 				top: auto;
+				height: var(--tut-dock-h);
 				padding: 6px 12px;
 				border: 0;
 				border-top: 1px solid var(--stroke);
@@ -1860,6 +1865,14 @@
 				padding: 4px 8px;
 				font-size: 13.5px;
 				line-height: 1.35;
+			}
+			/* two lines at most, in a narrower window too */
+			.tut-tracker.docked .tut-hint.show {
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 2;
+				line-clamp: 2;
+				overflow: hidden;
 			}
 			body.tut-docked #consolePanel .cpFrame {
 				height: calc(100% - var(--tut-dock-h, 0px));
@@ -1928,6 +1941,10 @@
 			}
 			.tut-hint.reveal {
 				background: rgba(255, 188, 99, 0.16);
+			}
+			.tut-hint.correct {
+				border-left-color: var(--green);
+				background: rgba(101, 221, 160, 0.12);
 			}
 			.tut-bar {
 				height: 6px;

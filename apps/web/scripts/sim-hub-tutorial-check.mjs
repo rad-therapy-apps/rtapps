@@ -30,12 +30,13 @@
 //          done without a miss; the end card's Main menu goes back to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
-// lies down; Jordan is on the Vault 1 monitors from the chart opening at step 3; at step 9 the
-// Vault 1 board shows BEAM ON while the console's beam is on, BETWEEN FIELDS when it goes off and
-// TREATMENT COMPLETE at the end; every move the
-// tutorial makes (Jordan's escorts, Jamie Williams's walks) keeps the 0.2 m circle round the
-// walker's root clear of the wall colliders on every frame (as NPC check l does); the marker's
-// route never crosses a wall collider; and after leaving, the journey actors, the people's
+// lies down; each play asks for a fresh console page at its first opening (step 3) and only then;
+// each console step ends with its "Correct." line; Jordan is on the Vault 1 monitors from the
+// chart opening at step 3; at step 9 the Vault 1 board shows BEAM ON while the console's beam is
+// on, BETWEEN FIELDS when it goes off and TREATMENT COMPLETE at the end; every move the tutorial
+// makes (Jordan's escorts, Jamie Williams's walks) keeps the 0.2 m circle round the walker's root
+// clear of the wall colliders on every frame (as NPC check l does); the marker's route never
+// crosses a wall collider; and after leaving, the journey actors, the people's
 // visibility and the vault 1 lasers are exactly as the journey reset leaves them (what
 // sim-hub-npc-check.mjs expects), with no console open and Jordan off the vault monitors.
 //
@@ -243,6 +244,12 @@ function playConsole(n, st, wrong, fails) {
 		);
 		return;
 	}
+	// each play of the chapter asks for a fresh console page at its first opening, step 3, and
+	// keeps that page for the other console steps
+	if (T.state().console.fresh !== (n === 3))
+		fails.push(
+			`step ${n}: the console was asked for ${T.state().console.fresh ? 'a fresh page' : 'the page as it was'}`
+		);
 	if (wrong) {
 		const miss = [
 			n === 3
@@ -291,6 +298,8 @@ function playConsole(n, st, wrong, fails) {
 			fails.push(
 				`step ${n}: E at ${st.target.name}'s stand point did not open the console again (phase '${T.state().phase}')`
 			);
+		else if (T.state().console.fresh)
+			fails.push(`step ${n}: reopening the console asked for a fresh page`);
 	}
 	if (c.beam) {
 		// the boards follow the console's beam: two fields, on and off
@@ -313,6 +322,8 @@ function playConsole(n, st, wrong, fails) {
 		fails.push(`step ${n}: not completed by ${c.done.join(', ')}`);
 		return;
 	}
+	if (T.state().correct !== `Correct. ${c.reason}`)
+		fails.push(`step ${n}: no "Correct." line when the step completed (${T.state().correct})`);
 	if (n === 3 && !T.state().jordanOnMonitors)
 		fails.push('step 3: Jordan is not on the Vault 1 monitors after the chart opened');
 	if (!T.state().console || !NPC.isConsoleOpen())

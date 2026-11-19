@@ -130,8 +130,9 @@ describe('console steps', () => {
 		r = run(r.s, linac('checked-in'));
 		expect(r.effects).toEqual([]);
 		r = run(r.s, linac('chart-opened'));
-		expect(r.effects.slice(0, 2)).toEqual([
+		expect(r.effects.slice(0, 3)).toEqual([
 			{ type: 'closeConsole' },
+			{ type: 'correct', text: `Correct. ${schedule.reason}` },
 			{ type: 'action', action: 'jordanOnMonitors' }
 		]);
 		expect(r.s.step).toBe(4);
@@ -236,7 +237,45 @@ describe('console steps', () => {
 		]);
 	});
 
-	it('completes a console step while its console is closed (a beam left running)', () => {
+	it('takes the walking and E hints down when the console opens, and keeps a miss for a reopen', () => {
+		const r = run(atStep(3), ...ticks(25, 1));
+		expect(r.s.hint).toBe(eHintText('the treatment console'));
+		const open = run(r.s, { type: 'pressedE', target: 'console' });
+		expect(open.effects).toEqual([
+			{ type: 'openConsole', workspace: 'queue' },
+			{ type: 'hint', text: null }
+		]);
+		const reopen = run(
+			open.s,
+			mistake,
+			{ type: 'consoleClosed' },
+			{ type: 'pressedE', target: 'console' }
+		);
+		expect(reopen.s.hint).toBe(`Not yet. ${schedule.hints[0]}`);
+		expect(reopen.effects.at(-1)).toEqual({ type: 'openConsole', workspace: 'queue' });
+	});
+
+	it('ignores the console until the step opens it: the last step’s close-out does not count', () => {
+		// step 8's console is still open for its beat when step 9 starts
+		const next = run(
+			atStep(8),
+			{ type: 'pressedE', target: 'console' },
+			linac('shift-applied'),
+			linac('alignment-verified')
+		).s;
+		expect(next.step).toBe(9);
+		for (const ev of [
+			mistake,
+			linac('treatment-complete'),
+			{ type: 'beam', on: true } as TutorialEvent
+		])
+			expect(run(next, ev)).toEqual({ s: next, effects: [] });
+		// once step 9 opens it, they count
+		const r = run(next, { type: 'pressedE', target: 'console' }, mistake);
+		expect(r.s.misses).toBe(1);
+	});
+
+	it('still counts the console’s events while its panel is closed', () => {
 		const r = run(
 			atStep(9),
 			{ type: 'pressedE', target: 'console' },
@@ -449,6 +488,9 @@ describe('the whole chapter', () => {
 			all.filter((e) => e.type === 'openConsole').map((e) => (e as { workspace: string }).workspace)
 		).toEqual(['queue', 'setup', 'igrt', 'delivery']);
 		expect(all.filter((e) => e.type === 'closeConsole')).toHaveLength(4);
+		expect(
+			all.filter((e) => e.type === 'correct').map((e) => (e as { text: string }).text)
+		).toEqual([3, 6, 8, 9].map((n) => `Correct. ${CHAPTER_1[n - 1].console!.reason}`));
 	});
 
 	it('runs every world action once, in order', () => {

@@ -89,7 +89,9 @@ export const TUTORIAL_TIMING = {
 	walkFadeMs: 1500,
 	walkCardMs: 1000,
 	/** A console step's console stays open this long after the step completes, to show the result. */
-	consoleCloseMs: 1500
+	consoleCloseMs: 1500,
+	/** A console step's "Correct." line stays in the hint line this long once the step completes. */
+	correctMs: 5000
 };
 
 export type TargetId =
@@ -177,8 +179,11 @@ export interface ConsoleTask {
 	done: readonly ConsoleProgressKind[];
 	/** After the first and the second miss. */
 	hints: readonly [string, string];
-	/** From the third miss on: what to do, and why. */
+	/** From the third miss on: what to do (the reason says why, once the step is done). */
 	reveal: string;
+	/** Why the step is done this way: "Correct. <reason>" shows when it completes, as a decision's
+	    reason does. */
+	reason: string;
 	/** The world actions as the console's beam (its pose stream, console-bus.ts linacPose) turns on
 	    and off during the step. */
 	beam?: { on: StepAction; off: StepAction };
@@ -215,7 +220,8 @@ export const eHintText = (name: string): string =>
 export const LINES = {
 	intercomToControl:
 		'Treatment Control, Jordan Ellis is checked in for 9:00 in Vault 1 and waiting in reception.',
-	controlAlert: 'Jordan Ellis just checked in. The chart is open and Vault 1 is ready for setup.',
+	controlAlert:
+		'Jordan Ellis just checked in at reception. Vault 1 is ready: open today’s schedule.',
 	jordanConfirms: 'Jordan Ellis, March 14, 1968. I’m ready to go back.',
 	jordanChanged: 'I’m changed and ready to continue.',
 	jamieSetup:
@@ -311,7 +317,9 @@ export const CHAPTER_1: readonly Step[] = [
 				'Two entries share Jordan’s name. Check the date of birth Jordan gave at check-in.',
 				`Jordan was born on ${JORDAN.born}, and is booked on ${JORDAN.vault} at ${JORDAN.time}.`
 			],
-			reveal: `Jordan’s entry is ${JORDAN.name} · born ${JORDAN.born} · ${JORDAN.vault} · ${JORDAN.time}. Check it in, then open its chart: a full name and date of birth together identify the patient.`
+			reveal: `Jordan’s entry is ${JORDAN.name} · born ${JORDAN.born} · ${JORDAN.vault} · ${JORDAN.time}. Check it in, then open its chart.`,
+			reason:
+				'A full name and date of birth together identify the patient, and the booking has to be on the machine where the plan is loaded.'
 		},
 		onTrigger: ['jordanOnMonitors']
 	},
@@ -395,7 +403,9 @@ export const CHAPTER_1: readonly Step[] = [
 				'The setup order calls for the Vac-Lok and the knee support, head first and supine.'
 			],
 			reveal:
-				'Place the Vac-Lok and the knee support, confirm position, indexing and preparation, then verify the setup. Each day’s setup reproduces the one documented at CT simulation.'
+				'Place the Vac-Lok and the knee support, confirm position, indexing and preparation, then verify the setup.',
+			reason:
+				'Each day’s setup reproduces the position, supports and indexing documented at CT simulation, so Jordan lies where the plan expects.'
 		},
 		onTrigger: ['jordanOnCouch', 'lasersOn', 'jamieAcrossCouch']
 	},
@@ -436,11 +446,13 @@ export const CHAPTER_1: readonly Step[] = [
 			workspace: 'igrt',
 			done: ['shift-applied', 'alignment-verified'],
 			hints: [
-				'The images are taken to find exactly this kind of difference before the beam is on. Acquire them, then read the correction.',
-				`Today’s images show Jordan ${TUTORIAL_SHIFT_MM} mm from the planned position. Drive the couch from the pendant until the residuals are within tolerance.`
+				'The images find this kind of difference before the beam is on. Press New Daily Setup and kV Imaging, then Acquire Images.',
+				`Today’s images show Jordan ${TUTORIAL_SHIFT_MM} mm off the plan. Press Motion Enable, then the couch keys, until the residuals are in tolerance.`
 			],
 			reveal:
-				'Apply the couch correction from the pendant, then press Verify Alignment. A shift measured on today’s images is corrected, then verified, before any treatment.'
+				'Press Motion Enable, apply the correction with the couch keys or by holding Move to field, then press Verify Alignment.',
+			reason:
+				'Image guidance checks that Jordan is in the planned treatment position before radiation is delivered; a measured shift is corrected, then verified.'
 		},
 		onTrigger: ['shiftApplied']
 	},
@@ -458,6 +470,8 @@ export const CHAPTER_1: readonly Step[] = [
 		},
 		trigger: 'pressE',
 		hints: CONSOLE_HINTS,
+		// no timed beam or countdown any more (it was afterSeconds 10, "Beam on · {s} s"): the
+		// console's own delivery runs the beam, field by field, and the boards follow it
 		console: {
 			workspace: 'delivery',
 			done: ['treatment-complete'],
@@ -466,7 +480,9 @@ export const CHAPTER_1: readonly Step[] = [
 				'Each field needs Enable Beam, then Beam On. Deliver the AP field, then the PA field.'
 			],
 			reveal:
-				'When the checklist is all green, press Enable Beam, then Beam On, for the AP field and then the PA field. The interlocks hold the beam until the room, the setup and the images are verified.',
+				'When the checklist is all green, press Enable Beam, then Beam On: the AP field first, then the PA field.',
+			reason:
+				'The beam came on only once the room, the setup and the images were verified, and both fields were delivered as planned.',
 			beam: { on: 'beamOn', off: 'betweenFields' }
 		},
 		onComplete: ['beamOff']
