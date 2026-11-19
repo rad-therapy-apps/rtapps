@@ -19,8 +19,8 @@ export type ConsoleScenario = 'free' | 'tutorial';
 
 /** The Tutorial's three schedule entries on the LINAC console (tutorial-steps.ts step 3). The
     patient is Jordan Ellis; the other two are the look-alikes the step asks the player to rule out.
-    Jordan's case copies the LINAC app's first treatment case (3D-CRT prostate AP/PA, 6 MV) with
-    Jordan's identity, and today's check images show a 4 mm shift to correct. */
+    Jordan's case copies the LINAC app's whole-brain case (lateral opposed, 6 MV) with Jordan's
+    identity, and today's check images show a 4 mm shift to correct. */
 export const TUTORIAL_PATIENTS = {
 	jordan: {
 		mrn: 'TUT-680314',
