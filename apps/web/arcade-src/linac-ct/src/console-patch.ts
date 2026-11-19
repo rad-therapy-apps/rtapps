@@ -2,6 +2,8 @@ import { readSide } from './side';
 import { CONSOLE, consoleEvent, consoleMistake } from './console-hooks';
 import { isTutorialPatient, tutorialQueueDetail, WRONG_PATIENT_MESSAGE } from './tutorial-cases';
 import { TREATMENT_CASES } from './delivery/cases';
+import { pageCount, pageOfRow, rowsPerPage, turnPage } from './queue-pages';
+import { pageStep } from '../../sim-hub/src/pager-math';
 
 /** The shell's navigation for console mode (console-mode.ts), filled in below. */
 export const consoleShell = {
@@ -26,6 +28,11 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 	const text = (id) => ($(id)?.textContent || '—').trim() || '—';
 	const checkedIn = new Set();
 	let openCaseValue = null;
+	// console mode pages the queue (queue-pages.ts): the page shown, the rows a page held at the last
+	// measure, and the patient last checked in, whose page the queue returns to with none open
+	let queuePage = 0;
+	let queuePerPage = 6;
+	let lastCheckedIn: string | null = null;
 	let activeWorkflow = 'chart';
 	let rtv2MonitorHost = null;
 
@@ -64,7 +71,7 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 		consoleMistake('wrong-patient', message);
 		return false;
 	}
-	function renderQueue() {
+	function renderQueue(jumpToPatient = false) {
 		const host = $('rtv2QueueRows');
 		if (!host) return;
 		const opts = caseOptions();
@@ -72,14 +79,13 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 			host.innerHTML = '<div class="rtv2-empty">Treatment schedule is loading…</div>';
 			return;
 		}
-		host.innerHTML = opts
-			.map((item, i) => {
-				const parsed = splitLabel(item.label);
-				// the tutorial's entries show the date of birth, vault and time that tell them apart
-				const detail = tutorialQueueDetail(caseMrn(item.value)) || parsed.detail;
-				const isIn = checkedIn.has(item.value);
-				const isOpen = openCaseValue === item.value;
-				return `<div class="rtv2-queue-row ${isIn ? 'checked-in' : ''} ${isOpen ? 'active-patient' : ''}" data-case="${esc(item.value)}">
+		const rows = opts.map((item, i) => {
+			const parsed = splitLabel(item.label);
+			// the tutorial's entries show the date of birth, vault and time that tell them apart
+			const detail = tutorialQueueDetail(caseMrn(item.value)) || parsed.detail;
+			const isIn = checkedIn.has(item.value);
+			const isOpen = openCaseValue === item.value;
+			return `<div class="rtv2-queue-row ${isIn ? 'checked-in' : ''} ${isOpen ? 'active-patient' : ''}" data-case="${esc(item.value)}">
         <div class="rtv2-time">${queueSlot(i)}</div>
         <div class="rtv2-qpatient"><b>${esc(parsed.name)}</b><span>${esc(detail)}</span></div>
         <div class="rtv2-qstatus"><span class="rtv2-status-dot"></span>${isOpen ? 'In Treatment' : isIn ? 'Checked In' : 'Scheduled'}</div>
@@ -88,8 +94,51 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
           <button type="button" class="rtv2-openchart" data-value="${esc(item.value)}" ${isIn ? '' : 'disabled'}>${isOpen ? 'Chart Open' : 'Open Chart'}</button>
         </div>
       </div>`;
-			})
-			.join('');
+		});
+		if (!CONSOLE.console) {
+			host.innerHTML = rows.join('');
+			return;
+		}
+		renderQueuePage(host, opts, rows, jumpToPatient);
+	}
+	/** Console mode: show one page of the rows, as many as the list's room holds, with the pager bar
+	    under them (hidden when every row fits). Rows are measured, not assumed. */
+	function renderQueuePage(host: HTMLElement, opts, rows: string[], jumpToPatient: boolean) {
+		const bar = $('rtv2QueuePager');
+		host.innerHTML = rows.join('');
+		const first = host.firstElementChild as HTMLElement | null;
+		if (!first || !bar) return;
+		bar.hidden = false;
+		const rowH = first.getBoundingClientRect().height;
+		const room = host.clientHeight;
+		if (room > 0 && rowH * rows.length <= room + bar.offsetHeight) {
+			bar.hidden = true;
+			queuePerPage = rows.length;
+		} else {
+			queuePerPage = rowsPerPage(room, rowH, queuePerPage);
+		}
+		const pages = pageCount(rows.length, queuePerPage);
+		if (jumpToPatient) {
+			const at = opts.findIndex((o) => o.value === (openCaseValue ?? lastCheckedIn));
+			queuePage = pageOfRow(at, queuePerPage);
+		}
+		queuePage = turnPage(queuePage, 0, pages);
+		const from = queuePage * queuePerPage;
+		Array.from(host.children).forEach((row, i) => {
+			if (i < from || i >= from + queuePerPage) row.remove();
+		});
+		const count = $('rtv2QCount');
+		if (count) count.textContent = `${queuePage + 1} / ${pages}`;
+		($<HTMLButtonElement>('rtv2QPrev') as HTMLButtonElement).disabled = queuePage === 0;
+		($<HTMLButtonElement>('rtv2QNext') as HTMLButtonElement).disabled = queuePage >= pages - 1;
+	}
+	function turnQueue(step: number) {
+		const bar = $('rtv2QueuePager');
+		if (!bar || bar.hidden) return;
+		const next = turnPage(queuePage, step, pageCount(caseOptions().length, queuePerPage));
+		if (next === queuePage) return;
+		queuePage = next;
+		renderQueue();
 	}
 	function buildShell() {
 		const screen = document.querySelector('#workflowDeskMonitor .monitor-screen');
@@ -111,6 +160,7 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
         <div class="rtv2-queue-title"><div><span>LINAC 1</span><h3>Today's Treatment Queue</h3></div><div class="rtv2-legend"><span><i class="scheduled"></i>Scheduled</span><span><i class="ready"></i>Checked In</span><span><i class="active"></i>In Treatment</span></div></div>
         <div class="rtv2-queue-head"><span>Queue</span><span>Patient / Treatment Site</span><span>Status</span><span>Actions</span></div>
         <div id="rtv2QueueRows" class="rtv2-queue-rows"></div>
+        <div id="rtv2QueuePager" class="pager" hidden><button id="rtv2QPrev" type="button" aria-label="Previous page">‹</button><span id="rtv2QCount" class="pgCount">1 / 1</span><button id="rtv2QNext" type="button" aria-label="Next page">›</button></div>
       </section>
       <section id="rtv2Chart" class="rtv2-view" aria-label="Treatment chart workstation">
         <div class="rtv2-chart-grid">
@@ -268,7 +318,7 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 		$('rtv2LINACQueueTab')?.classList.add('active');
 		$('rtv2CTQueueTab')?.classList.remove('active');
 		if (shell.parentNode !== document.body) document.body.appendChild(shell);
-		renderQueue();
+		renderQueue(true);
 	}
 	function showHome() {
 		enterLandingQueue();
@@ -351,12 +401,26 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 				$(targetMap[workflow.dataset.workflowLaunch])?.click();
 			}
 		});
+		if (CONSOLE.console) {
+			$('rtv2QPrev')?.addEventListener('click', () => turnQueue(-1));
+			$('rtv2QNext')?.addEventListener('click', () => turnQueue(1));
+			document.addEventListener('keydown', (e) => {
+				const home = $('rtv2Home');
+				if (!home?.classList.contains('active') || !home.offsetParent) return;
+				const step = pageStep(e, (document.activeElement as HTMLElement | null)?.tagName || '');
+				if (step) turnQueue(step);
+			});
+			const rowsHost = $('rtv2QueueRows');
+			if (rowsHost && typeof ResizeObserver !== 'undefined')
+				new ResizeObserver(() => renderQueue()).observe(rowsHost);
+		}
 		$('rtv2QueueRows')?.addEventListener('click', (e: MouseEvent) => {
 			const check = (e.target as HTMLElement).closest<HTMLElement>('.rtv2-checkin');
 			const open = (e.target as HTMLElement).closest<HTMLButtonElement>('.rtv2-openchart');
 			if (check) {
 				if (!queuePickAllowed(check.dataset.value, WRONG_PATIENT_MESSAGE.checkIn)) return;
 				checkedIn.add(check.dataset.value);
+				lastCheckedIn = check.dataset.value;
 				renderQueue();
 				consoleEvent({ kind: 'checked-in', mrn: caseMrn(check.dataset.value) });
 				return;
@@ -890,7 +954,7 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 		});
 		const select = $('treatmentCaseSelect');
 		if (select)
-			new MutationObserver(renderQueue).observe(select, { childList: true, subtree: true });
+			new MutationObserver(() => renderQueue()).observe(select, { childList: true, subtree: true });
 		new MutationObserver(() => {
 			syncRoomNav();
 			syncMirror();

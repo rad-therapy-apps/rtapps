@@ -10231,6 +10231,63 @@
 					.immo-actions {
 					gap: 6px;
 				}
+			/* console mode, no scroll: the treatment queue pages instead of scrolling (console-patch.ts
+			   renderQueue; the bar is the center's .pager, copied from sim-hub/index.html) */
+			body.linac-console-view #rtv2QueueRows {
+				overflow: hidden;
+				padding-bottom: 0;
+			}
+			body.linac-console-view.rtv2-landing .rtv2-queue-title {
+				padding: 10px 24px 8px;
+			}
+			body.linac-console-view.rtv2-landing .rtv2-queue-head {
+				padding: 7px 24px;
+			}
+			body.linac-console-view.rtv2-landing .rtv2-queue-row {
+				min-height: 0;
+				height: 52px;
+				box-sizing: border-box;
+				padding: 6px 24px;
+			}
+			body.linac-console-view.rtv2-landing .rtv2-qactions button {
+				min-height: 32px;
+			}
+			body.linac-console-view #rtv2QueuePager {
+				flex: 0 0 auto;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+				padding: 6px 24px;
+				background: #eef1f4;
+				border-top: 1px solid #ccdbe1;
+			}
+			body.linac-console-view #rtv2QueuePager[hidden] {
+				display: none;
+			}
+			body.linac-console-view #rtv2QueuePager .pgCount {
+				font-size: 14px;
+				font-weight: 800;
+				letter-spacing: 0.05em;
+				color: #1d2b33;
+			}
+			body.linac-console-view #rtv2QueuePager button {
+				width: 36px;
+				height: 30px;
+				border-radius: 9px;
+				border: 1px solid #7fb9bf;
+				background: #e3f3f3;
+				color: #14555b;
+				font-size: 18px;
+				line-height: 1;
+				cursor: pointer;
+			}
+			body.linac-console-view #rtv2QueuePager button:hover:not(:disabled) {
+				background: #d3ecec;
+			}
+			body.linac-console-view #rtv2QueuePager button:disabled {
+				opacity: 0.3;
+				cursor: default;
 			}
 		</style>
 	</head>
