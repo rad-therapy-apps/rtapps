@@ -17,18 +17,18 @@
    The couch's equipment anchor rides it too. The lasers follow only the console's own switch, when
    a pose turns it (and the Tutorial's, through ROOM_LASERS). Colliders, seats, stand points and
    routes are unchanged. The in-room monitors name whoever lies on the couch (from the start, model
-   or not); the Tutorial names its patient instead with setVaultMonitorPatient (from
-   vault-linac-monitor.ts). */
+   or not); the Tutorial names its patient instead through console-bus.ts vaultMonitorPatient, which
+   calls setVaultMonitorPatient (vault-linac-monitor.ts). */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { LinacPose } from '../../shared/console-protocol';
-import { linacPose } from './console-bus';
+import { linacPose, vaultMonitorPatient } from './console-bus';
 import { scene } from './scene';
 import { LINAC_SHELLS, LINAC_VAULT_MOUNTS, LYING_SURFACES, ROOM_LASERS } from './props';
 import { EQUIPMENT_BY_ID } from './equipment';
 import { JOURNEY, currentJourneyMeta } from './journey';
 import { LINAC_MODEL_URL } from './vault-linac-files';
-import { setVaultMonitorOccupant } from './vault-linac-monitor';
+import { setVaultMonitorOccupant, setVaultMonitorPatient } from './vault-linac-monitor';
 import {
 	clampPose,
 	parkedPose,
@@ -143,6 +143,7 @@ export function startVaultLinac(): void {
 		last = t;
 	};
 	requestAnimationFrame(tick);
+	vaultMonitorPatient.on(setVaultMonitorPatient);
 	linacPose.on((p) => {
 		target = clampPose(p, target ?? current ?? parkedPose(fit));
 		if (target.lasersOn !== consoleLasers) {
