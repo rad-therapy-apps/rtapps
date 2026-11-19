@@ -4,6 +4,7 @@ import { isTutorialPatient, tutorialQueueDetail, WRONG_PATIENT_MESSAGE } from '.
 import { TREATMENT_CASES } from './delivery/cases';
 import { pageCount, pageOfRow, rowsPerPage, turnPage } from './queue-pages';
 import { pageStep } from '../../sim-hub/src/pager-math';
+import { installConsoleScreens, renderInterlocks } from './console-screens';
 
 /** The shell's navigation for console mode (console-mode.ts), filled in below. */
 export const consoleShell = {
@@ -808,7 +809,9 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 			);
 		}
 		const checks = $('rtv2dChecklist');
-		if (checks) {
+		// console mode: every interlock, the failing ones first, fitted to the panel (console-screens.ts)
+		if (checks && CONSOLE.console) renderInterlocks(checks, readyInfo.checks || []);
+		else if (checks) {
 			const items = (readyInfo.checks || []).slice(0, 8);
 			checks.innerHTML =
 				items
@@ -1011,6 +1014,7 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 	function init() {
 		buildShell();
 		enhanceDock();
+		if (CONSOLE.console) installConsoleScreens();
 		observe();
 		renderQueue();
 		syncMirror();
