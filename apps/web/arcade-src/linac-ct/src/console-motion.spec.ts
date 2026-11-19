@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
+	KEY_STEPS,
+	keyLanding,
 	MOVE_SPEED,
 	moveToFieldStep,
 	REPEAT_DELAY_MS,
@@ -104,5 +106,50 @@ describe('one frame of Move to field', () => {
 	it('is already there when every axis matches', () => {
 		const at = { gantry: 180, collimator: 0, couchAngle: 0, vrt: 4, lng: 0, lat: 0 };
 		expect(moveToFieldStep(at, { ...at, gantry: 540 }, 0.016)).toEqual({ next: at, arrived: true });
+	});
+});
+
+describe('keys reaching the plan from a part-way move', () => {
+	it('steps each key as the app does: 5 degrees or 1 mm, signed', () => {
+		expect(KEY_STEPS.consoleGantryPlus).toEqual(['gantry', 5]);
+		expect(KEY_STEPS.consoleTableMinus).toEqual(['couchAngle', -5]);
+		expect(KEY_STEPS.consoleVrtMinus).toEqual(['vrt', -1]);
+		expect(KEY_STEPS.consoleLatPlus).toEqual(['lat', 1]);
+	});
+
+	it('lands the gantry on 180 when the next 5 degrees would pass it', () => {
+		expect(keyLanding('gantry', 47.8, 5, 180)).toBeNull();
+		expect(keyLanding('gantry', 177.8, 5, 180)).toBe(180);
+		expect(keyLanding('gantry', 179.99, 5, 180)).toBe(180);
+	});
+
+	it('reaches the plan from any value, pressing either way', () => {
+		const press = (axis: 'gantry' | 'vrt', from: number, step: number, target: number) => {
+			let v = from;
+			for (let i = 0; i < 200 && v !== target; i++) {
+				const land = keyLanding(axis, v, step, target);
+				v = land ?? (axis === 'gantry' ? (((v + step) % 360) + 360) % 360 : v + step);
+			}
+			return v;
+		};
+		expect(press('gantry', 47.8, 5, 180)).toBe(180);
+		expect(press('gantry', 47.8, -5, 0)).toBe(0);
+		expect(press('gantry', 47.8, -5, 180)).toBe(180); // the long way round, through 0
+		expect(press('vrt', 2.37, -1, 0)).toBe(0);
+		expect(press('vrt', 2.37, 1, 4)).toBe(4);
+	});
+
+	it('wraps through 0 for angles', () => {
+		expect(keyLanding('collimator', 357.5, 5, 0)).toBe(0);
+		expect(keyLanding('couchAngle', 2.5, -5, 0)).toBe(0);
+	});
+
+	it("leaves the key's own step alone on the plan's grid and when moving away", () => {
+		expect(keyLanding('gantry', 175, 5, 180)).toBeNull(); // the step lands on 180 itself
+		expect(keyLanding('gantry', 180, 5, 180)).toBeNull(); // at the plan: step away
+		expect(keyLanding('gantry', 182, 5, 180)).toBeNull(); // moving away
+		expect(keyLanding('vrt', 0.37, 1, 0)).toBeNull();
+		expect(keyLanding('vrt', 0.37, -1, 0)).toBe(0);
+		expect(keyLanding('lng', 0.5, -1, null)).toBeNull();
 	});
 });

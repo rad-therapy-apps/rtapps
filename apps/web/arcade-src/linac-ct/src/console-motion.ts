@@ -1,29 +1,12 @@
 /* The LINAC console's held machine keys (docs/specs/2026-11-18-consoles-in-center-design.md part 3):
    in console mode the gantry, collimator and couch keys repeat while held, and the Move to field
    key drives the machine toward the selected field at a steady, visible speed so the center's
-   Vault 1 follows it smoothly. This module holds the rules: which keys repeat and how fast, the
-   move speeds, and one frame of the move (each axis the shortest way round, no further than its
-   speed allows). console-keys.ts applies them to the page. Free of scene and DOM imports so it is
-   unit tested in Node (console-motion.spec.ts). */
-
-/** The Machine / Imaging keys (data-console-target) that repeat while held. */
-export const REPEATING_KEYS: ReadonlySet<string> = new Set([
-	'consoleGantryMinus',
-	'consoleGantryPlus',
-	'consoleCollMinus',
-	'consoleCollPlus',
-	'consoleVrtMinus',
-	'consoleVrtPlus',
-	'consoleLngMinus',
-	'consoleLngPlus',
-	'consoleLatMinus',
-	'consoleLatPlus',
-	'consoleTableMinus',
-	'consoleTablePlus'
-]);
-/** A held key steps once on press, waits this long, then steps every REPEAT_EVERY_MS. */
-export const REPEAT_DELAY_MS = 300;
-export const REPEAT_EVERY_MS = 100;
+   Vault 1 follows it smoothly. A move released part way leaves values between the keys' steps,
+   so a key whose step would pass the field's planned value lands on it instead. This module holds
+   the rules: which keys repeat, what each steps and how fast, the move speeds, one frame of the
+   move (each axis the shortest way round, no further than its speed allows) and the landing.
+   console-keys.ts applies them to the page. Free of scene and DOM imports so it is unit tested in
+   Node (console-motion.spec.ts). */
 
 /** The axes Move to field drives: angles in degrees, couch translations in mm (fundamentalState). */
 export interface FieldAxes {
@@ -37,6 +20,27 @@ export interface FieldAxes {
 type Axis = keyof FieldAxes;
 const ANGLES: Axis[] = ['gantry', 'collimator', 'couchAngle'];
 const TRANSLATIONS: Axis[] = ['vrt', 'lng', 'lat'];
+
+/** The Machine / Imaging keys (data-console-target) that repeat while held, with the axis and the
+    signed step each press moves through the app's own key (main.ts): 5° or 1 mm. */
+export const KEY_STEPS: Readonly<Record<string, [Axis, number]>> = {
+	consoleGantryMinus: ['gantry', -5],
+	consoleGantryPlus: ['gantry', 5],
+	consoleCollMinus: ['collimator', -5],
+	consoleCollPlus: ['collimator', 5],
+	consoleTableMinus: ['couchAngle', -5],
+	consoleTablePlus: ['couchAngle', 5],
+	consoleVrtMinus: ['vrt', -1],
+	consoleVrtPlus: ['vrt', 1],
+	consoleLngMinus: ['lng', -1],
+	consoleLngPlus: ['lng', 1],
+	consoleLatMinus: ['lat', -1],
+	consoleLatPlus: ['lat', 1]
+};
+export const REPEATING_KEYS: ReadonlySet<string> = new Set(Object.keys(KEY_STEPS));
+/** A held key steps once on press, waits this long, then steps every REPEAT_EVERY_MS. */
+export const REPEAT_DELAY_MS = 300;
+export const REPEAT_EVERY_MS = 100;
 
 /** Move to field speeds: degrees a second for the angles, mm a second for the couch. */
 export const MOVE_SPEED: Record<Axis, number> = {
@@ -81,4 +85,22 @@ export function moveToFieldStep(
 		}
 	}
 	return { next, arrived };
+}
+
+/** Where a key press on `axis` ends when its `step` would pass `target` (the field's planned
+    value): on the target itself, the shortest way round for an angle. Null when the press is the
+    key's own step: moving away from the target, short of it, landing on it exactly anyway, or
+    with no target. From any value, pressing toward the plan therefore reaches it exactly. */
+export function keyLanding(
+	axis: Axis,
+	current: number,
+	step: number,
+	target: number | null
+): number | null {
+	if (target == null || !Number.isFinite(target) || !Number.isFinite(current)) return null;
+	const angle = ANGLES.includes(axis),
+		left = angle ? shortestTurn(current, target) : target - current;
+	if (left === 0 || Math.sign(left) !== Math.sign(step) || Math.abs(left) >= Math.abs(step))
+		return null;
+	return angle ? wrap360(target) : target;
 }

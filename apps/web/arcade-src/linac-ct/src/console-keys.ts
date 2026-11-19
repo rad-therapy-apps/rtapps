@@ -3,7 +3,9 @@
    - the gantry, collimator and couch keys step once on press and then repeat while held, stopping
      on release, when the pointer leaves the key, when the window loses focus, or when the console
      refuses a step (a locked motion, a collision: the mistake is posted as for any press); a key
-     pressed from the keyboard steps once, as before;
+     pressed from the keyboard steps once, as before. A step that would pass the selected field's
+     planned value lands on it, so a machine left between steps by a part-way Move to field still
+     reaches the plan exactly (the plan checks are not loosened);
    - a Move to field key drives the gantry, collimator and couch toward the selected field while it
      is held, the shortest way round, through the same motion-enable and collision checks as the
      other keys. The machine values change every frame, so the console's pose stream (console-
@@ -12,6 +14,8 @@
 import { S } from './state';
 import { consoleMistakeCount } from './console-hooks';
 import {
+	KEY_STEPS,
+	keyLanding,
 	moveToFieldStep,
 	REPEAT_DELAY_MS,
 	REPEAT_EVERY_MS,
@@ -41,59 +45,7 @@ import {
 const COUCH_MIN_Y = 0.7 / 2 + GROUND_Y; // the couch-down key's floor (main.ts)
 const READOUT_EVERY_MS = 150;
 
-/* ----- held keys ----- */
-let held: HTMLElement | null = null;
-let holdTimer = 0;
-let pointerPressed: Element | null = null;
-
-/** One step of a key, as its click does; false when the console refused it. */
-function stepKey(key: HTMLElement): boolean {
-	const before = consoleMistakeCount();
-	document.getElementById(key.dataset.consoleTarget)?.click();
-	return consoleMistakeCount() === before;
-}
-
-function stopHold() {
-	held = null;
-	clearTimeout(holdTimer);
-}
-
-function onKeyDown(ev: PointerEvent) {
-	if (ev.button !== 0) return;
-	const key = (ev.target as Element).closest<HTMLButtonElement>('[data-console-target]');
-	if (!key || key.disabled || !REPEATING_KEYS.has(key.dataset.consoleTarget)) return;
-	stopHold();
-	// the click that ends this press is already this step
-	pointerPressed = key;
-	if (!stepKey(key)) return;
-	held = key;
-	key.addEventListener('pointerleave', stopHold, { once: true });
-	const again = () => {
-		if (held !== key) return;
-		if (!stepKey(key)) return stopHold();
-		holdTimer = window.setTimeout(again, REPEAT_EVERY_MS);
-	};
-	holdTimer = window.setTimeout(again, REPEAT_DELAY_MS);
-}
-
-/** Swallows the click that ends a pointer press (its step happened on press); a click from the
-    keyboard (detail 0) goes through to the chart's own handler as one step. */
-function onClick(ev: MouseEvent) {
-	const key = (ev.target as Element | null)?.closest?.('[data-console-target]');
-	if (!key || key !== pointerPressed || ev.detail === 0) return;
-	pointerPressed = null;
-	ev.stopPropagation();
-	ev.preventDefault();
-}
-
-/* ----- Move to field ----- */
-let moveKey: HTMLButtonElement | null = null;
-let moving = false;
-let moveTarget: FieldAxes | null = null;
-let frameId = 0;
-let lastFrame = 0;
-let lastReadout = 0;
-
+/* ----- the machine and the selected field ----- */
 function machineAxes(): FieldAxes {
 	const f = fundamentalState;
 	return {
@@ -106,19 +58,14 @@ function machineAxes(): FieldAxes {
 	};
 }
 
-/** The selected field's gantry, collimator and couch angle, and the couch the geometry check
-    expects: the image-guided position once images are acquired, else the plan's. A couch the
-    check already accepts stays where it is, so moving to a field never undoes a verified match. */
-function fieldTarget(): FieldAxes {
+/** The selected field's planned values, with the couch the geometry check expects: the
+    image-guided position once images are acquired, else the plan's. Axes the plan leaves open
+    keep the machine's value. */
+function plannedAxes(): FieldAxes {
 	const p = getCurrentPlannedParameters(),
-		now = machineAxes();
+		now = machineAxes(),
+		couch = getIGRTExpectedAbsoluteCouch() ?? getPlannedCouchState() ?? now;
 	const angle = (v: unknown, fallback: number) => normalizeAngleValue(v) ?? fallback;
-	const couchOK = treatmentParamMatches(
-		'couch',
-		p.couch,
-		`${now.vrt} / ${now.lng} / ${now.lat} mm`
-	);
-	const couch = couchOK ? now : (getIGRTExpectedAbsoluteCouch() ?? getPlannedCouchState() ?? now);
 	return {
 		gantry: angle(p.gantry, now.gantry),
 		collimator: angle(p.collimator, now.collimator),
@@ -129,12 +76,27 @@ function fieldTarget(): FieldAxes {
 	};
 }
 
-/** Puts the machine at `next` through the app's collision check; false when it refuses. */
-function moveMachine(next: FieldAxes): boolean {
+/** Move to field's target: the planned values, except that a couch the geometry check already
+    accepts stays where it is, so moving to a field never undoes a verified match. */
+function fieldTarget(): FieldAxes {
+	const p = getCurrentPlannedParameters(),
+		now = machineAxes(),
+		planned = plannedAxes();
+	const couchOK = treatmentParamMatches(
+		'couch',
+		p.couch,
+		`${now.vrt} / ${now.lng} / ${now.lat} mm`
+	);
+	return couchOK ? { ...planned, vrt: now.vrt, lng: now.lng, lat: now.lat } : planned;
+}
+
+/** Puts the machine at `next` through the app's collision check (`label` names the motion in
+    its interlock message); false when it refuses. */
+function moveMachine(next: FieldAxes, label: string): boolean {
 	const now = machineAxes(),
 		turn = shortestTurn(now.gantry, next.gantry),
 		d = { vrt: next.vrt - now.vrt, lng: next.lng - now.lng, lat: next.lat - now.lat };
-	const ok = attemptCollisionSafeMotion('MOVE TO FIELD', () => {
+	const ok = attemptCollisionSafeMotion(label, () => {
 		// the same scene moves as the gantry, couch and table keys (main.ts), by any amount
 		if (S.gantryRotatingGroup) S.gantryRotatingGroup.rotation.z -= (turn * Math.PI) / 180;
 		if (S.couchTreatmentPivot) S.couchTreatmentPivot.rotation.y = (next.couchAngle * Math.PI) / 180;
@@ -161,6 +123,81 @@ function moveMachine(next: FieldAxes): boolean {
 	return true;
 }
 
+/* ----- held keys ----- */
+/** The app's motion names (main.ts) for each axis, as its interlock messages and display use. */
+const AXIS_LABELS: Record<keyof FieldAxes, string> = {
+	gantry: 'GANTRY',
+	collimator: 'COLLIMATOR',
+	couchAngle: 'TREATMENT COUCH',
+	vrt: 'COUCH VERTICAL',
+	lng: 'COUCH LONGITUDINAL',
+	lat: 'COUCH LATERAL'
+};
+let held: HTMLElement | null = null;
+let holdTimer = 0;
+let pointerPressed: Element | null = null;
+
+/** One step of a key: the app's own key (its click), or the landing on the planned value when
+    that step would pass it. False when the console refused it. */
+function stepKey(key: HTMLElement): boolean {
+	const before = consoleMistakeCount(),
+		[axis, step] = KEY_STEPS[key.dataset.consoleTarget],
+		land = keyLanding(axis, machineAxes()[axis], step, plannedAxes()[axis]);
+	if (land === null) document.getElementById(key.dataset.consoleTarget)?.click();
+	else if (requirePendantMotion(AXIS_LABELS[axis])) {
+		const next = { ...machineAxes(), [axis]: land };
+		if (moveMachine(next, AXIS_LABELS[axis])) {
+			const unit = axis === 'vrt' || axis === 'lng' || axis === 'lat' ? ' mm' : '°';
+			syncFundamentalReadouts(AXIS_LABELS[axis], `${land}${unit}`);
+			renderTreatmentDeliveryPanel();
+		}
+	}
+	return consoleMistakeCount() === before;
+}
+
+function stopHold() {
+	held = null;
+	clearTimeout(holdTimer);
+}
+
+function onKeyDown(ev: PointerEvent) {
+	if (ev.button !== 0) return;
+	const key = (ev.target as Element).closest<HTMLButtonElement>('[data-console-target]');
+	if (!key || key.disabled || !REPEATING_KEYS.has(key.dataset.consoleTarget)) return;
+	stopHold();
+	// the click that ends this press is already this step
+	pointerPressed = key;
+	if (!stepKey(key)) return;
+	held = key;
+	key.addEventListener('pointerleave', stopHold, { once: true });
+	const again = () => {
+		if (held !== key) return;
+		if (!stepKey(key)) return stopHold();
+		holdTimer = window.setTimeout(again, REPEAT_EVERY_MS);
+	};
+	holdTimer = window.setTimeout(again, REPEAT_DELAY_MS);
+}
+
+/** Every click on a held-key goes through stepKey rather than the chart's own handler: the one
+    that ends a pointer press is swallowed (its step happened on press), and one from the keyboard
+    (detail 0) is a single step. */
+function onClick(ev: MouseEvent) {
+	const key = (ev.target as Element | null)?.closest?.<HTMLElement>('[data-console-target]');
+	if (!key || !REPEATING_KEYS.has(key.dataset.consoleTarget)) return;
+	ev.stopPropagation();
+	ev.preventDefault();
+	if (key === pointerPressed && ev.detail > 0) pointerPressed = null;
+	else stepKey(key);
+}
+
+/* ----- Move to field ----- */
+let moveKey: HTMLButtonElement | null = null;
+let moving = false;
+let moveTarget: FieldAxes | null = null;
+let frameId = 0;
+let lastFrame = 0;
+let lastReadout = 0;
+
 function stopMove(lcd: string) {
 	if (!moving) return;
 	moving = false;
@@ -176,7 +213,7 @@ function moveFrame(now: number) {
 		return stopMove('LOCKED · enable motion first');
 	const { next, arrived } = moveToFieldStep(machineAxes(), moveTarget, (now - lastFrame) / 1000);
 	lastFrame = now;
-	if (!moveMachine(next)) return stopMove('COLLISION INTERLOCK');
+	if (!moveMachine(next, 'MOVE TO FIELD')) return stopMove('COLLISION INTERLOCK');
 	if (arrived) return stopMove('AT FIELD');
 	if (now - lastReadout > READOUT_EVERY_MS) {
 		lastReadout = now;
