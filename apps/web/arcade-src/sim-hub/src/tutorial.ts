@@ -78,6 +78,7 @@ import * as hud from './tutorial-hud';
 import { linacEvents, linacPose, panelOpen } from './console-bus';
 import { closeConsole, openConsole } from './console-panel';
 import { ROOM_WORKFLOW } from './journey';
+import { setVaultMonitorPatient } from './vault-linac';
 import { TUTORIAL_PATIENTS } from '../../shared/console-protocol';
 import type { LinacEvent, LinacPose, LinacWorkspace } from '../../shared/console-protocol';
 
@@ -240,9 +241,10 @@ function closeStepConsole(): void {
 	closeConsole();
 }
 /** Jordan Ellis as the patient on the Vault 1 treatment monitors, from the chart opening at step 3
-    until the tutorial ends; off, the monitors go back to the center's own patient. */
+    until the tutorial ends; off, the monitors go back to naming whoever lies on the couch. */
 function showJordanOnVaultMonitors(on: boolean): void {
 	jordanOnMonitors = on;
+	setVaultMonitorPatient(on ? ROLES.patient.name : null);
 }
 /** The player closed the console panel before the step was done: the step stays, E opens it again. */
 function consolePanelClosed(): void {
