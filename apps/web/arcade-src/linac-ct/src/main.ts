@@ -284,7 +284,12 @@ import {
 	updateMotionAnimation,
 	verifyMotionManagement
 } from './delivery/motion';
-import { persistOISSession, renderOISPanel, signOffOISRecord } from './delivery/ois';
+import {
+	forgetOISSessions,
+	persistOISSession,
+	renderOISPanel,
+	signOffOISRecord
+} from './delivery/ois';
 import {
 	adaptiveRequired,
 	advanceAdaptiveFraction,
@@ -380,7 +385,7 @@ import {
 import type { TreatmentField } from './delivery/types';
 import { CONSOLE } from './console-hooks';
 import { startConsoleMode } from './console-mode';
-import { buildTutorialCases, JORDAN_QUEUE_INDEX } from './tutorial-cases';
+import { buildTutorialCases, isTutorialSessionKey, JORDAN_QUEUE_INDEX } from './tutorial-cases';
 
 // RTApps (#77 phase 2 task 19): consolidated `declare global` for this app's window
 // globals — folds in the interim per-module declarations previously carried by
@@ -499,8 +504,11 @@ TREATMENT_CASES.forEach((c) => {
 });
 // Console mode, tutorial scenario: the queue holds only the Tutorial's three entries, built from the
 // first case now that its setup refinements are in (tutorial-cases.ts)
-if (CONSOLE.scenario === 'tutorial')
+if (CONSOLE.scenario === 'tutorial') {
 	TREATMENT_CASES.splice(0, TREATMENT_CASES.length, ...buildTutorialCases(TREATMENT_CASES[0]));
+	// and every play starts with a fresh R&V record, not the last play's
+	forgetOISSessions(isTutorialSessionKey);
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
 window.clinicalIGRTCouchShift = function (axis, delta) {

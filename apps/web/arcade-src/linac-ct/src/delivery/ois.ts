@@ -49,6 +49,14 @@ function writeOISStore(store) {
 	}
 }
 
+/** Drops the saved R&V sessions whose key `forget` picks (the console tutorial starts fresh). */
+export function forgetOISSessions(forget: (key: string) => boolean) {
+	const store = readOISStore(),
+		keys = Object.keys(store).filter(forget);
+	keys.forEach((k) => delete store[k]);
+	if (keys.length) writeOISStore(store);
+}
+
 function oisClock() {
 	return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }

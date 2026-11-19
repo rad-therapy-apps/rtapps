@@ -4,6 +4,7 @@ import { TREATMENT_CASES } from './delivery/cases';
 import {
 	buildTutorialCases,
 	isTutorialPatient,
+	isTutorialSessionKey,
 	JORDAN_QUEUE_INDEX,
 	TUTORIAL_DAILY_ERROR,
 	tutorialQueueDetail
@@ -65,6 +66,15 @@ describe('the console tutorial cases', () => {
 			'Born March 14, 1968 · Left Breast · Vault 2 · 9:00'
 		);
 		expect(tutorialQueueDetail(base.mrn)).toBeNull();
+	});
+
+	it("picks out the tutorial patients' saved R&V sessions only", () => {
+		const jordan = buildTutorialCases(base)[JORDAN_QUEUE_INDEX];
+		expect(isTutorialSessionKey(`${jordan.mrn}|${jordan.fraction}`)).toBe(true);
+		expect(isTutorialSessionKey(`${TUTORIAL_PATIENTS.jody.mrn}|1 / 1`)).toBe(true);
+		expect(isTutorialSessionKey(`${base.mrn}|${base.fraction}`)).toBe(false);
+		expect(isTutorialSessionKey(`${TUTORIAL_PATIENTS.jordan.mrn}X|1`)).toBe(false);
+		expect(isTutorialSessionKey('')).toBe(false);
 	});
 
 	it('lets only Jordan be checked in and charted', () => {

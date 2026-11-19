@@ -5,7 +5,8 @@
    Vac-Lok and knee support) under Jordan's identity, and its daily setup error makes today's check
    images ask for the TUTORIAL_SHIFT_MM couch correction. The two look-alikes are queue rows only:
    console-patch.ts refuses to check them in or open their charts. main.ts swaps these cases in for
-   TREATMENT_CASES; console-patch.ts reads the queue details and the refusals. Free of scene and DOM
+   TREATMENT_CASES and drops their saved R&V sessions; console-patch.ts reads the queue details
+   and the refusals. Free of scene and DOM
    imports so it is unit tested in Node (tutorial-cases.spec.ts). */
 import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
 import type { TreatmentCase } from './delivery/types';
@@ -59,6 +60,12 @@ export function buildTutorialCases(base: TreatmentCase): TreatmentCase[] {
 export function tutorialQueueDetail(mrn: string): string | null {
 	const e = TUTORIAL_QUEUE.find((x) => x.mrn === mrn);
 	return e ? `Born ${e.born} · ${e.site} · ${e.vault} · ${e.time}` : null;
+}
+
+/** Whether a saved R&V session key (ois.ts: `mrn|fraction`) is a tutorial patient's. The console
+    tutorial drops these on boot, so every play starts with a fresh record. */
+export function isTutorialSessionKey(key: string): boolean {
+	return TUTORIAL_QUEUE.some((e) => key.startsWith(`${e.mrn}|`));
 }
 
 /** Whether the queue lets this MRN be checked in and charted: only Jordan's entry. */
