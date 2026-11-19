@@ -36,7 +36,9 @@
 //   node scripts/sim-hub-free-console-check.mjs
 // Needs Playwright's Chromium (WebGL through Metal on macOS, SwiftShader elsewhere). Exit codes:
 // 0 pass; 1 a check failed; 2 setup error. Output: one `FREE CONSOLE CHECK <part> PASS` line per
-// part with its time, or `FREE CONSOLE CHECK FAIL: <what>` and the console's last events.
+// part with its time, or `FREE CONSOLE CHECK FAIL: <what>` and the console's last events. The
+// consoles are scanned by lib/no-scroll.mjs as in sim-hub-console-check.mjs (`NO-SCROLL PASS`, or
+// `NO-SCROLL FAIL` with the scrolling areas and the cut-off elements); CHECK_VIEW=WxH sets the size.
 // The serving, the GL flags and the equipment drag are copied from sim-hub-console-check.mjs.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -280,7 +282,6 @@ async function openDesk(kind, [x, z], prompt, pagePath) {
 		`the panel holds the ${kind} console in the free scenario (${frame.url()})`
 	);
 	await noScroll.scan(page, `the center, ${kind} panel open`);
-	await noScroll.scan(frame, `${kind} console, on opening`);
 	return frame;
 }
 
@@ -449,6 +450,8 @@ async function playLinac() {
 		ready.scenario === 'free',
 		`the LINAC console is ready in the free scenario (${ready.scenario})`
 	);
+	// scanned once it is ready: before, its page still has the standalone app's layout
+	await noScroll.scan(frame, 'linac console, on opening');
 	const click = async (sel) => {
 		await noScroll.scan(frame, `before clicking ${sel}`);
 		await frame.locator(sel).first().click();
@@ -651,6 +654,7 @@ async function playCt() {
 		await frame.evaluate(() => document.body.classList.contains('rtapps-console-mode')),
 		'the CT suite runs in its console mode'
 	);
+	await noScroll.scan(frame, 'ct console, on opening');
 	// the table at rest (the console posts its first pose before its ready, so the panel drops it
 	// and the room follows from the console's first change)
 	const rest = await ev(() => window.__NPC.ctRoom.frame.position.x);
@@ -735,7 +739,7 @@ try {
 		process.exitCode = 1;
 	} else {
 		console.log(
-			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls`
+			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls; ${noScroll.cutScans} of the console, nothing cut off`
 		);
 		console.log(
 			`FREE CONSOLE CHECK PASS: a free LINAC fraction and a free CT scan, each recorded once, in ${((Date.now() - T0) / 1000).toFixed(0)} s`

@@ -33,7 +33,10 @@
 // 0 pass; 1 a check failed; 2 setup error (no build, or Chromium did not start). Output: one
 // `CONSOLE CHECK <part> PASS` line per part with its time (step 6's says how the drags went: by
 // mouse or by the drag events), then the whole run's time; or `CONSOLE CHECK FAIL: <what>` and
-// the console's last events.
+// the console's last events. Before each click the console (and at each opening the center) is
+// scanned by lib/no-scroll.mjs: nothing may scroll and nothing in the console may be cut off; at
+// the end `NO-SCROLL PASS`, or `NO-SCROLL FAIL` with each scrolling area and each cut-off
+// element (exit code 1). CHECK_VIEW=WxH (e.g. 992x624) sets the center's size.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import http from 'node:http';
@@ -682,7 +685,7 @@ try {
 		process.exitCode = 1;
 	} else {
 		console.log(
-			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls`
+			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls; ${noScroll.cutScans} of the console, nothing cut off`
 		);
 		console.log(
 			`CONSOLE CHECK PASS: steps 3, 6, 8 and 9 on the real LINAC console, and step 3 of a second play, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
