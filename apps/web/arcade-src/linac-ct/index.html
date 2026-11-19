@@ -11941,6 +11941,18 @@
 				font-size: 10.5px !important;
 				line-height: 1.3 !important;
 			}
+			/* frames 600 px tall and up have room for each code's title too */
+			@media (min-height: 600px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.charge-code-copy
+					strong {
+					display: block !important;
+					margin: 2px 0 0 !important;
+					font-size: 10.5px !important;
+					line-height: 1.3;
+				}
+			}
 			body.linac-console-view.control-room-mode.rt-v2-console
 				#consoleWorkflowDockBody
 				#chargeCodeExplanation,
