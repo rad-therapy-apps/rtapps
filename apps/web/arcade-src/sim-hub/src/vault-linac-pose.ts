@@ -100,8 +100,9 @@ export function jawOffset(cm: number): number {
 }
 
 /** The app's home pose (gantry and couch at 0, a 10 x 10 cm field) with the couch parked by `fit`:
-    the pose Vault 1 stands in until the console sends one, and after resetLinacPose. Its lasersOn
-    is not shown: Vault 1's lasers follow only the console's own switch (and the Tutorial's). */
+    the pose Vault 1 stands in until the console sends one, and after a resetLinacPose with no
+    console loaded. Its lasersOn is not shown: Vault 1's lasers follow only the console's own switch
+    (and the Tutorial's). */
 export function parkedPose(fit: CouchFit): LinacPose {
 	return {
 		gantry: 0,

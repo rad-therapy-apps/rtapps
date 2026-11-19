@@ -68,7 +68,7 @@ console records 'sim-linac-fraction' as it does today. The center records 'sim-c
   radiation sign go up. The monitors show the patient on the couch: Jordan Ellis in the Tutorial.
 - `vault-linac.ts` follows `linacPose`: gantry, collimator, couch angle and translations, jaws,
   kV/EPID arms, beam and lasers. A lying patient moves with the couch top. The pose resets when the
-  treatment journey resets. The LINAC Control desk monitors (equipment.ts CCTV) show the new
+  treatment journey resets: to the loaded LINAC console's last pose, or parked when none is loaded. The LINAC Control desk monitors (equipment.ts CCTV) show the new
   vault without changes.
 
 ### 2. CT room look and drivable scanner (sim-hub)

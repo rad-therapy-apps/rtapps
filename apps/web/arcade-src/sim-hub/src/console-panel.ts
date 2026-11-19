@@ -11,8 +11,8 @@
      the LINAC console's ready with the workspace to show (rtapps-linac-open) and sends the Vault 1
      door and whether the player is inside (rtapps-linac-room) on ready, on open and whenever they
      change, and whether the panel shows it (rtapps-linac-panel) on ready, on open and on close:
-     closed, the console holds a delivering field. A finished CT scan in the free scenario records
-     'sim-ct-scan'.
+     closed, the console holds a delivering field. The LINAC console's last pose is kept for
+     linacConsolePose. A finished CT scan in the free scenario records 'sim-ct-scan'.
    - Opening closes the other pop-ups (the equipment card, a conversation, the room card…), so none
      sits over the panel or takes its Esc; the settings and the Tutorial's cards stay.
    - The camera slots in the panel are holes: while it is open, main.ts calls renderConsoleFeeds
@@ -27,6 +27,7 @@ import type {
 	CenterToLinacMessage,
 	ConsoleKind,
 	ConsoleScenario,
+	LinacPose,
 	LinacRoomMsg,
 	LinacWorkspace
 } from '../../shared/console-protocol';
@@ -74,6 +75,8 @@ interface ConsoleFrame {
 	workspace: LinacWorkspace;
 	/** LINAC: the vault state last sent */
 	room: LinacRoomMsg | null;
+	/** LINAC: the pose this page load last posted */
+	pose: LinacPose | null;
 	/** CT: the scan keys recorded as 'sim-ct-scan' by this page load */
 	recorded: Set<string>;
 }
@@ -164,6 +167,7 @@ function loadFrame(kind: ConsoleKind, scenario: ConsoleScenario): ConsoleFrame {
 			ready: false,
 			workspace: 'queue',
 			room: null,
+			pose: null,
 			recorded: new Set()
 		};
 		host?.appendChild(el);
@@ -175,6 +179,7 @@ function loadFrame(kind: ConsoleKind, scenario: ConsoleScenario): ConsoleFrame {
 		ready: false,
 		workspace: 'queue',
 		room: null,
+		pose: null,
 		recorded: new Set()
 	});
 	f.el.src = src;
@@ -236,6 +241,7 @@ function onMessage(e: MessageEvent): void {
 			sendPanel();
 			return;
 		case 'rtapps-linac-state':
+			f.pose = m.pose;
 			linacPose.emit(m.pose);
 			return;
 		case 'rtapps-linac-event':
@@ -278,6 +284,14 @@ export function updateConsoleRoom(): void {
 // and stops its motion when the panel closes (console-mode.ts)
 function sendPanel(): void {
 	if (frames.linac?.ready) post(linacPanel(shown));
+}
+/** The pose the LINAC console last posted, while its page is loaded and ready; null with no
+    console, before its ready and after a reload (whose page posts its own first pose). A journey
+    reset (journey.ts) puts Vault 1 back to it rather than parking the machine under a live
+    console, which posts again only when its pose changes. */
+export function linacConsolePose(): LinacPose | null {
+	const f = frames.linac;
+	return f?.ready ? f.pose : null;
 }
 
 /* ---- the camera slots ---- */

@@ -8,10 +8,12 @@
 
    The machine then follows the LINAC console: each pose on console-bus.ts `linacPose` is checked
    (vault-linac-pose.ts clampPose) and becomes the target the parts close on with a light
-   smoothing, every frame; a lying patient on the couch moves with the couch top. Until the console
-   sends a pose, and again after resetLinacPose (journey.ts resetTreatmentJourney calls it), the
-   machine stands parked: gantry at 0 and the couch lowered and pulled back so that its board is
-   where today's couch top is (props.ts LYING_SURFACES.vault1), where every lying patient is placed.
+   smoothing, every frame; a lying patient on the couch moves with the couch top. A journey reset
+   (journey.ts resetTreatmentJourney calls resetLinacPose) puts it back to the loaded console's last
+   pose, as that console posts again only when its pose changes. Until the console sends a pose,
+   and after a reset with no console loaded, the machine stands parked: gantry at 0 and the couch
+   lowered and pulled back so that its board is where today's couch top is (props.ts
+   LYING_SURFACES.vault1), where every lying patient is placed.
    The console's home has the couch at treatment height, about 0.44 m higher; the parked couch
    rises to it when the console's poses come in, so the gantry clears the couch all the way round.
    The couch's equipment anchor rides it too. The lasers follow only the console's own switch, when
@@ -111,10 +113,12 @@ let couchRing: THREE.Object3D | null = null;
 
 const goal = () => target ?? parkedPose(fit);
 
-/** Puts Vault 1's machine back to its parked pose (the couch lowered to today's lying top, gantry
-    at 0; the lasers stay as they are); the console's next pose takes it from there. */
-export function resetLinacPose(): void {
-	target = null;
+/** Puts Vault 1's machine back to `live`, the pose the loaded LINAC console last posted
+    (console-panel.ts linacConsolePose); with none, to its parked pose (the couch lowered to today's
+    lying top, gantry at 0). The lasers stay as they are; the console's next pose takes it from
+    there. */
+export function resetLinacPose(live: LinacPose | null = null): void {
+	target = live ? clampPose(live, target ?? current ?? parkedPose(fit)) : null;
 }
 
 /** What Vault 1's machine shows, for the check hooks (npc-check-hook.ts). */
