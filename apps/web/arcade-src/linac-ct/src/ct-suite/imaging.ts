@@ -10,6 +10,7 @@ import {
 	spanOf
 } from './console';
 import type { CtCompleteMsg } from '../ct-protocol';
+import { postToParent } from './bridge';
 /* ---------------- EMBEDDED REAL CT SERIES (all de-identified) ----------------
    Five real planning CTs, each downsampled to the 220^2 recon matrix and
    subsampled in slices. HU are packed loss-lessly into a PNG sprite (16-bit
@@ -662,6 +663,7 @@ export function acquireTopogram() {
 	}
 	setStatus('Acquiring topogram…', 'busy');
 	setXray(true);
+	S.topogramming = true;
 	log('Topogram (scout) acquisition…', 'warn');
 	($('btnTopogram') as HTMLButtonElement).disabled = true;
 	let p = 0;
@@ -671,6 +673,7 @@ export function acquireTopogram() {
 		if (p >= 1) {
 			clearInterval(iv);
 			setXray(false);
+			S.topogramming = false;
 			S.topoAcquired = true;
 			$('topoHint').style.display = 'none';
 			['rangeStart', 'rangeEnd'].forEach((id) => (($(id) as HTMLInputElement).disabled = false));
@@ -791,16 +794,13 @@ export function finishScan() {
 	drawTopogram(S.sliceLevels[n - 1]);
 	setStatus('Scan complete — review series', 'rdy');
 	setStep(6);
-	window.parent?.postMessage(
-		{
-			type: 'rtapps-ct-complete',
-			key: S.proto?.key || '',
-			patient: S.proto?.patient || '',
-			series: S.proto?.series || '',
-			images: n
-		} satisfies CtCompleteMsg,
-		'*'
-	);
+	postToParent({
+		type: 'rtapps-ct-complete',
+		key: S.proto?.key || '',
+		patient: S.proto?.patient || '',
+		series: S.proto?.series || '',
+		images: n
+	} satisfies CtCompleteMsg);
 	$('progText').textContent = `Series complete · ${n} images`;
 	log(`Reconstruction complete — <b>${n}</b> axial images. Scroll to review.`, 'ok');
 }

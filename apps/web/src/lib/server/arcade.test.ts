@@ -28,6 +28,7 @@ describe('resolveArcadeFile', () => {
 	it('maps known extensions', () => {
 		expect(resolveArcadeFile(root, 'g', 'a/b.js')?.contentType).toBe('text/javascript');
 		expect(resolveArcadeFile(root, 'g', 'x.png')?.contentType).toBe('image/png');
+		expect(resolveArcadeFile(root, 'g', 'models/m.glb')?.contentType).toBe('model/gltf-binary');
 	});
 	it('rejects traversal, bad slugs, and unknown extensions', () => {
 		expect(resolveArcadeFile(root, 'g', '../../etc/passwd')).toBeNull();
@@ -39,6 +40,7 @@ describe('resolveArcadeFile', () => {
 	it('marks non-HTML files cacheable and HTML uncacheable', () => {
 		expect(cacheControlFor('.png')).toBe('private, max-age=3600');
 		expect(cacheControlFor('.mp3')).toBe('private, max-age=3600');
+		expect(cacheControlFor('.glb')).toBe('private, max-age=3600');
 		expect(cacheControlFor('.html')).toBe('no-cache');
 		expect(cacheControlFor('.js')).toBe('no-cache');
 	});

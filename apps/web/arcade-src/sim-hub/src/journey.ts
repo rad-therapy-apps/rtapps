@@ -81,7 +81,9 @@ import {
 	PLAYER_EYE_Y
 } from './main';
 import { focusCtPatientFromControl, showCtQaDock } from './sdk-bridge';
-import { LYING_SURFACES } from './props';
+import { LYING_SURFACES, VAULT1_LYING } from './props';
+import { resetLinacPose } from './vault-linac';
+import { linacConsolePose } from './console-panel';
 import { releaseArrivalSpot, clearArrivalSpots } from './room-routes';
 
 const JOURNEY_ROOM_TIMING = { roomId: null, enteredAt: 0, lastPatient: null };
@@ -454,7 +456,15 @@ function createJourneyTreatmentPatient(room, skin = 0xd7a17d, hairColor = 0x3a28
 		skin,
 		hairColor
 	);
-	restLyingPatient(cont, LYING_SURFACES.vault1, room.x - 1.25, room.z - 0.05);
+	// where npc.ts lays Vault 1's own couch patient (props.ts VAULT1_LYING)
+	cont.scale.setScalar(VAULT1_LYING.scale);
+	restLyingPatient(
+		cont,
+		LYING_SURFACES.vault1,
+		room.x + VAULT1_LYING.dx,
+		room.z + VAULT1_LYING.dz,
+		VAULT1_LYING.ry
+	);
 	scene.add(cont);
 	(ROOM_CAST.vault1 || (ROOM_CAST.vault1 = [])).push({ g: cont, kind: 'patient' });
 	cont.visible = false;
@@ -514,9 +524,16 @@ export function journeySpeech(actor, text, kind = 'staff', ms = 10000) {
 		actor.userData.journeyBubble = el;
 	}
 	el.textContent = text;
-	el.style.opacity = '1';
+	bubbleVis(el, true);
 	clearTimeout(el._journeyTimer);
-	el._journeyTimer = setTimeout(() => (el.style.opacity = '0'), hold);
+	el._journeyTimer = setTimeout(() => bubbleVis(el, false), hold);
+}
+/** Takes down the line `actor` is saying (the Tutorial does, as its steps move on). */
+export function clearJourneySpeech(actor) {
+	const el = actor?.userData.journeyBubble;
+	if (!el) return;
+	clearTimeout(el._journeyTimer);
+	bubbleVis(el, false);
 }
 function playIntercomAudio(text) {
 	// Settings > Sound off (the default) silences the intercom beeps and speech too (sound.ts)
@@ -839,6 +856,7 @@ export function resetTreatmentJourney(silent = false) {
 	setPatientGown(JOURNEY.ctSimPatient, false);
 	setPatientGown(JOURNEY.miaTreatmentPatient, false);
 	resetCtCouchMotion();
+	resetLinacPose(linacConsolePose());
 	workflowState('lobby', 'OPEN', 'Routine arrivals', '#42d5cf');
 	workflowState('linaccontrol', 'READY', 'Treatment team available', '#42d5cf');
 	workflowState('vault1', 'AVAILABLE', 'Room ready for next patient', '#65dda0');

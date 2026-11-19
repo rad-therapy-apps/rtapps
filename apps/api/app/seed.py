@@ -263,7 +263,8 @@ SEED_ARCADE_GAMES: list[dict[str, Any]] = [
         "config": {"arcade_slug": "onco-uno", "completion_only": True},
     },
     # Plan 4c: the simulator world. sim-hub-qa IS the hub activity (its player embeds
-    # the walkable hub); the two completion activities live in the room app.
+    # the walkable hub); the two completion activities also open the hub, straight at the
+    # LINAC / CT control room (start_room).
     {
         "title": "Center QA walkthrough",
         "subject_slug": "quality-management-and-safety",
@@ -273,15 +274,21 @@ SEED_ARCADE_GAMES: list[dict[str, Any]] = [
         "title": "Treatment delivery",
         "subject_slug": "treatment-delivery-procedures",
         "config": {
-            "arcade_slug": "linac-ct",
+            "arcade_slug": "sim-hub",
             "sdk_slug": "sim-linac-fraction",
             "completion_only": True,
+            "start_room": "linaccontrol",
         },
     },
     {
         "title": "CT simulation",
         "subject_slug": "treatment-delivery-procedures",
-        "config": {"arcade_slug": "linac-ct", "sdk_slug": "sim-ct-scan", "completion_only": True},
+        "config": {
+            "arcade_slug": "sim-hub",
+            "sdk_slug": "sim-ct-scan",
+            "completion_only": True,
+            "start_room": "ctcontrol",
+        },
     },
     # Plan 4d: the three alignment-set shim games (completion-only, no numeric score) plus
     # the console emulator (scored via the sim SDK, like the plan 4c simulator activities).

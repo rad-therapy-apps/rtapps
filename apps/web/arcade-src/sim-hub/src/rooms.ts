@@ -59,12 +59,15 @@ import {
 	biohazardBox,
 	ctScanner,
 	emulatorLinacShell,
+	linacVaultFitOut,
+	LINAC_VAULT_MOUNTS,
 	hdrSuite
 } from './props';
 import { add, MAT, roomFloors, ceilings, doors, roomById } from './main';
 import { registerInteractable } from './interact';
 import { doorNormal, doorCenter, TREATMENT_JUNCTION_X } from './walk';
 import { buildEngineeringWallSchematics, buildLinacHeadWallStation } from './equipment';
+import { linacTextureUrl } from './vault-linac-files';
 
 // RTApps (#77 phase 2 task 12): typed boundary for the ROOMS layout table — fields
 // derived from every property literal actually present across the table entries below
@@ -708,8 +711,11 @@ export function addRoomBaseboards(room: Room) {
 	board('xmax', false, room.x + hx - 0.1);
 }
 
-export function addRoomLighting(room: Room, h) {
-	const prof = roomLightProfile(room);
+/** Adds the room's light fixtures and accent cove; returns them (Vault 1's make way for the LINAC
+    app's light panels, vault-linac.ts). */
+export function addRoomLighting(room: Room, h): THREE.Mesh[] {
+	const prof = roomLightProfile(room),
+		made: THREE.Mesh[] = [];
 	const count = Math.max(1, Math.floor(room.w / 4.5));
 	for (let i = 0; i < count; i++) {
 		const lx = room.x - room.w / 2 + 2 + (room.w - 4) * (count === 1 ? 0.5 : i / (count - 1 || 1));
@@ -724,6 +730,7 @@ export function addRoomLighting(room: Room, h) {
 		);
 		fixture.castShadow = false;
 		scene.add(fixture);
+		made.push(fixture);
 	}
 	const accent = zoneAccentColor(room);
 	const cove = box(
@@ -737,6 +744,8 @@ export function addRoomLighting(room: Room, h) {
 	);
 	cove.castShadow = false;
 	scene.add(cove);
+	made.push(cove);
+	return made;
 }
 
 export function zoneFloorColor(room: Room) {
@@ -763,11 +772,91 @@ function ceilingMat(c) {
 	return std(c, 0.95, 0, { emissive: c, emissiveIntensity: 0.6 });
 }
 
+/* Vault 1's LINAC finish (docs/specs/2026-11-18-consoles-in-center-design.md, part 1): the LINAC
+   app's tiled floor, cream wall panels with the blue stripe and ceiling tiles, from the textures
+   scripts/export-linac-model.mjs exports. A surface w x h m repeats its texture at the app's scale:
+   the floor's every 6 m, a wall panel 4 m wide and 7.55 m high (so the stripe sits as low as in the
+   app), the ceiling's every 4.8 m. Until the picture arrives (never, in the Node checks, which load
+   nothing) a surface shows the finish's plain colour. The ceiling is drawn unlit, so the
+   hemisphere light's ground colour cannot shade it (ceilingMat glows for the same reason). */
+const LINAC_FINISH = {
+	floor: { color: 0xc9ccd1, tile: [6, 6] },
+	wall: { color: 0xe7e3da, tile: [4, 7.55] },
+	ceiling: { color: 0xdfe3e7, tile: [4.8, 4.8] }
+} as const;
+const linacTextures: Partial<Record<keyof typeof LINAC_FINISH, Promise<THREE.Texture>>> = {};
+function linacFinish(kind: keyof typeof LINAC_FINISH, w: number, h: number) {
+	const f = LINAC_FINISH[kind],
+		mat =
+			kind === 'ceiling'
+				? new THREE.MeshBasicMaterial({ color: f.color })
+				: new THREE.MeshStandardMaterial({
+						color: f.color,
+						roughness: kind === 'floor' ? 0.92 : 0.9,
+						metalness: 0
+					});
+	(linacTextures[kind] ??= new THREE.TextureLoader().loadAsync(linacTextureUrl(kind))).then(
+		(t) => {
+			const map = t.clone();
+			map.wrapS = map.wrapT = THREE.RepeatWrapping;
+			map.colorSpace = THREE.SRGBColorSpace;
+			map.anisotropy = 8;
+			map.repeat.set(w / f.tile[0], h / f.tile[1]);
+			mat.map = map;
+			// the ceiling keeps its tint over the picture, as in the approved look
+			if (kind !== 'ceiling') mat.color.set(0xffffff);
+			mat.needsUpdate = true;
+		},
+		() => {}
+	);
+	return mat;
+}
+/* Vault 1's walls take the LINAC finish on their room side only (the corridor faces keep the
+   center's look): a panel 0.01 m off each wall's inner face (0.29 m in from the wall line), from
+   the floor's top to the ceiling's underside. On the door wall the panels stop at the 4.8 m doorway
+   (buildSide) and one more covers the wall over it, above the 2.65 m opening. */
+function linacVaultWallPanels(room: Room, h: number) {
+	const y0 = 0.065,
+		y1 = h - 0.04,
+		inX = room.w / 2 - 0.3,
+		inZ = room.d / 2 - 0.3,
+		lenX = room.w - 0.58,
+		lenZ = room.d - 0.58,
+		half = 4.8 / 2;
+	const panel = (len, bottom, x, z, rot) => {
+		const p = new THREE.Mesh(
+			new THREE.PlaneGeometry(len, y1 - bottom),
+			linacFinish('wall', len, y1 - bottom)
+		);
+		p.position.set(x, (bottom + y1) / 2, z);
+		p.rotation.y = rot;
+		p.receiveShadow = true;
+		scene.add(p);
+	};
+	panel(lenX, y0, room.x, room.z - inZ, 0);
+	panel(lenX, y0, room.x, room.z + inZ, Math.PI);
+	panel(lenZ, y0, room.x + inX, room.z, -Math.PI / 2);
+	// the door wall (xmin): either side of the doorway, and over it
+	const side = (lenZ / 2 - half) / 2 + half;
+	panel(lenZ / 2 - half, y0, room.x - inX, room.z - side, Math.PI / 2);
+	panel(lenZ / 2 - half, y0, room.x - inX, room.z + side, Math.PI / 2);
+	panel(2 * half, 2.65, room.x - inX, room.z, Math.PI / 2);
+}
+
 export function buildRoom(room: Room) {
 	const h = room.vault ? 5.7 : 3.75,
 		t = room.vault ? 0.58 : 0.16,
-		mat = room.vault ? MAT.wallVault : MAT.wall;
-	const floor = box(room.w - 0.15, 0.07, room.d - 0.15, floorMatFor(room), room.x, 0.03, room.z);
+		mat = room.vault ? MAT.wallVault : MAT.wall,
+		linac = room.id === 'vault1';
+	const floor = box(
+		room.w - 0.15,
+		0.07,
+		room.d - 0.15,
+		linac ? linacFinish('floor', room.w - 0.15, room.d - 0.15) : floorMatFor(room),
+		room.x,
+		0.03,
+		room.z
+	);
 	floor.userData.roomId = room.id;
 	scene.add(floor);
 	roomFloors.push(floor);
@@ -782,6 +871,7 @@ export function buildRoom(room: Room) {
 	);
 	scene.add(stripe);
 	['zmin', 'zmax', 'xmin', 'xmax'].forEach((s) => buildSide(room, s, h, t, mat));
+	if (linac) linacVaultWallPanels(room, h);
 	if (room.vault) addVaultDoorwaySigns(room);
 	addRoomBaseboards(room);
 	// the slab's top is flush with the wall tops (h), so no edge shows over the walls from outside; its
@@ -790,7 +880,7 @@ export function buildRoom(room: Room) {
 		room.w - 0.2,
 		0.04,
 		room.d - 0.2,
-		ceilingMat(0xe9edef),
+		linac ? linacFinish('ceiling', room.w - 0.2, room.d - 0.2) : ceilingMat(0xe9edef),
 		room.x,
 		h - 0.02,
 		room.z
@@ -799,7 +889,10 @@ export function buildRoom(room: Room) {
 	ceiling.receiveShadow = false;
 	scene.add(ceiling);
 	ceilings.push(ceiling);
-	addRoomLighting(room, h);
+	if (room.id === 'ctsim') ctSimFinish(room, floor, ceiling);
+	const lights = addRoomLighting(room, h);
+	// until the LINAC app's light panels come with its model (vault-linac.ts)
+	if (linac) LINAC_VAULT_MOUNTS.fallback.push(...lights);
 	addRoomDecor(room);
 	furnish(room);
 }
@@ -952,6 +1045,10 @@ export function addRoomDecor(room: Room) {
 		plant(g, 8.6, -6.4, 1.15);
 		plant(g, -8.4, 6.3, 1.05);
 		wallArt(g, 7.8, 2.25, -9.86, 0, 2.8, 1.1, 0x347e91);
+		return;
+	}
+	if (room.id === 'ctsim') {
+		ctSimLightPanel(g, room);
 		return;
 	}
 	const backSide =
@@ -1436,40 +1533,8 @@ export function furnish(room: Room) {
 			break;
 		case 'vault1':
 			emulatorLinacShell(g, room);
-			framedWallMonitor(
-				g,
-				room.x + room.w / 2 - 0.32,
-				2.18,
-				room.z + 5.0,
-				-Math.PI / 2,
-				4.25,
-				2.28,
-				'IN-ROOM PATIENT INFO',
-				'Treatment setup and verification',
-				[
-					['Patient', 'LINAC treatment patient'],
-					['Position', 'Supine, treatment couch'],
-					['Immobilization', 'Site-specific device indexed'],
-					['Status', 'Setup ready / verify imaging']
-				]
-			);
-			framedWallMonitor(
-				g,
-				room.x + room.w / 2 - 0.32,
-				2.18,
-				room.z - 4.8,
-				-Math.PI / 2,
-				4.0,
-				2.18,
-				'SETUP CHECKLIST',
-				'Pre-treatment room tasks',
-				[
-					['Identity', '2 identifiers verified'],
-					['Couch', 'Indexed / accessory check'],
-					['Imaging', 'Verification pending'],
-					['Beam status', 'Standby']
-				]
-			);
+			// the LINAC app's in-room treatment monitors and radiation sign (vault-linac.ts)
+			linacVaultFitOut(g, room);
 			immobilizationStorage(
 				g,
 				room.x + 7.6,
@@ -1494,9 +1559,10 @@ export function furnish(room: Room) {
 			wallClock(g, room.x + 8.7, 3.2, room.z - room.d / 2 + 0.35, 0);
 			sanitizerDispenser(g, room.x - 4.4, 1.6, room.z - room.d / 2 + 0.34, 0);
 			gloveBoxRack(g, room.x - 5.3, 1.65, room.z - room.d / 2 + 0.34, 0);
-			emergencyStopPanel(g, room.x + room.w / 2 - 0.34, 1.55, room.z - 1.6, -Math.PI / 2);
+			// either side of the in-room monitor on the +x wall (room.z - 2 .. room.z + 2)
+			emergencyStopPanel(g, room.x + room.w / 2 - 0.34, 1.55, room.z - 3.4, -Math.PI / 2);
 			emergencyStopPanel(g, room.x - room.w / 2 + 0.45, 1.55, room.z + 1.2, Math.PI / 2);
-			wallSpeaker(g, room.x + room.w / 2 - 0.34, 3.15, room.z + 1.8, -Math.PI / 2);
+			wallSpeaker(g, room.x + room.w / 2 - 0.34, 3.15, room.z + 3.4, -Math.PI / 2);
 			warningPlaque(
 				g,
 				room.x - room.w / 2 + 0.32,
@@ -1509,7 +1575,7 @@ export function furnish(room: Room) {
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z + 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x + room.w / 2 - 0.55, 4.25, room.z - 9.2, -Math.PI / 2, -0.46);
 			cctvCamera(g, room.x - 5.4, 3.55, room.z - room.d / 2 + 0.32, 0, -0.44);
-			// clear of the setup checklist screen (room.z - 6.89 .. room.z - 2.71)
+			// clear of the radiation sign (room.z - 7.17 .. room.z - 5.63)
 			wallArt(g, room.x + room.w / 2 - 0.35, 3.15, room.z - 8.6, -Math.PI / 2, 1.2, 0.52, 0x5b7381);
 			break;
 		case 'vault2':
@@ -1675,18 +1741,45 @@ export function buildCorridorInfillWalls() {
 }
 
 export function buildVaultMazeEntries() {
-	const h = 4.55,
-		m = MAT.wallVault;
-	function straightHallWithTurn(z, turnPositive = true) {
+	const h = 4.55;
+	// Vault 1's maze takes the LINAC wall finish: the walls in its plain cream, a panel of the
+	// finish (buildRoom's linacFinish) 0.01 m off each long face, so the ends and tops are not
+	// streaked by a texture laid out for the faces; vault 2's keeps the vault wall
+	const cream = new THREE.MeshStandardMaterial({
+		color: LINAC_FINISH.wall.color,
+		roughness: 0.9,
+		metalness: 0
+	});
+	const panels = (x, z, len, alongX) => {
+		for (const side of [-1, 1]) {
+			const p = new THREE.Mesh(
+				new THREE.PlaneGeometry(len, h - 0.065),
+				linacFinish('wall', len, h - 0.065)
+			);
+			const off = side * (0.21 + 0.01);
+			p.position.set(alongX ? x : x + off, (h + 0.065) / 2, alongX ? z + off : z);
+			// each faces away from its wall: +z/-z for a wall along x, +x/-x for one along z
+			p.rotation.y = alongX ? (side > 0 ? 0 : Math.PI) : side > 0 ? Math.PI / 2 : -Math.PI / 2;
+			p.receiveShadow = true;
+			scene.add(p);
+		}
+	};
+	function straightHallWithTurn(z, turnPositive = true, linac = false) {
 		const hallCenterX = 67.9,
 			hallLength = 7.2,
-			halfWidth = 2.55;
+			halfWidth = 2.55,
+			m = linac ? cream : MAT.wallVault;
 		// long straight shielded hall from entry door
 		wall(hallCenterX, z - halfWidth, hallLength, 0.42, h, m, true);
 		wall(hallCenterX, z + halfWidth, hallLength, 0.42, h, m, true);
 		// single inside corner / baffle that creates the L-turn before the room opens up
 		const cornerZ = turnPositive ? z - 1.3 : z + 1.3;
 		wall(71.65, cornerZ, 0.42, 2.7, h, m, true);
+		if (linac) {
+			panels(hallCenterX, z - halfWidth, hallLength, true);
+			panels(hallCenterX, z + halfWidth, hallLength, true);
+			panels(71.65, cornerZ, 2.7, false);
+		}
 		// floor guidance stripe showing straight hall and corner turn
 		const stripe = box(7.05, 0.02, 0.22, std(0xff737b, 0.52, 0.02), 67.8, 0.07, z);
 		scene.add(stripe);
@@ -1708,7 +1801,7 @@ export function buildVaultMazeEntries() {
 		scene.add(marker);
 	}
 	// Vault 1 turns toward higher Z into the open treatment space; Vault 2 mirrors toward lower Z.
-	straightHallWithTurn(-18, true);
+	straightHallWithTurn(-18, true, true);
 	straightHallWithTurn(18, false);
 }
 
@@ -1817,6 +1910,8 @@ export function clinicalCeilingAccents(roomId) {
 	const h = r.vault ? 5.55 : 3.62;
 	const g = new THREE.Group();
 	scene.add(g);
+	// Vault 1's make way for the LINAC app's light panels once its model is in (vault-linac.ts)
+	if (roomId === 'vault1') LINAC_VAULT_MOUNTS.fallback.push(g);
 	const lightMat = std(0xeafcff, 0.22, 0, { emissive: 0xd9fbff, emissiveIntensity: 1.55 });
 	const trimMat = std(0x70878f, 0.62, 0.08);
 	if (roomId === 'vault1' || roomId === 'vault2') {
@@ -1868,6 +1963,94 @@ export function addClinicalWallPolish() {
 		const l = box(7.2, 0.04, 0.08, glow, ct.x, 3.15, ct.z + ct.d / 2 - 0.12);
 		g.add(l);
 	}
+}
+
+/* The CT Simulator room's finish, after the CT suite's dark scan room (linac-ct ct-suite room.ts)
+   and the approved look (docs/specs/2026-11-18-consoles-in-center-design.md, part 2): a dark floor
+   with a faint grid, dark linings on the walls' inner faces and a dark ceiling. The walls themselves
+   are shared with CT Control and the hallway, so they keep their own faces; the linings stand 4 mm in
+   front of them with the room's door and window openings left clear. Lights, signs and equipment
+   keep their look. buildRoom calls it for ctsim; the suite's teal light panel is ctSimLightPanel. */
+const CT_SIM_FLOOR = '#141c24',
+	CT_SIM_GRID = 'rgba(120,170,190,0.28)',
+	CT_SIM_GRID_CELL = 1.2,
+	CT_SIM_WALL = 0x1a2530,
+	CT_SIM_CEILING = 0x18222b;
+function ctSimFinish(room: Room, floor: THREE.Mesh, ceiling: THREE.Mesh) {
+	const c = document.createElement('canvas');
+	c.width = c.height = 256;
+	const q = c.getContext('2d');
+	q.fillStyle = CT_SIM_FLOOR;
+	q.fillRect(0, 0, 256, 256);
+	q.strokeStyle = CT_SIM_GRID;
+	q.lineWidth = 2;
+	q.strokeRect(1, 1, 254, 254);
+	const grid = new THREE.CanvasTexture(c);
+	grid.wrapS = grid.wrapT = THREE.RepeatWrapping;
+	grid.colorSpace = THREE.SRGBColorSpace;
+	grid.anisotropy = 8;
+	grid.repeat.set((room.w - 0.15) / CT_SIM_GRID_CELL, (room.d - 0.15) / CT_SIM_GRID_CELL);
+	floor.material = new THREE.MeshStandardMaterial({ map: grid, roughness: 0.85 });
+	ceiling.material = new THREE.MeshBasicMaterial({ color: CT_SIM_CEILING });
+	// the linings: inner faces 0.08 m off the wall lines (t 0.16), up to the ceiling's underside, with
+	// the openings buildSide leaves (door 2.6 m wide to y 2.65, window over y 1.0..2.82). The window
+	// opening is only the part CT Control's own 4.5 m window (on the same wall line) leaves clear: the
+	// rest of the CT room's 4.5 m window has CT Control's wall right behind its glass
+	const mat = std(CT_SIM_WALL, 0.8, 0.02),
+		inset = 0.084,
+		top = 3.71;
+	const lining = (side: string, a: number, b: number, y0: number, y1: number) => {
+		const p = new THREE.Mesh(new THREE.PlaneGeometry(b - a, y1 - y0), mat);
+		p.receiveShadow = true;
+		const m = (a + b) / 2,
+			y = (y0 + y1) / 2;
+		if (side === 'zmin') p.position.set(m, y, room.z - room.d / 2 + inset);
+		else if (side === 'zmax') p.position.set(m, y, room.z + room.d / 2 - inset);
+		else if (side === 'xmin') p.position.set(room.x - room.w / 2 + inset, y, m);
+		else p.position.set(room.x + room.w / 2 - inset, y, m);
+		p.rotation.y = { zmin: 0, zmax: Math.PI, xmin: Math.PI / 2, xmax: -Math.PI / 2 }[side];
+		scene.add(p);
+	};
+	for (const side of ['zmin', 'zmax', 'xmin', 'xmax']) {
+		const alongX = side[0] === 'z',
+			mid = alongX ? room.x : room.z,
+			lo = mid - (alongX ? room.w : room.d) / 2 + inset,
+			hi = mid + (alongX ? room.w : room.d) / 2 - inset;
+		if (room.doorSide === side) {
+			lining(side, lo, mid - 1.3, 0, top);
+			lining(side, mid + 1.3, hi, 0, top);
+			lining(side, mid - 1.3, mid + 1.3, 2.65, top);
+		} else if (room.windowSide === side) {
+			const cc = roomById('ctcontrol'),
+				w0 = Math.max(mid - 2.25, cc ? cc.z - 2.25 : -Infinity),
+				w1 = Math.min(mid + 2.25, cc ? cc.z + 2.25 : Infinity);
+			lining(side, lo, w0, 0, top);
+			lining(side, w1, hi, 0, top);
+			lining(side, w0, w1, 0, 1.0);
+			lining(side, w0, w1, 2.82, top);
+		} else lining(side, lo, hi, 0, top);
+	}
+}
+/* The CT suite's teal light panel (its scan room's control-window glow) on the CT room's back wall,
+   behind the room's sign, status screen and clock and clear of the sink (from x 47.9): a dark teal
+   face over a faint teal glow. addRoomDecor puts it up in place of the accent panel. */
+function ctSimLightPanel(g: THREE.Group, room: Room) {
+	const z = room.z - room.d / 2 + 0.08,
+		w = 7.0,
+		h = 2.2,
+		y = 2.4;
+	const glow = new THREE.Mesh(
+		new THREE.PlaneGeometry(w + 0.3, h + 0.3),
+		new THREE.MeshBasicMaterial({ color: 0x35d6c4, transparent: true, opacity: 0.15 })
+	);
+	glow.position.set(room.x, y, z + 0.01);
+	g.add(glow);
+	const face = new THREE.Mesh(
+		new THREE.PlaneGeometry(w, h),
+		new THREE.MeshBasicMaterial({ color: 0x0e3a44 })
+	);
+	face.position.set(room.x, y, z + 0.015);
+	g.add(face);
 }
 
 export function corridorAnchor(room: Room) {

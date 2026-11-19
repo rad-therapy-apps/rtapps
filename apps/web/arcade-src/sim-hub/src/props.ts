@@ -18,6 +18,7 @@ import { registerInteractable, openKioskDialog } from './interact';
 import { openCtQaMenu } from './sdk-bridge';
 import { CT_COUCH, ROOM_CLOCKS } from './equipment';
 import { seatActor } from './npc-behavior';
+import { vaultMonitorTexture } from './vault-linac-monitor';
 import type { Room } from './rooms';
 
 export type SeatKind = 'chair' | 'couch' | 'bench' | 'taskChair' | 'wheelchair' | 'examTable';
@@ -54,9 +55,26 @@ export function seatInWorld(s: SeatAnchor): SeatAnchor {
 /** The top a lying patient rests on, per room id: the CT table (ctsim), each vault couch's carbon
     insert (vault1, vault2) and the HDR exam table top (hdr). npc.ts restLyingPatient lies on it. */
 export const LYING_SURFACES: Record<string, THREE.Object3D> = {};
+/** Where a patient lies on Vault 1's couch (npc.ts departmentStaff, journey.ts), from the room's
+    centre: head first toward the gantry and supine, as the LINAC app's cases (HFS), and at the app's
+    patient size (0.72 of the center's lying figure: 1.68 m long), so that at treatment height the
+    pelvis is under the beam and the head clears the gantry's face. vault-linac.ts parks the LINAC
+    couch 1.16 m back from its treatment position, so here the pelvis (0.5 m along the figure, x 0.72)
+    lies that far short of the isocentre (room.x + 1.2), and 0.04 m more, which keeps the head 0.02 m
+    off the gantry; the figure's footprint stays on today's couch top (LYING_SURFACES.vault1). */
+export const VAULT1_LYING = {
+	dx: 1.2 - 1.16 - 0.04 + 0.5 * 0.72,
+	dz: 0,
+	ry: Math.PI,
+	scale: 0.72
+} as const;
 /** Each vault's room lasers (emulatorLinacShell), by room id: the tutorial turns vault 1's on for
-    Jordan's setup and off otherwise. */
-export const ROOM_LASERS: Record<string, THREE.Line[]> = {};
+    Jordan's setup and off otherwise. Vault 1's become the LINAC app's lasers once vault-linac.ts
+    has loaded its model. */
+export const ROOM_LASERS: Record<string, THREE.Object3D[]> = {};
+/** Each vault's machine and couch as emulatorLinacShell builds them, by room id: vault-linac.ts
+    hides vault 1's when the LINAC app's model takes its place. */
+export const LINAC_SHELLS: Record<string, THREE.Group> = {};
 /* Registers a seat of a prop centred at (x, z) in group g and turned by rot: (ox, oz) is the seat's
    offset in the prop's own frame, and the sitter faces the prop's +z turned by `turn`. */
 function addSeat(g, kind: SeatKind, x, z, rot, top, ox = 0, oz = 0, turn = 0) {
@@ -1305,7 +1323,30 @@ export function biohazardBox(g, x, z, rot = 0, label = 'BIOHAZARD') {
 	);
 }
 
+/** The CT scanner ctScanner builds, for ct-room-look.ts, which swaps the CT suite's model in for its
+    ring, pedestal and table top and drives it from the CT console: the group the scanner is built
+    in (inside the room's furnishing, so it is culled with the room), the ring and bore glow the
+    model replaces (the base under the ring stays), the pedestal, the bore's centre and the ring's
+    outer diameter the model is fitted to, the table top's height, and the x-ray warning lamp's face.
+    The table itself is CT_COUCH.table (equipment.ts). */
+export const CT_SCANNER = {
+	group: null as THREE.Group | null,
+	gantry: [] as THREE.Object3D[],
+	pedestal: null as THREE.Object3D | null,
+	boreCenter: new THREE.Vector3(),
+	ringDiameter: 2.835,
+	topY: 0,
+	xrayLamp: null as THREE.MeshBasicMaterial | null
+};
+/** The x-ray lamp face's colour when lit and when dark (it multiplies the face's texture). */
+export const XRAY_LAMP_ON = 0xffffff,
+	XRAY_LAMP_OFF = 0x3a3a3a;
+
 export function ctScanner(g, room: Room) {
+	const s = new THREE.Group();
+	s.name = 'ct-scanner';
+	g.add(s);
+	CT_SCANNER.group = s;
 	// a big-bore CT gantry at 1.35x real size (owner's choice, 2026-11-06): a 2.835 m ring with a
 	// 1.215 m bore, centred 1.31 m up, so the couch's bottom corners (y 0.875, z ±0.36) clear the bore
 	// glow by 0.023 m when the couch slides the patient in. Its foot sinks 0.1075 m under the floor; the
@@ -1314,24 +1355,28 @@ export function ctScanner(g, room: Room) {
 	ring.rotation.y = Math.PI / 2;
 	ring.position.set(room.x, 1.31, room.z + 1.5);
 	ring.castShadow = true;
-	add(g, ring);
+	add(s, ring);
 	const bore = new THREE.Mesh(
 		new THREE.TorusGeometry(0.6075, 0.02, 14, 48),
 		std(0x2b3944, 0.5, 0.1, { emissive: 0x16435a, emissiveIntensity: 0.65 })
 	);
 	bore.rotation.y = Math.PI / 2;
 	bore.position.copy(ring.position);
-	add(g, bore);
+	add(s, bore);
 	const base = box(1.0, 0.35, 2.1, MAT.white, room.x, 0.175, room.z + 1.5);
-	add(g, base);
+	add(s, base);
 	const table = box(5.8, 0.15, 0.72, MAT.white, room.x - 3.9, 0.95, room.z + 1.5);
-	add(g, table);
+	add(s, table);
 	CT_COUCH.table = table;
 	LYING_SURFACES[room.id] = table;
 	CT_COUCH.ring = ring;
 	CT_COUCH.bore = bore;
 	CT_COUCH.baseX = table.position.x;
-	add(g, box(2.1, 0.78, 0.65, MAT.metal, room.x - 5.0, 0.5, room.z + 1.5));
+	CT_SCANNER.pedestal = add(s, box(2.1, 0.78, 0.65, MAT.metal, room.x - 5.0, 0.5, room.z + 1.5));
+	CT_SCANNER.gantry = [ring, bore];
+	CT_SCANNER.boreCenter.copy(ring.position);
+	CT_SCANNER.topY = table.position.y + 0.15 / 2;
+	CT_SCANNER.xrayLamp = ctXrayLamp(g, room);
 	// E at the gantry's door-facing side opens the CT QA menu (sdk-bridge.ts openCtQaMenu); the 'CT
 	// Simulator Gantry' equipment anchor sits at the ring's centre, 1.45 m further in
 	const qaMenu = new THREE.Object3D();
@@ -1345,6 +1390,35 @@ export function ctScanner(g, room: Room) {
 		null,
 		() => openCtQaMenu()
 	);
+}
+
+/* The "X-RAY ON" warning lamp over the CT room's door, on the door wall's inner face (z -3.08),
+   facing into the room: between the door frame's head (to y 2.71) and the teal light bar (y 3.13).
+   Returns its face's material; ct-room-look.ts lights it while the CT console has x-ray on. */
+function ctXrayLamp(g, room: Room) {
+	const z = room.z + room.d / 2 - 0.08;
+	g.add(box(0.8, 0.26, 0.05, std(0x1b2228, 0.6, 0.2), room.x, 2.92, z - 0.025));
+	const c = document.createElement('canvas');
+	c.width = 512;
+	c.height = 160;
+	const q = c.getContext('2d');
+	q.fillStyle = '#3a0805';
+	q.fillRect(0, 0, 512, 160);
+	q.strokeStyle = '#ff6a55';
+	q.lineWidth = 8;
+	q.strokeRect(10, 10, 492, 140);
+	q.fillStyle = '#ff7a66';
+	q.textAlign = 'center';
+	q.font = '900 84px Arial';
+	q.fillText('X-RAY ON', 256, 110);
+	const tx = new THREE.CanvasTexture(c);
+	tx.colorSpace = THREE.SRGBColorSpace;
+	const mat = new THREE.MeshBasicMaterial({ map: tx, color: XRAY_LAMP_OFF });
+	const face = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.2), mat);
+	face.position.set(room.x, 2.92, z - 0.052);
+	face.rotation.y = Math.PI;
+	g.add(face);
+	return mat;
 }
 
 export function emulatorLinacShell(g, room: Room) {
@@ -1361,6 +1435,7 @@ export function emulatorLinacShell(g, room: Room) {
 	root.position.set(room.x + 1.2, 0, room.z);
 	root.rotation.y = -Math.PI / 2;
 	g.add(root);
+	LINAC_SHELLS[room.id] = root;
 	// floor pad / isocenter cue
 	const pad = cyl(3.0, 3.0, 0.05, std(0x56616a, 0.82, 0.05), 56);
 	pad.position.set(0, 0.055, 0);
@@ -1506,6 +1581,70 @@ export function emulatorLinacShell(g, room: Room) {
 	const l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2), laserMat);
 	root.add(l2);
 	ROOM_LASERS[room.id] = [l1, l2];
+}
+
+/** Vault 1's LINAC fit-out mounts (linacVaultFitOut): the two in-room treatment monitors and the
+    radiation sign, each a group on its wall that faces the room (its +z) and is scaled from the
+    LINAC app's size. vault-linac.ts hangs the app's monitor frame and sign (linac-vault.glb) in
+    them once the model has loaded; each monitor mount already holds its screen, so the screens
+    name the couch patient (vault-linac-monitor.ts) with or without the model. `fallback` is what
+    Vault 1 shows until then (and for good, if the model never loads): the monitors' plain frames
+    and the room's own ceiling lights (rooms.ts); vault-linac.ts hides them when the model is in. */
+export const LINAC_VAULT_MOUNTS: {
+	monitors: THREE.Group[];
+	sign: THREE.Group | null;
+	fallback: THREE.Object3D[];
+} = {
+	monitors: [],
+	sign: null,
+	fallback: []
+};
+/* The app's monitor (linac-ct scene.ts createTreatmentMonitor3D) is a 6.15 x 3.62 m frame, its back
+   0.08 m behind its centre and its 5.56 x 3.13 m screen 0.096 m in front; at 0.65 it is 4 m wide.
+   The app's radiation sign is a 1.7 m square. */
+const LINAC_MONITOR_SCALE = 0.65,
+	LINAC_MONITOR_BACK = 0.08,
+	LINAC_SIGN_SCALE = 0.9;
+export function linacVaultFitOut(g, room: Room) {
+	// the inner faces of the 0.58 m vault walls on the +x and +z sides
+	const xFace = room.x + room.w / 2 - 0.29,
+		zFace = room.z + room.d / 2 - 0.29;
+	// a mount whose back is 0.01 m off the wall face at (x, z), facing the room along rot
+	const mount = (x, y, z, rot, k, back) => {
+		const m = new THREE.Group(),
+			off = back * k + 0.01;
+		m.position.set(x + Math.sin(rot) * off, y, z + Math.cos(rot) * off);
+		m.rotation.y = rot;
+		m.scale.setScalar(k);
+		g.add(m);
+		return m;
+	};
+	const screenMat = new THREE.MeshBasicMaterial({ map: vaultMonitorTexture(), toneMapped: false });
+	// one behind the gantry on the +x wall; one on the +z wall between the live status board
+	// (equipment.ts, x room.x - 2.39 .. room.x + 1.29) and the immobilization shelf's sign (from
+	// room.x + 6.2)
+	for (const [x, z, rot] of [
+		[xFace, room.z, -Math.PI / 2],
+		[room.x + 3.8, zFace, Math.PI]
+	]) {
+		const m = mount(x, 2.75, z, rot, LINAC_MONITOR_SCALE, LINAC_MONITOR_BACK);
+		const screen = new THREE.Mesh(new THREE.PlaneGeometry(5.56, 3.13), screenMat);
+		screen.position.z = 0.096;
+		m.add(screen);
+		// a plain frame the size of the app's, until its own comes with the model
+		const frame = box(6.15, 3.62, 0.16, std(0x1f2730, 0.52, 0.22));
+		m.add(frame);
+		LINAC_VAULT_MOUNTS.fallback.push(frame);
+		registerInteractable(
+			screen,
+			'In-room treatment monitor',
+			'Shows the therapists in the vault who is on the treatment couch.',
+			2.4
+		);
+		LINAC_VAULT_MOUNTS.monitors.push(m);
+	}
+	// on the +x wall between the wall art (room.z - 8.6) and the emergency stop (room.z - 3.4)
+	LINAC_VAULT_MOUNTS.sign = mount(xFace, 2.6, room.z - 6.4, -Math.PI / 2, LINAC_SIGN_SCALE, 0);
 }
 
 export function hdrSuite(g, room: Room) {

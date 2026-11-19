@@ -1,7 +1,11 @@
 /* The sim-hub tutorial's screen (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3): the
    tracker card at the top-left (role, objective, hint line, progress, step and walking distance),
    the orange marker and its screen-edge arrow, the check-in and decision dialog, the fade and the
-   role-change card, and the end card. DOM only; tutorial.ts decides what they show. The keyboard
+   role-change card, and the end card. While a console step's console is open (docs/specs/
+   2026-11-18-consoles-in-center-design.md, part 6) the tracker docks as a slim strip of the
+   objective and the hint line, with the console hints, along the bottom of the console panel's
+   frame area (console-panel.ts #cpFrames), above the panel; the console's page is shortened to
+   clear it, and the marker and edge arrow hide. DOM only; tutorial.ts decides what they show. The keyboard
    focus goes to a decision's first option, to Continue when it appears and to the end card's Keep
    exploring, so Tab and Enter work without the mouse. The elements are index.html's slot:tutorial
    block, looked up once at init (a headless check's stub DOM hands out a new element on every
@@ -58,6 +62,9 @@ let E = {} as Record<Id, HTMLElement>;
 let handlers: HudHandlers | null = null;
 let optionButtons: HTMLButtonElement[] = [];
 let shownDistance = '';
+// the console panel's frame area, which the docked tracker sits along the bottom of
+let consoleFrames: HTMLElement | null = null;
+let docked = false;
 
 const show = (el: HTMLElement, on: boolean) => el.classList.toggle('show', on);
 
@@ -67,6 +74,8 @@ export function initTutorialHud(h: HudHandlers): void {
 		HTMLElement
 	>;
 	handlers = h;
+	consoleFrames = document.getElementById('cpFrames');
+	addEventListener('resize', placeDock);
 	E.tutDialogContinue.onclick = () => handlers?.cont();
 	E.tutEndMenu.onclick = () => handlers?.mainMenu();
 	E.tutEndExplore.onclick = () => handlers?.keepExploring();
@@ -80,11 +89,43 @@ export function showTracker(v: TrackerView | null): void {
 	E.tutObjective.textContent = v.objective;
 	E.tutStep.textContent = `Step ${v.step} of ${v.total}`;
 	E.tutBar.style.width = `${Math.round(v.progress * 100)}%`;
+	placeDock();
 }
 
-export function setHint(text: string | null): void {
+/** The hint line; `kind` styles a console step's miss feedback or its "Correct." line as a
+    decision's feedback is. */
+export function setHint(text: string | null, kind?: FeedbackKind): void {
 	E.tutHint.textContent = text ?? '';
-	show(E.tutHint, !!text);
+	E.tutHint.className = `tut-hint${text ? ' show' : ''}${text && kind ? ` ${kind}` : ''}`;
+	placeDock();
+}
+
+/** Docks the tracker on the open console panel (a console step's console is open), or puts it back
+    at the top-left. */
+export function dockOnConsole(on: boolean): void {
+	docked = on;
+	E.tutTracker.classList.toggle('docked', on);
+	document.body.classList.toggle('tut-docked', on);
+	const s = E.tutTracker.style;
+	if (!on) {
+		s.left = s.width = s.bottom = '';
+		return;
+	}
+	// they would show through the panel's camera slots, which are holes onto the canvas
+	placeMarker(null);
+	placeEdge(null);
+	placeDock();
+}
+/* Along the bottom of the frame area, inside its border. The strip's height is fixed (index.html,
+   --tut-dock-h: two lines of hint) and the console's page is shortened by it, so a new hint never
+   makes the console page reflow. */
+function placeDock(): void {
+	if (!docked || !consoleFrames) return;
+	const r = consoleFrames.getBoundingClientRect(),
+		s = E.tutTracker.style;
+	s.left = `${r.left + consoleFrames.clientLeft}px`;
+	s.width = `${consoleFrames.clientWidth}px`;
+	s.bottom = `${innerHeight - r.bottom}px`;
 }
 
 export function setDistance(text: string): void {
@@ -95,8 +136,8 @@ export function setDistance(text: string): void {
 
 /** The marker on screen at (x, y), screen fractions; null hides it. */
 export function placeMarker(m: { x: number; y: number; label: string } | null): void {
-	show(E.tutMarker, !!m);
-	if (!m) return;
+	show(E.tutMarker, !!m && !docked);
+	if (!m || docked) return;
 	E.tutMarker.style.left = `${(m.x * 100).toFixed(2)}%`;
 	E.tutMarker.style.top = `${(m.y * 100).toFixed(2)}%`;
 	E.tutMarkerLabel.textContent = m.label;
@@ -104,8 +145,8 @@ export function placeMarker(m: { x: number; y: number; label: string } | null): 
 
 /** The edge arrow at (x, y), screen fractions, pointing `angle` degrees (0 right, 90 down). */
 export function placeEdge(a: { x: number; y: number; angle: number; label: string } | null): void {
-	show(E.tutEdge, !!a);
-	if (!a) return;
+	show(E.tutEdge, !!a && !docked);
+	if (!a || docked) return;
 	E.tutEdge.style.left = `${(a.x * 100).toFixed(2)}%`;
 	E.tutEdge.style.top = `${(a.y * 100).toFixed(2)}%`;
 	// the label stays on screen: it hangs inward from a side edge, above the arrow at the bottom
@@ -224,6 +265,7 @@ export function showEnd(on: boolean): void {
 
 export function hideTutorialHud(): void {
 	showTracker(null);
+	dockOnConsole(false);
 	setHint(null);
 	placeMarker(null);
 	placeEdge(null);

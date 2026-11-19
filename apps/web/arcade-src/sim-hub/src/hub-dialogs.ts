@@ -27,9 +27,11 @@ for (const [name, id, close] of HUB_DIALOGS) registerDialog(name, shown(id), clo
 
 /* A click that closes the last open one of these (its × or Close, the kiosk's backdrop) hands the
    mouse back to looking around: the click is the gesture pointer lock needs, so the player doesn't
-   click the view again. The room card, settings and tutorial cards relock from their own buttons.
-   Esc can't do it: browsers don't count Escape as a gesture, so after Esc a click on the view locks. */
-const hubNames = new Set(HUB_DIALOGS.map(([name]) => name));
+   click the view again. The console panel is one of them; it registers itself last (console-panel.ts
+   initConsolePanel), after the tutorial's cards that can open over it. The room card, settings and
+   tutorial cards relock from their own buttons. Esc can't do it: browsers don't count Escape as a
+   gesture, so after Esc a click on the view locks. */
+const hubNames = new Set([...HUB_DIALOGS.map(([name]) => name), 'console']);
 let hubOpenBeforeClick = false;
 document.addEventListener(
 	'click',

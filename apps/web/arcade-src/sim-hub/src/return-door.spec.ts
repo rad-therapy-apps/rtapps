@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { hallwayFacing, returnDoorOnBoot, takeReturnView } from './return-door';
 import type { WallRect } from './prompt-math';
 
-const ROOM_IDS = new Set(['linaccontrol', 'ctcontrol', 'ctsim']);
+// the Learning Commons door is the one app door; any room id behaves the same
+const ROOM_IDS = new Set(['commons', 'education', 'ctsim']);
 const isRoom = (id: string) => ROOM_IDS.has(id);
 let session: Map<string, string>;
 function installSession(store: unknown) {
@@ -26,13 +27,13 @@ afterEach(() => {
 
 describe('returnDoorOnBoot', () => {
 	it('starts outside the door the player left through, after Back to the Center', () => {
-		session.set('simhub.returnDoor', '"ctsim"');
+		session.set('simhub.returnDoor', '"commons"');
 		session.set('simhub.returning', 'true');
-		expect(returnDoorOnBoot(isRoom)).toBe('ctsim');
+		expect(returnDoorOnBoot(isRoom)).toBe('commons');
 	});
 
 	it('takes both values, so the next load opens the title menu', () => {
-		session.set('simhub.returnDoor', '"linaccontrol"');
+		session.set('simhub.returnDoor', '"commons"');
 		session.set('simhub.returning', 'true');
 		returnDoorOnBoot(isRoom);
 		expect(session.size).toBe(0);
@@ -40,7 +41,7 @@ describe('returnDoorOnBoot', () => {
 	});
 
 	it('opens the title menu when the player came back another way, and drops the door', () => {
-		session.set('simhub.returnDoor', '"ctcontrol"');
+		session.set('simhub.returnDoor', '"commons"');
 		expect(returnDoorOnBoot(isRoom)).toBe(null);
 		expect(session.has('simhub.returnDoor')).toBe(false);
 	});

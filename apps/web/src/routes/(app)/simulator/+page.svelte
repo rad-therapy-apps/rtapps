@@ -49,8 +49,8 @@
 			Explore on your own and talk to the staff, then run the QA walkthrough.
 		</p>
 		<p>
-			The LINAC and CT simulators are inside the center: walk to the LINAC Control Area or the CT
-			Simulator Room and press E at the door.
+			The LINAC and CT simulators are inside the center: walk into LINAC Control or CT Control and
+			press E at the console.
 		</p>
 		{#if data.hub}
 			<a

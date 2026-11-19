@@ -134,6 +134,18 @@ jobs:
       - run: node scripts/sim-hub-tutorial-check.mjs
         working-directory: apps/web
         timeout-minutes: 5
+      # sim-hub console check (consoles in the center): headless Chromium plays the Tutorial's console
+      # steps on the real LINAC console in the center's panel, from the schedule to the treatment's
+      # last field; the events, Vault 1's gantry and the status boards follow.
+      - run: node scripts/sim-hub-console-check.mjs
+        working-directory: apps/web
+        timeout-minutes: 10
+      # sim-hub free console check (consoles in the center): headless Chromium plays the two graded
+      # activities in Free Mode, opened at LINAC Control and CT Control as the activities do: one
+      # fraction on the real LINAC console and one scan on the real CT console, each recorded once.
+      - run: node scripts/sim-hub-free-console-check.mjs
+        working-directory: apps/web
+        timeout-minutes: 10
 
   # Full-stack flow: boot the dev compose stack (same file as `make dev`), seed it, run the
   # Playwright test through Caddy on :8080, always upload the report and tear down volumes.

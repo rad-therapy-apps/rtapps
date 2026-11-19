@@ -163,7 +163,7 @@ async def resolve_arcade_slug(
     """The `by-sdk-slug` resolver for plain arcade games, which carry only an
     `arcade_slug` in their config (no SDK scoring, so no `sdk_slug`). Same filters and
     same 404 contract; added for the Simulator page, whose gantry-game entry is one of
-    these. If several published externals share an `arcade_slug` (linac-ct does), the
+    these. If several published externals share an `arcade_slug` (sim-hub does), the
     first row wins — callers that need a specific one use `by-sdk-slug`.
     """
     return await _resolve_published_external(db, "arcade_slug", slug)

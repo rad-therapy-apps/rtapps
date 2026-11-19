@@ -5,25 +5,40 @@
 // `window.__TUTORIAL` (src/tutorial.ts), and plays Chapter 1 twice on a simulated clock
 // (performance.now and setTimeout run on it, Math.random is seeded), as sim-hub-npc-check.mjs
 // does. The player is moved to each target, turns to it and presses E (the real
-// performInteraction), answers each decision and follows Jordan on the escorts. Each escort starts
-// under a fade that moves Jordan and the player on to just short of the destination room; after it
-// the player stands clear of the walls, a few metres behind Jordan, with under 25 m of the first leg
-// left (the whole walk to Vault 1 was about 100 m). Room introduction
-// cards are switched off through the page's own preference (localStorage
-// simhub.roomCards.enabled = false).
+// performInteraction), answers each decision, plays each console step and follows Jordan on the
+// escorts. A console step (3, 6, 8, 9; docs/specs/2026-11-18-consoles-in-center-design.md part 6)
+// opens the console panel (console-panel.ts), but its page never loads here: E must open the
+// LINAC console at the step's workspace (the hook's state().console and the panel's
+// isConsoleOpen), with the tracker docked on the panel, and the console's events and poses are
+// emitted on console-bus.ts linacEvents and linacPose through the hook, as the panel emits them;
+// the step completes on Jordan's events, in order, and the console closes a beat later. Each
+// escort starts under a fade that moves Jordan and the player on to just short of the destination
+// room; after it the player stands clear of the walls, a few metres behind Jordan, with under 25 m
+// of the first leg left (the whole walk to Vault 1 was about 100 m). Room introduction cards are
+// switched off through the page's own preference (localStorage simhub.roomCards.enabled = false).
 //   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
-//          the step completed; the 60 s and 120 s walking hints and the 20 s E hint show; on the
-//          walk to Vault 1 the player stays where the fade left them and Jordan waits at a stop;
-//          on the walk back the player runs ahead to reception ("Wait for Jordan"); the end
-//          card's Keep exploring leaves the player where they stand, in free mode
-//   run 2  every decision answered right; the end card's Main menu goes back to the title
+//          the step completed; on every console step three misses (a look-alike's chart and
+//          check-in at the schedule, the console's refusals elsewhere) show hint 1, hint 2 and the
+//          reveal in the hint line, an event out of order does nothing, and the panel closed early
+//          leaves the step and its hint and undocks the tracker, with E at the console's stand point
+//          (where Jamie Williams stood at steps 8 and 9) opening it again; the 60 s and 120 s
+//          walking hints and the 20 s E hint show; on the walk to Vault 1 the player stays where the
+//          fade left them and Jordan waits at a stop; on the walk back the player runs ahead to
+//          reception ("Wait for Jordan"); the end card's Keep exploring leaves the player where they
+//          stand, in free mode
+//   run 2  every decision answered right, every console step pressed from its stand point and
+//          done without a miss; the end card's Main menu goes back to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
-// lies down; every move the tutorial makes (Jordan's escorts, Jamie Williams's walks) keeps the
-// 0.2 m circle round the walker's root clear of the wall colliders on every frame (as NPC check l
-// does); the marker's route never crosses a wall collider; and after leaving, the journey actors,
-// the people's visibility and the vault 1 lasers are exactly as the journey reset leaves them (what
-// sim-hub-npc-check.mjs expects).
+// lies down; each play asks for a fresh console page at its first opening (step 3) and only then;
+// each console step ends with its "Correct." line; Jordan is on the Vault 1 monitors from the
+// chart opening at step 3; at step 9 the Vault 1 board shows BEAM ON while the console's beam is
+// on, BETWEEN FIELDS when it goes off and TREATMENT COMPLETE at the end; every move the tutorial
+// makes (Jordan's escorts, Jamie Williams's walks) keeps the 0.2 m circle round the walker's root
+// clear of the wall colliders on every frame (as NPC check l does); the marker's route never
+// crosses a wall collider; and after leaving, the journey actors, the people's
+// visibility and the vault 1 lasers are exactly as the journey reset leaves them (what
+// sim-hub-npc-check.mjs expects), with no console open and Jordan off the vault monitors.
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
 //   node scripts/sim-hub-tutorial-check.mjs
@@ -42,6 +57,7 @@ const STEP_LIMIT_S = 300; // the longest a step may take (an escort is the longe
 const PLAYER_R = 0.32; // the player's walk collision margin (src/walk.ts canMove)
 const FADE_LIMIT_S = 10; // the escort's fade: 1.5 s to black, 1 s of its line (src/tutorial-steps.ts)
 const AFTER_FADE_M = 25; // the most of the first leg left after the fade (m)
+const CONSOLE_BEAT_S = 1.6; // a done console step's console closes 1.5 s later (src/tutorial-steps.ts)
 const MAX_DETAIL = 30;
 
 function setupError(msg) {
@@ -199,11 +215,141 @@ function worldState() {
 			.flat()
 			.map((e) => e.g.visible),
 		moves: NPC.workflowTransitions.length,
-		lasers: T.lasersOn()
+		lasers: T.lasersOn(),
+		console: T.state().console,
+		panel: NPC.isConsoleOpen(),
+		docked: T.docked(),
+		monitors: T.state().jordanOnMonitors
 	});
 }
 NPC.resetTreatmentJourney(true);
 const BASELINE = worldState();
+
+// One console step, after E at its target: the console asked for at the step's workspace; on run 1
+// three misses (hint 1, hint 2, the reveal), an event out of order, and the panel closed early with E
+// opening it again from the step's stand point; then Jordan's events in order complete the step, and
+// the console closes a beat later.
+function playConsole(n, st, wrong, fails) {
+	const c = st.console,
+		jordan = T.patients.jordan.mrn,
+		opened = () =>
+			T.state().phase === 'console' &&
+			T.state().console?.kind === 'linac' &&
+			T.state().console?.workspace === c.workspace &&
+			NPC.isConsoleOpen() &&
+			T.docked();
+	if (!opened()) {
+		fails.push(
+			`step ${n}: E did not open the console at '${c.workspace}' (console ${JSON.stringify(T.state().console)}, phase '${T.state().phase}', panel open ${NPC.isConsoleOpen()}, tracker docked ${T.docked()})`
+		);
+		return;
+	}
+	// each play of the chapter asks for a fresh console page at its first opening, step 3, and
+	// keeps that page for the other console steps
+	if (T.state().console.fresh !== (n === 3))
+		fails.push(
+			`step ${n}: the console was asked for ${T.state().console.fresh ? 'a fresh page' : 'the page as it was'}`
+		);
+	if (wrong) {
+		const miss = [
+			n === 3
+				? { kind: 'chart-opened', mrn: T.patients.jordanLookalike.mrn }
+				: { kind: 'mistake', workspace: c.workspace, code: 'interlock', message: 'Refused.' },
+			n === 3
+				? { kind: 'checked-in', mrn: T.patients.jody.mrn }
+				: { kind: 'mistake', workspace: c.workspace, code: 'interlock', message: 'Refused.' },
+			{ kind: 'mistake', workspace: c.workspace, code: 'wrong-patient', message: 'Refused.' }
+		];
+		const want = [`Not yet. ${c.hints[0]}`, `Not yet. ${c.hints[1]}`, c.reveal];
+		for (let i = 0; i < 3; i++) {
+			T.consoleEvent(miss[i]);
+			const m = T.state();
+			if (m.misses !== i + 1 || m.hint !== want[i] || m.step !== n)
+				fails.push(`step ${n}: after miss ${i + 1}, misses ${m.misses}, hint "${m.hint}"`);
+		}
+		// Jordan's verified alignment does not complete a step before its own events (step 8: before
+		// the shift is applied)
+		T.consoleEvent({ kind: 'alignment-verified', mrn: jordan });
+		if (T.state().step !== n) fails.push(`step ${n}: an event out of order completed the step`);
+		// the panel closed early: the step stays, its last hint too, and E opens the console again
+		T.closePanel();
+		const closed = T.state();
+		if (
+			closed.console !== null ||
+			closed.phase !== 'active' ||
+			closed.step !== n ||
+			NPC.isConsoleOpen() ||
+			T.docked()
+		)
+			fails.push(
+				`step ${n}: closing the panel early left console ${JSON.stringify(closed.console)}, phase '${closed.phase}', step ${closed.step}, panel open ${NPC.isConsoleOpen()}, tracker docked ${T.docked()}`
+			);
+		stepFor(0.5);
+		if (T.state().hint !== c.reveal)
+			fails.push(
+				`step ${n}: the reveal left the hint line once the panel closed (hint "${T.state().hint}")`
+			);
+		const [sx, sz] = st.target.spec.stand;
+		T.placePlayer(sx, sz);
+		step();
+		T.faceTarget();
+		T.pressE();
+		if (!opened())
+			fails.push(
+				`step ${n}: E at ${st.target.name}'s stand point did not open the console again (phase '${T.state().phase}')`
+			);
+		else if (T.state().console.fresh)
+			fails.push(`step ${n}: reopening the console asked for a fresh page`);
+	}
+	if (c.beam) {
+		// the boards follow the console's beam: two fields, on and off
+		const vault = [];
+		for (const on of [true, true, false, true, false]) {
+			T.consolePose(pose(on));
+			vault.push(T.boards().vault1);
+		}
+		const want = ['BEAM ON', 'BEAM ON', 'BETWEEN FIELDS', 'BEAM ON', 'BETWEEN FIELDS'];
+		if (JSON.stringify(vault) !== JSON.stringify(want))
+			fails.push(`step ${n}: the Vault 1 board over two fields was ${JSON.stringify(vault)}`);
+	}
+	for (const kind of c.done) {
+		if (T.state().step !== n) fails.push(`step ${n}: completed before '${kind}'`);
+		T.consoleEvent({ kind, mrn: jordan });
+	}
+	if (c.beam && T.boards().vault1 !== 'TREATMENT COMPLETE')
+		fails.push(`step ${n}: the Vault 1 board at the end is '${T.boards().vault1}'`);
+	if (T.state().step === n) {
+		fails.push(`step ${n}: not completed by ${c.done.join(', ')}`);
+		return;
+	}
+	if (T.state().correct !== `Correct. ${c.reason}`)
+		fails.push(`step ${n}: no "Correct." line when the step completed (${T.state().correct})`);
+	if (n === 3 && !T.state().jordanOnMonitors)
+		fails.push('step 3: Jordan is not on the Vault 1 monitors after the chart opened');
+	if (!T.state().console || !NPC.isConsoleOpen())
+		fails.push(`step ${n}: the console closed with no beat to show the result`);
+	stepFor(CONSOLE_BEAT_S);
+	if (T.state().console || NPC.isConsoleOpen() || T.docked())
+		fails.push(`step ${n}: the console is still open ${CONSOLE_BEAT_S} s after the step completed`);
+}
+
+// A LINAC console pose (shared/console-protocol.ts LinacPose) at rest, with the beam `beamOn`.
+const pose = (beamOn) => ({
+	gantry: 0,
+	collimator: 0,
+	couchAngle: 0,
+	couchVrt: 0,
+	couchLng: 0,
+	couchLat: 0,
+	jawX1: -5,
+	jawX2: 5,
+	jawY1: -5,
+	jawY2: 5,
+	kvArmsOut: false,
+	epidOut: false,
+	beamOn,
+	lasersOn: true
+});
 
 const results = [];
 function report(part, fails, summary) {
@@ -264,7 +410,9 @@ function play(wrong) {
 		if (T.routeHitsWall())
 			fails.push(`step ${s.step}: the marker route crosses a wall: ${JSON.stringify(T.route())}`);
 		if (st.trigger === 'pressE') {
-			const [x, z] = T.standPoint();
+			// run 2 stands at a console step's own stand point (at the console desk, where Jamie Williams
+			// stood at steps 8 and 9); run 1 at the marker's, and goes there on reopening the console
+			const [x, z] = st.console && !wrong ? st.target.spec.stand : T.standPoint();
 			T.placePlayer(x, z);
 			step();
 			T.faceTarget(); // E offers only what is in front of the player (interact.ts inView)
@@ -294,7 +442,7 @@ function play(wrong) {
 						fails.push(`step ${s.step}: the right answer was not accepted`);
 				}
 				T.cont();
-			}
+			} else if (st.console) playConsole(s.step, st, wrong, fails);
 			if (T.state().step === s.step && T.state().phase === 'active')
 				fails.push(`step ${s.step}: E at ${st.target.name} did not reach the tutorial's target`);
 		} else if (st.trigger === 'enterRoom') {
@@ -365,7 +513,7 @@ function play(wrong) {
 	report(
 		`${name}: steps`,
 		fails,
-		`${order.length} of 11 steps completed, ${routes} marker routes clear of the walls`
+		`${order.length} of 11 steps completed (4 on the console), ${routes} marker routes clear of the walls`
 	);
 	report(
 		`${name}: walls`,
@@ -395,7 +543,7 @@ function play(wrong) {
 	report(
 		`${name}: leaving`,
 		leave,
-		`${wrong ? 'Keep exploring' : 'Main menu'}; the journey actors, people and lasers as the journey reset leaves them`
+		`${wrong ? 'Keep exploring' : 'Main menu'}; the journey actors, people and lasers as the journey reset leaves them, no console open`
 	);
 }
 

@@ -15,7 +15,8 @@
  * Treatment Delivery Procedures Games shelf.
  * Used here and why: Playwright against the running compose stack (baseURL http://localhost:8080,
  * see playwright.config.ts), same as `arcade.e2e.ts`; role/label/testid locators, no CSS
- * selectors. The real `sim-hub`/`linac-ct` apps load in their real iframes and are driven through
+ * selectors. The real `sim-hub` app loads in its real iframe (all three sim activities open the
+ * center) and is driven through
  * `window.RTApps.recordResult` directly — the actual SDK call a real simulator app makes — rather
  * than the games' postMessage shim; plan 4c's apps are real same-origin API clients
  * (`rtapps-sdk.js`'s header), so there's no player-side bridge to go through. The two
@@ -24,9 +25,9 @@
  * two contexts, not one shared page, because a single context's session cookie can only belong to
  * one signed-in identity at a time, and the student must stay signed in across both tests (the
  * second scenario's premise) while the educator checks stats independently after each. Both
- * apps are heavy (sim-hub ~380KB inline three.js; linac-ct ~1.4MB with three.js plus the
- * extracted CT images): `frame.waitForFunction(() => window.RTApps)` gets a generous 30s timeout,
- * and each test's own timeout is raised, rather than asserting anything more weakly.
+ * tests load the heavy center (sim-hub, a three.js bundle plus its 3D models):
+ * `frame.waitForFunction(() => window.RTApps)` gets a generous 30s timeout, and each test's own
+ * timeout is raised, rather than asserting anything more weakly.
  * Requires `make seed` first (the demo cohort/educator account, and the three sim activities —
  * Center QA walkthrough, Treatment delivery, CT simulation — the seed get-or-creates, so
  * re-seeding an already-seeded stack is safe and, if the stack predates plan 4c, required).
@@ -39,8 +40,8 @@
  * Works with: `./helpers` (registerStudent, signIn, educatorPage); the pages under apps/web/src/routes
  * ((app)/simulator, (app)/subjects/[slug]/activities/[id], (app)/educator/cohorts/[id],
  * (app)/educator/cohorts/[id]/activities/[aid]) and `#lib/activity/ExternalPlayer.svelte`; the
- * static `apps/web/static/arcade/rtapps-sdk.js` and the `apps/web/arcade/sim-hub`/`linac-ct` apps
- * it's embedded in. Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.
+ * static `apps/web/static/arcade/rtapps-sdk.js` and the `apps/web/arcade/sim-hub` app it's
+ * embedded in. Used by: `make e2e` and the CI `e2e` job in .github/workflows/pr.yml.
  */
 import { test, expect, type Page } from '@playwright/test';
 import { educatorPage, registerStudent, signIn } from './helpers';
@@ -96,9 +97,9 @@ test.describe
 		await studentPage.waitForLoadState('networkidle');
 		await expect(studentPage.getByTestId('simulator-entry')).toBeVisible();
 		// One card since 2026-11-11: the LINAC/CT simulators are reached through the center's
-		// doors, and the gantry game is archived.
+		// console desks, and the gantry game is archived.
 		await expect(studentPage.getByRole('main').getByRole('listitem')).toHaveCount(1);
-		await expect(studentPage.getByText('press E at the door')).toBeVisible();
+		await expect(studentPage.getByText('press E at the console')).toBeVisible();
 		await studentPage.getByTestId('simulator-entry').click();
 
 		// Lands on the hub activity's player (the resolver's own subject_slug/activity_id, not
@@ -150,8 +151,8 @@ test.describe
 		await expect(attemptRow.locator('td').nth(2)).toHaveText('75.0%');
 	});
 
-	test('room app completions record against the resolved slug, independent of the current player', async () => {
-		test.setTimeout(180_000); // linac-ct is a ~1.4MB three.js bundle with the extracted CT images; CI's 2-core runner timed out at 90s with the SDK chain proven complete server-side (PR #71 run 1)
+	test('the center records completions by activity slug, independent of the current player', async () => {
+		test.setTimeout(180_000); // the room app is a heavy three.js bundle; CI's 2-core runner timed out at 90s with the SDK chain proven complete server-side (PR #71 run 1)
 
 		// The student from the test above is still signed in (same Page/context, never signed
 		// out) — navigate straight to the Treatment delivery activity via its own subject page,
@@ -169,10 +170,16 @@ test.describe
 		await studentPage.getByRole('link', { name: 'Treatment delivery', exact: true }).click();
 		await expect(studentPage).toHaveURL(/\/activities\//);
 
-		// #rtappsBackBtn ("← Back to the Center") is static markup in the linac-ct shell.
+		// Treatment delivery now opens the center itself (arcade_slug sim-hub) with
+		// ?start=linaccontrol, so the iframe is the hub: #watermark is its static markup, and
+		// the player must have put the activity's start_room on the iframe URL.
 		const roomFrameLocator = studentPage.frameLocator('iframe[title="Treatment delivery"]');
-		await expect(roomFrameLocator.locator('#rtappsBackBtn')).toBeAttached();
-		const roomFrame = studentPage.frames().find((f) => f.url().includes('/arcade/linac-ct'))!;
+		await expect(roomFrameLocator.locator('#watermark')).toBeAttached();
+		await expect(studentPage.locator('iframe[title="Treatment delivery"]')).toHaveAttribute(
+			'src',
+			'/arcade/sim-hub/index.html?start=linaccontrol'
+		);
+		const roomFrame = studentPage.frames().find((f) => f.url().includes('/arcade/sim-hub'))!;
 		await roomFrame.waitForFunction(
 			() => (window as unknown as RTAppsGlobal).RTApps !== undefined,
 			{ timeout: 30_000 }

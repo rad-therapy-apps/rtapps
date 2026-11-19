@@ -25,6 +25,7 @@ import {
 	renderTreatmentDeliveryPanel
 } from './delivery/treatment-delivery';
 import { allTreatmentFieldsCompleted, setPendantLCD, updateBEVInset } from './linac-safety';
+import { CONSOLE, consoleMistake } from './console-hooks';
 
 // RTApps (#77 phase 2 task 19): honest shape for `S.treatmentCompletion.record`, built
 // at both posting sites below. Exported so state.ts can tighten that member from
@@ -298,8 +299,9 @@ export function completeFractionWithoutCurrentCPTModule() {
 	renderTreatmentDeliveryPanel();
 	renderTreatmentMonitor();
 	updateBEVInset();
-	// RTApps (plan 4c): one completion per delivered treatment fraction.
-	if (window.RTApps) window.RTApps.recordResult('sim-linac-fraction').catch(function () {});
+	// RTApps (plan 4c): one completion per delivered treatment fraction; the console tutorial records none.
+	if (window.RTApps && CONSOLE.scenario !== 'tutorial')
+		window.RTApps.recordResult('sim-linac-fraction').catch(function () {});
 }
 
 export function openChargeCapture() {
@@ -310,6 +312,10 @@ export function openChargeCapture() {
 	if (!allTreatmentFieldsCompleted() && !S.treatmentCompletion.posted) {
 		setPendantLCD('TREATMENT INCOMPLETE', 'Finish all prescribed fields');
 		renderTreatmentDeliveryPanel();
+		consoleMistake(
+			'treatment-incomplete',
+			'Treatment incomplete. Deliver every prescribed field before charge capture.'
+		);
 		return;
 	}
 	igrtPanel?.classList.remove('open');
@@ -433,6 +439,7 @@ export function postChargeAndCompleteFraction() {
 	renderTreatmentMonitor();
 	updateBEVInset();
 	renderOISPanel();
-	// RTApps (plan 4c): one completion per delivered treatment fraction.
-	if (window.RTApps) window.RTApps.recordResult('sim-linac-fraction').catch(function () {});
+	// RTApps (plan 4c): one completion per delivered treatment fraction; the console tutorial records none.
+	if (window.RTApps && CONSOLE.scenario !== 'tutorial')
+		window.RTApps.recordResult('sim-linac-fraction').catch(function () {});
 }

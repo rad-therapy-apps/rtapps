@@ -14,7 +14,7 @@ import { scene, camera } from './scene';
 import { S } from './state';
 import { registerDutyActor, registerNpcExchange, seatActor, visibleInTree } from './npc-behavior';
 import { STAFF_GUIDES, registerInteractable } from './interact';
-import { LYING_SURFACES } from './props';
+import { LYING_SURFACES, VAULT1_LYING } from './props';
 import { ROOM_CAST, PRIMARY_NPCS, PRIMARY_PATIENTS, roomById } from './main';
 
 // RTApps (#77 phase 2 task 13): typed boundary for the appearance-options bag passed into
@@ -540,10 +540,20 @@ export function departmentStaff() {
 		addCast(id, g, 'staff');
 		return g;
 	};
-	const lyingPatient = (id, detail, dx, dz, ry = 0, skin = 0xe9c39d, hairColor = 0x4a382e) => {
+	const lyingPatient = (
+		id,
+		detail,
+		dx,
+		dz,
+		ry = 0,
+		skin = 0xe9c39d,
+		hairColor = 0x4a382e,
+		scale = 1
+	) => {
 		const r = R(id);
 		if (!r) return;
 		const cont = createLyingPatient(detail, skin, hairColor);
+		cont.scale.setScalar(scale);
 		restLyingPatient(cont, LYING_SURFACES[id], r.x + dx, r.z + dz, ry);
 		scene.add(cont);
 		addCast(id, cont, 'patient');
@@ -798,7 +808,18 @@ export function departmentStaff() {
 		undefined,
 		'vault1'
 	);
-	lyingPatient('vault1', 'Positioned on the treatment couch.', -1.25, -0.05, 0, 0x7b5239, 0x1c1410);
+	// head first, its pelvis brought to the isocentre by the LINAC couch (props.ts VAULT1_LYING)
+	const v1 = VAULT1_LYING;
+	lyingPatient(
+		'vault1',
+		'Positioned on the treatment couch.',
+		v1.dx,
+		v1.dz,
+		v1.ry,
+		0x7b5239,
+		0x1c1410,
+		v1.scale
+	);
 	place(
 		'vault2',
 		'Radiation Therapist · Vault 2',

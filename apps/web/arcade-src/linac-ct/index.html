@@ -9133,6 +9133,943 @@
 				}
 			}
 		</style>
+		<style id="rtappsConsoleView">
+			/*
+       Console mode (?view=console, src/console-mode.ts): the app fills the center's console panel
+       (about 1100×640 to 1600×900). The center shows Vault 1 and its camera feeds, so the vault
+       view, the camera bank, the in-room pendant and every way out of the app are gone; the two
+       clinical monitors share the whole frame. Nothing here applies without body.linac-console-view.
+    */
+			body.linac-console-view {
+				background: #0b1118 !important;
+				overflow: hidden !important;
+			}
+			body.linac-console-view #appHeader,
+			body.linac-console-view #appFooter,
+			body.linac-console-view #mainGameArea,
+			body.linac-console-view #bottomMachineControls,
+			body.linac-console-view #startScreen,
+			body.linac-console-view #loadingScreen,
+			body.linac-console-view #cctvDeskMonitor,
+			body.linac-console-view #rtv2RoomNav,
+			body.linac-console-view #rtappsBackBtn,
+			body.linac-console-view #rtv2QueueSwitcher,
+			body.linac-console-view #ctSimWorkspace,
+			body.linac-console-view #dicomModal {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console .operator-console-panel {
+				top: 0 !important;
+				height: 100vh !important;
+				width: 100vw !important;
+				max-width: none !important;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr) !important;
+				grid-template-rows: minmax(0, 1fr) !important;
+				grid-template-areas: 'workflow patient' !important;
+				gap: 8px !important;
+				padding: 8px !important;
+				background: #0b1118 !important;
+			}
+			body.linac-console-view.control-room-mode .operator-console-panel::before,
+			body.linac-console-view.control-room-mode .operator-console-panel::after,
+			body.linac-console-view.control-room-mode #workflowDeskMonitor::before,
+			body.linac-console-view.control-room-mode #workflowDeskMonitor::after,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor::before,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor::after {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor,
+			body.linac-console-view.control-room-mode.rt-v2-console #patientInfoDeskMonitor {
+				padding: 5px !important;
+				border-radius: 10px !important;
+				box-shadow: inset 0 0 0 1px rgba(190, 205, 218, 0.12) !important;
+			}
+			body.linac-console-view.control-room-mode #workflowDeskMonitor .monitor-screen,
+			body.linac-console-view.control-room-mode #patientInfoDeskMonitor .monitor-screen {
+				max-height: none !important;
+				border-radius: 7px !important;
+			}
+			/* An open workflow window is the whole second screen: with the reference cards behind it
+			   gone, nothing can scroll the window off the top of the screen. */
+			body.linac-console-view.console-app-open
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> :not(#consoleWorkflowDock) {
+				display: none !important;
+			}
+			/* The window's title stays on one line in the narrower panel */
+			body.linac-console-view #consoleWorkflowDock .console-dock-eyebrow {
+				display: block !important;
+				flex: 1 1 auto;
+				min-width: 0;
+				overflow: hidden;
+				font-size: 13px;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view #consoleWorkflowDock #consoleDockClose {
+				flex: 0 0 auto !important;
+				width: auto !important;
+			}
+			/* The R&V delivery screen fits the second screen's width: plan / actual tables side by
+			   side with the beam controls and interlocks under them (the app's own narrow layout), a
+			   shorter camera strip, and the whole screen scrolling as one page */
+			body.linac-console-view #consoleWorkflowDockBody #deliveryPanel.open,
+			body.linac-console-view #consoleWorkflowDockBody #deliveryPanel #rtv2DeliveryAlt {
+				height: auto !important;
+			}
+			body.linac-console-view .rtv2d-body {
+				grid-template-columns: 150px minmax(0, 1fr);
+			}
+			body.linac-console-view .rtv2d-hero {
+				min-height: 96px;
+			}
+			body.linac-console-view .rtv2d-content {
+				flex: 0 0 auto;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			}
+			body.linac-console-view .rtv2d-panel.side {
+				grid-column: 1 / -1;
+			}
+			body.linac-console-view .rtv2d-panel-head,
+			body.linac-console-view .rtv2d-table-row {
+				grid-template-columns: minmax(56px, 1fr) minmax(0, 76px) minmax(0, 76px);
+				gap: 5px;
+			}
+			body.linac-console-view .rtv2d-table,
+			body.linac-console-view .rtv2d-sidebar {
+				overflow: visible;
+			}
+			/* Once devices are on the table, the drag hint would sit under them */
+			body.linac-console-view #immobilizationTableDrop:has(.immo-placed-device) .immo-table-help {
+				display: none;
+			}
+			/* Held machine keys (src/console-keys.ts): a press-and-hold must not scroll or select */
+			body.linac-console-view #rtv2MachinePanel [data-console-target],
+			#consoleMoveToField {
+				touch-action: none;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+			body.linac-console-view #rtv2MachinePanel .console-move-title {
+				margin-top: 7px;
+			}
+			#consoleMoveToField {
+				width: 100%;
+				min-height: 30px;
+				margin: 0;
+				padding: 4px 6px;
+				border: 1px solid #67b8e9;
+				border-radius: 3px;
+				background: linear-gradient(#2b6a95, #1f5174);
+				color: #fff;
+				font-size: 9px;
+				font-weight: 850;
+				cursor: pointer;
+			}
+			#consoleMoveToField:hover {
+				filter: brightness(1.13);
+			}
+			#consoleMoveToField.active {
+				background: #3a8fc6;
+				box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+			}
+			/* Below the widest panels, the Imaging / Room keys and the extra workflows go two to a row
+			   so their labels fit */
+			@media (max-width: 1400px) {
+				body.linac-console-view #rtv2MachinePanel .rtv2-control-group:first-child .rtv2-button-grid,
+				body.linac-console-view #rtv2MachinePanel .rtv2-advanced-workflows {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+			/* What the console refused, and why: posted to the center as a mistake too */
+			#consoleRefusal {
+				position: fixed;
+				left: 50%;
+				top: 10px;
+				z-index: 10050;
+				max-width: min(760px, calc(100vw - 40px));
+				padding: 10px 16px;
+				border: 1px solid #e0737b;
+				border-radius: 8px;
+				background: #5a1d24;
+				box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+				color: #fff3f3;
+				font:
+					600 13px/1.35 'Segoe UI',
+					Arial,
+					sans-serif;
+				opacity: 0;
+				pointer-events: none;
+				transform: translate(-50%, -8px);
+				transition:
+					opacity 0.18s ease,
+					transform 0.18s ease;
+			}
+			#consoleRefusal.show {
+				opacity: 1;
+				transform: translate(-50%, 0);
+			}
+
+			/*
+       The center's panel frame is about 970×500 to 1230×815 (a 1280×640 to 1600×900 window, less
+       the Tutorial's strip). Everything a step needs fits at once: the chart screen's patient
+       sidebar becomes a strip with the workflow buttons in two rows, the plan / actual tables
+       (shown on screen 2 as well) give way to the Machine / Imaging keys, set out in four columns
+       of two, and the windows on screen 2 drop the headings their title bar repeats. Only long
+       lists scroll inside their own pane: the setup instructions and the equipment shelf.
+    */
+			body.linac-console-view.control-room-mode.rt-v2-console .operator-console-panel {
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr) !important;
+				gap: 6px !important;
+				padding: 5px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor,
+			body.linac-console-view.control-room-mode.rt-v2-console #patientInfoDeskMonitor {
+				padding: 3px !important;
+				border-radius: 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .monitor-screen,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				.monitor-screen {
+				padding: 0 !important;
+				border-radius: 5px !important;
+			}
+			/* ---- screen 1: the chart ---- */
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-header {
+				flex: 0 0 34px !important;
+				min-height: 34px !important;
+				grid-template-columns: minmax(0, 1fr) auto !important;
+				gap: 8px !important;
+				padding: 3px 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-radmark {
+				width: 22px !important;
+				height: 22px !important;
+				font-size: 12px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-brand b {
+				font-size: 12px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-brand
+				div
+				span,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-header-mid {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor #rtv2Clock {
+				font-size: 9px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor #rtv2HomeBtn {
+				min-height: 0 !important;
+				padding: 4px 9px !important;
+				font-size: 9px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-chart-grid {
+				grid-template-columns: minmax(0, 1fr) !important;
+				grid-template-rows: auto minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-sidebar {
+				display: grid !important;
+				grid-template-columns: minmax(0, 1fr) auto;
+				align-items: center;
+				gap: 3px 10px;
+				padding: 4px 6px 5px !important;
+				overflow: visible !important;
+				border-right: 0 !important;
+				border-bottom: 1px solid #54789b;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block {
+				display: flex;
+				align-items: baseline;
+				gap: 7px;
+				min-width: 0;
+				padding: 0 !important;
+				border: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				> span,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-heading,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				> div:nth-child(n + 3) {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				b {
+				flex: 0 0 auto;
+				margin: 0 !important;
+				font-size: 12px !important;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				small {
+				min-width: 0;
+				overflow: hidden;
+				font-size: 8.5px !important;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-side-data {
+				display: flex !important;
+				gap: 10px;
+				margin: 0 !important;
+				padding: 0 !important;
+				border: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				> div {
+				display: flex !important;
+				align-items: baseline;
+				gap: 4px;
+				padding: 0 !important;
+				border: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				b {
+				font-size: 9px !important;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-nav {
+				grid-column: 1 / -1;
+				grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+				gap: 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-nav
+				button {
+				min-height: 21px !important;
+				padding: 2px 6px !important;
+				grid-template-columns: 10px minmax(0, 1fr) !important;
+				gap: 3px !important;
+				font-size: 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-nav
+				button
+				span {
+				overflow: hidden;
+				font-size: 9px !important;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-flow {
+				flex: 0 0 20px !important;
+				padding: 2px 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .flow-step {
+				min-width: 0 !important;
+				padding: 0 5px 0 9px !important;
+				font-size: 7.5px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-work-top {
+				align-items: center !important;
+				padding: 3px 7px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-work-top
+				> div:first-child {
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+				min-width: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-work-top
+				h3 {
+				margin: 0 !important;
+				font-size: 12px !important;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-work-top
+				p {
+				overflow: hidden;
+				font-size: 8px !important;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-work-status {
+				flex-wrap: nowrap !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-work-status
+				span {
+				padding: 2px 4px !important;
+				font-size: 7px !important;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-data-area,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-console-note {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-drawer {
+				flex: 1 1 auto !important;
+				margin: 4px 4px 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-drawer
+				> summary {
+				min-height: 18px !important;
+				padding: 2px 7px !important;
+				font-size: 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-drawer
+				> summary
+				span {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-console-grid {
+				grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr) !important;
+				gap: 4px !important;
+				padding: 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group {
+				padding: 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group
+				h4 {
+				margin: 0 0 3px !important;
+				font-size: 7px !important;
+				line-height: 1.15 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group
+				h4
+				+ .rtv2-advanced-workflows,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group
+				.rtv2-button-grid
+				+ h4 {
+				margin-top: 5px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-button-grid,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-button-grid.four,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-advanced-workflows {
+				grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+				gap: 3px !important;
+				margin-top: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-button-grid
+				> span {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-button-grid
+				button,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-advanced-workflows
+				button {
+				min-height: 24px !important;
+				padding: 1px 2px !important;
+				font-size: 8px !important;
+				line-height: 1.1 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				[data-console-target='consoleMLCShape'] {
+				grid-column: 1 / -1;
+			}
+			/* Beam Geometry is two columns of keys: gantry to MLC, then the jaw edges and Move to field */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2) {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+				grid-template-rows: auto auto auto 1fr;
+				align-content: start;
+				column-gap: 5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2)
+				> h4:first-child {
+				grid-area: 1 / 1;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2)
+				> .rtv2-button-grid:not(.four) {
+				grid-area: 2 / 1 / 5 / 2;
+				align-self: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2)
+				> h4:nth-of-type(2) {
+				grid-area: 1 / 2;
+				margin-top: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2)
+				> .rtv2-button-grid.four {
+				grid-area: 2 / 2;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2)
+				> .console-move-title {
+				grid-area: 3 / 2;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2)
+				> #consoleMoveToField {
+				grid-area: 4 / 2;
+				align-self: start;
+				min-height: 30px;
+				padding: 2px 4px;
+				line-height: 1.15;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls {
+				grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+				gap: 3px !important;
+				padding: 3px 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls
+				button {
+				min-height: 30px !important;
+				padding: 2px !important;
+				font-size: 8px !important;
+				line-height: 1.1 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls
+				button.motion {
+				flex-direction: column;
+				gap: 1px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls
+				button.motion
+				span {
+				padding: 0 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #workflowDeskMonitor .rtv2-message {
+				min-height: 0 !important;
+				overflow: hidden;
+				padding: 2px 7px !important;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			/* ---- screen 2: the workflow windows ---- */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDock
+				.console-dock-bar {
+				min-height: 30px !important;
+				padding: 3px 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDock .rtv2-dock-flow {
+				flex-basis: 20px !important;
+				padding: 2px 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody {
+				padding: 5px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-head,
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-head {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-body {
+				gap: 4px;
+				padding: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-chip {
+				padding: 3px 6px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-actions
+				button {
+				min-height: 26px !important;
+				padding: 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-acq-status {
+				padding: 4px 7px;
+				font-size: 8.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-view {
+				height: 80px;
+				aspect-ratio: auto;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-view
+				svg {
+				width: 100%;
+				height: 100%;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-row {
+				min-height: 17px;
+				padding-top: 1px;
+				padding-bottom: 1px;
+			}
+			/* Patient Setup: the instructions and the shelf are the long lists; the checks, the table
+			   and Verify stay in view */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-body {
+				gap: 4px !important;
+				padding: 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-chip {
+				padding: 3px 6px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-chip
+				b {
+				font-size: 10px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-card {
+				padding: 5px 7px !important;
+				font-size: 9px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card:not(#immobilizationVerificationChecks) {
+				max-height: 92px;
+				overflow: auto;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-workspace {
+				height: 170px;
+				min-height: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-shelf-wrap,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-table-wrap {
+				min-height: 0;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-shelf {
+				flex: 1 1 auto;
+				min-height: 0;
+				overflow: auto;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-table-drop {
+				flex: 1 1 auto;
+				min-height: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-actions
+				button {
+				min-height: 26px !important;
+			}
+			/* The R&V delivery screen: beam controls and interlocks first, the plan / actual tables
+			   (a long list) after them, and the camera strip down to its caption */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-topbar {
+				min-height: 30px;
+				padding: 3px 8px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .rtv2d-meta {
+				display: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .rtv2d-body {
+				grid-template-columns: 122px minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .rtv2d-hero {
+				min-height: 0 !important;
+				height: 24px;
+				background: #2a3138;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-hero::before,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-hero::after,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-shade {
+				display: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-hero-caption {
+				left: 8px;
+				right: 8px;
+				bottom: 5px;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-panel.side {
+				order: -1;
+			}
+
+			/* Patient Setup's text at the panel's size; the R&V screen's beam controls in one row */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-card {
+				padding: 5px 7px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				h4 {
+				margin: 0 0 3px !important;
+				font-size: 10px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-card p,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-instructions,
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-key,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks
+				label {
+				font-size: 9px !important;
+				line-height: 1.3 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-key {
+				margin-top: 4px !important;
+				padding: 3px 7px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-instructions {
+				margin-top: 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-instructions
+				li {
+				margin: 2px 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card:not(#immobilizationVerificationChecks) {
+				max-height: 78px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks {
+				gap: 2px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks
+				label {
+				gap: 6px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks
+				input {
+				width: 13px !important;
+				height: 13px !important;
+				margin-top: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-workspace {
+				height: 162px;
+				gap: 6px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-zone-title {
+				font-size: 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-status {
+				padding: 3px 7px !important;
+				font-size: 9px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-side-body {
+				gap: 4px !important;
+				padding: 5px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-status {
+				min-height: 0 !important;
+				padding: 3px 7px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-action-grid {
+				grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+				gap: 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-action-grid
+				button {
+				min-height: 28px !important;
+				padding: 2px !important;
+				line-height: 1.1 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .rtv2d-flow {
+				min-height: 22px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .rtv2d-step {
+				min-width: 0 !important;
+				font-size: 7px !important;
+			}
+
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-summary {
+				gap: 4px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-chip {
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+				min-width: 0;
+				border-radius: 6px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-chip
+				span {
+				flex: 0 0 auto;
+				font-size: 8px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-chip
+				b {
+				overflow: hidden;
+				margin: 0 !important;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks
+				label {
+				align-items: center !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-zone-title {
+				overflow: hidden;
+				margin-bottom: 4px !important;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			/* the shortest frames (a 1280×640 window under the Tutorial's strip): the window's step bar
+			   goes (the chart shows the same steps) and the shelf and table are a little shorter */
+			@media (max-height: 540px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDock
+					.rtv2-dock-flow {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-workspace {
+					height: 150px;
+				}
+			}
+
+			/* the setup body's own cap (100vh less its floating window's chrome) cuts it short here */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-body {
+				max-height: none !important;
+				overflow: visible !important;
+			}
+
+			/* the largest frames (a 1600×900 window and up) have room for the chart's plan / actual
+			   tables above the keys again */
+			@media (min-width: 1180px) and (min-height: 800px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					.rtv2-data-area {
+					display: grid !important;
+					flex: 0 0 auto !important;
+					padding: 5px 4px 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					.rtv2-control-drawer {
+					flex: 0 0 auto !important;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">

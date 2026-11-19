@@ -17,7 +17,10 @@
    `CLINICAL_FOCUS`/`setClinicalFocus`/`clearClinicalFocus`/`equipmentRoomName`/
    `flashCtScanner`/`pulseCtObject`/`workflowState` (read by main.js's still-resident CT QA
    console/journey sequence and by ./interact.js's equipment panel) are exported here and
-   imported back into those. */
+   imported back into those. The LINAC and CT Control console desks open their console in the panel
+   (console-panel.ts) instead of the equipment panel, and that panel's camera strip draws three of
+   the Vault 1 CCTV cameras (`vaultFeedCamera`) or the CT room's (`ctFeedCamera`), which
+   `aimOperatorFeeds` keeps aimed while the panel covers the desk monitors. */
 import * as THREE from 'three';
 import { S } from './state';
 import { applyVisibility } from './visibility';
@@ -42,6 +45,9 @@ import {
 } from './interact';
 import { setDoorTarget } from './walk';
 import { roomById, PRIMARY_PATIENTS, doors, player } from './main';
+import { openConsole } from './console-panel';
+import { getPlayMode } from './play-mode';
+import type { ConsoleKind } from '../../shared/console-protocol';
 import { VAULT2_SETUP_STEPS, vault2StepAt } from './vault-setup-loop';
 import {
 	JOURNEY,
@@ -380,6 +386,11 @@ function operatorLabel(g, x, y, z, rot, text, sub = 'LIVE') {
 	g.add(m);
 	return m;
 }
+/** A Vault 1 CCTV camera of the LINAC Control desk's feeds, by feed name ('Overhead' etc.), for the
+    console panel's camera strip (console-panel.ts); null before the desk is built. */
+export function vaultFeedCamera(name: string): THREE.PerspectiveCamera | null {
+	return OPERATOR_CONSOLE.feeds.find((f) => f.name === name)?.camera ?? null;
+}
 function createOperatorFeed(name, pos, target, fov = 42) {
 	const rt = new THREE.WebGLRenderTarget(800, 450);
 	rt.texture.colorSpace = THREE.SRGBColorSpace;
@@ -517,6 +528,11 @@ export function buildOperatorLiveConsole() {
 }
 
 const CT_OPERATOR_CONSOLE = { built: false, feeds: [], screens: [], lastRender: 0 };
+/** A CT room camera of the CT Control desk's feeds, by feed name ('CT Table Wide' etc.), for the
+    console panel (console-panel.ts); null before the desk is built. */
+export function ctFeedCamera(name: string): THREE.PerspectiveCamera | null {
+	return CT_OPERATOR_CONSOLE.feeds.find((f) => f.name === name)?.camera ?? null;
+}
 function createCtFeed(name, pos, target, fov = 40) {
 	const rt = new THREE.WebGLRenderTarget(800, 450);
 	rt.texture.colorSpace = THREE.SRGBColorSpace;
@@ -656,6 +672,18 @@ export function precompileShaders() {
 	renderer.setRenderTarget(feed.renderTarget);
 	renderer.compile(scene, feed.camera);
 	renderer.setRenderTarget(null);
+}
+/** While the console panel is open (main.ts) the desk monitors are not drawn, but their cameras keep
+    aiming at the patient as renderOperatorLiveFeeds does: the panel draws its feeds through them. */
+export function aimOperatorFeeds() {
+	if (OPERATOR_CONSOLE.built) {
+		const t = activeVaultPatientTarget();
+		for (const feed of OPERATOR_CONSOLE.feeds) feed.camera.lookAt(t);
+	}
+	if (CT_OPERATOR_CONSOLE.built) {
+		const t = ctPatientTarget();
+		for (const feed of CT_OPERATOR_CONSOLE.feeds) feed.camera.lookAt(t);
+	}
 }
 export function renderOperatorLiveFeeds(nowMs = performance.now()) {
 	/* Feeds reuse the previous main render's sun shadow map instead of redoing the 2048^2 pass
@@ -1387,6 +1415,11 @@ export const EQUIPMENT_SPECS: EquipmentSpec[] = [
 			'Source transfer, room access, emergency procedures, and patient monitoring follow strict brachytherapy safety protocols.'
 	}
 ];
+// The two console desks: E opens their console in the panel (console-panel.ts), with this prompt.
+const DESK_CONSOLES: Record<string, { kind: ConsoleKind; prompt: string }> = {
+	linac_console: { kind: 'linac', prompt: 'Open the treatment console' },
+	ct_console: { kind: 'ct', prompt: 'Open the CT console' }
+};
 export function buildClinicalEquipmentLayer() {
 	for (const spec of EQUIPMENT_SPECS) {
 		const r = roomById(spec.roomId);
@@ -1409,13 +1442,22 @@ export function buildClinicalEquipmentLayer() {
 		const item = { ...spec, anchor, ring, mat };
 		EQUIPMENT_BY_ID[spec.id] = item;
 		(EQUIPMENT_BY_ROOM[spec.roomId] || (EQUIPMENT_BY_ROOM[spec.roomId] = [])).push(item);
+		// a console desk opens its console instead of the info card (and counts as explored, as the
+		// card did); in the tutorial its E is the Tutorial's (it has its own console target)
+		const desk = DESK_CONSOLES[spec.id];
 		registerInteractable(
 			anchor,
-			spec.label,
+			desk ? desk.prompt : spec.label,
 			`${spec.purpose} Press E for clinical orientation details.`,
 			3.0,
 			null,
-			() => showEquipmentPanel(spec.id)
+			desk
+				? () => {
+						EQUIPMENT_EXPLORED.add(spec.id);
+						openConsole(desk.kind);
+					}
+				: () => showEquipmentPanel(spec.id),
+			desk ? { enabled: () => getPlayMode() !== 'tutorial' } : {}
 		);
 	}
 }

@@ -1,11 +1,16 @@
 /* Chapter 1 of the sim-hub tutorial, Jordan's treatment day (docs/specs/2026-11-11-sim-hub-menu-
    tutorial-design.md, PR 3), as data: each step's role, objective, target, completion trigger,
-   walking hints, check-in exchange or decision, and the world actions tutorial.ts runs when the
-   step starts, is triggered and completes. The decision wording and the reasons come from the
-   staff and journey text (interact.ts STAFF_GUIDES, journey.ts JOURNEY_META and the journey's
-   lines). Plain data, so its spec runs without the scene. Positions are world [x, z] in metres;
-   the escort and Jamie's finals are the journey's own (journey.ts), so their routes are the ones
-   the NPC check walks. */
+   walking hints, check-in exchange, decision or console task, and the world actions tutorial.ts
+   runs when the step starts, is triggered and completes. Steps 3, 6, 8 and 9 are console steps
+   (docs/specs/2026-11-18-consoles-in-center-design.md, part 6): E opens the real LINAC console in
+   the tutorial scenario, and Jordan's events on it complete the step. The decision wording and the
+   reasons come from the staff and journey text (interact.ts STAFF_GUIDES, journey.ts JOURNEY_META
+   and the journey's lines). Plain data, so its spec runs without the scene. Positions are world
+   [x, z] in metres; the escort and Jamie's vault finals are the journey's own (journey.ts), so
+   their routes are the ones the NPC check walks. Jamie's spot in LINAC Control is the Tutorial's
+   own (the tutorial check walks it against the walls). */
+import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
+import type { LinacEvent, LinacWorkspace } from '../../shared/console-protocol';
 import type { Pt } from './tutorial-math';
 
 export type Role = 'patient' | 'therapist';
@@ -60,8 +65,11 @@ export const WORLD = {
 	/** Jamie Williams across the couch: on the line from the vault graph's node off the couch's -x
 	    end (room-routes.ts vault1 node 6) to Elena Torres's place. */
 	jamieAcross: [76.3, -20.0] as Pt,
-	/** Jamie at the console, and back in the vault (journey.ts, the vault therapist's finals). */
-	jamieControl: [45.56, 8.6] as Pt,
+	/** Jamie in LINAC Control, behind the operators' chairs facing the console (the journey's spot,
+	    45.56, 8.6, is in the aisle in front of the desk, where E would talk to Jamie instead of
+	    opening the console), and back in the vault (journey.ts, the vault therapist's final). Off
+	    room-routes.ts linaccontrol node 6, so the walk in keeps behind the chairs. */
+	jamieControl: [47.7, 10.3] as Pt,
 	jamieBack: [76.3, -16.0] as Pt,
 	/** The eye above the seat top when seated: standing eye 1.87 - hip 1.06 + hip to pelvis 0.06. */
 	seatedEyeAboveSeat: 0.87,
@@ -79,7 +87,11 @@ export const TUTORIAL_TIMING = {
 	roleCardMs: 2500,
 	/** The escorts' slow fade, each way, and how long its line shows on the black. */
 	walkFadeMs: 1500,
-	walkCardMs: 1000
+	walkCardMs: 1000,
+	/** A console step's console stays open this long after the step completes, to show the result. */
+	consoleCloseMs: 1500,
+	/** A console step's "Correct." line stays in the hint line this long once the step completes. */
+	correctMs: 5000
 };
 
 export type TargetId =
@@ -111,6 +123,7 @@ export type StepAction =
 	| 'pickChair'
 	| 'sitPlayer'
 	| 'intercomToControl'
+	| 'jordanOnMonitors'
 	| 'jordanConfirms'
 	| 'escortToVault'
 	| 'jordanOnCouch'
@@ -120,6 +133,7 @@ export type StepAction =
 	| 'holdVaultClosed'
 	| 'shiftApplied'
 	| 'beamOn'
+	| 'betweenFields'
 	| 'beamOff'
 	| 'releaseVaultDoor'
 	| 'jamieBackIn'
@@ -151,6 +165,30 @@ export interface Decision {
 	reason: string;
 }
 
+/** Jordan's MRN on the LINAC console's tutorial queue. */
+export const JORDAN_MRN = TUTORIAL_PATIENTS.jordan.mrn;
+
+/** The LINAC console events that move a console step on (all but `mistake`). */
+export type ConsoleProgressKind = Exclude<LinacEvent['kind'], 'mistake'>;
+/** A console step's task: E at the target opens the LINAC console at `workspace`; the step is
+    triggered when the console has posted the `done` events for Jordan's MRN, in this order. A
+    refused action on the console (`mistake`), or another patient's chart or check-in, is a miss:
+    hint 1, hint 2, then the reveal, in the tracker's hint line. */
+export interface ConsoleTask {
+	workspace: LinacWorkspace;
+	done: readonly ConsoleProgressKind[];
+	/** After the first and the second miss. */
+	hints: readonly [string, string];
+	/** From the third miss on: what to do (the reason says why, once the step is done). */
+	reveal: string;
+	/** Why the step is done this way: "Correct. <reason>" shows when it completes, as a decision's
+	    reason does. */
+	reason: string;
+	/** The world actions as the console's beam (its pose stream, console-bus.ts linacPose) turns on
+	    and off during the step. */
+	beam?: { on: StepAction; off: StepAction };
+}
+
 export interface Step {
 	n: number;
 	role: Role;
@@ -163,10 +201,10 @@ export interface Step {
 	exchange?: readonly ExchangeLine[];
 	/** Opened by E; Continue after the answer triggers the step. */
 	decision?: Decision;
+	/** E opens the LINAC console; its events trigger the step. */
+	console?: ConsoleTask;
 	/** After the trigger, the step completes this many seconds later. */
 	afterSeconds?: number;
-	/** The hint line while afterSeconds runs; {s} is the whole seconds left. */
-	countdown?: string;
 	onStart?: readonly StepAction[];
 	onTrigger?: readonly StepAction[];
 	onComplete?: readonly StepAction[];
@@ -182,7 +220,8 @@ export const eHintText = (name: string): string =>
 export const LINES = {
 	intercomToControl:
 		'Treatment Control, Jordan Ellis is checked in for 9:00 in Vault 1 and waiting in reception.',
-	controlAlert: 'Jordan Ellis just checked in. The chart is open and Vault 1 is ready for setup.',
+	controlAlert:
+		'Jordan Ellis just checked in at reception. Vault 1 is ready: open today’s schedule.',
 	jordanConfirms: 'Jordan Ellis, March 14, 1968. I’m ready to go back.',
 	jordanChanged: 'I’m changed and ready to continue.',
 	jamieSetup:
@@ -195,6 +234,7 @@ export const LINES = {
 	walkToLobby: 'You walk Jordan back to reception.'
 };
 
+const JORDAN = TUTORIAL_PATIENTS.jordan;
 const CONSOLE_HINTS: readonly [string, string] = [
 	'The treatment console is the long desk of screens against the wall of LINAC Control.',
 	'Stand at the console desk, in front of the screens, and press E.'
@@ -265,35 +305,23 @@ export const CHAPTER_1: readonly Step[] = [
 			roomId: 'linaccontrol',
 			place: 'Treatment console',
 			name: 'the treatment console',
-			label: 'Open today’s schedule',
+			label: 'Open the treatment console',
 			spec: CONSOLE_SPEC
 		},
 		trigger: 'pressE',
 		hints: CONSOLE_HINTS,
-		decision: {
-			title: 'Today’s schedule',
-			prompt:
-				'Treatment Control has the alert: Jordan Ellis is checked in. Three entries on today’s schedule are for an Ellis. Which one is Jordan’s?',
-			options: [
-				{
-					id: 'a',
-					text: 'Ellis, Jordan · born October 2, 1985 · Vault 1 · 9:40'
-				},
-				{
-					id: 'b',
-					text: 'Ellis, Jordan · born March 14, 1968 · Vault 1 · 9:00',
-					correct: true
-				},
-				{ id: 'c', text: 'Ellis, Jody · born March 14, 1968 · Vault 2 · 9:00' }
-			],
+		console: {
+			workspace: 'queue',
+			done: ['chart-opened'],
 			hints: [
 				'Two entries share Jordan’s name. Check the date of birth Jordan gave at check-in.',
-				'Jordan was born on March 14, 1968, and is booked on Vault 1.'
+				`Jordan was born on ${JORDAN.born}, and is booked on ${JORDAN.vault} at ${JORDAN.time}.`
 			],
-			reveal: 'Jordan’s entry is Ellis, Jordan · born March 14, 1968 · Vault 1 · 9:00.',
+			reveal: `Jordan’s entry is ${JORDAN.name} · born ${JORDAN.born} · ${JORDAN.vault} · ${JORDAN.time}. Check it in, then open its chart.`,
 			reason:
 				'A full name and date of birth together identify the patient, and the booking has to be on the machine where the plan is loaded.'
-		}
+		},
+		onTrigger: ['jordanOnMonitors']
 	},
 	{
 		n: 4,
@@ -359,7 +387,7 @@ export const CHAPTER_1: readonly Step[] = [
 			roomId: 'vault1',
 			place: 'Treatment couch',
 			name: 'the treatment couch',
-			label: 'Set Jordan up on the couch',
+			label: 'Open Patient Setup',
 			spec: COUCH_SPEC
 		},
 		trigger: 'pressE',
@@ -367,36 +395,15 @@ export const CHAPTER_1: readonly Step[] = [
 			'The couch is in the middle of Vault 1, under the treatment machine.',
 			'Stand beside the couch, next to Jordan, and press E.'
 		],
-		decision: {
-			title: 'Jordan’s simulation record',
-			prompt: 'Jordan’s setup was documented at CT simulation. Which setup reproduces it?',
-			context: [
-				['Position', 'Head first, supine'],
-				['Head', 'Indexed head support'],
-				['Knees', 'Indexed knee support'],
-				['Couch', 'Index recorded at CT simulation']
-			],
-			options: [
-				{
-					id: 'a',
-					text: 'Feet first, supine · indexed head support and knee support · the recorded couch index'
-				},
-				{
-					id: 'b',
-					text: 'Head first, supine · indexed head support, no knee support · the recorded couch index'
-				},
-				{
-					id: 'c',
-					text: 'Head first, supine · indexed head support and knee support · the recorded couch index',
-					correct: true
-				}
-			],
+		console: {
+			workspace: 'setup',
+			done: ['setup-complete'],
 			hints: [
-				'Compare each part with the record: position, head support, knee support and couch index.',
-				'The record says head first, with both indexed supports.'
+				'Compare each part with the setup order: the devices, position, indexing and preparation.',
+				'The setup order calls for the Vac-Lok and the knee support, head first and supine.'
 			],
 			reveal:
-				'Head first, supine, with the indexed head and knee supports at the recorded couch index.',
+				'Place the Vac-Lok and the knee support, confirm position, indexing and preparation, then verify the setup.',
 			reason:
 				'Each day’s setup reproduces the position, supports and indexing documented at CT simulation, so Jordan lies where the plan expects.'
 		},
@@ -430,28 +437,20 @@ export const CHAPTER_1: readonly Step[] = [
 			roomId: 'linaccontrol',
 			place: 'Treatment console',
 			name: 'the treatment console',
-			label: 'Take the check images',
+			label: 'Open the treatment console',
 			spec: CONSOLE_SPEC
 		},
 		trigger: 'pressE',
 		hints: CONSOLE_HINTS,
-		decision: {
-			title: 'Today’s check images',
-			prompt:
-				'Today’s images are matched to the planning reference. They show Jordan 4 mm from the planned position. What do you do before treatment?',
-			options: [
-				{ id: 'a', text: 'Treat as is: 4 mm is a small shift' },
-				{
-					id: 'b',
-					text: 'Apply the couch shift, then check the match again',
-					correct: true
-				}
-			],
+		console: {
+			workspace: 'igrt',
+			done: ['shift-applied', 'alignment-verified'],
 			hints: [
-				'The images are taken to find exactly this kind of difference before the beam is on.',
-				'A shift measured on today’s images is corrected with the couch before any treatment.'
+				'The images find this kind of difference before the beam is on. Press New Daily Setup and kV Imaging, then Acquire Images.',
+				`Today’s images show Jordan ${TUTORIAL_SHIFT_MM} mm off the plan. Press Motion Enable, then the couch keys, until the residuals are in tolerance.`
 			],
-			reveal: 'Apply the couch shift first, then check the match again.',
+			reveal:
+				'Press Motion Enable, apply the correction with the couch keys or by holding Move to field, then press Verify Alignment.',
 			reason:
 				'Image guidance checks that Jordan is in the planned treatment position before radiation is delivered; a measured shift is corrected, then verified.'
 		},
@@ -466,14 +465,26 @@ export const CHAPTER_1: readonly Step[] = [
 			roomId: 'linaccontrol',
 			place: 'Treatment console',
 			name: 'the treatment console',
-			label: 'Start the treatment',
+			label: 'Open the treatment console',
 			spec: CONSOLE_SPEC
 		},
 		trigger: 'pressE',
 		hints: CONSOLE_HINTS,
-		afterSeconds: 10,
-		countdown: 'Beam on · {s} s',
-		onTrigger: ['beamOn'],
+		// no timed beam or countdown any more (it was afterSeconds 10, "Beam on · {s} s"): the
+		// console's own delivery runs the beam, field by field, and the boards follow it
+		console: {
+			workspace: 'delivery',
+			done: ['treatment-complete'],
+			hints: [
+				'The beam waits until every interlock on the checklist is green. Read the one that is not.',
+				'Each field needs Enable Beam, then Beam On. Deliver the AP field, then the PA field.'
+			],
+			reveal:
+				'When the checklist is all green, press Enable Beam, then Beam On: the AP field first, then the PA field.',
+			reason:
+				'The beam came on only once the room, the setup and the images were verified, and both fields were delivered as planned.',
+			beam: { on: 'beamOn', off: 'betweenFields' }
+		},
 		onComplete: ['beamOff']
 	},
 	{
