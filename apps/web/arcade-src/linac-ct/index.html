@@ -10291,6 +10291,686 @@
 				opacity: 0.3;
 				cursor: default;
 			}
+
+			/* console mode, Tutorial focus (src/tutorial-focus.ts; the tutorial scenario only, so Free
+			   Mode keeps the full console): each of the Tutorial's console steps shows only what it uses.
+			     queue     the queue as it is; the screens under it go
+			     chart     Jordan's identity, large (the chart opens as step 3 ends)
+			     setup     Patient Setup across the whole frame, with the patient's chips back on top
+			     igrt      image guidance, beside a column of the keys step 8 presses: kV Imaging, the
+			               couch's Vert / Long / Lat, Move to field and Motion Enable
+			     delivery  the R&V delivery screen (fields, MU, interlocks), beside a column of the keys
+			               step 9 presses: Move to field, kV Imaging (to stow the arms), Motion Enable and
+			               the beam keys
+			   Inside a step's screen there is no way off it: Home Queue and the window's Close go. */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-queue.rtv2-landing
+				.operator-console-panel {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-chart,
+					.tut-focus-setup,
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				)
+				:is(#rtv2HomeBtn, #consoleDockClose) {
+				display: none !important;
+			}
+
+			/* ---- chart: Jordan's identity fills the frame ---- */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				.operator-console-panel {
+				grid-template-columns: minmax(0, 1fr) !important;
+				grid-template-areas: 'workflow' !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				:is(
+					#patientInfoDeskMonitor,
+					#workflowDeskMonitor .rtv2-main,
+					#workflowDeskMonitor .rtv2-nav
+				) {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-chart-grid {
+				grid-template-rows: minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-sidebar {
+				display: flex !important;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				gap: 22px;
+				padding: 24px !important;
+				border: 0 !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block {
+				flex-direction: column;
+				align-items: center;
+				gap: 8px;
+				text-align: center;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				> span {
+				display: block !important;
+				font-size: 12px !important;
+				letter-spacing: 0.14em;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				b {
+				font-size: 32px !important;
+				line-height: 1.1;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				small {
+				font-size: 15px !important;
+				white-space: normal;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data {
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 10px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				> div {
+				display: flex !important;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 4px !important;
+				min-width: 120px;
+				padding: 9px 14px !important;
+				border: 1px solid rgba(255, 255, 255, 0.22) !important;
+				border-radius: 6px;
+				background: rgba(4, 18, 32, 0.25);
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				span {
+				font-size: 11px !important;
+				letter-spacing: 0.08em;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-chart.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				b {
+				font-size: 16px !important;
+			}
+
+			/* ---- setup: Patient Setup across the whole frame ---- */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				.operator-console-panel {
+				grid-template-columns: minmax(0, 1fr) !important;
+				grid-template-areas: 'patient' !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#workflowDeskMonitor {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-summary {
+				display: grid !important;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-shelf {
+				grid-template-columns: repeat(7, minmax(0, 1fr));
+				gap: 4px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(
+					.immo-card p,
+					.immo-instructions,
+					.immo-key,
+					.immo-verify-checks label,
+					.immo-status,
+					.immo-table-help,
+					.immo-chip b
+				) {
+				font-size: 11px !important;
+				line-height: 1.35 !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-chip
+				span {
+				font-size: 9px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.immo-device, .immo-placed-device) {
+				height: 36px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-device-label {
+				font-size: 11px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.immo-device, .immo-placed-device)
+				svg {
+				width: 28px;
+				height: 24px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-table-drop {
+				min-height: 46px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-actions
+				button {
+				height: 32px;
+				min-height: 32px !important;
+				font-size: 11px !important;
+			}
+			/* the shortest frames: the same type, the keys and gaps a little tighter */
+			@media (max-height: 540px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-card p, .immo-instructions, .immo-key, .immo-verify-checks label) {
+					line-height: 1.25 !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-body {
+					gap: 3px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-device, .immo-placed-device) {
+					height: 32px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-table-drop {
+					min-height: 40px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-actions
+					button {
+					height: 30px;
+					min-height: 30px !important;
+				}
+			}
+			/* the taller frames: the shelf and table say what they are again, and everything is larger */
+			@media (min-height: 560px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-zone-title {
+					display: block !important;
+					font-size: 10px !important;
+				}
+			}
+			@media (min-height: 700px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(
+						.immo-card p,
+						.immo-instructions,
+						.immo-key,
+						.immo-verify-checks label,
+						.immo-status,
+						.immo-table-help,
+						.immo-chip b
+					) {
+					font-size: 13px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-card
+					> h4 {
+					display: block !important;
+					font-size: 12px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-device, .immo-placed-device) {
+					height: 46px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-device-label {
+					font-size: 13px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-table-drop {
+					min-height: 62px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-actions
+					button {
+					height: 40px;
+					min-height: 40px !important;
+					font-size: 13px !important;
+				}
+			}
+
+			/* ---- igrt and delivery: the step's keys in a column beside the step's screen ---- */
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				.operator-console-panel {
+				grid-template-columns: 210px minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				:is(
+					.rtv2-header-right,
+					.rtv2-nav,
+					.rtv2-patient-block small,
+					.rtv2-side-data > div:not(:first-child),
+					.rtv2-flow,
+					.rtv2-work-top,
+					.rtv2-data-area,
+					.rtv2-console-note,
+					#rtv2ClinicalMessage,
+					.rtv2-control-group > h4:not(.console-move-title),
+					.rtv2-control-group .rtv2-advanced-workflows,
+					.rtv2-control-group:nth-child(2) > .rtv2-button-grid,
+					.rtv2-control-group:first-child
+						[data-console-target]:not([data-console-target='consoleKV']),
+					[data-console-target^='consoleTable'],
+					[data-console-target^='consoleRoll'],
+					[data-console-target^='consolePitch'],
+					[data-console-target^='consoleYaw'],
+					#rtv2Terminate
+				) {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-header {
+				grid-template-columns: minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-sidebar {
+				grid-template-columns: minmax(0, 1fr) !important;
+				gap: 2px !important;
+				padding: 6px 9px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-patient-block
+				b {
+				font-size: 14px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-side-data
+				:is(span, b) {
+				font-size: 11px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-drawer {
+				flex: 0 0 auto !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-drawer
+				> summary {
+				min-height: 24px !important;
+				font-size: 10px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-console-grid {
+				grid-template-columns: minmax(0, 1fr) !important;
+				gap: 6px !important;
+				padding: 6px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group {
+				display: flex !important;
+				flex-direction: column;
+				gap: 4px;
+				padding: 6px !important;
+			}
+			/* the groups' own headings name keys that are gone: each group says what it holds */
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group::before,
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group
+				> .console-move-title {
+				margin: 0 !important;
+				color: #9fc8e7;
+				font-size: 10px !important;
+				font-weight: 800;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:first-child::before {
+				content: 'Imaging';
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(3)::before {
+				content: 'Couch';
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:first-child
+				.rtv2-button-grid {
+				grid-template-columns: minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				:is(.rtv2-button-grid button, #consoleMoveToField, .rtv2-machine-controls button) {
+				min-height: 34px !important;
+				padding: 3px 6px !important;
+				font-size: 11px !important;
+				line-height: 1.15 !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-button-grid {
+				gap: 4px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls {
+				grid-template-columns: minmax(0, 1fr) !important;
+				gap: 4px !important;
+				padding: 6px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls
+				button.motion {
+				min-height: 42px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus:is(
+					.tut-focus-igrt,
+					.tut-focus-delivery
+				).control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-machine-controls
+				button.motion
+				span {
+				font-size: 9px !important;
+			}
+			/* image guidance: kV Imaging, the couch, then Move to field; the beam keys go */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				:is(#rtv2EnableBeam, #rtv2BeamOn, #rtv2BeamHold) {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(2) {
+				order: 3;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(3) {
+				order: 2;
+			}
+			/* the image-guidance screen at the width it now has: larger type, the images as tall as the
+			   frame allows, and the fine print on plane mapping and tolerances gone */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#igrtToleranceFootnote {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-chip
+				span {
+				font-size: 9px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-chip
+				b {
+				font-size: 11px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-actions
+				button {
+				min-height: 30px !important;
+				font-size: 11px;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(#igrtAcqStatus, #igrtAcqStatus *, #igrtResult) {
+				font-size: 10.5px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-row
+				> div {
+				padding-top: 2px;
+				padding-bottom: 2px;
+				font-size: 10.5px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.igrt-row.header
+				> div {
+				font-size: 9px !important;
+			}
+			@media (min-height: 560px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-view {
+					height: 110px;
+				}
+			}
+			@media (min-height: 700px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-view {
+					height: 170px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(
+						#igrtAcqStatus,
+						#igrtAcqStatus *,
+						#igrtResult,
+						.igrt-row > div,
+						.igrt-actions button
+					) {
+					font-size: 12px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-row {
+					min-height: 26px;
+				}
+			}
+			@media (min-height: 800px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-igrt.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-view {
+					height: 220px;
+				}
+			}
+			/* delivery: Move to field, then kV Imaging; the couch goes */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:nth-child(3) {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				.rtv2-control-group:first-child {
+				order: 2;
+			}
+			/* the delivery screen: fields, the step's state, MU and the interlocks; the plan / actual
+			   tables and the window's own beam keys (the column has them) go */
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.rtv2d-panel.beam, .rtv2d-panel.geometry, .rtv2d-action-grid) {
+				display: none !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-content {
+				grid-template-columns: minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-checklist {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				max-height: none;
+				overflow: visible;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-body {
+				grid-template-columns: 168px minmax(0, 1fr) !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(
+					.rtv2d-patient-card label,
+					.rtv2d-dose-head,
+					.rtv2d-course-bar b,
+					.rtv2d-course-bar span
+				) {
+				font-size: 9.5px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.rtv2d-patient-card div, .rtv2d-field-mu) {
+				font-size: 11px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-hero-caption {
+				font-size: 13px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-step {
+				font-size: 9px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.rtv2d-ready, .rtv2d-status, .rtv2d-check b, .rtv2d-field-main b) {
+				font-size: 11px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.rtv2d-check span, .rtv2d-progress span, .rtv2d-field-main span) {
+				font-size: 9.5px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-progress
+				b {
+				font-size: 18px !important;
+			}
+			body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-check {
+				align-items: center;
+				padding: 6px 8px;
+			}
+			@media (min-height: 700px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.rtv2d-ready, .rtv2d-status, .rtv2d-check b, .rtv2d-field-main b) {
+					font-size: 13px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.rtv2d-check span, .rtv2d-progress span, .rtv2d-field-main span) {
+					font-size: 11px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-delivery.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.rtv2d-check {
+					padding: 9px 10px;
+				}
+			}
 		</style>
 	</head>
 	<body>
