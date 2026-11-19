@@ -12040,6 +12040,30 @@
 				padding: 4px 6px !important;
 				font-size: 11px !important;
 			}
+
+			/* console mode, narrow frames: the queue. The center's console frame can be as narrow as
+			   760 px (a 1280×800 laptop's browser, under the Tutorial's strip); below 970 px the
+			   queue's columns shrink to their content so the actions stay in the frame, and the
+			   screens under the queue (covered by it) are gone, so nothing behind it can scroll. */
+			body.linac-console-view.rtv2-landing .operator-console-panel {
+				display: none !important;
+			}
+			@media (max-width: 969px) {
+				body.linac-console-view.rtv2-landing :is(.rtv2-queue-head, .rtv2-queue-row) {
+					grid-template-columns: 52px minmax(0, 1fr) 108px 224px;
+					gap: 10px;
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+				body.linac-console-view.rtv2-landing .rtv2-queue-title {
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+				body.linac-console-view.rtv2-landing #rtv2QueuePager {
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+			}
 		</style>
 	</head>
 	<body>
