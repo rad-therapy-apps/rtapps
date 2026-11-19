@@ -119,22 +119,26 @@ export async function cutOffs(target) {
 				if (c) return c;
 				const cs = css(el);
 				c = contentClip(container(el, cs.position));
-				if (c === HIDDEN) return c;
+				// overflow does not apply to an inline box, display:contents or a table row
 				const x = cs.overflowX !== 'visible',
-					y = cs.overflowY !== 'visible';
+					y = cs.overflowY !== 'visible',
+					applies = !/^(inline|contents|table-(row|column|header|footer)(-group)?)$/.test(
+						cs.display
+					);
 				const scrolls = /auto|scroll/.test(cs.overflowX + cs.overflowY);
-				if ((x || y) && cs.display !== 'contents' && (el.clientWidth < 2 || el.clientHeight < 2))
-					c = HIDDEN;
-				else if ((x || y) && cs.display !== 'contents' && !(scrolls && pagerPage(el))) {
-					const b = el.getBoundingClientRect();
-					const left = b.left + el.clientLeft,
-						top = b.top + el.clientTop;
-					c = { ...c };
-					// on a tie the inner box is named
-					if (x && left >= c.left[0]) c.left = [left, el];
-					if (x && left + el.clientWidth <= c.right[0]) c.right = [left + el.clientWidth, el];
-					if (y && top >= c.top[0]) c.top = [top, el];
-					if (y && top + el.clientHeight <= c.bottom[0]) c.bottom = [top + el.clientHeight, el];
+				if (c !== HIDDEN && (x || y) && applies) {
+					if (el.clientWidth < 2 || el.clientHeight < 2) c = HIDDEN;
+					else if (!(scrolls && pagerPage(el))) {
+						const b = el.getBoundingClientRect();
+						const left = b.left + el.clientLeft,
+							top = b.top + el.clientTop;
+						c = { ...c };
+						// on a tie the inner box is named
+						if (x && left >= c.left[0]) c.left = [left, el];
+						if (x && left + el.clientWidth <= c.right[0]) c.right = [left + el.clientWidth, el];
+						if (y && top >= c.top[0]) c.top = [top, el];
+						if (y && top + el.clientHeight <= c.bottom[0]) c.bottom = [top + el.clientHeight, el];
+					}
 				}
 				clips.set(el, c);
 				return c;
