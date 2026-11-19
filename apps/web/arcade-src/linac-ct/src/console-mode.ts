@@ -11,7 +11,8 @@
    rtapps-linac-room sets the vault door the door interlock reads; rtapps-linac-panel with open
    false (the panel closed: the therapist has left the console) holds a delivering field and stops
    the machine keys. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
-   Started by main.ts once the app has booted. */
+   In the tutorial scenario the body also carries the Tutorial's focus classes (tutorial-focus.ts),
+   kept in step with the screen shown. Started by main.ts once the app has booted. */
 import type {
 	LinacPose,
 	LinacToCenterMessage,
@@ -51,6 +52,7 @@ import {
 } from './linac-safety';
 import { syncRoomViewButtons } from './travel';
 import { syncOperatorConsole } from './main';
+import { focusClass, tutorialFocus, type TutorialFocus } from './tutorial-focus';
 
 const STATE_TICK_MS = 17; // the pose is checked this often; statePostDue spaces the posts
 const REFUSAL_SHOW_MS = 6000;
@@ -141,7 +143,27 @@ function watchShift() {
 	}
 }
 
+/* ----- the Tutorial's focused console: one body class for the screen shown (tutorial-focus.ts) ----- */
+let focus: TutorialFocus | null = null;
+function syncTutorialFocus() {
+	const next = tutorialFocus(
+		document.body.classList.contains('rtv2-landing'),
+		(id) => !!document.getElementById(id)?.classList.contains('open')
+	);
+	if (next !== focus) {
+		if (focus) document.body.classList.remove(focusClass(focus));
+		document.body.classList.add(focusClass(next));
+		focus = next;
+	}
+	// the delivery focus keeps the chart's Beam Hold, not the delivery window's own: it says Resume
+	// Beam while a field is held, as the window's does
+	const hold = document.getElementById('rtv2BeamHold'),
+		label = document.getElementById('deliveryHold')?.textContent?.trim().toUpperCase();
+	if (hold && label && hold.textContent !== label) hold.textContent = label;
+}
+
 function tick() {
+	if (CONSOLE.scenario === 'tutorial') syncTutorialFocus();
 	watchShift();
 	const pose = currentPose(),
 		workspace = currentWorkspace(),
@@ -236,6 +258,7 @@ export function startConsoleMode() {
 		// Jordan's plan is a 10 × 10 field; a jaw setting saved by an earlier session must not hold it
 		setCenteredJawField(10, 10);
 		syncFundamentalReadouts();
+		document.body.classList.add('linac-tutorial-focus');
 	}
 	setConsoleSink({
 		event: (event) => {
