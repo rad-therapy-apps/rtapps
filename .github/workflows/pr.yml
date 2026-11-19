@@ -140,6 +140,13 @@ jobs:
       - run: node scripts/sim-hub-console-check.mjs
         working-directory: apps/web
         timeout-minutes: 10
+      # the same Tutorial console check at the smallest laptop window (1280x640): every console screen
+      # must still fit with nothing scrolling (the check's NO-SCROLL guard).
+      - run: node scripts/sim-hub-console-check.mjs
+        working-directory: apps/web
+        timeout-minutes: 10
+        env:
+          CHECK_VIEW: 1280x640
       # sim-hub free console check (consoles in the center): headless Chromium plays the two graded
       # activities in Free Mode, opened at LINAC Control and CT Control as the activities do: one
       # fraction on the real LINAC console and one scan on the real CT console, each recorded once.

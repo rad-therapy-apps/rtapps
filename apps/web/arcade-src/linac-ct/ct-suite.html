@@ -1251,6 +1251,160 @@
 			body.rtapps-console-mode .ct-room-decor {
 				display: none;
 			}
+
+			/* console mode, no scroll: control column and log (src/ct-suite/console-layout.ts). One
+			   workflow step's controls at a time, under chips for the finished steps; the center's
+			   pager bar when they do not fit; the log shows its newest lines. */
+			body.rtapps-panel-mode .ctl {
+				flex: 1 1 0;
+				min-height: 0;
+				overflow: hidden;
+				padding: 9px 10px;
+				gap: 7px;
+			}
+			body.rtapps-panel-mode .ctl > .cs-left,
+			body.rtapps-panel-mode .cs-chips[hidden],
+			body.rtapps-panel-mode .cs-body:not(.open) {
+				display: none;
+			}
+			body.rtapps-panel-mode .cs-chips {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 5px;
+				flex: none;
+			}
+			body.rtapps-panel-mode .cs-chip {
+				min-height: 26px;
+				max-width: 100%;
+				padding: 5px 9px;
+				border-radius: 7px;
+				border: 1px solid #23523f;
+				background: #0d2119;
+				color: #a6ecc6;
+				font: 600 11px/1.2 var(--sans);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				cursor: pointer;
+			}
+			body.rtapps-panel-mode .cs-chip:hover:not(:disabled) {
+				border-color: var(--green);
+				color: #dcfbe9;
+			}
+			body.rtapps-panel-mode .cs-chip[aria-expanded='true'] {
+				border-color: var(--cyan);
+				background: #0e2b2a;
+				color: #b5f5ee;
+			}
+			body.rtapps-panel-mode .cs-chip.back {
+				border-color: var(--cyan-d);
+				background: var(--raise);
+				color: var(--ink);
+			}
+			body.rtapps-panel-mode .cs-chip:disabled {
+				opacity: 0.55;
+				cursor: default;
+			}
+			body.rtapps-panel-mode .cs-body.open {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				flex: none;
+			}
+			body.rtapps-panel-mode .cs-block {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+			}
+			/* the blocks' gaps space them, not the controls' own margins */
+			body.rtapps-panel-mode .cs-block > * {
+				margin-top: 0 !important;
+				margin-bottom: 0 !important;
+			}
+			/* the technique feedback before there is any, and Stop once no scan runs */
+			body.rtapps-panel-mode .cs-block[data-cs-block='2d']:not(:has(.show)),
+			body.rtapps-panel-mode .cs-block[data-cs-block='6a']:has(> :disabled) {
+				display: none;
+			}
+			body.rtapps-panel-mode .cs-block[data-cs-block='3b'] .minibtns {
+				grid-template-columns: 1fr 1fr;
+			}
+			body.rtapps-panel-mode .cs-block[data-cs-block='6c'] {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 12px;
+			}
+			body.rtapps-panel-mode .cs-block input[type='range'] {
+				width: 100%;
+			}
+			body.rtapps-panel-mode .cs-block .slab {
+				margin-bottom: 4px;
+			}
+			body.rtapps-panel-mode .cs-block .habitus-box {
+				padding: 8px;
+			}
+			body.rtapps-panel-mode .cs-block .chip {
+				padding: 7px 6px;
+			}
+			body.rtapps-panel-mode .cs-block .btn {
+				padding: 9px 8px;
+			}
+			body.rtapps-panel-mode .pgOff {
+				display: none !important;
+			}
+			/* the pager bar, as the center's (sim-hub index.html .pager) */
+			body.rtapps-panel-mode .pager {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+				flex: none;
+				padding: 6px 2px 0;
+				border-top: 1px solid rgba(129, 193, 214, 0.16);
+			}
+			body.rtapps-panel-mode .pager[hidden] {
+				display: none;
+			}
+			body.rtapps-panel-mode .pgCount {
+				font-size: 14px;
+				font-weight: 800;
+				letter-spacing: 0.05em;
+				color: #e8f1f4;
+			}
+			body.rtapps-panel-mode .pager button {
+				width: 36px;
+				height: 30px;
+				border-radius: 9px;
+				border: 1px solid rgba(66, 213, 207, 0.4);
+				background: rgba(66, 213, 207, 0.1);
+				color: #dff9f6;
+				font-size: 18px;
+				line-height: 1;
+				cursor: pointer;
+			}
+			body.rtapps-panel-mode .pager button:hover:not(:disabled) {
+				background: rgba(66, 213, 207, 0.18);
+			}
+			body.rtapps-panel-mode .pager button:disabled {
+				opacity: 0.3;
+				cursor: default;
+			}
+			/* the log: three lines high, newest first, older lines hidden; a line wraps to three at most */
+			body.rtapps-panel-mode .log {
+				position: relative;
+				flex: none;
+				min-height: 0;
+				max-height: none;
+				height: calc(3 * 1.55em + 14px);
+				overflow: hidden;
+			}
+			body.rtapps-panel-mode .log > div {
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 3;
+				line-clamp: 3;
+				overflow: hidden;
+			}
 		</style>
 	</head>
 	<body>
@@ -1340,12 +1494,12 @@
 						<div class="ctl">
 							<div>
 								<div class="sec-t">Scan Protocol</div>
-								<div class="grid2" id="protoGrid"></div>
+								<div class="grid2" id="protoGrid" data-cs="1a"></div>
 							</div>
 
 							<div id="techniqueSection">
 								<div class="sec-t">Body Habitus &amp; Technique</div>
-								<div class="habitus-box">
+								<div class="habitus-box" data-cs="2a">
 									<div class="habitus-cue" id="habitusCue">
 										Select a protocol to display patient-size cues.
 									</div>
@@ -1362,7 +1516,7 @@
 										universal clinical cutoffs.
 									</div>
 								</div>
-								<div class="tech-adjust">
+								<div class="tech-adjust" data-cs="2b">
 									<div class="tech-field">
 										<label for="kvSelect">Tube potential (kVp)</label
 										><select id="kvSelect">
@@ -1400,54 +1554,61 @@
 									<div class="ro"><span>Slice</span><b id="roSlice">—</b></div>
 									<div class="ro"><span>Pitch</span><b id="roPitch">—</b></div>
 								</div>
-								<button class="btn primary" id="btnValidateTechnique" style="margin-top: 8px">
+								<button
+									class="btn primary"
+									id="btnValidateTechnique"
+									style="margin-top: 8px"
+									data-cs="2c"
+								>
 									Validate Habitus &amp; Technique
 								</button>
-								<div class="tech-lock" id="techLock">
+								<div class="tech-lock" id="techLock" data-cs="2c">
 									<span class="lamp"></span
 									><span>Technique validation required before imaging.</span>
 								</div>
-								<div class="tech-feedback" id="techFeedback" aria-live="polite"></div>
+								<div class="tech-feedback" id="techFeedback" aria-live="polite" data-cs="2d"></div>
 							</div>
 
 							<div>
 								<div class="sec-t">Acquisition Workflow</div>
 								<div id="workflowSteps"></div>
-								<button class="btn primary" id="btnTopogram" disabled>Acquire Topogram</button>
-								<div class="rangefield" style="margin-top: 10px">
+								<button class="btn primary" id="btnTopogram" disabled data-cs="4a">
+									Acquire Topogram
+								</button>
+								<div class="rangefield" style="margin-top: 10px" data-cs="5a">
 									<div class="slab">Scan start (superior)<b id="rangeStartLbl">— cm</b></div>
 									<input type="range" id="rangeStart" min="0" max="100" value="10" disabled />
 								</div>
-								<div class="rangefield">
+								<div class="rangefield" data-cs="5a">
 									<div class="slab">Scan end (inferior)<b id="rangeEndLbl">— cm</b></div>
 									<input type="range" id="rangeEnd" min="0" max="100" value="80" disabled />
 								</div>
-								<div class="kv" style="margin-bottom: 8px">
+								<div class="kv" style="margin-bottom: 8px" data-cs="5b">
 									<span>Range length</span><b id="rangeLen">— cm</b><span>Slices</span
 									><b id="rangeSlices">—</b>
 								</div>
 								<div class="btnrow">
-									<button class="btn primary" id="btnScan" disabled>Start Scan</button>
-									<button class="btn warn" id="btnStop" disabled>Stop</button>
+									<button class="btn primary" id="btnScan" disabled data-cs="5c">Start Scan</button>
+									<button class="btn warn" id="btnStop" disabled data-cs="6a">Stop</button>
 								</div>
 							</div>
 
 							<div>
-								<div class="sec-t">Window / Level</div>
-								<div class="grid3" id="wlGrid"></div>
-								<div class="rangefield" style="margin-top: 9px">
+								<div class="sec-t" data-cs="6b">Window / Level</div>
+								<div class="grid3" id="wlGrid" data-cs="6b"></div>
+								<div class="rangefield" style="margin-top: 9px" data-cs="6c">
 									<div class="slab">Window (WW)<b id="wwLbl">400</b></div>
 									<input type="range" id="wwSlider" min="20" max="4000" value="400" />
 								</div>
-								<div class="rangefield">
+								<div class="rangefield" data-cs="6c">
 									<div class="slab">Level (WL)<b id="wlLbl">40</b></div>
 									<input type="range" id="wlSlider" min="-1200" max="1600" value="40" />
 								</div>
-								<div class="wl-actions">
+								<div class="wl-actions" data-cs="6d">
 									<button type="button" id="btnAutoWindow">Auto Contrast</button
 									><button type="button" id="btnResetWindow">Reset Protocol W/L</button>
 								</div>
-								<div class="wl-hint">
+								<div class="wl-hint" data-cs="6e">
 									<b>Interactive W/L:</b> drag directly on the axial image — horizontal changes
 									window width; vertical changes window level. Double-click the image to restore the
 									protocol preset.
@@ -1456,15 +1617,17 @@
 
 							<div>
 								<div class="sec-t">Patient Positioning</div>
-								<div class="slab" style="margin-bottom: 5px">Couch longitudinal (in/out)</div>
-								<div class="minibtns" style="margin-bottom: 7px">
+								<div class="slab" style="margin-bottom: 5px" data-cs="3a">
+									Couch longitudinal (in/out)
+								</div>
+								<div class="minibtns" style="margin-bottom: 7px" data-cs="3a">
 									<button class="mb" data-couch="z-1">In ◄</button>
 									<button class="mb" id="couchZval" disabled style="cursor: default; opacity: 1">
 										Z 0.0
 									</button>
 									<button class="mb" data-couch="z1">► Out</button>
 								</div>
-								<div class="grid2" style="margin-bottom: 7px">
+								<div class="grid2" style="margin-bottom: 7px" data-cs="3b">
 									<div class="minibtns">
 										<button class="mb" data-couch="y1">Up</button
 										><button class="mb" data-couch="y-1">Dn</button>
@@ -1474,7 +1637,7 @@
 										><button class="mb" data-couch="x1">Lat ►</button>
 									</div>
 								</div>
-								<button class="btn" id="btnSetIso" style="margin-bottom: 9px">
+								<button class="btn" id="btnSetIso" style="margin-bottom: 9px" data-cs="3c">
 									Align Lasers &amp; Set Isocenter
 								</button>
 								<label class="toggle" style="margin-bottom: 8px"

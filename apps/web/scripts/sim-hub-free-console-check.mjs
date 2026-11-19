@@ -43,13 +43,15 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkView, createNoScrollCollector } from './lib/no-scroll.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.resolve(HERE, '..');
 const ARCADE = path.join(WEB, 'arcade');
 const STATIC = path.join(WEB, 'static/arcade');
 const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright');
-const VIEW = { width: 1280, height: 800 };
+const VIEW = checkView({ width: 1280, height: 800 });
+const noScroll = createNoScrollCollector();
 
 function setupError(msg) {
 	console.error(`FREE CONSOLE CHECK setup error: ${msg}`);
@@ -277,6 +279,8 @@ async function openDesk(kind, [x, z], prompt, pagePath) {
 		url.searchParams.get('view') === 'console' && !url.searchParams.has('scenario'),
 		`the panel holds the ${kind} console in the free scenario (${frame.url()})`
 	);
+	await noScroll.scan(page, `the center, ${kind} panel open`);
+	await noScroll.scan(frame, `${kind} console, on opening`);
 	return frame;
 }
 
@@ -446,6 +450,7 @@ async function playLinac() {
 		`the LINAC console is ready in the free scenario (${ready.scenario})`
 	);
 	const click = async (sel) => {
+		await noScroll.scan(frame, `before clicking ${sel}`);
 		await frame.locator(sel).first().click();
 		await sleep(120);
 	};
@@ -466,6 +471,7 @@ async function playLinac() {
 	// ---------- Patient Setup, from the chart's workflow tabs ----------
 	await workflow('setup');
 	await frame.locator('#immobilizationVerify').waitFor({ state: 'visible' });
+	await noScroll.scan(frame, 'Patient Setup, on opening');
 	await dragDevices(frame);
 	for (const id of ['immoPositionCheck', 'immoIndexCheck', 'immoPrepCheck'])
 		if (await frame.locator(`#${id}`).count()) await click(`#${id}`);
@@ -476,6 +482,7 @@ async function playLinac() {
 	// ---------- image guidance ----------
 	await workflow('igrt');
 	await frame.locator('#igrtNewSetup').waitFor({ state: 'visible' });
+	await noScroll.scan(frame, 'image guidance, on opening');
 	await click('#igrtNewSetup');
 	await consoleKey('consoleKV');
 	n = await eventCount();
@@ -511,6 +518,7 @@ async function playLinac() {
 	// ---------- delivery: AP, then PA after Move to field ----------
 	await workflow('delivery');
 	await frame.locator('#rtv2EnableBeam').waitFor({ state: 'visible' });
+	await noScroll.scan(frame, 'delivery, on opening');
 	for (const [index, field, gantry] of [
 		[0, 'AP', 0],
 		[1, 'PA', 180]
@@ -518,6 +526,7 @@ async function playLinac() {
 		if (index > 0) {
 			await click(`#rtv2dFieldList .rtv2d-field-row[data-index="${index}"]`);
 			await ev(() => (window.__gantry = []));
+			await noScroll.scan(frame, 'delivery, before holding Move to field');
 			const hold = frame.locator('#consoleMoveToField');
 			await hold.scrollIntoViewIfNeeded();
 			const box = await hold.boundingBox();
@@ -559,6 +568,7 @@ async function playLinac() {
 	);
 	await click('#rtv2dActionRecord');
 	await frame.locator('#chargeTreatmentCode').waitFor({ state: 'visible' });
+	await noScroll.scan(frame, 'charge capture, on opening');
 	// Michael Carter's 3D-CRT AP/PA: CPT 77407 (Level 2), its image guidance bundled
 	await frame.locator('#chargeTreatmentCode').selectOption('77407');
 	await frame.locator('#chargeIgrtHandling').selectOption('bundled');
@@ -645,6 +655,7 @@ async function playCt() {
 	// and the room follows from the console's first change)
 	const rest = await ev(() => window.__NPC.ctRoom.frame.position.x);
 	const click = async (sel) => {
+		await noScroll.scan(frame, `before clicking ${sel}`);
 		await frame.locator(sel).first().click();
 		await sleep(120);
 	};
@@ -655,6 +666,7 @@ async function playCt() {
 	// techniqueTarget)
 	await click('#protoGrid .chip[data-k="prostate"]');
 	await click('[data-habitus="large"]');
+	await noScroll.scan(frame, 'CT, before setting the technique');
 	await frame.locator('#kvSelect').selectOption('140');
 	await frame.locator('#masInput').fill('310');
 	await frame.locator('#masInput').dispatchEvent('change');
@@ -717,9 +729,18 @@ try {
 	await playLinac();
 	await playCt();
 	expect(pageErrors.length === 0, `no page errors: ${pageErrors.join(' | ')}`);
-	console.log(
-		`FREE CONSOLE CHECK PASS: a free LINAC fraction and a free CT scan, each recorded once, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
-	);
+	const scrolled = noScroll.fail();
+	if (scrolled) {
+		console.log(scrolled);
+		process.exitCode = 1;
+	} else {
+		console.log(
+			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls`
+		);
+		console.log(
+			`FREE CONSOLE CHECK PASS: a free LINAC fraction and a free CT scan, each recorded once, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
+		);
+	}
 } catch (err) {
 	console.log(
 		`FREE CONSOLE CHECK FAIL: ${err instanceof CheckFailure ? err.message : (err?.stack ?? err)}`
