@@ -47,6 +47,20 @@
 	// message is only accepted while it is null and status is 'playing').
 	let reportedScore = $state<number | null>(null);
 
+	// Full screen: the iframe itself goes full screen (the game keeps its own document, so
+	// keyboard focus and pointer lock work as in a normal tab). Hidden when the API is missing.
+	let frame: HTMLIFrameElement | undefined = $state();
+	let isFullscreen = $state(false);
+	const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled === true;
+
+	function toggleFullscreen() {
+		if (document.fullscreenElement) {
+			void document.exitFullscreen();
+			return;
+		}
+		void frame?.requestFullscreen().then(() => frame?.focus());
+	}
+
 	onMount(async () => {
 		try {
 			const attempt = await startAttempt(post, activityId);
@@ -109,9 +123,13 @@
 </script>
 
 <svelte:window onmessage={onMessage} />
+<svelte:document onfullscreenchange={() => (isFullscreen = document.fullscreenElement === frame)} />
 
 <header class="player-bar">
 	<h1>{snapshot.activity.title}</h1>
+	{#if canFullscreen && status !== 'error' && status !== 'done'}
+		<Button onclick={toggleFullscreen}>{isFullscreen ? 'Exit full screen' : 'Full screen'}</Button>
+	{/if}
 </header>
 
 {#if status === 'error'}
@@ -147,6 +165,9 @@
 		}`}
 		title={snapshot.activity.title}
 		class="arcade-frame"
+		allow="fullscreen"
+		allowfullscreen
+		bind:this={frame}
 	></iframe>
 	{#if status === 'submitting'}<p>Saving your score…</p>{/if}
 {/if}
@@ -166,6 +187,10 @@
 		}
 	}
 	.player-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
 		margin-bottom: var(--space-3);
 	}
 	.player-bar h1 {
