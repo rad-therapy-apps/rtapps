@@ -73,6 +73,13 @@ export function initConsoleLayout() {
 		ctl.appendChild(body);
 		bodies[n] = body;
 	}
+	// the habitus box's footnote is a block of its own (2a1), so a short frame can page it apart from
+	// the cue and the size buttons
+	const rule = ctl.querySelector<HTMLElement>('.habitus-box .tech-rule');
+	if (rule) {
+		rule.dataset.cs = '2a1';
+		rule.parentElement?.after(rule);
+	}
 	// the marked controls, a block per mark, in mark order (the HTML's order differs: positioning
 	// comes after window / level there)
 	const marks = new Map<string, HTMLElement[]>();
