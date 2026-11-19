@@ -36,7 +36,7 @@ import {
 import { consoleShell, shellSettled } from './console-patch';
 import { installConsoleKeys } from './console-keys';
 import { TREATMENT_CASES } from './delivery/cases';
-import { renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
+import { holdTreatmentDelivery, renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
 import { activeIGRTTolerances } from './delivery/stereotactic';
 import { getIGRTApplied, getIGRTResidual } from './linac-igrt';
 import {
@@ -157,13 +157,18 @@ function openWorkspace(workspace: LinacWorkspace) {
 	consoleShell.launchWorkflow(workspace);
 }
 
-/** The door interlock and the console's door readouts follow the center's vault door. */
+/** The door interlock and the console's door readouts follow the center's vault door. A door
+    opening while a field is delivering holds the beam at once, as the delivery loop's own check
+    would on its next frame, which never comes while a hidden panel's frames are paused. */
 function applyRoom(doorClosed: boolean, staffInVault: boolean) {
 	consoleRoom.doorClosed = doorClosed;
 	consoleRoom.staffInVault = staffInVault;
 	S.vaultDoorTarget = S.vaultDoorProgress = doorClosed ? 0 : 1;
+	const d = S.treatmentDelivery;
+	if (!doorClosed && d.delivering && !d.held) holdTreatmentDelivery('Vault door closed');
 	syncOperatorConsole();
 	renderTreatmentDeliveryPanel();
+	if (settled) tick();
 }
 
 function onMessage(ev: MessageEvent) {
