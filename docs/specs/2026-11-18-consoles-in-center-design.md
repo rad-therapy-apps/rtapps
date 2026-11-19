@@ -99,9 +99,11 @@ console records 'sim-linac-fraction' as it does today. The center records 'sim-c
   ('Console left'), stops any held key or Move to field, and posts its state. Reopening resumes
   nothing: the learner presses Resume Beam.
 - `?scenario=tutorial` replaces the queue with the three Tutorial entries in
-  `TUTORIAL_PATIENTS`. Jordan's case copies the first treatment case (3D-CRT prostate AP/PA, 6 MV,
-  Vac-Lok and knee support) with Jordan's identity, and today's check images show the
-  `TUTORIAL_SHIFT_MM` (4 mm) correction. Every screen shows Jordan, with no demo names left over.
+  `TUTORIAL_PATIENTS`. Jordan's case copies the whole-brain treatment case, found by its site
+  (lateral opposed: Right Lateral at gantry 270 and Left Lateral at 90, 6 MV, head first supine,
+  short head mask and headrest, MV image pair), with Jordan's identity, and today's check images
+  show the `TUTORIAL_SHIFT_MM` (4 mm, vertical) correction. The machine starts at the fields' jaws
+  and MLC. Every screen shows Jordan, with no demo names left over.
   Opening a look-alike's chart is refused with a `mistake`.
 
 ### 4. CT console mode (ct-suite)
