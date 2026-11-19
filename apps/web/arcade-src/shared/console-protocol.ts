@@ -49,8 +49,10 @@ export const TUTORIAL_SHIFT_MM = 4;
 
 /* ===== LINAC ===== */
 
-/** The LINAC console's workspaces the center can open it at. */
-export type LinacWorkspace = 'queue' | 'setup' | 'igrt' | 'delivery';
+/** The LINAC console's workspaces the center can open it at; both sides check messages against
+    this list. */
+export const LINAC_WORKSPACES = ['queue', 'setup', 'igrt', 'delivery'] as const;
+export type LinacWorkspace = (typeof LINAC_WORKSPACES)[number];
 
 /** The LINAC as the console shows it right now, mid-move values while a motion runs (not the
     target). Angles in degrees (IEC 61217, 0..360), couch translations in cm from the couch's

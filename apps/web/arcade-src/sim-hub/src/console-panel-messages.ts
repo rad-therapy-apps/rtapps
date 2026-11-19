@@ -8,6 +8,7 @@ import {
 	CONSOLE_SCENARIO_PARAM,
 	CONSOLE_VIEW_PARAM,
 	CONSOLE_VIEW_VALUE,
+	LINAC_WORKSPACES,
 	type ConsoleKind,
 	type ConsoleScenario,
 	type CtPose,
@@ -55,8 +56,8 @@ const isBag = (v: unknown): v is Bag => typeof v === 'object' && v !== null;
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
 const isStr = (v: unknown): v is string => typeof v === 'string';
-const WORKSPACES: readonly LinacWorkspace[] = ['queue', 'setup', 'igrt', 'delivery'];
-const isWorkspace = (v: unknown): v is LinacWorkspace => WORKSPACES.includes(v as LinacWorkspace);
+const isWorkspace = (v: unknown): v is LinacWorkspace =>
+	LINAC_WORKSPACES.includes(v as LinacWorkspace);
 
 const LINAC_NUMBERS = [
 	'gantry',

@@ -8,6 +8,7 @@ import {
 	CONSOLE_SCENARIO_PARAM,
 	CONSOLE_VIEW_PARAM,
 	CONSOLE_VIEW_VALUE,
+	LINAC_WORKSPACES,
 	type CenterToLinacMessage,
 	type ConsoleScenario,
 	type LinacPose,
@@ -31,10 +32,8 @@ export function consoleViewFromSearch(search: string): ConsoleView {
 	};
 }
 
-const WORKSPACES: readonly LinacWorkspace[] = ['queue', 'setup', 'igrt', 'delivery'];
-
 export function isLinacWorkspace(value: unknown): value is LinacWorkspace {
-	return WORKSPACES.includes(value as LinacWorkspace);
+	return LINAC_WORKSPACES.includes(value as LinacWorkspace);
 }
 
 /** Whether a message event comes from the center: sent by the parent window, from our origin. */

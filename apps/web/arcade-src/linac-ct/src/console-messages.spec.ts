@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
+import { LINAC_WORKSPACES } from '../../shared/console-protocol';
 import {
 	beamRefusal,
 	consoleViewFromSearch,
 	correctionApplied,
 	fromCenter,
 	interlockRefusal,
+	isLinacWorkspace,
 	parseCenterMessage,
 	poseFromReadout,
 	samePose,
@@ -69,6 +71,13 @@ describe('which messages the console accepts', () => {
 			parseCenterMessage({ type: 'rtapps-linac-room', doorClosed: 'no', staffInVault: false })
 		).toBeNull();
 		expect(parseCenterMessage({ type: 'rtapps-linac-room', doorClosed: true })).toBeNull();
+	});
+
+	it('takes the workspaces from the shared contract list, and nothing else', () => {
+		expect(LINAC_WORKSPACES).toEqual(['queue', 'setup', 'igrt', 'delivery']);
+		for (const w of LINAC_WORKSPACES) expect(isLinacWorkspace(w)).toBe(true);
+		for (const w of ['chart', 'machine', 'ois', '', null, undefined, 0])
+			expect(isLinacWorkspace(w)).toBe(false);
 	});
 
 	it("refuses anything else, including the console's own outgoing messages", () => {
