@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { LINAC_WORKSPACES } from '../../shared/console-protocol';
 import {
 	beamRefusal,
 	clearsRefusal,
@@ -6,6 +7,7 @@ import {
 	correctionApplied,
 	fromCenter,
 	interlockRefusal,
+	isLinacWorkspace,
 	parseCenterMessage,
 	poseFromReadout,
 	samePose,
@@ -74,6 +76,27 @@ describe('which messages the console accepts', () => {
 			parseCenterMessage({ type: 'rtapps-linac-room', doorClosed: 'no', staffInVault: false })
 		).toBeNull();
 		expect(parseCenterMessage({ type: 'rtapps-linac-room', doorClosed: true })).toBeNull();
+	});
+
+	it('parses the panel message only with a boolean open, keeping only that field', () => {
+		expect(parseCenterMessage({ type: 'rtapps-linac-panel', open: false, extra: 1 })).toEqual({
+			type: 'rtapps-linac-panel',
+			open: false
+		});
+		expect(parseCenterMessage({ type: 'rtapps-linac-panel', open: true })).toEqual({
+			type: 'rtapps-linac-panel',
+			open: true
+		});
+		for (const open of [undefined, 0, 1, 'false', null])
+			expect(parseCenterMessage({ type: 'rtapps-linac-panel', open })).toBeNull();
+		expect(parseCenterMessage({ type: 'rtapps-linac-panel' })).toBeNull();
+	});
+
+	it('takes the workspaces from the shared contract list, and nothing else', () => {
+		expect(LINAC_WORKSPACES).toEqual(['queue', 'setup', 'igrt', 'delivery']);
+		for (const w of LINAC_WORKSPACES) expect(isLinacWorkspace(w)).toBe(true);
+		for (const w of ['chart', 'machine', 'ois', '', null, undefined, 0])
+			expect(isLinacWorkspace(w)).toBe(false);
 	});
 
 	it("refuses anything else, including the console's own outgoing messages", () => {

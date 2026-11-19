@@ -30,8 +30,8 @@ in `apps/web/arcade-src/shared/console-protocol.ts`:
 
 - console → center: `ready`, a machine pose stream (`rtapps-linac-state`, `rtapps-ct-state`, on
   change, at most 30 a second), and events (`rtapps-linac-event`, `rtapps-ct-complete`).
-- center → console: which workspace to show (`rtapps-linac-open`) and the vault door state
-  (`rtapps-linac-room`).
+- center → console: which workspace to show (`rtapps-linac-open`), the vault door state
+  (`rtapps-linac-room`) and whether the panel shows the console (`rtapps-linac-panel`).
 - Both sides accept a message only from the expected window (`source`) and from their own origin.
 
 Inside the center, `console-panel.ts` checks each message and emits it on `console-bus.ts`
@@ -68,7 +68,7 @@ console records 'sim-linac-fraction' as it does today. The center records 'sim-c
   radiation sign go up. The monitors show the patient on the couch: Jordan Ellis in the Tutorial.
 - `vault-linac.ts` follows `linacPose`: gantry, collimator, couch angle and translations, jaws,
   kV/EPID arms, beam and lasers. A lying patient moves with the couch top. The pose resets when the
-  treatment journey resets. The LINAC Control desk monitors (equipment.ts CCTV) show the new
+  treatment journey resets: to the loaded LINAC console's last pose, or parked when none is loaded. The LINAC Control desk monitors (equipment.ts CCTV) show the new
   vault without changes.
 
 ### 2. CT room look and drivable scanner (sim-hub)
@@ -94,7 +94,10 @@ console records 'sim-linac-fraction' as it does today. The center records 'sim-c
   chart changes, and `rtapps-linac-event` for each event in the protocol. Every refused action
   (interlock, wrong pick, step out of order) also posts a `mistake`.
 - It obeys `rtapps-linac-open` and reads `rtapps-linac-room`: the vault door interlock follows
-  `doorClosed`.
+  `doorClosed`. On `rtapps-linac-panel` with `open: false` (the panel closed: the therapist has left
+  the console, and a hidden page gets no animation frames) it holds a delivering field at once
+  ('Console left'), stops any held key or Move to field, and posts its state. Reopening resumes
+  nothing: the learner presses Resume Beam.
 - `?scenario=tutorial` replaces the queue with the three Tutorial entries in
   `TUTORIAL_PATIENTS`. Jordan's case copies the first treatment case (3D-CRT prostate AP/PA, 6 MV,
   Vac-Lok and knee support) with Jordan's identity, and today's check images show the
@@ -121,7 +124,8 @@ console records 'sim-linac-fraction' as it does today. The center records 'sim-c
 - The LINAC panel has a strip of Vault 1's three live camera feeds, rendered by the center into the
   panel's camera slots straight from its own cameras, no pixel copies. The CT panel has one feed of
   the CT room.
-- It sends `rtapps-linac-room` on open and whenever the vault door or the people inside change.
+- It sends `rtapps-linac-room` on open and whenever the vault door or the people inside change,
+  and `rtapps-linac-panel` on the console's ready, on open and on close.
 - The LINAC Control and CT doors no longer leave the hub; they open like other doors, and the
   `room-app-url.ts` door code goes. The Learning Commons door keeps its console emulator.
 - API for the Tutorial: `openConsole(kind, { workspace?, scenario? })`, `closeConsole()`,

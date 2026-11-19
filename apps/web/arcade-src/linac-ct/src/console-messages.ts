@@ -8,6 +8,7 @@ import {
 	CONSOLE_SCENARIO_PARAM,
 	CONSOLE_VIEW_PARAM,
 	CONSOLE_VIEW_VALUE,
+	LINAC_WORKSPACES,
 	type CenterToLinacMessage,
 	type ConsoleScenario,
 	type LinacPose,
@@ -50,10 +51,8 @@ export function workspaceClearsRefusal(
 	return before !== now && sinceMs > REFUSAL_WORKSPACE_GRACE_MS;
 }
 
-const WORKSPACES: readonly LinacWorkspace[] = ['queue', 'setup', 'igrt', 'delivery'];
-
 export function isLinacWorkspace(value: unknown): value is LinacWorkspace {
-	return WORKSPACES.includes(value as LinacWorkspace);
+	return LINAC_WORKSPACES.includes(value as LinacWorkspace);
 }
 
 /** Whether a message event comes from the center: sent by the parent window, from our origin. */
@@ -77,6 +76,8 @@ export function parseCenterMessage(data: unknown): CenterToLinacMessage | null {
 		return typeof d.doorClosed === 'boolean' && typeof d.staffInVault === 'boolean'
 			? { type: d.type, doorClosed: d.doorClosed, staffInVault: d.staffInVault }
 			: null;
+	if (d.type === 'rtapps-linac-panel')
+		return typeof d.open === 'boolean' ? { type: d.type, open: d.open } : null;
 	return null;
 }
 

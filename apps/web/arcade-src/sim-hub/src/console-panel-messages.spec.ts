@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	consoleUrl,
 	gateMessage,
+	linacPanel,
 	linacRoom,
 	messageFrom,
 	readCtMessage,
@@ -310,6 +311,15 @@ describe('linacRoom and sameRoom', () => {
 		expect(sameRoom(shut, linacRoom(0.5, null))).toBe(false);
 		expect(sameRoom(shut, linacRoom(0, 'vault1'))).toBe(false);
 		expect(sameRoom(null, shut)).toBe(false);
+	});
+});
+
+describe('linacPanel', () => {
+	it('tells the LINAC console it is shown only while the panel shows it', () => {
+		expect(linacPanel('linac')).toEqual({ type: 'rtapps-linac-panel', open: true });
+		// closed, or showing the CT console instead: the therapist has left the LINAC console
+		expect(linacPanel(null)).toEqual({ type: 'rtapps-linac-panel', open: false });
+		expect(linacPanel('ct')).toEqual({ type: 'rtapps-linac-panel', open: false });
 	});
 });
 

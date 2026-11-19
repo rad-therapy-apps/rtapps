@@ -1,18 +1,21 @@
 /* The console panel's message rules (docs/specs/2026-11-18-consoles-in-center-design.md, part 5):
    the URL each console opens at, which console a message came from (the window that sent it and
    its origin, nothing else), the shape checks every console message passes before console-panel.ts
-   emits it on console-bus.ts, which messages wait for the console's ready, the vault state the
-   center sends the LINAC console, and when a finished CT scan is recorded. The shapes are the contract in shared/console-protocol.ts. Free of
-   scene and DOM imports so it is unit tested in Node (console-panel-messages.spec.ts). */
+   emits it on console-bus.ts, which messages wait for the console's ready, the vault state and the
+   panel state the center sends the LINAC console, and when a finished CT scan is recorded. The
+   shapes are the contract in shared/console-protocol.ts. Free of scene and DOM imports so it is
+   unit tested in Node (console-panel-messages.spec.ts). */
 import {
 	CONSOLE_SCENARIO_PARAM,
 	CONSOLE_VIEW_PARAM,
 	CONSOLE_VIEW_VALUE,
+	LINAC_WORKSPACES,
 	type ConsoleKind,
 	type ConsoleScenario,
 	type CtPose,
 	type CtToCenterMessage,
 	type LinacEvent,
+	type LinacPanelMsg,
 	type LinacPose,
 	type LinacRoomMsg,
 	type LinacToCenterMessage,
@@ -55,8 +58,8 @@ const isBag = (v: unknown): v is Bag => typeof v === 'object' && v !== null;
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
 const isStr = (v: unknown): v is string => typeof v === 'string';
-const WORKSPACES: readonly LinacWorkspace[] = ['queue', 'setup', 'igrt', 'delivery'];
-const isWorkspace = (v: unknown): v is LinacWorkspace => WORKSPACES.includes(v as LinacWorkspace);
+const isWorkspace = (v: unknown): v is LinacWorkspace =>
+	LINAC_WORKSPACES.includes(v as LinacWorkspace);
 
 const LINAC_NUMBERS = [
 	'gantry',
@@ -183,6 +186,12 @@ export function linacRoom(doorProgress: number, playerRoom: string | null): Lina
 
 export function sameRoom(a: LinacRoomMsg | null, b: LinacRoomMsg): boolean {
 	return !!a && a.doorClosed === b.doorClosed && a.staffInVault === b.staffInVault;
+}
+
+/** Whether the panel shows the LINAC console, `shown` being the console the panel shows (null
+    while it is closed): open only while it is the LINAC's. */
+export function linacPanel(shown: ConsoleKind | null): LinacPanelMsg {
+	return { type: 'rtapps-linac-panel', open: shown === 'linac' };
 }
 
 /** A finished scan records 'sim-ct-scan' in the free scenario only, once per scan key (as the
