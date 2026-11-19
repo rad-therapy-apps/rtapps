@@ -58,6 +58,7 @@ import { isFixedElectronField } from './delivery/case-setup';
 import { renderClinicalIGRT } from './linac-igrt';
 import { saveGameState } from './game';
 import { setTextById, syncOperatorConsole, wrap360 } from './main';
+import { CONSOLE, consoleMistake, consoleRoom } from './console-hooks';
 
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return S.clearanceOverrideState.byField?.[idx] || null;
@@ -262,6 +263,13 @@ export function getDeliveryReadiness() {
 		ok: !!S.activeTreatmentCase,
 		detail: S.activeTreatmentCase ? S.activeTreatmentCase.siteLabel : 'No case'
 	});
+	// console mode: the center's Vault 1 door (rtapps-linac-room) is the door interlock
+	if (CONSOLE.console)
+		checks.push({
+			name: 'Vault door closed',
+			ok: consoleRoom.doorClosed,
+			detail: consoleRoom.doorClosed ? 'Door secure' : 'Close the vault door'
+		});
 	if (immobilizationRequired())
 		checks.push({
 			name: 'Immobilization / indexing verified',
@@ -1162,6 +1170,7 @@ export function setSafetyHUD(blocked, reason = '') {
 }
 
 function showCollisionBlocked(reason) {
+	consoleMistake('collision', `Collision blocked · ${reason}`);
 	setSafetyHUD(true, reason);
 	setPendantLCD('COLLISION INTERLOCK', `BLOCKED · ${reason}`);
 	const b = document.getElementById('collisionBanner');
@@ -1225,6 +1234,7 @@ export function setPendantMotionArmed(on) {
 export function requirePendantMotion(controlName) {
 	if (S.pendantMotionArmed || S.consoleMotionArmed) return true;
 	setPendantLCD(controlName || 'MOTION', 'LOCKED · enable motion first');
+	consoleMistake('motion-locked', 'Motion is locked. Press Motion Enable first.');
 	if (S.currentRoomView === 'control' && consoleMotionEnable?.animate)
 		consoleMotionEnable.animate(
 			[

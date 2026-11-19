@@ -1,0 +1,86 @@
+import { describe, it, expect } from 'vitest';
+import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
+import { TREATMENT_CASES } from './delivery/cases';
+import {
+	buildTutorialCases,
+	isTutorialPatient,
+	isTutorialSessionKey,
+	JORDAN_QUEUE_INDEX,
+	TUTORIAL_DAILY_ERROR,
+	tutorialQueueDetail
+} from './tutorial-cases';
+
+const base = TREATMENT_CASES[0];
+
+describe('the console tutorial cases', () => {
+	it('builds exactly the three tutorial entries, look-alike first as in the storyboard', () => {
+		const cases = buildTutorialCases(base);
+		expect(cases.map((c) => [c.patient, c.mrn])).toEqual([
+			['Ellis, Jordan', TUTORIAL_PATIENTS.jordanLookalike.mrn],
+			['Ellis, Jordan', TUTORIAL_PATIENTS.jordan.mrn],
+			['Ellis, Jody', TUTORIAL_PATIENTS.jody.mrn]
+		]);
+		expect(cases[JORDAN_QUEUE_INDEX].mrn).toBe(TUTORIAL_PATIENTS.jordan.mrn);
+	});
+
+	it("copies the first treatment case's plan for Jordan: 3D-CRT prostate AP/PA, 6 MV, Vac-Lok and knee support", () => {
+		const jordan = buildTutorialCases(base)[JORDAN_QUEUE_INDEX];
+		expect(base.patient).toBe('Michael Carter');
+		expect(jordan.technique).toBe('3DCRT AP/PA');
+		expect(jordan.energy).toBe('6 MV');
+		expect(jordan.siteLabel).toBe('Prostate');
+		expect(jordan.fields.map((f) => [f.name, f.geometry.gantry, f.mu])).toEqual([
+			['AP', '0°', 185],
+			['PA', '180°', 185]
+		]);
+		expect(jordan.immobilization.required).toEqual(['vacLok', 'kneeSupport']);
+		expect(jordan.planned).toEqual(base.planned);
+	});
+
+	it('gives only Jordan the fixed daily error, whose correction is TUTORIAL_SHIFT_MM long', () => {
+		const cases = buildTutorialCases(base);
+		const e = cases[JORDAN_QUEUE_INDEX].dailySetupError;
+		expect(e).toEqual(TUTORIAL_DAILY_ERROR);
+		expect(Math.hypot(e.lat, e.lng, e.vrt)).toBe(TUTORIAL_SHIFT_MM);
+		expect([e.roll, e.pitch, e.yaw]).toEqual([0, 0, 0]);
+		expect(cases.filter((c) => c.dailySetupError)).toHaveLength(1);
+	});
+
+	it('leaves the base case and the shared plan objects untouched', () => {
+		const before = JSON.stringify(base);
+		const cases = buildTutorialCases(base);
+		cases[JORDAN_QUEUE_INDEX].fields[0].mu = 1;
+		cases[JORDAN_QUEUE_INDEX].immobilization.required.push('headMask');
+		expect(JSON.stringify(base)).toBe(before);
+		expect(base.dailySetupError).toBeUndefined();
+	});
+
+	it("shows each entry's date of birth, site, vault and time so the look-alikes can be told apart", () => {
+		expect(tutorialQueueDetail(TUTORIAL_PATIENTS.jordan.mrn)).toBe(
+			'Born March 14, 1968 · Prostate · Vault 1 · 9:00'
+		);
+		expect(tutorialQueueDetail(TUTORIAL_PATIENTS.jordanLookalike.mrn)).toBe(
+			'Born October 2, 1985 · Prostate · Vault 1 · 9:40'
+		);
+		expect(tutorialQueueDetail(TUTORIAL_PATIENTS.jody.mrn)).toBe(
+			'Born March 14, 1968 · Left Breast · Vault 2 · 9:00'
+		);
+		expect(tutorialQueueDetail(base.mrn)).toBeNull();
+	});
+
+	it("picks out the tutorial patients' saved R&V sessions only", () => {
+		const jordan = buildTutorialCases(base)[JORDAN_QUEUE_INDEX];
+		expect(isTutorialSessionKey(`${jordan.mrn}|${jordan.fraction}`)).toBe(true);
+		expect(isTutorialSessionKey(`${TUTORIAL_PATIENTS.jody.mrn}|1 / 1`)).toBe(true);
+		expect(isTutorialSessionKey(`${base.mrn}|${base.fraction}`)).toBe(false);
+		expect(isTutorialSessionKey(`${TUTORIAL_PATIENTS.jordan.mrn}X|1`)).toBe(false);
+		expect(isTutorialSessionKey('')).toBe(false);
+	});
+
+	it('lets only Jordan be checked in and charted', () => {
+		expect(isTutorialPatient(TUTORIAL_PATIENTS.jordan.mrn)).toBe(true);
+		expect(isTutorialPatient(TUTORIAL_PATIENTS.jordanLookalike.mrn)).toBe(false);
+		expect(isTutorialPatient(TUTORIAL_PATIENTS.jody.mrn)).toBe(false);
+		expect(isTutorialPatient(base.mrn)).toBe(false);
+	});
+});

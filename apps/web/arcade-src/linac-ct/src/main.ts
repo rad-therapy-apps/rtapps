@@ -284,7 +284,12 @@ import {
 	updateMotionAnimation,
 	verifyMotionManagement
 } from './delivery/motion';
-import { persistOISSession, renderOISPanel, signOffOISRecord } from './delivery/ois';
+import {
+	forgetOISSessions,
+	persistOISSession,
+	renderOISPanel,
+	signOffOISRecord
+} from './delivery/ois';
 import {
 	adaptiveRequired,
 	advanceAdaptiveFraction,
@@ -378,6 +383,9 @@ import {
 	updateUI
 } from './game';
 import type { TreatmentField } from './delivery/types';
+import { CONSOLE } from './console-hooks';
+import { startConsoleMode } from './console-mode';
+import { buildTutorialCases, isTutorialSessionKey, JORDAN_QUEUE_INDEX } from './tutorial-cases';
 
 // RTApps (#77 phase 2 task 19): consolidated `declare global` for this app's window
 // globals — folds in the interim per-module declarations previously carried by
@@ -494,6 +502,13 @@ TREATMENT_CASES.forEach((c) => {
 		);
 	}
 });
+// Console mode, tutorial scenario: the queue holds only the Tutorial's three entries, built from the
+// first case now that its setup refinements are in (tutorial-cases.ts)
+if (CONSOLE.scenario === 'tutorial') {
+	TREATMENT_CASES.splice(0, TREATMENT_CASES.length, ...buildTutorialCases(TREATMENT_CASES[0]));
+	// and every play starts with a fresh R&V record, not the last play's
+	forgetOISSessions(isTutorialSessionKey);
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- pre-existing dead code, tracked in #77 phase 2 report
 window.clinicalIGRTCouchShift = function (axis, delta) {
@@ -888,6 +903,8 @@ export function animate() {
 			h.scale.setScalar(1 + 0.06 * Math.sin(t));
 		}
 	});
+	// console mode: the center draws Vault 1, so the machine logic above runs without a vault view
+	if (CONSOLE.console) return;
 	if (S.renderer && S.scene && S.camera) S.renderer.render(S.scene, S.camera);
 	if (S.scene && cctvFeeds.length) updateCCTVFeeds();
 }
@@ -1608,7 +1625,8 @@ igrtAcquire?.addEventListener('click', acquireClinicalIGRT);
 igrtVerify?.addEventListener('click', verifyClinicalIGRT);
 setPendantMotionArmed(false);
 syncFundamentalReadouts();
-loadTreatmentCase(0);
+// the tutorial loads Jordan's case, so no screen shows another patient before a chart is opened
+loadTreatmentCase(CONSOLE.scenario === 'tutorial' ? JORDAN_QUEUE_INDEX : 0);
 setSafetyHUD(false);
 syncOperatorConsole();
 (
@@ -2942,3 +2960,6 @@ window.RTAppsLinacMirrorBridge = {
 		}
 	}
 };
+
+// Console mode (?view=console): the app runs in the center's console panel (console-mode.ts)
+if (CONSOLE.console) startConsoleMode();

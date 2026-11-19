@@ -179,6 +179,16 @@ export interface TreatmentCase {
 	setupBodyY?: number;
 	specialSetup?: SpecialSetupSpec;
 	adaptive?: AdaptiveSpec;
+	// A fixed daily setup error (mm / degrees) for New Daily Setup instead of a random one; only
+	// the console tutorial's case sets it (tutorial-cases.ts).
+	dailySetupError?: {
+		lat: number;
+		lng: number;
+		vrt: number;
+		roll: number;
+		pitch: number;
+		yaw: number;
+	};
 	// Legacy fallback shape read by getTreatmentFields() when `fields` is absent; never
 	// set on any of the 32 cases (dead code kept from before the `fields` array existed).
 	delivery?: { field?: string; mu?: number; doseRate?: number };

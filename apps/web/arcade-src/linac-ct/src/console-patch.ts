@@ -1,4 +1,20 @@
 import { readSide } from './side';
+import { CONSOLE, consoleEvent, consoleMistake } from './console-hooks';
+import { isTutorialPatient, tutorialQueueDetail, WRONG_PATIENT_MESSAGE } from './tutorial-cases';
+import { TREATMENT_CASES } from './delivery/cases';
+
+/** The shell's navigation for console mode (console-mode.ts), filled in below. */
+export const consoleShell = {
+	showHome: () => {},
+	showChart: () => {},
+	launchWorkflow: (kind: string) => void kind,
+	/** The open chart's queue value (its TREATMENT_CASES index), or null before any chart opens. */
+	openCase: (): string | null => null,
+	onChartOpened: (listener: () => void) => void listener
+};
+let settle: () => void;
+/** Resolves once the shell is built and its first landing on the queue is done. */
+export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 
 (function () {
 	'use strict';
@@ -40,6 +56,14 @@ import { readSide } from './side';
 	function queueSlot(i) {
 		return `#${String(i + 1).padStart(2, '0')}`;
 	}
+	const caseMrn = (value) => TREATMENT_CASES[Number(value)]?.mrn || '';
+	const chartOpenedListeners: (() => void)[] = [];
+	/** The console tutorial's queue refuses Jordan's look-alikes (tutorial-cases.ts). */
+	function queuePickAllowed(value, message) {
+		if (CONSOLE.scenario !== 'tutorial' || isTutorialPatient(caseMrn(value))) return true;
+		consoleMistake('wrong-patient', message);
+		return false;
+	}
 	function renderQueue() {
 		const host = $('rtv2QueueRows');
 		if (!host) return;
@@ -51,11 +75,13 @@ import { readSide } from './side';
 		host.innerHTML = opts
 			.map((item, i) => {
 				const parsed = splitLabel(item.label);
+				// the tutorial's entries show the date of birth, vault and time that tell them apart
+				const detail = tutorialQueueDetail(caseMrn(item.value)) || parsed.detail;
 				const isIn = checkedIn.has(item.value);
 				const isOpen = openCaseValue === item.value;
 				return `<div class="rtv2-queue-row ${isIn ? 'checked-in' : ''} ${isOpen ? 'active-patient' : ''}" data-case="${esc(item.value)}">
         <div class="rtv2-time">${queueSlot(i)}</div>
-        <div class="rtv2-qpatient"><b>${esc(parsed.name)}</b><span>${esc(parsed.detail)}</span></div>
+        <div class="rtv2-qpatient"><b>${esc(parsed.name)}</b><span>${esc(detail)}</span></div>
         <div class="rtv2-qstatus"><span class="rtv2-status-dot"></span>${isOpen ? 'In Treatment' : isIn ? 'Checked In' : 'Scheduled'}</div>
         <div class="rtv2-qactions">
           <button type="button" class="rtv2-checkin" data-value="${esc(item.value)}" ${isIn ? 'disabled' : ''}>${isIn ? 'Checked In' : 'Check In'}</button>
@@ -266,9 +292,13 @@ import { readSide } from './side';
 			syncMirror();
 			renderQueue();
 			const msg = $('rtv2ClinicalMessage');
+			// console mode has no ENTER VAULT: the player walks into Vault 1 in the center
 			if (msg)
-				msg.textContent =
-					'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; select ENTER VAULT when hands-on in-room setup is required.';
+				msg.textContent = CONSOLE.console
+					? 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; for hands-on setup at the couch, go into Vault 1.'
+					: 'Chart opened at the treatment console. Use the workflow and Machine / Imaging controls here; select ENTER VAULT when hands-on in-room setup is required.';
+			chartOpenedListeners.forEach((l) => l());
+			consoleEvent({ kind: 'chart-opened', mrn: caseMrn(value) });
 		}, 80);
 	}
 	function launchWorkflow(kind) {
@@ -322,11 +352,16 @@ import { readSide } from './side';
 			const check = (e.target as HTMLElement).closest<HTMLElement>('.rtv2-checkin');
 			const open = (e.target as HTMLElement).closest<HTMLButtonElement>('.rtv2-openchart');
 			if (check) {
+				if (!queuePickAllowed(check.dataset.value, WRONG_PATIENT_MESSAGE.checkIn)) return;
 				checkedIn.add(check.dataset.value);
 				renderQueue();
+				consoleEvent({ kind: 'checked-in', mrn: caseMrn(check.dataset.value) });
 				return;
 			}
 			if (open && !open.disabled) {
+				if (!queuePickAllowed(open.dataset.value, WRONG_PATIENT_MESSAGE.openChart)) return;
+				// console mode: the chart already open is shown again, not reloaded from scratch
+				if (CONSOLE.console && open.dataset.value === openCaseValue) return showChart();
 				openChart(open.dataset.value);
 			}
 		});
@@ -406,8 +441,12 @@ import { readSide } from './side';
 		syncRoomNav();
 		syncMachineControlStates();
 		const name = text('consoleActivePatient');
-		// the CT side's header never names the LINAC console's patient
-		$('rtv2HeaderPatient').textContent = side === 'ct' ? 'No patient open' : name;
+		// the CT side's header never names the LINAC console's patient, and the console tutorial's
+		// names nobody until a chart is open, so the queue gives nothing away
+		$('rtv2HeaderPatient').textContent =
+			side === 'ct' || (CONSOLE.scenario === 'tutorial' && openCaseValue === null)
+				? 'No patient open'
+				: name;
 		$('rtv2PatientName').textContent = name;
 		$('rtv2PatientSubtitle').textContent = text('consolePatientRefSubtitle');
 		$('rtv2MRN').textContent = text('consoleRefMRN');
@@ -915,8 +954,16 @@ import { readSide } from './side';
 		setTimeout(() => {
 			renderQueue();
 			enterLandingQueue();
+			settle();
 		}, 350);
 	}
+	Object.assign(consoleShell, {
+		showHome,
+		showChart,
+		launchWorkflow,
+		openCase: () => openCaseValue,
+		onChartOpened: (listener) => chartOpenedListeners.push(listener)
+	});
 	if (document.readyState === 'complete') init();
 	else window.addEventListener('load', init, { once: true });
 })();
