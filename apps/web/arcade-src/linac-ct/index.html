@@ -9240,6 +9240,10 @@
 			body.linac-console-view .rtv2d-sidebar {
 				overflow: visible;
 			}
+			/* Once devices are on the table, the drag hint would sit under them */
+			body.linac-console-view #immobilizationTableDrop:has(.immo-placed-device) .immo-table-help {
+				display: none;
+			}
 			/* Held machine keys (src/console-keys.ts): a press-and-hold must not scroll or select */
 			body.linac-console-view #rtv2MachinePanel [data-console-target],
 			#consoleMoveToField {
