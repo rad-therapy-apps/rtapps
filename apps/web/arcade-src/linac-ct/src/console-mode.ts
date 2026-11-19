@@ -8,7 +8,9 @@
    each step the workflow reports through console-hooks.ts, with every refused action as a
    `mistake` that is also shown in the console's refusal bar. In: rtapps-linac-open switches
    workspace the way the chart's own buttons do (with no chart open yet it stays on the queue);
-   rtapps-linac-room sets the vault door the door interlock reads. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
+   rtapps-linac-room sets the vault door the door interlock reads; rtapps-linac-panel with open
+   false (the panel closed: the therapist has left the console) holds a delivering field and stops
+   the machine keys. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
    Started by main.ts once the app has booted. */
 import type {
 	LinacPose,
@@ -34,7 +36,7 @@ import {
 	setConsoleSink
 } from './console-hooks';
 import { consoleShell, shellSettled } from './console-patch';
-import { installConsoleKeys } from './console-keys';
+import { installConsoleKeys, releaseConsoleKeys } from './console-keys';
 import { TREATMENT_CASES } from './delivery/cases';
 import { holdTreatmentDelivery, renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
 import { activeIGRTTolerances } from './delivery/stereotactic';
@@ -170,12 +172,26 @@ function applyRoom(doorClosed: boolean, staffInVault: boolean) {
 	if (settled) tick();
 }
 
+/** The panel hid the console: the therapist has left it. A hidden page gets no animation frames,
+    so the delivery loop and any motion would stop where they are with the beam still shown on: a
+    delivering field holds at once, as for the door, a held key or Move to field stops, and the
+    state goes out with the beam off. Showing the console again resumes nothing: the learner
+    presses Resume Beam. */
+function leaveConsole() {
+	const d = S.treatmentDelivery;
+	if (d.delivering && !d.held) holdTreatmentDelivery('Console left');
+	releaseConsoleKeys();
+	if (settled) tick();
+}
+
 function onMessage(ev: MessageEvent) {
 	if (!fromCenter(ev.source, ev.origin, window.parent, location.origin)) return;
 	const msg = parseCenterMessage(ev.data);
 	if (!msg) return;
 	if (msg.type === 'rtapps-linac-room') applyRoom(msg.doorClosed, msg.staffInVault);
-	else if (settled) openWorkspace(msg.workspace);
+	else if (msg.type === 'rtapps-linac-panel') {
+		if (!msg.open) leaveConsole();
+	} else if (settled) openWorkspace(msg.workspace);
 	else pendingOpen = msg.workspace;
 }
 

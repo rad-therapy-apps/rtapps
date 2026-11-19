@@ -87,6 +87,15 @@ export interface LinacRoomMsg {
 	doorClosed: boolean;
 	staffInVault: boolean;
 }
+/** Center → LINAC: the panel shows the console (`open: true`) or has hidden it (`open: false`);
+    sent on each open and close, and on ready. Closing the panel is the therapist leaving the
+    console: a hidden page gets no animation frames, so the console holds a delivering field at
+    once (reason 'Console left'), stops any held key or Move to field, and posts its state.
+    Reopening resumes nothing: the learner presses Resume Beam. */
+export interface LinacPanelMsg {
+	type: 'rtapps-linac-panel';
+	open: boolean;
+}
 
 /** LINAC → center: the console has booted in console mode. */
 export interface LinacReadyMsg {
@@ -118,7 +127,7 @@ export interface LinacEventMsg {
 	event: LinacEvent;
 }
 
-export type CenterToLinacMessage = LinacOpenMsg | LinacRoomMsg;
+export type CenterToLinacMessage = LinacOpenMsg | LinacRoomMsg | LinacPanelMsg;
 export type LinacToCenterMessage = LinacReadyMsg | LinacStateMsg | LinacEventMsg;
 
 /* ===== CT ===== */

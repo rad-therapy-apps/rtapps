@@ -10,7 +10,9 @@
      a load only its ready passes until it comes (from the scenario asked for). The center answers
      the LINAC console's ready with the workspace to show (rtapps-linac-open) and sends the Vault 1
      door and whether the player is inside (rtapps-linac-room) on ready, on open and whenever they
-     change. A finished CT scan in the free scenario records 'sim-ct-scan'.
+     change, and whether the panel shows it (rtapps-linac-panel) on ready, on open and on close:
+     closed, the console holds a delivering field. A finished CT scan in the free scenario records
+     'sim-ct-scan'.
    - Opening closes the other pop-ups (the equipment card, a conversation, the room card…), so none
      sits over the panel or takes its Esc; the settings and the Tutorial's cards stay.
    - The camera slots in the panel are holes: while it is open, main.ts calls renderConsoleFeeds
@@ -32,6 +34,7 @@ import { ctComplete, ctPose, linacEvents, linacPose, panelOpen } from './console
 import {
 	consoleUrl,
 	gateMessage,
+	linacPanel,
 	linacRoom,
 	messageFrom,
 	readCtMessage,
@@ -115,14 +118,18 @@ export function openConsole(
 	releaseKeys();
 	if (document.pointerLockElement) document.exitPointerLock();
 	panelOpen.emit(kind);
-	if (kind === 'linac') sendRoom(true);
+	if (kind === 'linac') {
+		sendRoom(true);
+		sendPanel();
+	}
 }
 
 /** Hides the panel; the console stays loaded, as it was. A click on × hands the mouse back to
     looking around (hub-dialogs.ts); after Esc the next key press or click does (main.ts). */
 export function closeConsole(): void {
 	if (!shown) return;
-	const f = frames[shown];
+	const f = frames[shown],
+		left = shown === 'linac';
 	shown = null;
 	panel?.classList.remove('show');
 	document.body.classList.remove('consoleOpen');
@@ -132,6 +139,8 @@ export function closeConsole(): void {
 	f?.el.blur();
 	window.focus?.();
 	panelOpen.emit(null);
+	// the therapist has left the LINAC console: it holds a delivering field
+	if (left) sendPanel();
 }
 
 // A key held as the panel opens or closes gets its keyup in the other page: none stays down.
@@ -224,6 +233,7 @@ function onMessage(e: MessageEvent): void {
 		case 'rtapps-linac-ready':
 			post({ type: 'rtapps-linac-open', workspace: f.workspace });
 			sendRoom(true);
+			sendPanel();
 			return;
 		case 'rtapps-linac-state':
 			linacPose.emit(m.pose);
@@ -261,6 +271,13 @@ function sendRoom(force = false): void {
 /** A few times a second (main.ts stepSimulation): tells the LINAC console when the vault changes. */
 export function updateConsoleRoom(): void {
 	sendRoom();
+}
+
+/* ---- the LINAC console as it stands ---- */
+// shown or not: a hidden console page gets no animation frames, so it holds a delivering field
+// and stops its motion when the panel closes (console-mode.ts)
+function sendPanel(): void {
+	if (frames.linac?.ready) post(linacPanel(shown));
 }
 
 /* ---- the camera slots ---- */

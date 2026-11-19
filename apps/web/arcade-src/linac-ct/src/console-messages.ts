@@ -57,6 +57,8 @@ export function parseCenterMessage(data: unknown): CenterToLinacMessage | null {
 		return typeof d.doorClosed === 'boolean' && typeof d.staffInVault === 'boolean'
 			? { type: d.type, doorClosed: d.doorClosed, staffInVault: d.staffInVault }
 			: null;
+	if (d.type === 'rtapps-linac-panel')
+		return typeof d.open === 'boolean' ? { type: d.type, open: d.open } : null;
 	return null;
 }
 

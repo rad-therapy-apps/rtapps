@@ -10,7 +10,8 @@
      is held, the shortest way round, through the same motion-enable and collision checks as the
      other keys. The machine values change every frame, so the console's pose stream (console-
      mode.ts) and the center's Vault 1 follow it smoothly.
-   Installed by console-mode.ts once the chart shell is built. */
+   Installed by console-mode.ts once the chart shell is built; console-mode.ts also lets go of the
+   keys when the center's panel hides the console (releaseConsoleKeys). */
 import { S } from './state';
 import { consoleMistakeCount } from './console-hooks';
 import {
@@ -252,6 +253,12 @@ function startMove() {
 	frameId = requestAnimationFrame(moveFrame);
 }
 
+/** Lets go of a held key and stops Move to field, as a pointer release does. */
+export function releaseConsoleKeys() {
+	stopHold();
+	stopMove('STOPPED');
+}
+
 /** Adds the Move to field key under the Beam Geometry keys and wires the held keys. */
 export function installConsoleKeys() {
 	const panel = document.getElementById('rtv2MachinePanel');
@@ -282,10 +289,7 @@ export function installConsoleKeys() {
 	});
 	panel.addEventListener('pointerdown', onKeyDown);
 	document.addEventListener('click', onClick, true);
-	const release = () => {
-		stopHold();
-		stopMove('STOPPED');
-	};
-	for (const type of ['pointerup', 'pointercancel']) window.addEventListener(type, release);
-	window.addEventListener('blur', release);
+	for (const type of ['pointerup', 'pointercancel'])
+		window.addEventListener(type, releaseConsoleKeys);
+	window.addEventListener('blur', releaseConsoleKeys);
 }

@@ -73,6 +73,20 @@ describe('which messages the console accepts', () => {
 		expect(parseCenterMessage({ type: 'rtapps-linac-room', doorClosed: true })).toBeNull();
 	});
 
+	it('parses the panel message only with a boolean open, keeping only that field', () => {
+		expect(parseCenterMessage({ type: 'rtapps-linac-panel', open: false, extra: 1 })).toEqual({
+			type: 'rtapps-linac-panel',
+			open: false
+		});
+		expect(parseCenterMessage({ type: 'rtapps-linac-panel', open: true })).toEqual({
+			type: 'rtapps-linac-panel',
+			open: true
+		});
+		for (const open of [undefined, 0, 1, 'false', null])
+			expect(parseCenterMessage({ type: 'rtapps-linac-panel', open })).toBeNull();
+		expect(parseCenterMessage({ type: 'rtapps-linac-panel' })).toBeNull();
+	});
+
 	it('takes the workspaces from the shared contract list, and nothing else', () => {
 		expect(LINAC_WORKSPACES).toEqual(['queue', 'setup', 'igrt', 'delivery']);
 		for (const w of LINAC_WORKSPACES) expect(isLinacWorkspace(w)).toBe(true);
