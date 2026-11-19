@@ -2,8 +2,8 @@
 // design.md, part 1): serves the built linac-ct app, opens it in headless Chromium with
 // `?export-parts` (arcade-src/linac-ct/src/parts-hook.ts names the parts and hands them over) and
 // writes them with three's GLTFExporter, together with the room's floor, wall and ceiling textures,
-// into arcade-src/sim-hub/public/models/, which the center serves at /arcade/sim-hub/models/ and
-// sim-hub vault-linac.ts and rooms.ts load:
+// into arcade-src/sim-hub/src/models/, which Vite bundles hashed under /arcade/sim-hub/assets/;
+// sim-hub vault-linac.ts and rooms.ts load them:
 //   linac-vault.glb     one named node per part, in the app's coordinates: linacMachine (gantry,
 //                       collimator, jawX1/X2/Y1/Y2, kvArms, epid, beam), couch (couchRotation,
 //                       couchTop, couchTopBoard, couchBellows), couchBase, floorPadMachine/Iso/
@@ -29,7 +29,7 @@ const WEB = path.resolve(HERE, '..');
 const APP = path.join(WEB, 'arcade/linac-ct');
 const STATIC = path.join(WEB, 'static/arcade');
 const THREE_DIR = path.join(WEB, 'node_modules/three');
-const OUT = path.join(WEB, 'arcade-src/sim-hub/public/models');
+const OUT = path.join(WEB, 'arcade-src/sim-hub/src/models');
 const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright');
 
 function setupError(msg) {

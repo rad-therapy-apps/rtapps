@@ -7,8 +7,8 @@
 // How to rerun (after a change to the suite's scan room, room.ts), from apps/web:
 //   pnpm build:arcade
 //   node scripts/export-ct-model.mjs
-//   then commit arcade-src/sim-hub/public/models/ct-scanner.glb (served at
-//   /arcade/sim-hub/models/ct-scanner.glb) and rebuild with `pnpm build:arcade`.
+//   then commit arcade-src/sim-hub/src/models/ct-scanner.glb (Vite emits it
+//   hashed under /arcade/sim-hub/assets/) and rebuild with `pnpm build:arcade`.
 // Output: that file and one line with its size and node names. Needs Playwright's Chromium.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.resolve(HERE, '..');
 const LINAC_CT = path.join(WEB, 'arcade/linac-ct');
-const OUT = path.join(WEB, 'arcade-src/sim-hub/public/models/ct-scanner.glb');
+const OUT = path.join(WEB, 'arcade-src/sim-hub/src/models/ct-scanner.glb');
 const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright');
 
 if (!fs.existsSync(path.join(LINAC_CT, 'ct-suite.html'))) {
