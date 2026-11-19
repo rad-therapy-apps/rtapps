@@ -656,6 +656,7 @@ export function acquireClinicalIGRT() {
 		);
 		return;
 	}
+	const wasAcquired = S.clinicalIGRT.acquired;
 	S.clinicalIGRT.acquired = true;
 	S.clinicalIGRT.verified = false;
 	oisLogEvent(
@@ -667,11 +668,13 @@ export function acquireClinicalIGRT() {
 	setPendantLCD(S.clinicalIGRT.mode, 'REGISTRATION COMPLETE');
 	renderClinicalIGRT();
 	renderTreatmentMonitor();
-	consoleEvent({
-		kind: 'images-acquired',
-		mrn: S.activeTreatmentCase.mrn,
-		shiftMm: shiftLengthMm(S.clinicalIGRT.correction)
-	});
+	// posted for a new set of images, not for acquiring the same daily setup again
+	if (!wasAcquired)
+		consoleEvent({
+			kind: 'images-acquired',
+			mrn: S.activeTreatmentCase.mrn,
+			shiftMm: shiftLengthMm(S.clinicalIGRT.correction)
+		});
 }
 
 export function verifyClinicalIGRT() {
@@ -697,6 +700,7 @@ export function verifyClinicalIGRT() {
 		: S.clinicalIGRT.clearance;
 	if (wholePlanClearance) S.clinicalIGRT.clearance = wholePlanClearance;
 
+	const wasVerified = S.clinicalIGRT.verified;
 	S.clinicalIGRT.verified = S.clinicalIGRT.alignmentWithinTolerance;
 	const selectedClearance = S.clinicalIGRT.alignmentWithinTolerance
 		? currentSelectedFieldClearance()
@@ -720,9 +724,10 @@ export function verifyClinicalIGRT() {
 	renderClinicalIGRT();
 	renderTreatmentMonitor();
 	renderTreatmentDeliveryPanel();
-	if (S.clinicalIGRT.verified)
-		consoleEvent({ kind: 'alignment-verified', mrn: S.activeTreatmentCase.mrn });
-	else
+	// posted when the alignment becomes verified (again after any couch move), not on every press
+	if (S.clinicalIGRT.verified) {
+		if (!wasVerified) consoleEvent({ kind: 'alignment-verified', mrn: S.activeTreatmentCase.mrn });
+	} else
 		consoleMistake(
 			'verify-before-shift',
 			'Correction pending · drive the couch until all residual values are within tolerance.'

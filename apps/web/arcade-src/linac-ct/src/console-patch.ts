@@ -358,6 +358,8 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 			}
 			if (open && !open.disabled) {
 				if (!queuePickAllowed(open.dataset.value, WRONG_PATIENT_MESSAGE.openChart)) return;
+				// console mode: the chart already open is shown again, not reloaded from scratch
+				if (CONSOLE.console && open.dataset.value === openCaseValue) return showChart();
 				openChart(open.dataset.value);
 			}
 		});
