@@ -183,9 +183,18 @@ const INTERLOCK_CODES: [string, string][] = [
 	['In-room motion locked', 'motion-armed']
 ];
 
+/** `action` refused by the interlocks: the code names the most basic failed one, the message
+    lists every failed one as the checklist shows it. */
+export function interlockRefusal(action: string, checks: ReadinessCheck[]): Refusal {
+	const failed = checks.filter((c) => !c.ok);
+	return {
+		code: INTERLOCK_CODES.find(([name]) => failed.some((c) => c.name === name))?.[1] ?? 'interlock',
+		message: `${action} refused. Treatment holds: ${failed.map((c) => `${c.name} (${c.detail})`).join('; ')}.`
+	};
+}
+
 /** Why the console refuses Enable Beam ('enable') or Beam On ('on') right now, or null when the
-    press goes ahead (or, while the beam is already on, has nothing to refuse). The code names the
-    most basic failed interlock; the message lists every failed one as the checklist shows it. */
+    press goes ahead (or, while the beam is already on, has nothing to refuse). */
 export function beamRefusal(kind: 'enable' | 'on', s: BeamState): Refusal | null {
 	if (s.delivering) return null;
 	const action = kind === 'on' ? 'Beam On' : 'Enable Beam';
@@ -194,14 +203,7 @@ export function beamRefusal(kind: 'enable' | 'on', s: BeamState): Refusal | null
 			code: 'field-complete',
 			message: `${action} refused. This field is complete: select the next field.`
 		};
-	if (!s.ready) {
-		const failed = s.checks.filter((c) => !c.ok);
-		return {
-			code:
-				INTERLOCK_CODES.find(([name]) => failed.some((c) => c.name === name))?.[1] ?? 'interlock',
-			message: `${action} refused. Treatment holds: ${failed.map((c) => `${c.name} (${c.detail})`).join('; ')}.`
-		};
-	}
+	if (!s.ready) return interlockRefusal(action, s.checks);
 	if (kind === 'on' && !s.armed)
 		return { code: 'beam-not-enabled', message: 'Beam On refused. Press Enable Beam first.' };
 	return null;

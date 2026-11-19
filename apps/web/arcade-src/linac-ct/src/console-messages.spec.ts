@@ -4,6 +4,7 @@ import {
 	consoleViewFromSearch,
 	correctionApplied,
 	fromCenter,
+	interlockRefusal,
 	parseCenterMessage,
 	poseFromReadout,
 	samePose,
@@ -240,6 +241,15 @@ describe('refused Enable Beam and Beam On', () => {
 			beamRefusal('on', hold(['Image guidance verified', 'x'], ['Vault door closed', 'y'])).code
 		).toBe('door-open');
 		expect(beamRefusal('on', hold(['Something new', 'x'])).code).toBe('interlock');
+	});
+
+	it('words a refused Resume Beam the same way', () => {
+		expect(
+			interlockRefusal('Resume Beam', hold(['Vault door closed', 'Close the vault door']).checks)
+		).toEqual({
+			code: 'door-open',
+			message: 'Resume Beam refused. Treatment holds: Vault door closed (Close the vault door).'
+		});
 	});
 
 	it('asks for the next field once this one is complete, and stays quiet while the beam is on', () => {

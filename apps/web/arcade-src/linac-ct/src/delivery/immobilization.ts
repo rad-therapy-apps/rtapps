@@ -293,6 +293,7 @@ export function removeImmobilizationDevice(id) {
 export function verifyImmobilizationSelection() {
 	const spec = immobilizationSpec();
 	if (!spec) return;
+	const wasVerified = S.immobilizationWorkflow.verified;
 	S.immobilizationWorkflow.attempts++;
 	const req = [...(spec.required || [])],
 		optional = [...(spec.optional || [])],
@@ -330,8 +331,10 @@ export function verifyImmobilizationSelection() {
 	renderTreatmentDeliveryPanel();
 	renderTreatmentMonitor();
 	renderOISPanel();
-	if (ok) consoleEvent({ kind: 'setup-complete', mrn: S.activeTreatmentCase?.mrn || '' });
-	else consoleMistake('setup-hold', S.immobilizationWorkflow.lastFeedback);
+	// posted when the setup becomes verified, not on every press of a verified setup
+	if (ok && !wasVerified)
+		consoleEvent({ kind: 'setup-complete', mrn: S.activeTreatmentCase?.mrn || '' });
+	else if (!ok) consoleMistake('setup-hold', S.immobilizationWorkflow.lastFeedback);
 }
 
 export function clearImmobilizationSelection() {
