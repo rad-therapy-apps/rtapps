@@ -7,8 +7,8 @@
    the pose, workspace or open chart changes (at most 30 a second), and rtapps-linac-event for
    each step the workflow reports through console-hooks.ts, with every refused action as a
    `mistake` that is also shown in the console's refusal bar. In: rtapps-linac-open switches
-   workspace the way the chart's own buttons do; rtapps-linac-room sets the vault door the door
-   interlock reads. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
+   workspace the way the chart's own buttons do (with no chart open yet it stays on the queue);
+   rtapps-linac-room sets the vault door the door interlock reads. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
    Started by main.ts once the app has booted. */
 import type {
 	LinacPose,
@@ -148,10 +148,9 @@ function openWorkspace(workspace: LinacWorkspace) {
 		consoleShell.showHome();
 		return;
 	}
-	if (!openChartMrn()) {
-		consoleMistake('no-chart-open', 'Open a patient chart from the queue first.');
-		return;
-	}
+	// asked before any chart is open (the panel may forward its workspace on ready): stay on the
+	// queue. Only the learner's own actions post mistakes.
+	if (!openChartMrn()) return;
 	if (document.body.classList.contains('rtv2-landing')) consoleShell.showChart();
 	// the chart's workflow buttons share the workspaces' names (console-patch.ts launchWorkflow)
 	consoleShell.launchWorkflow(workspace);
