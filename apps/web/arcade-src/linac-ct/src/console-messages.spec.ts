@@ -45,6 +45,8 @@ describe('which messages the console accepts', () => {
 		expect(fromCenter(other, own, parent, own)).toBe(false);
 		expect(fromCenter(parent, 'http://evil.example', parent, own)).toBe(false);
 		expect(fromCenter(null, own, null, own)).toBe(false);
+		// a CT iframe's contentWindow is undefined before it loads: nothing matches
+		expect(fromCenter(other, own, undefined, own)).toBe(false);
 	});
 
 	it('parses the open message and keeps only the contract fields', () => {

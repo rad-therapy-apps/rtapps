@@ -1,5 +1,7 @@
 import type { ParentToCtMessage, CtToParentMessage } from './ct-protocol';
 import { readSide } from './side';
+import { fromCenter } from './console-messages';
+import { postTargetOrigin } from './ct-suite/ct-state';
 
 (function () {
 	'use strict';
@@ -146,7 +148,8 @@ import { readSide } from './side';
 	}
 	function postToCT(msg: ParentToCtMessage) {
 		const fr = $('rtappsCTFrame') as HTMLIFrameElement | null;
-		if (fr?.contentWindow) fr.contentWindow.postMessage(msg, '*');
+		const target = postTargetOrigin(location.origin);
+		if (fr?.contentWindow && target) fr.contentWindow.postMessage(msg, target);
 	}
 	function setCTView(view) {
 		ctView = view === 'console' ? 'console' : 'room';
@@ -189,6 +192,9 @@ import { readSide } from './side';
 		});
 	}
 	window.addEventListener('message', (ev) => {
+		// only our own CT suite iframe, on our origin, may report scan state (same rule as fromCenter)
+		const fr = $('rtappsCTFrame') as HTMLIFrameElement | null;
+		if (!fromCenter(ev.source, ev.origin, fr?.contentWindow, location.origin)) return;
 		const d = (ev.data || {}) as Partial<CtToParentMessage>;
 		if (d.type === 'rtapps-ct-ready') {
 			ctFrameReady = true;
