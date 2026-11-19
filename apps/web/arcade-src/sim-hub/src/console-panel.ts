@@ -89,14 +89,15 @@ export function isConsoleOpen(): boolean {
 }
 
 /** Opens a console in the panel: free scenario unless `scenario` says, at `workspace` (LINAC) when
-    given, else where it was (the queue on a first open). */
+    given, else where it was (the queue on a first open). `fresh` reloads its page first, so it
+    starts as on a first open (the Tutorial, at each start of its chapter). */
 export function openConsole(
 	kind: ConsoleKind,
-	opts: { workspace?: LinacWorkspace; scenario?: ConsoleScenario } = {}
+	opts: { workspace?: LinacWorkspace; scenario?: ConsoleScenario; fresh?: boolean } = {}
 ): void {
 	const scenario = opts.scenario ?? 'free';
 	let f = frames[kind];
-	if (!f || f.scenario !== scenario) f = loadFrame(kind, scenario);
+	if (!f || f.scenario !== scenario || opts.fresh) f = loadFrame(kind, scenario);
 	if (kind === 'linac' && opts.workspace) {
 		f.workspace = opts.workspace;
 		if (f.ready) post({ type: 'rtapps-linac-open', workspace: opts.workspace });
