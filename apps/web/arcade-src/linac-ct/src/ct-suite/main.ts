@@ -2,6 +2,7 @@ import { initThree } from './room';
 import { log, moveCouch, S, setProto, setStatus, wire } from './console';
 import { COUCH_Y_LOW, COUCH_Z_OUT } from './ct-state';
 import { attachBridgeListener, consoleMode, sendReady, startStateStream } from './bridge';
+import { initConsoleLayout } from './console-layout';
 
 /* boot */
 // ?view=console (the center's console panel) has no 3D room: the table, scan and x-ray state the
@@ -26,6 +27,7 @@ setProto('prostate');
 attachBridgeListener();
 if (consoleMode) {
 	document.body.classList.add('rtapps-console-mode', 'rtapps-panel-mode');
+	initConsoleLayout();
 } else {
 	document.body.classList.add('rtapps-room-mode');
 	const rtappsEmbedBadge = document.createElement('div');

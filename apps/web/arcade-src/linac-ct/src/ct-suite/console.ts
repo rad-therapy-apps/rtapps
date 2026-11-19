@@ -511,6 +511,9 @@ export function buildSteps() {
 		.join('');
 }
 
+/** Told each workflow step change (console-layout.ts opens the new step in console mode). */
+export const stepListeners: Array<(n: number) => void> = [];
+
 export function setStep(n) {
 	S.step = n;
 	$('conStep').textContent = ctStepLabel(n);
@@ -519,6 +522,7 @@ export function setStep(n) {
 		el.classList.toggle('done', k < n);
 		el.classList.toggle('cur', k === n);
 	});
+	stepListeners.forEach((f) => f(n));
 }
 
 export function setProto(key) {
