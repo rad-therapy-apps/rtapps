@@ -808,7 +808,7 @@ export function departmentStaff() {
 		undefined,
 		'vault1'
 	);
-	// head first, its pelvis brought to the isocentre by the LINAC couch (props.ts VAULT1_LYING)
+	// head first, its head brought to the isocentre by the LINAC couch (props.ts VAULT1_LYING)
 	const v1 = VAULT1_LYING;
 	lyingPatient(
 		'vault1',
