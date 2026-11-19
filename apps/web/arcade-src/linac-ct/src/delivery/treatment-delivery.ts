@@ -37,7 +37,8 @@ import { cranialSRSRequired } from './stereotactic';
 import { motionRequired, currentMotionGateOpen } from './motion';
 import { oisLogEvent } from './ois';
 import { renderElectronBolusDeliveryTask } from './electron-bolus';
-import { consoleEvent } from '../console-hooks';
+import { consoleEvent, consoleMistake } from '../console-hooks';
+import { interlockRefusal } from '../console-messages';
 
 const DELIVERY_SPEED_FACTOR = 4;
 
@@ -259,6 +260,8 @@ export function resumeTreatmentDelivery() {
 	if (!r.ready) {
 		S.treatmentDelivery.autoHoldReason = 'interlock remains';
 		renderTreatmentDeliveryPanel();
+		const refusal = interlockRefusal('Resume Beam', r.checks);
+		consoleMistake(refusal.code, refusal.message);
 		return;
 	}
 	S.treatmentDelivery.held = false;

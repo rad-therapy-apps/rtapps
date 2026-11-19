@@ -25,7 +25,7 @@ import {
 	renderTreatmentDeliveryPanel
 } from './delivery/treatment-delivery';
 import { allTreatmentFieldsCompleted, setPendantLCD, updateBEVInset } from './linac-safety';
-import { CONSOLE } from './console-hooks';
+import { CONSOLE, consoleMistake } from './console-hooks';
 
 // RTApps (#77 phase 2 task 19): honest shape for `S.treatmentCompletion.record`, built
 // at both posting sites below. Exported so state.ts can tighten that member from
@@ -312,6 +312,10 @@ export function openChargeCapture() {
 	if (!allTreatmentFieldsCompleted() && !S.treatmentCompletion.posted) {
 		setPendantLCD('TREATMENT INCOMPLETE', 'Finish all prescribed fields');
 		renderTreatmentDeliveryPanel();
+		consoleMistake(
+			'treatment-incomplete',
+			'Treatment incomplete. Deliver every prescribed field before charge capture.'
+		);
 		return;
 	}
 	igrtPanel?.classList.remove('open');
