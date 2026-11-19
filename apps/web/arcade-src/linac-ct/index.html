@@ -10069,6 +10069,169 @@
 					flex: 0 0 auto !important;
 				}
 			}
+
+			/* console mode, no scroll: Patient Setup. The order card shows in full; the shelf is a
+			   compact grid with every device in view; the table is a strip that holds the placed
+			   devices as small tiles. The patient chips (also on the console's own header) and the
+			   generic footnote give their room to the order. */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.immo-summary, .immo-footnote) {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card:not(#immobilizationVerificationChecks) {
+				max-height: none;
+				overflow: visible;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				.immo-key {
+				margin-top: 3px !important;
+				padding: 2px 6px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks {
+				grid-auto-flow: column;
+				grid-auto-columns: minmax(0, 1fr);
+				gap: 6px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-verify-checks
+				label {
+				align-items: flex-start !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-workspace {
+				display: flex;
+				flex-direction: column;
+				height: auto;
+				gap: 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.immo-shelf-wrap, .immo-table-wrap) {
+				flex: none;
+				padding: 3px 5px;
+				border-radius: 7px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-shelf {
+				flex: none;
+				overflow: visible;
+				grid-template-columns: repeat(5, minmax(0, 1fr));
+				gap: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-device {
+				flex-direction: row;
+				justify-content: flex-start;
+				gap: 4px;
+				min-height: 0;
+				height: 28px;
+				padding: 1px 4px;
+				border-radius: 6px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-device:hover {
+				transform: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.immo-device, .immo-placed-device)
+				svg {
+				flex: none;
+				width: 22px;
+				height: 18px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-device-label {
+				min-width: 0;
+				font-size: 10px;
+				line-height: 1.05;
+				text-align: left;
+				letter-spacing: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-table-drop {
+				flex: none;
+				display: flex;
+				align-items: center;
+				min-height: 36px;
+				border-width: 1px;
+				border-radius: 6px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.immo-table-bed, .immo-table-patient, .immo-table-head) {
+				display: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-placed-list {
+				position: static;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-start;
+				gap: 4px;
+				padding: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-placed-device {
+				flex-direction: row;
+				gap: 4px;
+				width: auto;
+				min-height: 0;
+				height: 28px;
+				padding: 1px 6px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-table-help {
+				position: static;
+				flex: 1;
+				font-size: 10px;
+				line-height: 1.2;
+				padding: 2px 6px;
+			}
+
+			/* the shorter frames: the zone titles and the two card headings go (the dashed strip says
+			   where to drop, the checks and the order say what they are), and the keys are 26 px */
+			@media (max-height: 600px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-zone-title, .immo-card > h4) {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-device {
+					height: 26px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-actions
+					button {
+					height: 26px;
+					min-height: 26px !important;
+					padding-top: 0 !important;
+					padding-bottom: 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-actions {
+					gap: 6px;
+				}
+			}
 		</style>
 	</head>
 	<body>
