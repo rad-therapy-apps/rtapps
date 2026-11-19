@@ -26,7 +26,6 @@ setProto('prostate');
 attachBridgeListener();
 if (consoleMode) {
 	document.body.classList.add('rtapps-console-mode', 'rtapps-panel-mode');
-	startStateStream();
 } else {
 	document.body.classList.add('rtapps-room-mode');
 	const rtappsEmbedBadge = document.createElement('div');
@@ -35,3 +34,5 @@ if (consoleMode) {
 	document.body.appendChild(rtappsEmbedBadge);
 }
 sendReady();
+// after ready: the center drops a console's messages until its ready, so the first pose must follow it
+if (consoleMode) startStateStream();
