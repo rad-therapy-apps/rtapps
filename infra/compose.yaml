@@ -51,7 +51,7 @@ services:
   # runner came out as zero volumes ("failed to find writable volumes", every upload 500).
   # Eight 1 GB volumes is far more than dev/CI media needs and fits any disk.
   storage:
-    image: chrislusf/seaweedfs:4.48
+    image: chrislusf/seaweedfs:4.53
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -80,7 +80,7 @@ services:
   # same approach as infra/backup/rclone-remote.sh; `mkdir` on an S3 remote is CreateBucket
   # and is a no-op when the bucket already exists.
   storage-init:
-    image: rclone/rclone:1.75
+    image: rclone/rclone:1.76
     depends_on:
       storage:
         condition: service_healthy
