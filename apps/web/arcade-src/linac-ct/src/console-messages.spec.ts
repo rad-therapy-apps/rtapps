@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	beamRefusal,
+	clearsRefusal,
 	consoleViewFromSearch,
 	correctionApplied,
 	fromCenter,
@@ -11,6 +12,8 @@ import {
 	shiftLengthMm,
 	STATE_MIN_GAP_MS,
 	statePostDue,
+	REFUSAL_WORKSPACE_GRACE_MS,
+	workspaceClearsRefusal,
 	type BeamState,
 	type MachineReadout
 } from './console-messages';
@@ -257,5 +260,28 @@ describe('refused Enable Beam and Beam On', () => {
 	it('asks for the next field once this one is complete, and stays quiet while the beam is on', () => {
 		expect(beamRefusal('on', { ...ready, completed: true }).code).toBe('field-complete');
 		expect(beamRefusal('on', { ...hold(['Vault door closed', 'x']), delivering: true })).toBeNull();
+	});
+});
+
+describe('the refusal bar', () => {
+	it('is cleared by any event except another mistake', () => {
+		for (const kind of [
+			'checked-in',
+			'chart-opened',
+			'setup-complete',
+			'images-acquired',
+			'shift-applied',
+			'alignment-verified',
+			'field-delivered',
+			'treatment-complete'
+		])
+			expect(clearsRefusal(kind)).toBe(true);
+		expect(clearsRefusal('mistake')).toBe(false);
+	});
+
+	it('is cleared by a later workspace change, but not the panel switch a refusal itself causes', () => {
+		expect(workspaceClearsRefusal('igrt', 'delivery', REFUSAL_WORKSPACE_GRACE_MS + 1)).toBe(true);
+		expect(workspaceClearsRefusal('igrt', 'delivery', 50)).toBe(false);
+		expect(workspaceClearsRefusal('igrt', 'igrt', 60000)).toBe(false);
 	});
 });
