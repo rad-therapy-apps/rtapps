@@ -80,7 +80,11 @@ function closeRoomCard(relock: boolean): void {
 	if (relock) requestWalkPointerLock();
 }
 
+/** Every room entry and every card shown, for scripts/sim-hub-tutorial-check.mjs (?npccheck only). */
+const checkLog: { entered: string[]; shown: string[] } = { entered: [], shown: [] };
+
 onRoomEnter((r) => {
+	checkLog.entered.push(r.id);
 	// one card at a time, never over another dialog (a conversation, a lab, the CT QA menu)
 	if (
 		shownId ||
@@ -88,6 +92,7 @@ onRoomEnter((r) => {
 		!shouldShowRoomCardNow(r.id, loadPrefs(), getPlayMode(), shownThisPlay)
 	)
 		return;
+	checkLog.shown.push(r.id);
 	showRoomCard(r);
 });
 onPlayModeChange((m) => {
@@ -111,3 +116,12 @@ if (roomCardsBox) {
 		savePrefs(setRoomCardsEnabled(roomCardsBox.checked, loadPrefs()))
 	);
 }
+if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('npccheck'))
+	Object.assign(window, {
+		__ROOMCARD: {
+			log: checkLog,
+			open: () => shownId,
+			/** As Continue does (without the pointer lock). */
+			close: () => closeRoomCard(false)
+		}
+	});

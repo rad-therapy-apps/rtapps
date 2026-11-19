@@ -15,7 +15,8 @@
 // escort starts under a fade that moves Jordan and the player on to just short of the destination
 // room; after it the player stands clear of the walls, a few metres behind Jordan, with under 25 m
 // of the first leg left (the whole walk to Vault 1 was about 100 m). Room introduction cards are
-// switched off through the page's own preference (localStorage simhub.roomCards.enabled = false).
+// on (the default): each frame the check presses Continue on any card (the check never sees a
+// pause), and each play asserts a room's card shows only the first time the player enters it in that play.
 //   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; on every console step three misses (a look-alike's chart and
 //          check-in at the schedule, the console's refusals elsewhere) show hint 1, hint 2 and the
@@ -107,8 +108,8 @@ console.warn = (...a) => {
 	warn(...a);
 };
 installBrowserStubs({ search: '?npccheck' });
-// a working store, with the room introduction cards off (the page reads it through prefs.ts)
-const store = new Map([['simhub.roomCards.enabled', 'false']]);
+// a working store, with the room introduction cards on (the page reads it through prefs.ts)
+const store = new Map();
 globalThis.localStorage = {
 	getItem: (k) => (store.has(k) ? store.get(k) : null),
 	setItem: (k, v) => void store.set(k, String(v)),
@@ -132,6 +133,8 @@ const NPC = globalThis.window && globalThis.window.__NPC;
 const T = globalThis.window && globalThis.window.__TUTORIAL;
 if (!NPC) setupError('window.__NPC missing (hook not installed with ?npccheck)');
 if (!T) setupError('window.__TUTORIAL missing (src/tutorial.ts initTutorial did not run)');
+const RC = globalThis.window.__ROOMCARD;
+if (!RC) setupError('window.__ROOMCARD missing (src/hud-roomcard.ts)');
 NPC.disableRendering();
 
 const J = NPC.JOURNEY;
@@ -163,6 +166,7 @@ const playerBlocked = (x, z) =>
 let wallHits = [],
 	movesSeen = new Set();
 function onFrame() {
+	if (RC.open()) RC.close(); // Continue
 	if (!T.state().active) return;
 	for (const t of NPC.workflowTransitions) {
 		movesSeen.add(t);
@@ -366,6 +370,8 @@ function play(wrong) {
 	wallHits = [];
 	movesSeen = new Set();
 	let routes = 0;
+	RC.log.entered.length = 0;
+	RC.log.shown.length = 0;
 	T.enter();
 	if (T.mode() !== 'tutorial' || T.state().phase !== 'active' || T.state().step !== 1)
 		fails.push(`entering did not start step 1 (mode ${T.mode()}, ${JSON.stringify(T.state())})`);
@@ -519,6 +525,22 @@ function play(wrong) {
 		`${name}: walls`,
 		wallHits,
 		`${movesSeen.size} tutorial moves, the ${WALL_R} m circle round every walker clear of the wall colliders on every frame`
+	);
+	// room cards: once per room in a play
+	const cards = [],
+		{ entered, shown } = RC.log,
+		dup = shown.filter((id, i) => shown.indexOf(id) !== i),
+		reentered = entered.filter((id, i) => entered.indexOf(id) !== i);
+	if (!shown.length) cards.push('no room card showed in the play (cards are on)');
+	if (!reentered.length) cards.push('the play never re-entered a room, so the rule went untested');
+	if (dup.length) cards.push(`cards showed again on re-entry: ${[...new Set(dup)].join(', ')}`);
+	for (const id of new Set(reentered))
+		if (!shown.includes(id) && entered.indexOf(id) === entered.lastIndexOf(id))
+			cards.push(`room ${id} never showed its card`);
+	report(
+		`${name}: room cards`,
+		cards,
+		`${shown.length} cards for ${new Set(entered).size} rooms entered (${entered.length} entries), none shown twice`
 	);
 	// leaving
 	const leave = [];
