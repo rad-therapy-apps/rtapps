@@ -20,10 +20,11 @@
 //          postChargeAndCompleteFraction): recordResult('sim-linac-fraction') once, from the
 //          console's page. Vault 1's gantry (window.__NPC.vaultLinac) turns through the angles
 //          between AP and PA and ends at 180.
-//   CT     ?start=ctcontrol: Free Mode at the CT Control door; E at the CT console desk opens the
-//          CT console, which posts ready; one prostate scan is run (protocol, habitus and
-//          technique, the table held in to the isocentre and raised, Set Isocenter, topogram,
-//          range, scan), and its rtapps-ct-complete makes the center record
+//   CT     ?start=ctcontrol: Free Mode at the CT Control door; once the CT room has the CT suite's
+//          scanner model, E at the CT console desk opens the CT console in its console mode
+//          (ct-suite.html?view=console), which posts ready; one prostate scan is run (protocol,
+//          habitus and technique, the table held in to the isocentre and raised, Set Isocenter,
+//          topogram, range, scan), and its rtapps-ct-complete makes the center record
 //          recordResult('sim-ct-scan') once, from the center's page (console-panel.ts). The CT
 //          room's table and the patients lying on it (window.__NPC.ctRoom frame and riders) move
 //          into the bore while it scans.
@@ -221,6 +222,9 @@ async function openCenter(room) {
 	expect(
 		at.fromDoor < 1.5,
 		`?start=${room} starts at its door (${at.fromDoor.toFixed(2)} m from the door's middle)`
+	);
+	console.log(
+		`  ?start=${room}: Free Mode, no title menu, ${at.fromDoor.toFixed(2)} m from the door`
 	);
 	await ev(() => {
 		// nothing here reads the center's pixels, and a software renderer (CI) draws it at under a
@@ -432,7 +436,9 @@ async function playLinac() {
 	const ready = await until(
 		"the LINAC console's ready",
 		() =>
-			window.__NPC.consoleMessages().find((m) => m.message.type === 'rtapps-linac-ready')?.message,
+			window.__NPC
+				.consoleMessages()
+				.find((m) => m.kind === 'linac' && m.message.type === 'rtapps-linac-ready')?.message,
 		WAIT_MS
 	);
 	expect(
@@ -611,7 +617,6 @@ async function playCt() {
 				travel: p.tableTravel,
 				scanning: p.scanning,
 				x: frame.position.x,
-				y: frame.position.y,
 				riderX: riders.position.x
 			})
 		);
@@ -626,8 +631,15 @@ async function playCt() {
 	);
 	await until(
 		"the CT console's ready",
-		() => window.__NPC.consoleMessages().some((m) => m.message.type === 'rtapps-ct-ready'),
+		() =>
+			window.__NPC
+				.consoleMessages()
+				.some((m) => m.kind === 'ct' && m.message.type === 'rtapps-ct-ready'),
 		WAIT_MS
+	);
+	expect(
+		await frame.evaluate(() => document.body.classList.contains('rtapps-console-mode')),
+		'the CT suite runs in its console mode'
 	);
 	// the table at rest (the console posts its first pose before its ready, so the panel drops it
 	// and the room follows from the console's first change)
