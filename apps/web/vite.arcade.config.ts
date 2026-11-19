@@ -9,8 +9,11 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	root: 'arcade-src/sim-hub',
 	base: '/arcade/sim-hub/',
+	assetsInclude: ['**/*.glb'],
 	build: {
 		outDir: '../../arcade/sim-hub',
-		emptyOutDir: true
+		emptyOutDir: true,
+		// The center's 3D models (src/models/*.glb) must stay separate hashed files, never base64
+		assetsInlineLimit: 0
 	}
 });

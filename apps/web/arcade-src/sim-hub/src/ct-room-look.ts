@@ -34,7 +34,7 @@ import {
 	liesOn
 } from './ct-room-pose';
 
-const MODEL_URL = `${import.meta.env.BASE_URL}models/ct-scanner.glb`;
+import MODEL_URL from './models/ct-scanner.glb?url';
 /** The CT room ceiling's underside (rooms.ts buildRoom: 3.75 m walls, a 0.04 m slab). */
 const CEILING_Y = 3.71;
 /** The bore glow while scanning: the model's bezel (or the old scanner's bore torus), then the
