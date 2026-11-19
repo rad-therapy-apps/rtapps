@@ -284,6 +284,11 @@
 		max-width: var(--content-max);
 		padding: var(--space-6);
 	}
+	/* The arcade player (ExternalPlayer's iframe) uses all the width beside the sidebar; every
+	   other page keeps the reading width above. */
+	main:has(:global(.arcade-frame)) {
+		max-width: none;
+	}
 	main:focus {
 		outline: none;
 	}
