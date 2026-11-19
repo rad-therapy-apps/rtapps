@@ -90,6 +90,17 @@ function fieldTarget(): FieldAxes {
 	return couchOK ? { ...planned, vrt: now.vrt, lng: now.lng, lat: now.lat } : planned;
 }
 
+/** Couch motion image guidance has not heard yet: imgCouch redraws its images, so a moving couch
+    reports at once when it starts and then with the readouts, a few times a second. */
+const unheard = { vrt: 0, lng: 0, lat: 0 };
+function tellImageGuidance() {
+	for (const k of ['vrt', 'lng', 'lat'] as const)
+		if (unheard[k]) {
+			imgCouch(k, unheard[k]);
+			unheard[k] = 0;
+		}
+}
+
 /** Puts the machine at `next` through the app's collision check (`label` names the motion in
     its interlock message); false when it refuses. */
 function moveMachine(next: FieldAxes, label: string): boolean {
@@ -118,8 +129,8 @@ function moveMachine(next: FieldAxes, label: string): boolean {
 		S.srsWorkflow.dryRunByField[idx] = false;
 	}
 	Object.assign(fundamentalState, next);
-	// image guidance hears every couch move, as from the couch keys
-	for (const k of ['vrt', 'lng', 'lat'] as const) if (d[k]) imgCouch(k, d[k]);
+	// image guidance hears every couch move, as from the couch keys (tellImageGuidance)
+	for (const k of ['vrt', 'lng', 'lat'] as const) unheard[k] += d[k];
 	return true;
 }
 
@@ -147,6 +158,7 @@ function stepKey(key: HTMLElement): boolean {
 	else if (requirePendantMotion(AXIS_LABELS[axis])) {
 		const next = { ...machineAxes(), [axis]: land };
 		if (moveMachine(next, AXIS_LABELS[axis])) {
+			tellImageGuidance();
 			const unit = axis === 'vrt' || axis === 'lng' || axis === 'lat' ? ' mm' : '°';
 			syncFundamentalReadouts(AXIS_LABELS[axis], `${land}${unit}`);
 			renderTreatmentDeliveryPanel();
@@ -197,12 +209,14 @@ let moveTarget: FieldAxes | null = null;
 let frameId = 0;
 let lastFrame = 0;
 let lastReadout = 0;
+let heardThisMove = false;
 
 function stopMove(lcd: string) {
 	if (!moving) return;
 	moving = false;
 	cancelAnimationFrame(frameId);
 	moveKey?.classList.remove('active');
+	tellImageGuidance();
 	syncFundamentalReadouts('MOVE TO FIELD', lcd);
 	renderTreatmentDeliveryPanel();
 }
@@ -215,8 +229,13 @@ function moveFrame(now: number) {
 	lastFrame = now;
 	if (!moveMachine(next, 'MOVE TO FIELD')) return stopMove('COLLISION INTERLOCK');
 	if (arrived) return stopMove('AT FIELD');
+	if (!heardThisMove && (unheard.vrt || unheard.lng || unheard.lat)) {
+		heardThisMove = true;
+		tellImageGuidance();
+	}
 	if (now - lastReadout > READOUT_EVERY_MS) {
 		lastReadout = now;
+		tellImageGuidance();
 		syncFundamentalReadouts();
 		renderTreatmentDeliveryPanel();
 	}
@@ -226,6 +245,7 @@ function moveFrame(now: number) {
 function startMove() {
 	if (moving || !requirePendantMotion('MOVE TO FIELD')) return;
 	moving = true;
+	heardThisMove = false;
 	moveTarget = fieldTarget();
 	moveKey?.classList.add('active');
 	lastFrame = lastReadout = performance.now();
