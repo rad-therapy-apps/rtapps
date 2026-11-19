@@ -96,6 +96,44 @@ describe('ExternalPlayer', () => {
 		await waitForAttemptStart(post);
 	});
 
+	// Scenario: the browser supports the Fullscreen API.
+	// Invariant: the iframe allows fullscreen, and the button asks the iframe to go full screen.
+	it('shows a Full screen button that requests fullscreen on the iframe', async () => {
+		const post: Post = vi.fn(async () => ({
+			data: { ...baseAttempt, items: [] },
+			error: undefined
+		})) as unknown as Post;
+		const spy = vi.spyOn(Element.prototype, 'requestFullscreen').mockResolvedValue(undefined);
+		try {
+			await render(ExternalPlayer, { activityId: 'activity-1', snapshot, post });
+			const iframe = document.querySelector('iframe');
+			expect(iframe?.getAttribute('allow')).toBe('fullscreen');
+			await page.getByRole('button', { name: 'Full screen' }).click();
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy.mock.contexts[0]).toBe(iframe);
+			await waitForAttemptStart(post);
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
+	// Scenario: the Fullscreen API is unavailable (e.g. iPhone Safari).
+	// Invariant: no button is shown.
+	it('hides the Full screen button without the Fullscreen API', async () => {
+		const post: Post = vi.fn(async () => ({
+			data: { ...baseAttempt, items: [] },
+			error: undefined
+		})) as unknown as Post;
+		Object.defineProperty(document, 'fullscreenEnabled', { value: false, configurable: true });
+		try {
+			await render(ExternalPlayer, { activityId: 'activity-1', snapshot, post });
+			expect(page.getByRole('button', { name: /full screen/i }).elements()).toHaveLength(0);
+			await waitForAttemptStart(post);
+		} finally {
+			delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled;
+		}
+	});
+
 	// Scenario: an activity that opens the center at a control room (start_room in its snapshot).
 	// Invariant: the iframe keeps the explicit /index.html and adds ?start=<room>.
 	it('adds ?start=<room> to the iframe src when the snapshot has a start_room', async () => {
