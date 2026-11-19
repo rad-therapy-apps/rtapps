@@ -47,13 +47,15 @@ const srv = http.createServer((req, res) => {
 	}
 });
 await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+// WebGL in headless Chromium: the GPU through Metal on macOS, SwiftShader (software) elsewhere
 const browser = await chromium.launch({
 	headless: true,
 	args: [
 		'--ignore-gpu-blocklist',
 		'--enable-webgl',
-		'--use-angle=swiftshader',
-		'--enable-unsafe-swiftshader'
+		...(process.platform === 'darwin'
+			? ['--use-angle=metal']
+			: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
 	]
 });
 try {
