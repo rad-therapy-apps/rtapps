@@ -37,13 +37,15 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkView, createNoScrollCollector } from './lib/no-scroll.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.resolve(HERE, '..');
 const ARCADE = path.join(WEB, 'arcade');
 const STATIC = path.join(WEB, 'static/arcade');
 const { chromium } = createRequire(path.join(WEB, 'package.json'))('playwright');
-const VIEW = { width: 1280, height: 800 };
+const VIEW = checkView({ width: 1280, height: 800 });
+const noScroll = createNoScrollCollector();
 
 function setupError(msg) {
 	console.error(`CONSOLE CHECK setup error: ${msg}`);
@@ -273,6 +275,7 @@ try {
 		'the panel to open at the queue',
 		() => window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'queue'
 	);
+	await noScroll.scan(page, 'the center, panel open at queue');
 	await until(
 		"the LINAC console's ready",
 		() => window.__NPC.consoleMessages().some((m) => m.message.type === 'rtapps-linac-ready'),
@@ -284,6 +287,7 @@ try {
 		`the panel holds the LINAC console in the tutorial scenario (${frame?.url()})`
 	);
 	const click = async (sel) => {
+		await noScroll.scan(frame, `before clicking ${sel}`);
 		await frame.locator(sel).first().click();
 		await sleep(120);
 	};
@@ -350,7 +354,9 @@ try {
 		'the panel to open at Patient Setup',
 		() => window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'setup'
 	);
+	await noScroll.scan(page, 'the center, panel open at setup');
 	await frame.locator('#immobilizationVerify').waitFor({ state: 'visible' });
+	await noScroll.scan(frame, 'Patient Setup, on opening');
 	const keys = (await frame.locator('#immobilizationOrderSummary .immo-key').textContent())
 		.split(':')
 		.slice(1)
@@ -478,7 +484,9 @@ try {
 		'the panel to open at image guidance',
 		() => window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'igrt'
 	);
+	await noScroll.scan(page, 'the center, panel open at igrt');
 	await frame.locator('#igrtNewSetup').waitFor({ state: 'visible' });
+	await noScroll.scan(frame, 'image guidance, on opening');
 	await click('#igrtNewSetup');
 	await consoleKey('consoleKV');
 	n = await eventCount();
@@ -519,6 +527,8 @@ try {
 			window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'delivery'
 	);
 	await frame.locator('#rtv2EnableBeam').waitFor({ state: 'visible' });
+	await noScroll.scan(page, 'the center, panel open at delivery');
+	await noScroll.scan(frame, 'delivery screen, on opening');
 	const pose = () =>
 		tut(
 			() =>
@@ -534,6 +544,7 @@ try {
 		if (index > 0) {
 			await click(`#rtv2dFieldList .rtv2d-field-row[data-index="${index}"]`);
 			await tut(() => (window.__gantry = []));
+			await noScroll.scan(frame, 'delivery, before holding Move to field');
 			const hold = frame.locator('#consoleMoveToField');
 			await hold.scrollIntoViewIfNeeded();
 			const box = await hold.boundingBox();
@@ -626,6 +637,7 @@ try {
 		'the panel to open at the queue again',
 		() => window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'queue'
 	);
+	await noScroll.scan(page, 'the center, panel open at queue');
 	expect((await state()).console.fresh, 'the second play asks for a fresh console page');
 	await until(
 		"the console's page to boot again",
@@ -645,9 +657,18 @@ try {
 	part('a second play, steps 1-3');
 
 	expect(pageErrors.length === 0, `no page errors: ${pageErrors.join(' | ')}`);
-	console.log(
-		`CONSOLE CHECK PASS: steps 3, 6, 8 and 9 on the real LINAC console, and step 3 of a second play, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
-	);
+	const scrolled = noScroll.fail();
+	if (scrolled) {
+		console.log(scrolled);
+		process.exitCode = 1;
+	} else {
+		console.log(
+			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls`
+		);
+		console.log(
+			`CONSOLE CHECK PASS: steps 3, 6, 8 and 9 on the real LINAC console, and step 3 of a second play, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
+		);
+	}
 } catch (err) {
 	console.log(
 		`CONSOLE CHECK FAIL: ${err instanceof CheckFailure ? err.message : (err?.stack ?? err)}`
