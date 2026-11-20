@@ -181,12 +181,24 @@ export interface ConsoleTask {
 	hints: readonly [string, string];
 	/** From the third miss on: what to do (the reason says why, once the step is done). */
 	reveal: string;
+	/** Hints for particular refusals, in place of `hints` and `reveal`: the first that fits the
+	    refusal is used, and the misses count on through hint 1, hint 2 and the reveal as before. */
+	refusals?: readonly RefusalHints[];
 	/** Why the step is done this way: "Correct. <reason>" shows when it completes, as a decision's
 	    reason does. */
 	reason: string;
 	/** The world actions as the console's beam (its pose stream, console-bus.ts linacPose) turns on
 	    and off during the step. */
 	beam?: { on: StepAction; off: StepAction };
+}
+
+/** A console step's hints for some of its refusals: those with a code in `codes`, once the step's
+    `after` event (one of its `done`) has come. */
+export interface RefusalHints {
+	codes: readonly string[];
+	after?: ConsoleProgressKind;
+	hints: readonly [string, string];
+	reveal: string;
 }
 
 export interface Step {
@@ -444,13 +456,36 @@ export const CHAPTER_1: readonly Step[] = [
 		hints: CONSOLE_HINTS,
 		console: {
 			workspace: 'igrt',
-			done: ['shift-applied', 'alignment-verified'],
+			done: ['images-acquired', 'shift-applied', 'alignment-verified'],
 			hints: [
 				'The images find this kind of difference before the beam is on. Press New Daily Setup and MV / EPID, then Acquire Images.',
 				`Today’s images show Jordan ${TUTORIAL_SHIFT_MM} mm off the plan. Press Motion Enable, then the couch keys, until the residuals are in tolerance.`
 			],
 			reveal:
 				'Press Motion Enable, apply the correction with the couch keys or by holding Move to field, then press Verify Alignment.',
+			// once the images are in, a couch refusal never sends the player back to New Daily Setup: with
+			// the couch off its baseline that is refused too, and counts as another miss
+			refusals: [
+				{
+					codes: ['collision'],
+					after: 'images-acquired',
+					hints: [
+						`The couch went past the ${TUTORIAL_SHIFT_MM} mm correction, so the collision interlock stopped it. Press Vert − to bring it back until the residuals turn green, then press Verify Alignment.`,
+						`The couch is above the ${TUTORIAL_SHIFT_MM} mm correction. Press Vert − until the Vertical residual turns green, then press Verify Alignment.`
+					],
+					reveal: `Press Vert − until the Vertical residual reads 0 mm (+${TUTORIAL_SHIFT_MM} mm applied), then press Verify Alignment.`
+				},
+				{
+					codes: ['motion-locked', 'baseline-required', 'verify-before-shift'],
+					after: 'images-acquired',
+					hints: [
+						`Today’s images show Jordan ${TUTORIAL_SHIFT_MM} mm off the plan. Press Motion Enable, then the couch keys, until the residuals are in tolerance.`,
+						'Press Motion Enable, then drive the couch until every residual is green, then press Verify Alignment.'
+					],
+					reveal:
+						'Press Motion Enable, apply the correction with the couch keys or by holding Move to field, then press Verify Alignment.'
+				}
+			],
 			reason:
 				'Image guidance checks that Jordan is in the planned treatment position before radiation is delivered; a measured shift is corrected, then verified.'
 		},
