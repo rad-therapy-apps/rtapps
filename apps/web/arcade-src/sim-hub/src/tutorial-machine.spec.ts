@@ -58,6 +58,15 @@ const mistake: TutorialEvent = {
 	type: 'linac',
 	event: { kind: 'mistake', workspace: 'queue', code: 'wrong-patient', message: 'Not the patient.' }
 };
+// a refusal on the image-guidance screen, by its code
+const refused = (code: string): TutorialEvent => ({
+	type: 'linac',
+	event: { kind: 'mistake', workspace: 'igrt', code, message: 'Refused.' }
+});
+const imagesAcquired: TutorialEvent = {
+	type: 'linac',
+	event: { kind: 'images-acquired', mrn: JORDAN_MRN, shiftMm: 4 }
+};
 
 describe('starting', () => {
 	it('opens step 1 with no hint', () => {
@@ -174,14 +183,17 @@ describe('console steps', () => {
 		expect(run(r.s, linac('chart-opened')).s.step).toBe(4);
 	});
 
-	it('completes step 8 on alignment-verified only after shift-applied', () => {
+	it('completes step 8 on alignment-verified only after the images and shift-applied', () => {
 		let r = run(atStep(8), { type: 'pressedE', target: 'console' });
 		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'igrt' }]);
 		r = run(r.s, linac('alignment-verified'));
 		expect(r.s.step).toBe(8);
 		expect(r.effects).toEqual([]);
-		r = run(r.s, linac('shift-applied'));
+		r = run(r.s, imagesAcquired);
 		expect(r.s.progress).toBe(1);
+		expect(r.effects).toEqual([]);
+		r = run(r.s, linac('shift-applied'));
+		expect(r.s.progress).toBe(2);
 		expect(r.effects).toEqual([]);
 		r = run(r.s, linac('alignment-verified'));
 		expect(actions(r.effects)).toEqual(['shiftApplied']);
@@ -260,6 +272,7 @@ describe('console steps', () => {
 		const next = run(
 			atStep(8),
 			{ type: 'pressedE', target: 'console' },
+			imagesAcquired,
 			linac('shift-applied'),
 			linac('alignment-verified')
 		).s;
@@ -322,6 +335,64 @@ describe('console steps', () => {
 		});
 		expect(consoleMissText(schedule, 3)).toEqual({ kind: 'reveal', text: schedule.reveal });
 		expect(consoleMissText(schedule, 7).kind).toBe('reveal');
+	});
+});
+
+describe('step 8: hints by what the console refused', () => {
+	const task = CHAPTER_1[7].console!;
+	const open = run(atStep(8), { type: 'pressedE', target: 'console' }).s;
+	const imaged = run(open, imagesAcquired).s;
+	const NEW_IMAGES = /New Daily Setup|Acquire Images/;
+
+	it('after the images, a collision says the couch went past the correction: back with Vert −, then Verify Alignment', () => {
+		const r = run(imaged, refused('collision'), refused('collision'), refused('collision'));
+		const lines = hints(r.effects);
+		expect(r.effects.map((e) => e.type === 'hint' && e.kind)).toEqual(['hint1', 'hint2', 'reveal']);
+		expect(lines[0]).toMatch(/^Not yet\. The couch went past the 4 mm correction/);
+		for (const l of lines) {
+			expect(l).toContain('Vert −');
+			expect(l).toContain('Verify Alignment');
+			expect(l).not.toMatch(NEW_IMAGES);
+		}
+		// the reveal says exactly where to stop
+		expect(lines[2]).toContain('Vertical residual reads 0 mm');
+		expect(r.s.misses).toBe(3);
+		expect(r.s.step).toBe(8);
+	});
+
+	it('after the images, the other couch refusals point at the correction, never at new images', () => {
+		for (const code of ['motion-locked', 'baseline-required', 'verify-before-shift']) {
+			const l = hints(run(imaged, refused(code)).effects);
+			expect(l, code).toHaveLength(1);
+			expect(l[0], code).not.toMatch(NEW_IMAGES);
+			expect(l[0], code).toContain('Motion Enable');
+		}
+	});
+
+	it('before the images, keeps the step’s own hints, which start with taking them', () => {
+		expect(hints(run(open, refused('collision')).effects)).toEqual([`Not yet. ${task.hints[0]}`]);
+		// and an image refusal after the images (a new daily setup) still points at the images
+		expect(hints(run(imaged, refused('verify-before-images')).effects)).toEqual([
+			`Not yet. ${task.hints[0]}`
+		]);
+	});
+
+	it('counts the misses across kinds: hint 1, hint 2, then the reveal of the hints that fit', () => {
+		const r = run(open, refused('imaging-not-ready'), imagesAcquired, refused('collision'));
+		const lines = hints(r.effects);
+		expect(lines[0]).toBe(`Not yet. ${task.hints[0]}`);
+		expect(r.effects.filter((e) => e.type === 'hint').at(-1)).toMatchObject({ kind: 'hint2' });
+		expect(lines[1]).toContain('Vert −');
+		expect(hints(run(r.s, refused('collision')).effects)[0]).toContain(
+			'Vertical residual reads 0 mm'
+		);
+	});
+
+	it('picks the hints from the refusal’s code and the events already in', () => {
+		expect(consoleMissText(task, 1, 'collision', 0).text).toBe(`Not yet. ${task.hints[0]}`);
+		expect(consoleMissText(task, 1, 'collision', 1).text).toMatch(/went past/);
+		expect(consoleMissText(task, 1, undefined, 1).text).toBe(`Not yet. ${task.hints[0]}`);
+		expect(consoleMissText(task, 3, 'collision', 2).kind).toBe('reveal');
 	});
 });
 

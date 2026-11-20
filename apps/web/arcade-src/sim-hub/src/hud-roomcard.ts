@@ -2,7 +2,8 @@
    (room-enter.ts, the lobby included): the room's kicker, name and description, its department zone
    and room type, "What happens here" and who to talk to. It pauses the game (pause.ts) and frees the
    pointer; Continue (the button or Enter) resumes and locks the pointer again, Esc closes it too
-   (dialogs.ts). "Don't show this again" keeps the room in PREF.roomCardsHidden; Settings > Room
+   (dialogs.ts). In the Tutorial a room's card shows only the first time the player enters it in that
+   play (roomcard-rules.ts shouldShowRoomCardNow); starting the Tutorial again starts fresh. "Don't show this again" keeps the room in PREF.roomCardsHidden; Settings > Room
    introductions (the #setRoomCards box in menu.ts's settings, wired here) turns every card off, and
    back on clears that list (roomcard-rules.ts). The element is #roomPopup: sdk-bridge.ts's CT QA
    animation pulses '#roomCard'. */
@@ -14,12 +15,13 @@ import { setPaused } from './pause';
 import { openDialogName, registerDialog } from './dialogs';
 import { PREF, readPref, writePref } from './prefs';
 import { onRoomEnter } from './room-enter';
+import { getPlayMode, onPlayModeChange } from './play-mode';
 import {
 	hideRoomCardFor,
 	roomTypeLabel,
 	roomZoneLabel,
 	setRoomCardsEnabled,
-	shouldShowRoomCard,
+	shouldShowRoomCardNow,
 	type RoomCardPrefs
 } from './roomcard-rules';
 
@@ -29,6 +31,8 @@ const setText = (id: string, text: string) => {
 	if (el) el.textContent = text;
 };
 let shownId: string | null = null;
+/** Rooms whose card this Tutorial play has shown; emptied when a Tutorial play starts. */
+const shownThisPlay = new Set<string>();
 
 function loadPrefs(): RoomCardPrefs {
 	const hidden = readPref<unknown>(PREF.roomCardsHidden, []);
@@ -58,6 +62,7 @@ function showRoomCard(r: Room): void {
 	const tick = byId('rcHide') as HTMLInputElement | null;
 	if (tick) tick.checked = false;
 	shownId = r.id;
+	shownThisPlay.add(r.id);
 	byId('roomPopup')?.classList.add('show');
 	setPaused('roomCard', true);
 	if (document.pointerLockElement) document.exitPointerLock();
@@ -75,10 +80,23 @@ function closeRoomCard(relock: boolean): void {
 	if (relock) requestWalkPointerLock();
 }
 
+/** Every room entry and every card shown, for scripts/sim-hub-tutorial-check.mjs (?npccheck only). */
+const checkLog: { entered: string[]; shown: string[] } = { entered: [], shown: [] };
+
 onRoomEnter((r) => {
+	checkLog.entered.push(r.id);
 	// one card at a time, never over another dialog (a conversation, a lab, the CT QA menu)
-	if (shownId || openDialogName() !== null || !shouldShowRoomCard(r.id, loadPrefs())) return;
+	if (
+		shownId ||
+		openDialogName() !== null ||
+		!shouldShowRoomCardNow(r.id, loadPrefs(), getPlayMode(), shownThisPlay)
+	)
+		return;
+	checkLog.shown.push(r.id);
 	showRoomCard(r);
+});
+onPlayModeChange((m) => {
+	if (m === 'tutorial') shownThisPlay.clear();
 });
 registerDialog(
 	'roomCard',
@@ -98,3 +116,12 @@ if (roomCardsBox) {
 		savePrefs(setRoomCardsEnabled(roomCardsBox.checked, loadPrefs()))
 	);
 }
+if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('npccheck'))
+	Object.assign(window, {
+		__ROOMCARD: {
+			log: checkLog,
+			open: () => shownId,
+			/** As Continue does (without the pointer lock). */
+			close: () => closeRoomCard(false)
+		}
+	});

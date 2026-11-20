@@ -106,7 +106,8 @@ function currentPose(): LinacPose {
 }
 
 /* ----- the refusal bar: every mistake shows at the top of the console for a few seconds, or until
-   the learner's next action succeeds or the workspace changes ----- */
+   the learner's next action succeeds (a workflow event, or a machine move the interlocks let
+   through) or the workspace changes ----- */
 let refusalBar: HTMLElement | null = null;
 let refusalTimer = 0;
 function hideRefusal() {
@@ -280,7 +281,10 @@ export function startConsoleMode() {
 				type: 'rtapps-linac-event',
 				event: { kind: 'mistake', workspace: currentWorkspace(), code, message }
 			});
-		}
+		},
+		// a refused couch key's "Collision blocked" must not stay up while the opposite key moves the
+		// couch back: that reads as the way back being blocked too
+		moved: hideRefusal
 	});
 	// the image-guidance steps name the console's keys, not the in-room pendant (linac-igrt.ts too)
 	const igrtSteps = document.querySelector('#igrtPanel .igrt-head p');

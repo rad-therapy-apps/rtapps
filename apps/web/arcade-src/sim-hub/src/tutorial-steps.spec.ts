@@ -49,6 +49,7 @@ function texts(): string[] {
 		out.push(s.objective, s.target.place, s.target.name, ...s.hints);
 		if (s.target.label) out.push(s.target.label);
 		if (s.console) out.push(...s.console.hints, s.console.reveal, s.console.reason);
+		for (const r of s.console?.refusals ?? []) out.push(...r.hints, r.reveal);
 		for (const l of s.exchange ?? []) out.push(l.who, l.text);
 		const d = s.decision;
 		if (d) {
@@ -115,7 +116,7 @@ describe('Chapter 1 steps', () => {
 		expect([3, 6, 8, 9].map((n) => at(n).console!.done)).toEqual([
 			['chart-opened'],
 			['setup-complete'],
-			['shift-applied', 'alignment-verified'],
+			['images-acquired', 'shift-applied', 'alignment-verified'],
 			['treatment-complete']
 		]);
 		expect(JORDAN_MRN).toBe(TUTORIAL_PATIENTS.jordan.mrn);
@@ -129,6 +130,11 @@ describe('Chapter 1 steps', () => {
 			expect(c.hints[0], `step ${s.n}`).not.toBe(c.hints[1]);
 			for (const l of [...c.hints, c.reveal, c.reason])
 				expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
+			// a refusal's own hints wait for one of the step's events, and differ from each other
+			for (const r of c.refusals ?? []) {
+				if (r.after) expect(c.done, `step ${s.n}`).toContain(r.after);
+				expect(r.hints[0], `step ${s.n}`).not.toBe(r.hints[1]);
+			}
 		}
 	});
 

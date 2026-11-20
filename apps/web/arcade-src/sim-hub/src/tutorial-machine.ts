@@ -145,15 +145,24 @@ export function consoleOutcome(
 	return ev.kind === next ? 'progress' : null;
 }
 
-/** The hint line for the n-th miss on a console step: hint 1, hint 2, then the reveal. */
+/** The hint line for the n-th miss on a console step: hint 1, hint 2, then the reveal, from the
+    task's hints for this refusal (`code`, with `progress` of its `done` events in) if it has
+    some, else its own. */
 export function consoleMissText(
 	task: ConsoleTask,
-	misses: number
+	misses: number,
+	code?: string,
+	progress = 0
 ): { kind: MissKind; text: string } {
-	const kind = missFeedback(misses);
+	const kind = missFeedback(misses),
+		heard = task.done.slice(0, progress),
+		h =
+			task.refusals?.find(
+				(r) => code !== undefined && r.codes.includes(code) && (!r.after || heard.includes(r.after))
+			) ?? task;
 	return {
 		kind,
-		text: kind === 'reveal' ? task.reveal : `Not yet. ${task.hints[kind === 'hint1' ? 0 : 1]}`
+		text: kind === 'reveal' ? h.reveal : `Not yet. ${h.hints[kind === 'hint1' ? 0 : 1]}`
 	};
 }
 
@@ -258,7 +267,8 @@ export function reduceTutorial(
 			const outcome = consoleOutcome(ev.event, task.done[s.progress]);
 			if (outcome === 'miss') {
 				const misses = s.misses + 1,
-					{ kind, text } = consoleMissText(task, misses);
+					code = ev.event.kind === 'mistake' ? ev.event.code : undefined,
+					{ kind, text } = consoleMissText(task, misses, code, s.progress);
 				fx.push({ type: 'hint', text, kind });
 				return out({ ...s, misses, missHint: text, hint: text });
 			}

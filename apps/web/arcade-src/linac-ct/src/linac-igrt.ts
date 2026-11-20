@@ -28,7 +28,8 @@ import {
 	TREATMENT_CLEARANCE_REQUIRED_MARGIN
 } from './linac-safety';
 import { CONSOLE, consoleEvent, consoleMistake } from './console-hooks';
-import { shiftLengthMm } from './console-messages';
+import { correctionApplied, shiftLengthMm } from './console-messages';
+import { collisionRefuses } from './collision-rule';
 
 // RTApps (#77 phase 2 task 19): honest 6DOF couch-shift shape for
 // `S.clinicalIGRT.baseline`/`.correction`. Exported so state.ts can tighten those
@@ -145,10 +146,8 @@ function quietIGRTStep(mutator) {
 	mutator();
 	S.scene?.updateMatrixWorld(true);
 	const after = getCollisionAssessment();
-	const tol = COLLISION_PROXY_TOL;
-	const entered = before.margin >= -tol && after.margin < -tol;
-	const worsened = before.margin < -tol && after.margin < before.margin - 0.002;
-	if (entered || worsened) {
+	// the same rule as the couch keys, so a correction found reachable here is reachable there
+	if (collisionRefuses(before.margin, after.margin)) {
 		restoreCollisionPose(beforePose);
 		return false;
 	}
@@ -555,6 +554,10 @@ export function renderClinicalIGRT() {
 				? 'IGRT VERIFIED · alignment is within tolerance. Selected treatment field clearance is clear.'
 				: `IGRT VERIFIED · alignment is within tolerance. ${selectedClearance?.field || deliveryCasePlan()?.field || 'Selected field'} has a separate simulator clearance hold that must be resolved or overridden in Delivery.`;
 			result.className = selectedClearance?.safe ? 'good' : '';
+		} else if (correctionApplied(residual, activeIGRTTolerances(), S.clinicalIGRT.mode)) {
+			// every residual already green: say so, not "Correction pending" (Verify Alignment's rule)
+			result.textContent = 'Within tolerance · press Verify Alignment.';
+			result.className = 'good';
 		} else {
 			result.textContent =
 				'Correction pending · drive the couch until all residual values are within tolerance.';

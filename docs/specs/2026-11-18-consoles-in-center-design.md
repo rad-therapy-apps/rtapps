@@ -140,7 +140,9 @@ console records 'sim-linac-fraction' as it does today. The center records 'sim-c
 - Step 6: E at the couch opens the console at Patient Setup. The step completes on
   `setup-complete`; Jordan is placed on the couch then, as today.
 - Step 8: E at the console opens it at image guidance. The step completes on
-  `alignment-verified` after `shift-applied`.
+  `alignment-verified` after `images-acquired` and `shift-applied`. Once the images are in, a
+  couch refusal gets hints about the correction instead of the step's own (a `collision`: the
+  couch went past it, Vert − back, then Verify Alignment), never New Daily Setup again.
 - Step 9: E at the console opens it at delivery. The step completes on `treatment-complete`; the
   vault door stays closed until then (`vaultHeld` agrees with the console's door interlock).
 - Each `mistake` during a console step counts as a miss for the step's hint track: hint 1, hint 2,
