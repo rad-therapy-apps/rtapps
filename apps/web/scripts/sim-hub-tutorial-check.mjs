@@ -534,13 +534,10 @@ function play(wrong) {
 	if (!shown.length) cards.push('no room card showed in the play (cards are on)');
 	if (!reentered.length) cards.push('the play never re-entered a room, so the rule went untested');
 	if (dup.length) cards.push(`cards showed again on re-entry: ${[...new Set(dup)].join(', ')}`);
-	for (const id of new Set(reentered))
-		if (!shown.includes(id) && entered.indexOf(id) === entered.lastIndexOf(id))
-			cards.push(`room ${id} never showed its card`);
 	report(
 		`${name}: room cards`,
 		cards,
-		`${shown.length} cards for ${new Set(entered).size} rooms entered (${entered.length} entries), none shown twice`
+		`${shown.length} cards for ${new Set(entered).size} rooms entered (${entered.length} entries)${dup.length ? '' : ', none shown twice'}`
 	);
 	// leaving
 	const leave = [];
