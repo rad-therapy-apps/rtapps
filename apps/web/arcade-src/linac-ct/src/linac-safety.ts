@@ -58,7 +58,7 @@ import { isFixedElectronField } from './delivery/case-setup';
 import { renderClinicalIGRT } from './linac-igrt';
 import { saveGameState } from './game';
 import { setTextById, syncOperatorConsole, wrap360 } from './main';
-import { CONSOLE, consoleMistake, consoleRoom } from './console-hooks';
+import { CONSOLE, consoleMistake, consoleMoved, consoleRoom } from './console-hooks';
 import { COLLISION_PROXY_TOL, collisionRefuses } from './collision-rule';
 
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
@@ -1203,6 +1203,7 @@ export function attemptCollisionSafeMotion(label, mutator) {
 		return false;
 	}
 	setSafetyHUD(false);
+	consoleMoved();
 	updateODIReadout();
 	return true;
 }
