@@ -17,6 +17,11 @@
      Couch · Beam & Workflows) beside the open window, and opening image guidance or delivery brings
      up the tab of keys that step presses (console-fit.ts keyTabFor). Elsewhere the bar is hidden
      and every key shows.
+   - The extra workflow windows (the chart's OIS / R&V step and its Additional Workflow keys) show
+     their sections as tabs over the actions and status they keep in view: OIS / R&V (Record · Fields · Audit trail · Sign-off), Adaptive
+     (Anatomy · Plans · Approval · Course · History) and SRS / SBRT (Checklist · Timeout); each
+     opens on, and each action brings up, the tab that matters then (console-fit.ts). 4D Motion
+     needs no tabs: index.html's styles alone fit it.
    A tab whose blocks still do not fit (a long list of holds, a long result on the smallest panel)
    splits into pages under a bar with ‹, the count and ›, turned with ArrowLeft / ArrowRight too, as
    the center's pop-ups are; pages break between blocks and the bar hides when everything fits
@@ -25,17 +30,23 @@
    the delivery screen (renderInterlocks). Outside console mode nothing here runs. */
 import { pageStep } from '../../sim-hub/src/pager-math';
 import {
+	adaptiveTabFor,
 	chargeTabFor,
-	fitBlocks,
+	fitGrid,
 	fitInterlocks,
+	fitTable,
 	interlockBadge,
 	keyTabFor,
+	oisTabOnOpen,
 	pageOfBlock,
 	splitInterlocks,
+	srsTabFor,
+	type AdaptiveAction,
 	type ChargeAction,
 	type ChargeTab,
 	type Interlock,
-	type KeyTab
+	type KeyTab,
+	type SrsAction
 } from './console-fit';
 import { S } from './state';
 
@@ -73,7 +84,7 @@ const pagedPanes: { host: HTMLElement; bar: HTMLElement; turn: (step: number) =>
     delivery window's selected field). */
 function pagedPane(
 	host: HTMLElement,
-	plan: () => { blocks: HTMLElement[]; pages: number[][] },
+	plan: () => Plan,
 	watch = false,
 	follow?: (blocks: HTMLElement[]) => number
 ): Paged {
@@ -128,14 +139,44 @@ function pagedPane(
 	return { layout, go };
 }
 
-/** The shown blocks of `host` (each shown for measuring) and their pages. */
-function planBlocks(host: HTMLElement) {
-	const blocks = [...host.children].filter((b): b is HTMLElement => {
-		b.classList.remove(OFF);
+interface Plan {
+	blocks: HTMLElement[];
+	pages: number[][];
+}
+
+/** The shown blocks among `items`, laid out in `host` `cols` to a row (each shown for measuring),
+    and their pages. */
+function planList(host: HTMLElement, items: (Element | null)[], cols = 1): Plan {
+	const blocks = items.filter((b): b is HTMLElement => {
+		b?.classList.remove(OFF);
 		return b instanceof HTMLElement && getComputedStyle(b).display !== 'none';
 	});
 	const gap = px(getComputedStyle(host).rowGap);
-	return { blocks, pages: fitBlocks(blocks.map(outerHeight), host.clientHeight, gap) };
+	return { blocks, pages: fitGrid(blocks.map(outerHeight), cols, host.clientHeight, gap) };
+}
+
+/** The shown blocks of `host` (each shown for measuring) and their pages. */
+function planBlocks(host: HTMLElement): Plan {
+	return planList(host, [...host.children]);
+}
+
+/** The cards of a grid `host`, paged by rows of as many columns as the grid has. */
+function planGrid(host: HTMLElement): Plan {
+	const cs = getComputedStyle(host);
+	const cols = cs.display === 'grid' ? cs.gridTemplateColumns.split(' ').filter(Boolean).length : 1;
+	return planList(host, [...host.children], Math.max(1, cols));
+}
+
+/** A table's `rows` in `host`, its header row first, paged under the header (on every page). */
+function planTable(host: HTMLElement, rows: Element[]): Plan {
+	const blocks = rows.filter((r): r is HTMLElement => r instanceof HTMLElement);
+	blocks.forEach((r) => r.classList.remove(OFF));
+	if (!blocks.length) return { blocks, pages: [] };
+	const [head, ...body] = blocks;
+	return {
+		blocks,
+		pages: fitTable(outerHeight(head), body.map(outerHeight), host.clientHeight, 0)
+	};
 }
 
 /** ArrowLeft / ArrowRight turn the shown pane's pages, unless focus is in a field. */
@@ -407,6 +448,228 @@ function installKeyTabs() {
 	}
 }
 
+/* ----- the extra workflow windows: OIS / R&V, Adaptive and SRS / SBRT show their sections as
+   tabs over what stays in view (the window's summary chips on top; its actions and status under
+   the tabs), each tab's blocks paged when they need more room than the tab has ----- */
+interface WindowPane {
+	key: string;
+	label: string;
+	/** What the tab shows, moved into it in order. */
+	items: (Element | null)[];
+	/** The box that pages (by default a box holding `items`) and how its blocks go on pages. */
+	host?: HTMLElement;
+	plan?: (host: HTMLElement) => Plan;
+}
+
+/** A tab bar `id` over `panes`, put in a window's `body` before `before`. Returns what shows a tab. */
+function windowTabs(
+	body: HTMLElement,
+	id: string,
+	label: string,
+	panes: WindowPane[],
+	before: Element
+) {
+	const shown = new Map<string, { el: HTMLElement; paged: Paged }>();
+	const show = (key: string) => {
+		markTabs(bar, key);
+		shown.forEach((p, k) => (p.el.hidden = k !== key));
+		shown.get(key)?.paged.go(0);
+	};
+	const bar = tabBar(
+		id,
+		label,
+		panes.map((p): [string, string] => [p.key, p.label]),
+		show
+	);
+	body.insertBefore(bar, before);
+	for (const p of panes) {
+		const el = document.createElement('div');
+		el.className = 'console-pane';
+		el.dataset.pane = p.key;
+		el.hidden = true;
+		const items = p.items.filter((i): i is Element => !!i);
+		let host = p.host;
+		if (host) el.append(...items);
+		else {
+			host = document.createElement('div');
+			host.className = 'console-blocks';
+			host.append(...items);
+			el.append(host);
+		}
+		body.insertBefore(el, before);
+		const h = host,
+			plan = p.plan ?? planBlocks;
+		shown.set(p.key, { el, paged: pagedPane(h, () => plan(h), true) });
+	}
+	return show;
+}
+
+/** Runs `opened` now and each time `panel` opens (gains the class open). */
+function whenOpened(panel: HTMLElement, opened: () => void) {
+	let wasOpen = panel.classList.contains('open');
+	new MutationObserver(() => {
+		const open = panel.classList.contains('open');
+		if (open && !wasOpen) opened();
+		wasOpen = open;
+	}).observe(panel, { attributes: true, attributeFilter: ['class'] });
+	opened();
+}
+
+/** OIS / R&V: Record (the verification and imaging cards) · Fields (the delivery table, paged under
+    its header) · Audit trail (paged by event, newest first) · Sign-off (the override review, paged
+    by line, and the therapist's documentation); the chips and the record's status stay in view. */
+function installOisTabs() {
+	const panel = $('oisPanel'),
+		body = panel?.querySelector<HTMLElement>('.ois-body'),
+		grid = body?.querySelector(':scope > .ois-grid'),
+		fields = $('oisFields'),
+		trail = $('oisTimeline'),
+		override = $('oisOverrideCard'),
+		docs = $('oisNote')?.closest('.ois-card'),
+		status = $('oisStatus');
+	if (!panel || !body || !grid || !fields || !trail || !override || !docs || !status) return;
+	// the override review, when a clearance override needs one, pages by line: its heading, each
+	// override's record and its acknowledgment (index.html lays them out as the card's)
+	const overrideLines = () =>
+		override.hidden
+			? []
+			: [
+					override.querySelector(':scope > h4'),
+					...($('oisOverrideSummary')?.children ?? []),
+					override.querySelector(':scope > .ois-sign-row')
+				];
+	const show = windowTabs(
+		body,
+		'oisTabs',
+		'Treatment record views',
+		[
+			{
+				key: 'record',
+				label: 'Record',
+				items: [...grid.children, body.querySelector('.ois-footnote')]
+			},
+			{
+				key: 'fields',
+				label: 'Fields',
+				items: [fields.closest('.ois-card')],
+				host: fields,
+				plan: (h) => planTable(h, [...h.querySelectorAll('tr')])
+			},
+			{ key: 'trail', label: 'Audit trail', items: [trail.closest('.ois-card')], host: trail },
+			{
+				key: 'signoff',
+				label: 'Sign-off',
+				items: [override, docs],
+				plan: (h) => planList(h, [...overrideLines(), docs])
+			}
+		],
+		status
+	);
+	grid.remove(); // emptied: its two cards are the Record tab's
+	whenOpened(panel, () =>
+		show(oisTabOnOpen(!!S.treatmentCompletion?.posted, !!S.oisSession?.signed))
+	);
+}
+
+/** Adaptive planning: Anatomy · Plans (three columns where the window is wide, else a list, paged
+    by rows) · Approval (the steps and the review's checks) · Course (the dose so far) · History
+    (paged under its header); the chips, Assess / Compare / Approve and the status stay in view,
+    and each action brings up the tab it changes (console-fit.ts adaptiveTabFor). */
+function installAdaptiveTabs() {
+	const panel = $('adaptivePanel'),
+		body = panel?.querySelector<HTMLElement>('.adaptive-body'),
+		steps = $('adaptiveStepList'),
+		checks = body?.querySelector<HTMLElement>('.adaptive-checks'),
+		actions = body?.querySelector<HTMLElement>('.adaptive-actions'),
+		plans = $('adaptivePlanGrid'),
+		history = $('adaptiveHistory'),
+		status = $('adaptiveStatus'),
+		stepsCard = steps?.closest('.adaptive-card'),
+		courseCard = history?.closest('.adaptive-card');
+	if (!panel || !body || !steps || !checks || !actions || !plans || !history || !status) return;
+	if (!stepsCard || !courseCard) return;
+	body.insertBefore(actions, status);
+	const show = windowTabs(
+		body,
+		'adaptiveTabs',
+		'Adaptive planning views',
+		[
+			{ key: 'anatomy', label: 'Anatomy', items: [$('adaptiveAnatomyCard')] },
+			{ key: 'plans', label: 'Plans', items: [plans], host: plans, plan: planGrid },
+			{
+				key: 'approval',
+				label: 'Approval',
+				items: [steps, checks],
+				plan: (h) => planList(h, [...steps.children, checks])
+			},
+			{
+				key: 'course',
+				label: 'Course',
+				items: [
+					courseCard.querySelector('.adaptive-dose-summary'),
+					$('adaptiveDoseCanvas'),
+					courseCard.querySelector('.adaptive-course-actions'),
+					body.querySelector('.adaptive-footnote')
+				]
+			},
+			{
+				key: 'history',
+				label: 'History',
+				items: [history],
+				host: history,
+				plan: (h) => planTable(h, [...h.children])
+			}
+		],
+		actions
+	);
+	stepsCard.remove(); // emptied but for their headings, which the tabs name
+	courseCard.remove();
+	const follow = (action: AdaptiveAction) => show(adaptiveTabFor(action, S.adaptiveWorkflow));
+	$('adaptiveAssess')?.addEventListener('click', () => follow('assess'));
+	$('adaptiveCompare')?.addEventListener('click', () => follow('compare'));
+	$('adaptiveApprove')?.addEventListener('click', () => follow('approve'));
+	checks.addEventListener('change', () => follow('check'));
+	$('adaptiveNextFraction')?.addEventListener('click', () => follow('next'));
+	$('adaptiveResetCourse')?.addEventListener('click', () => follow('reset'));
+	whenOpened(panel, () => follow('open'));
+}
+
+/** SRS / SBRT: Checklist (the prescription, the stereotactic checks, paged by row, and the controls
+    note) · Timeout (the team's four checks); the chips, the three actions and the status stay in
+    view. Opening it, Recheck Clearance and Dry Run show the checklist (console-fit.ts srsTabFor). */
+function installSrsTabs() {
+	const panel = $('srsPanel'),
+		body = panel?.querySelector<HTMLElement>('.srs-body'),
+		rx = $('srsPrescription'),
+		list = $('srsChecklist'),
+		note = $('stereoFootnote'),
+		manual = body?.querySelector<HTMLElement>('.srs-manual'),
+		actions = body?.querySelector('.srs-actions');
+	if (!panel || !body || !rx || !list || !note || !manual || !actions) return;
+	const show = windowTabs(
+		body,
+		'srsTabs',
+		'Stereotactic views',
+		[
+			{
+				key: 'checklist',
+				label: 'Checklist',
+				items: [rx, list, note],
+				plan: (h) => planList(h, [rx, ...list.children, note])
+			},
+			{ key: 'timeout', label: 'Timeout', items: [manual], host: manual, plan: planGrid }
+		],
+		actions
+	);
+	const follow = (action: SrsAction) => {
+		const tab = srsTabFor(action);
+		if (tab) show(tab);
+	};
+	$('srsClearanceCheck')?.addEventListener('click', () => follow('clearance'));
+	$('srsDryRun')?.addEventListener('click', () => follow('dryrun'));
+	whenOpened(panel, () => follow('open'));
+}
+
 /** Builds the tabs, the panes and their page bars, once. */
 export function installConsoleScreens() {
 	installDeliveryTabs();
@@ -415,5 +678,8 @@ export function installConsoleScreens() {
 	installFieldPages();
 	installReferencePages();
 	installKeyTabs();
+	installOisTabs();
+	installAdaptiveTabs();
+	installSrsTabs();
 	document.addEventListener('keydown', onKey);
 }
