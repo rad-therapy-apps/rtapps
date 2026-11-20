@@ -11338,7 +11338,7 @@
 			body.linac-console-view .pgOff {
 				display: none !important;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager {
+			body.linac-console-view #patientInfoDeskMonitor .pager {
 				display: flex;
 				flex: 0 0 auto;
 				align-items: center;
@@ -11347,16 +11347,16 @@
 				padding: 3px 4px 0;
 				border-top: 1px solid rgba(129, 193, 214, 0.16);
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager[hidden] {
+			body.linac-console-view #patientInfoDeskMonitor .pager[hidden] {
 				display: none;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pgCount {
+			body.linac-console-view #patientInfoDeskMonitor .pgCount {
 				color: #e8f1f4;
 				font-size: 13px;
 				font-weight: 800;
 				letter-spacing: 0.05em;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager button {
+			body.linac-console-view #patientInfoDeskMonitor .pager button {
 				width: 36px;
 				height: 26px;
 				margin: 0;
@@ -11369,10 +11369,10 @@
 				line-height: 1;
 				cursor: pointer;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager button:hover:not(:disabled) {
+			body.linac-console-view #patientInfoDeskMonitor .pager button:hover:not(:disabled) {
 				background: rgba(66, 213, 207, 0.18);
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager button:disabled {
+			body.linac-console-view #patientInfoDeskMonitor .pager button:disabled {
 				opacity: 0.3;
 				cursor: default;
 			}
@@ -12516,8 +12516,15 @@
 					display: none !important;
 				}
 			}
-			/* frames under 660 px tall: the keys in two tabs, Imaging & Couch and Beam & Workflows */
+			/* frames under 660 px tall: the keys in two tabs, Imaging & Couch and Beam & Workflows, and
+			   the top bar names the patient without the site line (screen 2 and the windows show it) */
 			@media (max-width: 969px) and (max-height: 659px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2PatientSubtitle {
+					display: none !important;
+				}
 				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
 						.rtv2-landing
 					)
@@ -12622,18 +12629,65 @@
 				> li {
 				margin: 0 !important;
 			}
+			/* the window's height is the setup's: the order gives up room first, its instructions paged
+			   when a long order would otherwise push the buttons out of the window */
+			body.linac-console-view #consoleWorkflowDockBody #immobilizationPanel.open {
+				height: 100%;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-body {
+				box-sizing: border-box;
+				height: 100%;
+				grid-template-rows: auto minmax(0, max-content) auto auto auto auto;
+				align-content: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card:not(#immobilizationVerificationChecks) {
+				grid-row: 2;
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				> * {
+				flex: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				> .immo-instructions {
+				flex: 0 1 auto;
+				min-height: 0;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				> .pager {
+				margin-top: 3px;
+			}
+			body.linac-console-view #consoleWorkflowDockBody #immobilizationVerificationChecks {
+				grid-row: 3;
+			}
+			body.linac-console-view #consoleWorkflowDockBody .immo-workspace {
+				grid-row: 4;
+			}
+			body.linac-console-view #consoleWorkflowDockBody .immo-actions {
+				grid-row: 5;
+			}
+			body.linac-console-view #consoleWorkflowDockBody #immobilizationFeedback {
+				grid-row: 6;
+			}
 			/* a wide, short window: the order beside the shelf and the table, the three checks across
 			   the window under them, then the result and the two buttons. The order takes the room the
 			   rest leaves, its instructions paged if they need more. */
-			@container dock (min-width: 640px) and (max-height: 430px) {
-				body.linac-console-view #consoleWorkflowDockBody #immobilizationPanel.open {
-					height: 100%;
-				}
+			@container dock (min-width: 640px) and (max-height: 519px) {
 				body.linac-console-view.control-room-mode.rt-v2-console
 					#consoleWorkflowDockBody
 					.immo-body {
-					box-sizing: border-box;
-					height: 100%;
 					gap: 3px !important;
 					padding: 3px !important;
 					grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -12652,24 +12706,6 @@
 					#consoleWorkflowDockBody
 					.immo-card:not(#immobilizationVerificationChecks) {
 					grid-area: order;
-					display: flex;
-					flex-direction: column;
-					min-height: 0;
-					overflow: hidden;
-				}
-				body.linac-console-view.control-room-mode.rt-v2-console
-					#consoleWorkflowDockBody
-					.immo-instructions {
-					flex: 0 1 auto;
-					min-height: 0;
-					overflow: hidden;
-				}
-				body.linac-console-view.control-room-mode.rt-v2-console
-					#consoleWorkflowDockBody
-					.immo-card
-					> .pager {
-					flex: none;
-					margin-top: 3px;
 				}
 				body.linac-console-view.control-room-mode.rt-v2-console
 					#consoleWorkflowDockBody
@@ -12777,6 +12813,114 @@
 					.charge-pane
 					.charge-section
 					> h4 {
+					display: none !important;
+				}
+			}
+			/* screen 2's setup card no taller than its row: its list pages when a patient's setup needs
+			   more room (src/console-screens.ts installReferencePages) */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> .patient-monitor-card:nth-child(5) {
+				display: flex;
+				flex-direction: column;
+				box-sizing: border-box;
+				min-height: 0;
+				max-height: 100%;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> .patient-monitor-card:nth-child(5)
+				> * {
+				flex: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				#consoleImmoList {
+				display: grid;
+				flex: 0 1 auto;
+				align-content: start;
+				row-gap: 2px;
+				min-height: 0;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				#consoleImmoList
+				> li {
+				margin: 0 !important;
+			}
+			/* the delivery window's fields: names and targets wrap; the list takes the room the patient
+			   column has left under the course and pages when a plan has more fields than that
+			   (src/console-screens.ts installFieldPages) */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar {
+				display: flex;
+				flex-direction: column;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				> * {
+				flex: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#rtv2dFieldList {
+				flex: 0 1 auto;
+				min-height: 0;
+				overflow: hidden;
+				align-content: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				> .pager {
+				gap: 4px;
+				margin: 2px 4px 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				> .pager
+				button {
+				width: 30px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				.pgCount {
+				font-size: 12px;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-field-main
+				:is(b, span) {
+				overflow: visible;
+				white-space: normal;
+				text-overflow: clip;
+				overflow-wrap: anywhere;
+			}
+			/* image guidance's chips and the chart's patient and field lines wrap a long name or site
+			   rather than cutting it short */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-chip b,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				:is(#rtv2PatientSubtitle, #rtv2FieldMeta) {
+				overflow: visible;
+				white-space: normal;
+				text-overflow: clip;
+			}
+			/* the wide console on frames under 560 px tall: the chart's site line and active field's
+			   plan line go (screen 2 beside it shows both), so a long one cannot push the keys down */
+			@media (min-width: 970px) and (max-height: 559px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus)
+					#workflowDeskMonitor
+					:is(#rtv2PatientSubtitle, #rtv2FieldMeta) {
 					display: none !important;
 				}
 			}

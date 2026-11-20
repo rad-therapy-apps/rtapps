@@ -5,6 +5,7 @@ import {
 	fitInterlocks,
 	interlockBadge,
 	keyTabFor,
+	pageOfBlock,
 	splitInterlocks
 } from './console-fit';
 
@@ -40,6 +41,18 @@ describe('fitBlocks', () => {
 	it('breaks between blocks, never inside one, when they do not', () => {
 		expect(fitBlocks([100, 60, 40], 170, 5)).toEqual([[0, 1], [2]]);
 		expect(fitBlocks([300, 40], 170, 5)).toEqual([[0], [1]]);
+	});
+});
+
+describe('pageOfBlock', () => {
+	it('finds the page a block is on', () => {
+		expect(pageOfBlock([[0, 1], [2, 3], [4]], 0)).toBe(0);
+		expect(pageOfBlock([[0, 1], [2, 3], [4]], 3)).toBe(1);
+		expect(pageOfBlock([[0, 1], [2, 3], [4]], 4)).toBe(2);
+	});
+	it('is -1 for a block on no page, or none', () => {
+		expect(pageOfBlock([[0, 1]], 5)).toBe(-1);
+		expect(pageOfBlock([[0, 1]], -1)).toBe(-1);
 	});
 });
 

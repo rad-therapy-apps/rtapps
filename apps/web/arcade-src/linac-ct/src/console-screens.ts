@@ -10,7 +10,9 @@
      guide, the image-guidance notes and the result as tabs above them; each choice and button shows
      the tab that explains it.
    - Patient Setup's instructions page when the window is too short for the whole order (the
-     narrow frames' two-column setup gives the order the room the shelf and table leave).
+     narrow frames' two-column setup gives the order the room the shelf and table leave), and so
+     do the delivery window's fields when a plan has more than the patient column holds, and
+     screen 2's setup card when a patient's setup is longer than its room.
    - In narrow, short frames the chart's Machine / Imaging keys show one tab at a time (Imaging &
      Couch · Beam & Workflows) beside the open window, and opening image guidance or delivery brings
      up the tab of keys that step presses (console-fit.ts keyTabFor). Elsewhere the bar is hidden
@@ -28,6 +30,7 @@ import {
 	fitInterlocks,
 	interlockBadge,
 	keyTabFor,
+	pageOfBlock,
 	splitInterlocks,
 	type ChargeAction,
 	type ChargeTab,
@@ -66,11 +69,13 @@ const pagedPanes: { host: HTMLElement; bar: HTMLElement; turn: (step: number) =>
     min-height 0), with a page bar after it. `plan` measures the blocks with the bar hidden, or
     again with it shown when they need pages, and says which block goes on which page. Laid out
     again when the host's room changes (its tab shown, a resize) and, with `watch`, when its
-    content does. */
+    content does. With `follow`, the page turns to the block it names whenever that changes (the
+    delivery window's selected field). */
 function pagedPane(
 	host: HTMLElement,
 	plan: () => { blocks: HTMLElement[]; pages: number[][] },
-	watch = false
+	watch = false,
+	follow?: (blocks: HTMLElement[]) => number
 ): Paged {
 	const bar = document.createElement('div');
 	bar.className = 'pager';
@@ -80,7 +85,8 @@ function pagedPane(
 	const [prev, next] = [...bar.querySelectorAll('button')],
 		count = bar.querySelector('.pgCount');
 	host.after(bar);
-	let page = 0;
+	let page = 0,
+		followed = -1;
 	function layout() {
 		if (!host.offsetParent) return; // not shown: laid out when it is
 		bar.hidden = true;
@@ -90,6 +96,12 @@ function pagedPane(
 			p = plan();
 		}
 		const pages = p.pages.length ? p.pages : [[]];
+		const want = follow ? follow(p.blocks) : -1;
+		if (want !== followed) {
+			followed = want;
+			const at = pageOfBlock(pages, want);
+			if (at >= 0) page = at;
+		}
 		page = Math.max(0, Math.min(page, pages.length - 1));
 		pages.forEach((blocks, i) =>
 			blocks.forEach((b) => p.blocks[b]?.classList.toggle(OFF, i !== page))
@@ -341,6 +353,25 @@ function installSetupPages() {
 	if (list) pagedPane(list, () => planBlocks(list), true);
 }
 
+/* ----- screen 2's setup card: its list pages when a patient's setup needs more room ----- */
+function installReferencePages() {
+	const list = $('consoleImmoList');
+	if (list) pagedPane(list, () => planBlocks(list), true);
+}
+
+/* ----- the delivery window's fields page when a plan has more than its column holds, the page
+   with the selected field shown ----- */
+function installFieldPages() {
+	const list = $('rtv2dFieldList');
+	if (list)
+		pagedPane(
+			list,
+			() => planBlocks(list),
+			true,
+			(rows) => rows.findIndex((r) => r.classList.contains('active'))
+		);
+}
+
 /* ----- the chart's Machine / Imaging keys in narrow, short frames: two tabs (index.html's
    "console mode, narrow frames" styles show the bar and hide the other tab's keys only there) ----- */
 function installKeyTabs() {
@@ -381,6 +412,8 @@ export function installConsoleScreens() {
 	installDeliveryTabs();
 	installChargeTabs();
 	installSetupPages();
+	installFieldPages();
+	installReferencePages();
 	installKeyTabs();
 	document.addEventListener('keydown', onKey);
 }

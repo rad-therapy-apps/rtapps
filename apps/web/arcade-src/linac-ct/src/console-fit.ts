@@ -63,6 +63,11 @@ export function fitInterlocks(
 	};
 }
 
+/** The page (from 0) that holds block `block`; -1 when no page does. */
+export function pageOfBlock(pages: number[][], block: number): number {
+	return pages.findIndex((p) => p.includes(block));
+}
+
 export type ChargeTab = 'codes' | 'notes' | 'result';
 export type ChargeAction = 'open' | 'code' | 'igrt' | 'verify' | 'post';
 
