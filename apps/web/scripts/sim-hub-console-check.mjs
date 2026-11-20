@@ -16,8 +16,9 @@
 //           Verify; the step completes
 //   step 8  image guidance (Jordan's whole-brain plan images with the MV panel): a new daily
 //           setup, the MV panel out, the images; Vert + past the correction until the collision
-//           interlock stops the couch, then Vert − from there goes and clears the refusal; the
-//           couch correction from the console's keys, Verify Alignment
+//           interlock stops the couch (the Tutorial's hint: Vert −, then Verify Alignment; the status
+//           line: correction pending), then Vert − from there goes and clears the refusal (the status
+//           line: within tolerance); the couch correction from the console's keys, Verify Alignment
 //   step 9  delivery: the right lateral field (gantry 270), then the left lateral field (90), each
 //           after Move to field; Vault 1's gantry (window.__NPC.vaultLinac) passes the angles
 //           between, one way, and ends at the field's angle (0 to 270, then 270 to 90); the Vault 1
@@ -499,7 +500,9 @@ try {
 	await click('#rtv2MotionEnable');
 	n = await eventCount();
 	// an overshoot first: Vert + past the +4 mm correction until the collision interlock stops the
-	// couch (still clear of the treatment head), then Vert − from there goes, and its refusal goes
+	// couch (still clear of the treatment head), then Vert − from there goes, and its refusal goes;
+	// the Tutorial's hint for the collision says Vert − and Verify Alignment, not new images, and the
+	// status line under the residuals follows the tolerance both ways
 	const appliedVertical = () =>
 		frame
 			.locator('#igrtCorrectionRows .igrt-row')
@@ -510,6 +513,8 @@ try {
 			)
 			.then(parseFloat);
 	const refusalShown = () => frame.evaluate(() => !!document.querySelector('#consoleRefusal.show'));
+	const statusLine = () => frame.locator('#igrtResult').textContent();
+	const hintBefore = (await state()).hint;
 	let stopped = null;
 	for (let i = 0; i < 12 && !stopped; i++) {
 		const from = await eventCount();
@@ -521,6 +526,25 @@ try {
 		stopped?.code === 'collision' && top > 4 && (await refusalShown()),
 		`Vert + past the correction stops at the collision interlock, the refusal shown (${top} mm applied; ${JSON.stringify(stopped)})`
 	);
+	const hint = await until(
+		"the Tutorial's hint for the collision",
+		(before) => {
+			const h = window.__TUTORIAL.state().hint;
+			return h !== before && h;
+		},
+		3000,
+		hintBefore
+	);
+	expect(
+		hint.includes('Vert −') &&
+			hint.includes('Verify Alignment') &&
+			!/New Daily Setup|Acquire Images/.test(hint),
+		`the Tutorial's hint after the collision names Vert − and Verify Alignment, not new images ("${hint}")`
+	);
+	expect(
+		/^Correction pending/.test(await statusLine()),
+		`the status line past the correction says the correction is pending ("${await statusLine()}")`
+	);
 	const fromTop = await eventCount();
 	await consoleKey('consoleVrtMinus');
 	const back = await appliedVertical(),
@@ -528,6 +552,11 @@ try {
 	expect(
 		back === top - 1 && refusedBack.length === 0 && !(await refusalShown()),
 		`Vert − from the stop goes and the refusal goes with it (${top} to ${back} mm; refused ${JSON.stringify(refusedBack)}; refusal shown: ${await refusalShown()})`
+	);
+	// 1 mm past the correction is inside Jordan's 1 mm tolerance
+	expect(
+		(await statusLine()) === 'Within tolerance · press Verify Alignment.',
+		`the status line within tolerance says to verify (${back} mm applied: "${await statusLine()}")`
 	);
 	const rows = await frame
 		.locator('#igrtCorrectionRows .igrt-row')
