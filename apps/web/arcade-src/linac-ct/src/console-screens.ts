@@ -9,6 +9,8 @@
    - Charge capture keeps its two choices and its Verify and Post buttons in view, with the code
      guide, the image-guidance notes and the result as tabs above them; each choice and button shows
      the tab that explains it.
+   - Patient Setup's instructions page when the window is too short for the whole order (the
+     narrow frames' two-column setup gives the order the room the shelf and table leave).
    - In narrow, short frames the chart's Machine / Imaging keys show one tab at a time (Imaging &
      Couch · Beam & Workflows) beside the open window, and opening image guidance or delivery brings
      up the tab of keys that step presses (console-fit.ts keyTabFor). Elsewhere the bar is hidden
@@ -333,6 +335,12 @@ function installChargeTabs() {
 	follow('open');
 }
 
+/* ----- Patient Setup: the instructions page when the order does not fit its room ----- */
+function installSetupPages() {
+	const list = $('immobilizationInstructions');
+	if (list) pagedPane(list, () => planBlocks(list), true);
+}
+
 /* ----- the chart's Machine / Imaging keys in narrow, short frames: two tabs (index.html's
    "console mode, narrow frames" styles show the bar and hide the other tab's keys only there) ----- */
 function installKeyTabs() {
@@ -372,6 +380,7 @@ function installKeyTabs() {
 export function installConsoleScreens() {
 	installDeliveryTabs();
 	installChargeTabs();
+	installSetupPages();
 	installKeyTabs();
 	document.addEventListener('keydown', onKey);
 }
