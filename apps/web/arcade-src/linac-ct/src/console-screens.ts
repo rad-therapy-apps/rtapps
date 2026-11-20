@@ -1,5 +1,6 @@
 /* Console mode, no scroll: the owner's rule for the center's pop-ups (no pop-up ever needs
-   scrolling) on screen 2 of the LINAC console in the center's panel, at every panel size.
+   scrolling) on the LINAC console in the center's panel, at every panel size: screen 2's windows,
+   and the chart's keys in narrow frames.
    - The R&V delivery window keeps its patient column, the beam keys and the interlocks in view. Its
      plan / actual tables are tabs beside the interlocks (Interlocks · Beam · Geometry), and the
      Interlocks tab counts the holds, so what blocks Beam On shows from any tab. The interlocks list
@@ -8,6 +9,10 @@
    - Charge capture keeps its two choices and its Verify and Post buttons in view, with the code
      guide, the image-guidance notes and the result as tabs above them; each choice and button shows
      the tab that explains it.
+   - In narrow, short frames the chart's Machine / Imaging keys show one tab at a time (Imaging &
+     Couch · Beam & Workflows) beside the open window, and opening image guidance or delivery brings
+     up the tab of keys that step presses (console-fit.ts keyTabFor). Elsewhere the bar is hidden
+     and every key shows.
    A tab whose blocks still do not fit (a long list of holds, a long result on the smallest panel)
    splits into pages under a bar with ‹, the count and ›, turned with ArrowLeft / ArrowRight too, as
    the center's pop-ups are; pages break between blocks and the bar hides when everything fits
@@ -20,10 +25,12 @@ import {
 	fitBlocks,
 	fitInterlocks,
 	interlockBadge,
+	keyTabFor,
 	splitInterlocks,
 	type ChargeAction,
 	type ChargeTab,
-	type Interlock
+	type Interlock,
+	type KeyTab
 } from './console-fit';
 import { S } from './state';
 
@@ -326,9 +333,45 @@ function installChargeTabs() {
 	follow('open');
 }
 
+/* ----- the chart's Machine / Imaging keys in narrow, short frames: two tabs (index.html's
+   "console mode, narrow frames" styles show the bar and hide the other tab's keys only there) ----- */
+function installKeyTabs() {
+	const panel = $('rtv2MachinePanel'),
+		grid = panel?.querySelector('.rtv2-console-grid');
+	if (!panel || !grid) return;
+	const show = (key: KeyTab) => {
+		panel.dataset.keys = key;
+		markTabs(tabs, key);
+	};
+	const tabs = tabBar(
+		'rtv2KeyTabs',
+		'Machine keys',
+		[
+			['couch', 'Imaging &amp; Couch'],
+			['beam', 'Beam &amp; Workflows']
+		],
+		(key) => show(key as KeyTab)
+	);
+	grid.before(tabs);
+	show('couch');
+	// opening image guidance or delivery brings up the keys that step presses
+	for (const id of ['igrtPanel', 'deliveryPanel']) {
+		const win = $(id);
+		if (!win) continue;
+		let wasOpen = win.classList.contains('open');
+		new MutationObserver(() => {
+			const open = win.classList.contains('open'),
+				tab = open && !wasOpen ? keyTabFor(id) : null;
+			if (tab) show(tab);
+			wasOpen = open;
+		}).observe(win, { attributes: true, attributeFilter: ['class'] });
+	}
+}
+
 /** Builds the tabs, the panes and their page bars, once. */
 export function installConsoleScreens() {
 	installDeliveryTabs();
 	installChargeTabs();
+	installKeyTabs();
 	document.addEventListener('keydown', onKey);
 }

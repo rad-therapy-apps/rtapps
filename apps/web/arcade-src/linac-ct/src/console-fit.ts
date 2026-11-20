@@ -1,6 +1,7 @@
 /* The no-scroll rules for the LINAC console's delivery window and charge capture in the center's
    panel (console-screens.ts lays them out): how the interlocks list fits its pane, what the
-   Interlocks tab says, and which charge capture tab follows the learner's action. Free of DOM
+   Interlocks tab says, and which charge capture tab follows the learner's action; and, in narrow
+   short frames, which tab of Machine / Imaging keys a workflow window brings up. Free of DOM
    imports so it is unit tested in Node (console-fit.spec.ts). Pages break as the center's pop-ups
    do (sim-hub/src/pager-math.ts breakPages). */
 import { breakPages } from '../../sim-hub/src/pager-math';
@@ -74,4 +75,15 @@ export function chargeTabFor(action: ChargeAction, posted: boolean): ChargeTab {
 	if (action === 'code') return 'codes';
 	if (action === 'igrt') return 'notes';
 	return 'result';
+}
+
+export type KeyTab = 'couch' | 'beam';
+
+/** The tab of Machine / Imaging keys a workflow window brings up where the keys show one tab at a
+    time (narrow, short frames): image guidance presses kV Imaging and the couch keys, delivery holds
+    Move to field. Any other window, or none, keeps the tab the learner picked (null). */
+export function keyTabFor(openWindow: string | null): KeyTab | null {
+	if (openWindow === 'igrtPanel') return 'couch';
+	if (openWindow === 'deliveryPanel') return 'beam';
+	return null;
 }

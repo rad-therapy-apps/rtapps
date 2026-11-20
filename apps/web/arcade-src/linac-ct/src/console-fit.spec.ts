@@ -4,6 +4,7 @@ import {
 	fitBlocks,
 	fitInterlocks,
 	interlockBadge,
+	keyTabFor,
 	splitInterlocks
 } from './console-fit';
 
@@ -89,5 +90,17 @@ describe('chargeTabFor', () => {
 		expect(chargeTabFor('igrt', false)).toBe('notes');
 		expect(chargeTabFor('verify', false)).toBe('result');
 		expect(chargeTabFor('post', true)).toBe('result');
+	});
+});
+
+describe('keyTabFor', () => {
+	it("brings up image guidance's couch keys and delivery's beam keys", () => {
+		expect(keyTabFor('igrtPanel')).toBe('couch');
+		expect(keyTabFor('deliveryPanel')).toBe('beam');
+	});
+	it('keeps the picked tab for any other window, or none', () => {
+		expect(keyTabFor('immobilizationPanel')).toBeNull();
+		expect(keyTabFor('chargeCapturePanel')).toBeNull();
+		expect(keyTabFor(null)).toBeNull();
 	});
 });
