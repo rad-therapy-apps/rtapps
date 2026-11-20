@@ -12877,6 +12877,91 @@
 					margin: 0;
 				}
 			}
+
+			/* console mode, narrow frames: the Tutorial's focused screens (above) on the smallest frames,
+			   760×430 with the Tutorial's strip docked, and on narrow tall ones. */
+			/* the Tutorial's image guidance and delivery on frames under 541 px tall: the column's keys
+			   at 28 px (Motion Enable 34) and the console's heading gone, so the column fits */
+			@media (max-height: 540px) {
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					.rtv2-control-drawer
+					> summary {
+					display: none !important;
+				}
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					:is(.rtv2-button-grid button, #consoleMoveToField, .rtv2-machine-controls button) {
+					min-height: 28px !important;
+					padding: 2px 6px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					.rtv2-machine-controls
+					button.motion {
+					min-height: 34px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					:is(.rtv2-console-grid, .rtv2-control-group, .rtv2-machine-controls) {
+					gap: 3px !important;
+					padding: 4px !important;
+				}
+			}
+			/* the Tutorial's Patient Setup on frames under 970 px wide and 700 px tall or more: the
+			   order wraps onto more lines than on the wider frames, so the type and keys are a notch
+			   smaller than there */
+			@media (max-width: 969px) and (min-height: 700px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(
+						.immo-card p,
+						.immo-instructions,
+						.immo-key,
+						.immo-verify-checks label,
+						.immo-status,
+						.immo-table-help,
+						.immo-chip b
+					) {
+					font-size: 12px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-device, .immo-placed-device) {
+					height: 40px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-device-label {
+					font-size: 12px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-table-drop {
+					min-height: 48px;
+				}
+			}
+			/* the Tutorial's Patient Setup on frames under 541 px tall: the chips under the window's
+			   title say what it is, so the title bar goes */
+			@media (max-height: 540px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDock
+					.console-dock-bar {
+					display: none !important;
+				}
+			}
 		</style>
 	</head>
 	<body>
