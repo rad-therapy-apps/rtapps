@@ -29,6 +29,7 @@ import {
 } from './linac-safety';
 import { CONSOLE, consoleEvent, consoleMistake } from './console-hooks';
 import { shiftLengthMm } from './console-messages';
+import { collisionRefuses } from './collision-rule';
 
 // RTApps (#77 phase 2 task 19): honest 6DOF couch-shift shape for
 // `S.clinicalIGRT.baseline`/`.correction`. Exported so state.ts can tighten those
@@ -145,10 +146,8 @@ function quietIGRTStep(mutator) {
 	mutator();
 	S.scene?.updateMatrixWorld(true);
 	const after = getCollisionAssessment();
-	const tol = COLLISION_PROXY_TOL;
-	const entered = before.margin >= -tol && after.margin < -tol;
-	const worsened = before.margin < -tol && after.margin < before.margin - 0.002;
-	if (entered || worsened) {
+	// the same rule as the couch keys, so a correction found reachable here is reachable there
+	if (collisionRefuses(before.margin, after.margin)) {
 		restoreCollisionPose(beforePose);
 		return false;
 	}

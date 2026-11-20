@@ -59,6 +59,7 @@ import { renderClinicalIGRT } from './linac-igrt';
 import { saveGameState } from './game';
 import { setTextById, syncOperatorConsole, wrap360 } from './main';
 import { CONSOLE, consoleMistake, consoleRoom } from './console-hooks';
+import { COLLISION_PROXY_TOL, collisionRefuses } from './collision-rule';
 
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return S.clearanceOverrideState.byField?.[idx] || null;
@@ -426,7 +427,7 @@ export function allTreatmentFieldsCompleted() {
 	return !!fields.length && fields.every((_, i) => !!S.treatmentDelivery.completedFields[i]);
 }
 
-export const COLLISION_PROXY_TOL = 0.025;
+export { COLLISION_PROXY_TOL };
 
 export const TREATMENT_CLEARANCE_REQUIRED_MARGIN = 0.015;
 
@@ -1193,17 +1194,10 @@ export function attemptCollisionSafeMotion(label, mutator) {
 	S.scene?.updateMatrixWorld(true);
 	const after = getCollisionAssessment();
 
-	// Block entry into a collision zone, or motion that makes an existing overlap worse.
-	// If a pose somehow begins inside the teaching proxy, movement that INCREASES
-	// clearance is always permitted so the learner can back the couch/gantry out.
-	// Allow ~2.5 cm of numerical proxy tolerance so the teaching interlock does not
-	// trip on near-tangent bounding geometry that would still be visibly clear onscreen.
-	const collisionTolerance = 0.025;
-	const enteredCollision =
-		before.margin >= -collisionTolerance && after.margin < -collisionTolerance;
-	const worsenedCollision =
-		before.margin < -collisionTolerance && after.margin < before.margin - 0.002;
-	if (enteredCollision || worsenedCollision) {
+	// Block entry into a collision zone, or motion that makes an existing overlap worse; motion
+	// that gains clearance always goes, so the learner can back the couch/gantry out
+	// (collision-rule.ts).
+	if (collisionRefuses(before.margin, after.margin)) {
 		restoreCollisionPose(pose);
 		showCollisionBlocked(after.reason || 'Machine clearance');
 		return false;
