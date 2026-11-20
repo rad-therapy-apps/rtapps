@@ -15,8 +15,9 @@
 //   step 6  Patient Setup at the couch: Jordan's devices dragged onto the table, the checks ticked,
 //           Verify; the step completes
 //   step 8  image guidance (Jordan's whole-brain plan images with the MV panel): a new daily
-//           setup, the MV panel out, the images, the couch correction from the console's keys,
-//           Verify Alignment
+//           setup, the MV panel out, the images; Vert + past the correction until the collision
+//           interlock stops the couch, then Vert − from there goes and clears the refusal; the
+//           couch correction from the console's keys, Verify Alignment
 //   step 9  delivery: the right lateral field (gantry 270), then the left lateral field (90), each
 //           after Move to field; Vault 1's gantry (window.__NPC.vaultLinac) passes the angles
 //           between, one way, and ends at the field's angle (0 to 270, then 270 to 90); the Vault 1
@@ -497,6 +498,37 @@ try {
 	expect(acquired.shiftMm === 4, `the check images show Jordan's 4 mm shift (${acquired.shiftMm})`);
 	await click('#rtv2MotionEnable');
 	n = await eventCount();
+	// an overshoot first: Vert + past the +4 mm correction until the collision interlock stops the
+	// couch (still clear of the treatment head), then Vert − from there goes, and its refusal goes
+	const appliedVertical = () =>
+		frame
+			.locator('#igrtCorrectionRows .igrt-row')
+			.evaluateAll(
+				(els) =>
+					els.find((r) => r.firstElementChild?.textContent.trim() === 'Vertical')?.children[2]
+						.textContent
+			)
+			.then(parseFloat);
+	const refusalShown = () => frame.evaluate(() => !!document.querySelector('#consoleRefusal.show'));
+	let stopped = null;
+	for (let i = 0; i < 12 && !stopped; i++) {
+		const from = await eventCount();
+		await consoleKey('consoleVrtPlus');
+		stopped = (await events()).slice(from).find((e) => e.kind === 'mistake');
+	}
+	const top = await appliedVertical();
+	expect(
+		stopped?.code === 'collision' && top > 4 && (await refusalShown()),
+		`Vert + past the correction stops at the collision interlock, the refusal shown (${top} mm applied; ${JSON.stringify(stopped)})`
+	);
+	const fromTop = await eventCount();
+	await consoleKey('consoleVrtMinus');
+	const back = await appliedVertical(),
+		refusedBack = (await events()).slice(fromTop).filter((e) => e.kind === 'mistake');
+	expect(
+		back === top - 1 && refusedBack.length === 0 && !(await refusalShown()),
+		`Vert − from the stop goes and the refusal goes with it (${top} to ${back} mm; refused ${JSON.stringify(refusedBack)}; refusal shown: ${await refusalShown()})`
+	);
 	const rows = await frame
 		.locator('#igrtCorrectionRows .igrt-row')
 		.evaluateAll((els) => els.map((r) => [...r.children].map((c) => c.textContent.trim())));
