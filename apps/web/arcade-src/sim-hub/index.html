@@ -2187,7 +2187,10 @@
 			/* The console panel (console-panel.ts): a console in an iframe over the center, which shows
 			   dimmed around the card (its spread shadow) and live in the camera slots. The slots are
 			   holes: the feed cameras are drawn onto the canvas behind them, so the card paints no
-			   background of its own, only its parts do, in solid colours. */
+			   background of its own, only its parts do, in solid colours. The website gives the center
+			   from about 992x624 (a 1280x800 laptop) to 1920x1080, so the margins round the card and
+			   the camera column narrow with it: the console's frame is at least 760x430 at 992x624
+			   with the Tutorial's strip docked, and never over 1600x950. */
 			#consolePanel {
 				position: fixed;
 				inset: 0;
@@ -2202,8 +2205,9 @@
 				visibility: hidden;
 			}
 			.cpCard {
-				width: min(1560px, calc(100vw - 64px));
-				height: min(980px, calc(100vh - 40px));
+				/* 8 px a side at a 992 px wide center, 32 px from 1600 px; 8 to 20 px above and below */
+				width: min(1560px, calc(100vw - 2 * clamp(8px, 4vw - 32px, 32px)));
+				height: min(980px, calc(100vh - 2 * clamp(8px, 4vh - 16px, 20px)));
 				display: flex;
 				flex-direction: column;
 				overflow: hidden;
@@ -2277,7 +2281,8 @@
 				display: grid;
 			}
 			.cpFeeds {
-				flex: 0 0 clamp(210px, 19vw, 360px);
+				/* 150 px at a 992 px wide center, 300 px from about 1600 px */
+				flex: 0 0 clamp(150px, 26vw - 120px, 300px);
 				display: flex;
 				flex-direction: column;
 			}
@@ -2313,6 +2318,30 @@
 			.cpFeedsRest {
 				flex: 1 1 auto;
 				background: #091117;
+			}
+			/* a narrow center: the slim camera column's labels and borders, so its feeds stay as wide
+			   as they can */
+			@media (max-width: 1199px) {
+				.cpFeedsK {
+					padding: 7px 8px 5px;
+					font-size: 12px;
+				}
+				.cpFeed {
+					border-width: 0 6px 6px;
+				}
+				.cpFeed span {
+					padding-top: 3px;
+					font-size: 12.5px;
+				}
+			}
+			/* a short center: a slimmer head over the console */
+			@media (max-height: 699px) {
+				.cpHead {
+					padding: 4px 8px 4px 14px;
+				}
+				.cpClose {
+					padding: 3px 10px;
+				}
 			}
 		</style>
 	</head>
