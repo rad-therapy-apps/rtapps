@@ -1405,6 +1405,140 @@
 				line-clamp: 3;
 				overflow: hidden;
 			}
+
+			/* console mode, narrow and short frames (760 x 430 up to 1600 x 950): nothing scrolls and nothing
+			   is cut off. The patient banner wraps instead of ending in "…" and drops its secondary
+			   fields (series under 1100 px, position under 1000) as the frame narrows; under 900 px the control column keeps its width and the two
+			   images share what is left, with a wider log below; under 560 px high the margins and the
+			   bottom bar tighten so the control column gets the room. */
+			body.rtapps-panel-mode .pt-field b {
+				white-space: normal;
+				overflow: visible;
+				text-overflow: clip;
+				overflow-wrap: anywhere;
+				line-height: 1.15;
+			}
+			body.rtapps-panel-mode .pt-field {
+				flex: 0 1 auto;
+			}
+			body.rtapps-panel-mode .cs-block[data-cs-block='2a1'] .tech-rule {
+				margin: 0;
+			}
+			@media (max-width: 1100px) {
+				body.rtapps-panel-mode .pt-field:has(#ptSeries) {
+					display: none;
+				}
+			}
+			@media (max-width: 1100px) {
+				body.rtapps-panel-mode .botbar {
+					grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.8fr) minmax(0, 1.5fr);
+				}
+			}
+			@media (max-width: 1000px) {
+				body.rtapps-panel-mode .pt-field:has(#ptPos) {
+					display: none;
+				}
+			}
+			@media (max-width: 900px) {
+				body.rtapps-panel-mode .brand {
+					min-width: 0;
+				}
+				body.rtapps-panel-mode .brand .sub {
+					display: none;
+				}
+				body.rtapps-panel-mode .topbar {
+					padding: 6px 10px;
+				}
+				body.rtapps-panel-mode .pt-banner {
+					gap: 10px;
+					padding: 5px 10px;
+				}
+				body.rtapps-panel-mode .xray {
+					min-width: 0;
+					padding: 6px 10px;
+					gap: 7px;
+				}
+				body.rtapps-panel-mode .viewports {
+					grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+					gap: 8px;
+				}
+				body.rtapps-panel-mode .status-line b {
+					letter-spacing: 0.03em;
+				}
+				body.rtapps-panel-mode .botcard .kv {
+					gap: 6px;
+				}
+				body.rtapps-panel-mode .slicebar {
+					gap: 6px;
+				}
+				body.rtapps-panel-mode .slicebar input[type='range'] {
+					min-width: 0;
+				}
+				body.rtapps-panel-mode .slicebar b {
+					min-width: 0;
+					white-space: nowrap;
+				}
+			}
+			@media (max-height: 560px) {
+				body.rtapps-panel-mode .topbar {
+					padding: 4px 10px;
+				}
+				body.rtapps-panel-mode .pt-banner {
+					padding: 3px 10px;
+				}
+				body.rtapps-panel-mode .xray {
+					padding: 4px 10px;
+				}
+				body.rtapps-panel-mode .main {
+					padding: 6px 10px !important;
+					gap: 8px !important;
+				}
+				body.rtapps-panel-mode .col {
+					gap: 6px;
+				}
+				body.rtapps-panel-mode .botbar {
+					padding: 0 10px 6px;
+					gap: 8px;
+				}
+				body.rtapps-panel-mode .botcard {
+					padding: 5px 8px;
+					gap: 3px;
+				}
+				body.rtapps-panel-mode .progwrap {
+					gap: 3px;
+				}
+				body.rtapps-panel-mode .card-h {
+					padding: 5px 10px;
+				}
+				body.rtapps-panel-mode .vp-h {
+					padding: 4px 8px;
+				}
+				body.rtapps-panel-mode .slicebar {
+					padding: 4px 8px;
+				}
+				body.rtapps-panel-mode .ctl {
+					padding: 7px 10px;
+					gap: 5px;
+				}
+				body.rtapps-panel-mode .cs-chips {
+					gap: 4px;
+				}
+				body.rtapps-panel-mode .cs-chip {
+					padding: 4px 8px;
+				}
+				body.rtapps-panel-mode .cs-body.open,
+				body.rtapps-panel-mode .cs-block {
+					gap: 4px;
+				}
+				body.rtapps-panel-mode .log {
+					height: calc(2 * 1.55em + 10px);
+					padding: 4px 8px;
+				}
+				body.rtapps-panel-mode .log > div {
+					-webkit-line-clamp: 2;
+					line-clamp: 2;
+				}
+			}
 		</style>
 	</head>
 	<body>

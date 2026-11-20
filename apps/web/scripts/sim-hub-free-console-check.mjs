@@ -19,7 +19,10 @@
 //          to field) and charge capture, whose Post closes the fraction (linac-ct/src/sdk.ts
 //          postChargeAndCompleteFraction): recordResult('sim-linac-fraction') once, from the
 //          console's page. Vault 1's gantry (window.__NPC.vaultLinac) turns through the angles
-//          between AP and PA and ends at 180.
+//          between AP and PA and ends at 180. Then the chart's four extra workflow windows, each
+//          opened for a patient it is for and scanned on every tab and page (playExtraWindows):
+//          OIS / R&V on the posted fraction and signed off, 4D Motion verified for Denise Walker,
+//          Adaptive approved for Noah Patel and SRS / SBRT's timeout checks for Maya Reynolds.
 //   CT     ?start=ctcontrol: Free Mode at the CT Control door; once the CT room has the CT suite's
 //          scanner model, E at the CT console desk opens the CT console in its console mode
 //          (ct-suite.html?view=console), which posts ready; one prostate scan is run (protocol,
@@ -36,7 +39,9 @@
 //   node scripts/sim-hub-free-console-check.mjs
 // Needs Playwright's Chromium (WebGL through Metal on macOS, SwiftShader elsewhere). Exit codes:
 // 0 pass; 1 a check failed; 2 setup error. Output: one `FREE CONSOLE CHECK <part> PASS` line per
-// part with its time, or `FREE CONSOLE CHECK FAIL: <what>` and the console's last events.
+// part with its time, or `FREE CONSOLE CHECK FAIL: <what>` and the console's last events. The
+// consoles are scanned by lib/no-scroll.mjs as in sim-hub-console-check.mjs (`NO-SCROLL PASS`, or
+// `NO-SCROLL FAIL` with the scrolling areas and the cut-off elements); CHECK_VIEW=WxH sets the size.
 // The serving, the GL flags and the equipment drag are copied from sim-hub-console-check.mjs.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -280,7 +285,6 @@ async function openDesk(kind, [x, z], prompt, pagePath) {
 		`the panel holds the ${kind} console in the free scenario (${frame.url()})`
 	);
 	await noScroll.scan(page, `the center, ${kind} panel open`);
-	await noScroll.scan(frame, `${kind} console, on opening`);
 	return frame;
 }
 
@@ -415,6 +419,142 @@ const LINAC_DESK = [46.1, 9.0],
 	CT_DESK = [29.0, -9.2];
 const MRN = 'AU-24031'; // Michael Carter, the free queue's first patient (delivery/cases.ts)
 
+/** The chart's four extra workflow windows, each opened through the console's own keys for a
+    patient it is for (delivery/cases.ts) and scanned on every tab and page at its first state and
+    its main result: OIS / R&V for Michael Carter's posted fraction, then signed off; 4D Motion for
+    Denise Walker's gated lung, its 4D acquired and verified; Adaptive for Noah Patel's bladder,
+    assessed, compared, the plan that fits picked, checked and approved; SRS / SBRT for Maya
+    Reynolds' radiosurgery, the team's four checks ticked and the clearance rechecked. `click`
+    scans before it clicks, as in playLinac. */
+async function playExtraWindows(frame, click) {
+	const dock = '#consoleWorkflowDockBody';
+	const pageKey = (dir) =>
+		frame.locator(`${dock} .pager button[aria-label="${dir} page"]:visible`).first();
+	/** Whether the shown tab has a page before (Previous) or after (Next) the one shown. */
+	const canTurn = async (dir) => (await pageKey(dir).count()) > 0 && pageKey(dir).isEnabled();
+	/** Turns the shown tab's pages back to the first, then on until `sel` shows. */
+	const reveal = async (sel) => {
+		const el = frame.locator(sel).first();
+		for (let i = 0; i < 6 && (await canTurn('Previous')); i++) await pageKey('Previous').click();
+		for (let i = 0; i < 6 && !(await el.isVisible()); i++) await pageKey('Next').click();
+		expect(await el.isVisible(), `${sel} shows on a page of its tab`);
+	};
+	/** Scans the open window on each tab of `bar` (or as it is, with none), page by page. */
+	const scanWindow = async (moment, bar) => {
+		const scanPages = async (at) => {
+			await noScroll.scan(frame, at);
+			for (let p = 2; await canTurn('Next'); p++) {
+				await pageKey('Next').click();
+				await sleep(120);
+				await noScroll.scan(frame, `${at}, page ${p}`);
+			}
+		};
+		if (!bar) return scanPages(moment);
+		const tabs = frame.locator(`#${bar} [data-tab]`);
+		for (let i = 0; i < (await tabs.count()); i++) {
+			await tabs.nth(i).click();
+			await sleep(120);
+			await scanPages(`${moment}, ${(await tabs.nth(i).textContent()).trim()} tab`);
+		}
+	};
+	const tabShown = async (bar, tab, after) =>
+		expect(
+			await frame.locator(`#${bar} [data-tab="${tab}"].active`).count(),
+			`${after} shows the ${tab} tab`
+		);
+	/** Back to the queue, then checks in and opens `name`'s chart, on whichever page it is. */
+	const openChart = async (name, mrn) => {
+		await click('#rtv2HomeBtn');
+		for (let i = 0; i < 12 && (await frame.locator('#rtv2QPrev:visible:enabled').count()); i++)
+			await click('#rtv2QPrev');
+		const row = frame.locator('#rtv2QueueRows .rtv2-queue-row', { hasText: name });
+		for (let i = 0; i < 12 && !(await row.count()); i++) await click('#rtv2QNext');
+		let n = await eventCount();
+		await click(`#rtv2QueueRows .rtv2-queue-row:has-text("${name}") .rtv2-checkin`);
+		await nextEvent('checked-in', n);
+		n = await eventCount();
+		await click(`#rtv2QueueRows .rtv2-queue-row:has-text("${name}") .rtv2-openchart`);
+		const opened = await nextEvent('chart-opened', n);
+		expect(opened.mrn === mrn, `${name}'s chart opened (${opened.mrn})`);
+	};
+	/** An Additional Workflow key (in narrow, short frames on the Beam & Workflows tab of keys). */
+	const launch = async (kind) => {
+		if (await frame.locator('#rtv2KeyTabs').isVisible())
+			await click('#rtv2KeyTabs [data-tab="beam"]');
+		await click(`#rtv2MachinePanel [data-workflow-launch="${kind}"]`);
+		await frame.locator(`${dock} .open`).waitFor({ state: 'visible' });
+	};
+
+	// OIS / R&V: the posted fraction opens on the sign-off, which closes the record
+	await click('.rtv2-nav button[data-workflow="ois"]');
+	await frame.locator('#oisPanel.open').waitFor({ state: 'visible' });
+	await tabShown('oisTabs', 'signoff', 'OIS / R&V after the charge is posted');
+	await scanWindow('OIS / R&V, the fraction posted', 'oisTabs');
+	await frame.locator('#oisTherapist').fill('QA');
+	await click('#oisReviewCheck');
+	await click('#oisSignOff');
+	expect(
+		await frame.locator('#oisStatus.good').count(),
+		`the daily record signs off (${await frame.locator('#oisStatus').textContent()})`
+	);
+	await scanWindow('OIS / R&V, signed', 'oisTabs');
+
+	// 4D Motion: Denise Walker's phase-gated lung
+	await openChart('Denise Walker', 'AU-24214');
+	await launch('motion');
+	await scanWindow('4D Motion, on opening');
+	await click('#motionAcquire');
+	await click('#motionVerify');
+	expect(
+		(await frame.locator('#motionVerified').textContent()) === 'VERIFIED',
+		`the 4D gate verifies (${await frame.locator('#motionStatus').textContent()})`
+	);
+	await scanWindow('4D Motion, verified');
+
+	// Adaptive: Noah Patel's bladder, the plan of the day picked and approved
+	await openChart('Noah Patel', 'AU-24782');
+	await launch('adaptive');
+	await tabShown('adaptiveTabs', 'anatomy', 'Adaptive on opening');
+	await scanWindow('Adaptive, on opening', 'adaptiveTabs');
+	await click('#adaptiveAssess');
+	await tabShown('adaptiveTabs', 'anatomy', 'Assess Anatomy');
+	await click('#adaptiveCompare');
+	await tabShown('adaptiveTabs', 'plans', 'Compare Plans');
+	const fits = '#adaptivePlanGrid .adaptive-plan.selected.correct';
+	for (const plan of ['small', 'medium', 'large']) {
+		await reveal(`#adaptivePlanGrid [data-adaptive-plan="${plan}"]`);
+		await click(`#adaptivePlanGrid [data-adaptive-plan="${plan}"]`);
+		if (await frame.locator(fits).count()) break;
+	}
+	expect(await frame.locator(fits).count(), "a plan fits today's anatomy");
+	await click('#adaptiveTabs [data-tab="approval"]');
+	for (const id of ['adaptiveCheckDose', 'adaptiveCheckApprove']) {
+		await reveal(`#${id}`);
+		await click(`#${id}`);
+	}
+	await click('#adaptiveApprove');
+	expect(
+		(await frame.locator('#adaptiveVerified').textContent()) === 'APPROVED',
+		`the adaptive plan approves (${await frame.locator('#adaptiveStatus').textContent()})`
+	);
+	await scanWindow('Adaptive, approved', 'adaptiveTabs');
+
+	// SRS / SBRT: Maya Reynolds' radiosurgery, the timeout's checks and the clearance
+	await openChart('Maya Reynolds', 'AU-24602');
+	await launch('srs');
+	await tabShown('srsTabs', 'checklist', 'SRS / SBRT on opening');
+	await scanWindow('SRS / SBRT, on opening', 'srsTabs');
+	await click('#srsTabs [data-tab="timeout"]');
+	for (const id of ['srsCheckPatient', 'srsCheckRx', 'srsCheckMask', 'srsCheckTeam']) {
+		await reveal(`#${id}`);
+		await click(`#${id}`);
+	}
+	await click('#srsClearanceCheck');
+	await tabShown('srsTabs', 'checklist', 'Recheck Clearance');
+	await click('#srsVerifyTimeout');
+	await scanWindow('SRS / SBRT, checked and the clearance rechecked', 'srsTabs');
+}
+
 /** 'Treatment delivery': one free fraction on the LINAC console from LINAC Control. */
 async function playLinac() {
 	await openCenter('linaccontrol');
@@ -449,6 +589,8 @@ async function playLinac() {
 		ready.scenario === 'free',
 		`the LINAC console is ready in the free scenario (${ready.scenario})`
 	);
+	// scanned once it is ready: before, its page still has the standalone app's layout
+	await noScroll.scan(frame, 'linac console, on opening');
 	const click = async (sel) => {
 		await noScroll.scan(frame, `before clicking ${sel}`);
 		await frame.locator(sel).first().click();
@@ -609,8 +751,12 @@ async function playLinac() {
 		mistakes.length === 0,
 		`no mistakes on a clean play: ${mistakes.map((e) => `${e.code} (${e.message})`).join(' | ')}`
 	);
+	part('LINAC charge capture and recordResult');
+
+	await playExtraWindows(frame, click);
+	part('LINAC extra windows (OIS / R&V, 4D Motion, Adaptive, SRS / SBRT)');
 	await closeWithX();
-	part('LINAC charge capture, recordResult and ×');
+	part('LINAC ×');
 	await page.close();
 }
 
@@ -651,6 +797,7 @@ async function playCt() {
 		await frame.evaluate(() => document.body.classList.contains('rtapps-console-mode')),
 		'the CT suite runs in its console mode'
 	);
+	await noScroll.scan(frame, 'ct console, on opening');
 	// the table at rest (the console posts its first pose before its ready, so the panel drops it
 	// and the room follows from the console's first change)
 	const rest = await ev(() => window.__NPC.ctRoom.frame.position.x);
@@ -735,7 +882,7 @@ try {
 		process.exitCode = 1;
 	} else {
 		console.log(
-			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls`
+			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls; ${noScroll.cutScans} of the console, nothing cut off`
 		);
 		console.log(
 			`FREE CONSOLE CHECK PASS: a free LINAC fraction and a free CT scan, each recorded once, in ${((Date.now() - T0) / 1000).toFixed(0)} s`

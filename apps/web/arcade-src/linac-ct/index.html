@@ -11338,7 +11338,7 @@
 			body.linac-console-view .pgOff {
 				display: none !important;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager {
+			body.linac-console-view #patientInfoDeskMonitor .pager {
 				display: flex;
 				flex: 0 0 auto;
 				align-items: center;
@@ -11347,16 +11347,16 @@
 				padding: 3px 4px 0;
 				border-top: 1px solid rgba(129, 193, 214, 0.16);
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager[hidden] {
+			body.linac-console-view #patientInfoDeskMonitor .pager[hidden] {
 				display: none;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pgCount {
+			body.linac-console-view #patientInfoDeskMonitor .pgCount {
 				color: #e8f1f4;
 				font-size: 13px;
 				font-weight: 800;
 				letter-spacing: 0.05em;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager button {
+			body.linac-console-view #patientInfoDeskMonitor .pager button {
 				width: 36px;
 				height: 26px;
 				margin: 0;
@@ -11369,10 +11369,10 @@
 				line-height: 1;
 				cursor: pointer;
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager button:hover:not(:disabled) {
+			body.linac-console-view #patientInfoDeskMonitor .pager button:hover:not(:disabled) {
 				background: rgba(66, 213, 207, 0.18);
 			}
-			body.linac-console-view #consoleWorkflowDockBody .pager button:disabled {
+			body.linac-console-view #patientInfoDeskMonitor .pager button:disabled {
 				opacity: 0.3;
 				cursor: default;
 			}
@@ -12039,6 +12039,1798 @@
 				min-height: 28px;
 				padding: 4px 6px !important;
 				font-size: 11px !important;
+			}
+
+			/* console mode, narrow frames: the queue. The center's console frame can be as narrow as
+			   760 px (a 1280×800 laptop's browser, under the Tutorial's strip); below 970 px the
+			   queue's columns shrink to their content so the actions stay in the frame, and the
+			   screens under the queue (covered by it) are gone, so nothing behind it can scroll. */
+			body.linac-console-view.rtv2-landing .operator-console-panel {
+				display: none !important;
+			}
+			@media (max-width: 969px) {
+				body.linac-console-view.rtv2-landing :is(.rtv2-queue-head, .rtv2-queue-row) {
+					grid-template-columns: 52px minmax(0, 1fr) 108px 224px;
+					gap: 10px;
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+				body.linac-console-view.rtv2-landing .rtv2-queue-title {
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+				body.linac-console-view.rtv2-landing #rtv2QueuePager {
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+			}
+
+			/* console mode, narrow frames: Free Mode's console. Under 970 px the chart and screen 2 no
+			   longer fit side by side, so they share one layout: the patient, MRN, fraction, clock and
+			   Home Queue along the top, the six workflow buttons under them, then the Machine / Imaging
+			   keys and the beam keys in a column beside screen 2 (its reference cards or the open
+			   window). The chart's step bar and active-field line go (the windows show both). Frames
+			   under 660 px tall show the keys one tab at a time (src/console-screens.ts installKeyTabs).
+			   The Tutorial's focused screens keep their own layouts. */
+			body.linac-console-view #rtv2KeyTabs {
+				display: none;
+			}
+			@media (max-width: 969px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					.operator-console-panel {
+					--keys: clamp(236px, 30vw, 290px);
+					grid-template-columns: var(--keys) minmax(0, 1fr) auto auto !important;
+					grid-template-rows: auto auto minmax(0, 1fr) !important;
+					grid-template-areas:
+						'who who data clock'
+						'nav nav nav nav'
+						'keys patient patient patient' !important;
+					gap: 4px 5px !important;
+				}
+				/* the chart's boxes give way, so its parts sit in the panel's own grid */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					:is(
+						#workflowDeskMonitor,
+						#workflowDeskMonitor > .monitor-screen,
+						#rtv2ConsoleShell,
+						#rtv2Chart.active,
+						#rtv2Chart.active > .rtv2-chart-grid,
+						#rtv2Chart.active .rtv2-patient-sidebar
+					) {
+					display: contents !important;
+				}
+				/* the top two rows: one bar, as the chart's sidebar was */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					.operator-console-panel::before {
+					content: '';
+					position: static;
+					z-index: auto;
+					display: block !important;
+					grid-area: 1 / 1 / 3 / -1;
+					width: auto;
+					height: auto;
+					margin: 0;
+					transform: none;
+					border: 0;
+					border-radius: 7px;
+					background: linear-gradient(180deg, #2b5880, #244a6f);
+					box-shadow: inset 0 0 0 1px rgba(190, 205, 218, 0.14);
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					:is(
+						.rtv2-brand,
+						.rtv2-header-mid,
+						.rtv2-side-heading,
+						.rtv2-flow,
+						.rtv2-work-top,
+						.rtv2-data-area,
+						.rtv2-control-drawer > summary
+					) {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-header {
+					grid-area: clock;
+					display: flex !important;
+					align-items: center;
+					min-height: 0 !important;
+					padding: 4px 7px 0 0 !important;
+					border: 0 !important;
+					background: none !important;
+					box-shadow: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-header-right {
+					display: flex;
+					align-items: center;
+					gap: 8px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					#rtv2Clock {
+					font-size: 11px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					#rtv2HomeBtn {
+					min-height: 26px !important;
+					padding: 3px 10px !important;
+					font-size: 11px !important;
+				}
+				/* the patient: name and site, then MRN and fraction */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-patient-block {
+					grid-area: who;
+					align-self: center;
+					display: flex !important;
+					flex-wrap: wrap;
+					align-items: baseline;
+					column-gap: 8px;
+					min-width: 0;
+					padding: 5px 0 0 9px !important;
+					border: 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-patient-block
+					b {
+					font-size: 14px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-patient-block
+					small {
+					min-width: 0;
+					margin: 0 !important;
+					overflow: visible;
+					font-size: 11px !important;
+					line-height: 1.25;
+					white-space: normal;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-side-data {
+					grid-area: data;
+					align-self: center;
+					gap: 12px !important;
+					padding: 5px 4px 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-side-data
+					:is(span, b) {
+					font-size: 11px !important;
+				}
+				/* the six workflow buttons in one row */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-nav {
+					grid-area: nav;
+					grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+					gap: 4px !important;
+					padding: 0 5px 5px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-nav
+					button {
+					min-height: 28px !important;
+					padding: 3px 7px !important;
+					grid-template-columns: auto minmax(0, 1fr) !important;
+					gap: 5px !important;
+					font-size: 10px !important;
+					line-height: 1.15 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-nav
+					button
+					span {
+					overflow: visible;
+					font-size: 10.5px !important;
+					white-space: normal;
+				}
+				/* the keys column */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-main {
+					grid-area: keys;
+					border-radius: 7px;
+					box-shadow: inset 0 0 0 1px rgba(190, 205, 218, 0.14);
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor {
+					grid-area: patient;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-drawer {
+					flex: 0 0 auto !important;
+					margin: 4px 4px 0 !important;
+					border: 0 !important;
+					background: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-console-grid {
+					grid-template-columns: minmax(0, 1fr) !important;
+					gap: 4px !important;
+					padding: 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group {
+					padding: 4px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group
+					h4 {
+					margin: 0 0 3px !important;
+					font-size: 10px !important;
+				}
+				/* the keys four to a row, each pair of − / + side by side */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					:is(.rtv2-button-grid, .rtv2-advanced-workflows) {
+					grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+					gap: 3px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					:is(.rtv2-button-grid button, .rtv2-advanced-workflows button, #consoleMoveToField) {
+					min-height: 28px !important;
+					padding: 2px 3px !important;
+					font-size: 10px !important;
+					line-height: 1.1 !important;
+				}
+				/* Beam Geometry and the jaws as one grid: the keys, MLC Shape beside Move to field, then
+				   the jaw edges */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group:nth-child(2) {
+					grid-template-columns: repeat(4, minmax(0, 1fr));
+					grid-template-rows: none;
+					gap: 3px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group:nth-child(2)
+					> .rtv2-button-grid {
+					display: contents;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group:nth-child(2)
+					> :is(h4, .console-move-title) {
+					grid-area: auto;
+					grid-column: 1 / -1;
+					margin: 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group:nth-child(2)
+					> h4:nth-of-type(2) {
+					order: 1;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group:nth-child(2)
+					> .console-move-title {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					:is([data-console-target='consoleMLCShape'], #consoleMoveToField) {
+					grid-area: auto !important;
+					grid-column: span 2 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group:nth-child(2)
+					> .rtv2-button-grid.four
+					> button {
+					order: 1;
+				}
+				/* the beam keys: Motion Enable beside the two pairs */
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-machine-controls {
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+					gap: 3px !important;
+					margin-top: auto;
+					padding: 4px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-machine-controls
+					button {
+					min-height: 30px !important;
+					padding: 2px 3px !important;
+					font-size: 10px !important;
+					line-height: 1.1 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					#rtv2MotionEnable {
+					grid-row: span 2;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					#rtv2MotionEnable
+					span {
+					font-size: 10px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-message {
+					padding: 3px 7px 5px !important;
+					font-size: 10.5px !important;
+					line-height: 1.25;
+					white-space: normal;
+				}
+			}
+			/* screen 2's reference cards beside the keys: the screen's title and clock go (the top bar
+			   has the clock); on the shortest frames the patient's card is just the four status chips
+			   (the top bar names the patient and the site) and the rows are closer */
+			@media (max-width: 969px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor
+					.monitor-screen
+					> .operator-console-top {
+					display: none !important;
+				}
+			}
+			@media (max-width: 969px) and (max-height: 540px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor
+					.patient-monitor-card:nth-child(2) {
+					flex-wrap: nowrap;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor
+					:is(#consolePatientRefName, #consolePatientRefSubtitle) {
+					display: none;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					):not(.console-app-open)
+					#patientInfoDeskMonitor
+					.monitor-screen {
+					gap: 4px;
+					padding: 4px 6px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor
+					.patient-monitor-card {
+					padding: 4px 8px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor
+					.patient-status-grid {
+					flex: 1 1 auto;
+					margin-top: 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#patientInfoDeskMonitor
+					.patient-info-cell {
+					padding: 1px !important;
+				}
+			}
+			/* frames under 471 px tall (smaller than the center's Free Mode panel gets): the window's
+			   title bar goes (the workflow buttons name the open window, and Chart Review closes it),
+			   and so does the chart's status line under the beam keys (each window shows its own) */
+			@media (max-width: 969px) and (max-height: 470px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					:is(#consoleWorkflowDock .console-dock-bar, #workflowDeskMonitor .rtv2-message) {
+					display: none !important;
+				}
+			}
+			/* frames under 660 px tall: the keys in two tabs, Imaging & Couch and Beam & Workflows, and
+			   the top bar names the patient without the site line (screen 2 and the windows show it) */
+			@media (max-width: 969px) and (max-height: 659px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2PatientSubtitle {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2KeyTabs {
+					display: flex;
+					margin-bottom: 4px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2KeyTabs
+					.console-tab {
+					min-height: 28px;
+					font-size: 10.5px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#workflowDeskMonitor
+					.rtv2-control-group
+					h4 {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2MachinePanel[data-keys='couch']
+					:is(.rtv2-control-group:nth-child(2), .rtv2-advanced-workflows),
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2MachinePanel[data-keys='beam']
+					:is(
+						.rtv2-control-group:nth-child(3),
+						.rtv2-control-group:first-child > .rtv2-button-grid
+					) {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					)
+					#rtv2MachinePanel[data-keys='beam']
+					.rtv2-control-group:first-child {
+					order: 1;
+				}
+			}
+
+			/* console mode, narrow frames: the windows on screen 2. They lay out by the room they have
+			   (a container query on the window's body), so the same rules serve Free Mode's narrow
+			   console, the Tutorial's focused screens and short frames. Free Mode's narrow console gives
+			   Patient Setup and charge capture the keys column's room as well on frames under 660 px
+			   tall (neither presses a key; the keys are back once the window closes). */
+			body.linac-console-view #consoleWorkflowDockBody {
+				container: dock / size;
+			}
+			@media (max-width: 969px) and (max-height: 659px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					):has(:is(#immobilizationPanel, #chargeCapturePanel).open)
+					.operator-console-panel {
+					grid-template-areas:
+						'who who data clock'
+						'nav nav nav nav'
+						'patient patient patient patient' !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus):not(
+						.rtv2-landing
+					):has(:is(#immobilizationPanel, #chargeCapturePanel).open)
+					#workflowDeskMonitor
+					.rtv2-main {
+					display: none !important;
+				}
+			}
+			/* Patient Setup in a window at least 520 px wide and under 640 px tall: readable type (the
+			   Tutorial's own sizes win; the wide console's narrower window keeps its own) */
+			@container dock (min-width: 520px) and (max-height: 639px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(
+						.immo-card p,
+						.immo-instructions,
+						.immo-key,
+						.immo-verify-checks label,
+						.immo-status,
+						.immo-table-help
+					) {
+					font-size: 10px !important;
+					line-height: 1.3 !important;
+				}
+			}
+			/* the instructions page (src/console-screens.ts installSetupPages) when the order has less
+			   room than it needs; a grid with no margins between them, so they measure as laid out */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-instructions {
+				display: grid;
+				row-gap: 2px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-instructions
+				> li {
+				margin: 0 !important;
+			}
+			/* the window's height is the setup's: the order gives up room first, its instructions paged
+			   when a long order would otherwise push the buttons out of the window */
+			body.linac-console-view #consoleWorkflowDockBody #immobilizationPanel.open {
+				height: 100%;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .immo-body {
+				box-sizing: border-box;
+				height: 100%;
+				grid-template-rows: auto minmax(0, max-content) auto auto auto auto;
+				align-content: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card:not(#immobilizationVerificationChecks) {
+				grid-row: 2;
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				> * {
+				flex: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				> .immo-instructions {
+				flex: 0 1 auto;
+				min-height: 0;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.immo-card
+				> .pager {
+				margin-top: 3px;
+			}
+			body.linac-console-view #consoleWorkflowDockBody #immobilizationVerificationChecks {
+				grid-row: 3;
+			}
+			body.linac-console-view #consoleWorkflowDockBody .immo-workspace {
+				grid-row: 4;
+			}
+			body.linac-console-view #consoleWorkflowDockBody .immo-actions {
+				grid-row: 5;
+			}
+			body.linac-console-view #consoleWorkflowDockBody #immobilizationFeedback {
+				grid-row: 6;
+			}
+			/* a wide, short window: the order beside the shelf and the table, the three checks across
+			   the window under them, then the result and the two buttons. The order takes the room the
+			   rest leaves, its instructions paged if they need more. */
+			@container dock (min-width: 640px) and (max-height: 519px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-body {
+					gap: 3px !important;
+					padding: 3px !important;
+					grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+					grid-template-rows: auto auto minmax(36px, 1fr) auto auto;
+					grid-template-areas:
+						'chips chips'
+						'order shelf'
+						'order table'
+						'checks checks'
+						'feedback actions';
+				}
+				body.linac-console-view #consoleWorkflowDockBody .immo-summary {
+					grid-area: chips;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-card:not(#immobilizationVerificationChecks) {
+					grid-area: order;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					#immobilizationVerificationChecks {
+					grid-area: checks;
+					padding: 3px 7px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-workspace {
+					display: contents;
+				}
+				body.linac-console-view #consoleWorkflowDockBody .immo-shelf-wrap {
+					grid-area: shelf;
+				}
+				body.linac-console-view #consoleWorkflowDockBody .immo-table-wrap {
+					grid-area: table;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-table-drop {
+					height: 100%;
+					box-sizing: border-box;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-table-wrap, .immo-shelf-wrap) {
+					padding: 2px 4px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-table-help {
+					padding: 0 6px;
+					line-height: 1.15 !important;
+				}
+				body.linac-console-view #consoleWorkflowDockBody .immo-actions {
+					grid-area: actions;
+					align-self: stretch;
+				}
+				body.linac-console-view #consoleWorkflowDockBody #immobilizationFeedback {
+					grid-area: feedback;
+					align-self: stretch;
+					margin: 0 !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-shelf {
+					grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-card p, .immo-instructions, .immo-verify-checks label, .immo-status) {
+					line-height: 1.2 !important;
+				}
+			}
+			/* the delivery window: its caption wraps rather than being cut short; in a window under
+			   400 px tall the window's own step bar goes (the caption and the state say the step) and
+			   the plan / actual rows are closer */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .rtv2d-hero {
+				height: auto !important;
+				min-height: 22px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-hero-caption {
+				position: static;
+				padding: 3px 8px;
+				overflow: visible !important;
+				white-space: normal !important;
+			}
+			@container dock (max-height: 399px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.rtv2d-flow {
+					display: none !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.rtv2d-cell {
+					min-height: 16px !important;
+					padding: 0 3px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.rtv2d-panel-head {
+					min-height: 18px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.rtv2d-table {
+					row-gap: 1px;
+					padding: 2px 6px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.rtv2d-table-row {
+					min-height: 16px !important;
+				}
+			}
+			/* charge capture in a window under 340 px tall: the code guide's heading goes (the Codes tab
+			   names it) */
+			@container dock (max-height: 339px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.charge-pane
+					.charge-section
+					> h4 {
+					display: none !important;
+				}
+			}
+			/* screen 2's setup card no taller than its row: its list pages when a patient's setup needs
+			   more room (src/console-screens.ts installReferencePages) */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> .patient-monitor-card:nth-child(5) {
+				display: flex;
+				flex-direction: column;
+				box-sizing: border-box;
+				min-height: 0;
+				max-height: 100%;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				.monitor-screen
+				> .patient-monitor-card:nth-child(5)
+				> * {
+				flex: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				#consoleImmoList {
+				display: grid;
+				flex: 0 1 auto;
+				align-content: start;
+				row-gap: 2px;
+				min-height: 0;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#patientInfoDeskMonitor
+				#consoleImmoList
+				> li {
+				margin: 0 !important;
+			}
+			/* the delivery window's fields: names and targets wrap; the list takes the room the patient
+			   column has left under the course and pages when a plan has more fields than that
+			   (src/console-screens.ts installFieldPages) */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar {
+				display: flex;
+				flex-direction: column;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				> * {
+				flex: none;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#rtv2dFieldList {
+				flex: 0 1 auto;
+				min-height: 0;
+				overflow: hidden;
+				align-content: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				> .pager {
+				gap: 4px;
+				margin: 2px 4px 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				> .pager
+				button {
+				width: 30px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-sidebar
+				.pgCount {
+				font-size: 12px;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.rtv2d-field-main
+				:is(b, span) {
+				overflow: visible;
+				white-space: normal;
+				text-overflow: clip;
+				overflow-wrap: anywhere;
+			}
+			/* image guidance's chips and the chart's patient and field lines wrap a long name or site
+			   rather than cutting it short */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .igrt-chip b,
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#workflowDeskMonitor
+				:is(#rtv2PatientSubtitle, #rtv2FieldMeta) {
+				overflow: visible;
+				white-space: normal;
+				text-overflow: clip;
+			}
+			/* the wide console on frames under 560 px tall: the chart's site line and active field's
+			   plan line go (screen 2 beside it shows both), so a long one cannot push the keys down */
+			@media (min-width: 970px) and (max-height: 559px) {
+				body.linac-console-view.control-room-mode.rt-v2-console:not(.linac-tutorial-focus)
+					#workflowDeskMonitor
+					:is(#rtv2PatientSubtitle, #rtv2FieldMeta) {
+					display: none !important;
+				}
+			}
+			/* the window's title bar on frames under 541 px tall: one slim line, its Close key readable */
+			@media (max-height: 540px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDock
+					.console-dock-bar {
+					min-height: 0 !important;
+					padding: 2px 3px 2px 8px !important;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDock
+					#consoleDockClose {
+					min-height: 26px;
+					padding: 2px 9px;
+					font-size: 10.5px;
+				}
+			}
+			/* image guidance in a window under 520 px tall: the correction table on its side (an axis to
+			   a column), the fine print on plane mapping and tolerances gone; under 360 px the images
+			   are shorter and the patient's chip goes (the console's top bar names the patient) */
+			@container dock (max-height: 519px) {
+				body.linac-console-view #consoleWorkflowDockBody #igrtToleranceFootnote {
+					display: none !important;
+				}
+				body.linac-console-view #consoleWorkflowDockBody .igrt-table {
+					display: grid;
+					grid-auto-flow: column;
+					grid-template-rows: repeat(4, auto);
+					grid-template-columns: max-content;
+					grid-auto-columns: minmax(0, 1fr);
+				}
+				body.linac-console-view
+					#consoleWorkflowDockBody
+					:is(.igrt-table > .igrt-row, #igrtCorrectionRows, #igrtCorrectionRows > .igrt-row) {
+					display: contents;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-row
+					> div {
+					padding: 3px 5px !important;
+					border-bottom: 1px solid #444d55;
+					font-size: 10.5px !important;
+					text-align: center;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-row
+					> div:nth-child(4) {
+					border-bottom: 0;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-row.header
+					> div {
+					background: #315d86;
+					font-size: 10px !important;
+					text-align: left;
+				}
+			}
+			@container dock (max-height: 359px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-body {
+					gap: 3px;
+					padding: 3px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-statusbar
+					> .igrt-chip:first-child {
+					display: none;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-statusbar {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-view {
+					height: 62px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-chip {
+					display: flex;
+					align-items: baseline;
+					gap: 6px;
+					padding: 3px 6px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.igrt-chip
+					span {
+					margin: 0;
+				}
+			}
+
+			/* console mode, narrow frames: the Tutorial's focused screens (above) on the smallest frames,
+			   760×430 with the Tutorial's strip docked, and on narrow tall ones. */
+			/* the Tutorial's image guidance and delivery on frames under 541 px tall: the column's keys
+			   at 28 px (Motion Enable 34) and the console's heading gone, so the column fits */
+			@media (max-height: 540px) {
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					.rtv2-control-drawer
+					> summary {
+					display: none !important;
+				}
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					:is(.rtv2-button-grid button, #consoleMoveToField, .rtv2-machine-controls button) {
+					min-height: 28px !important;
+					padding: 2px 6px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					.rtv2-machine-controls
+					button.motion {
+					min-height: 34px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus:is(
+						.tut-focus-igrt,
+						.tut-focus-delivery
+					).control-room-mode.rt-v2-console
+					#workflowDeskMonitor
+					:is(.rtv2-console-grid, .rtv2-control-group, .rtv2-machine-controls) {
+					gap: 3px !important;
+					padding: 4px !important;
+				}
+			}
+			/* the Tutorial's Patient Setup on frames under 970 px wide and 700 px tall or more: the
+			   order wraps onto more lines than on the wider frames, so the type and keys are a notch
+			   smaller than there */
+			@media (max-width: 969px) and (min-height: 700px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(
+						.immo-card p,
+						.immo-instructions,
+						.immo-key,
+						.immo-verify-checks label,
+						.immo-status,
+						.immo-table-help,
+						.immo-chip b
+					) {
+					font-size: 12px !important;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					:is(.immo-device, .immo-placed-device) {
+					height: 40px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-device-label {
+					font-size: 12px;
+				}
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.immo-table-drop {
+					min-height: 48px;
+				}
+			}
+			/* the Tutorial's Patient Setup on frames under 541 px tall: the chips under the window's
+			   title say what it is, so the title bar goes */
+			@media (max-height: 540px) {
+				body.linac-console-view.linac-tutorial-focus.tut-focus-setup.control-room-mode.rt-v2-console
+					#consoleWorkflowDock
+					.console-dock-bar {
+					display: none !important;
+				}
+			}
+
+			/* console mode, no scroll: the extra workflow windows (OIS / R&V, 4D Motion, Adaptive and
+			   SRS / SBRT, opened from the chart's workflow keys). Each is the whole second screen with
+			   nothing scrolling or cut off at any frame from 760×430 up: its own heading goes (the
+			   window's title bar names it), its chips put each name and value on one line, and its body
+			   is a column. 4D Motion is one compact view whose trace takes the room the rest leaves (its
+			   convention note goes in windows under 360 px tall); OIS / R&V, Adaptive and SRS / SBRT show
+			   their sections as tabs (src/console-screens.ts) over the actions and status that stay in
+			   view, a tab's blocks paged when they need more room than it has. */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(#oisPanel, #motionPanel, #adaptivePanel, #srsPanel).open {
+				display: flex !important;
+				flex-direction: column;
+				height: 100%;
+				overflow: hidden !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-head, .motion-head, .adaptive-head, .srs-head) {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-body, .adaptive-body, .srs-body) {
+				flex: 1 1 auto;
+				min-height: 0;
+				max-height: none;
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				box-sizing: border-box;
+				padding: 5px;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(
+					.ois-summary,
+					.adaptive-summary,
+					.srs-summary,
+					.console-tabs,
+					.adaptive-actions,
+					.srs-actions,
+					.ois-status,
+					#adaptiveStatus,
+					#srsStatus
+				) {
+				flex: none;
+			}
+			/* the chips: a name and its value on one line, the values wrapping rather than cut short */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-summary, .motion-summary, .adaptive-summary, .srs-summary) {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-chip, .motion-chip, .adaptive-chip, .srs-chip) {
+				flex: 1 1 auto;
+				display: flex;
+				flex-wrap: wrap;
+				align-items: baseline;
+				column-gap: 6px;
+				min-width: 0;
+				padding: 3px 7px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-chip, .motion-chip, .adaptive-chip, .srs-chip)
+				span {
+				margin: 0;
+				font-size: 10px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-chip, .motion-chip, .adaptive-chip, .srs-chip)
+				b {
+				margin: 0;
+				font-size: 11px;
+				line-height: 1.3;
+				white-space: normal;
+				overflow: visible;
+				text-overflow: clip;
+			}
+			/* a tab's pane takes the room the window leaves; its blocks show from the top */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-body, .adaptive-body, .srs-body)
+				> .console-pane {
+				flex: 1 1 0;
+				min-height: 0;
+				display: flex;
+				flex-direction: column;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.console-pane[hidden] {
+				display: none !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(
+					.console-blocks,
+					.console-pane > .ois-card,
+					#oisFields,
+					#oisTimeline,
+					#adaptivePlanGrid,
+					#adaptiveHistory,
+					.srs-manual
+				) {
+				flex: 0 1 auto;
+				min-height: 0;
+				max-height: none;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.console-blocks, .console-pane > .ois-card) {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.console-blocks
+				> * {
+				flex: none;
+				margin: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.console-pane
+				.pager {
+				flex: none;
+				margin-top: 3px;
+			}
+			/* the windows' type no smaller than 10 px, their keys at least 28 px tall */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-status, .motion-status, #adaptiveStatus, #srsStatus) {
+				min-height: 0;
+				padding: 4px 8px;
+				border-radius: 3px;
+				font-size: 10.5px;
+				line-height: 1.35;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.ois-footnote, .motion-footnote, .adaptive-footnote, .srs-footnote) {
+				font-size: 10px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(
+					.motion-actions button,
+					.adaptive-actions button,
+					.adaptive-course-actions button,
+					.adaptive-plan button,
+					.srs-actions button,
+					.ois-sign-row button
+				) {
+				min-height: 28px;
+				margin: 0;
+				padding: 3px 6px;
+				border-radius: 4px;
+				font-size: 10.5px;
+				line-height: 1.2;
+			}
+
+			/* ---- 4D Motion: the chips, the trace (the room left), the readouts, the gate, the phases,
+			   the keys in one row, the status and the convention note ---- */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-body {
+				flex: 1 1 auto;
+				min-height: 0;
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+				grid-template-rows: auto minmax(44px, 1fr) repeat(6, auto);
+				gap: 5px;
+				box-sizing: border-box;
+				padding: 5px;
+				overflow: hidden;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-body
+				> :not(.motion-actions) {
+				grid-column: 1 / -1;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-wave-wrap {
+				height: auto;
+				max-height: 200px;
+				border-radius: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-wave-legend {
+				font-size: 10px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.motion-metrics, .motion-config) {
+				gap: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-metric {
+				padding: 2px 4px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-metric
+				span {
+				margin-bottom: 1px;
+				font-size: 10px;
+				line-height: 1.2;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-metric
+				b {
+				font-size: 11px;
+				line-height: 1.2;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-control {
+				padding: 2px 7px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-control
+				label {
+				margin: 0;
+				font-size: 10px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-control
+				input[type='range'] {
+				height: 26px;
+				margin: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-phase-strip {
+				gap: 2px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-phase {
+				padding: 2px 1px;
+				border-radius: 3px;
+				font-size: 10px;
+				line-height: 1.2;
+				white-space: nowrap;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-phase
+				b {
+				margin: 0;
+				font-size: 10px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-actions {
+				display: flex;
+				gap: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.motion-actions
+				button {
+				flex: 1 1 0;
+				min-width: 0;
+			}
+			/* a window under 480 px wide: the phases in two rows of five */
+			@container dock (max-width: 479px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.motion-phase-strip {
+					grid-template-columns: repeat(5, minmax(0, 1fr));
+				}
+			}
+			@container dock (max-height: 359px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.motion-footnote {
+					display: none;
+				}
+			}
+
+			/* ---- SRS / SBRT: Checklist · Timeout ---- */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.srs-prescription {
+				padding: 4px 8px;
+				border-radius: 3px;
+				font-size: 10.5px;
+				line-height: 1.35;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#srsChecklist {
+				display: contents;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .srs-check {
+				flex: none;
+				grid-template-columns: 18px minmax(0, 1fr) auto;
+				gap: 6px;
+				min-height: 0;
+				padding: 3px 8px;
+				border: 1px solid #304260;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.srs-check
+				.name {
+				font-size: 11px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.srs-check
+				.detail {
+				max-width: 46cqw;
+				font-size: 10px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .srs-manual {
+				gap: 4px;
+				align-content: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.srs-manual
+				label {
+				padding: 4px 7px;
+				border-radius: 3px;
+				font-size: 10.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.srs-actions {
+				gap: 4px;
+			}
+
+			/* ---- OIS / R&V: Record · Fields · Audit trail · Sign-off ---- */
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .ois-card {
+				padding: 5px 8px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-card
+				h4 {
+				flex: none;
+				margin: 0 0 3px;
+				font-size: 11.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .ois-kv {
+				padding: 2px 0;
+				font-size: 10.5px;
+				line-height: 1.3;
+			}
+			/* the verification record's eight lines in two columns, so the card fits the shortest tab */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#oisVerification {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+				column-gap: 14px;
+			}
+			/* the override review's lines page one by one (console-screens.ts installOisTabs), so the
+			   card is drawn on each line: an amber edge, its heading on the first */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(#oisOverrideCard:not([hidden]), #oisOverrideSummary) {
+				display: contents;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(#oisOverrideCard > *, #oisOverrideSummary > *) {
+				flex: none;
+				margin: 0;
+				padding: 3px 8px;
+				border-left: 3px solid #c58b2a;
+				background: #241d12;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#oisOverrideCard
+				> h4 {
+				border-radius: 3px 3px 0 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#oisOverrideSummary
+				small {
+				font-size: 10px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .ois-table {
+				font-size: 10.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-table
+				:is(th, td) {
+				padding: 3px 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-table
+				th {
+				font-size: 10px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#oisTimeline {
+				display: flex;
+				flex-direction: column;
+				gap: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console #consoleWorkflowDockBody .ois-event {
+				flex: none;
+				grid-template-columns: 56px 70px minmax(0, 1fr);
+				padding: 3px 6px;
+				border-radius: 3px;
+				font-size: 10.5px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-doc-grid {
+				gap: 5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-doc-grid
+				textarea {
+				min-height: 0;
+				height: 58px;
+				padding: 4px 6px;
+				resize: none;
+				font-size: 10.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-doc-grid
+				input {
+				min-height: 28px;
+				padding: 3px 6px;
+				font-size: 11px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-doc-grid
+				label {
+				font-size: 10.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-sign-row {
+				margin-top: 5px;
+				gap: 6px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.ois-sign-row
+				label {
+				font-size: 10.5px;
+			}
+
+			/* ---- Adaptive: Anatomy · Plans · Approval · Course · History ---- */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-card {
+				padding: 5px 8px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-card
+				h4 {
+				margin: 0 0 3px;
+				font-size: 11.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.adaptive-card p, .adaptive-findings) {
+				font-size: 10.5px;
+				line-height: 1.35;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#adaptiveAnatomyCard
+				p
+				+ p {
+				margin-top: 3px !important;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-findings {
+				margin: 3px 0 0;
+				padding-left: 16px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-findings
+				li {
+				margin: 1px 0;
+			}
+			/* the plans as a list, each its name and Select on the left, what it predicts on the right */
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#adaptivePlanGrid {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr);
+				gap: 5px;
+				align-content: start;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan {
+				grid-template-columns: 120px minmax(0, 1fr);
+				grid-template-rows: auto auto 1fr;
+				gap: 2px 8px;
+				padding: 4px 8px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				> * {
+				grid-column: 1;
+				min-width: 0;
+				margin: 0;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				> b {
+				font-size: 11.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				> div {
+				grid-column: 2;
+				grid-row: 1;
+				font-size: 10.5px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				> ul {
+				grid-column: 2;
+				grid-row: 2 / span 2;
+				display: flex;
+				flex-wrap: wrap;
+				column-gap: 10px;
+				padding: 0;
+				list-style: none;
+				font-size: 10.5px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				li:last-child {
+				flex-basis: 100%;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				li
+				b {
+				font-size: inherit;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-plan
+				> button {
+				grid-row: 3;
+				align-self: end;
+			}
+			/* a wide, tall window: the three plans side by side */
+			@container dock (min-width: 600px) and (min-height: 480px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					#adaptivePlanGrid {
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.adaptive-plan {
+					display: flex;
+					flex-direction: column;
+					gap: 3px;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.adaptive-plan
+					> ul {
+					flex: 1 1 auto;
+					display: block;
+				}
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-steps {
+				display: contents;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-step {
+				flex: none;
+				padding: 3px 8px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-step
+				b {
+				font-size: 11px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-step
+				span {
+				font-size: 10.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-checks {
+				gap: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-checks
+				label {
+				font-size: 10.5px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				:is(.adaptive-actions, .adaptive-course-actions, .adaptive-dose-summary) {
+				gap: 4px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-dose-metric {
+				padding: 3px 6px;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-dose-metric
+				span {
+				font-size: 10px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-dose-metric
+				b {
+				margin-top: 1px;
+				font-size: 11.5px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#adaptiveDoseCanvas {
+				box-sizing: border-box;
+				height: auto;
+				aspect-ratio: 900 / 260;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				#adaptiveHistory {
+				margin: 0;
+				border-radius: 3px;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-history-row {
+				grid-template-columns: 24px minmax(0, 1.5fr) minmax(0, 1fr) 46px 54px 54px;
+				gap: 4px;
+				padding: 3px 6px;
+				font-size: 10.5px;
+				line-height: 1.3;
+			}
+			body.linac-console-view.control-room-mode.rt-v2-console
+				#consoleWorkflowDockBody
+				.adaptive-history-row.header {
+				font-size: 10px;
+			}
+			/* a window under 360 px tall: the chips go (the top bar names the patient and the fraction,
+			   the window's title the technique, the approval step the status), so two plans share a
+			   page, and the course chart is a little smaller, so it fits one */
+			@container dock (max-height: 359px) {
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					.adaptive-summary {
+					display: none;
+				}
+				body.linac-console-view.control-room-mode.rt-v2-console
+					#consoleWorkflowDockBody
+					#adaptiveDoseCanvas {
+					width: auto;
+					max-width: 100%;
+					max-height: 112px;
+				}
 			}
 		</style>
 	</head>

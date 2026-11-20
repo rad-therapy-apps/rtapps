@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+	adaptiveTabFor,
 	chargeTabFor,
 	fitBlocks,
+	fitGrid,
 	fitInterlocks,
+	fitTable,
 	interlockBadge,
-	splitInterlocks
+	keyTabFor,
+	oisTabOnOpen,
+	pageOfBlock,
+	splitInterlocks,
+	srsTabFor
 } from './console-fit';
 
 const check = (name: string, ok: boolean) => ({ name, ok, detail: `${name} detail` });
@@ -39,6 +46,18 @@ describe('fitBlocks', () => {
 	it('breaks between blocks, never inside one, when they do not', () => {
 		expect(fitBlocks([100, 60, 40], 170, 5)).toEqual([[0, 1], [2]]);
 		expect(fitBlocks([300, 40], 170, 5)).toEqual([[0], [1]]);
+	});
+});
+
+describe('pageOfBlock', () => {
+	it('finds the page a block is on', () => {
+		expect(pageOfBlock([[0, 1], [2, 3], [4]], 0)).toBe(0);
+		expect(pageOfBlock([[0, 1], [2, 3], [4]], 3)).toBe(1);
+		expect(pageOfBlock([[0, 1], [2, 3], [4]], 4)).toBe(2);
+	});
+	it('is -1 for a block on no page, or none', () => {
+		expect(pageOfBlock([[0, 1]], 5)).toBe(-1);
+		expect(pageOfBlock([[0, 1]], -1)).toBe(-1);
 	});
 });
 
@@ -89,5 +108,84 @@ describe('chargeTabFor', () => {
 		expect(chargeTabFor('igrt', false)).toBe('notes');
 		expect(chargeTabFor('verify', false)).toBe('result');
 		expect(chargeTabFor('post', true)).toBe('result');
+	});
+});
+
+describe('keyTabFor', () => {
+	it("brings up image guidance's couch keys and delivery's beam keys", () => {
+		expect(keyTabFor('igrtPanel')).toBe('couch');
+		expect(keyTabFor('deliveryPanel')).toBe('beam');
+	});
+	it('keeps the picked tab for any other window, or none', () => {
+		expect(keyTabFor('immobilizationPanel')).toBeNull();
+		expect(keyTabFor('chargeCapturePanel')).toBeNull();
+		expect(keyTabFor(null)).toBeNull();
+	});
+});
+
+describe('fitTable', () => {
+	it('keeps the header and every row on one page when they fit', () => {
+		// 20 + 2 + 30 + 2 + 30 = 84
+		expect(fitTable(20, [30, 30], 84, 2)).toEqual([[0, 1, 2]]);
+	});
+	it('repeats the header on every page, breaking between rows', () => {
+		// room for rows under the header: 70 - 20 - 2 = 48, one 30 px row a page
+		expect(fitTable(20, [30, 30, 30], 70, 2)).toEqual([
+			[0, 1],
+			[0, 2],
+			[0, 3]
+		]);
+	});
+	it('is the header alone when the table has no rows', () => {
+		expect(fitTable(20, [], 70, 2)).toEqual([[0]]);
+	});
+});
+
+describe('fitGrid', () => {
+	it('is a plain list in one column', () => {
+		expect(fitGrid([100, 60, 40], 1, 170, 5)).toEqual(fitBlocks([100, 60, 40], 170, 5));
+	});
+	it('breaks between rows, each as tall as its tallest block', () => {
+		// rows of three: [80, 120, 100] is 120 tall, [60] 60 tall; 120 + 5 + 60 = 185
+		expect(fitGrid([80, 120, 100, 60], 3, 190, 5)).toEqual([[0, 1, 2, 3]]);
+		expect(fitGrid([80, 120, 100, 60], 3, 150, 5)).toEqual([[0, 1, 2], [3]]);
+	});
+});
+
+describe('oisTabOnOpen', () => {
+	it('opens on the sign-off when the posted record waits for the therapist', () => {
+		expect(oisTabOnOpen(true, false)).toBe('signoff');
+	});
+	it('opens on the verification record before the charge is posted and once signed', () => {
+		expect(oisTabOnOpen(false, false)).toBe('record');
+		expect(oisTabOnOpen(true, true)).toBe('record');
+	});
+});
+
+describe('adaptiveTabFor', () => {
+	const fresh = { compared: false, approved: false };
+	it('opens where the review stands', () => {
+		expect(adaptiveTabFor('open', fresh)).toBe('anatomy');
+		expect(adaptiveTabFor('open', { compared: true, approved: false })).toBe('plans');
+		expect(adaptiveTabFor('open', { compared: true, approved: true })).toBe('approval');
+	});
+	it('follows each action to what it changes', () => {
+		expect(adaptiveTabFor('assess', fresh)).toBe('anatomy');
+		expect(adaptiveTabFor('compare', fresh)).toBe('plans');
+		expect(adaptiveTabFor('check', fresh)).toBe('approval');
+		expect(adaptiveTabFor('approve', fresh)).toBe('approval');
+		expect(adaptiveTabFor('next', fresh)).toBe('anatomy');
+		expect(adaptiveTabFor('reset', fresh)).toBe('history');
+	});
+});
+
+describe('srsTabFor', () => {
+	it('shows the checklist on opening and after Recheck Clearance or Dry Run', () => {
+		expect(srsTabFor('open')).toBe('checklist');
+		expect(srsTabFor('clearance')).toBe('checklist');
+		expect(srsTabFor('dryrun')).toBe('checklist');
+	});
+	it('keeps the tab the learner is on after Approve Timeout', () => {
+		expect(srsTabFor('approve')).toBeNull();
 	});
 });
