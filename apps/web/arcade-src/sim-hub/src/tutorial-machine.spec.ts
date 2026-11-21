@@ -396,6 +396,131 @@ describe('step 8: hints by what the console refused', () => {
 	});
 });
 
+describe('step 9: the geometry hold names its fix with the selected field', () => {
+	const task = CHAPTER_1[8].console!;
+	const hold = (field: string, planned: string, now = '0°'): TutorialEvent => ({
+		type: 'geometryHold',
+		hold: { field, mismatches: [{ label: 'Gantry', now, planned }] }
+	});
+	const cleared: TutorialEvent = { type: 'geometryHold', hold: null };
+	const geometryRefused: TutorialEvent = {
+		type: 'linac',
+		event: {
+			kind: 'mistake',
+			workspace: 'delivery',
+			code: 'geometry-mismatch',
+			message: 'Refused.'
+		}
+	};
+	const fieldDelivered: TutorialEvent = {
+		type: 'linac',
+		event: { kind: 'field-delivered', mrn: JORDAN_MRN, field: 'Right Lateral', index: 0, of: 2 }
+	};
+	const RIGHT =
+		'Hold Move to field until Right Lateral’s gantry reaches 270° and the checklist turns green.';
+	const LEFT =
+		'Hold Move to field until Left Lateral’s gantry reaches 90° and the checklist turns green.';
+	// the console open at step 9, its geometry hold on the right lateral field
+	const open = run(atStep(9), hold('Right Lateral', '270°'), {
+		type: 'pressedE',
+		target: 'console'
+	}).s;
+	// `seconds` of quarter-second frames with the console open
+	const wait = (seconds: number) => ticks(seconds, 0);
+
+	it('a refused beam for the geometry says to hold Move to field, with the field and its angle', () => {
+		const r = run(open, geometryRefused, geometryRefused, geometryRefused);
+		expect(r.effects).toEqual([
+			{ type: 'hint', text: `Not yet. ${RIGHT}`, kind: 'hint1' },
+			{
+				type: 'hint',
+				text: 'Not yet. Press and keep holding Move to field: the machine moves only while it is held. Keep holding until Right Lateral’s gantry reaches 270° and the checklist turns green.',
+				kind: 'hint2'
+			},
+			{
+				type: 'hint',
+				text: 'Hold Move to field until Right Lateral’s gantry reaches 270° and the checklist turns green, then press Enable Beam and Beam On.',
+				kind: 'reveal'
+			}
+		]);
+		expect(r.s.misses).toBe(3);
+	});
+
+	it('the hint follows the selected field, and goes once the geometry matches', () => {
+		let r = run(open, geometryRefused, hold('Left Lateral', '90°'));
+		expect(r.s.hint).toBe(`Not yet. ${LEFT}`);
+		expect(hints(r.effects).at(-1)).toBe(`Not yet. ${LEFT}`);
+		r = run(r.s, cleared);
+		expect(r.s.hint).toBeNull();
+		expect(r.effects).toEqual([{ type: 'hint', text: null }]);
+		// a later hold (the next field) brings no stale hint back
+		expect(run(r.s, hold('Left Lateral', '90°')).s.hint).toBeNull();
+	});
+
+	it('other refusals keep the step’s own hints', () => {
+		const r = run(open, {
+			type: 'linac',
+			event: { kind: 'mistake', workspace: 'delivery', code: 'door-open', message: 'Refused.' }
+		});
+		expect(hints(r.effects)).toEqual([`Not yet. ${task.hints[0]}`]);
+		// and they do not follow the hold
+		expect(run(r.s, cleared).s.hint).toBe(`Not yet. ${task.hints[0]}`);
+	});
+
+	it('with no hold heard, the refusal still names the fix in general', () => {
+		const r = run(run(atStep(9), { type: 'pressedE', target: 'console' }).s, geometryRefused);
+		expect(r.s.hint).toBe(
+			'Not yet. Hold Move to field until the machine reaches the selected field and the checklist turns green.'
+		);
+	});
+
+	it('names the fix after 20 s of the hold with the console open, and not before', () => {
+		let r = run(open, ...wait(19.75));
+		expect(r.s.hint).toBeNull();
+		r = run(r.s, ...wait(0.25));
+		expect(r.s.hint).toBe(RIGHT);
+		expect(r.effects).toEqual([{ type: 'hint', text: RIGHT }]);
+		// it follows the selected field, and goes when the geometry matches
+		expect(run(r.s, hold('Left Lateral', '90°')).s.hint).toBe(LEFT);
+		r = run(r.s, cleared);
+		expect(r.s.hint).toBeNull();
+		expect(r.s.holdSecs).toBe(0);
+	});
+
+	it('starts the 20 s again when a field is delivered, a miss shows or the hold clears', () => {
+		expect(run(open, ...wait(15), fieldDelivered, ...wait(15)).s.hint).toBeNull();
+		expect(
+			run(open, ...wait(15), cleared, hold('Left Lateral', '90°'), ...wait(15)).s.hint
+		).toBeNull();
+		const missed = run(open, ...wait(15), geometryRefused, ...wait(15)).s;
+		expect(missed.hint).toBe(`Not yet. ${RIGHT}`);
+		expect(run(missed, ...wait(5)).s.hint).toBe(RIGHT);
+	});
+
+	it('counts only while the console is open, and not at a step without a hold hint', () => {
+		const closed = run(open, { type: 'consoleClosed' }).s;
+		expect(run(closed, ...wait(30)).s.holdSecs).toBe(0);
+		const igrt = run(atStep(8), hold('Right Lateral', '270°'), {
+			type: 'pressedE',
+			target: 'console'
+		}).s;
+		expect(run(igrt, ...wait(30)).s.hint).toBeNull();
+	});
+
+	it('keeps the console’s hold from one step to the next', () => {
+		const verified = run(
+			atStep(8),
+			{ type: 'pressedE', target: 'console' },
+			imagesAcquired,
+			hold('Right Lateral', '270°'),
+			linac('shift-applied'),
+			linac('alignment-verified')
+		).s;
+		expect(verified.step).toBe(9);
+		expect(verified.hold?.field).toBe('Right Lateral');
+	});
+});
+
 describe('decisions', () => {
 	const open = run(atStep(4), { type: 'pressedE', target: 'jordan' }).s;
 	const d = CHAPTER_1[3].decision!;

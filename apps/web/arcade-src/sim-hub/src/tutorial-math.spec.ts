@@ -21,7 +21,13 @@ import {
 	stepEscort,
 	stepNear,
 	stepStuck,
-	stuckLevel
+	stuckLevel,
+	fillGoal,
+	GOAL,
+	HOLD_HINT_S,
+	holdGoal,
+	holdHintDue,
+	stepHold
 } from './tutorial-math';
 import type { EscortHold, Pt, StuckTimer } from './tutorial-math';
 
@@ -276,5 +282,45 @@ describe('distance text', () => {
 	it('rounds to whole metres', () => {
 		expect(formatDistance(0.4)).toBe('0 m');
 		expect(formatDistance(12.6)).toBe('13 m');
+	});
+});
+
+describe('the delivery step’s geometry hold', () => {
+	const hold = {
+		field: 'Right Lateral',
+		mismatches: [
+			{ label: 'Gantry', now: '0°', planned: '270°' },
+			{ label: 'Couch Vrt', now: '+6', planned: '+4 mm' }
+		]
+	};
+
+	it('times the hold like the E-step hint: 20 s with it on, back to 0 without it', () => {
+		expect(HOLD_HINT_S).toBe(20);
+		let secs = 0;
+		for (let i = 0; i < 79; i++) secs = stepHold(secs, 0.25, true);
+		expect(holdHintDue(secs)).toBe(false);
+		secs = stepHold(secs, 0.25, true);
+		expect(holdHintDue(secs)).toBe(true);
+		expect(stepHold(secs, 0.25, false)).toBe(0);
+	});
+
+	it('names the fix from the first axis off the plan, with the field', () => {
+		expect(holdGoal(hold)).toBe('Right Lateral’s gantry reaches 270°');
+		expect(
+			holdGoal({ ...hold, mismatches: [{ label: 'Couch Vrt', now: '+6', planned: '+4 mm' }] })
+		).toBe('Right Lateral’s couch Vrt reaches +4 mm');
+		expect(holdGoal({ ...hold, mismatches: [{ label: 'MLC', now: '10', planned: '16 cm' }] })).toBe(
+			'Right Lateral’s MLC reaches 16 cm'
+		);
+		expect(holdGoal(null)).toBe('the machine reaches the selected field');
+		expect(holdGoal({ ...hold, mismatches: [] })).toBe('the machine reaches the selected field');
+	});
+
+	it('fills the fix into a hint wherever it says {goal}', () => {
+		expect(GOAL).toBe('{goal}');
+		expect(fillGoal('Hold Move to field until {goal} and the checklist turns green.', hold)).toBe(
+			'Hold Move to field until Right Lateral’s gantry reaches 270° and the checklist turns green.'
+		);
+		expect(fillGoal('No goal here.', hold)).toBe('No goal here.');
 	});
 });

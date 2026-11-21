@@ -1,9 +1,10 @@
 /* Pure helpers for the sim-hub tutorial (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md,
    PR 3): the walking distance along a marker route, the marker's next stop as the player walks it,
    the line-of-sight test against the walk colliders, the stuck and E-step hint timers, the decision
-   miss counter, Jordan's escort stops and holds, and the off-screen edge arrow. Plain numbers only
-   (points are [x, z] in metres), so its spec runs without the scene; tutorial.ts feeds it the
-   world. */
+   miss counter, the delivery step's geometry hold (its timer and the fix its hints name), Jordan's
+   escort stops and holds, and the off-screen edge arrow. Plain numbers and strings only (points are
+   [x, z] in metres), so its spec runs without the scene; tutorial.ts feeds it the world. */
+import type { LinacGeometryHold } from '../../shared/console-protocol';
 
 /** A point on the floor: [x, z] in metres. */
 export type Pt = readonly [number, number];
@@ -132,6 +133,33 @@ export function stepNear(near: number, dt: number, distance: number): number {
 }
 export function eHintDue(near: number): boolean {
 	return near >= E_HINT_S;
+}
+
+/** A console step's hold hint shows once the LINAC console's geometry hold has stayed this many
+    seconds, the console open and no field delivered (tutorial-steps.ts ConsoleTask.holdHint). */
+export const HOLD_HINT_S = 20;
+/** One frame of the hold timer: seconds with the geometry hold on, back to 0 without it. */
+export function stepHold(secs: number, dt: number, holding: boolean): number {
+	return holding ? secs + dt : 0;
+}
+export function holdHintDue(secs: number): boolean {
+	return secs >= HOLD_HINT_S;
+}
+
+/** Where a hint names the geometry hold's fix (tutorial-steps.ts step 9). */
+export const GOAL = '{goal}';
+/** The fix for a geometry hold, from its first axis off the plan: "Right Lateral’s gantry reaches
+    270°" ("couch Vrt", "MLC": a label's first letter is lowercased only before a lowercase one);
+    with no hold known, "the machine reaches the selected field". */
+export function holdGoal(hold: LinacGeometryHold | null): string {
+	const m = hold?.mismatches[0];
+	if (!hold || !m) return 'the machine reaches the selected field';
+	const axis = /^[A-Z][a-z]/.test(m.label) ? m.label[0].toLowerCase() + m.label.slice(1) : m.label;
+	return `${hold.field}’s ${axis} reaches ${m.planned}`;
+}
+/** A hint with the hold's fix in place of GOAL. */
+export function fillGoal(text: string, hold: LinacGeometryHold | null): string {
+	return text.split(GOAL).join(holdGoal(hold));
 }
 
 export type FeedbackKind = 'correct' | 'hint1' | 'hint2' | 'reveal';

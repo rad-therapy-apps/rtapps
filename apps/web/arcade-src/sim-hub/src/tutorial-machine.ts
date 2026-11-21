@@ -1,13 +1,17 @@
 /* The sim-hub tutorial's step machine (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3):
    a pure reducer over Chapter 1's steps (tutorial-steps.ts). Events in (start, a frame's tick with
    the walking distance, E on a target, reaching a target, an answer, Continue, closing the dialog,
-   an event from the LINAC console, its beam turning on or off, the player closing the console, the
-   role change finishing, stop); a new state and a list of effects out, which tutorial.ts performs (tracker, dialog, hint
-   line, console, role change, world actions). It holds the hint timers and the miss counter of a
-   decision or a console step, mirroring the CT console's validateTechnique: "Not yet." with a
-   hint, a stronger hint, then the answer and its reason at the third miss. A console step
-   (docs/specs/2026-11-18-consoles-in-center-design.md, part 6) opens the console on E and is
-   triggered by Jordan's events on it, in order; its misses show in the hint line. */
+   an event from the LINAC console, its beam turning on or off, its geometry hold, the player
+   closing the console, the role change finishing, stop); a new state and a list of effects out,
+   which tutorial.ts performs (tracker, dialog, hint line, console, role change, world actions). It
+   holds the hint timers and the miss counter of a decision or a console step, mirroring the CT
+   console's validateTechnique: "Not yet." with a hint, a stronger hint, then the answer and its
+   reason at the third miss. A console step (docs/specs/2026-11-18-consoles-in-center-design.md,
+   part 6) opens the console on E and is triggered by Jordan's events on it, in order; its misses
+   show in the hint line. The delivery step's hints also follow the console's geometry hold (the
+   selected field off the plan): a refused beam for it names the fix with the field, as does its
+   hold hint once the hold has stayed HOLD_HINT_S with the console open and no field delivered (a
+   timer like the E-step hint's); both follow the hold as it changes and go when it clears. */
 import {
 	CHAPTER_1,
 	JORDAN_MRN,
@@ -23,11 +27,15 @@ import type {
 	StepAction,
 	TargetId
 } from './tutorial-steps';
-import type { LinacEvent, LinacWorkspace } from '../../shared/console-protocol';
+import type { LinacEvent, LinacGeometryHold, LinacWorkspace } from '../../shared/console-protocol';
 import {
 	eHintDue,
+	fillGoal,
+	GOAL,
+	holdHintDue,
 	missFeedback,
 	newStuckTimer,
+	stepHold,
 	stepNear,
 	stepStuck,
 	stuckLevel
@@ -50,6 +58,14 @@ export interface TutorialState {
 	consoleOpened: boolean;
 	/** The console step's last miss feedback, kept in the hint line while the console is closed. */
 	missHint: string | null;
+	/** That miss's text before its {goal} was filled, when it names the geometry hold's fix: filled
+	    again as the hold changes, and dropped with the miss when the hold clears. */
+	missTemplate: string | null;
+	/** The LINAC console's geometry hold as it last posted it (the selected field off the plan). */
+	hold: LinacGeometryHold | null;
+	/** Seconds a console step's console has been open with the hold on, since the hold came, a field
+	    was delivered or a miss (ConsoleTask.holdHint). */
+	holdSecs: number;
 	/** The console's beam as the step's world actions last showed it (ConsoleTask.beam). */
 	beamOn: boolean;
 	/** The decision was answered right, or its answer shown: Continue completes the step. */
@@ -86,6 +102,9 @@ export type TutorialEvent =
 	| { type: 'linac'; event: LinacEvent }
 	/** The LINAC console's beam, from each pose it posts (console-bus.ts linacPose). */
 	| { type: 'beam'; on: boolean }
+	/** The LINAC console's geometry hold, from each state it posts (console-bus.ts
+	    linacGeometryHold). */
+	| { type: 'geometryHold'; hold: LinacGeometryHold | null }
 	/** The player closed the console panel. */
 	| { type: 'consoleClosed' }
 	| { type: 'roleChangeDone' }
@@ -118,6 +137,9 @@ export const OFF: TutorialState = {
 	progress: 0,
 	consoleOpened: false,
 	missHint: null,
+	missTemplate: null,
+	hold: null,
+	holdSecs: 0,
 	beamOn: false,
 	resolved: false,
 	wait: 0,
@@ -166,6 +188,12 @@ export function consoleMissText(
 	};
 }
 
+/** A console step's own line in the hint line: its hold hint once due, else its last miss's. */
+function consoleHint(s: TutorialState, task: ConsoleTask | undefined): string | null {
+	if (task?.holdHint && s.hold && holdHintDue(s.holdSecs)) return fillGoal(task.holdHint, s.hold);
+	return s.missHint;
+}
+
 /** The share of the chapter done, for the tracker's bar: completed steps over all steps. */
 export function progressOf(s: TutorialState, total = CHAPTER_1.length): number {
 	if (s.phase === 'done') return 1;
@@ -187,7 +215,15 @@ export function reduceTutorial(
 	const enter = (n: number): TutorialState => {
 		fx.push({ type: 'showStep', step: n }, { type: 'hint', text: null });
 		actions(steps[n - 1].onStart);
-		return fresh(n, 'active');
+		// the console's hold is the console's, not the step's
+		return { ...fresh(n, 'active'), hold: s.hold };
+	};
+	/** `st` with the console step's line in the hint line, while its console is open. */
+	const showConsoleHint = (st: TutorialState): TutorialState => {
+		if (st.phase !== 'console') return st;
+		const hint = consoleHint(st, cur?.console);
+		if (hint !== st.hint) fx.push({ type: 'hint', text: hint });
+		return { ...st, hint };
 	};
 	const complete = (st: TutorialState): TutorialState => {
 		actions(cur?.onComplete);
@@ -221,6 +257,11 @@ export function reduceTutorial(
 				if (wait <= 1e-9) return out(complete({ ...s, wait: 0 }));
 				return out({ ...s, wait });
 			}
+			// the console open: only the hold timer runs (the console's hints are its own)
+			if (s.phase === 'console') {
+				if (!cur.console?.holdHint) return out(s);
+				return out(showConsoleHint({ ...s, holdSecs: stepHold(s.holdSecs, ev.dt, !!s.hold) }));
+			}
 			if (s.phase !== 'active') return out(s);
 			const pressE = cur.trigger === 'pressE',
 				stuck = stepStuck(s.stuck, ev.dt, ev.distance),
@@ -237,7 +278,7 @@ export function reduceTutorial(
 				? WAIT_FOR_JORDAN
 				: ev.heldForJamie
 					? WAIT_FOR_JAMIE
-					: (s.missHint ?? walking);
+					: (consoleHint(s, cur.console) ?? walking);
 			if (hint !== s.hint) fx.push({ type: 'hint', text: hint });
 			return out({ ...s, stuck, near, hintLevel, eHint, hint });
 		}
@@ -251,7 +292,7 @@ export function reduceTutorial(
 			if (cur.console) {
 				fx.push({ type: 'openConsole', workspace: cur.console.workspace });
 				// the walking and E hints are done with; a miss's hint stays for the reopened console
-				const hint = s.missHint;
+				const hint = consoleHint(s, cur.console);
 				if (hint !== s.hint) fx.push({ type: 'hint', text: hint });
 				return out({ ...s, phase: 'console', consoleOpened: true, hint });
 			}
@@ -266,12 +307,24 @@ export function reduceTutorial(
 				return out(s);
 			const outcome = consoleOutcome(ev.event, task.done[s.progress]);
 			if (outcome === 'miss') {
+				// a miss shows at once, and the hold timer starts again
 				const misses = s.misses + 1,
 					code = ev.event.kind === 'mistake' ? ev.event.code : undefined,
-					{ kind, text } = consoleMissText(task, misses, code, s.progress);
+					{ kind, text: template } = consoleMissText(task, misses, code, s.progress),
+					text = fillGoal(template, s.hold);
 				fx.push({ type: 'hint', text, kind });
-				return out({ ...s, misses, missHint: text, hint: text });
+				return out({
+					...s,
+					misses,
+					missHint: text,
+					missTemplate: template.includes(GOAL) ? template : null,
+					holdSecs: 0,
+					hint: text
+				});
 			}
+			// a field delivered is progress: the hold timer starts again
+			if (ev.event.kind === 'field-delivered' && ev.event.mrn === JORDAN_MRN)
+				return out(showConsoleHint({ ...s, holdSecs: 0 }));
 			if (outcome !== 'progress') return out(s);
 			const progress = s.progress + 1;
 			if (progress < task.done.length) return out({ ...s, progress });
@@ -290,6 +343,15 @@ export function reduceTutorial(
 				return out(s);
 			actions([ev.on ? beam.on : beam.off]);
 			return out({ ...s, beamOn: ev.on });
+		}
+		case 'geometryHold': {
+			// the hold's fix follows the hold; once it clears, its miss and timer go with it
+			const st: TutorialState = { ...s, hold: ev.hold, holdSecs: ev.hold ? s.holdSecs : 0 };
+			if (s.missTemplate) {
+				st.missHint = ev.hold ? fillGoal(s.missTemplate, ev.hold) : null;
+				if (!ev.hold) st.missTemplate = null;
+			}
+			return out(showConsoleHint(st));
 		}
 		case 'consoleClosed': {
 			// closed before the step is done: the step stays, and E opens the console again
