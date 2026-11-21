@@ -14,7 +14,9 @@
    false (the panel closed: the therapist has left the console) holds a delivering field and stops
    the machine keys. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
    In the tutorial scenario the body also carries the Tutorial's focus classes (tutorial-focus.ts),
-   kept in step with the screen shown. Started by main.ts once the app has booted. */
+   kept in step with the screen shown, and the delivery window selects the next field not yet
+   delivered when it opens and after each field (delivery-guide.ts nextFieldIndex). Started by
+   main.ts once the app has booted. */
 import type {
 	LinacPose,
 	LinacToCenterMessage,
@@ -44,7 +46,8 @@ import { consoleShell, shellSettled } from './console-patch';
 import { installConsoleKeys, releaseConsoleKeys, syncMoveKey } from './console-keys';
 import { TREATMENT_CASES } from './delivery/cases';
 import { holdTreatmentDelivery, renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
-import { parseFirstNumber, parseJawSpec } from './delivery/plan';
+import { getTreatmentFields, parseFirstNumber, parseJawSpec } from './delivery/plan';
+import { nextFieldIndex } from './delivery-guide';
 import { updateMLCPositions } from './scene';
 import { activeIGRTTolerances } from './delivery/stereotactic';
 import { getIGRTApplied, getIGRTResidual } from './linac-igrt';
@@ -135,6 +138,32 @@ function showRefusal(message: string, notice = false) {
 		() => refusalBar?.classList.remove('show'),
 		notice ? NOTICE_SHOW_MS : REFUSAL_SHOW_MS
 	);
+}
+
+/* ----- the Tutorial's field order: the next field not yet delivered, in plan order, is selected
+   when the delivery window opens and after each field, as a click on its row would; the learner
+   may still pick another ----- */
+function selectNextField() {
+	const select = document.getElementById('deliveryFieldSelect') as HTMLSelectElement | null,
+		d = S.treatmentDelivery,
+		next = nextFieldIndex(
+			getTreatmentFields().length,
+			(d.completedFields ?? {}) as Record<number, boolean>
+		);
+	if (!select || !S.activeTreatmentCase || d.delivering || next === null) return;
+	if ((Number(d.activeFieldIndex) || 0) === next) return;
+	select.value = String(next);
+	select.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function keepTutorialFieldOrder() {
+	const panel = document.getElementById('deliveryPanel');
+	if (!panel) return;
+	let wasOpen = panel.classList.contains('open');
+	new MutationObserver(() => {
+		const open = panel.classList.contains('open');
+		if (open && !wasOpen) selectNextField();
+		wasOpen = open;
+	}).observe(panel, { attributes: true, attributeFilter: ['class'] });
 }
 
 /* ----- the couch correction: shift-applied once the residual is inside tolerance ----- */
@@ -278,11 +307,15 @@ export function startConsoleMode() {
 		updateMLCPositions();
 		syncFundamentalReadouts();
 		document.body.classList.add('linac-tutorial-focus');
+		keepTutorialFieldOrder();
 	}
 	setConsoleSink({
 		event: (event) => {
 			if (clearsRefusal(event.kind)) hideRefusal();
 			post({ type: 'rtapps-linac-event', event });
+			// after the delivery loop has finished with the field
+			if (CONSOLE.scenario === 'tutorial' && event.kind === 'field-delivered')
+				setTimeout(selectNextField, 0);
 		},
 		mistake: (code, message) => {
 			showRefusal(message);
