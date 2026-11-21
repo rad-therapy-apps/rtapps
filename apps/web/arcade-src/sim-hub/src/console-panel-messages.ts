@@ -15,9 +15,11 @@ import {
 	type CtPose,
 	type CtToCenterMessage,
 	type LinacEvent,
+	type LinacGeometryHold,
 	type LinacPanelMsg,
 	type LinacPose,
 	type LinacRoomMsg,
+	type LinacStateMsg,
 	type LinacToCenterMessage,
 	type LinacWorkspace
 } from '../../shared/console-protocol';
@@ -114,6 +116,19 @@ function readLinacEvent(e: unknown): LinacEvent | null {
 	return out as unknown as LinacEvent;
 }
 
+/** A state message's geometry hold: null, or a copy of its field and axes; undefined when it is
+    neither (a field missing or of the wrong type). */
+function readGeometryHold(h: unknown): LinacGeometryHold | null | undefined {
+	if (h === null) return null;
+	if (!isBag(h) || !isStr(h.field) || !Array.isArray(h.mismatches)) return undefined;
+	const mismatches: LinacGeometryHold['mismatches'] = [];
+	for (const m of h.mismatches) {
+		if (!isBag(m) || !isStr(m.label) || !isStr(m.now) || !isStr(m.planned)) return undefined;
+		mismatches.push({ label: m.label, now: m.now, planned: m.planned });
+	}
+	return { field: h.field, mismatches };
+}
+
 /** A LINAC console message as the contract shapes it (a fresh copy), or null for anything else. */
 export function readLinacMessage(data: unknown): LinacToCenterMessage | null {
 	if (!isBag(data)) return null;
@@ -125,7 +140,14 @@ export function readLinacMessage(data: unknown): LinacToCenterMessage | null {
 		const pose = readLinacPose(data.pose),
 			{ mrn, workspace } = data;
 		if (!pose || !(mrn === null || isStr(mrn)) || !isWorkspace(workspace)) return null;
-		return { type: data.type, pose, mrn: mrn as string | null, workspace };
+		const msg: LinacStateMsg = { type: data.type, pose, mrn: mrn as string | null, workspace };
+		// the geometry hold came later to the contract: a message may leave it out
+		if (data.geometryHold !== undefined) {
+			const hold = readGeometryHold(data.geometryHold);
+			if (hold === undefined) return null;
+			msg.geometryHold = hold;
+		}
+		return msg;
 	}
 	if (data.type === 'rtapps-linac-event') {
 		const event = readLinacEvent(data.event);

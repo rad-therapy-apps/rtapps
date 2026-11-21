@@ -4,7 +4,7 @@
    camera feeds, index.html's #rtappsConsoleView styles lay the screens out for the panel), and it
    talks to the center only through postMessage (contract: shared/console-protocol.ts; rules:
    console-messages.ts). Out: rtapps-linac-ready once the shell has settled, rtapps-linac-state when
-   the pose, workspace or open chart changes (at most 30 a
+   the pose, workspace, open chart or the selected field's geometry hold changes (at most 30 a
    second), and rtapps-linac-event for each step the workflow reports through console-hooks.ts,
    with every refused action as a `mistake` that is also shown in the console's refusal bar (a
    notice, such as to keep holding Move to field, shows there too but is not posted). In:
@@ -18,6 +18,7 @@
    delivered when it opens and after each field (delivery-guide.ts nextFieldIndex). Started by
    main.ts once the app has booted. */
 import type {
+	LinacGeometryHold,
 	LinacPose,
 	LinacToCenterMessage,
 	LinacWorkspace
@@ -31,6 +32,7 @@ import {
 	fromCenter,
 	parseCenterMessage,
 	poseFromReadout,
+	sameGeometryHold,
 	samePose,
 	statePostDue,
 	type SixAxis
@@ -52,6 +54,7 @@ import { updateMLCPositions } from './scene';
 import { activeIGRTTolerances } from './delivery/stereotactic';
 import { getIGRTApplied, getIGRTResidual } from './linac-igrt';
 import {
+	deliveryGeometryHold,
 	fundamentalState,
 	getDeliveryReadiness,
 	setCenteredJawField,
@@ -79,7 +82,12 @@ let settled = false;
 let shownWorkspace: LinacWorkspace = 'queue';
 let refusalAt = 0;
 let pendingOpen: LinacWorkspace | null = null;
-let posted: { pose: LinacPose; mrn: string | null; workspace: LinacWorkspace } | null = null;
+let posted: {
+	pose: LinacPose;
+	mrn: string | null;
+	workspace: LinacWorkspace;
+	geometryHold: LinacGeometryHold | null;
+} | null = null;
 let postedAt: number | null = null;
 
 function post(msg: LinacToCenterMessage) {
@@ -208,17 +216,24 @@ function tick() {
 	syncMoveKey();
 	const pose = currentPose(),
 		workspace = currentWorkspace(),
-		mrn = workspace === 'queue' ? null : openChartMrn();
+		mrn = workspace === 'queue' ? null : openChartMrn(),
+		geometryHold = mrn === null ? null : deliveryGeometryHold();
 	if (workspaceClearsRefusal(shownWorkspace, workspace, performance.now() - refusalAt))
 		hideRefusal();
 	shownWorkspace = workspace;
-	if (posted && samePose(posted.pose, pose) && posted.mrn === mrn && posted.workspace === workspace)
+	if (
+		posted &&
+		samePose(posted.pose, pose) &&
+		posted.mrn === mrn &&
+		posted.workspace === workspace &&
+		sameGeometryHold(posted.geometryHold, geometryHold)
+	)
 		return;
 	const now = performance.now();
 	if (!statePostDue(now, postedAt)) return; // the change goes out on a later tick
-	posted = { pose, mrn, workspace };
+	posted = { pose, mrn, workspace, geometryHold };
 	postedAt = now;
-	post({ type: 'rtapps-linac-state', pose, mrn, workspace });
+	post({ type: 'rtapps-linac-state', pose, mrn, workspace, geometryHold });
 }
 
 /* ----- center → console ----- */

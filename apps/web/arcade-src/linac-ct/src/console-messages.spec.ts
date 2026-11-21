@@ -11,6 +11,7 @@ import {
 	isLinacWorkspace,
 	parseCenterMessage,
 	poseFromReadout,
+	sameGeometryHold,
 	samePose,
 	shiftLengthMm,
 	STATE_MIN_GAP_MS,
@@ -307,6 +308,33 @@ describe('the refusal bar', () => {
 		expect(workspaceClearsRefusal('igrt', 'delivery', REFUSAL_WORKSPACE_GRACE_MS + 1)).toBe(true);
 		expect(workspaceClearsRefusal('igrt', 'delivery', 50)).toBe(false);
 		expect(workspaceClearsRefusal('igrt', 'igrt', 60000)).toBe(false);
+	});
+});
+
+describe('the geometry hold the state message carries', () => {
+	const hold = {
+		field: 'Right Lateral',
+		mismatches: [{ label: 'Gantry', now: '0°', planned: '270°' }]
+	};
+
+	it('posts again only when the field or an axis off the plan changes', () => {
+		expect(sameGeometryHold(null, null)).toBe(true);
+		expect(sameGeometryHold(hold, structuredClone(hold))).toBe(true);
+		expect(sameGeometryHold(hold, null)).toBe(false);
+		expect(sameGeometryHold(null, hold)).toBe(false);
+		expect(sameGeometryHold(hold, { ...hold, field: 'Left Lateral' })).toBe(false);
+		expect(
+			sameGeometryHold(hold, {
+				...hold,
+				mismatches: [{ label: 'Gantry', now: '3°', planned: '270°' }]
+			})
+		).toBe(false);
+		expect(
+			sameGeometryHold(hold, {
+				...hold,
+				mismatches: [...hold.mismatches, { label: 'Couch Vrt', now: '+6', planned: '+4 mm' }]
+			})
+		).toBe(false);
 	});
 });
 

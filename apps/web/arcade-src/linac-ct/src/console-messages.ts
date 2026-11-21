@@ -11,6 +11,7 @@ import {
 	LINAC_WORKSPACES,
 	type CenterToLinacMessage,
 	type ConsoleScenario,
+	type LinacGeometryHold,
 	type LinacPose,
 	type LinacWorkspace
 } from '../../shared/console-protocol';
@@ -141,6 +142,25 @@ export function statePostDue(now: number, lastPostAt: number | null): boolean {
 export function samePose(a: LinacPose | null, b: LinacPose | null): boolean {
 	if (!a || !b) return a === b;
 	return (Object.keys(a) as (keyof LinacPose)[]).every((k) => a[k] === b[k]);
+}
+
+/** Whether two geometry holds say the same: both none, or the same field and the same axes off the
+    plan with the same values, in the same order. */
+export function sameGeometryHold(
+	a: LinacGeometryHold | null,
+	b: LinacGeometryHold | null
+): boolean {
+	if (!a || !b) return a === b;
+	return (
+		a.field === b.field &&
+		a.mismatches.length === b.mismatches.length &&
+		a.mismatches.every(
+			(m, i) =>
+				m.label === b.mismatches[i].label &&
+				m.now === b.mismatches[i].now &&
+				m.planned === b.mismatches[i].planned
+		)
+	);
 }
 
 /** The length of a couch correction's translation, in mm to 0.1. */
