@@ -102,6 +102,21 @@ export interface LinacReadyMsg {
 	type: 'rtapps-linac-ready';
 	scenario: ConsoleScenario;
 }
+/** One axis of the selected field's geometry that is off the plan, as the console's geometry
+    interlock names it ("Gantry 0° → 270°"): the axis, the machine's value now and the planned
+    value, display-ready (the unit on the planned value, and on both for angles). */
+export interface GeometryMismatch {
+	label: string;
+	now: string;
+	planned: string;
+}
+/** The geometry interlock holding the selected field: the field's name and what is off the plan,
+    in the checklist's order. */
+export interface LinacGeometryHold {
+	field: string;
+	mismatches: GeometryMismatch[];
+}
+
 /** LINAC → center: the machine pose, posted when it changes, at most 30 times a second. */
 export interface LinacStateMsg {
 	type: 'rtapps-linac-state';
@@ -109,6 +124,10 @@ export interface LinacStateMsg {
 	/** The open chart's MRN, or null on the queue. */
 	mrn: string | null;
 	workspace: LinacWorkspace;
+	/** Added later (optional, so a message without it is still valid): the geometry interlock's hold
+	    on the selected field while a chart is open, or null when its geometry matches the plan (or
+	    no chart is open). The Tutorial's delivery step names the fix from it. */
+	geometryHold?: LinacGeometryHold | null;
 }
 /** What happened on the LINAC console. `mistake` is posted whenever the console refuses an action
     (an interlock, a wrong pick, a step out of order); the Tutorial counts them for its hints. */

@@ -32,6 +32,8 @@ import {
 	deliveryProgressFraction,
 	getCurrentPlannedParameters,
 	getDynamicFieldState,
+	getIGRTExpectedAbsoluteCouch,
+	getPlannedCouchState,
 	getTreatmentFields,
 	normalizeAngleValue,
 	parseFirstNumber,
@@ -60,6 +62,16 @@ import { saveGameState } from './game';
 import { setTextById, syncOperatorConsole, wrap360 } from './main';
 import { CONSOLE, consoleMistake, consoleMoved, consoleRoom } from './console-hooks';
 import { COLLISION_PROXY_TOL, collisionRefuses } from './collision-rule';
+import { GEOMETRY_CHECK } from './console-messages';
+import {
+	angleMismatch,
+	couchMismatch,
+	geometryDetail,
+	jawsMismatch,
+	mlcMismatch,
+	textMismatch
+} from './delivery-guide';
+import type { GeometryMismatch, LinacGeometryHold } from '../../shared/console-protocol';
 
 export function clearanceOverrideRecord(idx = Number(S.treatmentDelivery.activeFieldIndex) || 0) {
 	return S.clearanceOverrideState.byField?.[idx] || null;
@@ -252,9 +264,69 @@ export function deliveryGeometryChecks() {
 			];
 	return defs.map(([name, key]) => ({
 		name,
+		key,
 		ok: treatmentParamMatches(key, planned[key], actual[key]),
 		detail: `${monitorPlannedDisplay(key, planned[key])} / ${actual[key]}`
 	}));
+}
+
+const ANGLE_LABELS = { gantry: 'Gantry', collimator: 'Collimator', couchAngle: 'Couch angle' };
+
+/** The axes of the selected field's geometry off the plan, from its failed geometry checks
+    (delivery-guide.ts words them): the couch axis by axis, each tested by the check's own rule with
+    the other two on target, so the axes named are the ones the check holds on. */
+function geometryMismatches(geom: ReturnType<typeof deliveryGeometryChecks>): GeometryMismatch[] {
+	const planned = getCurrentPlannedParameters(),
+		actual = getTreatmentMonitorActual(),
+		out: GeometryMismatch[] = [];
+	for (const { key, ok } of geom) {
+		if (ok) continue;
+		const p = planned[key],
+			a = actual[key],
+			raw = (label: string) => textMismatch(label, String(a ?? '—'), String(p ?? '—'));
+		if (key in ANGLE_LABELS) {
+			const pn = normalizeAngleValue(p),
+				an = normalizeAngleValue(a);
+			out.push(
+				pn == null || an == null ? raw(ANGLE_LABELS[key]) : angleMismatch(ANGLE_LABELS[key], an, pn)
+			);
+		} else if (key === 'couch') {
+			const target = getIGRTExpectedAbsoluteCouch() ?? getPlannedCouchState(),
+				[vrt, lng, lat] = (String(a).match(/[-+]?\d+(?:\.\d+)?/g) || []).map(Number);
+			if (!target || ![vrt, lng, lat].every(Number.isFinite)) {
+				out.push(raw('Couch'));
+				continue;
+			}
+			const now = { vrt, lng, lat };
+			for (const [axis, k] of [
+				['Vrt', 'vrt'],
+				['Lng', 'lng'],
+				['Lat', 'lat']
+			] as const) {
+				const probe = { ...target, [k]: now[k] };
+				if (!treatmentParamMatches('couch', p, `${probe.vrt} / ${probe.lng} / ${probe.lat} mm`))
+					out.push(couchMismatch(axis, now[k], target[k]));
+			}
+		} else if (key === 'jaws') {
+			const pj = parseJawSpec(p),
+				aj = parseJawSpec(a);
+			out.push(pj && aj ? jawsMismatch(aj, pj) : raw('Jaws'));
+		} else if (key === 'mlcAperture') {
+			const pm = parseFirstNumber(p),
+				am = parseFirstNumber(a);
+			out.push(pm != null && am != null ? mlcMismatch(am, pm) : raw('MLC'));
+		} else out.push(raw('MLC shape'));
+	}
+	return out;
+}
+
+/** The geometry interlock's hold on the selected field, for the center (console-mode.ts posts it):
+    the field and the axes off the plan; null when its geometry matches or no case is loaded. */
+export function deliveryGeometryHold(): LinacGeometryHold | null {
+	if (!S.activeTreatmentCase) return null;
+	const geom = deliveryGeometryChecks();
+	if (geom.every((x) => x.ok)) return null;
+	return { field: deliveryCasePlan().field, mismatches: geometryMismatches(geom) };
 }
 
 export function getDeliveryReadiness() {
@@ -289,10 +361,17 @@ export function getDeliveryReadiness() {
 	});
 	const geom = deliveryGeometryChecks();
 	const geomOK = geom.length > 0 && geom.every((x) => x.ok);
+	// console mode names the axes off the plan, now → planned (delivery-guide.ts); the rule is the same
+	const mismatches = CONSOLE.console && !geomOK ? geometryMismatches(geom) : [];
 	checks.push({
-		name: 'Treatment geometry matches plan',
+		name: GEOMETRY_CHECK,
 		ok: geomOK,
-		detail: geomOK ? 'Gantry · Coll · Jaws · MLC · Couch' : 'Review parameter mismatches'
+		detail: geomOK
+			? 'Gantry · Coll · Jaws · MLC · Couch'
+			: mismatches.length
+				? geometryDetail(mismatches)
+				: 'Review parameter mismatches',
+		mismatches
 	});
 	const imagingRequired = !!(
 		S.activeTreatmentCase?.planned?.imaging &&

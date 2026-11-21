@@ -191,6 +191,9 @@ export interface Refusal {
 	message: string;
 }
 
+/** The geometry interlock's name (linac-safety.ts getDeliveryReadiness). */
+export const GEOMETRY_CHECK = 'Treatment geometry matches plan';
+
 /** Mistake codes for the interlocks a learner meets most, the most basic step first: an
     unverified alignment, for one, also leaves the couch off the planned position, so it is coded
     before the geometry it causes. Any other failed check is 'interlock'. */
@@ -198,10 +201,21 @@ const INTERLOCK_CODES: [string, string][] = [
 	['Vault door closed', 'door-open'],
 	['Immobilization / indexing verified', 'setup-not-verified'],
 	['Image guidance verified', 'igrt-not-verified'],
-	['Treatment geometry matches plan', 'geometry-mismatch'],
+	[GEOMETRY_CHECK, 'geometry-mismatch'],
 	['Imaging hardware retracted', 'imaging-out'],
 	['In-room motion locked', 'motion-armed']
 ];
+
+/** The failed interlock to resolve first: the most basic of the coded ones, else the first failed
+    one in the checklist's order; null when none failed. */
+export function basicHold(checks: ReadinessCheck[]): ReadinessCheck | null {
+	const failed = checks.filter((c) => !c.ok);
+	for (const [name] of INTERLOCK_CODES) {
+		const hold = failed.find((c) => c.name === name);
+		if (hold) return hold;
+	}
+	return failed[0] ?? null;
+}
 
 /** `action` refused by the interlocks: the code names the most basic failed one, the message
     lists every failed one as the checklist shows it. */
