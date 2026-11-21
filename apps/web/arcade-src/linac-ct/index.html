@@ -13832,6 +13832,18 @@
 					max-height: 112px;
 				}
 			}
+			/* console mode, delivery clarity: a notice in the refusal bar's place (src/console-mode.ts:
+			   not a refused action, so amber, not red) and the Move to field key at the selected field
+			   (src/console-keys.ts) */
+			#consoleRefusal.notice {
+				border-color: #e2b552;
+				background: #4d3b10;
+				color: #fff6df;
+			}
+			#consoleMoveToField.at-field {
+				border-color: #6fd08c;
+				background: linear-gradient(#2f7448, #235a37);
+			}
 		</style>
 	</head>
 	<body>

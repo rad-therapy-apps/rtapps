@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
+	atFieldTarget,
+	KEEP_HOLDING_NOTICE,
 	KEY_STEPS,
 	keyLanding,
+	moveKeyLabel,
 	MOVE_SPEED,
 	moveToFieldStep,
 	REPEAT_DELAY_MS,
@@ -151,5 +154,28 @@ describe('keys reaching the plan from a part-way move', () => {
 		expect(keyLanding('vrt', 0.37, 1, 0)).toBeNull();
 		expect(keyLanding('vrt', 0.37, -1, 0)).toBe(0);
 		expect(keyLanding('lng', 0.5, -1, null)).toBeNull();
+	});
+});
+
+describe('what the Move to field key says', () => {
+	const field: FieldAxes = { ...home, gantry: 270, vrt: 4 };
+
+	it('is at the field only when every axis it drives is there', () => {
+		expect(atFieldTarget(field, field)).toBe(true);
+		expect(atFieldTarget({ ...field, gantry: 269.9 }, field)).toBe(false);
+		expect(atFieldTarget({ ...field, vrt: 3 }, field)).toBe(false);
+		// 360 is 0 the shortest way round
+		expect(atFieldTarget({ ...home, gantry: 360 }, home)).toBe(true);
+	});
+
+	it('says to keep holding while it moves, At field once there, else to hold it', () => {
+		expect(moveKeyLabel(true, false)).toBe('Moving… keep holding');
+		expect(moveKeyLabel(true, true)).toBe('Moving… keep holding');
+		expect(moveKeyLabel(false, true)).toBe('At field');
+		expect(moveKeyLabel(false, false)).toBe('Hold to move to field');
+	});
+
+	it('notes that a press let go too soon must be held', () => {
+		expect(KEEP_HOLDING_NOTICE).toBe('Keep holding to move to the field');
 	});
 });

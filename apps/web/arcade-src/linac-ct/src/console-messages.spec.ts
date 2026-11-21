@@ -4,6 +4,7 @@ import {
 	beamRefusal,
 	clearsRefusal,
 	consoleViewFromSearch,
+	basicHold,
 	correctionApplied,
 	fromCenter,
 	interlockRefusal,
@@ -306,5 +307,19 @@ describe('the refusal bar', () => {
 		expect(workspaceClearsRefusal('igrt', 'delivery', REFUSAL_WORKSPACE_GRACE_MS + 1)).toBe(true);
 		expect(workspaceClearsRefusal('igrt', 'delivery', 50)).toBe(false);
 		expect(workspaceClearsRefusal('igrt', 'igrt', 60000)).toBe(false);
+	});
+});
+
+describe('the hold to resolve first', () => {
+	const check = (name: string, ok: boolean) => ({ name, ok, detail: ok ? 'ok' : 'off' });
+
+	it('is the most basic coded hold, else the first failed one, else none', () => {
+		const geometry = check('Treatment geometry matches plan', false),
+			igrt = check('Image guidance verified', false),
+			trajectory = check('Treatment trajectory clearance', false);
+		expect(basicHold([geometry, igrt])).toBe(igrt);
+		expect(basicHold([trajectory, geometry])).toBe(geometry);
+		expect(basicHold([check('Vault door closed', true), trajectory])).toBe(trajectory);
+		expect(basicHold([check('Vault door closed', true)])).toBeNull();
 	});
 });

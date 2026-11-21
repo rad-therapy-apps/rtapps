@@ -4,10 +4,12 @@
    camera feeds, index.html's #rtappsConsoleView styles lay the screens out for the panel), and it
    talks to the center only through postMessage (contract: shared/console-protocol.ts; rules:
    console-messages.ts). Out: rtapps-linac-ready once the shell has settled, rtapps-linac-state when
-   the pose, workspace or open chart changes (at most 30 a second), and rtapps-linac-event for
-   each step the workflow reports through console-hooks.ts, with every refused action as a
-   `mistake` that is also shown in the console's refusal bar. In: rtapps-linac-open switches
-   workspace the way the chart's own buttons do (with no chart open yet it stays on the queue);
+   the pose, workspace or open chart changes (at most 30 a
+   second), and rtapps-linac-event for each step the workflow reports through console-hooks.ts,
+   with every refused action as a `mistake` that is also shown in the console's refusal bar (a
+   notice, such as to keep holding Move to field, shows there too but is not posted). In:
+   rtapps-linac-open switches workspace the way the chart's own buttons do (with no chart open yet
+   it stays on the queue);
    rtapps-linac-room sets the vault door the door interlock reads; rtapps-linac-panel with open
    false (the panel closed: the therapist has left the console) holds a delivering field and stops
    the machine keys. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
@@ -39,7 +41,7 @@ import {
 	setConsoleSink
 } from './console-hooks';
 import { consoleShell, shellSettled } from './console-patch';
-import { installConsoleKeys, releaseConsoleKeys } from './console-keys';
+import { installConsoleKeys, releaseConsoleKeys, syncMoveKey } from './console-keys';
 import { TREATMENT_CASES } from './delivery/cases';
 import { holdTreatmentDelivery, renderTreatmentDeliveryPanel } from './delivery/treatment-delivery';
 import { parseFirstNumber, parseJawSpec } from './delivery/plan';
@@ -58,6 +60,7 @@ import { focusClass, tutorialFocus, type TutorialFocus } from './tutorial-focus'
 
 const STATE_TICK_MS = 17; // the pose is checked this often; statePostDue spaces the posts
 const REFUSAL_SHOW_MS = 6000;
+const NOTICE_SHOW_MS = 3000;
 
 /** The workflow panels and the workspace each one is; the advanced workflow panels keep the last. */
 const PANEL_WORKSPACES: [string, LinacWorkspace][] = [
@@ -107,26 +110,31 @@ function currentPose(): LinacPose {
 
 /* ----- the refusal bar: every mistake shows at the top of the console for a few seconds, or until
    the learner's next action succeeds (a workflow event, or a machine move the interlocks let
-   through) or the workspace changes ----- */
+   through) or the workspace changes; a notice shows there the same way, in amber and for less
+   time ----- */
 let refusalBar: HTMLElement | null = null;
 let refusalTimer = 0;
 function hideRefusal() {
 	clearTimeout(refusalTimer);
 	refusalBar?.classList.remove('show');
 }
-function showRefusal(message: string) {
+function showRefusal(message: string, notice = false) {
 	shownWorkspace = currentWorkspace();
 	refusalAt = performance.now();
 	if (!refusalBar) {
 		refusalBar = document.createElement('div');
 		refusalBar.id = 'consoleRefusal';
-		refusalBar.setAttribute('role', 'alert');
 		document.body.appendChild(refusalBar);
 	}
+	refusalBar.setAttribute('role', notice ? 'status' : 'alert');
+	refusalBar.classList.toggle('notice', notice);
 	refusalBar.textContent = message;
 	refusalBar.classList.add('show');
 	clearTimeout(refusalTimer);
-	refusalTimer = window.setTimeout(() => refusalBar?.classList.remove('show'), REFUSAL_SHOW_MS);
+	refusalTimer = window.setTimeout(
+		() => refusalBar?.classList.remove('show'),
+		notice ? NOTICE_SHOW_MS : REFUSAL_SHOW_MS
+	);
 }
 
 /* ----- the couch correction: shift-applied once the residual is inside tolerance ----- */
@@ -168,6 +176,7 @@ function syncTutorialFocus() {
 function tick() {
 	if (CONSOLE.scenario === 'tutorial') syncTutorialFocus();
 	watchShift();
+	syncMoveKey();
 	const pose = currentPose(),
 		workspace = currentWorkspace(),
 		mrn = workspace === 'queue' ? null : openChartMrn();
@@ -282,6 +291,7 @@ export function startConsoleMode() {
 				event: { kind: 'mistake', workspace: currentWorkspace(), code, message }
 			});
 		},
+		notice: (message) => showRefusal(message, true),
 		// a refused couch key's "Collision blocked" must not stay up while the opposite key moves the
 		// couch back: that reads as the way back being blocked too
 		moved: hideRefusal

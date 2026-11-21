@@ -4,9 +4,10 @@
    Vault 1 follows it smoothly. A move released part way leaves values between the keys' steps,
    so a key whose step would pass the field's planned value lands on it instead. This module holds
    the rules: which keys repeat, what each steps and how fast, the move speeds, one frame of the
-   move (each axis the shortest way round, no further than its speed allows) and the landing.
-   console-keys.ts applies them to the page. Free of scene and DOM imports so it is unit tested in
-   Node (console-motion.spec.ts). */
+   move (each axis the shortest way round, no further than its speed allows), the landing, and
+   what the Move to field key says (moving, at the field, or to hold it) and the notice when it is
+   let go before the machine gets there. console-keys.ts applies them to the page. Free of scene
+   and DOM imports so it is unit tested in Node (console-motion.spec.ts). */
 
 /** The axes Move to field drives: angles in degrees, couch translations in mm (fundamentalState). */
 export interface FieldAxes {
@@ -104,3 +105,23 @@ export function keyLanding(
 		return null;
 	return angle ? wrap360(target) : target;
 }
+
+/** Whether the machine is at `target` on every axis Move to field drives. */
+export function atFieldTarget(current: FieldAxes, target: FieldAxes): boolean {
+	return moveToFieldStep(current, target, 0).arrived;
+}
+
+/** The Move to field key's label: while held and moving, once the machine is at the selected
+    field, and otherwise (the deadman key moves the machine only while it is held). */
+export const MOVE_KEY_LABELS = {
+	idle: 'Hold to move to field',
+	moving: 'Moving… keep holding',
+	atField: 'At field'
+} as const;
+export function moveKeyLabel(moving: boolean, atField: boolean): string {
+	if (moving) return MOVE_KEY_LABELS.moving;
+	return atField ? MOVE_KEY_LABELS.atField : MOVE_KEY_LABELS.idle;
+}
+/** The console's notice when Move to field is let go before the machine reaches the field: shown
+    in the refusal bar's place, but not a refused action (the Tutorial does not count it). */
+export const KEEP_HOLDING_NOTICE = 'Keep holding to move to the field';
