@@ -19,11 +19,16 @@
 //           interlock stops the couch (the Tutorial's hint: Vert −, then Verify Alignment; the status
 //           line: correction pending), then Vert − from there goes and clears the refusal (the status
 //           line: within tolerance); the couch correction from the console's keys, Verify Alignment
-//   step 9  delivery: the right lateral field (gantry 270), then the left lateral field (90), each
-//           after Move to field; Vault 1's gantry (window.__NPC.vaultLinac) passes the angles
-//           between, one way, and ends at the field's angle (0 to 270, then 270 to 90); the Vault 1
-//           board shows BEAM ON while the beam is on, BETWEEN FIELDS between the fields and
-//           TREATMENT COMPLETE at the end
+//   step 9  delivery: the window opens with the right lateral field selected; the left lateral
+//           picked first, the top line and the geometry hold name the mismatch (Gantry 0° → 90°),
+//           and a refused Enable Beam makes the Tutorial's hint name the fix with the field, which
+//           follows the field picked back; a click on Move to field (not a hold) brings the note to
+//           keep holding, not a mistake; then the right lateral field (gantry 270) and, selected by
+//           the console after it, the left lateral field (90), each held to with Move to field (the
+//           key says it is moving, then At field, and the Tutorial's hint goes); Vault 1's gantry
+//           (window.__NPC.vaultLinac) passes the angles between, one way, and ends at the field's
+//           angle (0 to 270, then 270 to 90); the Vault 1 board shows BEAM ON while the beam is
+//           on, BETWEEN FIELDS between the fields and TREATMENT COMPLETE at the end
 //   then    a second play from the title, steps 1-3: the console's page boots fresh, so
 //           Jordan's check-in and chart open again and step 3 completes
 // Also asserted: the Tutorial's events arrive in order from the console (console-bus.ts), Jordan
@@ -605,16 +610,101 @@ try {
 		);
 	// the signed turn from angle a to angle b the shortest way round, -180..180 (degrees)
 	const turn = (a, b) => ((b - a + 540) % 360) - 180;
+	const shown = (sel) =>
+		frame.evaluate(
+			(sel) => document.querySelector(sel)?.textContent.trim().replace(/\s+/g, ' ') ?? null,
+			sel
+		);
+	const selected = () =>
+		frame.evaluate(() =>
+			[...document.querySelectorAll('#rtv2dFieldList .rtv2d-field-row')].findIndex((r) =>
+				r.classList.contains('active')
+			)
+		);
+	/** Polls `fn` (run in the console's page) until it returns something truthy. */
+	const inConsole = async (what, fn, arg, timeout = WAIT_MS) => {
+		for (const t0 = Date.now(); ; await sleep(100)) {
+			const v = await frame.evaluate(fn, arg);
+			if (v) return v;
+			if (Date.now() - t0 > timeout)
+				throw new CheckFailure(`timed out after ${timeout / 1000} s waiting for ${what}`);
+		}
+	};
+	const hintIs = (what, want) =>
+		until(what, (h) => window.__TUTORIAL.state().hint === h, 3000, want).catch(async () => {
+			throw new CheckFailure(`${what} (the hint: "${(await state()).hint}")`);
+		});
+	expect((await selected()) === 0, 'the delivery window opens with Right Lateral selected');
+	// the wrong field first: the top line and the geometry hold name the gantry, now → planned
+	await click('#rtv2dFieldList .rtv2d-field-row[data-index="1"]');
+	await inConsole(
+		'the top line to name the left lateral field and its gantry',
+		(want) => document.getElementById('rtv2dHeroCaption')?.textContent.trim() === want,
+		'Left Lateral: hold Move to field until the checklist is green (Gantry 0° → 90°).'
+	);
+	const holdName = await shown('#rtv2dChecklist .rtv2d-check.bad b'),
+		holdDetail = await shown('#rtv2dChecklist .rtv2d-check.bad span');
+	expect(
+		holdName === 'Treatment geometry matches plan' && holdDetail === 'Gantry 0° → 90°',
+		`the Interlocks tab's hold names the mismatch ("${holdName}": "${holdDetail}")`
+	);
+	n = await eventCount();
+	await click('#rtv2EnableBeam');
+	const geometryRefused = await nextEvent('mistake', n);
+	expect(
+		geometryRefused.code === 'geometry-mismatch' &&
+			geometryRefused.message.includes('(Gantry 0° → 90°)'),
+		`Enable Beam is refused for the geometry, naming it (${JSON.stringify(geometryRefused)})`
+	);
+	await hintIs(
+		"the Tutorial's hint to name the fix with the left lateral field",
+		'Not yet. Hold Move to field until Left Lateral’s gantry reaches 90° and the checklist turns green.'
+	);
+	await click('#rtv2dFieldList .rtv2d-field-row[data-index="0"]');
+	await hintIs(
+		"the Tutorial's hint to follow the field picked back",
+		'Not yet. Hold Move to field until Right Lateral’s gantry reaches 270° and the checklist turns green.'
+	);
+	// a click on Move to field, not a hold: the note to keep holding, which is not a mistake
+	n = await eventCount();
+	const misses = (await state()).misses;
+	await noScroll.scan(frame, 'delivery, before clicking Move to field');
+	const moveBox = await frame.locator('#consoleMoveToField').boundingBox();
+	await page.mouse.click(moveBox.x + moveBox.width / 2, moveBox.y + moveBox.height / 2);
+	await inConsole(
+		'the note to keep holding Move to field',
+		() =>
+			document.querySelector('#consoleRefusal.show.notice')?.textContent ===
+			'Keep holding to move to the field'
+	);
+	await sleep(300);
+	expect(
+		(await events()).slice(n).every((e) => e.kind !== 'mistake') &&
+			(await state()).misses === misses,
+		`the note is not a mistake (${JSON.stringify((await events()).slice(n))})`
+	);
+	expect(
+		(await shown('#consoleMoveToField')) === 'Hold to move to field',
+		`Move to field let go says to hold it ("${await shown('#consoleMoveToField')}")`
+	);
 	// Jordan's whole-brain fields (linac-ct delivery/cases.ts, the whole-brain case), each with the
-	// gantry angle it starts from: 0 at the setup, then the first field's
-	for (const [index, field, gantry, from] of [
+	// gantry angle it starts near: 0 at the setup (the click may have turned it a frame's worth),
+	// then the first field's
+	for (const [index, field, gantry, near] of [
 		[0, 'Right Lateral', 270, 0],
 		[1, 'Left Lateral', 90, 270]
 	]) {
-		if (index > 0) await click(`#rtv2dFieldList .rtv2d-field-row[data-index="${index}"]`);
+		// after the first field the console selects the next, with no click
+		if (index > 0)
+			await inConsole('the console to select the left lateral field', () =>
+				document
+					.querySelector('#rtv2dFieldList .rtv2d-field-row[data-index="1"]')
+					?.classList.contains('active')
+			);
+		const from = (await pose())?.gantry;
 		expect(
-			(await pose())?.gantry === from,
-			`the console's gantry is at ${from} before the ${field} field (${(await pose())?.gantry})`
+			Math.abs(turn(near, from)) < 3,
+			`the console's gantry is at ${near} before the ${field} field (${from})`
 		);
 		await tut(() => (window.__gantry = []));
 		await noScroll.scan(frame, 'delivery, before holding Move to field');
@@ -623,13 +713,23 @@ try {
 		const box = await hold.boundingBox();
 		await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 		await page.mouse.down();
+		let moving = null;
 		const t0 = Date.now();
-		while (Date.now() - t0 < MOTION_MS && (await pose())?.gantry !== gantry) await sleep(100);
+		while (Date.now() - t0 < MOTION_MS && (await pose())?.gantry !== gantry) {
+			moving ??= (await shown('#consoleMoveToField')) === 'Moving… keep holding' || null;
+			await sleep(100);
+		}
 		await page.mouse.up();
 		expect(
 			(await pose())?.gantry === gantry,
 			`Move to field turned the console's gantry to ${gantry} (${(await pose())?.gantry})`
 		);
+		expect(moving, 'Move to field says "Moving… keep holding" while held');
+		await inConsole(
+			'Move to field to say At field',
+			() => document.getElementById('consoleMoveToField')?.textContent === 'At field'
+		);
+		await hintIs("the Tutorial's hint to go once the geometry matches", null);
 		// Vault 1's machine follows: the angles between, then the field's
 		await until(
 			`Vault 1 gantry at ${gantry}`,
