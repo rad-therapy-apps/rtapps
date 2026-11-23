@@ -31,6 +31,9 @@ export interface DeliverySnap {
 	armed: boolean;
 	delivering: boolean;
 	held: boolean;
+	/** Move to field's key says At field (console-keys.ts syncMoveKey): the machine exactly at the
+	    selected field. The geometry interlock clears a little before that, within its tolerance. */
+	keyAtField: boolean;
 	/** Every event the console has reported this page load. */
 	events: readonly ConsoleEvent[];
 }
@@ -57,8 +60,9 @@ const delivered = (s: DeliverySnap) =>
 const gantryHold = (s: DeliverySnap) =>
 	s.hold?.mismatches.find((m) => m.label === 'Gantry') ?? null;
 
-/** Move to field's sub-step for the field at `i`: done once it is selected and at field. */
-const atField = (s: DeliverySnap, i: number) => s.field === FIELDS[i] && s.hold === null;
+/** Move to field's sub-step for the field at `i`: done once it is selected and its key says At
+    field, as the bubble tells the player to hold it until. */
+const atField = (s: DeliverySnap, i: number) => s.field === FIELDS[i] && s.keyAtField;
 const moveTargets = (s: DeliverySnap, i: number) =>
 	s.field === FIELDS[i] ? [MOVE] : [MOVE, fieldRow(i)];
 /** The key that brings the beam on now: Resume Beam while held, Beam On once enabled or on, else
@@ -187,6 +191,7 @@ export const DELIVERY_WALK: WalkPart<DeliverySnap> = {
 			armed: d.armed,
 			delivering: d.delivering,
 			held: d.held,
+			keyAtField: !!document.getElementById('consoleMoveToField')?.classList.contains('at-field'),
 			events
 		};
 	}

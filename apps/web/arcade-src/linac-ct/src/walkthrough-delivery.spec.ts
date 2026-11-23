@@ -26,7 +26,9 @@ const snap = (o: Partial<DeliverySnap> = {}): DeliverySnap => ({
 	delivering: false,
 	held: false,
 	events: [],
-	...o
+	...o,
+	// at field when the geometry matches, unless a case says the key doesn't say so yet
+	keyAtField: o.keyAtField ?? o.hold === null
 });
 const steps = DELIVERY_WALK.steps,
 	at = (s: DeliverySnap, seen: string[] = [], reached = 0) =>
@@ -97,7 +99,7 @@ describe("step 9's walkthrough, the treatment", () => {
 			events: firstDone
 		});
 		expect(at(left, EXPLAINS, from)).toBe(index('delivery.move2'));
-		const atLeft = { ...left, hold: null };
+		const atLeft = { ...left, hold: null, keyAtField: true };
 		expect(at(atLeft, EXPLAINS, from)).toBe(index('delivery.beam2'));
 		expect(at({ ...atLeft, armed: true }, EXPLAINS, from)).toBe(index('delivery.beam2'));
 		const complete: ConsoleEvent[] = [
@@ -148,6 +150,12 @@ describe("step 9's walkthrough, the treatment", () => {
 				index('delivery.move2')
 			)
 		).toBe(index('delivery.beam2'));
+	});
+
+	it('waits for the key to say At field, past the interlock clearing within its tolerance', () => {
+		const cleared = snap({ motion: true, hold: null, keyAtField: false });
+		expect(at(cleared, EXPLAINS)).toBe(index('delivery.move1'));
+		expect(at({ ...cleared, keyAtField: true }, EXPLAINS)).toBe(index('delivery.enable1'));
 	});
 
 	it("is not at field on the other field's angle", () => {
