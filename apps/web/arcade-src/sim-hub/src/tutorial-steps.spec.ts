@@ -9,7 +9,7 @@ import {
 	WORLD,
 	eHintText
 } from './tutorial-steps';
-import type { StepAction } from './tutorial-steps';
+import type { Step, StepAction } from './tutorial-steps';
 import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
 import { TREATMENT_CASES } from '../../linac-ct/src/delivery/cases';
 import { buildTutorialCases, JORDAN_QUEUE_INDEX } from '../../linac-ct/src/tutorial-cases';
@@ -37,6 +37,9 @@ const ACTIONS: StepAction[] = [
 	'jordanThanks'
 ];
 
+// a step card's four texts: the title, You did, Why and Next
+const cardTexts = (s: Step): string[] => [s.card.title, s.card.did, s.card.why, s.card.next];
+
 // every string in Chapter 1 that a player reads
 function texts(): string[] {
 	const out: string[] = [
@@ -46,14 +49,14 @@ function texts(): string[] {
 		...Object.values(LINES)
 	];
 	for (const s of CHAPTER_1) {
-		out.push(s.objective, s.target.place, s.target.name, ...s.hints);
+		out.push(s.objective, s.target.place, s.target.name, ...s.hints, ...cardTexts(s));
 		if (s.target.label) out.push(s.target.label);
-		if (s.console) out.push(...s.console.hints, s.console.reveal, s.console.reason);
+		if (s.console) out.push(...s.console.hints, s.console.reveal);
 		for (const r of s.console?.refusals ?? []) out.push(...r.hints, r.reveal);
 		for (const l of s.exchange ?? []) out.push(l.who, l.text);
 		const d = s.decision;
 		if (d) {
-			out.push(d.title, d.prompt, ...d.hints, d.reveal, d.reason);
+			out.push(d.title, d.prompt, ...d.hints, d.reveal);
 			for (const o of d.options) out.push(o.text);
 			for (const [k, v] of d.context ?? []) out.push(k, v);
 		}
@@ -128,7 +131,7 @@ describe('Chapter 1 steps', () => {
 			expect(s.decision ?? s.exchange ?? s.afterSeconds, `step ${s.n}`).toBeUndefined();
 			const c = s.console!;
 			expect(c.hints[0], `step ${s.n}`).not.toBe(c.hints[1]);
-			for (const l of [...c.hints, c.reveal, c.reason])
+			for (const l of [...c.hints, c.reveal, ...cardTexts(s)])
 				expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
 			// a refusal's own hints wait for one of the step's events, and differ from each other
 			for (const r of c.refusals ?? []) {
@@ -160,8 +163,18 @@ describe('Chapter 1 steps', () => {
 			expect(d.options.length, `step ${s.n}`).toBeGreaterThanOrEqual(2);
 			const lines = [...d.hints, d.reveal];
 			expect(lines, `step ${s.n}`).toHaveLength(3);
-			for (const l of [...lines, d.reason]) expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
+			for (const l of [...lines, ...cardTexts(s)])
+				expect(l.length, `step ${s.n}`).toBeGreaterThan(10);
 		}
+	});
+
+	it('gives every step a card: a title of its own, then You did, Why and Next', () => {
+		for (const s of CHAPTER_1) {
+			expect(s.card, `step ${s.n}`).toBeDefined();
+			for (const t of cardTexts(s)) expect(t.trim().length, `step ${s.n}`).toBeGreaterThan(0);
+		}
+		const titles = CHAPTER_1.map((s) => s.card.title);
+		expect(new Set(titles).size).toBe(titles.length);
 	});
 
 	it('does not put a decision’s correct answer first', () => {
@@ -192,7 +205,7 @@ describe('Chapter 1 steps', () => {
 		const jordan = buildTutorialCases(TREATMENT_CASES)[JORDAN_QUEUE_INDEX],
 			said = (n: number) => {
 				const c = CHAPTER_1[n - 1].console!;
-				return [...c.hints, c.reveal, c.reason].join(' ');
+				return [...c.hints, c.reveal, ...cardTexts(CHAPTER_1[n - 1])].join(' ');
 			};
 		// the console shelf's names for headMask and headrest (linac-ct delivery/immobilization.ts)
 		expect(jordan.immobilization.required).toEqual(['headMask', 'headrest']);

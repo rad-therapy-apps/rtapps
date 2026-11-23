@@ -2184,6 +2184,95 @@
 				border-color: var(--teal);
 				background: rgba(66, 213, 207, 0.16);
 			}
+			/* The step card after every step (tutorial-hud.ts showStepCard), as the walkthrough
+			   mockup draws it, over a dimmed center. Styled by its id: its .tut-card class is the
+			   dialogs' card's too, and these rules replace those. It fits at 992x624, so it never
+			   scrolls. */
+			#tutCard {
+				position: fixed;
+				z-index: 186;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				display: none;
+				width: min(520px, calc(100vw - 32px));
+				max-height: none;
+				overflow: visible;
+				padding: 22px 26px 20px;
+				background: #172029;
+				border: 1px solid rgba(63, 208, 201, 0.45);
+				border-radius: 14px;
+				box-shadow:
+					0 13px 38px rgba(0, 0, 0, 0.55),
+					0 0 0 100vmax rgba(6, 12, 18, 0.55);
+				color: #eef4f7;
+			}
+			#tutCard.show {
+				display: block;
+			}
+			.tut-card-kick {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				color: #3fd0c9;
+				font-size: 12px;
+				font-weight: 700;
+				line-height: 1;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+			}
+			.tut-card-kick b {
+				display: inline-grid;
+				place-items: center;
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: #3fd0c9;
+				color: #0b1a20;
+				font-size: 13px;
+			}
+			#tutCard h3 {
+				margin: 10px 0 14px;
+				font-size: 22px;
+				font-weight: 700;
+				line-height: 1.2;
+			}
+			#tutCard dl {
+				display: grid;
+				grid-template-columns: 92px 1fr;
+				gap: 9px 14px;
+				margin: 0;
+				font-size: 14px;
+				line-height: 1.45;
+			}
+			#tutCard dt {
+				padding-top: 2px;
+				color: #f0a640;
+				font-size: 12px;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+			#tutCard dd {
+				margin: 0;
+				color: #d3dee5;
+			}
+			.tut-card-foot {
+				display: flex;
+				justify-content: flex-end;
+				margin-top: 19px;
+			}
+			#tutCardContinue {
+				padding: 11px 23px;
+				border: 0;
+				border-radius: 7px;
+				background: #3fd0c9;
+				color: #0b1a20;
+				font-size: 14px;
+				font-weight: 700;
+				line-height: 1;
+				cursor: pointer;
+			}
 			/* The console panel (console-panel.ts): a console in an iframe over the center, which shows
 			   dimmed around the card (its spread shadow) and live in the camera slots. The slots are
 			   holes: the feed cameras are drawn onto the canvas behind them, so the card paints no
@@ -2787,6 +2876,27 @@
 			<span class="tut-k">You are now</span><b id="tutRoleCardName"></b>
 		</div>
 		<div id="tutWalkCard" class="tut-rolecard tut-walkcard" aria-live="polite"></div>
+		<div
+			id="tutCard"
+			class="tut-card"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="tutCardTitle"
+		>
+			<div class="tut-card-kick"><b aria-hidden="true">✓</b><span id="tutCardKick"></span></div>
+			<h3 id="tutCardTitle"></h3>
+			<dl>
+				<dt>You did</dt>
+				<dd id="tutCardDid"></dd>
+				<dt>Why</dt>
+				<dd id="tutCardWhy"></dd>
+				<dt>Next</dt>
+				<dd id="tutCardNext"></dd>
+			</dl>
+			<div class="tut-card-foot">
+				<button type="button" id="tutCardContinue">Continue</button>
+			</div>
+		</div>
 		<div id="tutEnd" class="tut-end" role="dialog" aria-modal="true" aria-labelledby="tutEndTitle">
 			<div class="tut-card">
 				<div id="tutEndTitle" class="tut-title">Chapter 1 complete</div>

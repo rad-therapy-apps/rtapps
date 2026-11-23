@@ -67,6 +67,13 @@ const imagesAcquired: TutorialEvent = {
 	type: 'linac',
 	event: { kind: 'images-acquired', mrn: JORDAN_MRN, shiftMm: 4 }
 };
+// Continue on the step card
+const cardContinue: TutorialEvent = { type: 'cardContinue' };
+// a step's completion: the hint line cleared and its card
+const cardFor = (step: number): Effect[] => [
+	{ type: 'hint', text: null },
+	{ type: 'showCard', step }
+];
 
 describe('starting', () => {
 	it('opens step 1 with no hint', () => {
@@ -95,16 +102,16 @@ describe('E steps', () => {
 		expect(r.effects).toEqual([{ type: 'openDialog', step: 1 }]);
 	});
 
-	it('moves on to step 2 after the exchange, picking the chair', () => {
-		const { s, effects } = run(
-			atStep(1),
-			{ type: 'pressedE', target: 'maya' },
-			{ type: 'continue' }
-		);
-		expect(s.step).toBe(2);
-		expect(s.phase).toBe('active');
-		expect(effects.slice(1)).toEqual([
-			{ type: 'closeDialog' },
+	it('moves on to step 2 after the exchange and its card, picking the chair', () => {
+		let r = run(atStep(1), { type: 'pressedE', target: 'maya' }, { type: 'continue' });
+		expect(r.s.step).toBe(1);
+		expect(r.s.phase).toBe('card');
+		expect(r.effects.slice(1)).toEqual([{ type: 'closeDialog' }, ...cardFor(1)]);
+		r = run(r.s, cardContinue);
+		expect(r.s.step).toBe(2);
+		expect(r.s.phase).toBe('active');
+		expect(r.effects).toEqual([
+			{ type: 'hideCard' },
 			{ type: 'showStep', step: 2 },
 			{ type: 'hint', text: null },
 			{ type: 'action', action: 'pickChair' }
@@ -118,9 +125,12 @@ describe('E steps', () => {
 		r = run(r.s, ...ticks(5.75, 0));
 		expect(r.s.phase).toBe('waiting');
 		r = run(r.s, ...ticks(0.25, 0));
+		expect(r.s.phase).toBe('card');
+		expect(r.effects).toEqual(cardFor(2));
+		r = run(r.s, cardContinue);
 		expect(r.s.phase).toBe('roleChange');
 		expect(r.s.step).toBe(3);
-		expect(r.effects).toContainEqual({ type: 'roleChange', role: 'therapist' });
+		expect(r.effects).toEqual([{ type: 'hideCard' }, { type: 'roleChange', role: 'therapist' }]);
 		expect(progressOf(r.s)).toBeCloseTo(2 / 11);
 		r = run(r.s, { type: 'roleChangeDone' });
 		expect(r.s.phase).toBe('active');
@@ -139,10 +149,19 @@ describe('console steps', () => {
 		r = run(r.s, linac('checked-in'));
 		expect(r.effects).toEqual([]);
 		r = run(r.s, linac('chart-opened'));
-		expect(r.effects.slice(0, 3)).toEqual([
+		// no "Correct." line: the step card says why
+		expect(r.effects).toEqual([
 			{ type: 'closeConsole' },
-			{ type: 'correct', text: `Correct. ${schedule.reason}` },
-			{ type: 'action', action: 'jordanOnMonitors' }
+			{ type: 'action', action: 'jordanOnMonitors' },
+			...cardFor(3)
+		]);
+		expect(r.s.step).toBe(3);
+		expect(r.s.phase).toBe('card');
+		r = run(r.s, cardContinue);
+		expect(r.effects).toEqual([
+			{ type: 'hideCard' },
+			{ type: 'showStep', step: 4 },
+			{ type: 'hint', text: null }
 		]);
 		expect(r.s.step).toBe(4);
 		expect(r.s.phase).toBe('active');
@@ -152,12 +171,10 @@ describe('console steps', () => {
 		let r = run(atStep(6), { type: 'pressedE', target: 'couch' });
 		expect(r.effects).toEqual([{ type: 'openConsole', workspace: 'setup' }]);
 		r = run(r.s, linac('setup-complete'));
-		expect(actions(r.effects)).toEqual([
-			'jordanOnCouch',
-			'lasersOn',
-			'jamieAcrossCouch',
-			'jamieToControl'
-		]);
+		expect(actions(r.effects)).toEqual(['jordanOnCouch', 'lasersOn', 'jamieAcrossCouch']);
+		expect(r.s.phase).toBe('card');
+		r = run(r.s, cardContinue);
+		expect(actions(r.effects)).toEqual(['jamieToControl']);
 		expect(r.s.step).toBe(7);
 	});
 
@@ -180,7 +197,7 @@ describe('console steps', () => {
 		expect(r.s.step).toBe(3);
 		expect(r.s.phase).toBe('console');
 		// the right chart still completes the step
-		expect(run(r.s, linac('chart-opened')).s.step).toBe(4);
+		expect(run(r.s, linac('chart-opened'), cardContinue).s.step).toBe(4);
 	});
 
 	it('completes step 8 on alignment-verified only after the images and shift-applied', () => {
@@ -198,7 +215,8 @@ describe('console steps', () => {
 		r = run(r.s, linac('alignment-verified'));
 		expect(actions(r.effects)).toEqual(['shiftApplied']);
 		expect(r.effects[0]).toEqual({ type: 'closeConsole' });
-		expect(r.s.step).toBe(9);
+		expect(r.s.phase).toBe('card');
+		expect(run(r.s, cardContinue).s.step).toBe(9);
 	});
 
 	it('completes step 9 on treatment-complete, not on a field, and then opens the door', () => {
@@ -211,7 +229,10 @@ describe('console steps', () => {
 		expect(r.s.step).toBe(9);
 		r = run(r.s, linac('treatment-complete'));
 		expect(r.effects[0]).toEqual({ type: 'closeConsole' });
-		expect(actions(r.effects)).toEqual(['beamOff', 'releaseVaultDoor', 'jamieBackIn']);
+		expect(actions(r.effects)).toEqual(['beamOff']);
+		expect(r.s.phase).toBe('card');
+		r = run(r.s, cardContinue);
+		expect(actions(r.effects)).toEqual(['releaseVaultDoor', 'jamieBackIn']);
 		expect(r.s.step).toBe(10);
 	});
 
@@ -224,7 +245,7 @@ describe('console steps', () => {
 		r = run(r.s, beam(false), beam(true), beam(false));
 		expect(actions(r.effects)).toEqual(['betweenFields', 'beamOn', 'betweenFields']);
 		// still followed with the console closed; TREATMENT COMPLETE comes with the step's end
-		r = run(r.s, { type: 'consoleClosed' }, beam(true), linac('treatment-complete'));
+		r = run(r.s, { type: 'consoleClosed' }, beam(true), linac('treatment-complete'), cardContinue);
 		expect(actions(r.effects)).toEqual(['beamOn', 'beamOff', 'releaseVaultDoor', 'jamieBackIn']);
 		expect(r.s.beamOn).toBe(false);
 		// no boards outside the delivery step
@@ -274,7 +295,8 @@ describe('console steps', () => {
 			{ type: 'pressedE', target: 'console' },
 			imagesAcquired,
 			linac('shift-applied'),
-			linac('alignment-verified')
+			linac('alignment-verified'),
+			cardContinue
 		).s;
 		expect(next.step).toBe(9);
 		for (const ev of [
@@ -293,7 +315,8 @@ describe('console steps', () => {
 			atStep(9),
 			{ type: 'pressedE', target: 'console' },
 			{ type: 'consoleClosed' },
-			linac('treatment-complete')
+			linac('treatment-complete'),
+			cardContinue
 		);
 		expect(r.s.step).toBe(10);
 	});
@@ -514,7 +537,8 @@ describe('step 9: the geometry hold names its fix with the selected field', () =
 			imagesAcquired,
 			hold('Right Lateral', '270°'),
 			linac('shift-applied'),
-			linac('alignment-verified')
+			linac('alignment-verified'),
+			cardContinue
 		).s;
 		expect(verified.step).toBe(9);
 		expect(verified.hold?.field).toBe('Right Lateral');
@@ -525,7 +549,7 @@ describe('decisions', () => {
 	const open = run(atStep(4), { type: 'pressedE', target: 'jordan' }).s;
 	const d = CHAPTER_1[3].decision!;
 
-	it('gives a hint, a stronger hint, then the answer with its reason at the third miss', () => {
+	it('gives a hint, a stronger hint, then the answer at the third miss', () => {
 		const { s, effects } = run(
 			open,
 			{ type: 'answered', option: 'a' },
@@ -535,20 +559,32 @@ describe('decisions', () => {
 		expect(effects).toEqual([
 			{ type: 'feedback', kind: 'hint1', text: `Not yet. ${d.hints[0]}` },
 			{ type: 'feedback', kind: 'hint2', text: `Not yet. ${d.hints[1]}` },
-			{ type: 'feedback', kind: 'reveal', text: `${d.reveal} ${d.reason}` }
+			{ type: 'feedback', kind: 'reveal', text: d.reveal }
 		]);
 		expect(s.resolved).toBe(true);
-		const next = run(s, { type: 'answered', option: 'c' }, { type: 'continue' });
+		const next = run(s, { type: 'answered', option: 'c' }, { type: 'continue' }, cardContinue);
 		expect(next.effects[0]).toEqual({ type: 'closeDialog' });
 		expect(next.s.step).toBe(5);
 	});
 
-	it('accepts the right answer with its reason, and Continue completes the step', () => {
+	it('accepts the right answer, and Continue completes the step', () => {
 		const r = run(open, { type: 'answered', option: 'c' });
+		expect(r.effects).toEqual([{ type: 'feedback', kind: 'correct', text: 'Correct.' }]);
+		expect(run(r.s, { type: 'continue' }, cardContinue).s.step).toBe(5);
+	});
+
+	it('leads from Continue on the answer to the step card', () => {
+		const answered = run(open, { type: 'answered', option: 'c' }).s;
+		const r = run(answered, { type: 'continue' });
 		expect(r.effects).toEqual([
-			{ type: 'feedback', kind: 'correct', text: `Correct. ${d.reason}` }
+			{ type: 'closeDialog' },
+			{ type: 'action', action: 'jordanConfirms' },
+			...cardFor(4)
 		]);
-		expect(run(r.s, { type: 'continue' }).s.step).toBe(5);
+		expect(r.s.step).toBe(4);
+		expect(r.s.phase).toBe('card');
+		// Esc on the answered decision does the same
+		expect(run(answered, { type: 'closeDialog' })).toEqual(r);
 	});
 
 	it('ignores Continue before the decision is answered', () => {
@@ -565,7 +601,7 @@ describe('decisions', () => {
 	});
 
 	it('runs the step’s actions after the answer', () => {
-		const r = run(open, { type: 'answered', option: 'c' }, { type: 'continue' });
+		const r = run(open, { type: 'answered', option: 'c' }, { type: 'continue' }, cardContinue);
 		expect(actions(r.effects)).toEqual(['jordanConfirms', 'escortToVault']);
 		expect(r.s.step).toBe(5);
 	});
@@ -574,7 +610,7 @@ describe('decisions', () => {
 describe('walking steps', () => {
 	it('completes on reaching the target, not on E', () => {
 		expect(run(atStep(7), { type: 'pressedE', target: 'linaccontrol' }).s.step).toBe(7);
-		const r = run(atStep(7), { type: 'reachedTarget' });
+		const r = run(atStep(7), { type: 'reachedTarget' }, cardContinue);
 		expect(actions(r.effects)).toEqual(['holdVaultClosed']);
 		expect(r.s.step).toBe(8);
 	});
@@ -614,8 +650,81 @@ describe('walking steps', () => {
 	});
 
 	it('completes an escort when Jordan arrives', () => {
-		const r = run(atStep(5), { type: 'reachedTarget' });
+		const r = run(atStep(5), { type: 'reachedTarget' }, cardContinue);
 		expect(r.s.step).toBe(6);
+	});
+});
+
+describe('the step card', () => {
+	// step n's card, reached as a player does: E and the dialog's right answer, the console's events
+	// for Jordan or the wait; or reaching the target
+	const atCard = (n: number): TutorialState => {
+		const st = CHAPTER_1[n - 1];
+		if (st.trigger !== 'pressE') return run(atStep(n), { type: 'reachedTarget' }).s;
+		const right = st.decision?.options.find((o) => o.correct);
+		return run(
+			atStep(n),
+			{ type: 'pressedE', target: st.target.id },
+			...((right ? [{ type: 'answered', option: right.id }] : []) as TutorialEvent[]),
+			...((st.exchange || st.decision ? [{ type: 'continue' }] : []) as TutorialEvent[]),
+			...(st.console?.done ?? []).map(
+				(kind) => ({ type: 'linac', event: { kind, mrn: JORDAN_MRN } }) as TutorialEvent
+			),
+			...ticks(st.afterSeconds ?? 0, 0)
+		).s;
+	};
+
+	it('shows step 2’s card before the role change', () => {
+		let r = run(atStep(2), { type: 'pressedE', target: 'chair' }, ...ticks(6, 0));
+		expect(r.effects.slice(-2)).toEqual(cardFor(2));
+		expect(r.effects.some((e) => e.type === 'roleChange')).toBe(false);
+		expect(r.s).toMatchObject({ step: 2, phase: 'card' });
+		r = run(r.s, cardContinue);
+		expect(r.effects).toEqual([{ type: 'hideCard' }, { type: 'roleChange', role: 'therapist' }]);
+		expect(r.s).toMatchObject({ step: 3, phase: 'roleChange' });
+	});
+
+	it('shows step 11’s card before the end', () => {
+		let r = run(atStep(11), { type: 'reachedTarget' });
+		expect(r.effects).toEqual([{ type: 'action', action: 'jordanThanks' }, ...cardFor(11)]);
+		expect(r.s).toMatchObject({ step: 11, phase: 'card' });
+		expect(progressOf(r.s)).toBe(1);
+		r = run(r.s, cardContinue);
+		expect(r.effects).toEqual([{ type: 'hideCard' }, { type: 'complete' }]);
+		expect(r.s).toMatchObject({ step: 11, phase: 'done' });
+	});
+
+	it('ignores Continue on the card outside the card', () => {
+		const dialog = run(atStep(1), { type: 'pressedE', target: 'maya' }).s,
+			consoleOpen = run(atStep(3), { type: 'pressedE', target: 'console' }).s,
+			waiting = run(atStep(2), { type: 'pressedE', target: 'chair' }).s,
+			roleChange = run(atCard(2), cardContinue).s,
+			done = run(atCard(11), cardContinue).s;
+		for (const s of [OFF, atStep(3), dialog, consoleOpen, waiting, roleChange, done])
+			expect(run(s, cardContinue), s.phase).toEqual({ s, effects: [] });
+	});
+
+	it('changes nothing on the console, its beam, a frame or E while the card shows', () => {
+		for (const n of [3, 7, 9]) {
+			const s = atCard(n);
+			expect(s.phase, `step ${n}`).toBe('card');
+			for (const ev of [
+				mistake,
+				linac('chart-opened'),
+				linac('treatment-complete'),
+				{ type: 'beam', on: true },
+				{ type: 'beam', on: false },
+				...ticks(1, 5),
+				{ type: 'pressedE', target: CHAPTER_1[n - 1].target.id },
+				{ type: 'pressedE', target: CHAPTER_1[n].target.id }
+			] as TutorialEvent[])
+				expect(run(s, ev), `step ${n}: ${ev.type}`).toEqual({ s, effects: [] });
+		}
+	});
+
+	it('fills the bar to the step just done while its card shows', () => {
+		for (const n of [1, 5, 9, 11]) expect(progressOf(atCard(n)), `step ${n}`).toBe(n / 11);
+		expect(progressOf(atCard(5), 20)).toBe(5 / 20);
 	});
 });
 
@@ -653,6 +762,7 @@ describe('the whole chapter', () => {
 			const step = CHAPTER_1[s.step - 1];
 			if (s.phase === 'roleChange') go({ type: 'roleChangeDone' });
 			else if (s.phase === 'waiting') go(...ticks(1, 0));
+			else if (s.phase === 'card') go(cardContinue);
 			else if (step.trigger !== 'pressE') go({ type: 'reachedTarget' });
 			else {
 				go({ type: 'pressedE', target: step.target.id });
@@ -684,9 +794,32 @@ describe('the whole chapter', () => {
 			all.filter((e) => e.type === 'openConsole').map((e) => (e as { workspace: string }).workspace)
 		).toEqual(['queue', 'setup', 'igrt', 'delivery']);
 		expect(all.filter((e) => e.type === 'closeConsole')).toHaveLength(4);
-		expect(
-			all.filter((e) => e.type === 'correct').map((e) => (e as { text: string }).text)
-		).toEqual([3, 6, 8, 9].map((n) => `Correct. ${CHAPTER_1[n - 1].console!.reason}`));
+	});
+
+	it('shows a card after every step, before the next step, the role change or the end', () => {
+		const { all } = playThrough();
+		const flow = all.flatMap((e) =>
+			e.type === 'showCard' || e.type === 'showStep'
+				? [`${e.type} ${e.step}`]
+				: e.type === 'hideCard' || e.type === 'roleChange' || e.type === 'complete'
+					? [e.type]
+					: []
+		);
+		const want = ['showStep 1'];
+		for (const st of CHAPTER_1) {
+			want.push(`showCard ${st.n}`, 'hideCard');
+			const next = CHAPTER_1[st.n];
+			if (!next) want.push('complete');
+			else {
+				if (next.role !== st.role) want.push('roleChange');
+				want.push(`showStep ${next.n}`);
+			}
+		}
+		expect(flow).toEqual(want);
+		// the hint line is cleared as each card shows
+		all.forEach((e, i) => {
+			if (e.type === 'showCard') expect(all[i - 1]).toEqual({ type: 'hint', text: null });
+		});
 	});
 
 	it('runs every world action once, in order', () => {
@@ -718,6 +851,7 @@ describe('the whole chapter', () => {
 			{ type: 'pressedE', target: 'reception' },
 			{ type: 'reachedTarget' },
 			{ type: 'continue' },
+			cardContinue,
 			mistake,
 			linac('treatment-complete'),
 			...ticks(1, 0)

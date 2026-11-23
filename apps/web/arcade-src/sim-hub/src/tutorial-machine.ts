@@ -2,11 +2,13 @@
    a pure reducer over Chapter 1's steps (tutorial-steps.ts). Events in (start, a frame's tick with
    the walking distance, E on a target, reaching a target, an answer, Continue, closing the dialog,
    an event from the LINAC console, its beam turning on or off, its geometry hold, the player
-   closing the console, the role change finishing, stop); a new state and a list of effects out,
-   which tutorial.ts performs (tracker, dialog, hint line, console, role change, world actions). It
-   holds the hint timers and the miss counter of a decision or a console step, mirroring the CT
-   console's validateTechnique: "Not yet." with a hint, a stronger hint, then the answer and its
-   reason at the third miss. A console step (docs/specs/2026-11-18-consoles-in-center-design.md,
+   closing the console, the role change finishing, Continue on the step card, stop); a new state
+   and a list of effects out, which tutorial.ts performs (tracker, dialog, hint line, console, step
+   card, role change, world actions). Every step ends on its step card (docs/specs/2026-11-23-
+   tutorial-walkthrough-design.md, "The step card"), the 'card' phase: its Continue starts the next
+   step, the role change or the end. It holds the hint timers and the miss counter of a decision or
+   a console step, mirroring the CT console's validateTechnique: "Not yet." with a hint, a stronger
+   hint, then the answer at the third miss. A console step (docs/specs/2026-11-18-consoles-in-center-design.md,
    part 6) opens the console on E and is triggered by Jordan's events on it, in order; its misses
    show in the hint line. The delivery step's hints also follow the console's geometry hold (the
    selected field off the plan): a refused beam for it names the fix with the field, as does its
@@ -42,8 +44,10 @@ import {
 } from './tutorial-math';
 import type { FeedbackKind, StuckTimer } from './tutorial-math';
 
-/** 'console': a console step's console is open (E opened it, and the player has not closed it). */
-export type Phase = 'off' | 'active' | 'dialog' | 'console' | 'waiting' | 'roleChange' | 'done';
+/** 'console': a console step's console is open (E opened it, and the player has not closed it).
+    'card': the step is done and its card waits for Continue. */
+export type Phase =
+	'off' | 'active' | 'dialog' | 'console' | 'waiting' | 'card' | 'roleChange' | 'done';
 
 export interface TutorialState {
 	phase: Phase;
@@ -107,6 +111,8 @@ export type TutorialEvent =
 	| { type: 'geometryHold'; hold: LinacGeometryHold | null }
 	/** The player closed the console panel. */
 	| { type: 'consoleClosed' }
+	/** Continue on the step card. */
+	| { type: 'cardContinue' }
 	| { type: 'roleChangeDone' }
 	| { type: 'stop' };
 
@@ -120,10 +126,11 @@ export type Effect =
 	| { type: 'openConsole'; workspace: LinacWorkspace }
 	/** The console step is done: close the console after a beat (tutorial.ts). */
 	| { type: 'closeConsole' }
-	/** The console step is done: "Correct." and why, in the hint line for a few seconds. */
-	| { type: 'correct'; text: string }
 	/** `kind`: the line is a console step's miss feedback. */
 	| { type: 'hint'; text: string | null; kind?: MissKind }
+	/** The step is done: its card (after a console step's console has closed, tutorial.ts). */
+	| { type: 'showCard'; step: number }
+	| { type: 'hideCard' }
 	| { type: 'roleChange'; role: Role }
 	| { type: 'complete' };
 
@@ -198,6 +205,7 @@ function consoleHint(s: TutorialState, task: ConsoleTask | undefined): string | 
 export function progressOf(s: TutorialState, total = CHAPTER_1.length): number {
 	if (s.phase === 'done') return 1;
 	if (s.phase === 'off') return 0;
+	if (s.phase === 'card') return s.step / total;
 	return (s.step - 1) / total;
 }
 
@@ -227,16 +235,8 @@ export function reduceTutorial(
 	};
 	const complete = (st: TutorialState): TutorialState => {
 		actions(cur?.onComplete);
-		if (st.step >= steps.length) {
-			fx.push({ type: 'hint', text: null }, { type: 'complete' });
-			return fresh(st.step, 'done');
-		}
-		const next = steps[st.step];
-		if (cur && next.role !== cur.role) {
-			fx.push({ type: 'hint', text: null }, { type: 'roleChange', role: next.role });
-			return fresh(st.step + 1, 'roleChange');
-		}
-		return enter(st.step + 1);
+		fx.push({ type: 'hint', text: null }, { type: 'showCard', step: st.step });
+		return { ...fresh(st.step, 'card'), hold: s.hold };
 	};
 	const trigger = (st: TutorialState): TutorialState => {
 		if (!cur) return st;
@@ -328,7 +328,7 @@ export function reduceTutorial(
 			if (outcome !== 'progress') return out(s);
 			const progress = s.progress + 1;
 			if (progress < task.done.length) return out({ ...s, progress });
-			fx.push({ type: 'closeConsole' }, { type: 'correct', text: `Correct. ${task.reason}` });
+			fx.push({ type: 'closeConsole' });
 			return out(trigger({ ...s, progress, phase: 'active' }));
 		}
 		case 'beam': {
@@ -368,19 +368,12 @@ export function reduceTutorial(
 			const opt = d.options.find((o) => o.id === ev.option);
 			if (!opt) return out(s);
 			if (opt.correct) {
-				fx.push({
-					type: 'feedback',
-					kind: 'correct',
-					text: `Correct. ${d.reason}`
-				});
+				fx.push({ type: 'feedback', kind: 'correct', text: 'Correct.' });
 				return out({ ...s, resolved: true });
 			}
 			const misses = s.misses + 1,
 				kind = missFeedback(misses),
-				text =
-					kind === 'reveal'
-						? `${d.reveal} ${d.reason}`
-						: `Not yet. ${d.hints[kind === 'hint1' ? 0 : 1]}`;
+				text = kind === 'reveal' ? d.reveal : `Not yet. ${d.hints[kind === 'hint1' ? 0 : 1]}`;
 			fx.push({ type: 'feedback', kind, text });
 			return out({ ...s, misses, resolved: kind === 'reveal' });
 		}
@@ -397,6 +390,20 @@ export function reduceTutorial(
 			fx.push({ type: 'closeDialog' });
 			if (cur.decision && s.resolved) return out(trigger({ ...s, phase: 'active' }));
 			return out({ ...s, phase: 'active' });
+		}
+		case 'cardContinue': {
+			if (!cur || s.phase !== 'card') return out(s);
+			fx.push({ type: 'hideCard' });
+			if (s.step >= steps.length) {
+				fx.push({ type: 'complete' });
+				return out(fresh(s.step, 'done'));
+			}
+			const next = steps[s.step];
+			if (next.role !== cur.role) {
+				fx.push({ type: 'roleChange', role: next.role });
+				return out(fresh(s.step + 1, 'roleChange'));
+			}
+			return out(enter(s.step + 1));
 		}
 		case 'roleChangeDone':
 			if (s.phase !== 'roleChange') return out(s);

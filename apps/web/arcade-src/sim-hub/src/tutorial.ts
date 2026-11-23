@@ -53,7 +53,7 @@ import { setTutorialAvailable } from './menu';
 import { CHAPTER_1, LINES, ROLES, TUTORIAL_TIMING, WORLD } from './tutorial-steps';
 import type { Role, Step, StepAction } from './tutorial-steps';
 import { OFF, progressOf, reduceTutorial } from './tutorial-machine';
-import type { Effect, MissKind, TutorialEvent, TutorialState } from './tutorial-machine';
+import type { Effect, TutorialEvent, TutorialState } from './tutorial-machine';
 import {
 	ESCORT_WAIT_R,
 	MARKER_SWITCH_R,
@@ -129,6 +129,9 @@ let dialogOpen = false,
 	roleCardOpen = false,
 	walkFade = false,
 	endOpen = false;
+/** The step card shows, and the step whose card shows or waits for its console to close. */
+let cardOpen = false,
+	cardStep: number | null = null;
 let lastAnswer: string | null = null;
 /** The console the tutorial asked for and has open (openStepConsole; `fresh`: its page reloaded
     for this play of the chapter), whether the next opening asks for a fresh page, and whether
@@ -136,9 +139,6 @@ let lastAnswer: string | null = null;
 let consoleShown: { kind: 'linac'; workspace: LinacWorkspace; fresh: boolean } | null = null;
 let freshConsole = true;
 let jordanOnMonitors = false;
-/** A console step's "Correct." line while it shows, and the hint line to put back after it. */
-let correctLine: string | null = null;
-let hintAfter: { text: string | null; kind?: MissKind } = { text: null };
 const timers = new Set<ReturnType<typeof setTimeout>>();
 let route: Pt[] = [];
 let stopIdx = 1;
@@ -228,22 +228,21 @@ function perform(e: Effect): void {
 			return;
 		}
 		case 'hint':
-			// held under a "Correct." line until it goes, unless it is a miss's
-			hintAfter = { text: e.text, kind: e.kind };
-			if (correctLine && !e.kind) return;
-			correctLine = null;
 			hud.setHint(e.text, e.kind);
 			return;
-		case 'correct': {
-			const line = (correctLine = e.text);
-			hud.setHint(line, 'correct');
-			after(TUTORIAL_TIMING.correctMs, () => {
-				if (correctLine !== line) return;
-				correctLine = null;
-				hud.setHint(hintAfter.text, hintAfter.kind);
-			});
+		case 'showCard':
+			cardStep = e.step;
+			// a console step's card waits for its console to close, after the beat
+			if (!consoleShown) openCard();
 			return;
-		}
+		case 'hideCard':
+			cardOpen = false;
+			cardStep = null;
+			hud.showStepCard(null);
+			setPaused('tutorial', false);
+			// the role change and the end card pause again themselves
+			if (machine.phase === 'active') requestWalkPointerLock();
+			return;
 		case 'roleChange':
 			roleChange(e.role);
 			return;
@@ -269,6 +268,7 @@ function closeStepConsole(): void {
 	consoleShown = null; // first, so the panel's close is not taken for the player's
 	hud.dockOnConsole(false);
 	closeConsole();
+	openCard();
 }
 /** Jordan Ellis as the patient on the Vault 1 treatment monitors, from the chart opening at step 3
     until the tutorial ends; off, the monitors go back to naming whoever lies on the couch. */
@@ -276,12 +276,14 @@ function showJordanOnVaultMonitors(on: boolean): void {
 	jordanOnMonitors = on;
 	vaultMonitorPatient.emit(on ? ROLES.patient.name : null);
 }
-/** The player closed the console panel before the step was done: the step stays, E opens it again. */
+/** The player closed the console panel before the step was done: the step stays, E opens it again.
+    Closed in the beat after the step is done, it brings the step's card at once. */
 function consolePanelClosed(): void {
 	if (!consoleShown) return;
 	consoleShown = null;
 	hud.dockOnConsole(false);
-	dispatch({ type: 'consoleClosed' });
+	if (machine.phase !== 'card') dispatch({ type: 'consoleClosed' });
+	openCard();
 }
 
 /* ---- dialogs, the role change and the end card (each pauses the game) ---- */
@@ -298,7 +300,21 @@ function closeDialog(): void {
 	lastAnswer = null;
 	hud.closeDialog();
 	setPaused('tutorial', false);
-	requestWalkPointerLock();
+	// not when the step's card follows: the lock would come after the card had freed the pointer
+	if (machine.phase === 'active') requestWalkPointerLock();
+}
+/** The step card of `cardStep`, once its console (if it had one) is closed: the tracker behind it
+    shows the step done; it pauses the game and frees the pointer until Continue. */
+function openCard(): void {
+	if (cardStep === null || cardOpen) return;
+	const st = CHAPTER_1[cardStep - 1];
+	cardOpen = true; // before the lock goes, so losing it opens no settings menu
+	showTrackerFor(st);
+	hud.placeMarker(null);
+	hud.placeEdge(null);
+	hud.showStepCard({ step: st.n, total: CHAPTER_1.length, ...st.card });
+	setPaused('tutorial', true);
+	if (document.pointerLockElement) document.exitPointerLock();
 }
 function answer(id: string): void {
 	lastAnswer = id;
@@ -945,7 +961,8 @@ function exitTutorial(): void {
 	hud.hideTutorialHud();
 	dialogOpen = roleCardOpen = walkFade = endOpen = false;
 	lastAnswer = null;
-	correctLine = null;
+	cardOpen = false;
+	cardStep = null; // first, so closing the console opens no card
 	closeStepConsole();
 	showJordanOnVaultMonitors(false);
 	setPaused('tutorial', false);
@@ -1028,7 +1045,7 @@ function installCheckHook(): void {
 				seated: !!seatedAt,
 				vaultHeld,
 				console: consoleShown,
-				correct: correctLine,
+				card: cardOpen,
 				jordanOnMonitors,
 				dialogOpen,
 				roleCardOpen,
@@ -1072,6 +1089,8 @@ function installCheckHook(): void {
 			docked: () => document.body.classList.contains('tut-docked'),
 			answer,
 			cont: () => dispatch({ type: 'continue' }),
+			/** Continue on the step card. */
+			cardContinue: () => dispatch({ type: 'cardContinue' }),
 			mainMenu,
 			keepExploring,
 			/** Leaves the tutorial from anywhere, as Settings > Main menu does. */
@@ -1090,14 +1109,16 @@ export function initTutorial(): void {
 	hud.initTutorialHud({
 		answer,
 		cont: () => dispatch({ type: 'continue' }),
+		cardContinue: () => dispatch({ type: 'cardContinue' }),
 		mainMenu,
 		keepExploring
 	});
 	registerDialog(
 		'tutorial',
-		() => dialogOpen || roleCardOpen || walkFade || endOpen,
+		() => dialogOpen || cardOpen || roleCardOpen || walkFade || endOpen,
 		() => {
 			if (dialogOpen) dispatch({ type: 'closeDialog' });
+			else if (cardOpen) dispatch({ type: 'cardContinue' });
 			else if (endOpen) keepExploring();
 		}
 	);
