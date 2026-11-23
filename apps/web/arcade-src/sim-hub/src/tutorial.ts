@@ -1054,6 +1054,7 @@ export function updateTutorial(dt: number): void {
 			pos: p,
 			yaw: player.yaw,
 			nearMaya: dist(p, destination(st, p)) <= 2.4,
+			// unreachable in practice: step 1's dialog stops the guide as it opens (perform, 'openDialog')
 			checkedIn: machine.phase === 'dialog'
 		});
 	if (machine.phase !== 'active' && machine.phase !== 'waiting') {

@@ -4,12 +4,14 @@
    the game, so no frame would), ticks it on each frame of step 1 with the player's place and
    facing (tickGuide), and stops it at the check-in and on leaving. An explain pauses the game and
    frees the pointer, as a dialog does, until its Next, or Esc through tutorial.ts's dialog entry;
-   the sub-steps the player does leave both free. Skip walkthrough ends it for the rest of the
-   play. The sub-steps and their rules are tutorial-guide-steps.ts. */
+   the sub-steps the player does leave both free. While anything else pauses the game (a room card,
+   the settings, the Tutorial's own dialogs) the bubble hides under it, and it shows again when
+   that ends. Skip walkthrough ends it for the rest of the play. The sub-steps and their rules are
+   tutorial-guide-steps.ts. */
 import { hideCoach, showCoach } from '../../shared/coach';
 import { DEFAULT_CUE } from '../../shared/walkthrough-core';
 import type { SubKind } from '../../shared/walkthrough-core';
-import { setPaused } from './pause';
+import { isPaused, onPauseChange, setPaused } from './pause';
 import { requestWalkPointerLock } from './walk';
 import {
 	GETTING_STARTED,
@@ -39,6 +41,12 @@ document.addEventListener('pointerlockchange', () => {
 	if (holding && document.pointerLockElement) document.exitPointerLock();
 });
 
+/* The game pausing or resuming for anything but an explain (the guide's own pause): the bubble of a
+   sub-step the player does hides under that pause, and comes back when it ends. */
+onPauseChange(() => {
+	if (running && !holding) show(false);
+});
+
 /** Pauses the game and frees the pointer for an explain, or gives them back; `relock` inside a
     click (Next, Skip), which the pointer lock needs. */
 function hold(on: boolean, relock: boolean): void {
@@ -60,6 +68,12 @@ function shows(e: Element | null): e is Element {
 function show(relock: boolean): void {
 	const s = current();
 	if (!s) return;
+	hold(s.kind === 'explain', relock);
+	// another pause covers the game: the bubble would sit over that dialog's buttons
+	if (!holding && isPaused()) {
+		hideCoach();
+		return;
+	}
 	const sels = s.targets(frame && progress.base ? guideSnap(progress.base, frame) : NOTHING_DONE),
 		targets = sels.map((q) => document.querySelector(q)).filter(shows);
 	showCoach({
@@ -75,7 +89,6 @@ function show(relock: boolean): void {
 		onNext: guideNext,
 		onSkip: guideSkip
 	});
-	hold(s.kind === 'explain', relock);
 }
 
 function end(relock: boolean): void {
