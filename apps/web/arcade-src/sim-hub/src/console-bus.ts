@@ -4,7 +4,8 @@
    Tutorial (tutorial.ts) listens to `linacEvents`, `ctComplete` and `panelOpen` and emits
    `vaultMonitorPatient`, which Vault 1 listens to. A channel per
    message keeps those modules from importing one another. Free of scene and DOM imports so it is
-   unit tested in Node (console-bus.spec.ts). The Tutorial also listens to `linacGeometryHold` and `linacWalkthrough`. */
+   unit tested in Node (console-bus.spec.ts). The Tutorial also listens to `linacGeometryHold` and
+   `linacWalkthrough`. */
 import type {
 	ConsoleKind,
 	CtPose,
