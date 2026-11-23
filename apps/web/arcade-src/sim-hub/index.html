@@ -1942,10 +1942,6 @@
 			.tut-hint.reveal {
 				background: rgba(255, 188, 99, 0.16);
 			}
-			.tut-hint.correct {
-				border-left-color: var(--green);
-				background: rgba(101, 221, 160, 0.12);
-			}
 			.tut-bar {
 				height: 6px;
 				margin-top: 10px;
@@ -2184,31 +2180,20 @@
 				border-color: var(--teal);
 				background: rgba(66, 213, 207, 0.16);
 			}
-			/* The step card after every step (tutorial-hud.ts showStepCard), as the walkthrough
-			   mockup draws it, over a dimmed center. Styled by its id: its .tut-card class is the
-			   dialogs' card's too, and these rules replace those. It fits at 992x624, so it never
-			   scrolls. */
+			/* The step card after every step (tutorial-hud.ts showStepCard): a .tut-dialog backdrop,
+			   so a click beside the card does not reach the center, round a .tut-card drawn as the
+			   walkthrough mockup does. It fits at 992x624, so it never scrolls. */
 			#tutCard {
-				position: fixed;
-				z-index: 186;
-				left: 50%;
-				top: 50%;
-				transform: translate(-50%, -50%);
-				display: none;
+				background: rgba(6, 12, 18, 0.55);
+			}
+			#tutCard .tut-card {
 				width: min(520px, calc(100vw - 32px));
-				max-height: none;
-				overflow: visible;
 				padding: 22px 26px 20px;
 				background: #172029;
 				border: 1px solid rgba(63, 208, 201, 0.45);
 				border-radius: 14px;
-				box-shadow:
-					0 13px 38px rgba(0, 0, 0, 0.55),
-					0 0 0 100vmax rgba(6, 12, 18, 0.55);
+				box-shadow: 0 13px 38px rgba(0, 0, 0, 0.55);
 				color: #eef4f7;
-			}
-			#tutCard.show {
-				display: block;
 			}
 			.tut-card-kick {
 				display: flex;
@@ -2878,23 +2863,25 @@
 		<div id="tutWalkCard" class="tut-rolecard tut-walkcard" aria-live="polite"></div>
 		<div
 			id="tutCard"
-			class="tut-card"
+			class="tut-dialog"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="tutCardTitle"
 		>
-			<div class="tut-card-kick"><b aria-hidden="true">✓</b><span id="tutCardKick"></span></div>
-			<h3 id="tutCardTitle"></h3>
-			<dl>
-				<dt>You did</dt>
-				<dd id="tutCardDid"></dd>
-				<dt>Why</dt>
-				<dd id="tutCardWhy"></dd>
-				<dt>Next</dt>
-				<dd id="tutCardNext"></dd>
-			</dl>
-			<div class="tut-card-foot">
-				<button type="button" id="tutCardContinue">Continue</button>
+			<div class="tut-card">
+				<div class="tut-card-kick"><b aria-hidden="true">✓</b><span id="tutCardKick"></span></div>
+				<h3 id="tutCardTitle"></h3>
+				<dl>
+					<dt>You did</dt>
+					<dd id="tutCardDid"></dd>
+					<dt>Why</dt>
+					<dd id="tutCardWhy"></dd>
+					<dt>Next</dt>
+					<dd id="tutCardNext"></dd>
+				</dl>
+				<div class="tut-card-foot">
+					<button type="button" id="tutCardContinue">Continue</button>
+				</div>
 			</div>
 		</div>
 		<div id="tutEnd" class="tut-end" role="dialog" aria-modal="true" aria-labelledby="tutEndTitle">

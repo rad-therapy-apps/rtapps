@@ -240,8 +240,9 @@ function perform(e: Effect): void {
 			cardStep = null;
 			hud.showStepCard(null);
 			setPaused('tutorial', false);
-			// the role change and the end card pause again themselves
-			if (machine.phase === 'active') requestWalkPointerLock();
+			// asked for inside Continue's click, which the lock needs: nothing asks after the role change
+			// (it pauses again itself); the end card frees the pointer
+			if (machine.phase === 'active' || machine.phase === 'roleChange') requestWalkPointerLock();
 			return;
 		case 'roleChange':
 			roleChange(e.role);

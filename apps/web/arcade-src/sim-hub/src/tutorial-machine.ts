@@ -2,18 +2,19 @@
    a pure reducer over Chapter 1's steps (tutorial-steps.ts). Events in (start, a frame's tick with
    the walking distance, E on a target, reaching a target, an answer, Continue, closing the dialog,
    an event from the LINAC console, its beam turning on or off, its geometry hold, the player
-   closing the console, the role change finishing, Continue on the step card, stop); a new state
-   and a list of effects out, which tutorial.ts performs (tracker, dialog, hint line, console, step
-   card, role change, world actions). Every step ends on its step card (docs/specs/2026-11-23-
-   tutorial-walkthrough-design.md, "The step card"), the 'card' phase: its Continue starts the next
-   step, the role change or the end. It holds the hint timers and the miss counter of a decision or
-   a console step, mirroring the CT console's validateTechnique: "Not yet." with a hint, a stronger
-   hint, then the answer at the third miss. A console step (docs/specs/2026-11-18-consoles-in-center-design.md,
-   part 6) opens the console on E and is triggered by Jordan's events on it, in order; its misses
-   show in the hint line. The delivery step's hints also follow the console's geometry hold (the
-   selected field off the plan): a refused beam for it names the fix with the field, as does its
-   hold hint once the hold has stayed HOLD_HINT_S with the console open and no field delivered (a
-   timer like the E-step hint's); both follow the hold as it changes and go when it clears. */
+   closing the console, the role change finishing, Continue on the step card, stop); a new
+   state and a list of effects out, which tutorial.ts performs (tracker, dialog, hint line,
+   console, step card, role change, world actions). Every step ends on its step card (docs/
+   specs/2026-11-23-tutorial-walkthrough-design.md, "The step card"), the 'card' phase: its
+   Continue starts the next step, the role change or the end. It holds the hint timers and the
+   miss counter of a decision or a console step, mirroring the CT console's validateTechnique:
+   "Not yet." with a hint, a stronger hint, then the answer at the third miss. A console step
+   (docs/specs/2026-11-18-consoles-in-center-design.md, part 6) opens the console on E and is
+   triggered by Jordan's events on it, in order; its misses show in the hint line. The delivery
+   step's hints also follow the console's geometry hold (the selected field off the plan): a
+   refused beam for it names the fix with the field, as does its hold hint once the hold has
+   stayed HOLD_HINT_S with the console open and no field delivered (a timer like the E-step
+   hint's); both follow the hold as it changes and go when it clears. */
 import {
 	CHAPTER_1,
 	JORDAN_MRN,

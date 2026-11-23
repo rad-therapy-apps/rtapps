@@ -28,7 +28,9 @@
 //          reception ("Wait for Jordan"); the end card's Keep exploring leaves the player where they
 //          stand, in free mode
 //   run 2  every decision answered right, every console step pressed from its stand point and
-//          done without a miss; the end card's Main menu goes back to the title
+//          done without a miss; at step 6 the panel is closed in the beat after the step is done,
+//          which shows the card at once and brings no second; the end card's Main menu goes back
+//          to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
 // lies down; each play asks for a fresh console page at its first opening (step 3) and only then;
@@ -169,9 +171,11 @@ const playerBlocked = (x, z) =>
 		(c) => Math.abs(x - c.x) < c.hw + PLAYER_R && Math.abs(z - c.z) < c.hd + PLAYER_R
 	);
 
-// The step cards a play showed, by step, and what was wrong with them.
+// The step cards a play showed, by step, and what was wrong with them; `holdCard`: onFrame leaves
+// a card open.
 let cardsShown = [],
-	cardFails = [];
+	cardFails = [],
+	holdCard = false;
 // The step card that shows: the current step's, with its title, never over the console; then its
 // Continue.
 function continueCard() {
@@ -193,7 +197,7 @@ let wallHits = [],
 	movesSeen = new Set();
 function onFrame() {
 	if (RC.open()) RC.close(); // Continue
-	if (T.state().card) continueCard();
+	if (T.state().card && !holdCard) continueCard();
 	if (!T.state().active) return;
 	for (const t of NPC.workflowTransitions) {
 		movesSeen.add(t);
@@ -361,10 +365,36 @@ function playConsole(n, st, wrong, fails) {
 		fails.push('step 3: Jordan is not on the Vault 1 monitors after the chart opened');
 	if (!T.state().console || !NPC.isConsoleOpen())
 		fails.push(`step ${n}: the console closed with no beat to show the result`);
-	stepFor(CONSOLE_BEAT_S);
+	if (n === 6 && !wrong) closeInBeat(n, fails);
+	else stepFor(CONSOLE_BEAT_S);
 	if (T.state().console || NPC.isConsoleOpen() || T.docked())
 		fails.push(`step ${n}: the console is still open ${CONSOLE_BEAT_S} s after the step completed`);
 	if (cardsShown.at(-1) !== n) fails.push(`step ${n}: no card once the console closed`);
+}
+
+// The player closes the console panel in the beat after console step `n` is done: the card shows at
+// once, still at step n; held open, it stays the one card when the beat's timer fires, and after its
+// Continue no second card follows.
+function closeInBeat(n, fails) {
+	T.closePanel();
+	const at = (when) => {
+		const s = T.state();
+		if (!s.card || s.phase !== 'card' || s.step !== n)
+			fails.push(
+				`step ${n}: ${when}, card ${s.card}, phase '${s.phase}', step ${s.step} (want the card at step ${n})`
+			);
+	};
+	at('closing the panel in the beat');
+	holdCard = true;
+	const shown = cardsShown.length;
+	stepFor(CONSOLE_BEAT_S);
+	holdCard = false;
+	at("once the beat's timer had fired");
+	if (cardsShown.length !== shown) fails.push(`step ${n}: a card was continued in the beat`);
+	continueCard();
+	stepFor(CONSOLE_BEAT_S);
+	const cards = cardsShown.filter((s) => s === n).length;
+	if (cards !== 1) fails.push(`step ${n}: ${cards} cards after closing the panel in the beat`);
 }
 
 // A LINAC console pose (shared/console-protocol.ts LinacPose) at rest, with the beam `beamOn`.

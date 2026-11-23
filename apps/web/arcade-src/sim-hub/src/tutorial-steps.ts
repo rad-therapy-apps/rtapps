@@ -3,14 +3,14 @@
    walking hints, check-in exchange, decision or console task, the step card shown when it
    completes, and the world actions tutorial.ts runs when the step starts, is triggered and
    completes. Steps 3, 6, 8 and 9 are console steps (docs/specs/2026-11-18-consoles-in-center-
-   design.md, part 6): E opens the real LINAC console in the tutorial scenario, and Jordan's events
-   on it complete the step. The decision wording comes from the staff and journey text (interact.ts
-   STAFF_GUIDES, journey.ts JOURNEY_META and the journey's lines); the step cards' is the
-   walkthrough design's (docs/specs/2026-11-23-tutorial-walkthrough-design.md, "The step cards").
-   Plain data, so its spec runs without the scene. Positions are world
-   [x, z] in metres; the escort and Jamie's vault finals are the journey's own (journey.ts), so
-   their routes are the ones the NPC check walks. Jamie's spot in LINAC Control is the Tutorial's
-   own (the tutorial check walks it against the walls). */
+   design.md, part 6): E opens the real LINAC console in the tutorial scenario, and Jordan's
+   events on it complete the step. The decision wording comes from the staff and journey text
+   (interact.ts STAFF_GUIDES, journey.ts JOURNEY_META and the journey's lines); the step cards'
+   is the walkthrough design's (docs/specs/2026-11-23-tutorial-walkthrough-design.md, "The step
+   cards"). Plain data, so its spec runs without the scene. Positions are world [x, z] in
+   metres; the escort and Jamie's vault finals are the journey's own (journey.ts), so their
+   routes are the ones the NPC check walks. Jamie's spot in LINAC Control is the Tutorial's own
+   (the tutorial check walks it against the walls). */
 import { TUTORIAL_PATIENTS, TUTORIAL_SHIFT_MM } from '../../shared/console-protocol';
 import type { LinacEvent, LinacWorkspace } from '../../shared/console-protocol';
 import type { Pt } from './tutorial-math';

@@ -2,16 +2,15 @@
    tracker card at the top-left (role, objective, hint line, progress, step and walking distance),
    the orange marker and its screen-edge arrow, the check-in and decision dialog, the step card
    after every step (docs/specs/2026-11-23-tutorial-walkthrough-design.md, "The step card"), the
-   fade and the role-change card, and the end card. While a console step's console is open (docs/specs/
-   2026-11-18-consoles-in-center-design.md, part 6) the tracker docks as a slim strip of the
+   fade and the role-change card, and the end card. While a console step's console is open (docs/
+   specs/2026-11-18-consoles-in-center-design.md, part 6) the tracker docks as a slim strip of the
    objective and the hint line, with the console hints, along the bottom of the console panel's
    frame area (console-panel.ts #cpFrames), above the panel; the console's page is shortened to
-   clear it, and the marker and edge arrow hide. DOM only; tutorial.ts decides what they show. The keyboard
-   focus goes to a decision's first option, to Continue when it appears (the dialog's and the step
-   card's) and to the end card's Keep exploring, so Tab and Enter work without the mouse. The
-   elements are index.html's slot:tutorial
-   block, looked up once at init (a headless check's stub DOM hands out a new element on every
-   lookup). */
+   clear it, and the marker and edge arrow hide. DOM only; tutorial.ts decides what they show. The
+   keyboard focus goes to a decision's first option, to Continue when it appears (the dialog's and
+   the step card's) and to the end card's Keep exploring, so Tab and Enter work without the mouse.
+   The elements are index.html's slot:tutorial block, looked up once at init (a headless check's
+   stub DOM hands out a new element on every lookup). */
 import type { Decision, ExchangeLine, RoleInfo } from './tutorial-steps';
 import type { FeedbackKind } from './tutorial-math';
 
