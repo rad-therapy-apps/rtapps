@@ -8,13 +8,17 @@
    the LINAC console in its panel (console-panel.ts) through openStepConsole and listen to it on
    console-bus.ts (linacEvents; linacPose, whose beam the status boards show at step 9;
    linacGeometryHold, whose fix step 9's hints name; and panelOpen for the player closing it
-   early); Jordan's name goes on the Vault 1 monitors through
-   showJordanOnVaultMonitors. Leaving play mode 'tutorial' resets the journey again, so the world is
-   left as the NPC check expects. Outside the tutorial nothing here runs: updateTutorial returns at
-   once, the console events are ignored, and the E targets are made on the first start and disabled
-   otherwise. With ?npccheck it exposes window.__TUTORIAL for scripts/sim-hub-tutorial-check.mjs,
-   which drives the console steps by emitting their events on linacEvents (the console page never
-   loads there). */
+   early; and linacWalkthrough, the console's own walkthrough, which holds back the step's hints
+   and the panel's close); Jordan's name goes on the Vault 1 monitors through
+   showJordanOnVaultMonitors. The Tutorial walkthrough (docs/specs/
+   2026-11-23-tutorial-walkthrough-design.md) adds getting started at step 1 (tutorial-guide.ts),
+   a step card after every step (shown once a console step's panel has closed) and the floor ring
+   under the next target (tutorial-ring.ts). Leaving play mode 'tutorial' resets the journey
+   again, so the world is left as the NPC check expects. Outside the tutorial nothing here runs:
+   updateTutorial returns at once, the console events are ignored, and the E targets are made on
+   the first start and disabled otherwise. With ?npccheck it exposes window.__TUTORIAL for
+   scripts/sim-hub-tutorial-check.mjs, which drives the console steps by emitting their events on
+   linacEvents (the console page never loads there). */
 import * as THREE from 'three';
 import { S } from './state';
 import { camera, scene } from './scene';
@@ -1200,9 +1204,9 @@ export function initTutorial(): void {
 	});
 	linacWalkthrough.on((w) => {
 		const on = !!w;
-		if (on === walkthroughOn) return;
+		if (!active || on === walkthroughOn) return;
 		walkthroughOn = on;
-		if (active) dispatch({ type: 'walkthrough', on });
+		dispatch({ type: 'walkthrough', on });
 		if (!on && closePending) closeStepConsole();
 	});
 	linacGeometryHold.on((hold) => {

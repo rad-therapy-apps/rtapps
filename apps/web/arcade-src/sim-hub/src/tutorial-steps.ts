@@ -90,7 +90,8 @@ export const TUTORIAL_TIMING = {
 	/** The escorts' slow fade, each way, and how long its line shows on the black. */
 	walkFadeMs: 1500,
 	walkCardMs: 1000,
-	/** A console step's console stays open this long after the step completes, to show the result. */
+	/** A console step's console stays open at least this long after the step completes, to show the
+	    result (longer while the console's walkthrough still shows its last bubble). */
 	consoleCloseMs: 1500
 };
 

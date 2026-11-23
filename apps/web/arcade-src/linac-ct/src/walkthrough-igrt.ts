@@ -73,10 +73,18 @@ export function couchKey(s: IgrtSnap): { target: string; label: string; axis: Co
 	return null;
 }
 
+/** `target`, and the couch key that brings a residual back to 0 when one no longer reads 0 (a
+    couch key held past 0 after the couch sub-step): the walkthrough never steps back, so the key
+    stays lit for the sub-steps after it. */
+function withCouchKey(s: IgrtSnap, target: string): string[] {
+	const k = couchKey(s);
+	return k ? [target, machineKey(k.target)] : [target];
+}
+
 /** The correction the images call for: the axis with the largest recommended shift, and its size. */
 function correction(s: IgrtSnap): Record<string, string> {
 	const top = [...s.rows].sort((a, b) => Math.abs(b.recommended) - Math.abs(a.recommended))[0];
-	return top ? { shift: String(Math.abs(top.recommended)), axis: top.axis } : {};
+	return top ? { shift: String(Math.abs(top.recommended)), axis: top.axis.toLowerCase() } : {};
 }
 
 export const IGRT_WALK: WalkPart<IgrtSnap> = {
@@ -164,7 +172,7 @@ export const IGRT_WALK: WalkPart<IgrtSnap> = {
 			},
 			tokens: (s): Record<string, string> => {
 				const k = couchKey(s);
-				return k ? { key: k.label, axis: k.axis } : {};
+				return k ? { key: k.label, axis: k.axis.toLowerCase() } : {};
 			},
 			done: (s) =>
 				reported(s, 'shift-applied') &&
@@ -179,7 +187,7 @@ export const IGRT_WALK: WalkPart<IgrtSnap> = {
 				do: 'Press MV / EPID again to fold the panel away.',
 				why: 'The beam stays locked while imaging hardware is out.'
 			},
-			targets: () => [MV_KEY],
+			targets: (s) => withCouchKey(s, MV_KEY),
 			done: (s) => !s.panelOut,
 			cue: 'Press MV / EPID'
 		},
@@ -190,7 +198,7 @@ export const IGRT_WALK: WalkPart<IgrtSnap> = {
 				do: 'Press Verify Alignment.',
 				why: "It records that Jordan's position was checked and corrected before treatment."
 			},
-			targets: () => ['#igrtVerify'],
+			targets: (s) => withCouchKey(s, '#igrtVerify'),
 			done: (s) => reported(s, 'alignment-verified'),
 			cue: 'Press Verify Alignment'
 		}

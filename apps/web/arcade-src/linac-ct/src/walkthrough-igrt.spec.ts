@@ -113,7 +113,7 @@ describe("step 8's walkthrough, the check images", () => {
 		});
 		expect(step('igrt.couch').targets(imaged(5))).toEqual([machineKey('consoleVrtMinus')]);
 		expect(text('igrt.couch', imaged(6)).do).toBe(
-			'Press Vert − until the Vertical residual reads 0 mm.'
+			'Press Vert − until the vertical residual reads 0 mm.'
 		);
 		expect(couchKey(imaged(4))).toBe(null);
 		expect(step('igrt.couch').targets(imaged(4))).toEqual([]);
@@ -135,13 +135,13 @@ describe("step 8's walkthrough, the check images", () => {
 
 	it("fills the tokens from Jordan's correction", () => {
 		expect(text('igrt.table', imaged())).toEqual({
-			do: `The images show Jordan ${TUTORIAL_SHIFT_MM} mm off in the Vertical direction.`,
+			do: `The images show Jordan ${TUTORIAL_SHIFT_MM} mm off in the vertical direction.`,
 			why: "Recommended is the shift the images call for, Applied is how far you've moved, and Residual is what's left. Residual must reach 0."
 		});
 		// the correction stays what the images called for as the couch moves
 		expect(text('igrt.table', imaged(2)).do).toBe(text('igrt.table', imaged()).do);
 		expect(text('igrt.couch', imaged(1))).toEqual({
-			do: 'Press Vert + until the Vertical residual reads 0 mm.',
+			do: 'Press Vert + until the vertical residual reads 0 mm.',
 			why: 'Each press moves the couch 1 mm.'
 		});
 	});
@@ -182,8 +182,19 @@ describe("step 8's walkthrough, the check images", () => {
 		expect(step('igrt.couch').targets(s)).toEqual([
 			'#rtv2MachinePanel [data-console-target="consoleVrtPlus"]'
 		]);
-		expect(step('igrt.mvIn').targets(s)).toEqual(step('igrt.mvOut').targets(s));
-		expect(step('igrt.verify').targets(s)).toEqual(['#igrtVerify']);
+		// the couch back at 0: the key alone
+		const at0 = imaged(4);
+		expect(step('igrt.mvIn').targets(at0)).toEqual(step('igrt.mvOut').targets(at0));
+		expect(step('igrt.verify').targets(at0)).toEqual(['#igrtVerify']);
+		// a residual left (a couch key held past 0): the couch key that brings it back, too
+		expect(step('igrt.mvIn').targets(imaged(5))).toEqual([
+			machineKey('consoleMV'),
+			machineKey('consoleVrtMinus')
+		]);
+		expect(step('igrt.verify').targets(imaged(5))).toEqual([
+			'#igrtVerify',
+			machineKey('consoleVrtMinus')
+		]);
 	});
 
 	it('gives every do sub-step a short cue', () => {

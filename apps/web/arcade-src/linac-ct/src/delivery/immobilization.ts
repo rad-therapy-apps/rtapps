@@ -8,6 +8,7 @@ import { setPendantLCD } from '../linac-safety';
 import { oisLogEvent, renderOISPanel } from './ois';
 import { renderTreatmentDeliveryPanel } from './treatment-delivery';
 import { consoleEvent, consoleMistake } from '../console-hooks';
+import { coachShown } from '../../../shared/coach';
 
 export const IMMOBILIZATION_DEVICE_META = {
 	headMask: { name: 'Short Head Mask', color: '#7fd8f7', dark: '#254c61' },
@@ -258,11 +259,12 @@ function wireImmobilizationDragDrop() {
 			});
 			el.addEventListener('dragend', () => el.classList.remove('dragging'));
 		});
-	document
-		.querySelectorAll('.immo-placed-device')
-		.forEach((el: HTMLElement) =>
-			el.addEventListener('dblclick', () => removeImmobilizationDevice(el.dataset.immoId))
-		);
+	document.querySelectorAll('.immo-placed-device').forEach((el: HTMLElement) =>
+		el.addEventListener('dblclick', () => {
+			// not under the Tutorial's spotlight: its walkthrough never steps back to put a device on
+			if (!coachShown()) removeImmobilizationDevice(el.dataset.immoId);
+		})
+	);
 }
 
 export function addImmobilizationDevice(id) {

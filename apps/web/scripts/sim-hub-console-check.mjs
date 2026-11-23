@@ -474,6 +474,12 @@ try {
 		await guardBubble(`${s.id}, skipped`);
 		await frame.locator('#rtCoach .rt-coach-skip').click();
 		await frame.waitForFunction(() => !window.__WALKTHROUGH.state());
+		// the center hears the end on the console's next state message: before that, a mistake
+		// would still be held back as the walkthrough's
+		await until(
+			'the center to see the walkthrough end',
+			() => !window.__TUTORIAL.state().walkthrough
+		);
 	};
 	await skipWalkthrough('queue');
 	const steps = await tut(() =>

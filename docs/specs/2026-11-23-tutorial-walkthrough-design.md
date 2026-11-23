@@ -114,7 +114,9 @@ floor ring and the step cards.
 
 ### Console: the four walkthroughs (`apps/web/arcade-src/linac-ct/src/`)
 
-- `tutorial-walkthrough.ts` holds the data and rules, and is unit tested:
+- The data and rules are unit tested: the shared sub-step rules are
+  `arcade-src/shared/walkthrough-core.ts` (also used by getting started), and each walkthrough is
+  its own `walkthrough-<part>.ts` (`WalkPart`, `walkthrough-part.ts`):
   - one walkthrough per Tutorial workspace (queue → step 3, setup → step 6, igrt → step 8,
     delivery → step 9);
   - each is a list of sub-steps, each with an `id`, a `kind` (`explain` or `do`), its `targets`,
@@ -161,7 +163,8 @@ index: number; of: number } | null`. A message without it is still valid. The ce
 
 - `window.__TUTORIAL` (with `?npccheck`) gets `cardContinue()`, `coachNext()`, `coachSkip()` and
   `coach()`, the last returning the current sub-step's id, index and kind.
-- The console page exposes the same coach calls on its window for the console check.
+- The console page (tutorial scenario only) exposes `window.__WALKTHROUGH`: `state()` (the part,
+  the sub-step's id, index and kind, and its cut-outs' selectors), `next()` and `skip()`.
 
 ## The wording
 
