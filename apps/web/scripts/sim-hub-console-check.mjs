@@ -10,6 +10,7 @@
 // checks (window.__NPC.disableRendering). At each console step it presses E at the target and
 // plays the LINAC console in the panel's iframe by its real buttons: the drag from the equipment
 // shelf, the couch keys and the held Move to field key.
+//   each console step skips its Tutorial walkthrough at the first bubble, with its Skip
 //   step 3  checking in the look-alike first is refused and the Tutorial shows hint 1; Jordan's
 //           check-in and chart complete the step, and the panel closes a beat later
 //   step 6  Patient Setup at the couch: Jordan's devices dragged onto the table, the checks ticked,
@@ -30,7 +31,8 @@
 //           angle (0 to 270, then 270 to 90); the Vault 1 board shows BEAM ON while the beam is
 //           on, BETWEEN FIELDS between the fields and TREATMENT COMPLETE at the end
 //   then    a second play from the title, steps 1-3: the console's page boots fresh, so
-//           Jordan's check-in and chart open again and step 3 completes
+//           Jordan's check-in and chart open again, following the schedule walkthrough (its two
+//           explains, then the two presses), and step 3 completes
 // Also asserted: the Tutorial's events arrive in order from the console (console-bus.ts), Jordan
 // is on the Vault 1 monitors from step 3, and no page (the center or the console) throws.
 //
@@ -320,6 +322,31 @@ try {
 		await sleep(120);
 	};
 	const consoleKey = (target) => click(`#rtv2MachinePanel [data-console-target="${target}"]`);
+	// The console's Tutorial walkthrough (walkthrough-mode.ts): this play skips each part at its
+	// first bubble with the bubble's own Skip, so today's paths (the mistakes among them) play as
+	// before. A part with no walkthrough yet shows no bubble (`optional`).
+	const walk = () => frame.evaluate(() => window.__WALKTHROUGH?.state() ?? null);
+	const skipWalkthrough = async (part, optional = false) => {
+		const t0 = Date.now();
+		let s = await walk();
+		while (!s && Date.now() - t0 < 1500) {
+			await sleep(100);
+			s = await walk();
+		}
+		if (!s && optional) return;
+		expect(
+			s?.part === part && s.index === 0,
+			`the ${part} walkthrough opens at its first bubble (${JSON.stringify(s)})`
+		);
+		await frame.locator('#rtCoach .rt-coach-skip').click();
+		await frame.waitForFunction(() => !window.__WALKTHROUGH.state());
+	};
+	const walkNext = async (from, to) => {
+		await frame.waitForFunction((id) => window.__WALKTHROUGH.state()?.id === id, from);
+		await frame.locator('#rtCoach .rt-coach-next').click();
+		await frame.waitForFunction((id) => window.__WALKTHROUGH.state()?.id === id, to);
+	};
+	await skipWalkthrough('queue');
 	const steps = await tut(() =>
 		window.__TUTORIAL.steps.map(
 			(s) => s.console && { hints: s.console.hints, reveal: s.console.reveal }
@@ -387,6 +414,7 @@ try {
 	);
 	await noScroll.scan(page, 'the center, panel open at setup');
 	await frame.locator('#immobilizationVerify').waitFor({ state: 'visible' });
+	await skipWalkthrough('setup', true);
 	await noScroll.scan(frame, 'Patient Setup, on opening');
 	const keys = (await frame.locator('#immobilizationOrderSummary .immo-key').textContent())
 		.split(':')
@@ -520,6 +548,7 @@ try {
 	);
 	await noScroll.scan(page, 'the center, panel open at igrt');
 	await frame.locator('#igrtNewSetup').waitFor({ state: 'visible' });
+	await skipWalkthrough('igrt', true);
 	await noScroll.scan(frame, 'image guidance, on opening');
 	await click('#igrtNewSetup');
 	await consoleKey('consoleMV');
@@ -621,6 +650,7 @@ try {
 			window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'delivery'
 	);
 	await frame.locator('#rtv2EnableBeam').waitFor({ state: 'visible' });
+	await skipWalkthrough('delivery', true);
 	await noScroll.scan(page, 'the center, panel open at delivery');
 	await noScroll.scan(frame, 'delivery screen, on opening');
 	const pose = () =>
@@ -854,8 +884,12 @@ try {
 		WAIT_MS,
 		readies
 	);
+	// this play follows the schedule walkthrough: its two explains, then its two presses
+	await walkNext('queue.intro', 'queue.twins');
+	await walkNext('queue.twins', 'queue.checkin');
 	n = await eventCount();
 	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-checkin');
+	await frame.waitForFunction(() => window.__WALKTHROUGH.state()?.id === 'queue.chart');
 	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-openchart');
 	await continueCard(3);
 	await stepIs(4);
