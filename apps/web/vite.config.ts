@@ -72,7 +72,8 @@ export default defineConfig({
 					include: [
 						'src/**/*.{test,spec}.{js,ts}',
 						'arcade-src/sim-hub/src/**/*.spec.ts',
-						'arcade-src/linac-ct/src/**/*.spec.ts'
+						'arcade-src/linac-ct/src/**/*.spec.ts',
+						'arcade-src/shared/**/*.spec.ts'
 					],
 					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}', 'src/lib/arcade/**/*.spec.ts']
 				}
