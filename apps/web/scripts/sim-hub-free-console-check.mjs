@@ -33,7 +33,8 @@
 //          into the bore while it scans.
 // Each part closes the panel with its × and the click asks for mouse look again (hub-dialogs.ts,
 // counted on the canvas's requestPointerLock). Also asserted: the console's events in order and
-// with no mistakes, and no page error in the center or either console.
+// with no mistakes, no page error in the center or either console, and no walkthrough on the free
+// LINAC console (no #rtCoach shown, no window.__WALKTHROUGH).
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
 //   node scripts/sim-hub-free-console-check.mjs
@@ -591,6 +592,13 @@ async function playLinac() {
 	);
 	// scanned once it is ready: before, its page still has the standalone app's layout
 	await noScroll.scan(frame, 'linac console, on opening');
+	// the Tutorial's walkthrough runs in the tutorial scenario only: no bubble, no hooks here
+	expect(
+		await frame.evaluate(
+			() => !document.querySelector('#rtCoach:not([hidden])') && !('__WALKTHROUGH' in window)
+		),
+		'the free LINAC console shows no walkthrough bubble and has no window.__WALKTHROUGH'
+	);
 	const click = async (sel) => {
 		await noScroll.scan(frame, `before clicking ${sel}`);
 		await frame.locator(sel).first().click();

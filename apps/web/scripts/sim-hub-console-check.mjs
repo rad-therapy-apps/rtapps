@@ -1,6 +1,7 @@
-// sim-hub console check (docs/specs/2026-11-18-consoles-in-center-design.md, part 6): the real
-// LINAC console, in the center's console panel, played through the Tutorial's console steps in
-// headless Chromium.
+// sim-hub console check (docs/specs/2026-11-18-consoles-in-center-design.md, part 6, and
+// 2026-11-23-tutorial-walkthrough-design.md, "Testing"): the real LINAC console, in the center's
+// console panel, played through the Tutorial's console steps in headless Chromium, twice: once
+// with each console walkthrough skipped, once following each one.
 //
 // Serves the built arcade (apps/web/arcade, and apps/web/static/arcade for the shared SDK) on a
 // random port, opens /arcade/sim-hub/?npccheck, starts the Tutorial and moves through its other
@@ -10,7 +11,9 @@
 // checks (window.__NPC.disableRendering). At each console step it presses E at the target and
 // plays the LINAC console in the panel's iframe by its real buttons: the drag from the equipment
 // shelf, the couch keys and the held Move to field key.
-//   each console step skips its Tutorial walkthrough at the first bubble, with its Skip
+// The first play:
+//   each console step's walkthrough opens at its first bubble, of its own part, and is skipped
+//   with the bubble's own Skip, so today's paths (the mistakes among them) play as before
 //   step 3  checking in the look-alike first is refused and the Tutorial shows hint 1; Jordan's
 //           check-in and chart complete the step, and the panel closes a beat later
 //   step 6  Patient Setup at the couch: Jordan's devices dragged onto the table, the checks ticked,
@@ -30,11 +33,23 @@
 //           (window.__NPC.vaultLinac) passes the angles between, one way, and ends at the field's
 //           angle (0 to 270, then 270 to 90); the Vault 1 board shows BEAM ON while the beam is
 //           on, BETWEEN FIELDS between the fields and TREATMENT COMPLETE at the end
-//   then    a second play from the title, steps 1-3: the console's page boots fresh, so
-//           Jordan's check-in and chart open again, following the schedule walkthrough (its two
-//           explains, then the two presses), and step 3 completes
-// Also asserted: the Tutorial's events arrive in order from the console (console-bus.ts), Jordan
-// is on the Vault 1 monitors from step 3, and no page (the center or the console) throws.
+// The second play, from the title (the console's page boots fresh, so Jordan checks in again),
+// follows the walkthroughs of steps 3, 6, 8 and 9 sub-step by sub-step through the console's real
+// controls (linac-ct walkthrough-{queue,setup,igrt,delivery}.ts): Next on each explain, the press,
+// drag or hold each do sub-step asks for. At each sub-step window.__WALKTHROUGH.state() names it,
+// its place in its part and its cut-outs, each target (and drag end) sits inside a hole, and the
+// center's hint line is empty. Along the way:
+//   step 3  during Check In, a click on the look-alike's Check In (row #01, under the dim) does
+//           nothing: no event, no mistake, the same sub-step
+//   step 6  the Headrest, then the Short Head Mask, dragged from the shelf onto the table
+//   step 8  Vert + once for each millimetre of the correction; the couch sub-step holds at the
+//           tolerance and ends when every residual reads 0 mm
+//   step 9  Motion Enable's sub-step is passed over (motion is on from step 8); each field held to
+//           with Move to field; the panel stays open past the beat while "Treatment delivered"
+//           shows, and closes once its Next is pressed
+// Also asserted: the Tutorial's events arrive in order from the console (console-bus.ts), in each
+// play, the guided one with no mistake; Jordan is on the Vault 1 monitors from step 3; the center
+// shows no hint while a walkthrough runs; and no page (the center or the console) throws.
 //
 // How to run (builds nothing; run `pnpm build:arcade` first), from apps/web:
 //   node scripts/sim-hub-console-check.mjs
@@ -45,13 +60,16 @@
 // the console's last events. Before each click the console (and at each opening the center) is
 // scanned by lib/no-scroll.mjs: nothing may scroll and nothing in the console may be cut off; at
 // the end `NO-SCROLL PASS`, or `NO-SCROLL FAIL` with each scrolling area and each cut-off
-// element (exit code 1). CHECK_VIEW=WxH (e.g. 992x624) sets the center's size.
+// element (exit code 1). The same guard scans every walkthrough bubble the check meets, in both
+// plays, and each bubble must also sit inside the frame, be at most 360 px wide, cover none of
+// its holes and have no text under 12 px; and every step card, on which nothing may scroll or be
+// cut off. CHECK_VIEW=WxH (e.g. 992x624) sets the center's size; CI runs 1280x800 and 992x624.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkView, createNoScrollCollector } from './lib/no-scroll.mjs';
+import { checkView, createNoScrollCollector, cutOffs } from './lib/no-scroll.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.resolve(HERE, '..');
@@ -166,8 +184,8 @@ const stepIs = (n, phase = 'active') =>
 		60000,
 		[n, phase]
 	);
-/** Waits for step `n`'s card (a console step's shows once its console has closed) and presses its
-    Continue. */
+/** Waits for step `n`'s card (a console step's shows once its console has closed), checks nothing
+    on it scrolls or is cut off (lib/no-scroll.mjs), and presses its Continue. */
 async function continueCard(n) {
 	await until(
 		`step ${n}'s card`,
@@ -178,6 +196,9 @@ async function continueCard(n) {
 		60000,
 		n
 	);
+	await noScroll.scan(page, `step ${n}'s card`);
+	const cut = ((await cutOffs(page))?.items ?? []).filter((it) => it.owner === 'tutCard');
+	expect(!cut.length, `nothing on step ${n}'s card is cut off (${JSON.stringify(cut)})`);
 	await tut(() => window.__TUTORIAL.cardContinue());
 }
 /** Resolves after `n` of the center's frames (its frame loop moves the E targets and the prompt). */
@@ -236,6 +257,70 @@ const nextEvent = (kind, from, timeout = WAIT_MS) =>
 		timeout,
 		[kind, from]
 	);
+/** From the title: the Tutorial entered (the center's getting-started walkthrough skipped where
+    the center has one), then steps 1-2 as the patient, to step 3. */
+async function playSteps1to2() {
+	await tut(() => {
+		window.__TUTORIAL.enter();
+		window.__TUTORIAL.coachSkip?.();
+	});
+	await stepIs(1);
+	await pressE();
+	await tut(() => window.__TUTORIAL.cont());
+	await continueCard(1);
+	await stepIs(2);
+	await pressE();
+	await continueCard(2);
+	await stepIs(3);
+}
+/** Steps 4-5: Jordan called (the decision answered), the walk to Vault 1 put at its end. */
+async function playSteps4to5() {
+	await pressE();
+	await tut(() => {
+		const t = window.__TUTORIAL,
+			s = t.steps[t.state().step - 1];
+		t.answer(s.decision.options.find((o) => o.correct).id);
+		t.cont();
+	});
+	await continueCard(4);
+	await stepIs(5);
+	await until(
+		'Jordan to reach the couch',
+		() => {
+			const t = window.__TUTORIAL,
+				s = t.state(),
+				J = window.__NPC.JOURNEY;
+			if (s.step !== 5 || s.phase === 'card') return true;
+			if (!s.walkFade) {
+				t.placePlayer(J.patient.position.x + 0.8, J.patient.position.z + 0.8);
+				window.__skipWalk(J.patient);
+			}
+			return false;
+		},
+		60000
+	);
+	await continueCard(5);
+	await stepIs(6);
+}
+/** Step 7: back to LINAC Control, Jamie Williams's walk put at its end. */
+async function playStep7() {
+	await tut(() => {
+		const t = window.__TUTORIAL,
+			[x, z] = t.standPoint();
+		t.placePlayer(x, z);
+	});
+	await until(
+		'Jamie Williams to join the player in LINAC Control',
+		() => {
+			window.__skipWalk(window.__NPC.JOURNEY.vaultTherapist);
+			const s = window.__TUTORIAL.state();
+			return s.step === 7 && s.phase === 'card';
+		},
+		60000
+	);
+	await continueCard(7);
+	await stepIs(8);
+}
 
 try {
 	// a software renderer (SwiftShader) takes a while to compile the center's shaders
@@ -257,6 +342,13 @@ try {
 			if (e.data?.type === 'rtapps-linac-ready') window.__consoleReadies++;
 		});
 		bus.linacEvents.on((e) => window.__consoleEvents.push(e));
+		// any hint the center's hint line shows while it knows a console walkthrough runs
+		window.__walkHints = [];
+		const hintLine = document.getElementById('tutHint');
+		new MutationObserver(() => {
+			if (hintLine.textContent && window.__TUTORIAL.state().walkthrough)
+				window.__walkHints.push(hintLine.textContent);
+		}).observe(hintLine, { childList: true, characterData: true, subtree: true });
 		// the Vault 1 board and machine as each pose comes in
 		window.__boards = [];
 		window.__gantry = [];
@@ -288,19 +380,7 @@ try {
 	part('load');
 
 	// ---------- steps 1-2, as the patient ----------
-	// getting started (tutorial-guide.ts) is the tutorial check's to play: skipped here
-	await tut(() => {
-		window.__TUTORIAL.enter();
-		window.__TUTORIAL.coachSkip();
-	});
-	await stepIs(1);
-	await pressE();
-	await tut(() => window.__TUTORIAL.cont());
-	await continueCard(1);
-	await stepIs(2);
-	await pressE();
-	await continueCard(2);
-	await stepIs(3);
+	await playSteps1to2();
 	part('steps 1-2');
 
 	// ---------- step 3: today's schedule ----------
@@ -326,29 +406,74 @@ try {
 		await sleep(120);
 	};
 	const consoleKey = (target) => click(`#rtv2MachinePanel [data-console-target="${target}"]`);
+	/** Polls `fn` (run in the console's page) until it returns something truthy. */
+	const inConsole = async (what, fn, arg, timeout = WAIT_MS) => {
+		for (const t0 = Date.now(); ; await sleep(100)) {
+			const v = await frame.evaluate(fn, arg);
+			if (v) return v;
+			if (Date.now() - t0 > timeout)
+				throw new CheckFailure(`timed out after ${timeout / 1000} s waiting for ${what}`);
+		}
+	};
+	/** The guard on the bubble showing: nothing in the console scrolls or is cut off
+	    (lib/no-scroll.mjs), and the bubble is inside the frame, at most 360 px wide, clear of every
+	    hole (the rings, 4 px larger than the targets) and has no text under 12 px. */
+	const guardBubble = async (at) => {
+		await noScroll.scan(frame, `the bubble at ${at}`);
+		let g;
+		for (const t0 = Date.now(); ; await sleep(100)) {
+			g = await frame.evaluate(() => {
+				const root = document.querySelector('#rtCoach:not([hidden])'),
+					el = root?.querySelector('.rt-coach-bubble');
+				if (!el) return null;
+				const b = el.getBoundingClientRect(),
+					holes = [...root.querySelectorAll('.rt-coach-ring')].map((r) =>
+						['x', 'y', 'width', 'height'].map((k) => +r.getAttribute(k))
+					),
+					hits = holes.filter(
+						([x, y, w, h]) => b.left < x + w && x < b.right && b.top < y + h && y < b.bottom
+					),
+					small = [el, ...el.querySelectorAll('*')]
+						.filter(
+							(e) =>
+								[...e.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim()) &&
+								parseFloat(getComputedStyle(e).fontSize) < 12
+						)
+						.map((e) => `${e.className} ${getComputedStyle(e).fontSize}`),
+					inside =
+						b.left >= -0.5 &&
+						b.top >= -0.5 &&
+						b.right <= innerWidth + 0.5 &&
+						b.bottom <= innerHeight + 0.5;
+				return {
+					ok: inside && b.width <= 360 && !hits.length && !small.length,
+					bubble: [b.left, b.top, b.width, b.height].map(Math.round),
+					frame: [innerWidth, innerHeight],
+					hits,
+					small
+				};
+			});
+			if (g?.ok || Date.now() - t0 > 3000) break;
+		}
+		expect(
+			g?.ok,
+			`the bubble at ${at} is inside the frame, at most 360 px wide, clear of its holes, with no text under 12 px (${JSON.stringify(g)})`
+		);
+	};
 	// The console's Tutorial walkthrough (walkthrough-mode.ts): this play skips each part at its
 	// first bubble with the bubble's own Skip, so today's paths (the mistakes among them) play as
-	// before. A part with no walkthrough yet shows no bubble (`optional`).
-	const walk = () => frame.evaluate(() => window.__WALKTHROUGH?.state() ?? null);
-	const skipWalkthrough = async (part, optional = false) => {
-		const t0 = Date.now();
-		let s = await walk();
-		while (!s && Date.now() - t0 < 1500) {
-			await sleep(100);
-			s = await walk();
-		}
-		if (!s && optional) return;
+	// before.
+	const skipWalkthrough = async (part) => {
+		const s = await inConsole(`the ${part} walkthrough's first bubble`, () =>
+			window.__WALKTHROUGH?.state()
+		);
 		expect(
 			s?.part === part && s.index === 0,
 			`the ${part} walkthrough opens at its first bubble (${JSON.stringify(s)})`
 		);
+		await guardBubble(`${s.id}, skipped`);
 		await frame.locator('#rtCoach .rt-coach-skip').click();
 		await frame.waitForFunction(() => !window.__WALKTHROUGH.state());
-	};
-	const walkNext = async (from, to) => {
-		await frame.waitForFunction((id) => window.__WALKTHROUGH.state()?.id === id, from);
-		await frame.locator('#rtCoach .rt-coach-next').click();
-		await frame.waitForFunction((id) => window.__WALKTHROUGH.state()?.id === id, to);
 	};
 	await skipWalkthrough('queue');
 	const steps = await tut(() =>
@@ -382,32 +507,7 @@ try {
 	part('step 3 (schedule)');
 
 	// ---------- steps 4-5: call Jordan, the walk to Vault 1 ----------
-	await pressE();
-	await tut(() => {
-		const t = window.__TUTORIAL,
-			s = t.steps[t.state().step - 1];
-		t.answer(s.decision.options.find((o) => o.correct).id);
-		t.cont();
-	});
-	await continueCard(4);
-	await stepIs(5);
-	await until(
-		'Jordan to reach the couch',
-		() => {
-			const t = window.__TUTORIAL,
-				s = t.state(),
-				J = window.__NPC.JOURNEY;
-			if (s.step !== 5 || s.phase === 'card') return true;
-			if (!s.walkFade) {
-				t.placePlayer(J.patient.position.x + 0.8, J.patient.position.z + 0.8);
-				window.__skipWalk(J.patient);
-			}
-			return false;
-		},
-		60000
-	);
-	await continueCard(5);
-	await stepIs(6);
+	await playSteps4to5();
 	part('steps 4-5');
 
 	// ---------- step 6: Patient Setup at the couch ----------
@@ -418,7 +518,7 @@ try {
 	);
 	await noScroll.scan(page, 'the center, panel open at setup');
 	await frame.locator('#immobilizationVerify').waitFor({ state: 'visible' });
-	await skipWalkthrough('setup', true);
+	await skipWalkthrough('setup');
 	await noScroll.scan(frame, 'Patient Setup, on opening');
 	const keys = (await frame.locator('#immobilizationOrderSummary .immo-key').textContent())
 		.split(':')
@@ -427,14 +527,17 @@ try {
 		.split('+')
 		.map((s) => s.trim())
 		.filter(Boolean);
-	// the console's drag events, to pace the mouse on them rather than on guessed sleeps
-	await frame.evaluate(() => {
-		window.__drag = { started: 0, over: 0 };
-		document.addEventListener('dragstart', () => window.__drag.started++, true);
-		document
-			.getElementById('immobilizationTableDrop')
-			.addEventListener('dragover', () => window.__drag.over++, true);
-	});
+	// the console's drag events, to pace the mouse on them rather than on guessed sleeps (again on
+	// each fresh console page)
+	const watchDrags = () =>
+		frame.evaluate(() => {
+			window.__drag = { started: 0, over: 0 };
+			document.addEventListener('dragstart', () => window.__drag.started++, true);
+			document
+				.getElementById('immobilizationTableDrop')
+				.addEventListener('dragover', () => window.__drag.over++, true);
+		});
+	await watchDrags();
 	const dragSeen = (k) => frame.evaluate((k) => window.__drag[k], k);
 	const placed = () =>
 		frame
@@ -446,11 +549,11 @@ try {
 		return false;
 	};
 	const frameBox = await page.locator('#consolePanel iframe:not([hidden])').boundingBox();
-	// all the drags, bounded: a native drag that never ends would otherwise hold the check for many
-	// minutes (seen once, locally, under heavy machine load)
-	const dragAll = async () => {
+	// the drags of the devices `names`, bounded by the caller: a native drag that never ends would
+	// otherwise hold the check for many minutes (seen once, locally, under heavy machine load)
+	const dragAll = async (names) => {
 		const paths = [];
-		for (const name of keys) {
+		for (const name of names) {
 			const src = frame.locator(`#immobilizationShelf .immo-device[aria-label="${name}"]`),
 				dst = frame.locator('#immobilizationTableDrop');
 			// a real mouse drag from the shelf to the table; headless Chromium now and then drops one, so
@@ -510,7 +613,7 @@ try {
 		}
 		return paths;
 	};
-	const dragPaths = await Promise.race([dragAll(), sleep(DRAG_MS).then(() => null)]);
+	const dragPaths = await Promise.race([dragAll(keys), sleep(DRAG_MS).then(() => null)]);
 	expect(dragPaths, `the drags onto the table did not finish in ${DRAG_MS / 1000} s`);
 	const onTable = await placed();
 	expect(
@@ -526,22 +629,7 @@ try {
 	part(`step 6 (setup; dragged by ${dragPaths.join(', ')})`);
 
 	// ---------- step 7: back to LINAC Control ----------
-	await tut(() => {
-		const t = window.__TUTORIAL,
-			[x, z] = t.standPoint();
-		t.placePlayer(x, z);
-	});
-	await until(
-		'Jamie Williams to join the player in LINAC Control',
-		() => {
-			window.__skipWalk(window.__NPC.JOURNEY.vaultTherapist);
-			const s = window.__TUTORIAL.state();
-			return s.step === 7 && s.phase === 'card';
-		},
-		60000
-	);
-	await continueCard(7);
-	await stepIs(8);
+	await playStep7();
 	part('step 7');
 
 	// ---------- step 8: image guidance ----------
@@ -552,7 +640,7 @@ try {
 	);
 	await noScroll.scan(page, 'the center, panel open at igrt');
 	await frame.locator('#igrtNewSetup').waitFor({ state: 'visible' });
-	await skipWalkthrough('igrt', true);
+	await skipWalkthrough('igrt');
 	await noScroll.scan(frame, 'image guidance, on opening');
 	await click('#igrtNewSetup');
 	await consoleKey('consoleMV');
@@ -654,7 +742,7 @@ try {
 			window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'delivery'
 	);
 	await frame.locator('#rtv2EnableBeam').waitFor({ state: 'visible' });
-	await skipWalkthrough('delivery', true);
+	await skipWalkthrough('delivery');
 	await noScroll.scan(page, 'the center, panel open at delivery');
 	await noScroll.scan(frame, 'delivery screen, on opening');
 	const pose = () =>
@@ -678,15 +766,6 @@ try {
 				r.classList.contains('active')
 			)
 		);
-	/** Polls `fn` (run in the console's page) until it returns something truthy. */
-	const inConsole = async (what, fn, arg, timeout = WAIT_MS) => {
-		for (const t0 = Date.now(); ; await sleep(100)) {
-			const v = await frame.evaluate(fn, arg);
-			if (v) return v;
-			if (Date.now() - t0 > timeout)
-				throw new CheckFailure(`timed out after ${timeout / 1000} s waiting for ${what}`);
-		}
-	};
 	const hintIs = (what, want) =>
 		until(what, (h) => window.__TUTORIAL.state().hint === h, 3000, want).catch(async () => {
 			throw new CheckFailure(`${what} (the hint: "${(await state()).hint}")`);
@@ -861,27 +940,128 @@ try {
 	const boards = await tut(() => window.__boards);
 	console.log(`  Vault 1 board through delivery: ${boards.join(' > ')}`);
 
-	// ---------- a second play, steps 1-3: a fresh console page, so Jordan checks in again ----------
+	// ---------- a second play, guided: a fresh console page, so Jordan checks in again ----------
 	const readies = await tut(() => window.__consoleReadies);
-	await tut(() => {
-		window.__TUTORIAL.toTitle();
-		window.__TUTORIAL.enter();
-		window.__TUTORIAL.coachSkip();
-	});
-	await stepIs(1);
-	await pressE();
-	await tut(() => window.__TUTORIAL.cont());
-	await continueCard(1);
-	await stepIs(2);
-	await pressE();
-	await continueCard(2);
-	await stepIs(3);
-	await pressE([46.1, 9.0]);
-	await until(
-		'the panel to open at the queue again',
-		() => window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === 'queue'
-	);
-	await noScroll.scan(page, 'the center, panel open at queue');
+	const playFrom = await eventCount();
+	await tut(() => window.__TUTORIAL.toTitle());
+	await playSteps1to2();
+	part('guided play, steps 1-2');
+
+	// Each part's sub-steps, in order (linac-ct walkthrough-{queue,setup,igrt,delivery}.ts). This
+	// play follows every one through the console's real controls, Next on the explains.
+	const SUB_STEPS = {
+		queue: ['intro', 'twins', 'checkin', 'chart'],
+		setup: ['order', 'key', 'headrest', 'mask', 'position', 'indexing', 'verify'],
+		igrt: ['intro', 'new', 'mvOut', 'acquire', 'table', 'motion', 'couch', 'mvIn', 'verify'],
+		delivery: [
+			'intro',
+			'fields',
+			'hold',
+			'motion',
+			'move1',
+			'enable1',
+			'beam1',
+			'move2',
+			'beam2',
+			'done'
+		]
+	};
+	const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+	const walk = () => frame.evaluate(() => window.__WALKTHROUGH?.state() ?? null);
+	// a target one of the console's tabs hides is cut out as the tab that shows it
+	// (walkthrough-mode.ts TABS)
+	const TAB = /^#rtv2(KeyTabs|dTabs) \[data-tab="[a-z]+"\]$/;
+	const viaTab = (s) => s.targets.length === 1 && TAB.test(s.targets[0]);
+	/** Waits for the walkthrough's sub-step `id` on the cut-outs `targets` (a target behind a tab:
+	    the tab pressed first, as a player would), and asserts its part, place and drag, each
+	    target and drag end inside a hole (its rect within a ring, the hole 4 px larger), and the
+	    center's hint line empty while it runs. */
+	const subStep = async (id, targets, drag = null) => {
+		const [part, sub] = id.split('.'),
+			ids = SUB_STEPS[part];
+		const reach = async () => {
+			for (const t0 = Date.now(); ; await sleep(100)) {
+				const s = await walk();
+				if (s?.id === id && (same(s.targets, targets) || viaTab(s))) return s;
+				if (Date.now() - t0 > WAIT_MS)
+					throw new CheckFailure(
+						`timed out after ${WAIT_MS / 1000} s waiting for the walkthrough's ${id} on ${JSON.stringify(targets)} (it shows ${JSON.stringify(s)})`
+					);
+			}
+		};
+		let s = await reach();
+		if (!same(s.targets, targets)) {
+			await guardBubble(`${id}, on its tab`);
+			await click(s.targets[0]);
+			s = await reach();
+		}
+		expect(
+			s.part === part &&
+				s.index === ids.indexOf(sub) &&
+				s.of === ids.length &&
+				same(s.targets, targets) &&
+				same(s.drag, drag),
+			`the walkthrough shows ${id}, ${ids.indexOf(sub) + 1} of ${ids.length}, on ${JSON.stringify(targets)} (${JSON.stringify(s)})`
+		);
+		const lit = [...targets, ...(drag ? [drag.from, drag.to] : [])];
+		let outside;
+		for (const t0 = Date.now(); ; await sleep(100)) {
+			outside = await frame.evaluate((sels) => {
+				const rings = [...document.querySelectorAll('#rtCoach:not([hidden]) .rt-coach-ring')].map(
+					(r) => ['x', 'y', 'width', 'height'].map((k) => +r.getAttribute(k))
+				);
+				return sels.filter((sel) => {
+					const r = document.querySelector(sel)?.getBoundingClientRect();
+					return (
+						!r ||
+						!rings.some(
+							([x, y, w, h]) =>
+								r.left >= x - 0.5 &&
+								r.top >= y - 0.5 &&
+								r.right <= x + w + 0.5 &&
+								r.bottom <= y + h + 0.5
+						)
+					);
+				});
+			}, lit);
+			if (!outside.length || Date.now() - t0 > 3000) break;
+		}
+		expect(!outside.length, `${id}: ${JSON.stringify(outside)} not inside a hole`);
+		await guardBubble(id);
+		const held = await until(
+			`the center to hold its hint at ${id}`,
+			() => {
+				const s = window.__TUTORIAL.state();
+				return s.walkthrough && s.hint === null && !document.getElementById('tutHint').textContent;
+			},
+			3000
+		).catch(() => false);
+		if (!held)
+			throw new CheckFailure(
+				`the center's hint line is not empty while ${id} shows (${JSON.stringify((await state()).hint)})`
+			);
+		return s;
+	};
+	const next = () => click('#rtCoach .rt-coach-next');
+	const walkEnds = (part) =>
+		inConsole(
+			`the ${part} walkthrough to end`,
+			() => !window.__WALKTHROUGH.state() && !document.querySelector('#rtCoach:not([hidden])')
+		);
+	/** E at the console's stand point (or the step's target) opens the panel at `workspace`. */
+	const openAt = async (workspace, at) => {
+		await pressE(at);
+		await until(
+			`the panel to open at ${workspace}`,
+			(w) => window.__NPC.isConsoleOpen() && window.__TUTORIAL.state().console?.workspace === w,
+			WAIT_MS,
+			workspace
+		);
+		await noScroll.scan(page, `the center, panel open at ${workspace} (guided)`);
+	};
+
+	// ---------- guided step 3: the schedule ----------
+	await openAt('queue', [46.1, 9.0]);
 	expect((await state()).console.fresh, 'the second play asks for a fresh console page');
 	await until(
 		"the console's page to boot again",
@@ -889,13 +1069,40 @@ try {
 		WAIT_MS,
 		readies
 	);
-	// this play follows the schedule walkthrough: its two explains, then its two presses
-	await walkNext('queue.intro', 'queue.twins');
-	await walkNext('queue.twins', 'queue.checkin');
+	const row = (n) => `#rtv2QueueRows .rtv2-queue-row:nth-child(${n})`;
+	await subStep('queue.intro', ['#rtv2Home .rtv2-queue-title']);
+	await next();
+	await subStep('queue.twins', [row(1), row(2)]);
+	await next();
+	await subStep('queue.checkin', [`${row(2)} .rtv2-checkin`]);
+	{
+		// the look-alike's Check In, dimmed: a click on it does nothing
+		const box = await page.locator('#consolePanel iframe:not([hidden])').boundingBox(),
+			b = await frame.locator(`${row(1)} .rtv2-checkin`).boundingBox(),
+			[x, y] = [b.x + b.width / 2, b.y + b.height / 2];
+		expect(
+			await frame.evaluate(
+				([x, y]) => !!document.elementFromPoint(x, y)?.classList.contains('rt-coach-dim'),
+				[x - box.x, y - box.y]
+			),
+			"row #01's Check In is under the dim layer"
+		);
+		const from = await eventCount(),
+			misses = (await state()).misses;
+		await page.mouse.click(x, y);
+		await sleep(400);
+		const after = (await events()).slice(from),
+			still = await walk();
+		expect(
+			after.length === 0 && (await state()).misses === misses && still?.id === 'queue.checkin',
+			`a click on row #01's dimmed Check In does nothing (events ${JSON.stringify(after)}; misses ${misses} to ${(await state()).misses}; sub-step ${still?.id})`
+		);
+	}
 	n = await eventCount();
-	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-checkin');
-	await frame.waitForFunction(() => window.__WALKTHROUGH.state()?.id === 'queue.chart');
-	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-openchart');
+	await click(`${row(2)} .rtv2-checkin`);
+	await subStep('queue.chart', [`${row(2)} .rtv2-openchart`]);
+	await click(`${row(2)} .rtv2-openchart`);
+	await walkEnds('queue');
 	await continueCard(3);
 	await stepIs(4);
 	const again = (await events()).slice(n).map((e) => e.kind);
@@ -903,7 +1110,176 @@ try {
 		JSON.stringify(again) === JSON.stringify(['checked-in', 'chart-opened']),
 		`the second play checks Jordan in and opens the chart again (${again.join(', ')})`
 	);
-	part('a second play, steps 1-3');
+	await until('the panel to close after the beat', () => !window.__NPC.isConsoleOpen());
+	part('guided play, step 3 (schedule)');
+
+	await playSteps4to5();
+	part('guided play, steps 4-5');
+
+	// ---------- guided step 6: Patient Setup ----------
+	await openAt('setup');
+	await frame.locator('#immobilizationVerify').waitFor({ state: 'visible' });
+	await watchDrags();
+	await subStep('setup.order', ['#immobilizationOrderSummary', '#immobilizationInstructions']);
+	await next();
+	await subStep('setup.key', ['#immobilizationOrderSummary .immo-key', '#immobilizationPosition']);
+	await next();
+	const guidedDrags = [];
+	for (const [id, name] of [
+		['setup.headrest', 'Headrest'],
+		['setup.mask', 'Short Head Mask']
+	]) {
+		await subStep(id, [], {
+			from: `#immobilizationShelf .immo-device[aria-label="${name}"]`,
+			to: '#immobilizationTableDrop'
+		});
+		const how = await Promise.race([dragAll([name]), sleep(DRAG_MS).then(() => null)]);
+		expect(how && (await isPlaced(name)), `dragged the ${name} onto the table (${how})`);
+		guidedDrags.push(...how);
+	}
+	const checkRow = (id) => `#immobilizationVerificationChecks label:has(#${id})`;
+	await subStep('setup.position', [checkRow('immoPositionCheck')]);
+	await click(checkRow('immoPositionCheck'));
+	await subStep('setup.indexing', [checkRow('immoIndexCheck')]);
+	await click(checkRow('immoIndexCheck'));
+	await subStep('setup.verify', ['#immobilizationVerify']);
+	await click('#immobilizationVerify');
+	await walkEnds('setup');
+	await continueCard(6);
+	await stepIs(7);
+	await until('the panel to close after the beat', () => !window.__NPC.isConsoleOpen());
+	part(`guided play, step 6 (setup; dragged by ${guidedDrags.join(', ')})`);
+
+	await playStep7();
+	part('guided play, step 7');
+
+	// ---------- guided step 8: image guidance ----------
+	await openAt('igrt', [46.1, 9.0]);
+	await frame.locator('#igrtNewSetup').waitFor({ state: 'visible' });
+	const key = (target) => `#rtv2MachinePanel [data-console-target="${target}"]`;
+	await subStep('igrt.intro', ['#consoleWorkflowDock .console-dock-eyebrow']);
+	await next();
+	await subStep('igrt.new', ['#igrtNewSetup']);
+	await click('#igrtNewSetup');
+	await subStep('igrt.mvOut', [key('consoleMV')]);
+	await consoleKey('consoleMV');
+	await subStep('igrt.acquire', ['#igrtAcquire']);
+	n = await eventCount();
+	await click('#igrtAcquire');
+	const guidedShift = (await nextEvent('images-acquired', n)).shiftMm;
+	await subStep('igrt.table', ['#igrtPanel .igrt-table']);
+	await next();
+	await subStep('igrt.motion', ['#rtv2MotionEnable']);
+	await click('#rtv2MotionEnable');
+	// Vert + once for each millimetre of Jordan's correction: the shift is reported at 1 mm, inside
+	// the tolerance, and the sub-step stays until every residual reads 0 mm
+	const residuals = () =>
+		frame
+			.locator('#igrtCorrectionRows .igrt-row')
+			.evaluateAll((els) => els.map((r) => r.children[3]?.textContent.trim()));
+	for (let mm = guidedShift; mm > 0; mm--) {
+		await subStep('igrt.couch', [key('consoleVrtPlus')]);
+		const before = JSON.stringify(await residuals());
+		await consoleKey('consoleVrtPlus');
+		await inConsole(
+			'the couch to move 1 mm',
+			(b) =>
+				JSON.stringify(
+					[...document.querySelectorAll('#igrtCorrectionRows .igrt-row')].map((r) =>
+						r.children[3]?.textContent.trim()
+					)
+				) !== b,
+			before
+		);
+	}
+	await subStep('igrt.mvIn', [key('consoleMV')]);
+	const zero = await residuals();
+	expect(
+		zero.length > 0 && zero.every((r) => parseFloat(r) === 0),
+		`the couch sub-step ends with every residual at 0 mm (${zero.join(', ')})`
+	);
+	expect(
+		(await events()).slice(n).some((e) => e.kind === 'shift-applied'),
+		'the shift is applied'
+	);
+	await consoleKey('consoleMV');
+	await subStep('igrt.verify', ['#igrtVerify']);
+	await click('#igrtVerify');
+	await walkEnds('igrt');
+	await continueCard(8);
+	await stepIs(9);
+	await until('the panel to close after the beat', () => !window.__NPC.isConsoleOpen());
+	part('guided play, step 8 (image guidance)');
+
+	// ---------- guided step 9: the treatment ----------
+	await openAt('delivery', [46.1, 9.0]);
+	await frame.locator('#rtv2EnableBeam').waitFor({ state: 'visible' });
+	await subStep('delivery.intro', ['#rtv2dFieldList', '#rtv2dChecksPane']);
+	await next();
+	await subStep('delivery.fields', ['#rtv2dFieldList']);
+	await next();
+	await subStep('delivery.hold', ['#rtv2dChecksPane']);
+	await next();
+	// Motion Enable is on from step 8, so its sub-step is passed over
+	const holdToField = async (id) => {
+		const b = await frame.locator('#consoleMoveToField').boundingBox();
+		await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+		await page.mouse.down();
+		let moving = false;
+		for (const t0 = Date.now(); Date.now() - t0 < MOTION_MS && (await walk())?.id === id;) {
+			moving ||= (await shown('#consoleMoveToField')) === 'Moving… keep holding';
+			await sleep(100);
+		}
+		await page.mouse.up();
+		expect(moving, `Move to field says "Moving… keep holding" while held at ${id}`);
+		await inConsole(
+			'Move to field to say At field',
+			() => document.getElementById('consoleMoveToField')?.textContent === 'At field'
+		);
+	};
+	await subStep('delivery.move1', ['#consoleMoveToField']);
+	await holdToField('delivery.move1');
+	await subStep('delivery.enable1', ['#rtv2EnableBeam']);
+	await click('#rtv2EnableBeam');
+	await subStep('delivery.beam1', ['#rtv2BeamOn']);
+	n = await eventCount();
+	await click('#rtv2BeamOn');
+	await nextEvent('field-delivered', n, MOTION_MS);
+	await subStep('delivery.move2', ['#consoleMoveToField']);
+	await holdToField('delivery.move2');
+	await subStep('delivery.beam2', ['#rtv2EnableBeam']);
+	await click('#rtv2EnableBeam');
+	await subStep('delivery.beam2', ['#rtv2BeamOn']);
+	n = await eventCount();
+	await click('#rtv2BeamOn');
+	await nextEvent('treatment-complete', n, MOTION_MS);
+	await subStep('delivery.done', ['#rtv2dFieldList']);
+	// the panel stays open past the beat while the last bubble shows; its Next lets it close
+	await sleep(2500);
+	expect(
+		await tut(() => window.__NPC.isConsoleOpen() && !window.__TUTORIAL.state().card),
+		'the panel stays open, with no card, while "Treatment delivered" shows'
+	);
+	await next();
+	await walkEnds('delivery');
+	await continueCard(9);
+	await stepIs(10);
+	part('guided play, step 9 (delivery)');
+
+	const guided = (await events()).slice(playFrom);
+	const guidedOrder = guided
+		.filter((e) => e.kind !== 'mistake')
+		.map((e) => (e.kind === 'field-delivered' ? `${e.kind}:${e.field}` : e.kind));
+	expect(
+		JSON.stringify(guidedOrder) === JSON.stringify(want) &&
+			guided.every((e) => e.kind !== 'mistake' && e.mrn === 'TUT-680314'),
+		`the guided play's events, each Jordan's and no mistake: ${guidedOrder.join(' > ')}`
+	);
+	const walkHints = await tut(() => window.__walkHints);
+	expect(
+		walkHints.length === 0,
+		`the center showed no hint while a walkthrough ran (${walkHints.join(' | ')})`
+	);
 
 	expect(pageErrors.length === 0, `no page errors: ${pageErrors.join(' | ')}`);
 	const scrolled = noScroll.fail();
@@ -915,7 +1291,7 @@ try {
 			`NO-SCROLL PASS: ${noScroll.scans} scans at ${VIEW.width}x${VIEW.height}, nothing scrolls; ${noScroll.cutScans} of the console, nothing cut off`
 		);
 		console.log(
-			`CONSOLE CHECK PASS: steps 3, 6, 8 and 9 on the real LINAC console, and step 3 of a second play, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
+			`CONSOLE CHECK PASS: steps 3, 6, 8 and 9 on the real LINAC console, skipped and then guided, in ${((Date.now() - T0) / 1000).toFixed(0)} s`
 		);
 	}
 } catch (err) {
