@@ -4,8 +4,9 @@
    camera feeds, index.html's #rtappsConsoleView styles lay the screens out for the panel), and it
    talks to the center only through postMessage (contract: shared/console-protocol.ts; rules:
    console-messages.ts). Out: rtapps-linac-ready once the shell has settled, rtapps-linac-state when
-   the pose, workspace, open chart or the selected field's geometry hold changes (at most 30 a
-   second), and rtapps-linac-event for each step the workflow reports through console-hooks.ts,
+   the pose, workspace, open chart, the selected field's geometry hold or the Tutorial's
+   walkthrough changes (at most 30 a second), and rtapps-linac-event for each step the workflow
+   reports through console-hooks.ts,
    with every refused action as a `mistake` that is also shown in the console's refusal bar (a
    notice, such as to keep holding Move to field, shows there too but is not posted). In:
    rtapps-linac-open switches workspace the way the chart's own buttons do (with no chart open yet
@@ -14,13 +15,16 @@
    false (the panel closed: the therapist has left the console) holds a delivering field and stops
    the machine keys. The Machine keys' hold-to-repeat and Move to field are console-keys.ts's.
    In the tutorial scenario the body also carries the Tutorial's focus classes (tutorial-focus.ts),
-   kept in step with the screen shown, and the delivery window selects the next field not yet
-   delivered when it opens and after each field (delivery-guide.ts nextFieldIndex). Started by
-   main.ts once the app has booted. */
+   kept in step with the screen shown, the delivery window selects the next field not yet
+   delivered when it opens and after each field (delivery-guide.ts nextFieldIndex), and each tick
+   runs the walkthrough for the workspace shown (walkthrough-mode.ts), which hears every workflow
+   event; the state message carries it (null in the free scenario). Started by main.ts once the app
+   has booted. */
 import type {
 	LinacGeometryHold,
 	LinacPose,
 	LinacToCenterMessage,
+	LinacWalkthrough,
 	LinacWorkspace
 } from '../../shared/console-protocol';
 import { S } from './state';
@@ -34,6 +38,7 @@ import {
 	poseFromReadout,
 	sameGeometryHold,
 	samePose,
+	sameWalkthrough,
 	statePostDue,
 	type SixAxis
 } from './console-messages';
@@ -63,6 +68,7 @@ import {
 import { syncRoomViewButtons } from './travel';
 import { syncOperatorConsole } from './main';
 import { focusClass, tutorialFocus, type TutorialFocus } from './tutorial-focus';
+import { noteWalkthroughEvent, tickWalkthrough } from './walkthrough-mode';
 
 const STATE_TICK_MS = 17; // the pose is checked this often; statePostDue spaces the posts
 const REFUSAL_SHOW_MS = 6000;
@@ -87,6 +93,7 @@ let posted: {
 	mrn: string | null;
 	workspace: LinacWorkspace;
 	geometryHold: LinacGeometryHold | null;
+	walkthrough: LinacWalkthrough | null;
 } | null = null;
 let postedAt: number | null = null;
 
@@ -217,7 +224,8 @@ function tick() {
 	const pose = currentPose(),
 		workspace = currentWorkspace(),
 		mrn = workspace === 'queue' ? null : openChartMrn(),
-		geometryHold = mrn === null ? null : deliveryGeometryHold();
+		geometryHold = mrn === null ? null : deliveryGeometryHold(),
+		walkthrough = CONSOLE.scenario === 'tutorial' ? tickWalkthrough(focus) : null;
 	if (workspaceClearsRefusal(shownWorkspace, workspace, performance.now() - refusalAt))
 		hideRefusal();
 	shownWorkspace = workspace;
@@ -226,14 +234,15 @@ function tick() {
 		samePose(posted.pose, pose) &&
 		posted.mrn === mrn &&
 		posted.workspace === workspace &&
-		sameGeometryHold(posted.geometryHold, geometryHold)
+		sameGeometryHold(posted.geometryHold, geometryHold) &&
+		sameWalkthrough(posted.walkthrough, walkthrough)
 	)
 		return;
 	const now = performance.now();
 	if (!statePostDue(now, postedAt)) return; // the change goes out on a later tick
-	posted = { pose, mrn, workspace, geometryHold };
+	posted = { pose, mrn, workspace, geometryHold, walkthrough };
 	postedAt = now;
-	post({ type: 'rtapps-linac-state', pose, mrn, workspace, geometryHold });
+	post({ type: 'rtapps-linac-state', pose, mrn, workspace, geometryHold, walkthrough });
 }
 
 /* ----- center → console ----- */
@@ -327,6 +336,7 @@ export function startConsoleMode() {
 	setConsoleSink({
 		event: (event) => {
 			if (clearsRefusal(event.kind)) hideRefusal();
+			if (CONSOLE.scenario === 'tutorial') noteWalkthroughEvent(event);
 			post({ type: 'rtapps-linac-event', event });
 			// after the delivery loop has finished with the field
 			if (CONSOLE.scenario === 'tutorial' && event.kind === 'field-delivered')

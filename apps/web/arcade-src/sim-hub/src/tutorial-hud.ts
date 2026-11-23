@@ -1,21 +1,23 @@
 /* The sim-hub tutorial's screen (docs/specs/2026-11-11-sim-hub-menu-tutorial-design.md, PR 3): the
    tracker card at the top-left (role, objective, hint line, progress, step and walking distance),
-   the orange marker and its screen-edge arrow, the check-in and decision dialog, the fade and the
-   role-change card, and the end card. While a console step's console is open (docs/specs/
-   2026-11-18-consoles-in-center-design.md, part 6) the tracker docks as a slim strip of the
+   the orange marker and its screen-edge arrow, the check-in and decision dialog, the step card
+   after every step (docs/specs/2026-11-23-tutorial-walkthrough-design.md, "The step card"), the
+   fade and the role-change card, and the end card. While a console step's console is open (docs/
+   specs/2026-11-18-consoles-in-center-design.md, part 6) the tracker docks as a slim strip of the
    objective and the hint line, with the console hints, along the bottom of the console panel's
    frame area (console-panel.ts #cpFrames), above the panel; the console's page is shortened to
-   clear it, and the marker and edge arrow hide. DOM only; tutorial.ts decides what they show. The keyboard
-   focus goes to a decision's first option, to Continue when it appears and to the end card's Keep
-   exploring, so Tab and Enter work without the mouse. The elements are index.html's slot:tutorial
-   block, looked up once at init (a headless check's stub DOM hands out a new element on every
-   lookup). */
+   clear it, and the marker and edge arrow hide. DOM only; tutorial.ts decides what they show. The
+   keyboard focus goes to a decision's first option, to Continue when it appears (the dialog's and
+   the step card's) and to the end card's Keep exploring, so Tab and Enter work without the mouse.
+   The elements are index.html's slot:tutorial block, looked up once at init (a headless check's
+   stub DOM hands out a new element on every lookup). */
 import type { Decision, ExchangeLine, RoleInfo } from './tutorial-steps';
 import type { FeedbackKind } from './tutorial-math';
 
 export interface HudHandlers {
 	answer(id: string): void;
 	cont(): void;
+	cardContinue(): void;
 	mainMenu(): void;
 	keepExploring(): void;
 }
@@ -48,6 +50,13 @@ const IDS = [
 	'tutDialogOptions',
 	'tutDialogFeedback',
 	'tutDialogContinue',
+	'tutCard',
+	'tutCardKick',
+	'tutCardTitle',
+	'tutCardDid',
+	'tutCardWhy',
+	'tutCardNext',
+	'tutCardContinue',
 	'tutFade',
 	'tutRoleCard',
 	'tutRoleCardName',
@@ -77,6 +86,7 @@ export function initTutorialHud(h: HudHandlers): void {
 	consoleFrames = document.getElementById('cpFrames');
 	addEventListener('resize', placeDock);
 	E.tutDialogContinue.onclick = () => handlers?.cont();
+	E.tutCardContinue.onclick = () => handlers?.cardContinue();
 	E.tutEndMenu.onclick = () => handlers?.mainMenu();
 	E.tutEndExplore.onclick = () => handlers?.keepExploring();
 }
@@ -92,8 +102,7 @@ export function showTracker(v: TrackerView | null): void {
 	placeDock();
 }
 
-/** The hint line; `kind` styles a console step's miss feedback or its "Correct." line as a
-    decision's feedback is. */
+/** The hint line; `kind` styles a console step's miss feedback as a decision's feedback is. */
 export function setHint(text: string | null, kind?: FeedbackKind): void {
 	E.tutHint.textContent = text ?? '';
 	E.tutHint.className = `tut-hint${text ? ' show' : ''}${text && kind ? ` ${kind}` : ''}`;
@@ -241,6 +250,21 @@ export function closeDialog(): void {
 	optionButtons = [];
 }
 
+/** The step card: "Step n of total complete", the title, then You did, Why and Next; Continue
+    takes the focus, so Enter and Space press it. Null hides it. */
+export function showStepCard(
+	c: { step: number; total: number; title: string; did: string; why: string; next: string } | null
+): void {
+	show(E.tutCard, !!c);
+	if (!c) return;
+	E.tutCardKick.textContent = `Step ${c.step} of ${c.total} complete`;
+	E.tutCardTitle.textContent = c.title;
+	E.tutCardDid.textContent = c.did;
+	E.tutCardWhy.textContent = c.why;
+	E.tutCardNext.textContent = c.next;
+	E.tutCardContinue.focus?.();
+}
+
 /** The black screen; `ms` is a fade length other than the stylesheet's (the escorts' slow fade). */
 export function setFade(on: boolean, ms?: number): void {
 	E.tutFade.style.transitionDuration = ms ? `${ms}ms` : '';
@@ -270,6 +294,7 @@ export function hideTutorialHud(): void {
 	placeMarker(null);
 	placeEdge(null);
 	closeDialog();
+	showStepCard(null);
 	setFade(false);
 	showRoleCard(null);
 	showWalkCard(null);

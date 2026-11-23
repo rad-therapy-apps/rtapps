@@ -37,6 +37,7 @@ import {
 	linacEvents,
 	linacGeometryHold,
 	linacPose,
+	linacWalkthrough,
 	panelOpen
 } from './console-bus';
 import {
@@ -252,6 +253,7 @@ function onMessage(e: MessageEvent): void {
 			f.pose = m.pose;
 			linacPose.emit(m.pose);
 			linacGeometryHold.emit(m.geometryHold ?? null);
+			linacWalkthrough.emit(m.walkthrough ?? null);
 			return;
 		case 'rtapps-linac-event':
 			linacEvents.emit(m.event);

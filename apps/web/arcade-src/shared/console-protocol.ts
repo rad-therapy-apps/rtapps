@@ -128,6 +128,16 @@ export interface LinacStateMsg {
 	    on the selected field while a chart is open, or null when its geometry matches the plan (or
 	    no chart is open). The Tutorial's delivery step names the fix from it. */
 	geometryHold?: LinacGeometryHold | null;
+	/** Added later (optional, as geometryHold): the Tutorial's walkthrough on this workspace while
+	    its spotlight shows, or null when none does. The Tutorial holds back its hints meanwhile. */
+	walkthrough?: LinacWalkthrough | null;
+}
+/** The console's Tutorial walkthrough showing (docs/specs/2026-11-23-tutorial-walkthrough-design.md):
+    its part (the workspace it guides) and its current sub-step, `index` of `of` (0-based). */
+export interface LinacWalkthrough {
+	part: LinacWorkspace;
+	index: number;
+	of: number;
 }
 /** What happened on the LINAC console. `mistake` is posted whenever the console refuses an action
     (an interlock, a wrong pick, a step out of order); the Tutorial counts them for its hints. */

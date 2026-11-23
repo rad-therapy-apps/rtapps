@@ -4,13 +4,15 @@
    Tutorial (tutorial.ts) listens to `linacEvents`, `ctComplete` and `panelOpen` and emits
    `vaultMonitorPatient`, which Vault 1 listens to. A channel per
    message keeps those modules from importing one another. Free of scene and DOM imports so it is
-   unit tested in Node (console-bus.spec.ts). The Tutorial also listens to `linacGeometryHold`. */
+   unit tested in Node (console-bus.spec.ts). The Tutorial also listens to `linacGeometryHold` and
+   `linacWalkthrough`. */
 import type {
 	ConsoleKind,
 	CtPose,
 	LinacEvent,
 	LinacGeometryHold,
-	LinacPose
+	LinacPose,
+	LinacWalkthrough
 } from '../../shared/console-protocol';
 import type { CtCompleteMsg } from '../../linac-ct/src/ct-protocol';
 
@@ -38,6 +40,9 @@ export const linacPose = channel<LinacPose>();
 /** The LINAC console's geometry hold on the selected field, or null, as each rtapps-linac-state
     message brings it (null when the message has none). */
 export const linacGeometryHold = channel<LinacGeometryHold | null>();
+/** Where the LINAC console's walkthrough is (its part, step index and step count), or null, as each
+    rtapps-linac-state message brings it (null when the message has none). */
+export const linacWalkthrough = channel<LinacWalkthrough | null>();
 /** What happened on the LINAC console (rtapps-linac-event). */
 export const linacEvents = channel<LinacEvent>();
 /** The CT console's scanner pose (rtapps-ct-state). */

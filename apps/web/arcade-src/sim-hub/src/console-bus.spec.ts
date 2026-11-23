@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { channel } from './console-bus';
+import { channel, linacWalkthrough } from './console-bus';
 
 describe('console message channels', () => {
 	it('passes each value to every listener, in the order they were added', () => {
@@ -23,5 +23,15 @@ describe('console message channels', () => {
 		ch.emit('x');
 		ch.emit('y');
 		expect(seen).toEqual(['x', 'other x', 'other y']);
+	});
+
+	it('emits the walkthrough position to its listeners until they are removed', () => {
+		const seen: unknown[] = [];
+		const off = linacWalkthrough.on((v) => seen.push(v));
+		linacWalkthrough.emit({ part: 'setup', index: 1, of: 4 });
+		linacWalkthrough.emit(null);
+		off();
+		linacWalkthrough.emit({ part: 'queue', index: 0, of: 2 });
+		expect(seen).toEqual([{ part: 'setup', index: 1, of: 4 }, null]);
 	});
 });

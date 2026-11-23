@@ -17,7 +17,8 @@
 // of the first leg left (the whole walk to Vault 1 was about 100 m). Room introduction cards are
 // on (the default): each frame the check presses Continue on any card (the check never sees a
 // pause), and each play asserts a room's card shows only the first time the player enters it in that play.
-//   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
+//   run 1  getting started (src/tutorial-guide.ts) skipped at its first bubble, which leaves none;
+//          every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; on every console step three misses (a look-alike's chart and
 //          check-in at the schedule, the console's refusals elsewhere) show hint 1, hint 2 and the
 //          reveal in the hint line, an event out of order does nothing, and the panel closed early
@@ -27,12 +28,18 @@
 //          fade left them and Jordan waits at a stop; on the walk back the player runs ahead to
 //          reception ("Wait for Jordan"); the end card's Keep exploring leaves the player where they
 //          stand, in free mode
-//   run 2  every decision answered right, every console step pressed from its stand point and
-//          done without a miss; the end card's Main menu goes back to the title
+//   run 2  getting started played by its predicates (src/tutorial-guide-steps.ts): Next on its two
+//          explains, just over 3 m along the walk in, a 70° turn, Maya Brooks's stand point and
+//          E, each bubble asserted in turn and none after the E; every decision answered right, every console step pressed from its stand point and
+//          done without a miss; at step 6 the panel is closed in the beat after the step is done,
+//          which shows the card at once and brings no second; the end card's Main menu goes back
+//          to the title
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
 // lies down; each play asks for a fresh console page at its first opening (step 3) and only then;
-// each console step ends with its "Correct." line; Jordan is on the Vault 1 monitors from the
+// every step ends on its step card, once each, titled as the step's (src/tutorial-steps.ts), never
+// over the console (a console step's waits for the console's beat), and the check presses its
+// Continue as it does a room card's; Jordan is on the Vault 1 monitors from the
 // chart opening at step 3; at step 9 the Vault 1 board shows BEAM ON while the console's beam is
 // on, BETWEEN FIELDS when it goes off and TREATMENT COMPLETE at the end; every move the tutorial
 // makes (Jordan's escorts, Jamie Williams's walks) keeps the 0.2 m circle round the walker's root
@@ -108,6 +115,11 @@ console.warn = (...a) => {
 	warn(...a);
 };
 installBrowserStubs({ search: '?npccheck' });
+// the step card's title element, kept: the stub DOM hands out a new element on every lookup, and
+// the check reads the one src/tutorial-hud.ts looked up at init and writes the title in
+const byId = document.getElementById;
+let cardTitle = null;
+document.getElementById = (id) => (id === 'tutCardTitle' ? (cardTitle ??= byId(id)) : byId(id));
 // a working store, with the room introduction cards on (the page reads it through prefs.ts)
 const store = new Map();
 globalThis.localStorage = {
@@ -162,11 +174,33 @@ const playerBlocked = (x, z) =>
 		(c) => Math.abs(x - c.x) < c.hw + PLAYER_R && Math.abs(z - c.z) < c.hd + PLAYER_R
 	);
 
+// The step cards a play showed, by step, and what was wrong with them; `holdCard`: onFrame leaves
+// a card open.
+let cardsShown = [],
+	cardFails = [],
+	holdCard = false;
+// The step card that shows: the current step's, with its title, never over the console; then its
+// Continue.
+function continueCard() {
+	const s = T.state(),
+		card = T.steps[s.step - 1]?.card;
+	cardsShown.push(s.step);
+	if (s.phase !== 'card' || !s.card)
+		cardFails.push(`step ${s.step}: no card shows (phase '${s.phase}', card ${s.card})`);
+	if (cardTitle?.textContent !== card?.title)
+		cardFails.push(
+			`step ${s.step}: the card's title reads "${cardTitle?.textContent}", not "${card?.title}"`
+		);
+	if (NPC.isConsoleOpen()) cardFails.push(`step ${s.step}: the card shows over the console`);
+	T.cardContinue();
+}
+
 // every frame of a run: each tutorial move's walker against the walls
 let wallHits = [],
 	movesSeen = new Set();
 function onFrame() {
 	if (RC.open()) RC.close(); // Continue
+	if (T.state().card && !holdCard) continueCard();
 	if (!T.state().active) return;
 	for (const t of NPC.workflowTransitions) {
 		movesSeen.add(t);
@@ -194,6 +228,16 @@ function stepUntil(cond, seconds) {
 		step();
 	}
 	return cond();
+}
+
+// The floor ring is shown within 0.5 m of where the step's target is.
+function checkRing(n, want, fails) {
+	const r = T.ring();
+	if (!r) fails.push(`step ${n}: no floor ring`);
+	else if (Math.hypot(r[0] - want[0], r[1] - want[1]) > 0.5)
+		fails.push(
+			`step ${n}: the ring is at ${r.map((v) => v.toFixed(2))}, not ${want.map((v) => v.toFixed(2))}`
+		);
 }
 
 // The journey actors and the people as the journey reset leaves them.
@@ -274,7 +318,8 @@ function playConsole(n, st, wrong, fails) {
 		// Jordan's verified alignment does not complete a step before its own events (step 8: before
 		// the shift is applied)
 		T.consoleEvent({ kind: 'alignment-verified', mrn: jordan });
-		if (T.state().step !== n) fails.push(`step ${n}: an event out of order completed the step`);
+		if (T.state().step !== n || T.state().phase === 'card')
+			fails.push(`step ${n}: an event out of order completed the step`);
 		// the panel closed early: the step stays, its last hint too, and E opens the console again
 		T.closePanel();
 		const closed = T.state();
@@ -317,24 +362,52 @@ function playConsole(n, st, wrong, fails) {
 			fails.push(`step ${n}: the Vault 1 board over two fields was ${JSON.stringify(vault)}`);
 	}
 	for (const kind of c.done) {
-		if (T.state().step !== n) fails.push(`step ${n}: completed before '${kind}'`);
+		if (T.state().step !== n || T.state().phase === 'card')
+			fails.push(`step ${n}: completed before '${kind}'`);
 		T.consoleEvent({ kind, mrn: jordan });
 	}
 	if (c.beam && T.boards().vault1 !== 'TREATMENT COMPLETE')
 		fails.push(`step ${n}: the Vault 1 board at the end is '${T.boards().vault1}'`);
-	if (T.state().step === n) {
+	if (T.state().step !== n || T.state().phase !== 'card') {
 		fails.push(`step ${n}: not completed by ${c.done.join(', ')}`);
 		return;
 	}
-	if (T.state().correct !== `Correct. ${c.reason}`)
-		fails.push(`step ${n}: no "Correct." line when the step completed (${T.state().correct})`);
+	// the step's card waits for the console's beat, then shows (and onFrame continues it)
+	if (T.state().card) fails.push(`step ${n}: the card showed over the console's beat`);
 	if (n === 3 && !T.state().jordanOnMonitors)
 		fails.push('step 3: Jordan is not on the Vault 1 monitors after the chart opened');
 	if (!T.state().console || !NPC.isConsoleOpen())
 		fails.push(`step ${n}: the console closed with no beat to show the result`);
-	stepFor(CONSOLE_BEAT_S);
+	if (n === 6 && !wrong) closeInBeat(n, fails);
+	else stepFor(CONSOLE_BEAT_S);
 	if (T.state().console || NPC.isConsoleOpen() || T.docked())
 		fails.push(`step ${n}: the console is still open ${CONSOLE_BEAT_S} s after the step completed`);
+	if (cardsShown.at(-1) !== n) fails.push(`step ${n}: no card once the console closed`);
+}
+
+// The player closes the console panel in the beat after console step `n` is done: the card shows at
+// once, still at step n; held open, it stays the one card when the beat's timer fires, and after its
+// Continue no second card follows.
+function closeInBeat(n, fails) {
+	T.closePanel();
+	const at = (when) => {
+		const s = T.state();
+		if (!s.card || s.phase !== 'card' || s.step !== n)
+			fails.push(
+				`step ${n}: ${when}, card ${s.card}, phase '${s.phase}', step ${s.step} (want the card at step ${n})`
+			);
+	};
+	at('closing the panel in the beat');
+	holdCard = true;
+	const shown = cardsShown.length;
+	stepFor(CONSOLE_BEAT_S);
+	holdCard = false;
+	at("once the beat's timer had fired");
+	if (cardsShown.length !== shown) fails.push(`step ${n}: a card was continued in the beat`);
+	continueCard();
+	stepFor(CONSOLE_BEAT_S);
+	const cards = cardsShown.filter((s) => s === n).length;
+	if (cards !== 1) fails.push(`step ${n}: ${cards} cards after closing the panel in the beat`);
 }
 
 // A LINAC console pose (shared/console-protocol.ts LinacPose) at rest, with the beam `beamOn`.
@@ -360,6 +433,42 @@ function report(part, fails, summary) {
 	results.push({ part, pass: !fails.length, summary, fails });
 }
 
+// Run 2's getting started, played by its predicates up to step 1's E: each bubble in turn, then
+// none once the check-in opens.
+function playGettingStarted(fails) {
+	const want = (id, when) => {
+		const c = T.coach();
+		if ((c?.id ?? null) !== id)
+			fails.push(`getting started ${when}: the bubble is ${c?.id ?? 'none'}, not ${id ?? 'none'}`);
+	};
+	want('gs.tracker', 'at the start');
+	T.coachNext();
+	want('gs.marker', 'after Next');
+	T.coachNext();
+	want('gs.walk', 'after the second Next');
+	// just over 3 m toward the marker's next stop (the entrance), facing along the walk
+	const [x0, z0] = T.playerPos(),
+		[nx, nz] = T.route()[1],
+		len = Math.hypot(nx - x0, nz - z0),
+		walk = 3.1,
+		x = x0 + ((nx - x0) / len) * walk,
+		z = z0 + ((nz - z0) / len) * walk,
+		yaw = Math.atan2(x0 - nx, z0 - nz); // as src/walk.ts aimPlayerAt
+	T.placePlayer(x, z, yaw);
+	step();
+	want('gs.look', `${walk} m along the walk in`);
+	T.placePlayer(x, z, yaw + (70 * Math.PI) / 180);
+	step();
+	want('gs.follow', 'after a 70° turn');
+	const [sx, sz] = T.standPoint();
+	T.placePlayer(sx, sz);
+	step();
+	want('gs.checkin', "at Maya Brooks's stand point");
+	T.faceTarget();
+	T.pressE();
+	want(null, 'after E');
+}
+
 // One play-through. `wrong`: answer every decision wrong three times; also exercises the hints,
 // Jordan's wait, "Wait for Jordan" and Keep exploring. Otherwise answers right and leaves by Main
 // menu.
@@ -369,13 +478,21 @@ function play(wrong) {
 		order = [];
 	wallHits = [];
 	movesSeen = new Set();
+	cardsShown = [];
+	cardFails = [];
 	let routes = 0;
 	RC.log.entered.length = 0;
 	RC.log.shown.length = 0;
 	T.enter();
 	if (T.mode() !== 'tutorial' || T.state().phase !== 'active' || T.state().step !== 1)
 		fails.push(`entering did not start step 1 (mode ${T.mode()}, ${JSON.stringify(T.state())})`);
+	// getting started shows its first bubble at once
+	if (T.coach()?.id !== 'gs.tracker')
+		fails.push(`getting started did not start on the tracker (${JSON.stringify(T.coach())})`);
 	if (wrong) {
+		T.coachSkip();
+		if (T.coach() !== null)
+			fails.push(`Skip walkthrough left a bubble (${JSON.stringify(T.coach())})`);
 		// the walking hints at the plaza, then the E hint near Maya Brooks
 		const st = T.steps[0];
 		stepFor(60.5);
@@ -400,6 +517,11 @@ function play(wrong) {
 				fails.push(`step ${s.step}: stuck in '${s.phase}'`);
 			continue;
 		}
+		// a card shown at once: after the check-in and the decision's Continue
+		if (s.phase === 'card') {
+			continueCard();
+			continue;
+		}
 		if (s.phase !== 'active') {
 			fails.push(`step ${s.step}: unexpected phase '${s.phase}'`);
 			break;
@@ -415,14 +537,23 @@ function play(wrong) {
 		routes++;
 		if (T.routeHitsWall())
 			fails.push(`step ${s.step}: the marker route crosses a wall: ${JSON.stringify(T.route())}`);
+		if (s.step === 1 || s.step === 2 || s.step === 7)
+			checkRing(s.step, s.step === 7 ? T.doorOf(st.target.roomId) : T.standPoint(), fails);
 		if (st.trigger === 'pressE') {
 			// run 2 stands at a console step's own stand point (at the console desk, where Jamie Williams
 			// stood at steps 8 and 9); run 1 at the marker's, and goes there on reopening the console
-			const [x, z] = st.console && !wrong ? st.target.spec.stand : T.standPoint();
-			T.placePlayer(x, z);
-			step();
-			T.faceTarget(); // E offers only what is in front of the player (interact.ts inView)
-			T.pressE();
+			if (!wrong && s.step === 1) playGettingStarted(fails);
+			else {
+				const [x, z] = st.console && !wrong ? st.target.spec.stand : T.standPoint();
+				T.placePlayer(x, z);
+				step();
+				T.faceTarget(); // E offers only what is in front of the player (interact.ts inView)
+				T.pressE();
+			}
+			if (T.state().phase === 'dialog') {
+				step();
+				if (T.ring()) fails.push(`step ${s.step}: the ring is shown in the dialog`);
+			}
 			if (st.exchange) {
 				if (T.state().phase !== 'dialog') fails.push(`step ${s.step}: E did not open the check-in`);
 				T.cont();
@@ -459,9 +590,17 @@ function play(wrong) {
 		} else {
 			// escort: the fade moves Jordan and the player on; then walk beside Jordan. On run 1 the
 			// player stays put once on the walk to Vault 1 and runs ahead once on the walk back.
+			if (T.state().walkFade) {
+				step();
+				if (T.ring()) fails.push(`step ${s.step}: the ring is shown in the walk fade`);
+			}
 			if (!stepUntil(() => !T.state().walkFade, FADE_LIMIT_S)) {
 				fails.push(`step ${s.step}: the fade did not end in ${FADE_LIMIT_S} s`);
 				break;
+			}
+			if (s.step === 5) {
+				step();
+				checkRing(5, T.doorOf(st.target.roomId), fails);
 			}
 			const j = xz(J.patient),
 				[px, pz] = T.playerPos(),
@@ -525,6 +664,15 @@ function play(wrong) {
 		`${name}: walls`,
 		wallHits,
 		`${movesSeen.size} tutorial moves, the ${WALL_R} m circle round every walker clear of the wall colliders on every frame`
+	);
+	// step cards: one per step, in order
+	const steps11 = T.steps.map((st) => st.n);
+	if (JSON.stringify(cardsShown) !== JSON.stringify(steps11))
+		cardFails.push(`cards shown for steps ${JSON.stringify(cardsShown)}, not one for each of 1-11`);
+	report(
+		`${name}: step cards`,
+		cardFails,
+		`${cardsShown.length} step cards, one for each step, each with its title and none over the console`
 	);
 	// room cards: once per room in a play
 	const cards = [],

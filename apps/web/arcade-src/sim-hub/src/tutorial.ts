@@ -8,13 +8,17 @@
    the LINAC console in its panel (console-panel.ts) through openStepConsole and listen to it on
    console-bus.ts (linacEvents; linacPose, whose beam the status boards show at step 9;
    linacGeometryHold, whose fix step 9's hints name; and panelOpen for the player closing it
-   early); Jordan's name goes on the Vault 1 monitors through
-   showJordanOnVaultMonitors. Leaving play mode 'tutorial' resets the journey again, so the world is
-   left as the NPC check expects. Outside the tutorial nothing here runs: updateTutorial returns at
-   once, the console events are ignored, and the E targets are made on the first start and disabled
-   otherwise. With ?npccheck it exposes window.__TUTORIAL for scripts/sim-hub-tutorial-check.mjs,
-   which drives the console steps by emitting their events on linacEvents (the console page never
-   loads there). */
+   early; and linacWalkthrough, the console's own walkthrough, which holds back the step's hints
+   and the panel's close); Jordan's name goes on the Vault 1 monitors through
+   showJordanOnVaultMonitors. The Tutorial walkthrough (docs/specs/
+   2026-11-23-tutorial-walkthrough-design.md) adds getting started at step 1 (tutorial-guide.ts),
+   a step card after every step (shown once a console step's panel has closed) and the floor ring
+   under the next target (tutorial-ring.ts). Leaving play mode 'tutorial' resets the journey
+   again, so the world is left as the NPC check expects. Outside the tutorial nothing here runs:
+   updateTutorial returns at once, the console events are ignored, and the E targets are made on
+   the first start and disabled otherwise. With ?npccheck it exposes window.__TUTORIAL for
+   scripts/sim-hub-tutorial-check.mjs, which drives the console steps by emitting their events on
+   linacEvents (the console page never loads there). */
 import * as THREE from 'three';
 import { S } from './state';
 import { camera, scene } from './scene';
@@ -53,7 +57,7 @@ import { setTutorialAvailable } from './menu';
 import { CHAPTER_1, LINES, ROLES, TUTORIAL_TIMING, WORLD } from './tutorial-steps';
 import type { Role, Step, StepAction } from './tutorial-steps';
 import { OFF, progressOf, reduceTutorial } from './tutorial-machine';
-import type { Effect, MissKind, TutorialEvent, TutorialState } from './tutorial-machine';
+import type { Effect, TutorialEvent, TutorialState } from './tutorial-machine';
 import {
 	ESCORT_WAIT_R,
 	MARKER_SWITCH_R,
@@ -77,10 +81,21 @@ import {
 } from './tutorial-math';
 import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
+import { placeRing, hideRing, ringShown } from './tutorial-ring';
+import {
+	guideBlocking,
+	guideNext,
+	guideSkip,
+	guideState,
+	startGuide,
+	stopGuide,
+	tickGuide
+} from './tutorial-guide';
 import {
 	linacEvents,
 	linacGeometryHold,
 	linacPose,
+	linacWalkthrough,
 	panelOpen,
 	vaultMonitorPatient
 } from './console-bus';
@@ -129,16 +144,20 @@ let dialogOpen = false,
 	roleCardOpen = false,
 	walkFade = false,
 	endOpen = false;
+/** The step card shows, and the step whose card shows or waits for its console to close. */
+let cardOpen = false,
+	cardStep: number | null = null;
 let lastAnswer: string | null = null;
 /** The console the tutorial asked for and has open (openStepConsole; `fresh`: its page reloaded
     for this play of the chapter), whether the next opening asks for a fresh page, and whether
     Jordan is on the Vault 1 monitors (showJordanOnVaultMonitors). */
 let consoleShown: { kind: 'linac'; workspace: LinacWorkspace; fresh: boolean } | null = null;
 let freshConsole = true;
+/** The LINAC console shows a walkthrough bubble; its step's close waits for it to end. */
+let walkthroughOn = false;
+/** The step's close is waiting out the walkthrough (the beat has passed). */
+let closePending = false;
 let jordanOnMonitors = false;
-/** A console step's "Correct." line while it shows, and the hint line to put back after it. */
-let correctLine: string | null = null;
-let hintAfter: { text: string | null; kind?: MissKind } = { text: null };
 const timers = new Set<ReturnType<typeof setTimeout>>();
 let route: Pt[] = [];
 let stopIdx = 1;
@@ -206,6 +225,9 @@ function perform(e: Effect): void {
 			ACTIONS[e.action]();
 			return;
 		case 'openDialog':
+			// step 1's E is getting started's last sub-step: it ends here, whichever bubble shows, as the
+			// dialog pauses the frames that would tick it
+			if (e.step === 1) stopGuide();
 			openDialog(CHAPTER_1[e.step - 1]);
 			return;
 		case 'feedback': {
@@ -223,27 +245,30 @@ function perform(e: Effect): void {
 			// after a beat, so the player sees the result; not a console opened since (step 8 to 9)
 			const shown = consoleShown;
 			after(TUTORIAL_TIMING.consoleCloseMs, () => {
-				if (consoleShown === shown) closeStepConsole();
+				if (consoleShown !== shown) return;
+				// a walkthrough still showing (delivery's last bubble) keeps the panel open
+				if (walkthroughOn) closePending = true;
+				else closeStepConsole();
 			});
 			return;
 		}
 		case 'hint':
-			// held under a "Correct." line until it goes, unless it is a miss's
-			hintAfter = { text: e.text, kind: e.kind };
-			if (correctLine && !e.kind) return;
-			correctLine = null;
 			hud.setHint(e.text, e.kind);
 			return;
-		case 'correct': {
-			const line = (correctLine = e.text);
-			hud.setHint(line, 'correct');
-			after(TUTORIAL_TIMING.correctMs, () => {
-				if (correctLine !== line) return;
-				correctLine = null;
-				hud.setHint(hintAfter.text, hintAfter.kind);
-			});
+		case 'showCard':
+			cardStep = e.step;
+			// a console step's card waits for its console to close, after the beat
+			if (!consoleShown) openCard();
 			return;
-		}
+		case 'hideCard':
+			cardOpen = false;
+			cardStep = null;
+			hud.showStepCard(null);
+			setPaused('tutorial', false);
+			// asked for inside Continue's click, which the lock needs: nothing asks after the role change
+			// (it pauses again itself); the end card frees the pointer
+			if (machine.phase === 'active' || machine.phase === 'roleChange') requestWalkPointerLock();
+			return;
 		case 'roleChange':
 			roleChange(e.role);
 			return;
@@ -259,16 +284,19 @@ function perform(e: Effect): void {
     checked in from an earlier play. The game is not paused; the tracker docks on the panel for the
     console hints. */
 function openStepConsole(workspace: LinacWorkspace): void {
+	closePending = false;
 	consoleShown = { kind: 'linac', workspace, fresh: freshConsole };
 	openConsole('linac', { workspace, scenario: 'tutorial', fresh: freshConsole });
 	freshConsole = false;
 	hud.dockOnConsole(true);
 }
 function closeStepConsole(): void {
+	closePending = false;
 	if (!consoleShown) return;
 	consoleShown = null; // first, so the panel's close is not taken for the player's
 	hud.dockOnConsole(false);
 	closeConsole();
+	openCard();
 }
 /** Jordan Ellis as the patient on the Vault 1 treatment monitors, from the chart opening at step 3
     until the tutorial ends; off, the monitors go back to naming whoever lies on the couch. */
@@ -276,12 +304,15 @@ function showJordanOnVaultMonitors(on: boolean): void {
 	jordanOnMonitors = on;
 	vaultMonitorPatient.emit(on ? ROLES.patient.name : null);
 }
-/** The player closed the console panel before the step was done: the step stays, E opens it again. */
+/** The player closed the console panel before the step was done: the step stays, E opens it again.
+    Closed in the beat after the step is done, it brings the step's card at once. */
 function consolePanelClosed(): void {
+	closePending = false;
 	if (!consoleShown) return;
 	consoleShown = null;
 	hud.dockOnConsole(false);
-	dispatch({ type: 'consoleClosed' });
+	if (machine.phase !== 'card') dispatch({ type: 'consoleClosed' });
+	openCard();
 }
 
 /* ---- dialogs, the role change and the end card (each pauses the game) ---- */
@@ -298,7 +329,21 @@ function closeDialog(): void {
 	lastAnswer = null;
 	hud.closeDialog();
 	setPaused('tutorial', false);
-	requestWalkPointerLock();
+	// not when the step's card follows: the lock would come after the card had freed the pointer
+	if (machine.phase === 'active') requestWalkPointerLock();
+}
+/** The step card of `cardStep`, once its console (if it had one) is closed: the tracker behind it
+    shows the step done; it pauses the game and frees the pointer until Continue. */
+function openCard(): void {
+	if (cardStep === null || cardOpen) return;
+	const st = CHAPTER_1[cardStep - 1];
+	cardOpen = true; // before the lock goes, so losing it opens no settings menu
+	showTrackerFor(st);
+	hud.placeMarker(null);
+	hud.placeEdge(null);
+	hud.showStepCard({ step: st.n, total: CHAPTER_1.length, ...st.card });
+	setPaused('tutorial', true);
+	if (document.pointerLockElement) document.exitPointerLock();
 }
 function answer(id: string): void {
 	lastAnswer = id;
@@ -792,6 +837,16 @@ function destination(st: Step, p: Pt): Pt {
 	}
 	return sp.final;
 }
+/** Where the floor ring lies: the target room's door for a room target or an escort, else the
+    stand point. */
+function ringPoint(st: Step, p: Pt): Pt {
+	const k = st.target.spec.kind;
+	if (k === 'room' || k === 'escort') {
+		const d = doorPoint(roomById(st.target.roomId));
+		return [d.x, d.z];
+	}
+	return destination(st, p);
+}
 /* The walking route from the player: from the plaza in through the main entrance, then the NPC
    route builder's (out through the room's door and graph, the corridors, in through the target
    room's door and graph). */
@@ -935,17 +990,24 @@ function startTutorial(): void {
 	workflowState('linaccontrol', 'READY', 'Vault 1 scheduled for Jordan Ellis', '#42d5cf');
 	workflowState('vault1', 'AVAILABLE', 'Awaiting patient arrival', '#65dda0');
 	dispatch({ type: 'start' });
+	// getting started's explains pause the game: the marker is placed for its bubble first
+	updateMarker(CHAPTER_1[0], 0);
+	startGuide();
 }
 function exitTutorial(): void {
 	active = false;
+	walkthroughOn = closePending = false;
 	for (const id of timers) clearTimeout(id);
 	timers.clear();
 	queue.length = 0;
 	machine = OFF;
+	stopGuide();
 	hud.hideTutorialHud();
+	hideRing();
 	dialogOpen = roleCardOpen = walkFade = endOpen = false;
 	lastAnswer = null;
-	correctLine = null;
+	cardOpen = false;
+	cardStep = null; // first, so closing the console opens no card
 	closeStepConsole();
 	showJordanOnVaultMonitors(false);
 	setPaused('tutorial', false);
@@ -976,17 +1038,29 @@ export function updateTutorial(dt: number): void {
 		// nothing moves on under the black: Jordan's walk starts when play resumes (the game is
 		// paused meanwhile; the NPC check never pauses, so its clock is held here)
 		if (escort?.t) escort.t.start = S.simSec;
+		hideRing();
 		return;
 	}
 	const esc = updateEscort(),
 		st = CHAPTER_1[machine.step - 1];
 	if (!st) return;
 	const p: Pt = [player.pos.x, player.pos.z];
+	const rp = machine.phase === 'active' ? ringPoint(st, p) : null;
+	placeRing(rp && [rp[0], rp[1]], S.simSec);
 	for (const a of anchors) {
 		const q = a.step.n === machine.step ? anchorPoint(a.step, p) : null;
 		if (q) a.obj.position.set(q[0], REACH_Y, q[1]);
 		else a.obj.position.y = PARKED_Y;
 	}
+	// getting started, from the player: within reach of Maya Brooks is 2.4 m from her stand point
+	if (machine.step === 1 && (machine.phase === 'active' || machine.phase === 'dialog'))
+		tickGuide({
+			pos: p,
+			yaw: player.yaw,
+			nearMaya: dist(p, destination(st, p)) <= 2.4,
+			// unreachable in practice: step 1's dialog stops the guide as it opens (perform, 'openDialog')
+			checkedIn: machine.phase === 'dialog'
+		});
 	if (machine.phase !== 'active' && machine.phase !== 'waiting') {
 		hud.placeMarker(null);
 		hud.placeEdge(null);
@@ -1028,7 +1102,7 @@ function installCheckHook(): void {
 				seated: !!seatedAt,
 				vaultHeld,
 				console: consoleShown,
-				correct: correctLine,
+				card: cardOpen,
 				jordanOnMonitors,
 				dialogOpen,
 				roleCardOpen,
@@ -1037,6 +1111,13 @@ function installCheckHook(): void {
 				escortHolding: !!escort?.hold.holding,
 				escortLength: escort?.length ?? null
 			}),
+			/** Where the floor ring is, or null while hidden. */
+			ring: () => ringShown(),
+			/** A room's door point, where the ring lies for a room or escort target. */
+			doorOf: (id: string) => {
+				const d = doorPoint(roomById(id));
+				return [d.x, d.z];
+			},
 			/** Where the marker leads for the current step. */
 			standPoint: () =>
 				machine.step
@@ -1072,6 +1153,13 @@ function installCheckHook(): void {
 			docked: () => document.body.classList.contains('tut-docked'),
 			answer,
 			cont: () => dispatch({ type: 'continue' }),
+			/** Continue on the step card. */
+			cardContinue: () => dispatch({ type: 'cardContinue' }),
+			/** Getting started's sub-step showing ({ id, index, of, kind }), or null. */
+			coach: () => guideState(),
+			/** Its Next and its Skip walkthrough. */
+			coachNext: () => guideNext(),
+			coachSkip: () => guideSkip(),
 			mainMenu,
 			keepExploring,
 			/** Leaves the tutorial from anywhere, as Settings > Main menu does. */
@@ -1090,15 +1178,18 @@ export function initTutorial(): void {
 	hud.initTutorialHud({
 		answer,
 		cont: () => dispatch({ type: 'continue' }),
+		cardContinue: () => dispatch({ type: 'cardContinue' }),
 		mainMenu,
 		keepExploring
 	});
 	registerDialog(
 		'tutorial',
-		() => dialogOpen || roleCardOpen || walkFade || endOpen,
+		() => dialogOpen || cardOpen || roleCardOpen || walkFade || endOpen || guideBlocking(),
 		() => {
 			if (dialogOpen) dispatch({ type: 'closeDialog' });
+			else if (cardOpen) dispatch({ type: 'cardContinue' });
 			else if (endOpen) keepExploring();
+			else if (guideBlocking()) guideNext(); // Esc on an explain is its Next
 		}
 	);
 	onPlayModeChange((m) => {
@@ -1110,6 +1201,13 @@ export function initTutorial(): void {
 	});
 	linacPose.on((pose) => {
 		if (active) dispatch({ type: 'beam', on: pose.beamOn });
+	});
+	linacWalkthrough.on((w) => {
+		const on = !!w;
+		if (!active || on === walkthroughOn) return;
+		walkthroughOn = on;
+		dispatch({ type: 'walkthrough', on });
+		if (!on && closePending) closeStepConsole();
 	});
 	linacGeometryHold.on((hold) => {
 		if (active) dispatch({ type: 'geometryHold', hold });
