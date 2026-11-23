@@ -225,7 +225,7 @@ function tick() {
 		workspace = currentWorkspace(),
 		mrn = workspace === 'queue' ? null : openChartMrn(),
 		geometryHold = mrn === null ? null : deliveryGeometryHold(),
-		walkthrough = CONSOLE.scenario === 'tutorial' ? tickWalkthrough(workspace) : null;
+		walkthrough = CONSOLE.scenario === 'tutorial' ? tickWalkthrough(focus) : null;
 	if (workspaceClearsRefusal(shownWorkspace, workspace, performance.now() - refusalAt))
 		hideRefusal();
 	shownWorkspace = workspace;
@@ -336,7 +336,7 @@ export function startConsoleMode() {
 	setConsoleSink({
 		event: (event) => {
 			if (clearsRefusal(event.kind)) hideRefusal();
-			noteWalkthroughEvent(event);
+			if (CONSOLE.scenario === 'tutorial') noteWalkthroughEvent(event);
 			post({ type: 'rtapps-linac-event', event });
 			// after the delivery loop has finished with the field
 			if (CONSOLE.scenario === 'tutorial' && event.kind === 'field-delivered')

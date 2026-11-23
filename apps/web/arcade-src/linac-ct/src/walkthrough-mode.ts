@@ -17,6 +17,7 @@ import type { LinacWalkthrough, LinacWorkspace } from '../../shared/console-prot
 import { hideCoach, showCoach, type CoachView } from '../../shared/coach';
 import { currentIndex, DEFAULT_CUE, fillTokens, type SubKind } from '../../shared/walkthrough-core';
 import { CONSOLE, type ConsoleEvent } from './console-hooks';
+import type { TutorialFocus } from './tutorial-focus';
 import type { WalkPart } from './walkthrough-part';
 import { QUEUE_WALK } from './walkthrough-queue';
 import { SETUP_WALK } from './walkthrough-setup';
@@ -98,16 +99,17 @@ function shows(el: Element | null): el is Element {
 	return !!r && r.width > 0 && r.height > 0;
 }
 
-/** The selector of the tab button that would show `el`, hidden on a tab not picked; else null. */
-function tabFor(el: Element): string | null {
+/** The tab button that would show `el`, hidden on a tab not picked, and its selector; else null. */
+function tabFor(el: Element): { sel: string; el: Element } | null {
 	for (const t of TABS) {
 		const host = el.closest<HTMLElement>(t.host);
 		if (!host) continue;
 		for (const [tab, pane] of t.panes) {
 			const p = el.closest(pane);
 			if (!p || !host.contains(p) || host.dataset[t.key] === tab) continue;
-			const button = `${t.bar} [data-tab="${tab}"]`;
-			return shows(document.querySelector(button)) ? button : null;
+			const sel = `${t.bar} [data-tab="${tab}"]`,
+				button = document.querySelector(sel);
+			return shows(button) ? { sel, el: button } : null;
 		}
 	}
 	return null;
@@ -118,21 +120,23 @@ function tabFor(el: Element): string | null {
 function resolve(sel: string): { sel: string; el: Element } | null {
 	const el = document.querySelector(sel);
 	if (!el) return null;
-	if (shows(el)) return { sel, el };
-	const tab = tabFor(el);
-	return tab ? { sel: tab, el: document.querySelector(tab) } : null;
+	return shows(el) ? { sel, el } : tabFor(el);
 }
 
-/** Runs the part for the workspace shown: shows its current sub-step on the spotlight and returns
-    it for the state message, or hides the spotlight and returns null once the part has ended. */
-export function tickWalkthrough(workspace: LinacWorkspace): LinacWalkthrough | null {
-	const p = PARTS[workspace];
-	if (ended.has(workspace)) {
+/** Runs the part for the screen shown (console-mode.ts's Tutorial focus): shows its current
+    sub-step on the spotlight and returns it for the state message, or hides the spotlight and
+    returns null once the part has ended. The chart's own screen, or a window no Tutorial step
+    uses, runs no part: the console's workspace there is the last workflow opened, so a part would
+    start before its window opens. */
+export function tickWalkthrough(screen: TutorialFocus | null): LinacWalkthrough | null {
+	const workspace = screen && screen in PARTS ? (screen as LinacWorkspace) : null;
+	if (!workspace || ended.has(workspace)) {
 		shown = null;
 		hideCoach();
 		return null;
 	}
-	const snap = p.read(events),
+	const p = PARTS[workspace],
+		snap = p.read(events),
 		i = currentIndex(p.steps, snap, seen, reached[workspace] ?? 0);
 	reached[workspace] = i;
 	if (i === p.steps.length) {
