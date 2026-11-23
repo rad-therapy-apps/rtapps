@@ -17,7 +17,8 @@
 // of the first leg left (the whole walk to Vault 1 was about 100 m). Room introduction cards are
 // on (the default): each frame the check presses Continue on any card (the check never sees a
 // pause), and each play asserts a room's card shows only the first time the player enters it in that play.
-//   run 1  every decision answered wrong three times: hint 1, hint 2, then the answer shown and
+//   run 1  getting started (src/tutorial-guide.ts) skipped at its first bubble, which leaves none;
+//          every decision answered wrong three times: hint 1, hint 2, then the answer shown and
 //          the step completed; on every console step three misses (a look-alike's chart and
 //          check-in at the schedule, the console's refusals elsewhere) show hint 1, hint 2 and the
 //          reveal in the hint line, an event out of order does nothing, and the panel closed early
@@ -27,7 +28,9 @@
 //          fade left them and Jordan waits at a stop; on the walk back the player runs ahead to
 //          reception ("Wait for Jordan"); the end card's Keep exploring leaves the player where they
 //          stand, in free mode
-//   run 2  every decision answered right, every console step pressed from its stand point and
+//   run 2  getting started played by its predicates (src/tutorial-guide-steps.ts): Next on its two
+//          explains, just over 3 m along the walk in, a 70° turn, Maya Brooks's stand point and
+//          E, each bubble asserted in turn and none after the E; every decision answered right, every console step pressed from its stand point and
 //          done without a miss; at step 6 the panel is closed in the beat after the step is done,
 //          which shows the card at once and brings no second; the end card's Main menu goes back
 //          to the title
@@ -430,6 +433,42 @@ function report(part, fails, summary) {
 	results.push({ part, pass: !fails.length, summary, fails });
 }
 
+// Run 2's getting started, played by its predicates up to step 1's E: each bubble in turn, then
+// none once the check-in opens.
+function playGettingStarted(fails) {
+	const want = (id, when) => {
+		const c = T.coach();
+		if ((c?.id ?? null) !== id)
+			fails.push(`getting started ${when}: the bubble is ${c?.id ?? 'none'}, not ${id ?? 'none'}`);
+	};
+	want('gs.tracker', 'at the start');
+	T.coachNext();
+	want('gs.marker', 'after Next');
+	T.coachNext();
+	want('gs.walk', 'after the second Next');
+	// just over 3 m toward the marker's next stop (the entrance), facing along the walk
+	const [x0, z0] = T.playerPos(),
+		[nx, nz] = T.route()[1],
+		len = Math.hypot(nx - x0, nz - z0),
+		walk = 3.1,
+		x = x0 + ((nx - x0) / len) * walk,
+		z = z0 + ((nz - z0) / len) * walk,
+		yaw = Math.atan2(x0 - nx, z0 - nz); // as src/walk.ts aimPlayerAt
+	T.placePlayer(x, z, yaw);
+	step();
+	want('gs.look', `${walk} m along the walk in`);
+	T.placePlayer(x, z, yaw + (70 * Math.PI) / 180);
+	step();
+	want('gs.follow', 'after a 70° turn');
+	const [sx, sz] = T.standPoint();
+	T.placePlayer(sx, sz);
+	step();
+	want('gs.checkin', "at Maya Brooks's stand point");
+	T.faceTarget();
+	T.pressE();
+	want(null, 'after E');
+}
+
 // One play-through. `wrong`: answer every decision wrong three times; also exercises the hints,
 // Jordan's wait, "Wait for Jordan" and Keep exploring. Otherwise answers right and leaves by Main
 // menu.
@@ -447,7 +486,13 @@ function play(wrong) {
 	T.enter();
 	if (T.mode() !== 'tutorial' || T.state().phase !== 'active' || T.state().step !== 1)
 		fails.push(`entering did not start step 1 (mode ${T.mode()}, ${JSON.stringify(T.state())})`);
+	// getting started shows its first bubble at once
+	if (T.coach()?.id !== 'gs.tracker')
+		fails.push(`getting started did not start on the tracker (${JSON.stringify(T.coach())})`);
 	if (wrong) {
+		T.coachSkip();
+		if (T.coach() !== null)
+			fails.push(`Skip walkthrough left a bubble (${JSON.stringify(T.coach())})`);
 		// the walking hints at the plaza, then the E hint near Maya Brooks
 		const st = T.steps[0];
 		stepFor(60.5);
@@ -497,11 +542,14 @@ function play(wrong) {
 		if (st.trigger === 'pressE') {
 			// run 2 stands at a console step's own stand point (at the console desk, where Jamie Williams
 			// stood at steps 8 and 9); run 1 at the marker's, and goes there on reopening the console
-			const [x, z] = st.console && !wrong ? st.target.spec.stand : T.standPoint();
-			T.placePlayer(x, z);
-			step();
-			T.faceTarget(); // E offers only what is in front of the player (interact.ts inView)
-			T.pressE();
+			if (!wrong && s.step === 1) playGettingStarted(fails);
+			else {
+				const [x, z] = st.console && !wrong ? st.target.spec.stand : T.standPoint();
+				T.placePlayer(x, z);
+				step();
+				T.faceTarget(); // E offers only what is in front of the player (interact.ts inView)
+				T.pressE();
+			}
 			if (T.state().phase === 'dialog') {
 				step();
 				if (T.ring()) fails.push(`step ${s.step}: the ring is shown in the dialog`);

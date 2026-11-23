@@ -79,6 +79,15 @@ import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
 import { placeRing, hideRing, ringShown } from './tutorial-ring';
 import {
+	guideBlocking,
+	guideNext,
+	guideSkip,
+	guideState,
+	startGuide,
+	stopGuide,
+	tickGuide
+} from './tutorial-guide';
+import {
 	linacEvents,
 	linacGeometryHold,
 	linacPose,
@@ -212,6 +221,9 @@ function perform(e: Effect): void {
 			ACTIONS[e.action]();
 			return;
 		case 'openDialog':
+			// step 1's E is getting started's last sub-step: it ends here, whichever bubble shows, as the
+			// dialog pauses the frames that would tick it
+			if (e.step === 1) stopGuide();
 			openDialog(CHAPTER_1[e.step - 1]);
 			return;
 		case 'feedback': {
@@ -974,6 +986,9 @@ function startTutorial(): void {
 	workflowState('linaccontrol', 'READY', 'Vault 1 scheduled for Jordan Ellis', '#42d5cf');
 	workflowState('vault1', 'AVAILABLE', 'Awaiting patient arrival', '#65dda0');
 	dispatch({ type: 'start' });
+	// getting started's explains pause the game: the marker is placed for its bubble first
+	updateMarker(CHAPTER_1[0], 0);
+	startGuide();
 }
 function exitTutorial(): void {
 	active = false;
@@ -982,6 +997,7 @@ function exitTutorial(): void {
 	timers.clear();
 	queue.length = 0;
 	machine = OFF;
+	stopGuide();
 	hud.hideTutorialHud();
 	hideRing();
 	dialogOpen = roleCardOpen = walkFade = endOpen = false;
@@ -1032,6 +1048,14 @@ export function updateTutorial(dt: number): void {
 		if (q) a.obj.position.set(q[0], REACH_Y, q[1]);
 		else a.obj.position.y = PARKED_Y;
 	}
+	// getting started, from the player: within reach of Maya Brooks is 2.4 m from her stand point
+	if (machine.step === 1 && (machine.phase === 'active' || machine.phase === 'dialog'))
+		tickGuide({
+			pos: p,
+			yaw: player.yaw,
+			nearMaya: dist(p, destination(st, p)) <= 2.4,
+			checkedIn: machine.phase === 'dialog'
+		});
 	if (machine.phase !== 'active' && machine.phase !== 'waiting') {
 		hud.placeMarker(null);
 		hud.placeEdge(null);
@@ -1126,6 +1150,11 @@ function installCheckHook(): void {
 			cont: () => dispatch({ type: 'continue' }),
 			/** Continue on the step card. */
 			cardContinue: () => dispatch({ type: 'cardContinue' }),
+			/** Getting started's sub-step showing ({ id, index, of, kind }), or null. */
+			coach: () => guideState(),
+			/** Its Next and its Skip walkthrough. */
+			coachNext: () => guideNext(),
+			coachSkip: () => guideSkip(),
 			mainMenu,
 			keepExploring,
 			/** Leaves the tutorial from anywhere, as Settings > Main menu does. */
@@ -1150,11 +1179,12 @@ export function initTutorial(): void {
 	});
 	registerDialog(
 		'tutorial',
-		() => dialogOpen || cardOpen || roleCardOpen || walkFade || endOpen,
+		() => dialogOpen || cardOpen || roleCardOpen || walkFade || endOpen || guideBlocking(),
 		() => {
 			if (dialogOpen) dispatch({ type: 'closeDialog' });
 			else if (cardOpen) dispatch({ type: 'cardContinue' });
 			else if (endOpen) keepExploring();
+			else if (guideBlocking()) guideNext(); // Esc on an explain is its Next
 		}
 	);
 	onPlayModeChange((m) => {

@@ -4,7 +4,7 @@
    it updateWalk, so nobody moves and no simulation clock runs, but it still draws the frame. The NPC
    check calls stepSimulation directly and never sees a pause. Free of scene and DOM imports so it is
    unit tested in Node (pause.spec.ts). */
-export type PauseReason = 'menu' | 'settings' | 'roomCard' | 'tutorial';
+export type PauseReason = 'menu' | 'settings' | 'roomCard' | 'tutorial' | 'tutorial-guide';
 
 const reasons = new Set<PauseReason>();
 const listeners: ((paused: boolean) => void)[] = [];
