@@ -260,10 +260,11 @@ const nextEvent = (kind, from, timeout = WAIT_MS) =>
 /** From the title: the Tutorial entered (the center's getting-started walkthrough skipped where
     the center has one), then steps 1-2 as the patient, to step 3. */
 async function playSteps1to2() {
-	await tut(() => {
-		window.__TUTORIAL.enter();
-		window.__TUTORIAL.coachSkip?.();
-	});
+	await tut(() => window.__TUTORIAL.enter());
+	// getting started's first bubble frees the pointer: skip it only once that has happened, or the
+	// lock's loss, heard after the skip with nothing paused, would open the settings (seen in CI)
+	await until('getting started to free the pointer', () => !document.pointerLockElement);
+	await tut(() => window.__TUTORIAL.coachSkip?.());
 	await stepIs(1);
 	await pressE();
 	await tut(() => window.__TUTORIAL.cont());
