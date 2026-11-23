@@ -4,12 +4,14 @@ import {
 	beamRefusal,
 	clearsRefusal,
 	consoleViewFromSearch,
+	basicHold,
 	correctionApplied,
 	fromCenter,
 	interlockRefusal,
 	isLinacWorkspace,
 	parseCenterMessage,
 	poseFromReadout,
+	sameGeometryHold,
 	samePose,
 	shiftLengthMm,
 	STATE_MIN_GAP_MS,
@@ -306,5 +308,46 @@ describe('the refusal bar', () => {
 		expect(workspaceClearsRefusal('igrt', 'delivery', REFUSAL_WORKSPACE_GRACE_MS + 1)).toBe(true);
 		expect(workspaceClearsRefusal('igrt', 'delivery', 50)).toBe(false);
 		expect(workspaceClearsRefusal('igrt', 'igrt', 60000)).toBe(false);
+	});
+});
+
+describe('the geometry hold the state message carries', () => {
+	const hold = {
+		field: 'Right Lateral',
+		mismatches: [{ label: 'Gantry', now: '0°', planned: '270°' }]
+	};
+
+	it('posts again only when the field or an axis off the plan changes', () => {
+		expect(sameGeometryHold(null, null)).toBe(true);
+		expect(sameGeometryHold(hold, structuredClone(hold))).toBe(true);
+		expect(sameGeometryHold(hold, null)).toBe(false);
+		expect(sameGeometryHold(null, hold)).toBe(false);
+		expect(sameGeometryHold(hold, { ...hold, field: 'Left Lateral' })).toBe(false);
+		expect(
+			sameGeometryHold(hold, {
+				...hold,
+				mismatches: [{ label: 'Gantry', now: '3°', planned: '270°' }]
+			})
+		).toBe(false);
+		expect(
+			sameGeometryHold(hold, {
+				...hold,
+				mismatches: [...hold.mismatches, { label: 'Couch Vrt', now: '+6', planned: '+4 mm' }]
+			})
+		).toBe(false);
+	});
+});
+
+describe('the hold to resolve first', () => {
+	const check = (name: string, ok: boolean) => ({ name, ok, detail: ok ? 'ok' : 'off' });
+
+	it('is the most basic coded hold, else the first failed one, else none', () => {
+		const geometry = check('Treatment geometry matches plan', false),
+			igrt = check('Image guidance verified', false),
+			trajectory = check('Treatment trajectory clearance', false);
+		expect(basicHold([geometry, igrt])).toBe(igrt);
+		expect(basicHold([trajectory, geometry])).toBe(geometry);
+		expect(basicHold([check('Vault door closed', true), trajectory])).toBe(trajectory);
+		expect(basicHold([check('Vault door closed', true)])).toBeNull();
 	});
 });

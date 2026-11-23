@@ -128,6 +128,51 @@ describe('readLinacMessage', () => {
 		expect(state(null)).toBe(null);
 	});
 
+	it('reads the geometry hold when the state carries one, a fresh copy of its fields', () => {
+		const geometryHold = {
+			field: 'Right Lateral',
+			mismatches: [{ label: 'Gantry', now: '0°', planned: '270°', extra: 1 }],
+			extra: 'dropped'
+		};
+		const base = {
+			type: 'rtapps-linac-state',
+			pose: POSE,
+			mrn: 'TUT-680314',
+			workspace: 'delivery'
+		};
+		const msg = readLinacMessage({ ...base, geometryHold });
+		expect(msg).toEqual({
+			...base,
+			geometryHold: {
+				field: 'Right Lateral',
+				mismatches: [{ label: 'Gantry', now: '0°', planned: '270°' }]
+			}
+		});
+		expect(msg && msg.type === 'rtapps-linac-state' && msg.geometryHold).not.toBe(geometryHold);
+		expect(readLinacMessage({ ...base, geometryHold: null })).toEqual({
+			...base,
+			geometryHold: null
+		});
+		// a state from before the hold was in the contract is still read
+		expect(readLinacMessage(base)).toEqual(base);
+	});
+
+	it('refuses a state whose geometry hold is malformed', () => {
+		const state = (geometryHold: unknown) =>
+			readLinacMessage({
+				type: 'rtapps-linac-state',
+				pose: POSE,
+				mrn: null,
+				workspace: 'queue',
+				geometryHold
+			});
+		expect(state({ mismatches: [] })).toBe(null);
+		expect(state({ field: 'Right Lateral', mismatches: 'Gantry' })).toBe(null);
+		expect(state({ field: 'Right Lateral', mismatches: [{ label: 'Gantry', now: 0 }] })).toBe(null);
+		expect(state('Right Lateral')).toBe(null);
+		expect(state({ field: 'Right Lateral', mismatches: [] })).not.toBe(null);
+	});
+
 	it('refuses a pose message with an unknown workspace or a bad MRN', () => {
 		expect(
 			readLinacMessage({ type: 'rtapps-linac-state', pose: POSE, mrn: null, workspace: 'vault' })

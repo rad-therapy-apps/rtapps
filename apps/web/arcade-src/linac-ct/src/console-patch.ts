@@ -5,6 +5,7 @@ import { TREATMENT_CASES } from './delivery/cases';
 import { pageCount, pageOfRow, rowsPerPage, turnPage } from './queue-pages';
 import { pageStep } from '../../sim-hub/src/pager-math';
 import { installConsoleScreens, renderInterlocks } from './console-screens';
+import { deliveryHero } from './delivery-guide';
 
 /** The shell's navigation for console mode (console-mode.ts), filled in below. */
 export const consoleShell = {
@@ -681,6 +682,22 @@ export const shellSettled = new Promise<void>((resolve) => (settle = resolve));
 		else if (isCompleted) hero = 'Field complete. Record the fraction or select the next field.';
 		else if (isArmed) hero = 'Field enabled. Click Beam On to deliver.';
 		else if (ready) hero = 'Patient ready. Click Ready to enable beam.';
+		// console mode: the real next action, naming only keys on screen (delivery-guide.ts)
+		if (CONSOLE.console)
+			hero = deliveryHero({
+				hasCase,
+				delivering: isDelivering,
+				held: !!treatmentDelivery?.held,
+				posted,
+				completed: isCompleted,
+				allDone: !!bs.allFieldsCompleted,
+				armed: isArmed,
+				ready,
+				checks: readyInfo.checks || [],
+				field: activeFields[activeIndex]?.name || 'The selected field',
+				motionArmed: !!$('consoleMotionEnable')?.classList.contains('active'),
+				recordKey: CONSOLE.scenario !== 'tutorial'
+			});
 		setDeliveryText('rtv2dHeroCaption', hero);
 		[
 			'rtv2dStepPreview',

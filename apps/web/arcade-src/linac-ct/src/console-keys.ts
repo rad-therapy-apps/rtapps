@@ -9,14 +9,21 @@
    - a Move to field key drives the gantry, collimator and couch toward the selected field while it
      is held, the shortest way round, through the same motion-enable and collision checks as the
      other keys. The machine values change every frame, so the console's pose stream (console-
-     mode.ts) and the center's Vault 1 follow it smoothly.
+     mode.ts) and the center's Vault 1 follow it smoothly. The key says what it is doing: "Moving…
+     keep holding" while it moves the machine, "At field" once the machine is at the selected
+     field, else "Hold to move to field"; let go before the machine gets there, the console's bar
+     says to keep holding (a notice, not a refused action).
    Installed by console-mode.ts once the chart shell is built; console-mode.ts also lets go of the
-   keys when the center's panel hides the console (releaseConsoleKeys). */
+   keys when the center's panel hides the console (releaseConsoleKeys) and keeps the key's label in
+   step with the machine and the selected field (syncMoveKey). */
 import { S } from './state';
-import { consoleMistakeCount } from './console-hooks';
+import { consoleMistakeCount, consoleNotice } from './console-hooks';
 import {
+	atFieldTarget,
+	KEEP_HOLDING_NOTICE,
 	KEY_STEPS,
 	keyLanding,
+	moveKeyLabel,
 	moveToFieldStep,
 	REPEAT_DELAY_MS,
 	REPEAT_EVERY_MS,
@@ -212,7 +219,9 @@ let lastFrame = 0;
 let lastReadout = 0;
 let heardThisMove = false;
 
-function stopMove(lcd: string) {
+/** Ends a move: arrived, refused, or let go (`letGo`: by the learner, before the machine got
+    there, which brings up the notice to keep holding). */
+function stopMove(lcd: string, letGo = false) {
 	if (!moving) return;
 	moving = false;
 	cancelAnimationFrame(frameId);
@@ -220,6 +229,18 @@ function stopMove(lcd: string) {
 	tellImageGuidance();
 	syncFundamentalReadouts('MOVE TO FIELD', lcd);
 	renderTreatmentDeliveryPanel();
+	syncMoveKey();
+	if (letGo) consoleNotice(KEEP_HOLDING_NOTICE);
+}
+
+/** The Move to field key's label (and its at-field look) for the machine and the selected field
+    now; console-mode.ts calls it on each state tick. */
+export function syncMoveKey() {
+	if (!moveKey) return;
+	const at = !moving && !!S.activeTreatmentCase && atFieldTarget(machineAxes(), fieldTarget()),
+		label = moveKeyLabel(moving, at);
+	if (moveKey.textContent !== label) moveKey.textContent = label;
+	moveKey.classList.toggle('at-field', at);
 }
 
 function moveFrame(now: number) {
@@ -249,14 +270,23 @@ function startMove() {
 	heardThisMove = false;
 	moveTarget = fieldTarget();
 	moveKey?.classList.add('active');
+	syncMoveKey();
 	lastFrame = lastReadout = performance.now();
 	frameId = requestAnimationFrame(moveFrame);
 }
 
-/** Lets go of a held key and stops Move to field, as a pointer release does. */
+/** Lets go of a held key and stops Move to field (the panel hid the console, the window lost
+    focus). */
 export function releaseConsoleKeys() {
 	stopHold();
 	stopMove('STOPPED');
+}
+
+/** The learner let go (a pointer release): as releaseConsoleKeys, and a Move to field let go
+    before the machine got there says to keep holding. */
+function letGoOfKeys() {
+	stopHold();
+	stopMove('STOPPED', true);
 }
 
 /** Adds the Move to field key under the Beam Geometry keys and wires the held keys. */
@@ -270,14 +300,14 @@ export function installConsoleKeys() {
 	moveKey = document.createElement('button');
 	moveKey.type = 'button';
 	moveKey.id = 'consoleMoveToField';
-	moveKey.textContent = 'Hold to move to field';
+	moveKey.textContent = moveKeyLabel(false, false);
 	moveKey.title =
 		'Hold to turn the gantry and collimator and move the couch to the selected field. Motion Enable first.';
 	geometry.append(title, moveKey);
 	moveKey.addEventListener('pointerdown', (ev) => {
 		if (ev.button === 0) startMove();
 	});
-	moveKey.addEventListener('pointerleave', () => stopMove('STOPPED'));
+	moveKey.addEventListener('pointerleave', () => stopMove('STOPPED', true));
 	moveKey.addEventListener('keydown', (ev) => {
 		if ((ev.key === ' ' || ev.key === 'Enter') && !ev.repeat) {
 			ev.preventDefault();
@@ -285,11 +315,10 @@ export function installConsoleKeys() {
 		}
 	});
 	moveKey.addEventListener('keyup', (ev) => {
-		if (ev.key === ' ' || ev.key === 'Enter') stopMove('STOPPED');
+		if (ev.key === ' ' || ev.key === 'Enter') stopMove('STOPPED', true);
 	});
 	panel.addEventListener('pointerdown', onKeyDown);
 	document.addEventListener('click', onClick, true);
-	for (const type of ['pointerup', 'pointercancel'])
-		window.addEventListener(type, releaseConsoleKeys);
+	for (const type of ['pointerup', 'pointercancel']) window.addEventListener(type, letGoOfKeys);
 	window.addEventListener('blur', releaseConsoleKeys);
 }

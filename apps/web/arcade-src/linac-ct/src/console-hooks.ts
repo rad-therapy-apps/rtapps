@@ -1,12 +1,13 @@
 /* What the LINAC app's own modules share with console mode (`?view=console`, docs/specs/
    2026-11-18-consoles-in-center-design.md part 3): the mode read once from the app's own URL, the
-   vault as the center last reported it, and three calls the workflow makes at the moment something
+   vault as the center last reported it, and four calls the workflow makes at the moment something
    happens: consoleEvent (a patient checked in, images acquired, a field delivered, ...),
-   consoleMistake (the console refused an action) and consoleMoved (the machine made a move the
-   learner asked for). console-mode.ts installs the sink that posts the first two to the center and
-   lets a move end the refusal on screen; outside console mode there is no sink and the calls do
-   nothing, so the app behaves exactly as before. No app imports, so any module can use it without
-   an import cycle. */
+   consoleMistake (the console refused an action), consoleNotice (a note for the learner that is
+   not a refusal, such as to keep holding Move to field) and consoleMoved (the machine made a move
+   the learner asked for). console-mode.ts installs the sink that posts the first two to the
+   center, shows the mistakes and notices in the refusal bar, and lets a move end it; outside
+   console mode there is no sink and the calls do nothing, so the app behaves exactly as before.
+   No app imports, so any module can use it without an import cycle. */
 import type { LinacEvent } from '../../shared/console-protocol';
 import { consoleViewFromSearch } from './console-messages';
 
@@ -28,6 +29,7 @@ export type ConsoleEvent = Exclude<LinacEvent, { kind: 'mistake' }>;
 interface ConsoleSink {
 	event(e: ConsoleEvent): void;
 	mistake(code: string, message: string): void;
+	notice(message: string): void;
 	moved(): void;
 }
 let sink: ConsoleSink | null = null;
@@ -47,6 +49,12 @@ let mistakes = 0;
 export function consoleMistake(code: string, message: string): void {
 	mistakes++;
 	sink?.mistake(code, message);
+}
+
+/** A note for the learner in the refusal bar's place that is not a refused action: not posted to
+    the center, so the Tutorial does not count it. */
+export function consoleNotice(message: string): void {
+	sink?.notice(message);
 }
 
 /** The machine just made a move the learner asked for: a gantry, couch or table move the collision

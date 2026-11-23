@@ -182,8 +182,13 @@ export interface ConsoleTask {
 	/** From the third miss on: what to do (the reason says why, once the step is done). */
 	reveal: string;
 	/** Hints for particular refusals, in place of `hints` and `reveal`: the first that fits the
-	    refusal is used, and the misses count on through hint 1, hint 2 and the reveal as before. */
+	    refusal is used, and the misses count on through hint 1, hint 2 and the reveal as before. A
+	    hint with {goal} names the fix for the console's geometry hold on the selected field
+	    (tutorial-math.ts holdGoal); it follows the hold and goes when the hold clears. */
 	refusals?: readonly RefusalHints[];
+	/** The hint once the console's geometry hold has stayed HOLD_HINT_S (tutorial-math.ts) with the
+	    console open and no field delivered; {goal} as in `refusals`. */
+	holdHint?: string;
 	/** Why the step is done this way: "Correct. <reason>" shows when it completes, as a decision's
 	    reason does. */
 	reason: string;
@@ -516,6 +521,20 @@ export const CHAPTER_1: readonly Step[] = [
 			],
 			reveal:
 				'Hold Move to field until the checklist is all green, then press Enable Beam and Beam On: the right lateral field first, then the left lateral field.',
+			// the geometry hold's fix, with the selected field: "Hold Move to field until Right Lateral’s
+			// gantry reaches 270° and the checklist turns green."
+			refusals: [
+				{
+					codes: ['geometry-mismatch'],
+					hints: [
+						'Hold Move to field until {goal} and the checklist turns green.',
+						'Press and keep holding Move to field: the machine moves only while it is held. Keep holding until {goal} and the checklist turns green.'
+					],
+					reveal:
+						'Hold Move to field until {goal} and the checklist turns green, then press Enable Beam and Beam On.'
+				}
+			],
+			holdHint: 'Hold Move to field until {goal} and the checklist turns green.',
 			reason:
 				'The beam came on only once the room, the setup and the images were verified, and both lateral fields were delivered as planned.',
 			beam: { on: 'beamOn', off: 'betweenFields' }

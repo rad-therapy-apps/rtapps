@@ -31,7 +31,14 @@ import type {
 	LinacRoomMsg,
 	LinacWorkspace
 } from '../../shared/console-protocol';
-import { ctComplete, ctPose, linacEvents, linacPose, panelOpen } from './console-bus';
+import {
+	ctComplete,
+	ctPose,
+	linacEvents,
+	linacGeometryHold,
+	linacPose,
+	panelOpen
+} from './console-bus';
 import {
 	consoleUrl,
 	gateMessage,
@@ -244,6 +251,7 @@ function onMessage(e: MessageEvent): void {
 		case 'rtapps-linac-state':
 			f.pose = m.pose;
 			linacPose.emit(m.pose);
+			linacGeometryHold.emit(m.geometryHold ?? null);
 			return;
 		case 'rtapps-linac-event':
 			linacEvents.emit(m.event);

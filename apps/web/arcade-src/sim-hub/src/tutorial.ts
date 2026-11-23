@@ -6,8 +6,9 @@
    decisions, the role change, Jordan's escorts with their waits, the vault door and the end card.
    The console steps (3, 6, 8, 9; docs/specs/2026-11-18-consoles-in-center-design.md, part 6) open
    the LINAC console in its panel (console-panel.ts) through openStepConsole and listen to it on
-   console-bus.ts (linacEvents; linacPose, whose beam the status boards show at step 9; and
-   panelOpen for the player closing it early); Jordan's name goes on the Vault 1 monitors through
+   console-bus.ts (linacEvents; linacPose, whose beam the status boards show at step 9;
+   linacGeometryHold, whose fix step 9's hints name; and panelOpen for the player closing it
+   early); Jordan's name goes on the Vault 1 monitors through
    showJordanOnVaultMonitors. Leaving play mode 'tutorial' resets the journey again, so the world is
    left as the NPC check expects. Outside the tutorial nothing here runs: updateTutorial returns at
    once, the console events are ignored, and the E targets are made on the first start and disabled
@@ -76,7 +77,13 @@ import {
 } from './tutorial-math';
 import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
-import { linacEvents, linacPose, panelOpen, vaultMonitorPatient } from './console-bus';
+import {
+	linacEvents,
+	linacGeometryHold,
+	linacPose,
+	panelOpen,
+	vaultMonitorPatient
+} from './console-bus';
 import { closeConsole, openConsole } from './console-panel';
 import { ROOM_WORKFLOW } from './journey';
 import { TUTORIAL_PATIENTS } from '../../shared/console-protocol';
@@ -983,6 +990,8 @@ export function updateTutorial(dt: number): void {
 	if (machine.phase !== 'active' && machine.phase !== 'waiting') {
 		hud.placeMarker(null);
 		hud.placeEdge(null);
+		// with a console step's console open, only its hold timer runs (tutorial-machine.ts)
+		if (machine.phase === 'console') dispatch({ type: 'tick', dt, distance: 0 });
 		return;
 	}
 	// in LINAC Control, with Jamie Williams out of the vault too: nobody stays in for the beam
@@ -1101,6 +1110,9 @@ export function initTutorial(): void {
 	});
 	linacPose.on((pose) => {
 		if (active) dispatch({ type: 'beam', on: pose.beamOn });
+	});
+	linacGeometryHold.on((hold) => {
+		if (active) dispatch({ type: 'geometryHold', hold });
 	});
 	panelOpen.on((kind) => {
 		if (active && kind === null) consolePanelClosed();

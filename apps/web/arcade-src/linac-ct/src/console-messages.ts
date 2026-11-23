@@ -11,6 +11,7 @@ import {
 	LINAC_WORKSPACES,
 	type CenterToLinacMessage,
 	type ConsoleScenario,
+	type LinacGeometryHold,
 	type LinacPose,
 	type LinacWorkspace
 } from '../../shared/console-protocol';
@@ -143,6 +144,25 @@ export function samePose(a: LinacPose | null, b: LinacPose | null): boolean {
 	return (Object.keys(a) as (keyof LinacPose)[]).every((k) => a[k] === b[k]);
 }
 
+/** Whether two geometry holds say the same: both none, or the same field and the same axes off the
+    plan with the same values, in the same order. */
+export function sameGeometryHold(
+	a: LinacGeometryHold | null,
+	b: LinacGeometryHold | null
+): boolean {
+	if (!a || !b) return a === b;
+	return (
+		a.field === b.field &&
+		a.mismatches.length === b.mismatches.length &&
+		a.mismatches.every(
+			(m, i) =>
+				m.label === b.mismatches[i].label &&
+				m.now === b.mismatches[i].now &&
+				m.planned === b.mismatches[i].planned
+		)
+	);
+}
+
 /** The length of a couch correction's translation, in mm to 0.1. */
 export function shiftLengthMm(c: { lat: number; lng: number; vrt: number }): number {
 	return Math.round(Math.hypot(num(c.lat), num(c.lng), num(c.vrt)) * 10) / 10;
@@ -191,6 +211,9 @@ export interface Refusal {
 	message: string;
 }
 
+/** The geometry interlock's name (linac-safety.ts getDeliveryReadiness). */
+export const GEOMETRY_CHECK = 'Treatment geometry matches plan';
+
 /** Mistake codes for the interlocks a learner meets most, the most basic step first: an
     unverified alignment, for one, also leaves the couch off the planned position, so it is coded
     before the geometry it causes. Any other failed check is 'interlock'. */
@@ -198,10 +221,21 @@ const INTERLOCK_CODES: [string, string][] = [
 	['Vault door closed', 'door-open'],
 	['Immobilization / indexing verified', 'setup-not-verified'],
 	['Image guidance verified', 'igrt-not-verified'],
-	['Treatment geometry matches plan', 'geometry-mismatch'],
+	[GEOMETRY_CHECK, 'geometry-mismatch'],
 	['Imaging hardware retracted', 'imaging-out'],
 	['In-room motion locked', 'motion-armed']
 ];
+
+/** The failed interlock to resolve first: the most basic of the coded ones, else the first failed
+    one in the checklist's order; null when none failed. */
+export function basicHold(checks: ReadinessCheck[]): ReadinessCheck | null {
+	const failed = checks.filter((c) => !c.ok);
+	for (const [name] of INTERLOCK_CODES) {
+		const hold = failed.find((c) => c.name === name);
+		if (hold) return hold;
+	}
+	return failed[0] ?? null;
+}
 
 /** `action` refused by the interlocks: the code names the most basic failed one, the message
     lists every failed one as the checklist shows it. */
