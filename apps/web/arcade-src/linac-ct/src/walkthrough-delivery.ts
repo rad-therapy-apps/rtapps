@@ -8,10 +8,13 @@
    (linac-safety.ts, formatted by delivery-guide.ts) and is passed over when the gantry is not
    holding. A Move to field sub-step is done once its field is selected with no geometry hold; with
    the other field selected, that field's row is cut out too, so the learner can pick it back. The
-   sub-steps are pure, so walkthrough-delivery.spec.ts tests them with made-up snapshots; read()
+   beam's presses follow the beam: a held beam (the panel closed or the door opened mid-field) cuts
+   out Resume Beam, and a beam disarmed by an interlock after Enable Beam cuts out Enable Beam
+   again. The sub-steps are pure, so walkthrough-delivery.spec.ts tests them with made-up snapshots; read()
    is the DOM side. */
 import { TUTORIAL_PATIENTS, type LinacGeometryHold } from '../../shared/console-protocol';
 import type { ConsoleEvent } from './console-hooks';
+import { deliveryCasePlan } from './delivery/plan';
 import { deliveryGeometryHold } from './linac-safety';
 import { S } from './state';
 import type { WalkPart } from './walkthrough-part';
@@ -23,9 +26,11 @@ export interface DeliverySnap {
 	hold: LinacGeometryHold | null;
 	/** Motion Enable is armed. */
 	motion: boolean;
-	/** The beam is enabled for the selected field (Enable Beam), and on (Beam On). */
+	/** The beam is enabled for the selected field (Enable Beam), on (Beam On), and held mid-field
+	    (Resume Beam goes on). */
 	armed: boolean;
 	delivering: boolean;
+	held: boolean;
 	/** Every event the console has reported this page load. */
 	events: readonly ConsoleEvent[];
 }
@@ -39,6 +44,8 @@ export const fieldRow = (i: number): string =>
 const MOVE = '#consoleMoveToField',
 	ENABLE = '#rtv2EnableBeam',
 	BEAM_ON = '#rtv2BeamOn',
+	// the chart's Beam Hold, which says Resume Beam while a field is held (console-mode.ts)
+	RESUME = '#rtv2BeamHold',
 	FIELD_LIST = '#rtv2dFieldList',
 	INTERLOCKS = '#rtv2dChecksPane',
 	JORDAN = TUTORIAL_PATIENTS.jordan.mrn;
@@ -54,6 +61,10 @@ const gantryHold = (s: DeliverySnap) =>
 const atField = (s: DeliverySnap, i: number) => s.field === FIELDS[i] && s.hold === null;
 const moveTargets = (s: DeliverySnap, i: number) =>
 	s.field === FIELDS[i] ? [MOVE] : [MOVE, fieldRow(i)];
+/** The key that brings the beam on now: Resume Beam while held, Beam On once enabled or on, else
+    Enable Beam (`disarmed`, its keys when the beam is neither: one or both). */
+const beamKeys = (s: DeliverySnap, disarmed: readonly string[]) =>
+	s.held ? [RESUME] : s.armed || s.delivering ? [BEAM_ON] : disarmed;
 
 export const DELIVERY_WALK: WalkPart<DeliverySnap> = {
 	id: 'delivery',
@@ -131,7 +142,7 @@ export const DELIVERY_WALK: WalkPart<DeliverySnap> = {
 				do: 'Press Beam On.',
 				why: 'Watch the MU count climb to 152. The beam stops by itself when the field is done.'
 			},
-			targets: () => [BEAM_ON],
+			targets: (s) => beamKeys(s, [ENABLE, BEAM_ON]),
 			done: (s) => delivered(s) > 0,
 			cue: 'Press Beam On'
 		},
@@ -153,7 +164,7 @@ export const DELIVERY_WALK: WalkPart<DeliverySnap> = {
 				do: 'Press Enable Beam, then Beam On.',
 				why: 'The second field delivers its 152 MU.'
 			},
-			targets: (s) => [s.armed || s.delivering ? BEAM_ON : ENABLE],
+			targets: (s) => beamKeys(s, [ENABLE]),
 			done: (s) => s.events.some((e) => e.kind === 'treatment-complete' && e.mrn === JORDAN),
 			cue: 'Enable Beam, then Beam On'
 		},
@@ -170,11 +181,12 @@ export const DELIVERY_WALK: WalkPart<DeliverySnap> = {
 	read(events) {
 		const d = S.treatmentDelivery;
 		return {
-			field: S.activeTreatmentCase?.fields[Number(d.activeFieldIndex) || 0]?.name ?? null,
+			field: S.activeTreatmentCase ? deliveryCasePlan().field : null,
 			hold: deliveryGeometryHold(),
 			motion: S.consoleMotionArmed,
 			armed: d.armed,
 			delivering: d.delivering,
+			held: d.held,
 			events
 		};
 	}

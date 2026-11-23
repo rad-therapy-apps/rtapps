@@ -7,8 +7,10 @@ import { angleMismatch } from './delivery-guide';
 import { buildTutorialCases } from './tutorial-cases';
 import { DELIVERY_WALK, FIELDS, fieldRow, type DeliverySnap } from './walkthrough-delivery';
 
-// read() is the console's side; linac-safety.ts loads the whole console (main.ts), which Node cannot
+// read() is the console's side; linac-safety.ts and delivery/plan.ts load the whole console (main.ts),
+// which Node cannot
 vi.mock('./linac-safety', () => ({ deliveryGeometryHold: () => null }));
+vi.mock('./delivery/plan', () => ({ deliveryCasePlan: () => ({ field: 'Right Lateral' }) }));
 
 const JORDAN = TUTORIAL_PATIENTS.jordan.mrn,
 	LOOKALIKE = TUTORIAL_PATIENTS.jordanLookalike.mrn;
@@ -22,6 +24,7 @@ const snap = (o: Partial<DeliverySnap> = {}): DeliverySnap => ({
 	motion: false,
 	armed: false,
 	delivering: false,
+	held: false,
 	events: [],
 	...o
 });
@@ -121,9 +124,11 @@ describe("step 9's walkthrough, the treatment", () => {
 	});
 
 	it('keeps a sub-step passed, from the furthest reached', () => {
-		// enabled, then the beam back off with no field delivered: Beam On stays the step
+		// enabled, then disarmed by an interlock with no field delivered: Beam On stays the step, and
+		// Enable Beam is cut out again beside it
 		const atRight = snap({ motion: true, hold: null });
 		expect(at(atRight, EXPLAINS, index('delivery.beam1'))).toBe(index('delivery.beam1'));
+		expect(step('delivery.beam1').targets(atRight)).toEqual(['#rtv2EnableBeam', '#rtv2BeamOn']);
 		// Motion Enable turned off after Move to field: not asked again
 		expect(at(snap({ hold: null }), EXPLAINS, index('delivery.enable1'))).toBe(
 			index('delivery.enable1')
@@ -163,10 +168,34 @@ describe("step 9's walkthrough, the treatment", () => {
 		expect(step('delivery.motion').targets(s)).toEqual(['#rtv2MotionEnable']);
 		expect(step('delivery.move1').targets(s)).toEqual(['#consoleMoveToField']);
 		expect(step('delivery.enable1').targets(s)).toEqual(['#rtv2EnableBeam']);
-		expect(step('delivery.beam1').targets(s)).toEqual(['#rtv2BeamOn']);
+		expect(step('delivery.beam1').targets({ ...s, armed: true })).toEqual(['#rtv2BeamOn']);
 		const left = snap({ field: 'Left Lateral', hold: gantry('Left Lateral', 270, 90) });
 		expect(step('delivery.move2').targets(left)).toEqual(['#consoleMoveToField']);
 		expect(step('delivery.done').targets(s)).toEqual(['#rtv2dFieldList']);
+	});
+
+	it('cuts out Resume Beam while a field is held, on either field', () => {
+		// the panel closed or the door opened mid-field: the beam stays delivering, held
+		const right = snap({ motion: true, hold: null, armed: true, delivering: true, held: true });
+		expect(at(right, EXPLAINS, index('delivery.beam1'))).toBe(index('delivery.beam1'));
+		expect(step('delivery.beam1').targets(right)).toEqual(['#rtv2BeamHold']);
+		expect(step('delivery.beam1').targets({ ...right, held: false })).toEqual(['#rtv2BeamOn']);
+		const left = { ...right, field: 'Left Lateral', events: firstDone };
+		expect(at(left, EXPLAINS, index('delivery.beam2'))).toBe(index('delivery.beam2'));
+		expect(step('delivery.beam2').targets(left)).toEqual(['#rtv2BeamHold']);
+		expect(step('delivery.beam2').targets({ ...left, held: false })).toEqual(['#rtv2BeamOn']);
+	});
+
+	it('cuts out Enable Beam again when an interlock disarms the beam', () => {
+		const armed = snap({ motion: true, hold: null, armed: true });
+		expect(step('delivery.beam1').targets(armed)).toEqual(['#rtv2BeamOn']);
+		expect(step('delivery.beam1').targets({ ...armed, armed: false })).toEqual([
+			'#rtv2EnableBeam',
+			'#rtv2BeamOn'
+		]);
+		const left = { ...armed, field: 'Left Lateral', events: firstDone };
+		expect(step('delivery.beam2').targets(left)).toEqual(['#rtv2BeamOn']);
+		expect(step('delivery.beam2').targets({ ...left, armed: false })).toEqual(['#rtv2EnableBeam']);
 	});
 
 	it('moves the last press from Enable Beam to Beam On once the beam is enabled', () => {
