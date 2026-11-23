@@ -227,6 +227,16 @@ function stepUntil(cond, seconds) {
 	return cond();
 }
 
+// The floor ring is shown within 0.5 m of where the step's target is.
+function checkRing(n, want, fails) {
+	const r = T.ring();
+	if (!r) fails.push(`step ${n}: no floor ring`);
+	else if (Math.hypot(r[0] - want[0], r[1] - want[1]) > 0.5)
+		fails.push(
+			`step ${n}: the ring is at ${r.map((v) => v.toFixed(2))}, not ${want.map((v) => v.toFixed(2))}`
+		);
+}
+
 // The journey actors and the people as the journey reset leaves them.
 function worldState() {
 	const actors = {};
@@ -482,6 +492,8 @@ function play(wrong) {
 		routes++;
 		if (T.routeHitsWall())
 			fails.push(`step ${s.step}: the marker route crosses a wall: ${JSON.stringify(T.route())}`);
+		if (s.step === 1 || s.step === 2 || s.step === 7)
+			checkRing(s.step, s.step === 7 ? T.doorOf(st.target.roomId) : T.standPoint(), fails);
 		if (st.trigger === 'pressE') {
 			// run 2 stands at a console step's own stand point (at the console desk, where Jamie Williams
 			// stood at steps 8 and 9); run 1 at the marker's, and goes there on reopening the console
@@ -490,6 +502,10 @@ function play(wrong) {
 			step();
 			T.faceTarget(); // E offers only what is in front of the player (interact.ts inView)
 			T.pressE();
+			if (T.state().phase === 'dialog') {
+				step();
+				if (T.ring()) fails.push(`step ${s.step}: the ring is shown in the dialog`);
+			}
 			if (st.exchange) {
 				if (T.state().phase !== 'dialog') fails.push(`step ${s.step}: E did not open the check-in`);
 				T.cont();
@@ -526,9 +542,17 @@ function play(wrong) {
 		} else {
 			// escort: the fade moves Jordan and the player on; then walk beside Jordan. On run 1 the
 			// player stays put once on the walk to Vault 1 and runs ahead once on the walk back.
+			if (T.state().walkFade) {
+				step();
+				if (T.ring()) fails.push(`step ${s.step}: the ring is shown in the walk fade`);
+			}
 			if (!stepUntil(() => !T.state().walkFade, FADE_LIMIT_S)) {
 				fails.push(`step ${s.step}: the fade did not end in ${FADE_LIMIT_S} s`);
 				break;
+			}
+			if (s.step === 5) {
+				step();
+				checkRing(5, T.doorOf(st.target.roomId), fails);
 			}
 			const j = xz(J.patient),
 				[px, pz] = T.playerPos(),

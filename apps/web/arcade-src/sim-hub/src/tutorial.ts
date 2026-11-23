@@ -77,6 +77,7 @@ import {
 } from './tutorial-math';
 import type { EscortHold, Pt } from './tutorial-math';
 import * as hud from './tutorial-hud';
+import { placeRing, hideRing, ringShown } from './tutorial-ring';
 import {
 	linacEvents,
 	linacGeometryHold,
@@ -820,6 +821,16 @@ function destination(st: Step, p: Pt): Pt {
 	}
 	return sp.final;
 }
+/** Where the floor ring lies: the target room's door for a room target or an escort, else the
+    stand point. */
+function ringPoint(st: Step, p: Pt): Pt {
+	const k = st.target.spec.kind;
+	if (k === 'room' || k === 'escort') {
+		const d = doorPoint(roomById(st.target.roomId));
+		return [d.x, d.z];
+	}
+	return destination(st, p);
+}
 /* The walking route from the player: from the plaza in through the main entrance, then the NPC
    route builder's (out through the room's door and graph, the corridors, in through the target
    room's door and graph). */
@@ -972,6 +983,7 @@ function exitTutorial(): void {
 	queue.length = 0;
 	machine = OFF;
 	hud.hideTutorialHud();
+	hideRing();
 	dialogOpen = roleCardOpen = walkFade = endOpen = false;
 	lastAnswer = null;
 	cardOpen = false;
@@ -1006,12 +1018,15 @@ export function updateTutorial(dt: number): void {
 		// nothing moves on under the black: Jordan's walk starts when play resumes (the game is
 		// paused meanwhile; the NPC check never pauses, so its clock is held here)
 		if (escort?.t) escort.t.start = S.simSec;
+		hideRing();
 		return;
 	}
 	const esc = updateEscort(),
 		st = CHAPTER_1[machine.step - 1];
 	if (!st) return;
 	const p: Pt = [player.pos.x, player.pos.z];
+	const rp = machine.phase === 'active' ? ringPoint(st, p) : null;
+	placeRing(rp && [rp[0], rp[1]], S.simSec);
 	for (const a of anchors) {
 		const q = a.step.n === machine.step ? anchorPoint(a.step, p) : null;
 		if (q) a.obj.position.set(q[0], REACH_Y, q[1]);
@@ -1067,6 +1082,13 @@ function installCheckHook(): void {
 				escortHolding: !!escort?.hold.holding,
 				escortLength: escort?.length ?? null
 			}),
+			/** Where the floor ring is, or null while hidden. */
+			ring: () => ringShown(),
+			/** A room's door point, where the ring lies for a room or escort target. */
+			doorOf: (id: string) => {
+				const d = doorPoint(roomById(id));
+				return [d.x, d.z];
+			},
 			/** Where the marker leads for the current step. */
 			standPoint: () =>
 				machine.step
