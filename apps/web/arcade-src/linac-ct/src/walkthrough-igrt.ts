@@ -90,7 +90,9 @@ export const IGRT_WALK: WalkPart<IgrtSnap> = {
 				do: 'Before any beam, you image Jordan to check the position.',
 				why: 'This is image-guided radiation therapy (IGRT). The images are compared with the plan, and any difference is corrected by moving the couch.'
 			},
-			targets: () => ['#igrtPanel .igrt-head h3']
+			// the window's title, "Registration & Couch Correction" (main.ts copies the panel's heading
+			// there; the console view hides the panel's own)
+			targets: () => ['#consoleWorkflowDock .console-dock-eyebrow']
 		},
 		{
 			id: 'igrt.new',
@@ -132,7 +134,9 @@ export const IGRT_WALK: WalkPart<IgrtSnap> = {
 				do: 'The images show Jordan {shift} mm off in the {axis} direction.',
 				why: "Recommended is the shift the images call for, Applied is how far you've moved, and Residual is what's left. Residual must reach 0."
 			},
-			targets: () => ['#igrtCorrectionRows'],
+			// the whole table with its header: in a short window index.html turns it on its side, and
+			// #igrtCorrectionRows then has no box of its own (display: contents)
+			targets: () => ['#igrtPanel .igrt-table'],
 			tokens: correction
 		},
 		{

@@ -171,13 +171,13 @@ describe("step 8's walkthrough, the check images", () => {
 
 	it('points at the panel heading, the buttons and the MV / EPID key', () => {
 		const s = imaged();
-		expect(step('igrt.intro').targets(s)).toEqual(['#igrtPanel .igrt-head h3']);
+		expect(step('igrt.intro').targets(s)).toEqual(['#consoleWorkflowDock .console-dock-eyebrow']);
 		expect(step('igrt.new').targets(s)).toEqual(['#igrtNewSetup']);
 		expect(step('igrt.mvOut').targets(s)).toEqual([
 			'#rtv2MachinePanel [data-console-target="consoleMV"]'
 		]);
 		expect(step('igrt.acquire').targets(s)).toEqual(['#igrtAcquire']);
-		expect(step('igrt.table').targets(s)).toEqual(['#igrtCorrectionRows']);
+		expect(step('igrt.table').targets(s)).toEqual(['#igrtPanel .igrt-table']);
 		expect(step('igrt.motion').targets(s)).toEqual(['#rtv2MotionEnable']);
 		expect(step('igrt.couch').targets(s)).toEqual([
 			'#rtv2MachinePanel [data-console-target="consoleVrtPlus"]'
