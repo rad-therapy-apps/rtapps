@@ -18,8 +18,9 @@ export interface CoachView {
 	drag?: { from: Element; to: Element };
 	/** 'full' 66%, 'light' 34%, 'none' no dim layer (the bubble only). */
 	dim: CoachDim;
-	/** Clicks, drags and keys outside the cut-outs do nothing (Esc, and keys aimed at a focused
-	    cut-out or at the bubble, still work). */
+	/** Clicks, drags and keys outside the cut-outs do nothing (Esc, Tab, key releases, and keys
+	    aimed at a focused cut-out or at the bubble still work). With dim 'none' there is no lock at
+	    all: no key filter and no press stop. */
 	lock: boolean;
 	/** The part's name, in the bubble's header beside the dots. */
 	header: string;
@@ -39,7 +40,9 @@ const DIM_ALPHA: Record<CoachDim, number> = { full: 0.66, light: 0.34, none: 0 }
     BUBBLE_GAP, sticks out). */
 const PTR = 14;
 const FONT = `system-ui, -apple-system, 'Segoe UI', sans-serif`;
-const KEYS = ['keydown', 'keyup', 'keypress'];
+/** The keys the lock filters. Key releases always go on, so a key held when a lock begins (W in
+    the center) is not left down. */
+const KEYS = ['keydown', 'keypress'];
 /** Presses on the dim layer or the bubble stop at the root, so the page's own listeners (a
     document click, the center's mouse look) never see them. Moves and releases go on, so a drag
     started in a cut-out still ends wherever it is let go. */
@@ -54,11 +57,14 @@ const PRESSES = [
 ];
 
 /* The reset reverts every page rule (the LINAC page makes each button full width and green) for
-   the coach's HTML. The SVG's insides are left out of it: reverting them would drop the geometry
-   their attributes give (d, x, y, width, height, rx are CSS properties too). */
+   the coach's HTML. The SVG's children are left out of it because `all: revert` drops their
+   presentation attributes (d, x, y, width, height, rx, fill are CSS properties too), so nothing
+   would draw; page-wide svg, path or rect rules can therefore reach them, and the coach's own
+   #rtCoach rules below outrank any plain ones. */
 const CSS = `
 #rtCoach, #rtCoach *:not(svg *) { all: revert; box-sizing: border-box; }
 #rtCoach { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; }
+#rtCoach[hidden] { display: none; }
 #rtCoach .rt-coach-layer { position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 #rtCoach .rt-coach-dim { fill-rule: evenodd; stroke: none; }
 #rtCoach .rt-coach-ring { fill: none; stroke: #3fd0c9; stroke-width: 2px; animation: rtCoachPulse 1.4s ease-in-out infinite; }
@@ -175,7 +181,10 @@ function build(): Dom {
 	skip.type = 'button';
 	skip.textContent = 'Skip walkthrough';
 	skip.addEventListener('click', () => current?.onSkip());
-	for (const type of PRESSES) root.addEventListener(type, (e) => e.stopPropagation());
+	for (const type of PRESSES) root.addEventListener(type, onPress);
+	root.addEventListener('keydown', onBubbleKey);
+	root.addEventListener('keypress', onBubbleKey);
+	document.body.appendChild(root);
 	return {
 		root,
 		dim,
@@ -303,10 +312,27 @@ function layout(v: CoachView, d: Dom): void {
 	placePointer(d, at, size);
 }
 
-/** While a bubble locks: a key goes through when it is Esc, aimed at the bubble, or pressed while
-    a cut-out's element holds the focus; any other stops here, before the page's listeners. */
+/** A press on the dim layer or the bubble stops at the root. On the dim layer it also does nothing
+    by default, so a stray press doesn't blur a focused cut-out or start a text selection. With dim
+    'none' there is no lock, so presses go on. */
+function onPress(e: Event): void {
+	if (!dom || current?.dim === 'none') return;
+	if (e.target === dom.dim && (e.type === 'pointerdown' || e.type === 'mousedown'))
+		e.preventDefault();
+	e.stopPropagation();
+}
+
+/** Keys aimed at the bubble are its own: Enter, Space and Tab still work on Next and Skip, but the
+    page's listeners never see them (the queue's arrow keys turn its page). Esc goes on. */
+function onBubbleKey(e: KeyboardEvent): void {
+	if (e.key !== 'Escape') e.stopPropagation();
+}
+
+/** While a bubble locks: a key goes through when it is Esc or Tab (so the focus can always reach
+    the cut-out and the bubble), aimed at the bubble, or pressed while a cut-out's element holds the
+    focus; any other stops here, before the page's listeners. */
 function onKey(e: KeyboardEvent): void {
-	if (e.key === 'Escape') return;
+	if (e.key === 'Escape' || e.key === 'Tab') return;
 	if (dom && e.target instanceof Node && dom.bubble.contains(e.target)) return;
 	const focused = document.activeElement;
 	if (focused && holeEls.some((h) => h.contains(focused))) return;
@@ -342,19 +368,20 @@ export function showCoach(view: CoachView): void {
 	current = view;
 	dom ??= build();
 	if (!shown) {
-		document.body.appendChild(dom.root);
+		dom.root.removeAttribute('hidden');
 		shown = true;
 	}
 	const key = JSON.stringify([view.header, view.dots, view.text, view.footer]);
 	const nextButton = key !== contentKey ? fill(view, dom) : null;
 	contentKey = key;
-	setKeyFilter(view.lock);
+	setKeyFilter(view.lock && view.dim !== 'none');
 	layout(view, dom);
 	nextButton?.focus({ preventScroll: true });
 	loop();
 }
 
-/** Hides the spotlight and its bubble, and drops the key filter. */
+/** Hides the spotlight and its bubble, and drops the key filter. The root stays in the page,
+    hidden, so its live region is there before the next bubble's text. */
 export function hideCoach(): void {
 	setKeyFilter(false);
 	if (looping && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf);
@@ -363,8 +390,12 @@ export function hideCoach(): void {
 	holeEls = [];
 	contentKey = '';
 	layoutKey = '';
-	if (shown && dom) dom.root.parentNode?.removeChild(dom.root);
 	shown = false;
+	if (!dom) return;
+	dom.root.setAttribute('hidden', '');
+	// a hidden Next keeps the focus otherwise, and the root would go on stopping the page's keys
+	const focused = document.activeElement as HTMLElement | null;
+	if (focused && dom.root.contains(focused)) focused.blur();
 }
 
 /** Whether the spotlight is showing. */
