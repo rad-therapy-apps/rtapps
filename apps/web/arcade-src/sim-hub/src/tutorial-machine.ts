@@ -71,6 +71,9 @@ export interface TutorialState {
 	/** Seconds a console step's console has been open with the hold on, since the hold came, a field
 	    was delivered or a miss (ConsoleTask.holdHint). */
 	holdSecs: number;
+	/** A walkthrough bubble shows on the LINAC console (console-bus.ts linacWalkthrough): the
+	    console's own guidance, so the step holds back its hints and counts no miss. */
+	walkthrough: boolean;
 	/** The console's beam as the step's world actions last showed it (ConsoleTask.beam). */
 	beamOn: boolean;
 	/** The decision was answered right, or its answer shown: Continue completes the step. */
@@ -110,6 +113,8 @@ export type TutorialEvent =
 	/** The LINAC console's geometry hold, from each state it posts (console-bus.ts
 	    linacGeometryHold). */
 	| { type: 'geometryHold'; hold: LinacGeometryHold | null }
+	/** The LINAC console's walkthrough began or ended (a part ended, or the player skipped it). */
+	| { type: 'walkthrough'; on: boolean }
 	/** The player closed the console panel. */
 	| { type: 'consoleClosed' }
 	/** Continue on the step card. */
@@ -148,6 +153,7 @@ export const OFF: TutorialState = {
 	missTemplate: null,
 	hold: null,
 	holdSecs: 0,
+	walkthrough: false,
 	beamOn: false,
 	resolved: false,
 	wait: 0,
@@ -198,6 +204,7 @@ export function consoleMissText(
 
 /** A console step's own line in the hint line: its hold hint once due, else its last miss's. */
 function consoleHint(s: TutorialState, task: ConsoleTask | undefined): string | null {
+	if (s.walkthrough) return null;
 	if (task?.holdHint && s.hold && holdHintDue(s.holdSecs)) return fillGoal(task.holdHint, s.hold);
 	return s.missHint;
 }
@@ -224,8 +231,8 @@ export function reduceTutorial(
 	const enter = (n: number): TutorialState => {
 		fx.push({ type: 'showStep', step: n }, { type: 'hint', text: null });
 		actions(steps[n - 1].onStart);
-		// the console's hold is the console's, not the step's
-		return { ...fresh(n, 'active'), hold: s.hold };
+		// the console's hold and walkthrough are the console's, not the step's
+		return { ...fresh(n, 'active'), hold: s.hold, walkthrough: s.walkthrough };
 	};
 	/** `st` with the console step's line in the hint line, while its console is open. */
 	const showConsoleHint = (st: TutorialState): TutorialState => {
@@ -237,7 +244,7 @@ export function reduceTutorial(
 	const complete = (st: TutorialState): TutorialState => {
 		actions(cur?.onComplete);
 		fx.push({ type: 'hint', text: null }, { type: 'showCard', step: st.step });
-		return { ...fresh(st.step, 'card'), hold: s.hold };
+		return { ...fresh(st.step, 'card'), hold: s.hold, walkthrough: s.walkthrough };
 	};
 	const trigger = (st: TutorialState): TutorialState => {
 		if (!cur) return st;
@@ -261,7 +268,12 @@ export function reduceTutorial(
 			// the console open: only the hold timer runs (the console's hints are its own)
 			if (s.phase === 'console') {
 				if (!cur.console?.holdHint) return out(s);
-				return out(showConsoleHint({ ...s, holdSecs: stepHold(s.holdSecs, ev.dt, !!s.hold) }));
+				return out(
+					showConsoleHint({
+						...s,
+						holdSecs: stepHold(s.holdSecs, ev.dt, !!s.hold && !s.walkthrough)
+					})
+				);
 			}
 			if (s.phase !== 'active') return out(s);
 			const pressE = cur.trigger === 'pressE',
@@ -307,6 +319,8 @@ export function reduceTutorial(
 			if (!task || !s.consoleOpened || (s.phase !== 'console' && s.phase !== 'active'))
 				return out(s);
 			const outcome = consoleOutcome(ev.event, task.done[s.progress]);
+			// the console's walkthrough counts no miss; its progress events still count
+			if (outcome === 'miss' && s.walkthrough) return out(s);
 			if (outcome === 'miss') {
 				// a miss shows at once, and the hold timer starts again
 				const misses = s.misses + 1,
@@ -354,6 +368,14 @@ export function reduceTutorial(
 			}
 			return out(showConsoleHint(st));
 		}
+		case 'walkthrough': {
+			if (ev.on === s.walkthrough) return out(s);
+			// off: misses count from zero again; on: the console's own bubbles take over
+			const st: TutorialState = ev.on
+				? { ...s, walkthrough: true, holdSecs: 0 }
+				: { ...s, walkthrough: false, misses: 0, missHint: null, missTemplate: null, holdSecs: 0 };
+			return out(showConsoleHint(st));
+		}
 		case 'consoleClosed': {
 			// closed before the step is done: the step stays, and E opens the console again
 			if (!cur?.console || s.phase !== 'console') return out(s);
@@ -397,12 +419,12 @@ export function reduceTutorial(
 			fx.push({ type: 'hideCard' });
 			if (s.step >= steps.length) {
 				fx.push({ type: 'complete' });
-				return out(fresh(s.step, 'done'));
+				return out({ ...fresh(s.step, 'done'), walkthrough: s.walkthrough });
 			}
 			const next = steps[s.step];
 			if (next.role !== cur.role) {
 				fx.push({ type: 'roleChange', role: next.role });
-				return out(fresh(s.step + 1, 'roleChange'));
+				return out({ ...fresh(s.step + 1, 'roleChange'), walkthrough: s.walkthrough });
 			}
 			return out(enter(s.step + 1));
 		}

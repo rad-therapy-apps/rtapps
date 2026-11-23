@@ -81,6 +81,7 @@ import {
 	linacEvents,
 	linacGeometryHold,
 	linacPose,
+	linacWalkthrough,
 	panelOpen,
 	vaultMonitorPatient
 } from './console-bus';
@@ -138,6 +139,10 @@ let lastAnswer: string | null = null;
     Jordan is on the Vault 1 monitors (showJordanOnVaultMonitors). */
 let consoleShown: { kind: 'linac'; workspace: LinacWorkspace; fresh: boolean } | null = null;
 let freshConsole = true;
+/** The LINAC console shows a walkthrough bubble; its step's close waits for it to end. */
+let walkthroughOn = false;
+/** The step's close is waiting out the walkthrough (the beat has passed). */
+let closePending = false;
 let jordanOnMonitors = false;
 const timers = new Set<ReturnType<typeof setTimeout>>();
 let route: Pt[] = [];
@@ -223,7 +228,10 @@ function perform(e: Effect): void {
 			// after a beat, so the player sees the result; not a console opened since (step 8 to 9)
 			const shown = consoleShown;
 			after(TUTORIAL_TIMING.consoleCloseMs, () => {
-				if (consoleShown === shown) closeStepConsole();
+				if (consoleShown !== shown) return;
+				// a walkthrough still showing (delivery's last bubble) keeps the panel open
+				if (walkthroughOn) closePending = true;
+				else closeStepConsole();
 			});
 			return;
 		}
@@ -259,12 +267,14 @@ function perform(e: Effect): void {
     checked in from an earlier play. The game is not paused; the tracker docks on the panel for the
     console hints. */
 function openStepConsole(workspace: LinacWorkspace): void {
+	closePending = false;
 	consoleShown = { kind: 'linac', workspace, fresh: freshConsole };
 	openConsole('linac', { workspace, scenario: 'tutorial', fresh: freshConsole });
 	freshConsole = false;
 	hud.dockOnConsole(true);
 }
 function closeStepConsole(): void {
+	closePending = false;
 	if (!consoleShown) return;
 	consoleShown = null; // first, so the panel's close is not taken for the player's
 	hud.dockOnConsole(false);
@@ -280,6 +290,7 @@ function showJordanOnVaultMonitors(on: boolean): void {
 /** The player closed the console panel before the step was done: the step stays, E opens it again.
     Closed in the beat after the step is done, it brings the step's card at once. */
 function consolePanelClosed(): void {
+	closePending = false;
 	if (!consoleShown) return;
 	consoleShown = null;
 	hud.dockOnConsole(false);
@@ -955,6 +966,7 @@ function startTutorial(): void {
 }
 function exitTutorial(): void {
 	active = false;
+	walkthroughOn = closePending = false;
 	for (const id of timers) clearTimeout(id);
 	timers.clear();
 	queue.length = 0;
@@ -1132,6 +1144,13 @@ export function initTutorial(): void {
 	});
 	linacPose.on((pose) => {
 		if (active) dispatch({ type: 'beam', on: pose.beamOn });
+	});
+	linacWalkthrough.on((w) => {
+		const on = !!w;
+		if (on === walkthroughOn) return;
+		walkthroughOn = on;
+		if (active) dispatch({ type: 'walkthrough', on });
+		if (!on && closePending) closeStepConsole();
 	});
 	linacGeometryHold.on((hold) => {
 		if (active) dispatch({ type: 'geometryHold', hold });

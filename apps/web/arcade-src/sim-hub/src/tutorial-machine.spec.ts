@@ -545,6 +545,78 @@ describe('step 9: the geometry hold names its fix with the selected field', () =
 	});
 });
 
+describe('the console’s walkthrough', () => {
+	const on: TutorialEvent = { type: 'walkthrough', on: true };
+	const off: TutorialEvent = { type: 'walkthrough', on: false };
+	const hold: TutorialEvent = {
+		type: 'geometryHold',
+		hold: { field: 'Right Lateral', mismatches: [{ label: 'Gantry', now: '0°', planned: '270°' }] }
+	};
+	const wait = (seconds: number) => ticks(seconds, 0);
+	const open = (n: number) => run(atStep(n), { type: 'pressedE', target: 'console' }).s;
+
+	it('is tracked, and a repeat changes nothing', () => {
+		const r = run(OFF, on);
+		expect(r.s.walkthrough).toBe(true);
+		expect(r.effects).toEqual([]);
+		expect(run(r.s, on).s).toEqual(r.s);
+		expect(run(r.s, off).s.walkthrough).toBe(false);
+	});
+
+	it('counts no miss and pushes no hint for a mistake or another patient’s check-in or chart', () => {
+		const r = run(
+			open(3),
+			on,
+			mistake,
+			linac('checked-in', TUTORIAL_PATIENTS.jody.mrn),
+			linac('chart-opened', TUTORIAL_PATIENTS.jody.mrn)
+		);
+		expect(r.s.misses).toBe(0);
+		expect(r.s.missHint).toBeNull();
+		expect(hints(r.effects)).toEqual([]);
+	});
+
+	it('still counts progress, and completes the step', () => {
+		const r = run(open(3), on, linac('checked-in'), linac('chart-opened'));
+		expect(r.s.phase).toBe('card');
+		expect(r.effects).toContainEqual({ type: 'closeConsole' });
+	});
+
+	it('counts misses from zero again once it goes off, with hint 1 first', () => {
+		const task = CHAPTER_1[2].console!;
+		const r = run(open(3), on, mistake, mistake, mistake, off, mistake);
+		expect(r.s.misses).toBe(1);
+		expect(r.s.hint).toBe(`Not yet. ${task.hints[0]}`);
+	});
+
+	it('clears a showing miss hint when it begins, and brings none back when it ends', () => {
+		let r = run(open(3), mistake);
+		expect(r.s.hint).not.toBeNull();
+		r = run(r.s, on);
+		expect(r.s.hint).toBeNull();
+		expect(r.effects).toContainEqual({ type: 'hint', text: null });
+		expect(run(r.s, off).s.hint).toBeNull();
+	});
+
+	it('holds the step 9 hold hint and its timer at 0', () => {
+		let r = run(open(9), hold, on, ...wait(30));
+		expect(r.s.holdSecs).toBe(0);
+		expect(r.s.hint).toBeNull();
+		r = run(r.s, off, ...wait(20));
+		expect(r.s.hint).toContain('Right Lateral');
+	});
+
+	it('survives enter(), as the hold does, and the card', () => {
+		const r = run(open(3), on, linac('checked-in'), linac('chart-opened'));
+		expect(r.s.walkthrough).toBe(true);
+		expect(run(r.s, cardContinue).s.walkthrough).toBe(true);
+	});
+
+	it('is reset by stop', () => {
+		expect(run(open(3), on, { type: 'stop' }).s.walkthrough).toBe(false);
+	});
+});
+
 describe('decisions', () => {
 	const open = run(atStep(4), { type: 'pressedE', target: 'jordan' }).s;
 	const d = CHAPTER_1[3].decision!;
