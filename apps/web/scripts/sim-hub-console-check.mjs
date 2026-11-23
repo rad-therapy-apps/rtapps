@@ -288,7 +288,11 @@ try {
 	part('load');
 
 	// ---------- steps 1-2, as the patient ----------
-	await tut(() => window.__TUTORIAL.enter());
+	// getting started (tutorial-guide.ts) is the tutorial check's to play: skipped here
+	await tut(() => {
+		window.__TUTORIAL.enter();
+		window.__TUTORIAL.coachSkip();
+	});
 	await stepIs(1);
 	await pressE();
 	await tut(() => window.__TUTORIAL.cont());
@@ -862,6 +866,7 @@ try {
 	await tut(() => {
 		window.__TUTORIAL.toTitle();
 		window.__TUTORIAL.enter();
+		window.__TUTORIAL.coachSkip();
 	});
 	await stepIs(1);
 	await pressE();
