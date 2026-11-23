@@ -32,7 +32,9 @@
 // Asserted on both runs: every step completes, in order; the figure the player is being is hidden
 // (Jordan's in steps 1-2, Morgan Reed's from step 3) and the vault 1 couch is empty until Jordan
 // lies down; each play asks for a fresh console page at its first opening (step 3) and only then;
-// each console step ends with its "Correct." line; Jordan is on the Vault 1 monitors from the
+// every step ends on its step card, once each, titled as the step's (src/tutorial-steps.ts), never
+// over the console (a console step's waits for the console's beat), and the check presses its
+// Continue as it does a room card's; Jordan is on the Vault 1 monitors from the
 // chart opening at step 3; at step 9 the Vault 1 board shows BEAM ON while the console's beam is
 // on, BETWEEN FIELDS when it goes off and TREATMENT COMPLETE at the end; every move the tutorial
 // makes (Jordan's escorts, Jamie Williams's walks) keeps the 0.2 m circle round the walker's root
@@ -108,6 +110,11 @@ console.warn = (...a) => {
 	warn(...a);
 };
 installBrowserStubs({ search: '?npccheck' });
+// the step card's title element, kept: the stub DOM hands out a new element on every lookup, and
+// the check reads the one src/tutorial-hud.ts looked up at init and writes the title in
+const byId = document.getElementById;
+let cardTitle = null;
+document.getElementById = (id) => (id === 'tutCardTitle' ? (cardTitle ??= byId(id)) : byId(id));
 // a working store, with the room introduction cards on (the page reads it through prefs.ts)
 const store = new Map();
 globalThis.localStorage = {
@@ -162,11 +169,31 @@ const playerBlocked = (x, z) =>
 		(c) => Math.abs(x - c.x) < c.hw + PLAYER_R && Math.abs(z - c.z) < c.hd + PLAYER_R
 	);
 
+// The step cards a play showed, by step, and what was wrong with them.
+let cardsShown = [],
+	cardFails = [];
+// The step card that shows: the current step's, with its title, never over the console; then its
+// Continue.
+function continueCard() {
+	const s = T.state(),
+		card = T.steps[s.step - 1]?.card;
+	cardsShown.push(s.step);
+	if (s.phase !== 'card' || !s.card)
+		cardFails.push(`step ${s.step}: no card shows (phase '${s.phase}', card ${s.card})`);
+	if (cardTitle?.textContent !== card?.title)
+		cardFails.push(
+			`step ${s.step}: the card's title reads "${cardTitle?.textContent}", not "${card?.title}"`
+		);
+	if (NPC.isConsoleOpen()) cardFails.push(`step ${s.step}: the card shows over the console`);
+	T.cardContinue();
+}
+
 // every frame of a run: each tutorial move's walker against the walls
 let wallHits = [],
 	movesSeen = new Set();
 function onFrame() {
 	if (RC.open()) RC.close(); // Continue
+	if (T.state().card) continueCard();
 	if (!T.state().active) return;
 	for (const t of NPC.workflowTransitions) {
 		movesSeen.add(t);
@@ -274,7 +301,8 @@ function playConsole(n, st, wrong, fails) {
 		// Jordan's verified alignment does not complete a step before its own events (step 8: before
 		// the shift is applied)
 		T.consoleEvent({ kind: 'alignment-verified', mrn: jordan });
-		if (T.state().step !== n) fails.push(`step ${n}: an event out of order completed the step`);
+		if (T.state().step !== n || T.state().phase === 'card')
+			fails.push(`step ${n}: an event out of order completed the step`);
 		// the panel closed early: the step stays, its last hint too, and E opens the console again
 		T.closePanel();
 		const closed = T.state();
@@ -317,17 +345,18 @@ function playConsole(n, st, wrong, fails) {
 			fails.push(`step ${n}: the Vault 1 board over two fields was ${JSON.stringify(vault)}`);
 	}
 	for (const kind of c.done) {
-		if (T.state().step !== n) fails.push(`step ${n}: completed before '${kind}'`);
+		if (T.state().step !== n || T.state().phase === 'card')
+			fails.push(`step ${n}: completed before '${kind}'`);
 		T.consoleEvent({ kind, mrn: jordan });
 	}
 	if (c.beam && T.boards().vault1 !== 'TREATMENT COMPLETE')
 		fails.push(`step ${n}: the Vault 1 board at the end is '${T.boards().vault1}'`);
-	if (T.state().step === n) {
+	if (T.state().step !== n || T.state().phase !== 'card') {
 		fails.push(`step ${n}: not completed by ${c.done.join(', ')}`);
 		return;
 	}
-	if (T.state().correct !== `Correct. ${c.reason}`)
-		fails.push(`step ${n}: no "Correct." line when the step completed (${T.state().correct})`);
+	// the step's card waits for the console's beat, then shows (and onFrame continues it)
+	if (T.state().card) fails.push(`step ${n}: the card showed over the console's beat`);
 	if (n === 3 && !T.state().jordanOnMonitors)
 		fails.push('step 3: Jordan is not on the Vault 1 monitors after the chart opened');
 	if (!T.state().console || !NPC.isConsoleOpen())
@@ -335,6 +364,7 @@ function playConsole(n, st, wrong, fails) {
 	stepFor(CONSOLE_BEAT_S);
 	if (T.state().console || NPC.isConsoleOpen() || T.docked())
 		fails.push(`step ${n}: the console is still open ${CONSOLE_BEAT_S} s after the step completed`);
+	if (cardsShown.at(-1) !== n) fails.push(`step ${n}: no card once the console closed`);
 }
 
 // A LINAC console pose (shared/console-protocol.ts LinacPose) at rest, with the beam `beamOn`.
@@ -369,6 +399,8 @@ function play(wrong) {
 		order = [];
 	wallHits = [];
 	movesSeen = new Set();
+	cardsShown = [];
+	cardFails = [];
 	let routes = 0;
 	RC.log.entered.length = 0;
 	RC.log.shown.length = 0;
@@ -398,6 +430,11 @@ function play(wrong) {
 		if (s.phase === 'roleChange' || s.phase === 'waiting') {
 			if (!stepUntil(() => T.state().phase !== s.phase, 20))
 				fails.push(`step ${s.step}: stuck in '${s.phase}'`);
+			continue;
+		}
+		// a card shown at once: after the check-in and the decision's Continue
+		if (s.phase === 'card') {
+			continueCard();
 			continue;
 		}
 		if (s.phase !== 'active') {
@@ -525,6 +562,15 @@ function play(wrong) {
 		`${name}: walls`,
 		wallHits,
 		`${movesSeen.size} tutorial moves, the ${WALL_R} m circle round every walker clear of the wall colliders on every frame`
+	);
+	// step cards: one per step, in order
+	const steps11 = T.steps.map((st) => st.n);
+	if (JSON.stringify(cardsShown) !== JSON.stringify(steps11))
+		cardFails.push(`cards shown for steps ${JSON.stringify(cardsShown)}, not one for each of 1-11`);
+	report(
+		`${name}: step cards`,
+		cardFails,
+		`${cardsShown.length} step cards, one for each step, each with its title and none over the console`
 	);
 	// room cards: once per room in a play
 	const cards = [],

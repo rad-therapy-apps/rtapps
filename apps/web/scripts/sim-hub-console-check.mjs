@@ -164,6 +164,20 @@ const stepIs = (n, phase = 'active') =>
 		60000,
 		[n, phase]
 	);
+/** Waits for step `n`'s card (a console step's shows once its console has closed) and presses its
+    Continue. */
+async function continueCard(n) {
+	await until(
+		`step ${n}'s card`,
+		(n) => {
+			const s = window.__TUTORIAL.state();
+			return s.step === n && s.phase === 'card' && s.card;
+		},
+		60000,
+		n
+	);
+	await tut(() => window.__TUTORIAL.cardContinue());
+}
 /** Resolves after `n` of the center's frames (its frame loop moves the E targets and the prompt). */
 const frames = (n) =>
 	page.evaluate(
@@ -276,8 +290,10 @@ try {
 	await stepIs(1);
 	await pressE();
 	await tut(() => window.__TUTORIAL.cont());
+	await continueCard(1);
 	await stepIs(2);
 	await pressE();
+	await continueCard(2);
 	await stepIs(3);
 	part('steps 1-2');
 
@@ -325,6 +341,7 @@ try {
 	);
 	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-checkin');
 	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-openchart');
+	await continueCard(3);
 	await stepIs(4);
 	expect(
 		(await state()).jordanOnMonitors,
@@ -341,6 +358,7 @@ try {
 		t.answer(s.decision.options.find((o) => o.correct).id);
 		t.cont();
 	});
+	await continueCard(4);
 	await stepIs(5);
 	await until(
 		'Jordan to reach the couch',
@@ -348,7 +366,7 @@ try {
 			const t = window.__TUTORIAL,
 				s = t.state(),
 				J = window.__NPC.JOURNEY;
-			if (s.step !== 5) return true;
+			if (s.step !== 5 || s.phase === 'card') return true;
 			if (!s.walkFade) {
 				t.placePlayer(J.patient.position.x + 0.8, J.patient.position.z + 0.8);
 				window.__skipWalk(J.patient);
@@ -357,6 +375,7 @@ try {
 		},
 		60000
 	);
+	await continueCard(5);
 	await stepIs(6);
 	part('steps 4-5');
 
@@ -469,6 +488,7 @@ try {
 	for (const id of ['immoPositionCheck', 'immoIndexCheck', 'immoPrepCheck'])
 		if (await frame.locator(`#${id}`).count()) await click(`#${id}`);
 	await click('#immobilizationVerify');
+	await continueCard(6);
 	await stepIs(7);
 	await until('the panel to close after the beat', () => !window.__NPC.isConsoleOpen());
 	part(`step 6 (setup; dragged by ${dragPaths.join(', ')})`);
@@ -484,10 +504,12 @@ try {
 		() => {
 			window.__skipWalk(window.__NPC.JOURNEY.vaultTherapist);
 			const s = window.__TUTORIAL.state();
-			return s.step === 8 && s.phase === 'active';
+			return s.step === 7 && s.phase === 'card';
 		},
 		60000
 	);
+	await continueCard(7);
+	await stepIs(8);
 	part('step 7');
 
 	// ---------- step 8: image guidance ----------
@@ -586,6 +608,7 @@ try {
 	await nextEvent('shift-applied', n);
 	await consoleKey('consoleMV'); // stowed for the beam
 	await click('#igrtVerify');
+	await continueCard(8);
 	await stepIs(9);
 	await until('the panel to close after the beat', () => !window.__NPC.isConsoleOpen());
 	part('step 8 (image guidance)');
@@ -770,6 +793,7 @@ try {
 			[boardsFrom, index === 0 ? 'BETWEEN FIELDS' : null]
 		);
 	}
+	await continueCard(9);
 	await stepIs(10);
 	expect(
 		(await tut(() => window.__TUTORIAL.boards().vault1)) === 'TREATMENT COMPLETE',
@@ -812,8 +836,10 @@ try {
 	await stepIs(1);
 	await pressE();
 	await tut(() => window.__TUTORIAL.cont());
+	await continueCard(1);
 	await stepIs(2);
 	await pressE();
+	await continueCard(2);
 	await stepIs(3);
 	await pressE([46.1, 9.0]);
 	await until(
@@ -831,6 +857,7 @@ try {
 	n = await eventCount();
 	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-checkin');
 	await click('#rtv2QueueRows .rtv2-queue-row:nth-child(2) .rtv2-openchart');
+	await continueCard(3);
 	await stepIs(4);
 	const again = (await events()).slice(n).map((e) => e.kind);
 	expect(
