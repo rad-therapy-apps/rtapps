@@ -21,6 +21,7 @@ import {
 	type LinacRoomMsg,
 	type LinacStateMsg,
 	type LinacToCenterMessage,
+	type LinacWalkthrough,
 	type LinacWorkspace
 } from '../../shared/console-protocol';
 
@@ -129,6 +130,18 @@ function readGeometryHold(h: unknown): LinacGeometryHold | null | undefined {
 	return { field: h.field, mismatches };
 }
 
+/** A state message's walkthrough position: null, or a copy of its part, step index and step count;
+    undefined when it is neither (an unknown part, an index that is not a whole number inside the
+    count). */
+function readWalkthrough(w: unknown): LinacWalkthrough | null | undefined {
+	if (w === null) return null;
+	if (!isBag(w) || !isWorkspace(w.part) || !isNum(w.index) || !isNum(w.of)) return undefined;
+	const { part, index, of } = w;
+	if (!Number.isInteger(index) || !Number.isInteger(of) || index < 0 || of < 1 || index >= of)
+		return undefined;
+	return { part, index, of };
+}
+
 /** A LINAC console message as the contract shapes it (a fresh copy), or null for anything else. */
 export function readLinacMessage(data: unknown): LinacToCenterMessage | null {
 	if (!isBag(data)) return null;
@@ -146,6 +159,12 @@ export function readLinacMessage(data: unknown): LinacToCenterMessage | null {
 			const hold = readGeometryHold(data.geometryHold);
 			if (hold === undefined) return null;
 			msg.geometryHold = hold;
+		}
+		// the walkthrough position likewise: a message may leave it out
+		if (data.walkthrough !== undefined) {
+			const walkthrough = readWalkthrough(data.walkthrough);
+			if (walkthrough === undefined) return null;
+			msg.walkthrough = walkthrough;
 		}
 		return msg;
 	}

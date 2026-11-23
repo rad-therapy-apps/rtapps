@@ -173,6 +173,41 @@ describe('readLinacMessage', () => {
 		expect(state({ field: 'Right Lateral', mismatches: [] })).not.toBe(null);
 	});
 
+	it('reads the walkthrough position when the state carries one, a fresh copy', () => {
+		const base = { type: 'rtapps-linac-state', pose: POSE, mrn: null, workspace: 'setup' };
+		const walkthrough = { part: 'setup', index: 2, of: 7, extra: 'dropped' };
+		const msg = readLinacMessage({ ...base, walkthrough });
+		expect(msg).toEqual({ ...base, walkthrough: { part: 'setup', index: 2, of: 7 } });
+		expect(msg && msg.type === 'rtapps-linac-state' && msg.walkthrough).not.toBe(walkthrough);
+		expect(readLinacMessage({ ...base, walkthrough: null })).toEqual({
+			...base,
+			walkthrough: null
+		});
+		const without = readLinacMessage(base);
+		expect(without).toEqual(base);
+		expect(without && 'walkthrough' in without).toBe(false);
+	});
+
+	it('refuses a state whose walkthrough is malformed', () => {
+		const state = (walkthrough: unknown) =>
+			readLinacMessage({
+				type: 'rtapps-linac-state',
+				pose: POSE,
+				mrn: null,
+				workspace: 'queue',
+				walkthrough
+			});
+		expect(state({ part: 'vault', index: 0, of: 3 })).toBe(null);
+		expect(state({ index: 0, of: 3 })).toBe(null);
+		expect(state({ part: 'setup', index: 1.5, of: 3 })).toBe(null);
+		expect(state({ part: 'setup', index: -1, of: 3 })).toBe(null);
+		expect(state({ part: 'setup', index: 0, of: 0 })).toBe(null);
+		expect(state({ part: 'setup', index: 3, of: 3 })).toBe(null);
+		expect(state({ part: 'setup', index: 4, of: 3 })).toBe(null);
+		expect(state('setup')).toBe(null);
+		expect(state({ part: 'setup', index: 2, of: 3 })).not.toBe(null);
+	});
+
 	it('refuses a pose message with an unknown workspace or a bad MRN', () => {
 		expect(
 			readLinacMessage({ type: 'rtapps-linac-state', pose: POSE, mrn: null, workspace: 'vault' })
