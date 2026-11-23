@@ -79,7 +79,10 @@ describe("step 6's walkthrough, the couch setup", () => {
 
 	it('targets the order, the key and the position, then each drag, tick and Verify', () => {
 		const s = snap();
-		expect(step('setup.order').targets(s)).toEqual(['#immobilizationOrderSummary']);
+		expect(step('setup.order').targets(s)).toEqual([
+			'#immobilizationOrderSummary',
+			'#immobilizationInstructions'
+		]);
 		expect(step('setup.key').targets(s)).toEqual([
 			'#immobilizationOrderSummary .immo-key',
 			'#immobilizationPosition'

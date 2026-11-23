@@ -45,7 +45,7 @@ export const SETUP_WALK: WalkPart<SetupSnap> = {
 				do: "This is Jordan's setup order.",
 				why: "It was written at CT simulation, when the plan was made. Today's setup has to match it."
 			},
-			targets: () => ['#immobilizationOrderSummary']
+			targets: () => ['#immobilizationOrderSummary', '#immobilizationInstructions']
 		},
 		{
 			id: 'setup.key',
