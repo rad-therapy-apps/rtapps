@@ -13,6 +13,7 @@ import {
 	poseFromReadout,
 	sameGeometryHold,
 	samePose,
+	sameWalkthrough,
 	shiftLengthMm,
 	STATE_MIN_GAP_MS,
 	statePostDue,
@@ -335,6 +336,24 @@ describe('the geometry hold the state message carries', () => {
 				mismatches: [...hold.mismatches, { label: 'Couch Vrt', now: '+6', planned: '+4 mm' }]
 			})
 		).toBe(false);
+	});
+});
+
+describe('the walkthrough the state message carries', () => {
+	const walk = { part: 'queue' as const, index: 1, of: 4 };
+
+	it('says two walkthroughs with no spotlight are the same, and one with none differs', () => {
+		expect(sameWalkthrough(null, null)).toBe(true);
+		expect(sameWalkthrough(walk, null)).toBe(false);
+		expect(sameWalkthrough(null, walk)).toBe(false);
+	});
+	it('says the same part at the same sub-step is the same', () => {
+		expect(sameWalkthrough(walk, { ...walk })).toBe(true);
+	});
+	it('posts again when the part, the sub-step or the count changes', () => {
+		expect(sameWalkthrough(walk, { ...walk, part: 'setup' })).toBe(false);
+		expect(sameWalkthrough(walk, { ...walk, index: 2 })).toBe(false);
+		expect(sameWalkthrough(walk, { ...walk, of: 7 })).toBe(false);
 	});
 });
 

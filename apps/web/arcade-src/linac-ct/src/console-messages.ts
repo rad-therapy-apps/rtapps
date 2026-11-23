@@ -13,6 +13,7 @@ import {
 	type ConsoleScenario,
 	type LinacGeometryHold,
 	type LinacPose,
+	type LinacWalkthrough,
 	type LinacWorkspace
 } from '../../shared/console-protocol';
 
@@ -161,6 +162,13 @@ export function sameGeometryHold(
 				m.planned === b.mismatches[i].planned
 		)
 	);
+}
+
+/** Whether two walkthrough states say the same: both none, or the same part at the same sub-step
+    of the same count. */
+export function sameWalkthrough(a: LinacWalkthrough | null, b: LinacWalkthrough | null): boolean {
+	if (!a || !b) return a === b;
+	return a.part === b.part && a.index === b.index && a.of === b.of;
 }
 
 /** The length of a couch correction's translation, in mm to 0.1. */
