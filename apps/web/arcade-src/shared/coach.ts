@@ -4,7 +4,9 @@
    tutorial-guide.ts) and the LINAC console (linac-ct walkthrough-mode.ts) both use it; its pure
    geometry is coach-geometry.ts. A caller calls showCoach with the current sub-step as often as it
    likes (each frame is fine: the same view is not rebuilt), and hideCoach when the walkthrough
-   ends. */
+   ends. While the player presses or holds a cut-out's control the dim clears, so they can watch
+   what it does (the gantry turning, the couch readouts), and it comes back on release; the lock
+   stays on meanwhile. */
 
 import { holesPath, HOLE_RADIUS, padRect, placeBubble, union } from './coach-geometry';
 import type { Placement, Rect, Size } from './coach-geometry';
@@ -56,6 +58,10 @@ const PRESSES = [
 	'contextmenu'
 ];
 
+/** What ends a press on a cut-out's control: let go, cancelled, or a drag dropped (a native drag
+    sends no pointerup); the window losing the focus ends it too (build). */
+const RELEASES = ['pointerup', 'pointercancel', 'dragend'];
+
 /* The reset reverts every page rule (the LINAC page makes each button full width and green) for
    the coach's HTML. The SVG's children are left out of it because `all: revert` drops their
    presentation attributes (d, x, y, width, height, rx, fill are CSS properties too), so nothing
@@ -66,12 +72,13 @@ const CSS = `
 #rtCoach { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; }
 #rtCoach[hidden] { display: none; }
 #rtCoach .rt-coach-layer { position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
-#rtCoach .rt-coach-dim { fill-rule: evenodd; stroke: none; }
+#rtCoach .rt-coach-dim { fill-rule: evenodd; stroke: none; transition: opacity 0.15s ease-out; }
+#rtCoach.rt-coach-pressing .rt-coach-dim { opacity: 0; }
 #rtCoach .rt-coach-ring { fill: none; stroke: #3fd0c9; stroke-width: 2px; animation: rtCoachPulse 1.4s ease-in-out infinite; }
 #rtCoach .rt-coach-arrow { fill: none; stroke: #3fd0c9; stroke-width: 2px; stroke-dasharray: 6 5; }
 #rtCoach .rt-coach-head { fill: #3fd0c9; stroke: none; }
 @keyframes rtCoachPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-@media (prefers-reduced-motion: reduce) { #rtCoach .rt-coach-ring { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #rtCoach .rt-coach-ring { animation: none; } #rtCoach .rt-coach-dim { transition: none; } }
 #rtCoach .rt-coach-bubble { position: fixed; left: 0; top: 0; width: min(360px, 100vw - 16px); padding: 16px 18px 14px; border-radius: 12px; background: #f6f9fb; color: #13202b; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45); font: 400 13px/1.45 ${FONT}; text-align: left; pointer-events: auto; }
 #rtCoach .rt-coach-ptr { position: absolute; z-index: -1; width: ${PTR}px; height: ${PTR}px; background: #f6f9fb; transform: rotate(45deg); }
 #rtCoach .rt-coach-kick { display: flex; align-items: center; gap: 10px; font: 700 12px/1.2 ${FONT}; letter-spacing: 0.08em; text-transform: uppercase; color: #1e8f8a; }
@@ -182,6 +189,11 @@ function build(): Dom {
 	skip.textContent = 'Skip walkthrough';
 	skip.addEventListener('click', () => current?.onSkip());
 	for (const type of PRESSES) root.addEventListener(type, onPress);
+	window.addEventListener('pointerdown', onHolePress, true);
+	for (const type of RELEASES) window.addEventListener(type, endHolePress, true);
+	// the window's own blur only: an element's (the focus leaving the last button pressed) comes
+	// with the very press that clears the dim
+	window.addEventListener('blur', (e) => e.target === window && endHolePress());
 	root.addEventListener('keydown', onBubbleKey);
 	root.addEventListener('keypress', onBubbleKey);
 	document.body.appendChild(root);
@@ -322,6 +334,15 @@ function onPress(e: Event): void {
 	e.stopPropagation();
 }
 
+/** A press on a cut-out's control clears the dim until it is let go (endHolePress). */
+function onHolePress(e: PointerEvent): void {
+	if (dom && shown && e.target instanceof Node && holeEls.some((h) => h.contains(e.target as Node)))
+		dom.root.classList.add('rt-coach-pressing');
+}
+function endHolePress(): void {
+	dom?.root.classList.remove('rt-coach-pressing');
+}
+
 /** Keys aimed at the bubble are its own: Enter, Space and Tab still work on Next and Skip, but the
     page's listeners never see them (the queue's arrow keys turn its page). Esc goes on. */
 function onBubbleKey(e: KeyboardEvent): void {
@@ -384,6 +405,7 @@ export function showCoach(view: CoachView): void {
     hidden, so its live region is there before the next bubble's text. */
 export function hideCoach(): void {
 	setKeyFilter(false);
+	endHolePress();
 	if (looping && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf);
 	looping = false;
 	current = null;
