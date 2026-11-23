@@ -31,6 +31,9 @@ const HEADREST = { id: 'headrest', name: 'Headrest' },
 export const shelfDevice = (name: string): string =>
 	`#immobilizationShelf .immo-device[aria-label="${name}"]`;
 const TABLE = '#immobilizationTableDrop';
+/** The selector of the label row that holds the checkbox `id`: its box and its word, so a click
+    anywhere on it ticks the box. */
+const checkRow = (id: string): string => `#immobilizationVerificationChecks label:has(#${id})`;
 
 const placed = (device: { id: string }) => (s: SetupSnap) => s.onTable.includes(device.id);
 
@@ -87,7 +90,7 @@ export const SETUP_WALK: WalkPart<SetupSnap> = {
 				do: 'Tick Position.',
 				why: 'Jordan lies as the setup record says: head first, on the back, head straight and centred.'
 			},
-			targets: () => ['#immoPositionCheck'],
+			targets: () => [checkRow('immoPositionCheck')],
 			done: (s) => s.position,
 			cue: 'Tick Position'
 		},
@@ -98,7 +101,7 @@ export const SETUP_WALK: WalkPart<SetupSnap> = {
 				do: 'Tick Indexing.',
 				why: 'The headrest and mask lock into numbered positions on the couch, so they sit in the same place every day.'
 			},
-			targets: () => ['#immoIndexCheck'],
+			targets: () => [checkRow('immoIndexCheck')],
 			done: (s) => s.indexing,
 			cue: 'Tick Indexing'
 		},

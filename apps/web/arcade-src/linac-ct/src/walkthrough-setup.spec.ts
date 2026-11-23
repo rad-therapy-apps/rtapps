@@ -97,8 +97,12 @@ describe("step 6's walkthrough, the couch setup", () => {
 			from: '#immobilizationShelf .immo-device[aria-label="Short Head Mask"]',
 			to: '#immobilizationTableDrop'
 		});
-		expect(step('setup.position').targets(s)).toEqual(['#immoPositionCheck']);
-		expect(step('setup.indexing').targets(s)).toEqual(['#immoIndexCheck']);
+		expect(step('setup.position').targets(s)).toEqual([
+			'#immobilizationVerificationChecks label:has(#immoPositionCheck)'
+		]);
+		expect(step('setup.indexing').targets(s)).toEqual([
+			'#immobilizationVerificationChecks label:has(#immoIndexCheck)'
+		]);
 		expect(step('setup.verify').targets(s)).toEqual(['#immobilizationVerify']);
 		// only the two drags have one
 		expect(steps.filter((x) => x.drag).map((x) => x.id)).toEqual(['setup.headrest', 'setup.mask']);
