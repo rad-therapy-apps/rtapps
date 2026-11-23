@@ -1232,6 +1232,12 @@ try {
 		const b = await frame.locator('#consoleMoveToField').boundingBox();
 		await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
 		await page.mouse.down();
+		// the dim clears while the key is held, so the gantry and the readouts can be watched
+		const pressing = () =>
+			frame.evaluate(
+				() => !!document.getElementById('rtCoach')?.classList.contains('rt-coach-pressing')
+			);
+		expect(await pressing(), `the spotlight's dim clears while Move to field is held at ${id}`);
 		let moving = false;
 		for (const t0 = Date.now(); Date.now() - t0 < MOTION_MS && (await walk())?.id === id;) {
 			moving ||= (await shown('#consoleMoveToField')) === 'Moving… keep holding';
@@ -1239,6 +1245,7 @@ try {
 		}
 		await page.mouse.up();
 		expect(moving, `Move to field says "Moving… keep holding" while held at ${id}`);
+		expect(!(await pressing()), `the dim comes back when Move to field is let go at ${id}`);
 		await inConsole(
 			'Move to field to say At field',
 			() => document.getElementById('consoleMoveToField')?.textContent === 'At field'
